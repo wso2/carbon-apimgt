@@ -92,6 +92,52 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
     }
 
     /**
+     * Update a Governance Policy
+     *
+     * @param policyId            Policy ID
+     * @param governancePolicyDTO Governance Policy  with Ruleset Ids
+     * @param messageContext      Message Context
+     * @return Response
+     * @throws GovernanceException If an error occurs while updating the policy
+     */
+    public Response updateGovernancePolicyById(String policyId, GovernancePolicyDTO
+            governancePolicyDTO, MessageContext messageContext) throws GovernanceException {
+        PolicyManager policyManager = new PolicyManagerImpl();
+        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String username = GovernanceAPIUtil.getLoggedInUsername();
+
+        GovernancePolicy governancePolicy =
+                PolicyMappingUtil.
+                        fromDTOtoGovernancePolicy(governancePolicyDTO);
+
+        governancePolicy.setUpdatedBy(username);
+        GovernancePolicy updatedPolicy = policyManager.updateGovernancePolicy
+                (policyId, governancePolicy);
+
+        GovernancePolicyDTO updatedPolicyDTO = PolicyMappingUtil.
+                fromGovernancePolicyToGovernancePolicyDTO(updatedPolicy);
+
+        // Re-access policy compliance in the background
+        new ComplianceManagerImpl().handlePolicyChangeEvent(policyId, organization);
+
+        return Response.status(Response.Status.OK).entity(updatedPolicyDTO).build();
+    }
+
+    /**
+     * Delete a Governance Policy
+     *
+     * @param policyId       Policy ID
+     * @param messageContext Message Context
+     * @return Response
+     * @throws GovernanceException If an error occurs while deleting the policy
+     */
+    public Response deleteGovernancePolicy(String policyId, MessageContext messageContext) throws GovernanceException {
+        PolicyManager policyManager = new PolicyManagerImpl();
+        policyManager.deletePolicy(policyId);
+        return Response.status(Response.Status.NO_CONTENT).build();
+    }
+
+    /**
      * Get Governance Policy by ID
      *
      * @param policyId       Policy ID
@@ -112,20 +158,28 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      *
      * @param limit          Limit for Pagination
      * @param offset         Offset for Pagination
+     * @param query          Query for filtering
      * @param messageContext Message Context
      * @return Response
      * @throws GovernanceException If an error occurs while retrieving the policies
      */
-    public Response getGovernancePolicies(Integer limit, Integer offset, MessageContext messageContext)
+    public Response getGovernancePolicies(Integer limit, Integer offset, String query, MessageContext messageContext)
             throws GovernanceException {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        query = query != null ? query : "";
 
         PolicyManager policyManager = new PolicyManagerImpl();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
-        GovernancePolicyList policyList = policyManager.getGovernancePolicies(organization);
 
-        GovernancePolicyListDTO policyListDTO = getPaginatedPolicyList(policyList, limit, offset);
+        GovernancePolicyList policyList;
+        if (!query.isEmpty()) {
+            policyList = policyManager.searchGovernancePolicies(query, organization);
+        } else {
+            policyList = policyManager.getGovernancePolicies(organization);
+        }
+
+        GovernancePolicyListDTO policyListDTO = getPaginatedPolicyList(policyList, limit, offset, query);
 
         return Response.status(Response.Status.OK).entity(policyListDTO).build();
     }
@@ -136,9 +190,11 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @param policyList List of Governance Policies
      * @param limit      Limit for Pagination
      * @param offset     Offset for Pagination
+     * @param query      Query for filtering
      * @return Paginated Governance Policy List
      */
-    private GovernancePolicyListDTO getPaginatedPolicyList(GovernancePolicyList policyList, int limit, int offset) {
+    private GovernancePolicyListDTO getPaginatedPolicyList(GovernancePolicyList policyList, int limit, int offset,
+                                                           String query) {
         int policyCount = policyList.getCount();
         List<GovernancePolicyDTO> policies = new ArrayList<>();
         GovernancePolicyListDTO paginatedPolicyListDTO = new GovernancePolicyListDTO();
@@ -171,66 +227,19 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.POLICIES_GET_URL,
+            paginatedPrevious = GovernanceAPIUtil.getPaginatedURLWithQuery(GovernanceAPIConstants.POLICIES_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
         }
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.POLICIES_GET_URL,
+            paginatedNext = GovernanceAPIUtil.getPaginatedURLWithQuery(GovernanceAPIConstants.POLICIES_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
 
         paginationDTO.setPrevious(paginatedPrevious);
         paginationDTO.setNext(paginatedNext);
 
         return paginatedPolicyListDTO;
-    }
-
-
-    /**
-     * Delete a Governance Policy
-     *
-     * @param policyId       Policy ID
-     * @param messageContext Message Context
-     * @return Response
-     * @throws GovernanceException If an error occurs while deleting the policy
-     */
-    public Response deleteGovernancePolicy(String policyId, MessageContext messageContext) throws GovernanceException {
-        PolicyManager policyManager = new PolicyManagerImpl();
-        policyManager.deletePolicy(policyId);
-        return Response.status(Response.Status.OK).build();
-    }
-
-    /**
-     * Update a Governance Policy
-     *
-     * @param policyId            Policy ID
-     * @param governancePolicyDTO Governance Policy  with Ruleset Ids
-     * @param messageContext      Message Context
-     * @return Response
-     * @throws GovernanceException If an error occurs while updating the policy
-     */
-    public Response updateGovernancePolicyById(String policyId, GovernancePolicyDTO
-            governancePolicyDTO, MessageContext messageContext) throws GovernanceException {
-        PolicyManager policyManager = new PolicyManagerImpl();
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
-        String username = GovernanceAPIUtil.getLoggedInUsername();
-
-        GovernancePolicy governancePolicy =
-                PolicyMappingUtil.
-                        fromDTOtoGovernancePolicy(governancePolicyDTO);
-
-        governancePolicy.setUpdatedBy(username);
-        GovernancePolicy updatedPolicy = policyManager.updateGovernancePolicy
-                (policyId, governancePolicy);
-
-        GovernancePolicyDTO updatedPolicyDTO = PolicyMappingUtil.
-                fromGovernancePolicyToGovernancePolicyDTO(updatedPolicy);
-
-        // Re-access policy compliance in the background
-        new ComplianceManagerImpl().handlePolicyChangeEvent(policyId, organization);
-
-        return Response.status(Response.Status.OK).entity(updatedPolicyDTO).build();
     }
 }

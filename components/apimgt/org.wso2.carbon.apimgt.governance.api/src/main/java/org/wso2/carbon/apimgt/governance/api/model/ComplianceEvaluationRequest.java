@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * This class represents a compliance evaluation request
  */
@@ -29,7 +32,7 @@ public class ComplianceEvaluationRequest {
 
     private ArtifactType artifactType;
 
-    private String policyId;
+    private List<String> policyIds;
 
     private String organization;
 
@@ -59,12 +62,12 @@ public class ComplianceEvaluationRequest {
         this.artifactType = artifactType;
     }
 
-    public String getPolicyId() {
-        return policyId;
+    public List<String> getPolicyIds() {
+        return new ArrayList<>(policyIds);
     }
 
-    public void setPolicyId(String policyId) {
-        this.policyId = policyId;
+    public void setPolicyIds(List<String> policyIds) {
+        this.policyIds = new ArrayList<>(policyIds);
     }
 
     public String getOrganization() {

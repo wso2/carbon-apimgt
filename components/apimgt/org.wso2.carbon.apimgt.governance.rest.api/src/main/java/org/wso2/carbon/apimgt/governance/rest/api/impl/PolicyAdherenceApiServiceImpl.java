@@ -79,10 +79,11 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
     public Response getPolicyAdherenceByPolicyId(String policyId, MessageContext messageContext)
             throws GovernanceException {
 
+        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
         GovernancePolicy policy = new PolicyManagerImpl().getGovernancePolicyByID(policyId);
 
         Map<ArtifactComplianceState, List<ArtifactInfo>> evaluatedArtifacts =
-                new ComplianceManagerImpl().getArtifactsComplianceForPolicy(policyId,
+                new ComplianceManagerImpl().getArtifactsComplianceForPolicy(policyId, organization,
                         true);
 
         PolicyAdherenceDetailsDTO policyAdherenceDetailsDTO = new PolicyAdherenceDetailsDTO();
@@ -148,10 +149,14 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
 
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-
         // Get the list of policies
         List<GovernancePolicy> allPolicies = new PolicyManagerImpl().getGovernancePolicies(organization)
                 .getGovernancePolicyList();
+
+        // If the offset is greater than the total number of policies, set the offset to the default value
+        if (offset > allPolicies.size()) {
+            offset = RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        }
 
         List<GovernancePolicy> policies = allPolicies.subList(offset, Math.min(offset + limit, allPolicies.size()));
 
@@ -159,7 +164,7 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
 
         for (GovernancePolicy policy : policies) {
             Map<ArtifactComplianceState, List<ArtifactInfo>> evaluatedArtifactsByPolicy =
-                    new ComplianceManagerImpl().getArtifactsComplianceForPolicy(policy.getId(),
+                    new ComplianceManagerImpl().getArtifactsComplianceForPolicy(policy.getId(), organization,
                             false);
 
             int compliantCount = evaluatedArtifactsByPolicy.get(ArtifactComplianceState.COMPLIANT).size();

@@ -103,7 +103,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         for (GovernableState dependentState : dependentGovernableStates) {
             List<String> applicablePolicyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactId,
                     artifactType, dependentState, organization);
-            complianceManager.handleComplianceEvaluationAsync
+            complianceManager.handleComplianceEvalAsync
                     (artifactId, artifactType, applicablePolicyIds, organization);
         }
     }
@@ -135,7 +135,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         List<String> applicablePolicyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactId,
                 artifactType, state, organization);
 
-        ArtifactComplianceInfo artifactComplianceInfo = complianceManager.handleComplianceEvaluationSync
+        ArtifactComplianceInfo artifactComplianceInfo = complianceManager.handleComplianceEvalSync
                 (artifactId, revisionNo, artifactType, applicablePolicyIds,
                         artifactProjectContent, state, organization);
 
@@ -174,7 +174,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         if (ExtendedArtifactType.isArtifactAPI(artifactType)) {
             Map<RuleType, String> contentMap = GovernanceUtil
                     .extractArtifactProjectContent(projectContent, ArtifactType.API);
-            return complianceManager.handleComplianceEvaluationDryRun(artifactType, applicablePolicyIds,
+            return complianceManager.handleComplianceEvalDryRun(artifactType, applicablePolicyIds,
                     contentMap, organization);
         } else {
             throw new GovernanceException(GovernanceExceptionCodes.INVALID_ARTIFACT_TYPE, artifactType.toString());
@@ -216,7 +216,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
             }
         }
 
-        complianceManager.handleComplianceEvaluationAsync(artifactId, artifactType, applicablePolicyIds, organization);
+        complianceManager.handleComplianceEvalAsync(artifactId, artifactType, applicablePolicyIds, organization);
 
     }
 

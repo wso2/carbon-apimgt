@@ -72,14 +72,6 @@ public interface GovernancePolicyMgtDAO {
     GovernancePolicyList getGovernancePolicies(String organization) throws GovernanceException;
 
     /**
-     * Delete a Governance Policy
-     *
-     * @param policyId Policy ID
-     * @throws GovernanceException If an error occurs while deleting the policy
-     */
-    void deletePolicy(String policyId) throws GovernanceException;
-
-    /**
      * Update a Governance Policy
      *
      * @param policyId         Policy ID
@@ -91,7 +83,6 @@ public interface GovernancePolicyMgtDAO {
             governancePolicy)
             throws GovernanceException;
 
-
     /**
      * Get the list of rulesets for a given policy
      *
@@ -100,6 +91,15 @@ public interface GovernancePolicyMgtDAO {
      * @throws GovernanceException If an error occurs while getting the rulesets
      */
     List<Ruleset> getRulesetsByPolicyId(String policyId) throws GovernanceException;
+
+    /**
+     * Get the list of rulesets for a given policy
+     *
+     * @param policyId Policy ID
+     * @return List of rulesets IDs
+     * @throws GovernanceException If an error occurs while getting the rulesets
+     */
+    List<String> getRulesetsIdsByPolicyId(String policyId) throws GovernanceException;
 
     /**
      * Get the list of policies by label
@@ -122,14 +122,13 @@ public interface GovernancePolicyMgtDAO {
     List<String> getPoliciesByLabelAndState(String label, GovernableState state, String organization)
             throws GovernanceException;
 
-
     /**
      * Get Policies without labels
      *
      * @param organization Organization
      * @return Map of Policy IDs, Policy Names
      */
-    Map<String, String> getPoliciesWithGlobalLabel(String organization)
+    Map<String, String> getGlobalPolicies(String organization)
             throws GovernanceException;
 
     /**
@@ -139,7 +138,7 @@ public interface GovernancePolicyMgtDAO {
      * @param organization Organization
      * @return List of Policy IDs
      */
-    List<String> getPoliciesWithGlobalLabelByState(GovernableState state, String organization)
+    List<String> getGlobalPoliciesWithState(GovernableState state, String organization)
             throws GovernanceException;
 
     /**
@@ -159,6 +158,25 @@ public interface GovernancePolicyMgtDAO {
      * @throws GovernanceException If an error occurs while getting the labels
      */
     List<String> getLabelsByPolicyId(String policyId) throws GovernanceException;
+
+    /**
+     * Search for Governance Policies
+     *
+     * @param searchCriteria Search criteria
+     * @param organization   Organization
+     * @return GovernancePolicyList object
+     * @throws GovernanceException If an error occurs while searching for policies
+     */
+    GovernancePolicyList searchPolicies(Map<String, String> searchCriteria, String organization)
+            throws GovernanceException;
+
+    /**
+     * Delete a Governance Policy
+     *
+     * @param policyId Policy ID
+     * @throws GovernanceException If an error occurs while deleting the policy
+     */
+    void deletePolicy(String policyId) throws GovernanceException;
 }
 
 

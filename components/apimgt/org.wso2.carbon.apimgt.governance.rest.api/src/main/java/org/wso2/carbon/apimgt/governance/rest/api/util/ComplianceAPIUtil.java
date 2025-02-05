@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceWithRulesetsDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RuleValidationResultDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.RuleValidationResultViolatedPathDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultWithoutRulesDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.SeverityBasedRuleViolationCountDTO;
@@ -106,8 +107,13 @@ public class ComplianceAPIUtil {
         List<String> evaluatedPolicies = new ComplianceManagerImpl().getEvaluatedPoliciesForArtifact(artifactId,
                 artifactType, organization);
 
-        // If the artifact is not evaluated yet, set the compliance status to not applicable and return
+        // If the artifact is not evaluated yet, set the compliance status to not applicable/pending and return
         if (evaluatedPolicies.isEmpty()) {
+            boolean isEvaluationPending = new ComplianceManagerImpl()
+                    .isEvaluationPendingForArtifact(artifactId, artifactType, organization);
+            if (isEvaluationPending) {
+                artifactComplianceDetailsDTO.setStatus(ArtifactComplianceDetailsDTO.StatusEnum.PENDING);
+            }
             artifactComplianceDetailsDTO.setStatus(ArtifactComplianceDetailsDTO.StatusEnum.NOT_APPLICABLE);
             return artifactComplianceDetailsDTO;
         }
@@ -168,22 +174,22 @@ public class ComplianceAPIUtil {
         }
 
         // Retrieve rulesets tied to the policy
-        List<Ruleset> applicableRulesets = policyManager.getRulesetsByPolicyId(policyId);
+        List<Ruleset> policyRulesets = policyManager.getRulesetsByPolicyId(policyId);
 
         // Retrieve the evaluated rulesets for the policy
         List<String> evaluatedRulesets =
                 complianceManager.getEvaluatedRulesetsForArtifactAndPolicy(artifactId, artifactType,
-                        policyId, organization);
+                        policyRulesets, organization);
 
         // Store the ruleset validation results
         List<RulesetValidationResultWithoutRulesDTO> rulesetValidationResults = new ArrayList<>();
 
         // Get ruleset validation results for each ruleset
-        for (Ruleset ruleset : applicableRulesets) {
+        for (Ruleset ruleset : policyRulesets) {
             boolean isRulesetEvaluated = evaluatedRulesets.contains(ruleset.getId());
 
             RulesetValidationResultWithoutRulesDTO resultDTO = getRulesetValidationResultsDTO(ruleset, artifactId,
-                    artifactType, organization, policyId, isRulesetEvaluated);
+                    artifactType, organization, isRulesetEvaluated);
             rulesetValidationResults.add(resultDTO);
         }
 
@@ -208,13 +214,12 @@ public class ComplianceAPIUtil {
      * @param artifactId         artifact ID
      * @param artifactType       artifact type
      * @param organization       organization
-     * @param policyId           policy ID
      * @param isRulesetEvaluated whether the ruleset has been evaluated
      * @return RulesetValidationResultDTO
      * @throws GovernanceException if an error occurs while updating the ruleset validation results
      */
     private static RulesetValidationResultWithoutRulesDTO getRulesetValidationResultsDTO(Ruleset ruleset, String
-            artifactId, ArtifactType artifactType, String organization, String policyId, boolean isRulesetEvaluated)
+            artifactId, ArtifactType artifactType, String organization, boolean isRulesetEvaluated)
             throws GovernanceException {
 
         ComplianceManager complianceManager = new ComplianceManagerImpl();
@@ -224,7 +229,7 @@ public class ComplianceAPIUtil {
         rulesetDTO.setName(ruleset.getName());
 
         // Fetch violations for the current ruleset
-        List<RuleViolation> ruleViolations = complianceManager.getRuleViolations(artifactId, artifactType, policyId,
+        List<RuleViolation> ruleViolations = complianceManager.getRuleViolations(artifactId, artifactType,
                 ruleset.getId(), organization);
 
         // If the ruleset has not been evaluated, set the ruleset validation status to unapplied
@@ -263,6 +268,9 @@ public class ComplianceAPIUtil {
         // Retrieve Artifacts the given organization
         if (ArtifactType.API.equals(artifactType)) {
             List<String> allAPIs = APIMUtil.getAllAPIs(organization);
+            if (offset >= allAPIs.size()) {
+                offset = RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+            }
             totalArtifactCount = allAPIs.size();
             List<String> paginatedAPIIds = allAPIs.subList(offset, Math.min(offset + limit, allAPIs.size()));
             for (String apiId : paginatedAPIIds) {
@@ -293,7 +301,8 @@ public class ComplianceAPIUtil {
      * @return ArtifactComplianceStatusDTO
      * @throws GovernanceException if an error occurs while getting the artifact compliance status
      */
-    private static ArtifactComplianceStatusDTO getArtifactComplianceStatus(String artifactId, ArtifactType artifactType,
+    private static ArtifactComplianceStatusDTO getArtifactComplianceStatus(String artifactId,
+                                                                           ArtifactType artifactType,
                                                                            String organization)
             throws GovernanceException {
 
@@ -324,14 +333,19 @@ public class ComplianceAPIUtil {
         List<String> evaluatedPolicies = complianceManager.getEvaluatedPoliciesForArtifact(artifactId, artifactType,
                 organization);
 
-        // If the artifact is not evaluated yet, set the compliance status to not applicable and return
+        // If the artifact is not evaluated yet, set the compliance status to not applicable/pending and return
         if (evaluatedPolicies.isEmpty()) {
+            boolean isEvaluationPending = new ComplianceManagerImpl()
+                    .isEvaluationPendingForArtifact(artifactId, artifactType, organization);
+            if (isEvaluationPending) {
+                complianceStatus.setStatus(ArtifactComplianceStatusDTO.StatusEnum.PENDING);
+            }
             complianceStatus.setStatus(ArtifactComplianceStatusDTO.StatusEnum.NOT_APPLICABLE);
             return complianceStatus;
         }
 
-        // Track violated policy IDs for the current artifact
-        Set<String> violatedPolicies = new HashSet<>();
+        // Track violated ruleset IDs for the current artifact
+        Set<String> violatedRulesets = new HashSet<>();
 
         // Retrieve rule violations categorized by severity for the current artifact
         Map<Severity, List<RuleViolation>> ruleViolationsBySeverity = complianceManager
@@ -353,11 +367,15 @@ public class ComplianceAPIUtil {
 
             ruleViolationCounts.add(violationCountDTO);
 
-            // Track the IDs of violated policies
+            // Track the IDs of violated rulesets
             for (RuleViolation ruleViolation : ruleViolations) {
-                violatedPolicies.add(ruleViolation.getPolicyId());
+                violatedRulesets.add(ruleViolation.getRulesetId());
             }
         }
+
+        // Identify violated policies
+        List<String> violatedPolicies = complianceManager
+                .identifyViolatedPolicies(evaluatedPolicies, new ArrayList<>(violatedRulesets));
 
         // Set policy adherence summary
         PolicyAdherenceSummaryDTO policyAdherenceSummaryDTO = new PolicyAdherenceSummaryDTO();
@@ -453,14 +471,14 @@ public class ComplianceAPIUtil {
             return rulesetValidationResultDTO;
         }
 
-        Set<String> violatedRuleCodes = new HashSet<>();
+        Set<String> violatedRuleNames = new HashSet<>();
         List<RuleValidationResultDTO> violatedRules = new ArrayList<>();
         List<RuleValidationResultDTO> followedRules = new ArrayList<>();
 
         // Fetch all rules within the current ruleset
         List<Rule> allRules = rulesetManager.getRules(rulesetId);
         Map<String, Rule> rulesMap = allRules.stream()
-                .collect(Collectors.toMap(Rule::getCode, rule -> rule));
+                .collect(Collectors.toMap(Rule::getName, rule -> rule));
 
         // Fetch violations for the current ruleset
         List<RuleViolation> ruleViolations = complianceManager.getRuleViolations(artifactId, artifactType,
@@ -468,13 +486,13 @@ public class ComplianceAPIUtil {
 
         // IMPORTANT: NOTE THAT THERE CAN BE MULTIPLE VIOLATIONS WITH SAME CODE BUT DIFFERENT PATH
         for (RuleViolation ruleViolation : ruleViolations) {
-            Rule rule = rulesMap.get(ruleViolation.getRuleCode());
+            Rule rule = rulesMap.get(ruleViolation.getRuleName());
             violatedRules.add(ComplianceAPIUtil.getRuleValidationResultDTO(rule, ruleViolation));
-            violatedRuleCodes.add(rule.getCode());
+            violatedRuleNames.add(rule.getName());
         }
 
         for (Rule rule : allRules) {
-            if (!violatedRuleCodes.contains(rule.getCode())) {
+            if (!violatedRuleNames.contains(rule.getName())) {
                 followedRules.add(ComplianceAPIUtil.getRuleValidationResultDTO(rule, null));
             }
         }
@@ -499,14 +517,16 @@ public class ComplianceAPIUtil {
 
         RuleValidationResultDTO ruleValidationResultDTO = new RuleValidationResultDTO();
         ruleValidationResultDTO.setId(rule.getId());
-        ruleValidationResultDTO.setName(rule.getCode());
+        ruleValidationResultDTO.setName(rule.getName());
         ruleValidationResultDTO.setDescription(rule.getDescription());
         if (ruleViolation != null) {
             ruleValidationResultDTO.setMessage(rule.getMessageOnFailure());
             ruleValidationResultDTO.setStatus(RuleValidationResultDTO.StatusEnum.FAILED);
             ruleValidationResultDTO.setSeverity(RuleValidationResultDTO.SeverityEnum.valueOf(
                     String.valueOf(rule.getSeverity())));
-            ruleValidationResultDTO.setViolatedPath(ruleViolation.getViolatedPath());
+            RuleValidationResultViolatedPathDTO violatedPathDTO = new RuleValidationResultViolatedPathDTO();
+            violatedPathDTO.setPath(ruleViolation.getViolatedPath());
+            ruleValidationResultDTO.setViolatedPath(violatedPathDTO);
         } else {
             ruleValidationResultDTO.setStatus(RuleValidationResultDTO.StatusEnum.PASSED);
         }

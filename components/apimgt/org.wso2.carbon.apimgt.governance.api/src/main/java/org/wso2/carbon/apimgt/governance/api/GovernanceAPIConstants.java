@@ -30,19 +30,20 @@ public class GovernanceAPIConstants {
 
     public static final String LIMIT_PARAM = "{limit}";
     public static final String OFFSET_PARAM = "{offset}";
+    public static final String QUERY_PARAM = "{query}";
     public static final String ARTIFACT_TYPE_PARAM = "{artifactType}";
 
     public static final String RULESETS_GET_URL =
-            RULESET_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+            RULESET_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&query=" + QUERY_PARAM;
 
     public static final String POLICIES_GET_URL =
-            POLICY_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+            POLICY_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + "&query=" + QUERY_PARAM;
 
     public static final String ARTIFACT_COMPLIANCE_GET_URL =
             ARTIFACT_COMPLIANCE_PATH + "/" + ARTIFACT_TYPE_PARAM + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
-    public static final String POLICY_ADHERENCE_GET_URL = POLICY_ADHERENCE_PATH +
-            "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
-
+    public static final String POLICY_ADHERENCE_GET_URL =
+            POLICY_ADHERENCE_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
 
 }
+

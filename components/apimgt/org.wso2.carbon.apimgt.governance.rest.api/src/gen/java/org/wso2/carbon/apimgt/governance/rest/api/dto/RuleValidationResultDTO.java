@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.RuleValidationResultViolatedPathDTO;
 import javax.validation.constraints.*;
 
 /**
@@ -90,7 +91,7 @@ return null;
         }
     } 
     private SeverityEnum severity = null;
-    private String violatedPath = null;
+    private RuleValidationResultViolatedPathDTO violatedPath = null;
     private String message = null;
     private String description = null;
 
@@ -167,20 +168,20 @@ return null;
   }
 
   /**
-   * Path in the artifact where the rule is violated.
    **/
-  public RuleValidationResultDTO violatedPath(String violatedPath) {
+  public RuleValidationResultDTO violatedPath(RuleValidationResultViolatedPathDTO violatedPath) {
     this.violatedPath = violatedPath;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Path in the artifact where the rule is violated.")
+  @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("violatedPath")
-  public String getViolatedPath() {
+  public RuleValidationResultViolatedPathDTO getViolatedPath() {
     return violatedPath;
   }
-  public void setViolatedPath(String violatedPath) {
+  public void setViolatedPath(RuleValidationResultViolatedPathDTO violatedPath) {
     this.violatedPath = violatedPath;
   }
 

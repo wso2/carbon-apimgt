@@ -75,9 +75,10 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      * @throws GovernanceException If an error occurs while creating the ruleset
      */
     @Override
-    public Response createRuleset(String name, InputStream rulesetContentInputStream, Attachment rulesetContentDetail,
-                                  String ruleType, String artifactType, String provider,
-                                  String description, String ruleCategory, String documentationLink,
+    public Response createRuleset(String name, InputStream rulesetContentInputStream,
+                                  Attachment rulesetContentDetail, String ruleType,
+                                  String artifactType, String description, String ruleCategory,
+                                  String documentationLink, String provider,
                                   MessageContext messageContext) throws GovernanceException {
         RulesetInfoDTO createdRulesetDTO;
         URI createdRulesetURI;
@@ -113,6 +114,63 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         } finally {
             IOUtils.closeQuietly(rulesetContentInputStream);
         }
+    }
+
+
+    /**
+     * Update a Governance Ruleset
+     *
+     * @param rulesetId                 Ruleset ID
+     * @param name                      Name
+     * @param rulesetContentInputStream Ruleset content input stream
+     * @param rulesetContentDetail      Ruleset content detail
+     * @param ruleCategory              Rule category
+     * @param ruleType                  Rule type
+     * @param artifactType              Artifact type
+     * @param provider                  Provider
+     * @param description               Description
+     * @param documentationLink         Documentation link
+     * @param messageContext            MessageContext
+     * @return Response object
+     * @throws GovernanceException If an error occurs while updating the ruleset
+     */
+    @Override
+    public Response updateRulesetById(String rulesetId, String name, InputStream rulesetContentInputStream,
+                                      Attachment rulesetContentDetail, String ruleType, String artifactType,
+                                      String description, String ruleCategory, String documentationLink,
+                                      String provider, MessageContext messageContext)
+            throws GovernanceException {
+
+        try {
+            Ruleset ruleset = new Ruleset();
+            ruleset.setName(name);
+            ruleset.setRuleCategory(RuleCategory.fromString(ruleCategory));
+            ruleset.setRuleType(RuleType.fromString(ruleType));
+            ruleset.setArtifactType(ExtendedArtifactType.fromString(artifactType));
+            ruleset.setProvider(provider);
+            ruleset.setId(rulesetId);
+            ruleset.setDescription(description);
+            ruleset.setDocumentationLink(documentationLink);
+            ruleset.setRulesetContent(IOUtils.toString(rulesetContentInputStream, StandardCharsets.UTF_8));
+
+            String username = GovernanceAPIUtil.getLoggedInUsername();
+            String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+            ruleset.setUpdatedBy(username);
+
+            RulesetManager rulesetManager = new RulesetManagerImpl();
+            RulesetInfo updatedRuleset = rulesetManager.updateRuleset(rulesetId, ruleset);
+
+            // Re-access policy compliance in the background
+            new ComplianceManagerImpl().handleRulesetChangeEvent(rulesetId, organization);
+
+            return Response.status(Response.Status.OK).entity(RulesetMappingUtil.
+                    fromRulesetInfoToRulesetInfoDTO(updatedRuleset)).build();
+        } catch (IOException e) {
+            throw new GovernanceException("Error while converting ruleset content stream", e);
+        } finally {
+            IOUtils.closeQuietly(rulesetContentInputStream);
+        }
+
     }
 
     /**
@@ -159,7 +217,6 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     @Override
     public Response getRulesetContent(String rulesetId, MessageContext messageContext) throws GovernanceException {
         RulesetManager rulesetManager = new RulesetManagerImpl();
-
         String content = rulesetManager.getRulesetContent(rulesetId);
 
         return Response.status(Response.Status.OK)
@@ -186,21 +243,30 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     /**
      * Get all the Governance Rulesets
      *
+     * @param limit          Limit
+     * @param offset         Offset
+     * @param query          Query for filtering
      * @param messageContext MessageContext
      * @return Response object
      * @throws GovernanceException If an error occurs while getting the rulesets
      */
-    public Response getRulesets(Integer limit, Integer offset, MessageContext messageContext)
+    public Response getRulesets(Integer limit, Integer offset, String query, MessageContext messageContext)
             throws GovernanceException {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        query = query != null ? query : "";
 
         RulesetManager rulesetManager = new RulesetManagerImpl();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-        RulesetList rulesetList = rulesetManager.getRulesets(organization);
-        RulesetListDTO paginatedRuleList = getPaginatedRulesets(rulesetList, limit, offset);
+        RulesetList rulesetList;
+        if (!query.isEmpty()) {
+            rulesetList = rulesetManager.searchRulesets(query, organization);
+        } else {
+            rulesetList = rulesetManager.getRulesets(organization);
+        }
+        RulesetListDTO paginatedRuleList = getPaginatedRulesets(rulesetList, limit, offset, query);
 
         return Response.status(Response.Status.OK).entity(paginatedRuleList).build();
     }
@@ -211,9 +277,10 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      * @param rulesetList RulesetList object
      * @param limit       Limit
      * @param offset      Offset
+     * @param query       Query for filtering
      * @return RulesetListDTO object
      */
-    private RulesetListDTO getPaginatedRulesets(RulesetList rulesetList, int limit, int offset) {
+    private RulesetListDTO getPaginatedRulesets(RulesetList rulesetList, int limit, int offset, String query) {
         int rulesetCount = rulesetList.getCount();
         List<RulesetInfoDTO> paginatedRulesets = new ArrayList<>();
         RulesetListDTO paginatedRulesetListDTO = new RulesetListDTO();
@@ -246,76 +313,19 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.RULESETS_GET_URL,
+            paginatedPrevious = GovernanceAPIUtil.getPaginatedURLWithQuery(GovernanceAPIConstants.RULESETS_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
-                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
+                    paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
         }
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.RULESETS_GET_URL,
+            paginatedNext = GovernanceAPIUtil.getPaginatedURLWithQuery(GovernanceAPIConstants.RULESETS_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
-                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
+                    paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }
 
         paginationDTO.setPrevious(paginatedPrevious);
         paginationDTO.setNext(paginatedNext);
 
         return paginatedRulesetListDTO;
-    }
-
-    /**
-     * Update a Governance Ruleset
-     *
-     * @param rulesetId                 Ruleset ID
-     * @param name                      Name
-     * @param rulesetContentInputStream Ruleset content input stream
-     * @param rulesetContentDetail      Ruleset content detail
-     * @param ruleCategory              Rule category
-     * @param ruleType                  Rule type
-     * @param artifactType              Artifact type
-     * @param provider                  Provider
-     * @param description               Description
-     * @param documentationLink         Documentation link
-     * @param messageContext            MessageContext
-     * @return Response object
-     * @throws GovernanceException If an error occurs while updating the ruleset
-     */
-    @Override
-    public Response updateRulesetById(String rulesetId, String name, InputStream rulesetContentInputStream,
-                                      Attachment rulesetContentDetail, String ruleType, String artifactType,
-                                      String provider, String description, String ruleCategory,
-                                      String documentationLink, MessageContext messageContext)
-            throws GovernanceException {
-
-        try {
-            Ruleset ruleset = new Ruleset();
-            ruleset.setName(name);
-            ruleset.setRuleCategory(RuleCategory.fromString(ruleCategory));
-            ruleset.setRuleType(RuleType.fromString(ruleType));
-            ruleset.setArtifactType(ExtendedArtifactType.fromString(artifactType));
-            ruleset.setProvider(provider);
-            ruleset.setId(rulesetId);
-            ruleset.setDescription(description);
-            ruleset.setDocumentationLink(documentationLink);
-            ruleset.setRulesetContent(IOUtils.toString(rulesetContentInputStream, StandardCharsets.UTF_8));
-
-            String username = GovernanceAPIUtil.getLoggedInUsername();
-            String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
-            ruleset.setUpdatedBy(username);
-
-            RulesetManager rulesetManager = new RulesetManagerImpl();
-            RulesetInfo updatedRuleset = rulesetManager.updateRuleset(rulesetId, ruleset);
-
-            // Re-access policy compliance in the background
-            new ComplianceManagerImpl().handleRulesetChangeEvent(rulesetId, organization);
-
-            return Response.status(Response.Status.OK).entity(RulesetMappingUtil.
-                    fromRulesetInfoToRulesetInfoDTO(updatedRuleset)).build();
-        } catch (IOException e) {
-            throw new GovernanceException("Error while converting ruleset content stream", e);
-        } finally {
-            IOUtils.closeQuietly(rulesetContentInputStream);
-        }
-
-
     }
 }

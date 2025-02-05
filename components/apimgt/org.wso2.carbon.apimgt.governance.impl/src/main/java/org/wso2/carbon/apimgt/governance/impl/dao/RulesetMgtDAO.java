@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * This interface represents the Governance Ruleset DAO
@@ -40,6 +41,25 @@ public interface RulesetMgtDAO {
      * @throws GovernanceException If an error occurs while creating the ruleset
      */
     RulesetInfo createRuleset(Ruleset ruleset, String organization) throws GovernanceException;
+
+    /**
+     * Update a Governance Ruleset
+     *
+     * @param rulesetId Ruleset ID
+     * @param ruleset   Ruleset object
+     * @return RulesetInfo Updated object
+     * @throws GovernanceException If an error occurs while updating the ruleset
+     */
+    RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset)
+            throws GovernanceException;
+
+    /**
+     * Delete a Governance Ruleset
+     *
+     * @param rulesetId Ruleset ID
+     * @throws GovernanceException If an error occurs while deleting the ruleset
+     */
+    void deleteRuleset(String rulesetId) throws GovernanceException;
 
     /**
      * Get all the Governance Rulesets of the organization
@@ -70,6 +90,17 @@ public interface RulesetMgtDAO {
     RulesetInfo getRulesetById(String rulesetId) throws GovernanceException;
 
     /**
+     * Search for Governance Rulesets based on the search criteria
+     *
+     * @param searchCriteria Search attributes
+     * @param organization   Organization
+     * @return List of RulesetInfo objects
+     * @throws GovernanceException If an error occurs while searching for rulesets
+     */
+    RulesetList searchRulesets(Map<String, String> searchCriteria, String organization)
+            throws GovernanceException;
+
+    /**
      * Get the content of a Governance Ruleset
      *
      * @param rulesetId Ruleset ID
@@ -77,25 +108,6 @@ public interface RulesetMgtDAO {
      * @throws GovernanceException If an error occurs while getting the ruleset content
      */
     String getRulesetContent(String rulesetId) throws GovernanceException;
-
-    /**
-     * Delete a Governance Ruleset
-     *
-     * @param rulesetId    Ruleset ID
-     * @throws GovernanceException If an error occurs while deleting the ruleset
-     */
-    void deleteRuleset(String rulesetId) throws GovernanceException;
-
-    /**
-     * Update a Governance Ruleset
-     *
-     * @param rulesetId    Ruleset ID
-     * @param ruleset      Ruleset object
-     * @return RulesetInfo Updated object
-     * @throws GovernanceException If an error occurs while updating the ruleset
-     */
-    RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset)
-            throws GovernanceException;
 
     /**
      * Get the associated policies for a Ruleset

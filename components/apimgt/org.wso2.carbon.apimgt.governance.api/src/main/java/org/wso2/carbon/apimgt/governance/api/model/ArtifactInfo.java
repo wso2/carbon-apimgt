@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+import java.util.Objects;
+
 /**
  * This class represents information about an artifact.
  */
@@ -28,6 +30,38 @@ public class ArtifactInfo {
     private String organization;
     private String name;
     private String version;
+
+    public String toKeyString() {
+        return artifactId + "|" + artifactType + "|" + organization;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        ArtifactInfo that = (ArtifactInfo) obj;
+        return Objects.equals(toKeyString(), that.toKeyString());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(toKeyString());
+    }
+
+    @Override
+    public String toString() {
+        return "ArtifactInfo{" +
+                "artifactId='" + artifactId + '\'' +
+                ", artifactType=" + artifactType +
+                ", organization='" + organization + '\'' +
+                ", name='" + name + '\'' +
+                ", version='" + version + '\'' +
+                '}';
+    }
 
     public String getArtifactId() {
         return artifactId;
