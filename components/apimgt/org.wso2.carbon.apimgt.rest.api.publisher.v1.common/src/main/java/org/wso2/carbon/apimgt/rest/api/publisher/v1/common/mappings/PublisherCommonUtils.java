@@ -2753,21 +2753,22 @@ public class PublisherCommonUtils {
                 Type type = new TypeToken<Map<String, Object>>() {
                 }.getType();
                 Map<String, Object> endpointConfigMap = gson.fromJson(endpointConfig, type);
-                String endpointSecurity = gson.toJson(endpointConfigMap.get(APIConstants.ENDPOINT_SECURITY));
+                Object endpointSecurityObj = endpointConfigMap.get(APIConstants.ENDPOINT_SECURITY);
 
                 // Add primary production endpoint from endpoint config
                 if (endpointConfigMap.containsKey(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
                     Map<String, Object> productionEndpointConfig = new HashMap<>();
                     productionEndpointConfig.put(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS,
                             endpointConfigMap.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS));
-                    if (endpointSecurity != null) {
-                        JsonObject endpointSecurityObj = (JsonObject) JsonParser.parseString(endpointSecurity);
+                    if (endpointSecurityObj != null) {
+                        String endpointSecurity = gson.toJson(endpointSecurityObj);
+                        JsonObject endpointSecurityJsonObj = (JsonObject) JsonParser.parseString(endpointSecurity);
                         // Remove sandbox security (if defined)
-                        if (endpointSecurityObj.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
-                            endpointSecurityObj.remove(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                        if (endpointSecurityJsonObj.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                            endpointSecurityJsonObj.remove(APIConstants.ENDPOINT_SECURITY_SANDBOX);
                         }
                         productionEndpointConfig.put(APIConstants.ENDPOINT_SECURITY,
-                                gson.fromJson(endpointSecurityObj, Object.class));
+                                gson.fromJson(endpointSecurityJsonObj, Object.class));
                     }
                     APIEndpointInfo primaryProductionEndpoint = getAPIEndpointFromEndpointConfig(apiUUID,
                             productionEndpointConfig, APIConstants.APIEndpoint.PRODUCTION, organization);
@@ -2779,14 +2780,15 @@ public class PublisherCommonUtils {
                     Map<String, Object> sandboxEndpointConfig = new HashMap<>();
                     sandboxEndpointConfig.put(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS,
                             endpointConfigMap.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS));
-                    if (endpointSecurity != null) {
-                        JsonObject endpointSecurityObj = (JsonObject) JsonParser.parseString(endpointSecurity);
+                    if (endpointSecurityObj != null) {
+                        String endpointSecurity = gson.toJson(endpointSecurityObj);
+                        JsonObject endpointSecurityJsonObj = (JsonObject) JsonParser.parseString(endpointSecurity);
                         // Remove production security (if defined)
-                        if (endpointSecurityObj.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
-                            endpointSecurityObj.remove(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                        if (endpointSecurityJsonObj.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                            endpointSecurityJsonObj.remove(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
                         }
                         sandboxEndpointConfig.put(APIConstants.ENDPOINT_SECURITY,
-                                gson.fromJson(endpointSecurityObj, Object.class));
+                                gson.fromJson(endpointSecurityJsonObj, Object.class));
                     }
                     APIEndpointInfo primarySandboxEndpoint = getAPIEndpointFromEndpointConfig(apiUUID,
                             sandboxEndpointConfig, APIConstants.APIEndpoint.SANDBOX, organization);
