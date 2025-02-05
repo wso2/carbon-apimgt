@@ -44,8 +44,6 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
             500, "Error while updating ruleset: %s", true),
     ERROR_WHILE_DELETING_RULESET(200006, "Deleting ruleset failed",
             500, "Error while deleting ruleset with ID: %s ", true),
-    ERROR_WHILE_DELETING_RULES(200007, "Deleting rules failed",
-            500, "Error while deleting rules for the ruleset with ID: %s", true),
     RULESET_NOT_FOUND(200008, "Ruleset not found",
             404, "Ruleset with ID: %s not found"),
     ERROR_WHILE_RETRIEVING_RULESET_CONTENT(200009, "Retrieving ruleset content failed",
@@ -60,36 +58,32 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
             " '%s'", true),
     INVALID_RULESET_CONTENT(200012, "Ruleset content is invalid",
             400, "Content of ruleset '%s' is invalid"),
-    INVALID_RULESET_CONTENT_WITH_INFO(200013, "Invalid Ruleset content",
-            400, "Invalid Ruleset content, message: '%s'"),
-    ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT(200014, "Error while loading default ruleset content",
+    ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT(200013, "Error while loading default ruleset content",
             500, "Error while loading " +
             "default ruleset provided by WSO2.", true),
-    ERROR_WHILE_RETRIEVING_RULESET_BY_NAME(200015, "Retrieving ruleset by name failed",
+    ERROR_WHILE_RETRIEVING_RULESET_BY_NAME(200014, "Retrieving ruleset by name failed",
             500, "Error while retrieving " +
             "ruleset for the organization: %s", true),
-    ERROR_FAILED_TO_PARSE_RULESET_CONTENT(200016, "Failed to parse ruleset content",
+    ERROR_FAILED_TO_PARSE_RULESET_CONTENT(200015, "Failed to parse ruleset content",
             500, "Failed to parse ruleset " +
             "content for the ruleset.", true),
-    ERROR_RULESET_ASSOCIATED_WITH_POLICIES(200017, "Ruleset is currently " +
+    ERROR_RULESET_ASSOCIATED_WITH_POLICIES(200016, "Ruleset is currently " +
             "in use by some governance policies", 409,
             "The ruleset with ID: %s cannot be deleted because it " +
                     "is associated with some governance policies. " +
                     "Please update the associated governance policies before " +
                     "attempting to delete the ruleset."),
-    ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICIES(200018, "Error while retrieving " +
+    ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICIES(200017, "Error while retrieving " +
             "associated policies for the ruleset.", 500,
             "Error while retrieving associated policies for the ruleset with ID: %s", true),
-    ERROR_WHILE_EXTRACTING_RULE_CONTENT(200019, "Error while extracting rule content",
+    ERROR_WHILE_EXTRACTING_RULE_CONTENT(200018, "Error while extracting rule content",
             500, "Error while extracting " +
             "rule content from the ruleset", true),
-    ERROR_WHILE_RETRIEVING_RULES_BY_RULESET_ID(200020, "Error while retrieving rules by ruleset id",
+    ERROR_WHILE_RETRIEVING_RULES_BY_RULESET_ID(200019, "Error while retrieving rules by ruleset id",
             500, "Error while " +
             "retrieving rules by ruleset id: %s", true),
-
-    ERROR_WHILE_DELETING_RULESET_POLICY_MAPPING(200021, "Error while deleting ruleset policy mappings",
-            500, "Error while deleting ruleset policy mappings for ruleset with ID: %s",
-            true),
+    ERROR_WHILE_SEARCHING_RULESETS(200020, "Error while searching rulesets",
+            500, "Error while searching rulesets for the organization: %s", true),
 
     // Policy related codes
     ERROR_WHILE_CREATING_POLICY(300001, "Policy creation failed.",
@@ -118,41 +112,26 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
             500, "Error while retrieving labels by policy id: %s", true),
     ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY(300012, "Error while assigning action to policy",
             400, "Invalid action provided for the policy: %s"),
-    ERROR_WHILE_DELETING_POLICY_RULESET_MAPPINGS(300013, "Error while deleting policy ruleset mappings",
-            500, "Error while deleting policy ruleset mappings for policy with ID: %s",
-            true),
-    ERROR_WHILE_DELETING_POLICY_ACTIONS_MAPPINGS(300014, "Error while deleting policy actions mappings",
-            500, "Error while deleting policy actions mappings for policy with ID: %s",
-            true),
-    ERROR_WHILE_DELETING_POLICY_LABELS_MAPPINGS(300015, "Error while deleting policy labels mappings",
-            500, "Error while deleting policy labels mappings for policy with ID: %s",
-            true),
-    ERROR_WHILE_DELETING_POLICY_STATE_MAPPINGS(300016, "Error while deleting policy state mappings",
-            500, "Error while deleting policy state mappings for policy with ID: %s",
-            true),
+    ERROR_WHILE_SEARCHING_POLICIES(300013, "Error while searching policies",
+            500, "Error while searching policies for the organization: %s", true),
 
     // Request related codes
-    ERROR_WHILE_PROCESSING_GOVERNANCE_EVALUATION_REQUEST(400001,
-            "Error while processing governance evaluation request.",
-            500, "Error while processing governance evaluation request for " +
-            "artifact: %s in the organization: %s", true),
-    ERROR_WHILE_GETTING_GOVERNANCE_EVALUATION_REQUESTS(400002, "Error while getting governance evaluation requests.",
+    ERROR_WHILE_ADDING_NEW_GOV_EVAL_REQUEST(400001, "Error while adding new governance evaluation request.",
+            500, "Error while adding new governance evaluation request for artifact: %s", true),
+    ERROR_WHILE_GETTING_GOV_EVAL_REQUEST_FOR_ARTIFACT(400002, "Error while getting governance evaluation request.",
+            500, "Error while getting governance evaluation request for artifact: %s", true),
+    ERROR_WHILE_GETTING_GOV_EVAL_REQUESTS(400003, "Error while getting governance evaluation requests.",
             500, "Error while getting governance evaluation requests"),
-    ERROR_WHILE_UPDATING_GOVERNANCE_EVALUATION_REQUEST(400003, "Error while updating governance evaluation request.",
+    ERROR_WHILE_UPDATING_GOV_EVAL_REQUEST(400004, "Error while updating governance evaluation request.",
             500, "Error while updating governance evaluation request with ID: %s", true),
-    ERROR_WHILE_DELETING_GOVERNANCE_EVALUATION_REQUEST(400004, "Error while deleting governance evaluation request.",
+    ERROR_WHILE_DELETING_GOVERNANCE_EVAL_REQUEST(400005, "Error while deleting governance evaluation request.",
             500, "Error while deleting governance evaluation request with ID: %s"),
-    ERROR_WHILE_DELETING_GOVERNANCE_EVALUATION_REQUESTS(400005, "Error while deleting governance evaluation requests.",
+    ERROR_WHILE_DELETING_GOVERNANCE_EVAL_REQUESTS(400006, "Error while deleting governance evaluation requests.",
             500, "Error while deleting governance evaluation requests."),
-    ERROR_WHILE_CHANGING_PROCESSING_REQ_TO_PENDING(400006, "Error while changing processing requests to pending.",
+    ERROR_WHILE_CHANGING_PROCESSING_REQ_TO_PENDING(400007, "Error while changing processing requests to pending.",
             500, "Error while changing processing requests to pending", true),
-    ERROR_WHILE_DELETING_COMPLIANCE_EVALUATION_REQUESTS_FOR_POLICY(400007, "Error while deleting compliance " +
-            "evaluation requests for policy.",
-            500, "Error while deleting compliance evaluation requests for policy with ID: %s",
-            true),
 
     // Result related codes
-
     ERROR_WHILE_SAVING_GOVERNANCE_RESULT(500001, "Error while saving governance result.",
             500, "Error while saving governance result for artifact: %s", true),
     ERROR_WHILE_DELETING_GOVERNANCE_RESULT(500002, "Error while deleting governance result.",

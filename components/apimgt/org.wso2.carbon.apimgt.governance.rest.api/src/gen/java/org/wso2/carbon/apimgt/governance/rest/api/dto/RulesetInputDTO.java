@@ -265,9 +265,8 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "TechWave", required = true, value = "Entity or individual providing the ruleset.")
+  @ApiModelProperty(example = "TechWave", value = "Entity or individual providing the ruleset.")
   @JsonProperty("provider")
-  @NotNull
   public String getProvider() {
     return provider;
   }

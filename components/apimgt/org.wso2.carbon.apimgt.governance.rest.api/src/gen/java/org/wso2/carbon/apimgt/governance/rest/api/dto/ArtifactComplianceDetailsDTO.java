@@ -34,7 +34,8 @@ public class ArtifactComplianceDetailsDTO   {
     public enum StatusEnum {
         COMPLIANT("COMPLIANT"),
         NON_COMPLIANT("NON-COMPLIANT"),
-        NOT_APPLICABLE("NOT-APPLICABLE");
+        NOT_APPLICABLE("NOT-APPLICABLE"),
+        PENDING("PENDING");
         private String value;
 
         StatusEnum (String v) {

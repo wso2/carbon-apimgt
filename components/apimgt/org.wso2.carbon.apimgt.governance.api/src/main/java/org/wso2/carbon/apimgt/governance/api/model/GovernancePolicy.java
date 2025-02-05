@@ -37,6 +37,7 @@ public class GovernancePolicy {
     private String createdTime;
     private String updatedBy;
     private String updatedTime;
+    private boolean isGlobal = false;
 
     public String getId() {
         return id;
@@ -132,5 +133,13 @@ public class GovernancePolicy {
 
     public void setUpdatedTime(String updatedTime) {
         this.updatedTime = updatedTime;
+    }
+
+    public boolean isGlobal() {
+        return isGlobal;
+    }
+
+    public void setGlobal(boolean global) {
+        isGlobal = global;
     }
 }

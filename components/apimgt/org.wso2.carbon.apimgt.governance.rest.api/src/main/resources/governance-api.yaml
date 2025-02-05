@@ -53,6 +53,22 @@ paths:
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
+        - name: query
+          in: query
+          schema:
+            type: string
+            example: "name:WSO2 Security Practices artifactType:REST_API ruleType:API_DEFINITION"
+          description: |
+            You can search for rulesets using the following format:
+
+              - "query=name:{NAME}" searches rulesets by name.
+              - "query=artifactType:{ARTIFACT_TYPE}" searches rulesets by artifact type.
+              - "query=ruleType:{RULE_TYPE}" searches rulesets by rule type.
+
+            You can combine multiple attributes to search for rulesets:
+              - "query=name:{NAME} artifactType:{ARTIFACT_TYPE} ruleType:{RULE_TYPE}" searches rulesets by name, artifact type, and rule type.
+
+            Remember to use URL encoding if your client does not support it (e.g., curl).
       responses:
         "200":
           description: OK. Successful response with a list of rulesets.
@@ -392,6 +408,21 @@ paths:
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
+        - name: query
+          in: query
+          schema:
+            type: string
+            example: "name:WSO2 Best Practices state:API_CREATE label:GLOBAL"
+          description: |
+            You can search for governance policies using following format.
+
+              - "query=name:{NAME}" searches policies by name.
+              - "query=state:{STATE} " searches policies by state.
+            
+            You can also use multiple attributes to search for policies.
+              - "query=name:{NAME} state:{STATE}" searches policies by name, state, and label.
+
+            Remember to use URL encoding if your client doesn't support it (e.g., curl).
       responses:
         "200":
           description: OK. Successful response with a list of governance policies.
@@ -1037,7 +1068,6 @@ components:
         - rulesetContent
         - ruleType
         - artifactType
-        - provider
     RulesetInfo:
       type: object
       description: Detailed information about a ruleset.
@@ -1255,10 +1285,6 @@ components:
           type: integer
           description: Number of non-compliant artifacts.
           example: 4
-        pending:
-          type: integer
-          description: Number of artifacts pending for compliance.
-          example: 0
         notApplicable:
           type: integer
           description: Number of artifacts not applicable for compliance yet.
@@ -1326,6 +1352,7 @@ components:
             - COMPLIANT
             - NON-COMPLIANT
             - NOT-APPLICABLE
+            - PENDING
           example: "COMPLIANT"
         info:
           $ref: '#/components/schemas/ArtifactInfo'
@@ -1385,6 +1412,7 @@ components:
             - COMPLIANT
             - NON-COMPLIANT
             - NOT-APPLICABLE
+            - PENDING
           example: "COMPLIANT"
         info:
           $ref: '#/components/schemas/ArtifactInfo'
@@ -1551,8 +1579,17 @@ components:
             - INFO
           example: WARN
         violatedPath:
-          type: string
+          type: object
           description: Path in the artifact where the rule is violated.
+          properties:
+            path:
+              type: string
+              description: Path in the artifact where the rule is violated.
+              example: "info.title"
+            description:
+              type: string
+              description: Description of the path.
+              example: "API name"
         message:
           type: string
           description: Message to be displayed when the rule is violated.

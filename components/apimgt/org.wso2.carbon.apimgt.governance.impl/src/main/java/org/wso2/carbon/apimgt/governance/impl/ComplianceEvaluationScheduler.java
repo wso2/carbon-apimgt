@@ -24,14 +24,11 @@ import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationRequest;
-import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationResult;
-import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationStatus;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
-import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
@@ -68,13 +65,11 @@ public class ComplianceEvaluationScheduler {
     /**
      * Initialize the evaluation request scheduler.
      */
-    public static void initialize() throws GovernanceException {
+    public static void initialize() {
         log.info("Initializing Evaluation Request Scheduler...");
 
         scheduler = Executors.newSingleThreadScheduledExecutor();
         processorPool = createProcessorPool();
-
-        complianceMgtDAO.updateProcessingRequestToPending();
 
         scheduler.scheduleAtFixedRate(
                 ComplianceEvaluationScheduler::processPendingRequests,
@@ -98,13 +93,13 @@ public class ComplianceEvaluationScheduler {
 
     /**
      * Process pending evaluation requests.
-     *
      */
     private static void processPendingRequests() {
         if (log.isDebugEnabled()) {
             log.debug("Checking for pending evaluation requests...");
         }
 
+        // TODO: Change long lasting processing requests to pending
         List<ComplianceEvaluationRequest> pendingRequests = fetchPendingRequests();
 
         if (pendingRequests == null || pendingRequests.isEmpty()) {
@@ -114,55 +109,44 @@ public class ComplianceEvaluationScheduler {
             return;
         }
 
-        // Group pending requests by artifact ID
-        Map<String, List<ComplianceEvaluationRequest>> groupedRequests = new HashMap<>();
-        for (ComplianceEvaluationRequest request : pendingRequests) {
-            String artifactId = request.getArtifactId();
-            if (groupedRequests.containsKey(artifactId)) {
-                groupedRequests.get(artifactId).add(request);
-            } else {
-                List<ComplianceEvaluationRequest> requests = new ArrayList<>();
-                requests.add(request);
-                groupedRequests.put(artifactId, requests);
-            }
-        }
-
         List<Future<?>> futures = new ArrayList<>();
 
-        // Process requests for each artifact in parallel
-        for (String artifactId : groupedRequests.keySet()) {
+        for (ComplianceEvaluationRequest request : pendingRequests) {
             Future<?> future = processorPool.submit(() -> {
-                List<ComplianceEvaluationRequest> requests = groupedRequests.get(artifactId);
 
-                String organization = requests.get(0).getOrganization(); // Can get organization from any request
-                ArtifactType artifactType = requests.get(0)
-                        .getArtifactType(); // Can get artifact type from any request
+                String organization = request.getOrganization();
+                ArtifactType artifactType = request.getArtifactType();
 
-                // Start tenant flow for this thread
+                // Start tenant flow for this thread, need to get the project from APIM
                 PrivilegedCarbonContext.startTenantFlow();
                 try {
                     PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                     carbonContext.setTenantDomain(organization, true);
-
-                    // Process the requests for an artifact
-                    processRequestsForArtifact(artifactId, artifactType, organization, requests);
+                    processRequest(request);
                 } finally {
-                    // End the tenant flow to avoid memory leaks
                     PrivilegedCarbonContext.endTenantFlow();
                 }
             });
             futures.add(future);
         }
 
-        // Wait for all tasks to complete
-        for (Future<?> future : futures) {
+        // TODO: Handle exceptions and retries
+        for (int i = 0; i < futures.size(); i++) {
+            Future<?> future = futures.get(i);
+            ComplianceEvaluationRequest request = pendingRequests.get(i);
+
             try {
                 future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                // Handle exceptions thrown during task execution
-                log.error("Error occurred while processing compliance evaluation request", e);
+            } catch (InterruptedException e) {
+                log.error("Task interrupted for request: " + request.getId() + "for artifact ID: " +
+                        request.getArtifactId(), e.getCause());
+                Thread.currentThread().interrupt();
+            } catch (ExecutionException e) {
+                log.error("Execution error for request: " + request.getId() + "for artifact ID: " +
+                        request.getArtifactId(), e.getCause());
             }
         }
+
 
     }
 
@@ -173,7 +157,7 @@ public class ComplianceEvaluationScheduler {
      */
     private static List<ComplianceEvaluationRequest> fetchPendingRequests() {
         try {
-            return complianceMgtDAO.getPendingComplianceEvaluationRequests();
+            return complianceMgtDAO.getPendingComplianceEvalRequests();
         } catch (GovernanceException e) {
             log.error("Error fetching pending requests: " + e.getMessage(), e);
         }
@@ -183,21 +167,21 @@ public class ComplianceEvaluationScheduler {
     /**
      * Process evaluation requests for a given artifact.
      *
-     * @param artifactId   ID of the artifact.
-     * @param artifactType Type of the artifact.
-     * @param organization Organization of the artifact.
-     * @param requests     List of evaluation requests.
+     * @param request Evaluation request.
      */
-    private static void processRequestsForArtifact(String artifactId, ArtifactType artifactType, String organization,
-                                                   List<ComplianceEvaluationRequest> requests) {
+    private static void processRequest(ComplianceEvaluationRequest request) {
+
+        String requestId = request.getId();
+        String artifactId = request.getArtifactId();
+        ArtifactType artifactType = request.getArtifactType();
+        String organization = request.getOrganization();
 
         try {
-
             // Check if artifact exists
             if (!GovernanceUtil.isArtifactAvailable(artifactId, artifactType)) {
                 log.warn("Artifact not found for artifact ID: " + artifactId + " " +
                         ". Skipping governance evaluation");
-                complianceMgtDAO.deleteComplianceEvaluationRequestsForArtifact(artifactId, artifactType, organization);
+                complianceMgtDAO.deleteComplianceEvalReqsForArtifact(artifactId, artifactType, organization);
                 return;
             }
 
@@ -210,8 +194,7 @@ public class ComplianceEvaluationScheduler {
                     log.warn("Artifact type " + extendedArtifactType + " not supported " +
                             "for artifact ID: " + artifactId + " " +
                             ". Skipping governance evaluation");
-                    complianceMgtDAO.deleteComplianceEvaluationRequestsForArtifact
-                            (artifactId, artifactType, organization);
+                    complianceMgtDAO.deleteComplianceEvalReqsForArtifact(artifactId, artifactType, organization);
                     return;
                 }
             }
@@ -223,7 +206,7 @@ public class ComplianceEvaluationScheduler {
             if (artifactProject == null) {
                 log.warn("Artifact project not found for artifact ID: " +
                         artifactId + " .Skipping governance evaluation");
-                complianceMgtDAO.deleteComplianceEvaluationRequestsForArtifact(artifactId, artifactType, organization);
+                complianceMgtDAO.deleteComplianceEvalReqsForArtifact(artifactId, artifactType, organization);
                 return;
             }
 
@@ -232,60 +215,58 @@ public class ComplianceEvaluationScheduler {
                     (artifactProject, artifactType);
 
 
-            for (ComplianceEvaluationRequest request : requests) {
-                processEvaluationRequest(request.getId(), artifactId, artifactType,
-                        request.getPolicyId(), artifactProjectContentMap, organization);
+            // Attempt to process the evaluation request
+            boolean isUpdated = complianceMgtDAO.updatePendingRequestToProcessing(requestId);
+            if (!isUpdated) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping governance evaluation for artifact ID: " + artifactId
+                            + " of type " + artifactType +
+                            " as there are processing requests for same artifact.");
+                }
+                complianceMgtDAO.deleteComplianceEvalRequest(requestId);
+                return;
             }
 
+            // Evaluate the artifact against each policy
+            for (String policyId : request.getPolicyIds()) {
+                evaluteArtifactWithPolicy(artifactId, artifactType, policyId, artifactProjectContentMap, organization);
+            }
+
+            // Delete the evaluation request after processing completes
+            complianceMgtDAO.deleteComplianceEvalRequest(requestId);
         } catch (GovernanceException e) {
-            log.error("Error processing evaluation requests for artifact ID: " + artifactId, e);
+            log.error("Error processing evaluation request for artifact ID: " + artifactId, e);
         }
 
     }
 
     /**
-     * Process a single evaluation request.
+     * Evaluate an artifact against a policy.
      *
-     * @param requestId                 ID of the artifact.
      * @param artifactId                ID of the artifact.
-     * @param artifactType              Type of the artifact. (API)
+     * @param artifactType              Type of the artifact.
      * @param policyId                  ID of the policy.
-     * @param artifactProjectContentMap Map of rule type to content.
+     * @param artifactProjectContentMap Content of the artifact project.
      * @param organization              Organization of the artifact.
-     * @throws GovernanceException If an error occurs while processing the evaluation request.
+     * @throws GovernanceException If an error occurs while evaluating the artifact.
      */
-    private static void processEvaluationRequest(String requestId,
-                                                 String artifactId, ArtifactType artifactType, String policyId,
-                                                 Map<RuleType, String> artifactProjectContentMap, String organization)
+    private static void evaluteArtifactWithPolicy(String artifactId, ArtifactType artifactType, String policyId,
+                                                  Map<RuleType, String> artifactProjectContentMap, String organization)
             throws GovernanceException {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
 
-        // Check if there are processing requests for the same artifact, policy pair. If so, skip evaluation
-        if (complianceMgtDAO.getProcessingComplianceEvaluationRequest(artifactId, artifactType,
-                policyId, organization) != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Skipping governance evaluation for artifact ID: " + artifactId + " of type " + artifactType +
-                        " and policy ID: " + policyId +
-                        " as there are processing requests for same artifact and policy.");
-            }
-            return;
-        }
-
-        // Update evaluation status to PROCESSING
-        complianceMgtDAO.updateComplianceEvaluationStatus(requestId, ComplianceEvaluationStatus.PROCESSING);
-
-        // Get Rulesets related to the policy
-        GovernancePolicyMgtDAO policyMgtDAO = GovernancePolicyMgtDAOImpl.getInstance();
-
-        List<Ruleset> rulesets = policyMgtDAO.getRulesetsByPolicyId(policyId);
-
         // Validate the artifact against each ruleset
+        List<Ruleset> rulesets = GovernancePolicyMgtDAOImpl.getInstance().getRulesetsByPolicyId(policyId);
+
+        Map<String, List<RuleViolation>> rulesetViolationsMap = new HashMap<>();
+
         for (Ruleset ruleset : rulesets) {
-            ExtendedArtifactType extendedArtifactType = ruleset.getArtifactType();
+            List<RuleViolation> ruleViolations = new ArrayList<>();
 
             // Check if ruleset's artifact type matches with the artifact's type
+            ExtendedArtifactType extendedArtifactType = ruleset.getArtifactType();
             if (ArtifactType.API.equals(artifactType) && extendedArtifactType.equals(
                     APIMUtil.getExtendedArtifactTypeForAPI(APIMUtil.getAPIType(artifactId)))) {
 
@@ -298,12 +279,10 @@ public class ComplianceEvaluationScheduler {
                             artifactId + ". Skipping governance evaluation for ruleset ID: " + ruleset.getId());
                     continue;
                 }
-                // Send target content and ruleset for validation
-                List<RuleViolation> ruleViolations = validationEngine.validate(
-                        contentToValidate, ruleset);
 
-                saveEvaluationResults(artifactId, artifactType, policyId, ruleset.getId(),
-                        ruleViolations, organization);
+                // Send target content and ruleset for validation
+                List<RuleViolation> violations = validationEngine.validate(contentToValidate, ruleset);
+                ruleViolations.addAll(violations);
 
             } else {
                 if (log.isDebugEnabled()) {
@@ -311,44 +290,29 @@ public class ComplianceEvaluationScheduler {
                             "governance evaluation for ruleset ID: " + ruleset.getId());
                 }
             }
+            rulesetViolationsMap.put(ruleset.getId(), ruleViolations);
         }
-
-        // Delete the evaluation request after processing completes
-        complianceMgtDAO.deleteComplianceEvaluationRequest(requestId);
-
+        savePolicyEvaluationResults(artifactId, artifactType, policyId, rulesetViolationsMap,
+                organization);
     }
 
     /**
-     * Save compliance evaluation results to the database.
+     * Save compliance evaluation results of the policy.
      *
-     * @param artifactId     ID of the artifact.
-     * @param artifactType   Type of the artifact.
-     * @param policyId       ID of the policy.
-     * @param rulesetId      ID of the ruleset.
-     * @param organization   Organization of the artifact.
-     * @param ruleViolations List of rule violations.
+     * @param artifactId           ID of the artifact.
+     * @param artifactType         Type of the artifact.
+     * @param policyId             ID of the policy.
+     * @param rulesetViolationsMap Map of rule violations for each ruleset.
+     * @param organization         Organization of the artifact.
      */
-    private static void saveEvaluationResults(String artifactId, ArtifactType artifactType, String policyId,
-                                              String rulesetId,
-                                              List<RuleViolation> ruleViolations, String organization) {
+    private static void savePolicyEvaluationResults(String artifactId, ArtifactType artifactType, String policyId,
+                                                    Map<String, List<RuleViolation>> rulesetViolationsMap,
+                                                    String organization) {
         try {
-            ComplianceEvaluationResult result = new ComplianceEvaluationResult(artifactId, artifactType,
-                    policyId, rulesetId, ruleViolations.isEmpty(), organization);
-
-            for (RuleViolation violation : ruleViolations) {
-                violation.setPolicyId(policyId);
-                violation.setArtifactId(artifactId);
-                violation.setArtifactType(artifactType);
-                violation.setOrganization(organization);
-            }
-
-            complianceMgtDAO.addComplianceEvaluationResult(result, ruleViolations);
-
+            complianceMgtDAO.addComplianceEvalResults(artifactId, artifactType, policyId, rulesetViolationsMap,
+                    organization);
         } catch (GovernanceException e) {
-            log.error("Error saving governance result for artifact ID: " + artifactId, e);
-        }
-        if (log.isDebugEnabled()) {
-            log.debug("New governance result saved for artifact ID: " + artifactId);
+            log.error("Error saving governance results for artifact ID: " + artifactId, e);
         }
     }
 

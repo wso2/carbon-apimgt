@@ -3006,7 +3006,7 @@ public class PublisherCommonUtils {
 
         for (RuleViolation violation : blockingViolations) {
             Map<String, String> violationDetails = new HashMap<>();
-            violationDetails.put("ruleCode", violation.getRuleCode());
+            violationDetails.put("ruleCode", violation.getRuleName());
             violationDetails.put("violatedPath", violation.getViolatedPath());
             violationDetails.put("severity", violation.getSeverity().name());
             violations.add(violationDetails);
@@ -3014,7 +3014,7 @@ public class PublisherCommonUtils {
 
         for (RuleViolation violation : nonBlockingViolations) {
             Map<String, String> violationDetails = new HashMap<>();
-            violationDetails.put("ruleCode", violation.getRuleCode());
+            violationDetails.put("ruleCode", violation.getRuleName());
             violationDetails.put("violatedPath", violation.getViolatedPath());
             violationDetails.put("severity", violation.getSeverity().name());
             violations.add(violationDetails);

@@ -19,10 +19,9 @@
 package org.wso2.carbon.apimgt.governance.impl.dao;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationRequest;
-import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationResult;
-import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationStatus;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 
 import java.util.List;
@@ -38,14 +37,14 @@ public interface ComplianceMgtDAO {
      *
      * @param artifactId   Artifact ID
      * @param artifactType Artifact Type
-     * @param policyId     Policy ID
+     * @param policyIds    List of Policy IDs
      * @param organization Organization
      * @throws GovernanceException If an error occurs while adding the artifact
      *                             compliance evaluation request event
      */
-    void addComplianceEvaluationRequest(String artifactId, ArtifactType artifactType,
-                                        String policyId,
-                                        String organization) throws GovernanceException;
+    void addComplianceEvalRequest(String artifactId, ArtifactType artifactType,
+                                  List<String> policyIds, String organization)
+            throws GovernanceException;
 
     /**
      * Get pending evaluation requests
@@ -53,32 +52,30 @@ public interface ComplianceMgtDAO {
      * @return List of pending evaluation requests
      * @throws GovernanceException If an error occurs while getting the pending evaluation requests
      */
-    List<ComplianceEvaluationRequest> getPendingComplianceEvaluationRequests() throws GovernanceException;
+    List<ComplianceEvaluationRequest> getPendingComplianceEvalRequests() throws GovernanceException;
 
     /**
-     * Get the processing compliance evaluation request by artifact ID, artifact Type, policy ID and Org, if any
+     * Add an artifact compliance evaluation request event
      *
      * @param artifactId   Artifact ID
      * @param artifactType Artifact Type
-     * @param policyId     Policy ID
      * @param organization Organization
-     * @return ComplianceEvaluationRequest
-     * @throws GovernanceException If an error occurs while getting the processing compliance evaluation request
+     * @return Request ID
+     * @throws GovernanceException If an error occurs while adding the artifact compliance evaluation
+     *                             request
      */
-    ComplianceEvaluationRequest getProcessingComplianceEvaluationRequest(String artifactId,
-                                                                         ArtifactType artifactType, String policyId,
-                                                                         String organization)
+    String getPendingEvalRequest(String artifactId, ArtifactType artifactType, String organization)
             throws GovernanceException;
 
+
     /**
-     * Update the evaluation status of a request
+     * Update the evaluation status of a pending request to processing
      *
-     * @param requestId Evaluation request ID
-     * @param status    Evaluation status
+     * @param requestId Request ID
+     * @return True if the request is updated successfully
      * @throws GovernanceException If an error occurs while updating the evaluation status
      */
-    void updateComplianceEvaluationStatus(String requestId, ComplianceEvaluationStatus status) throws
-            GovernanceException;
+    boolean updatePendingRequestToProcessing(String requestId) throws GovernanceException;
 
     /**
      * Update the evaluation status of all processing requests to pending
@@ -93,7 +90,7 @@ public interface ComplianceMgtDAO {
      * @param requestId Evaluation request ID
      * @throws GovernanceException If an error occurs while deleting the evaluation request
      */
-    void deleteComplianceEvaluationRequest(String requestId) throws GovernanceException;
+    void deleteComplianceEvalRequest(String requestId) throws GovernanceException;
 
     /**
      * Delete evaluation requests for an artifact
@@ -103,32 +100,22 @@ public interface ComplianceMgtDAO {
      * @param organization Organization
      * @throws GovernanceException If an error occurs while deleting the evaluation request
      */
-    void deleteComplianceEvaluationRequestsForArtifact(String artifactId, ArtifactType artifactType,
-                                                       String organization) throws GovernanceException;
+    void deleteComplianceEvalReqsForArtifact(String artifactId, ArtifactType artifactType,
+                                             String organization) throws GovernanceException;
+
 
     /**
-     * Add a compliance evaluation result to DB
+     * Add compliance evaluation results for an artifact and policy
      *
-     * @param result         Evaluation result
-     * @param ruleViolations List of rule violations from policy evaluation
-     * @throws GovernanceException If an error occurs while adding the compliance evaluation result
+     * @param artifactId           Artifact ID
+     * @param artifactType         Artifact Type
+     * @param policyId             Policy ID
+     * @param rulesetViolationsMap Map of Rulesets to Rule Violations
+     * @param organization         Organization
+     * @throws GovernanceException If an error occurs while adding the compliance evaluation results
      */
-    void addComplianceEvaluationResult(ComplianceEvaluationResult result, List<RuleViolation> ruleViolations)
-            throws GovernanceException;
-
-    /**
-     * Get the rule violations
-     *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
-     * @param policyId     Policy ID
-     * @param rulesetId    Ruleset ID
-     * @param organization Organization
-     * @return List of rule violations
-     * @throws GovernanceException If an error occurs while getting the rule violations
-     */
-    List<RuleViolation> getRuleViolations(String artifactId, ArtifactType artifactType, String policyId,
-                                          String rulesetId, String organization)
+    void addComplianceEvalResults(String artifactId, ArtifactType artifactType, String policyId,
+                                  Map<String, List<RuleViolation>> rulesetViolationsMap, String organization)
             throws GovernanceException;
 
     /**
@@ -159,65 +146,42 @@ public interface ComplianceMgtDAO {
 
 
     /**
-     * Get the compliance evaluation result
-     *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
-     * @param policyId     Policy ID
-     * @param rulesetId    Ruleset ID
-     * @param organization Organization
-     * @return ComplianceEvaluationResult
-     * @throws GovernanceException If an error occurs while getting the compliance evaluation result
-     */
-    ComplianceEvaluationResult getComplianceEvaluationResult(String artifactId, ArtifactType artifactType,
-                                                             String policyId,
-                                                             String rulesetId, String organization)
-            throws GovernanceException;
-
-    /**
-     * Get compliance evaluation results by artifact ID and type
+     * Get policy evaluations for an artifact
      *
      * @param artifactId   Artifact ID
      * @param artifactType Artifact Type
      * @param organization Organization
-     * @return List of ComplianceEvaluationResult
+     * @return List of evaluated policies
      * @throws GovernanceException If an error occurs while getting the compliance evaluation results
      */
-    List<ComplianceEvaluationResult> getComplianceEvaluationResultsForArtifact(String artifactId,
-                                                                               ArtifactType artifactType,
-                                                                               String organization)
+    List<String> getEvaluatedPoliciesForArtifact(String artifactId, ArtifactType artifactType,
+                                                 String organization) throws GovernanceException;
+
+    /**
+     * Get ruleset runs for an artifact
+     *
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @param organization Organization
+     * @return List of evaluated rulesets
+     * @throws GovernanceException If an error occurs while getting the compliance evaluation results
+     */
+    List<String> getEvaluatedRulesetsForArtifact(String artifactId, ArtifactType artifactType,
+                                                 String organization)
             throws GovernanceException;
 
     /**
-     * Get compliance evaluation results by artifact and ruleset ID
+     * Check if a ruleset is evaluated for an artifact
      *
      * @param artifactId   Artifact ID
      * @param artifactType Artifact Type
      * @param rulesetId    Ruleset ID
      * @param organization Organization
-     * @return List of ComplianceEvaluationResult
+     * @return True if the ruleset is evaluated for the artifact
      * @throws GovernanceException If an error occurs while getting the compliance evaluation results
      */
-    List<ComplianceEvaluationResult> getComplianceEvaluationResultsForArtifactAndRuleset(String artifactId,
-                                                                                         ArtifactType artifactType,
-                                                                                         String rulesetId,
-                                                                                         String organization)
-            throws GovernanceException;
-
-    /**
-     * Get compliance evaluation results for an artifact and policy
-     *
-     * @param artifactId   Artifact ID
-     * @param artifactType Artifact Type
-     * @param policyId     Policy ID
-     * @param organization Organization
-     * @return List of ComplianceEvaluationResult
-     * @throws GovernanceException If an error occurs while getting the compliance evaluation results
-     */
-    List<ComplianceEvaluationResult> getComplianceEvaluationResultsForArtifactAndPolicy(String artifactId,
-                                                                                        ArtifactType artifactType,
-                                                                                        String policyId,
-                                                                                        String organization)
+    boolean isRulesetEvaluatedForArtifact(String artifactId,
+                                          ArtifactType artifactType, String rulesetId, String organization)
             throws GovernanceException;
 
     /**
@@ -242,6 +206,7 @@ public interface ComplianceMgtDAO {
     List<String> getNonCompliantArtifacts(ArtifactType artifactType,
                                           String organization) throws GovernanceException;
 
+
     /**
      * Get list of all compliance evaluated policies
      *
@@ -252,23 +217,37 @@ public interface ComplianceMgtDAO {
     List<String> getAllComplianceEvaluatedPolicies(String organization) throws GovernanceException;
 
     /**
-     * Get list of violated policies
+     * Get list of all violated rulesets
      *
      * @param organization Organization
-     * @return List of violated policies
-     * @throws GovernanceException If an error occurs while getting the list of violated policies
+     * @return List of all violated rulesets
+     * @throws GovernanceException If an error occurs while getting the list of all violated rulesets
      */
-    List<String> getViolatedPolicies(String organization) throws GovernanceException;
+    List<String> getViolatedRulesets(String organization) throws GovernanceException;
 
     /**
-     * Get compliance evaluation results for a given policy as a map of artifact type to list of
-     * compliance evaluation results
+     * Get list of all violated rulesets for an artifact
+     *
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @param organization Organization
+     * @return List of all violated rulesets for an artifact
+     * @throws GovernanceException If an error occurs while getting the list of all
+     *                             violated rulesets for an artifact
+     */
+    List<String> getViolatedRulesetsForArtifact(String artifactId, ArtifactType artifactType,
+                                                String organization)
+            throws GovernanceException;
+
+    /**
+     * Get list of all evaluated artifacts for a policy
      *
      * @param policyId Policy ID
-     * @return Map of compliance evaluation results
-     * @throws GovernanceException If an error occurs while getting the compliance evaluation results
+     * @return List of all evaluated artifacts for a policy
+     * @throws GovernanceException If an error occurs while getting the list of all
+     *                             evaluated artifacts for a policy
      */
-    Map<ArtifactType, List<ComplianceEvaluationResult>> getEvaluationResultsForPolicy(String policyId)
+    List<ArtifactInfo> getEvaluatedArtifactsForPolicy(String policyId)
             throws GovernanceException;
 
     /**

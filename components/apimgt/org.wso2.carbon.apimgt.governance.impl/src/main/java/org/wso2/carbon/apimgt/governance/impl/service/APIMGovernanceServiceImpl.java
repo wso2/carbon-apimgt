@@ -103,7 +103,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         for (GovernableState dependentState : dependentGovernableStates) {
             List<String> applicablePolicyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactId,
                     artifactType, dependentState, organization);
-            complianceManager.handleComplianceEvaluationAsync
+            complianceManager.handleComplianceEvalAsync
                     (artifactId, artifactType, applicablePolicyIds, organization);
         }
     }
@@ -135,7 +135,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         List<String> applicablePolicyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactId,
                 artifactType, state, organization);
 
-        ArtifactComplianceInfo artifactComplianceInfo = complianceManager.handleComplianceEvaluationSync
+        ArtifactComplianceInfo artifactComplianceInfo = complianceManager.handleComplianceEvalSync
                 (artifactId, revisionNo, artifactType, applicablePolicyIds,
                         artifactProjectContent, state, organization);
 
@@ -216,7 +216,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
             }
         }
 
-        complianceManager.handleComplianceEvaluationAsync(artifactId, artifactType, applicablePolicyIds, organization);
+        complianceManager.handleComplianceEvalAsync(artifactId, artifactType, applicablePolicyIds, organization);
 
     }
 
