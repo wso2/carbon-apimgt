@@ -1187,9 +1187,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
             }
 
-            if (!api.isAPIProduct()) {
-                String organizationID = APIUtil.getOrganizationIdFromExternalReference(userOrgInfo.getOrganizationId(),
-                        userOrgInfo.getName(), organization);
+            if (!api.isAPIProduct() ) {
+                String organizationID = null;
+                if (userOrgInfo != null && !StringUtils.isEmpty(userOrgInfo.getOrganizationId())) {
+                    organizationID = APIUtil.getOrganizationIdFromExternalReference(userOrgInfo.getOrganizationId(),
+                            userOrgInfo.getName(), organization);
+                }
                 org.wso2.carbon.apimgt.rest.api.store.v1.utils.APIUtils.updateAvailableTiersByOrganization(
                         api.getApi(), organizationID);
             }

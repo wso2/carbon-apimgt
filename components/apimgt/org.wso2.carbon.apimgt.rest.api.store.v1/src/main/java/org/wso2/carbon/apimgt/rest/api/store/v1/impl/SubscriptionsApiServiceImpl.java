@@ -235,8 +235,11 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             OrganizationInfo userOrgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             userOrgInfo.setSuperOrganization(organization);
             if (!apiTypeWrapper.isAPIProduct()) {
-                String organizationID = APIUtil.getOrganizationIdFromExternalReference(userOrgInfo.getOrganizationId(),
-                        userOrgInfo.getName(), organization);
+                String organizationID = null;
+                if (userOrgInfo != null && !StringUtils.isEmpty(userOrgInfo.getOrganizationId())) {
+                    organizationID = APIUtil.getOrganizationIdFromExternalReference(userOrgInfo.getOrganizationId(),
+                            userOrgInfo.getName(), organization);
+                }
                 org.wso2.carbon.apimgt.rest.api.store.v1.utils.APIUtils
                         .updateAvailableTiersByOrganization(apiTypeWrapper.getApi(), organizationID);
             }
@@ -355,8 +358,11 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             OrganizationInfo userOrgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             userOrgInfo.setSuperOrganization(organization);
             if (!apiTypeWrapper.isAPIProduct()) {
-                String organizationID = APIUtil.getOrganizationIdFromExternalReference(userOrgInfo.getOrganizationId(),
-                        userOrgInfo.getName(), organization);
+                String organizationID = null;
+                if (userOrgInfo != null && !StringUtils.isEmpty(userOrgInfo.getOrganizationId())) {
+                    organizationID = APIUtil.getOrganizationIdFromExternalReference(userOrgInfo.getOrganizationId(),
+                            userOrgInfo.getName(), organization);
+                }
                 org.wso2.carbon.apimgt.rest.api.store.v1.utils.APIUtils
                         .updateAvailableTiersByOrganization(apiTypeWrapper.getApi(), organizationID);
             }
@@ -448,8 +454,11 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 OrganizationInfo userOrgInfo = RestApiUtil.getOrganizationInfo(messageContext);
                 userOrgInfo.setSuperOrganization(organization);
                 if (!apiTypeWrapper.isAPIProduct()) {
-                    String organizationID = APIUtil.getOrganizationIdFromExternalReference(userOrgInfo.getOrganizationId(),
-                            userOrgInfo.getName(), organization);
+                    String organizationID = null;
+                    if (userOrgInfo != null && !StringUtils.isEmpty(userOrgInfo.getOrganizationId())) {
+                        organizationID = APIUtil.getOrganizationIdFromExternalReference(userOrgInfo.getOrganizationId(),
+                                userOrgInfo.getName(), organization);
+                    }
                     org.wso2.carbon.apimgt.rest.api.store.v1.utils.APIUtils.updateAvailableTiersByOrganization(
                             apiTypeWrapper.getApi(), organizationID);
                 }
