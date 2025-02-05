@@ -1285,10 +1285,6 @@ components:
           type: integer
           description: Number of non-compliant artifacts.
           example: 4
-        pending:
-          type: integer
-          description: Number of artifacts pending for compliance.
-          example: 0
         notApplicable:
           type: integer
           description: Number of artifacts not applicable for compliance yet.
@@ -1356,6 +1352,7 @@ components:
             - COMPLIANT
             - NON-COMPLIANT
             - NOT-APPLICABLE
+            - PENDING
           example: "COMPLIANT"
         info:
           $ref: '#/components/schemas/ArtifactInfo'
@@ -1415,6 +1412,7 @@ components:
             - COMPLIANT
             - NON-COMPLIANT
             - NOT-APPLICABLE
+            - PENDING
           example: "COMPLIANT"
         info:
           $ref: '#/components/schemas/ArtifactInfo'

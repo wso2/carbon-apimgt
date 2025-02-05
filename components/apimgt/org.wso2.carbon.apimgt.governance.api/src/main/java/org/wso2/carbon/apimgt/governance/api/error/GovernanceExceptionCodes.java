@@ -118,15 +118,17 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     // Request related codes
     ERROR_WHILE_ADDING_NEW_GOV_EVAL_REQUEST(400001, "Error while adding new governance evaluation request.",
             500, "Error while adding new governance evaluation request for artifact: %s", true),
-    ERROR_WHILE_GETTING_GOV_EVAL_REQUESTS(400002, "Error while getting governance evaluation requests.",
+    ERROR_WHILE_GETTING_GOV_EVAL_REQUEST_FOR_ARTIFACT(400002, "Error while getting governance evaluation request.",
+            500, "Error while getting governance evaluation request for artifact: %s", true),
+    ERROR_WHILE_GETTING_GOV_EVAL_REQUESTS(400003, "Error while getting governance evaluation requests.",
             500, "Error while getting governance evaluation requests"),
-    ERROR_WHILE_UPDATING_GOV_EVAL_REQUEST(400003, "Error while updating governance evaluation request.",
+    ERROR_WHILE_UPDATING_GOV_EVAL_REQUEST(400004, "Error while updating governance evaluation request.",
             500, "Error while updating governance evaluation request with ID: %s", true),
-    ERROR_WHILE_DELETING_GOVERNANCE_EVAL_REQUEST(400004, "Error while deleting governance evaluation request.",
+    ERROR_WHILE_DELETING_GOVERNANCE_EVAL_REQUEST(400005, "Error while deleting governance evaluation request.",
             500, "Error while deleting governance evaluation request with ID: %s"),
-    ERROR_WHILE_DELETING_GOVERNANCE_EVAL_REQUESTS(400005, "Error while deleting governance evaluation requests.",
+    ERROR_WHILE_DELETING_GOVERNANCE_EVAL_REQUESTS(400006, "Error while deleting governance evaluation requests.",
             500, "Error while deleting governance evaluation requests."),
-    ERROR_WHILE_CHANGING_PROCESSING_REQ_TO_PENDING(400006, "Error while changing processing requests to pending.",
+    ERROR_WHILE_CHANGING_PROCESSING_REQ_TO_PENDING(400007, "Error while changing processing requests to pending.",
             500, "Error while changing processing requests to pending", true),
 
     // Result related codes

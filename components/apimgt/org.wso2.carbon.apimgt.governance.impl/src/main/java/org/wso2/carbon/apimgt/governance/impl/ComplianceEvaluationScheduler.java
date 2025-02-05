@@ -261,7 +261,6 @@ public class ComplianceEvaluationScheduler {
         List<Ruleset> rulesets = GovernancePolicyMgtDAOImpl.getInstance().getRulesetsByPolicyId(policyId);
 
         Map<String, List<RuleViolation>> rulesetViolationsMap = new HashMap<>();
-        boolean isEvaluationSuccess = true;
 
         for (Ruleset ruleset : rulesets) {
             List<RuleViolation> ruleViolations = new ArrayList<>();
@@ -284,9 +283,6 @@ public class ComplianceEvaluationScheduler {
                 // Send target content and ruleset for validation
                 List<RuleViolation> violations = validationEngine.validate(contentToValidate, ruleset);
                 ruleViolations.addAll(violations);
-                if (!violations.isEmpty()) {
-                    isEvaluationSuccess = false;
-                }
 
             } else {
                 if (log.isDebugEnabled()) {

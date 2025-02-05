@@ -93,6 +93,15 @@ public interface GovernancePolicyMgtDAO {
     List<Ruleset> getRulesetsByPolicyId(String policyId) throws GovernanceException;
 
     /**
+     * Get the list of rulesets for a given policy
+     *
+     * @param policyId Policy ID
+     * @return List of rulesets IDs
+     * @throws GovernanceException If an error occurs while getting the rulesets
+     */
+    List<String> getRulesetsIdsByPolicyId(String policyId) throws GovernanceException;
+
+    /**
      * Get the list of policies by label
      *
      * @param label        label

@@ -478,7 +478,6 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
     public List<Ruleset> getRulesetsByPolicyId(String policyId)
             throws GovernanceException {
         List<Ruleset> rulesetList = new ArrayList<>();
-        String query;
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_RULESETS_BY_POLICY_ID)) {
             prepStmt.setString(1, policyId);
@@ -502,6 +501,31 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             throw new GovernanceException(GovernanceExceptionCodes.
                     ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY,
                     e, policyId);
+        }
+    }
+
+    /**
+     * Get the list of rulesets for a given policy
+     *
+     * @param policyId Policy ID
+     * @return List of rulesets IDs
+     * @throws GovernanceException If an error occurs while getting the rulesets
+     */
+    @Override
+    public List<String> getRulesetsIdsByPolicyId(String policyId) throws GovernanceException {
+        List<String> rulesetIds = new ArrayList<>();
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_RULESETS_IDS_BY_POLICY_ID)) {
+            prepStmt.setString(1, policyId);
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                while (resultSet.next()) {
+                    rulesetIds.add(resultSet.getString("RULESET_ID"));
+                }
+            }
+            return rulesetIds;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes
+                    .ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY, e, policyId);
         }
     }
 
