@@ -731,16 +731,37 @@ public class PublisherCommonUtils {
         return isRegularAPITier(tier);
     }
 
+    /**
+     * Checks if the given tier is an Async API tier.
+     *
+     * @param tier The tier to evaluate.
+     * @return {@code true} if the tier is of type EVENT_COUNT_TYPE, otherwise {@code false}.
+     */
     private static boolean isAsyncAPITier(Tier tier) {
         return EVENT_COUNT_TYPE.equals(tier.getQuotaPolicyType());
     }
 
+    /**
+     * Checks if the given tier is an AI API tier.
+     *
+     * @param tier The tier to evaluate.
+     * @return {@code true} if the tier is of type AI_API_QUOTA_TYPE,
+     *         contains the default subscription-less policy name,
+     *         or has a null quota policy type. Otherwise, returns {@code false}.
+     */
     private static boolean isAIAPITier(Tier tier) {
         return AI_API_QUOTA_TYPE.equals(tier.getQuotaPolicyType()) ||
                 tier.getName().contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS) ||
                 tier.getQuotaPolicyType() == null;
     }
 
+    /**
+     * Checks if the given tier is a regular API tier.
+     *
+     * @param tier The tier to evaluate.
+     * @return {@code true} if the tier is neither an AI API tier nor an Async API tier,
+     *         otherwise {@code false}.
+     */
     private static boolean isRegularAPITier(Tier tier) {
         return !AI_API_QUOTA_TYPE.equals(tier.getQuotaPolicyType()) &&
                 !EVENT_COUNT_TYPE.equals(tier.getQuotaPolicyType());
