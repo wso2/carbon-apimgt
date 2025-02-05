@@ -4053,6 +4053,10 @@ components:
           description: |
             If the provider value is not given user invoking the api will be used as the provider.
           example: admin
+        markdownContentId:
+          type: string
+          description: UUID of the overview markdown document
+          example: 01234567-0123-0123-0123-012345678901
         apiDefinition:
           type: string
           description: |

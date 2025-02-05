@@ -2676,6 +2676,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                     if (doc.getName().equalsIgnoreCase(requestedDocName)) {
                                         documentationList.add(doc);
                                     }
+                                }
+                                else if (searchQuery.toLowerCase().startsWith("other:")) {
+                                    String requestedDocOtherTypeName = searchQuery.split(":")[1];
+                                    if (doc.getOtherTypeName() != null
+                                            && doc.getOtherTypeName().equalsIgnoreCase(requestedDocOtherTypeName)) {
+                                        documentationList.add(doc);
+                                    }
                                 } else {
                                     log.warn("Document search not implemented for the query " + searchQuery);
                                 }

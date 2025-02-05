@@ -36,6 +36,7 @@ public class APIDTO   {
     private String context = null;
     private String version = null;
     private String provider = null;
+    private String markdownContentId = null;
     private String apiDefinition = null;
     private String wsdlUri = null;
     private String lifeCycleStatus = null;
@@ -178,6 +179,24 @@ public class APIDTO   {
   }
   public void setProvider(String provider) {
     this.provider = provider;
+  }
+
+  /**
+   * UUID of the overview markdown document
+   **/
+  public APIDTO markdownContentId(String markdownContentId) {
+    this.markdownContentId = markdownContentId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the overview markdown document")
+  @JsonProperty("markdownContentId")
+  public String getMarkdownContentId() {
+    return markdownContentId;
+  }
+  public void setMarkdownContentId(String markdownContentId) {
+    this.markdownContentId = markdownContentId;
   }
 
   /**
@@ -751,6 +770,7 @@ public class APIDTO   {
         Objects.equals(context, API.context) &&
         Objects.equals(version, API.version) &&
         Objects.equals(provider, API.provider) &&
+        Objects.equals(markdownContentId, API.markdownContentId) &&
         Objects.equals(apiDefinition, API.apiDefinition) &&
         Objects.equals(wsdlUri, API.wsdlUri) &&
         Objects.equals(lifeCycleStatus, API.lifeCycleStatus) &&
@@ -786,7 +806,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, apiKeyHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, subscriptions, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols, egress, subtype);
+    return Objects.hash(id, name, description, context, version, provider, markdownContentId, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, apiKeyHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, subscriptions, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols, egress, subtype);
   }
 
   @Override
@@ -800,6 +820,7 @@ public class APIDTO   {
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
+    sb.append("    markdownContentId: ").append(toIndentedString(markdownContentId)).append("\n");
     sb.append("    apiDefinition: ").append(toIndentedString(apiDefinition)).append("\n");
     sb.append("    wsdlUri: ").append(toIndentedString(wsdlUri)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");

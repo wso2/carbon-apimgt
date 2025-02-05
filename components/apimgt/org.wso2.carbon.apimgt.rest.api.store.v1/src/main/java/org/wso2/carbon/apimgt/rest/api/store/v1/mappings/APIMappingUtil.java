@@ -98,6 +98,7 @@ public class APIMappingUtil {
         dto.setSubtype(model.getSubtype());
         dto.setAvgRating(String.valueOf(model.getRating()));
         dto.setEgress(model.isEgress() == 1);
+        dto.setMarkdownContentId(model.getMarkdownContentId());
 
         Set<Scope> scopes = model.getScopes();
         Map<String, ScopeInfoDTO> uniqueScope = new HashMap<>();
@@ -302,6 +303,7 @@ public class APIMappingUtil {
         dto.setType(model.getType());
         dto.setAvgRating(String.valueOf(model.getRating()));
         dto.setEgress(model.isEgress() == 1);
+        dto.setMarkdownContentId(model.getMarkdownContentId());
 
         /* todo: created and last updated times
         if (null != model.getLastUpdated()) {

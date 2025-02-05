@@ -143,6 +143,8 @@ public class API implements Serializable {
     private String implementation = "ENDPOINT";
 
     private String monetizationCategory;
+
+    private String markdownContentId;
     
     private List<SOAPToRestSequence> soapToRestSequences;
 
@@ -1378,6 +1380,14 @@ public class API implements Serializable {
 
     public void setTestKey(String testKey) {
         this.testKey = testKey;
+    }
+
+    public String getMarkdownContentId() {
+        return markdownContentId;
+    }
+
+    public void setMarkdownContentId(String markdownContentId) {
+        this.markdownContentId = markdownContentId;
     }
 
     /**
