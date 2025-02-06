@@ -83,10 +83,16 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_API_DEFINITION_FILE_NAME = "mistral_api.yaml";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_DESCRIPTION = "Mistral AI service";
         public static final String LLM_PROVIDER_SERVICE_METADATA_MODEL = "model";
+//        public static final String LLM_PROVIDER_SERVICE_METADATA_REQUEST_MODEL = "requestModel";
+//        public static final String LLM_PROVIDER_SERVICE_METADATA_RESPONSE_MODEL = "responseModel";
         public static final String LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT = "promptTokenCount";
         public static final String LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT = "completionTokenCount";
         public static final String LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT = "totalTokenCount";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_MODEL = "$.model";
+//        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_REQUEST_MODEL_OPENAI = "$.model";
+//        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_REQUEST_MODEL_MISTRAL = "$.model";
+//        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_REQUEST_MODEL_AZURE_OPENAI = "deployment-id";
+//        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_RESPONSE_MODEL = "$.model";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_PROMPT_TOKEN_COUNT = "$.usage" +
                 ".prompt_tokens";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_COMPLETION_TOKEN_COUNT = "$.usage" +

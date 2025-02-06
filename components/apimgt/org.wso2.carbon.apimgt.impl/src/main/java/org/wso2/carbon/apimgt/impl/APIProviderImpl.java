@@ -54,56 +54,9 @@ import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.ClonePolicyMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIDefinitionContentSearchResult;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIInfo;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIPublisher;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.APISearchResult;
-import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.LLMProvider;
-import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
-import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
-import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentSourceType;
 import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent;
-import org.wso2.carbon.apimgt.api.model.DocumentationType;
-import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
-import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
-import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
-import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.AIConfiguration;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
-import org.wso2.carbon.apimgt.api.model.Mediation;
-import org.wso2.carbon.apimgt.api.model.Monetization;
-import org.wso2.carbon.apimgt.api.model.OperationPolicy;
-import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
-import org.wso2.carbon.apimgt.api.model.OperationPolicySpecAttribute;
-import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.ResourcePath;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
-import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.api.model.Usage;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.ApplicationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.Condition;
@@ -1127,6 +1080,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
         }
         updateAPIResources(api, tenantId);
+        updateAPIPrimaryEndpointsMapping(api);
+    }
+
+    /**
+     * Update primary endpoints of an API.
+     *
+     * @param api API to update
+     * @throws APIManagementException If fails to update primary endpoints of the API.
+     */
+    private void updateAPIPrimaryEndpointsMapping(API api) throws APIManagementException {
+        apiMgtDAO.updateAPIPrimaryEndpointsMapping(api);
     }
 
     /**
@@ -5341,6 +5305,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateApiInfo(api);
                 populateSubtypeConfiguration(api);
                 populateDefaultVersion(api);
+                populateAPIPrimaryEndpointsMapping(api, uuid);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -7777,6 +7742,63 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while resuming workflow " + workflowReferenceID, e);
         }
+    }
+
+    @Override
+    public String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint) throws APIManagementException {
+        int apiId = apiMgtDAO.getAPIID(apiUUID);
+        String endpointUUID = UUID.randomUUID().toString();
+        apiEndpoint.setEndpointUuid(endpointUUID);
+        return apiMgtDAO.addAPIEndpoint(apiId, apiEndpoint);
+    }
+
+    @Override
+    public APIEndpointInfo getAPIEndpointByUUID(String apiUUID, String endpointUUID) throws APIManagementException {
+        return apiMgtDAO.getAPIEndpoint(apiUUID, endpointUUID);
+    }
+
+    @Override
+    public APIEndpointInfo updateAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint)
+            throws APIManagementException {
+        return apiMgtDAO.updateAPIEndpoint(apiUUID, apiEndpoint);
+    }
+
+    @Override
+    public void deleteAPIEndpointById(String endpointUUID) throws APIManagementException {
+        apiMgtDAO.deleteAPIEndpointByEndpointId(endpointUUID);
+    }
+
+    @Override
+    public List<APIEndpointInfo> getAllAPIEndpointsByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getAPIEndpoints(uuid);
+    }
+
+    /**
+     * It fetches the primary endpoint mappings of an API and populate their UUIDs.
+     *
+     * @param api API model Object
+     * @param uuid unique identifier of an API
+     * @throws APIManagementException
+     */
+    private void populateAPIPrimaryEndpointsMapping(API api, String uuid) throws APIManagementException {
+        String currentApiUuid;
+        String revisionUuid = null;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+            revisionUuid = apiRevision.getRevisionUUID();
+        } else {
+            currentApiUuid = uuid;
+        }
+        int apiId = apiMgtDAO.getAPIID(currentApiUuid);
+        // Get primary production Endpoint mapping
+        String productionEndpointId =
+                apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(apiId, APIConstants.APIEndpoint.PRODUCTION, revisionUuid);
+        api.setPrimaryProductionEndpointId(productionEndpointId);
+        // Get primary sandbox endpoint endpoint
+        String sandboxEndpointId =
+                apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(apiId, APIConstants.APIEndpoint.SANDBOX, revisionUuid);
+        api.setPrimarySandboxEndpointId(sandboxEndpointId);
     }
 
 }

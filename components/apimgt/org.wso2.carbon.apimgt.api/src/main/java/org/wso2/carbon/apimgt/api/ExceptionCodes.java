@@ -492,6 +492,12 @@ public enum ExceptionCodes implements ErrorHandler {
             "Cannot find the yaml/json file with the project definition."),
     NO_API_ARTIFACT_FOUND(900910, "No Api artifacts found for given criteria", 404,
             "No Api artifacts found for given criteria"),
+    ERROR_READING_API_ENDPOINTS_FILE(900911, "Error while reading API Endpoints from the endpoints file",
+            400, "Error while reading API Endpoints from the endpoints file"),
+    ERROR_ADDING_API_ENDPOINT(900912, "Error while adding API Endpoint to the API", 500,
+            "Error while adding API Endpoint with ID: %s to the API"),
+    ERROR_ADDING_API_ENDPOINTS(900913, "Error while adding API Endpoints to the API", 500,
+            "Error while adding API Endpoints to the API"),
     ERROR_UPLOADING_THUMBNAIL(900914,
             "Error while updating thumbnail of API/API Product", 500,
             "Error while updating thumbnail of API/API Product: %s-%s"),
@@ -521,6 +527,16 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_ENDPOINT_CREDENTIALS(902000, "Invalid Endpoint Security credentials", 400,
             "Invalid Endpoint Security credentials. %s", false),
     INVALID_TENANT_CONFIG(902001, "Invalid tenant-config found", 400, "Invalid tenant-config found with error %s", false),
+
+    //API Endpoints Error codes
+    API_ENDPOINT_NOT_FOUND(900921, "Cannot find the required API Endpoint details.", 404,
+            "Requested API endpoint with id '%s' not found."),
+    ERROR_UPDATING_API_ENDPOINT_API(902032, "Error has occurred. Cannot update an API endpoint.", 500,
+            "Error when updating the API Endpoint."),
+    ERROR_INSERTING_API_ENDPOINT_API(902033, "Error has occurred. Fail to add an API endpoint to API.", 500,
+            "Error has occurred while inserting an API endpoint."),
+    ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API(902036, "Missing mandatory API endpoint's endpoint config", 500,
+            "Required attributes %s for an API endpoint config specification %s are either missing or empty"),
 
     //Operation Policies related error codes
     INVALID_OPERATION_POLICY(902005, "Cannot find the selected api policy", 400,

@@ -316,4 +316,8 @@ public final class ImportExportConstants {
     public static final String EXPORT_POLICY_TYPE_JSON = "JSON";
 
     public static final String POLICY_NAME = "name";
+
+    // API Endpoints related constants
+    public static final String API_ENDPOINTS_TYPE = "endpoints";
+    public static final String API_ENDPOINTS_FILE_LOCATION = File.separator + "endpoints";
 }
