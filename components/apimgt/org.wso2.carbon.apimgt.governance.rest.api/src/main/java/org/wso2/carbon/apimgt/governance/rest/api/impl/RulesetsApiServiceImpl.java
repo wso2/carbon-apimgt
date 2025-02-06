@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
@@ -91,7 +92,11 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             ruleset.setProvider(provider);
             ruleset.setDescription(description);
             ruleset.setDocumentationLink(documentationLink);
-            ruleset.setRulesetContent(IOUtils.toString(rulesetContentInputStream, StandardCharsets.UTF_8));
+
+            RulesetContent rulesetContent = new RulesetContent();
+            rulesetContent.setContent(IOUtils.toByteArray(rulesetContentInputStream));
+            rulesetContent.setFileName(rulesetContentDetail.getContentDisposition().getFilename());
+            ruleset.setRulesetContent(rulesetContent);
 
             String username = GovernanceAPIUtil.getLoggedInUsername();
             String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
@@ -151,7 +156,11 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             ruleset.setId(rulesetId);
             ruleset.setDescription(description);
             ruleset.setDocumentationLink(documentationLink);
-            ruleset.setRulesetContent(IOUtils.toString(rulesetContentInputStream, StandardCharsets.UTF_8));
+
+            RulesetContent rulesetContent = new RulesetContent();
+            rulesetContent.setContent(IOUtils.toByteArray(rulesetContentInputStream));
+            rulesetContent.setFileName(rulesetContentDetail.getContentDisposition().getFilename());
+            ruleset.setRulesetContent(rulesetContent);
 
             String username = GovernanceAPIUtil.getLoggedInUsername();
             String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
@@ -217,12 +226,20 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     @Override
     public Response getRulesetContent(String rulesetId, MessageContext messageContext) throws GovernanceException {
         RulesetManager rulesetManager = new RulesetManagerImpl();
-        String content = rulesetManager.getRulesetContent(rulesetId);
 
+        RulesetContent rulesetContent = rulesetManager.getRulesetContent(rulesetId);
+
+        String fileName = rulesetContent.getFileName() != null ? rulesetContent.getFileName() : "ruleset.yaml";
+        String contentTypeHeader = "application/x-yaml"; // Default content type
+
+        if (RulesetContent.ContentType.JSON.equals(rulesetContent.getContentType())) {
+            contentTypeHeader = "application/json";
+        }
+        
         return Response.status(Response.Status.OK)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=ruleset.yaml")
-                .header(HttpHeaders.CONTENT_TYPE, "application/x-yaml")
-                .entity(content).build();
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + fileName)
+                .header(HttpHeaders.CONTENT_TYPE, contentTypeHeader)
+                .entity(new String(rulesetContent.getContent(), StandardCharsets.UTF_8)).build();
     }
 
     /**

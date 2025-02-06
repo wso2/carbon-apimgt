@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
@@ -143,12 +144,12 @@ public class RulesetManagerImpl implements RulesetManager {
      * Get the content of a Governance Ruleset
      *
      * @param rulesetId Ruleset ID
-     * @return String Content of the ruleset
+     * @return Content of the ruleset
      * @throws GovernanceException If an error occurs while getting the ruleset content
      */
     @Override
-    public String getRulesetContent(String rulesetId) throws GovernanceException {
-        String content = rulesetMgtDAO.getRulesetContent(rulesetId);
+    public RulesetContent getRulesetContent(String rulesetId) throws GovernanceException {
+        RulesetContent content = rulesetMgtDAO.getRulesetContent(rulesetId);
         if (content == null) {
             throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId);
         }

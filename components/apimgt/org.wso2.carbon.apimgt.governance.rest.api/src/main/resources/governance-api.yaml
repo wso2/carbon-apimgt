@@ -38,8 +38,6 @@ tags:
     description: for accessing artifact compliance.
   - name: Policy Adherence
     description: for accessing policy adherence.
-  - name: Health Check
-    description: for health check.
   - name: Deprecated
     description: resources that are deprecated.
 paths:
@@ -296,6 +294,9 @@ paths:
             application/x-yaml:
               schema:
                 type: string
+            application/json:
+              schema:
+                type: string
         "400":
           description: Bad Request
           content:
@@ -370,34 +371,6 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_read
-  /healthz/liveness:
-    get:
-      summary: Liveness Check
-      description: Checks if the application is alive and able to respond to requests.
-      operationId: getHealthzLiveness
-      tags:
-        - Health Check
-      responses:
-        "200":
-          description: Application is alive
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HealthzResponse"
-  /healthz/readiness:
-    get:
-      summary: Readiness Check
-      description: Checks if the application is ready to handle requests.
-      operationId: getHealthzReadiness
-      tags:
-        - Health Check
-      responses:
-        "200":
-          description: Application is ready
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HealthzResponse"
   /policies:
     get:
       summary: Retrieves a list of all governance policies.
@@ -976,12 +949,6 @@ components:
           type: string
           description: |
             A detail description about the error message.
-    HealthzResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          example: Ok
     RulesetList:
       type: object
       description: A list of rulesets.

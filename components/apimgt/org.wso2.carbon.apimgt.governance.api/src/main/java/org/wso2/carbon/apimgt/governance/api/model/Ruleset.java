@@ -21,123 +21,15 @@ package org.wso2.carbon.apimgt.governance.api.model;
 /**
  * This class represents a governance Ruleset
  */
-public class Ruleset {
-    private String id;
-    private String name;
-    private String description;
-    private String rulesetContent;
-    private RuleCategory ruleCategory;
-    private RuleType ruleType;
-    private ExtendedArtifactType artifactType;
-    private String documentationLink;
-    private String provider;
-    private String createdBy;
-    private String createdTime;
-    private String updatedBy;
-    private String updatedTime;
+public class Ruleset extends RulesetInfo {
+    private RulesetContent rulesetContent;
 
-    public String getId() {
-        return id;
+    public RulesetContent getRulesetContent() {
+        return new RulesetContent(rulesetContent);
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getRulesetContent() {
-        return rulesetContent;
-    }
-
-    public void setRulesetContent(String rulesetContent) {
-        this.rulesetContent = rulesetContent;
-    }
-
-    public RuleType getRuleType() {
-        return ruleType;
-    }
-
-    public void setRuleType(RuleType ruleType) {
-        this.ruleType = ruleType;
-    }
-
-    public ExtendedArtifactType getArtifactType() {
-        return artifactType;
-    }
-
-    public void setArtifactType(ExtendedArtifactType artifactType) {
-        this.artifactType = artifactType;
-    }
-
-    public String getDocumentationLink() {
-        return documentationLink;
-    }
-
-    public void setDocumentationLink(String documentationLink) {
-        this.documentationLink = documentationLink;
-    }
-
-    public String getProvider() {
-        return provider;
-    }
-
-    public void setProvider(String provider) {
-        this.provider = provider;
-    }
-
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    public String getCreatedTime() {
-        return createdTime;
-    }
-
-    public void setCreatedTime(String createdTime) {
-        this.createdTime = createdTime;
-    }
-
-    public String getUpdatedBy() {
-        return updatedBy;
-    }
-
-    public void setUpdatedBy(String updatedBy) {
-        this.updatedBy = updatedBy;
-    }
-
-    public String getUpdatedTime() {
-        return updatedTime;
-    }
-
-    public void setUpdatedTime(String updatedTime) {
-        this.updatedTime = updatedTime;
-    }
-
-    public RuleCategory getRuleCategory() {
-        return ruleCategory;
-    }
-
-    public void setRuleCategory(RuleCategory ruleCategory) {
-        this.ruleCategory = ruleCategory;
+    public void setRulesetContent(RulesetContent rulesetContent) {
+        this.rulesetContent = new RulesetContent(rulesetContent);
     }
 }
 

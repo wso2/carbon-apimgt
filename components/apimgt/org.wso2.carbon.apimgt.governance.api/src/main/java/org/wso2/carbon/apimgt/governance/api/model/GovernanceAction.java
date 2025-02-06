@@ -23,7 +23,7 @@ package org.wso2.carbon.apimgt.governance.api.model;
  */
 public class GovernanceAction {
     private GovernableState governableState;
-    private Severity ruleSeverity;
+    private RuleSeverity ruleSeverity;
     private GovernanceActionType type;
 
     public GovernableState getGovernableState() {
@@ -35,11 +35,11 @@ public class GovernanceAction {
                 = governableState;
     }
 
-    public Severity getRuleSeverity() {
+    public RuleSeverity getRuleSeverity() {
         return ruleSeverity;
     }
 
-    public void setRuleSeverity(Severity ruleSeverity) {
+    public void setRuleSeverity(RuleSeverity ruleSeverity) {
         this.ruleSeverity = ruleSeverity;
     }
 

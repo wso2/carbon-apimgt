@@ -85,6 +85,10 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
     ERROR_WHILE_SEARCHING_RULESETS(200020, "Error while searching rulesets",
             500, "Error while searching rulesets for the organization: %s", true),
 
+    ERROR_WHILE_INSERTING_RULESET_CONTENT(200021, "Error while inserting ruleset content",
+            500, "Error while inserting " +
+            "ruleset content for the ruleset with id: %s", true),
+
     // Policy related codes
     ERROR_WHILE_CREATING_POLICY(300001, "Policy creation failed.",
             500, "Error while creating governance policy " +

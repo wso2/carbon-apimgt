@@ -22,7 +22,7 @@ import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
-import org.wso2.carbon.apimgt.governance.api.model.Severity;
+import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ActionDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
@@ -118,7 +118,7 @@ public class PolicyMappingUtil {
             GovernanceAction governanceAction = new GovernanceAction();
             governanceAction.setGovernableState(GovernableState.fromString(String.valueOf(
                     action.getState())));
-            governanceAction.setRuleSeverity(Severity.fromString(String.valueOf(action.getRuleSeverity())));
+            governanceAction.setRuleSeverity(RuleSeverity.fromString(String.valueOf(action.getRuleSeverity())));
             governanceAction.setType(GovernanceActionType.fromString(String.valueOf(action.getType())));
             governanceActions.add(governanceAction);
         }
