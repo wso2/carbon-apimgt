@@ -118,6 +118,9 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
             400, "Invalid action provided for the policy: %s"),
     ERROR_WHILE_SEARCHING_POLICIES(300013, "Error while searching policies",
             500, "Error while searching policies for the organization: %s", true),
+    ERROR_WHILE_DELETING_LABEL_POLICY_MAPPINGS(300014, "Error while deleting label policy mappings",
+            500, "Error while deleting label policy mappings for " +
+            "label with ID: %s", true),
 
     // Request related codes
     ERROR_WHILE_ADDING_NEW_GOV_EVAL_REQUEST(400001, "Error while adding new governance evaluation request.",

@@ -37,8 +37,10 @@ import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This class represents the API Governance Service Implementation
@@ -186,17 +188,21 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact type ArtifactType.API
-     * @param label         ID of the label to be attached
+     * @param labels        List of label IDs
      * @param organization  Organization
      * @throws GovernanceException If an error occurs while attaching the label
      */
     @Override
     public void evaluateComplianceOnLabelAttach(String artifactRefId, ArtifactType artifactType,
-                                                String label, String organization) throws GovernanceException {
+                                                List<String> labels, String organization) throws GovernanceException {
 
 
-        List<String> allPoliciesForLabel =
-                new ArrayList<>(policyManager.getPoliciesByLabel(label, organization).keySet());
+        Set<String> allPoliciesForLabel = new HashSet<>();
+        for (String label : labels) {
+            allPoliciesForLabel.addAll(new ArrayList<>(policyManager
+                    .getPoliciesByLabel(label, organization).keySet()));
+        }
+
         List<String> applicablePolicyIds = new ArrayList<>();
 
         if (ArtifactType.API.equals(artifactType)) {
@@ -215,7 +221,17 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         }
 
         complianceManager.handleComplianceEvalAsync(artifactRefId, artifactType, applicablePolicyIds, organization);
+    }
 
+    /**
+     * Delete governance related data for the given label
+     *
+     * @param label Label id to delete governance data
+     * @throws GovernanceException If an error occurs while deleting governance data
+     */
+    @Override
+    public void deleteGovernanceDataForLabel(String label, String organization) throws GovernanceException {
+        policyManager.deleteLabelPolicyMappings(label, organization);
     }
 
     /**

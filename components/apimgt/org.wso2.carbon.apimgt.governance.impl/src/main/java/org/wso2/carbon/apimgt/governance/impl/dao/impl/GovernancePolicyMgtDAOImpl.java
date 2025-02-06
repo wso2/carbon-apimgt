@@ -1002,4 +1002,25 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             prepStmt.executeUpdate();
         }
     }
+
+    /**
+     * Delete policy label mappings for a given label
+     *
+     * @param label        label
+     * @param organization organization
+     * @throws GovernanceException If an error occurs while deleting the mappings
+     */
+    @Override
+    public void deleteLabelPolicyMappings(String label, String organization) throws GovernanceException {
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
+                     .DELETE_GOVERNANCE_POLICIES_BY_LABEL)) {
+            prepStmt.setString(1, label);
+            prepStmt.setString(2, organization);
+            prepStmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes
+                    .ERROR_WHILE_DELETING_LABEL_POLICY_MAPPINGS, e, label);
+        }
+    }
 }

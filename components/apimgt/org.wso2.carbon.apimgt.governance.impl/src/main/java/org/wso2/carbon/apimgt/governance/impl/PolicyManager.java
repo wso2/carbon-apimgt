@@ -320,4 +320,15 @@ public class PolicyManager {
 
         return criteriaMap;
     }
+
+    /**
+     * Delete the label policy mappings
+     *
+     * @param label        Label ID
+     * @param organization Organization
+     * @throws GovernanceException If an error occurs while deleting the mappings
+     */
+    public void deleteLabelPolicyMappings(String label, String organization) throws GovernanceException {
+        policyMgtDAO.deleteLabelPolicyMappings(label, organization);
+    }
 }
