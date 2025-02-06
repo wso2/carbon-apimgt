@@ -3356,21 +3356,23 @@ public final class APIUtil {
         externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
             String externalGatewayFeatures = gatewayConfiguration.getGatewayFeatureCatalog();
 
-            JsonObject configsJSON = gson.fromJson(externalGatewayFeatures, JsonObject.class);
-            Set<String> keys = configsJSON.keySet();
-            String gatewayType = keys.iterator().next();
+            if (!externalGatewayFeatures.equalsIgnoreCase("")) {
+                JsonObject configsJSON = gson.fromJson(externalGatewayFeatures, JsonObject.class);
+                Set<String> keys = configsJSON.keySet();
+                String gatewayType = keys.iterator().next();
 
-            JsonObject configsJSONValue = configsJSON.getAsJsonObject(gatewayType);
+                JsonObject configsJSONValue = configsJSON.getAsJsonObject(gatewayType);
 
-            JsonObject features = configsJSONValue.getAsJsonObject("gatewayFeatures");
-            gatewayFeatures.add(gatewayType, features);
+                JsonObject features = configsJSONValue.getAsJsonObject("gatewayFeatures");
+                gatewayFeatures.add(gatewayType, features);
 
-            JsonArray types = configsJSONValue.getAsJsonArray("apiTypes");
-            for (int i = 0; i < types.size(); i++) {
-                String apiType = types.get(i).getAsString();
-                if (apiData.has(apiType)) {
-                    JsonArray existingGateways = apiData.getAsJsonArray(apiType);
-                    existingGateways.add(gatewayType);
+                JsonArray types = configsJSONValue.getAsJsonArray("apiTypes");
+                for (int i = 0; i < types.size(); i++) {
+                    String apiType = types.get(i).getAsString();
+                    if (apiData.has(apiType)) {
+                        JsonArray existingGateways = apiData.getAsJsonArray(apiType);
+                        existingGateways.add(gatewayType);
+                    }
                 }
             }
         });
