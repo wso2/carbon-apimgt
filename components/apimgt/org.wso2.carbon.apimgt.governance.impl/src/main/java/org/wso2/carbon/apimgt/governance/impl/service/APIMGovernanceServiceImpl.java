@@ -21,8 +21,6 @@ package org.wso2.carbon.apimgt.governance.impl.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
-import org.wso2.carbon.apimgt.governance.api.ComplianceManager;
-import org.wso2.carbon.apimgt.governance.api.PolicyManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
@@ -33,8 +31,8 @@ import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
-import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
-import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
+import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
+import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
@@ -58,8 +56,8 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
 
     public APIMGovernanceServiceImpl() {
 
-        complianceManager = new ComplianceManagerImpl();
-        policyManager = new PolicyManagerImpl();
+        complianceManager = new ComplianceManager();
+        policyManager = new PolicyManager();
     }
 
     /**

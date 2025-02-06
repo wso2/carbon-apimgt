@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.governance.impl;
 
-import org.wso2.carbon.apimgt.governance.api.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
@@ -37,13 +36,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Implementation of the RulesetManager interface.
+ * This class implements the Ruleset Manager.
  */
-public class RulesetManagerImpl implements RulesetManager {
+public class RulesetManager {
 
     private RulesetMgtDAO rulesetMgtDAO;
 
-    public RulesetManagerImpl() {
+    public RulesetManager() {
         rulesetMgtDAO = RulesetMgtDAOImpl.getInstance();
     }
 
@@ -54,7 +53,7 @@ public class RulesetManagerImpl implements RulesetManager {
      * @param organization Organization
      * @return Ruleset Created object
      */
-    @Override
+
     public RulesetInfo createNewRuleset(Ruleset ruleset, String organization) throws GovernanceException {
         ruleset.setId(ruleset.getId() == null ? GovernanceUtil.generateUUID() : ruleset.getId());
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
@@ -73,7 +72,7 @@ public class RulesetManagerImpl implements RulesetManager {
      * @param rulesetId Ruleset ID
      * @throws GovernanceException If an error occurs while deleting the ruleset
      */
-    @Override
+
     public void deleteRuleset(String rulesetId) throws GovernanceException {
         RulesetInfo ruleset = rulesetMgtDAO.getRulesetById(rulesetId);
         if (isRulesetAssociatedWithPolicies(rulesetId)) {
@@ -102,7 +101,7 @@ public class RulesetManagerImpl implements RulesetManager {
      * @return Ruleset Updated object
      * @throws GovernanceException If an error occurs while updating the ruleset
      */
-    @Override
+
     public RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset)
             throws GovernanceException {
 
@@ -123,7 +122,7 @@ public class RulesetManagerImpl implements RulesetManager {
      * @return RulesetList object
      * @throws GovernanceException If an error occurs while getting the rulesets
      */
-    @Override
+
     public RulesetList getRulesets(String organization) throws GovernanceException {
         return rulesetMgtDAO.getRulesets(organization);
     }
@@ -135,7 +134,7 @@ public class RulesetManagerImpl implements RulesetManager {
      * @return RulesetInfo object
      * @throws GovernanceException If an error occurs while getting the ruleset
      */
-    @Override
+
     public RulesetInfo getRulesetById(String rulesetId) throws GovernanceException {
         return rulesetMgtDAO.getRulesetById(rulesetId);
     }
@@ -147,7 +146,7 @@ public class RulesetManagerImpl implements RulesetManager {
      * @return Content of the ruleset
      * @throws GovernanceException If an error occurs while getting the ruleset content
      */
-    @Override
+
     public RulesetContent getRulesetContent(String rulesetId) throws GovernanceException {
         RulesetContent content = rulesetMgtDAO.getRulesetContent(rulesetId);
         if (content == null) {
@@ -164,7 +163,7 @@ public class RulesetManagerImpl implements RulesetManager {
      * @return List of policies using the ruleset
      * @throws GovernanceException If an error occurs while getting the ruleset usage
      */
-    @Override
+
     public List<String> getRulesetUsage(String rulesetId) throws GovernanceException {
         return rulesetMgtDAO.getAssociatedPoliciesForRuleset(rulesetId);
     }
@@ -176,7 +175,7 @@ public class RulesetManagerImpl implements RulesetManager {
      * @return List of rules using the ruleset
      * @throws GovernanceException If an error occurs while getting the ruleset usage
      */
-    @Override
+
     public List<Rule> getRules(String rulesetId) throws GovernanceException {
         return rulesetMgtDAO.getRulesByRulesetId(rulesetId);
     }
@@ -189,7 +188,7 @@ public class RulesetManagerImpl implements RulesetManager {
      * @return List of RulesetInfo objects
      * @throws GovernanceException If an error occurs while searching for rulesets
      */
-    @Override
+
     public RulesetList searchRulesets(String query, String organization) throws GovernanceException {
         Map<String, String> searchCriteria = getRulesetSearchCriteria(query);
         return rulesetMgtDAO.searchRulesets(searchCriteria, organization);

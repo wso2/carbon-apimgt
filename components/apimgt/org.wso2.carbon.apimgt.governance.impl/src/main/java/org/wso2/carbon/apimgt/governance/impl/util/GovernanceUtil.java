@@ -23,8 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.governance.api.PolicyManager;
-import org.wso2.carbon.apimgt.governance.api.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
@@ -38,8 +36,8 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
-import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
-import org.wso2.carbon.apimgt.governance.impl.RulesetManagerImpl;
+import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
+import org.wso2.carbon.apimgt.governance.impl.RulesetManager;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
@@ -137,7 +135,7 @@ public class GovernanceUtil {
      * @param organization Organization
      */
     public static void loadDefaultRulesets(String organization) {
-        RulesetManager rulesetManager = new RulesetManagerImpl();
+        RulesetManager rulesetManager = new RulesetManager();
         try {
             // Fetch existing rulesets for the organization
             RulesetList existingRulesets = rulesetManager.getRulesets(organization);
@@ -294,7 +292,7 @@ public class GovernanceUtil {
                                                                        String organization) throws GovernanceException {
 
         List<String> labels = GovernanceUtil.getLabelsForArtifact(artifactRefId, artifactType);
-        PolicyManager policyManager = new PolicyManagerImpl();
+        PolicyManager policyManager = new PolicyManager();
 
         Map<String, String> policies = new HashMap<>();
         for (String label : labels) {
@@ -328,7 +326,7 @@ public class GovernanceUtil {
             throws GovernanceException {
 
         List<String> labels = GovernanceUtil.getLabelsForArtifact(artifactRefId, artifactType);
-        PolicyManager policyManager = new PolicyManagerImpl();
+        PolicyManager policyManager = new PolicyManager();
 
         // Check for policies using labels and the state
         Set<String> policies = new HashSet<>();
@@ -357,7 +355,7 @@ public class GovernanceUtil {
      */
     public static boolean isBlockingActionsPresent(List<String> policyIds, GovernableState governableState)
             throws GovernanceException {
-        PolicyManager policyManager = new PolicyManagerImpl();
+        PolicyManager policyManager = new PolicyManager();
         boolean isBlocking = false;
         for (String policyId : policyIds) {
             if (policyManager.isBlockingActionPresentForState(policyId, governableState)) {

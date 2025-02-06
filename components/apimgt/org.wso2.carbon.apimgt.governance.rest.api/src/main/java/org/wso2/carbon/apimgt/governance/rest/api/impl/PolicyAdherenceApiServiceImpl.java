@@ -1,17 +1,15 @@
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.governance.api.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
-import org.wso2.carbon.apimgt.governance.api.PolicyManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyAdherenceSate;
-import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
-import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
+import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
+import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
 import org.wso2.carbon.apimgt.governance.rest.api.PolicyAdherenceApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceForPolicyDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryForPolicyDTO;
@@ -46,8 +44,8 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
     public Response getPolicyAdherenceSummary(MessageContext messageContext) throws GovernanceException {
 
 
-        PolicyManager policyManager = new PolicyManagerImpl();
-        ComplianceManager complianceManager = new ComplianceManagerImpl();
+        PolicyManager policyManager = new PolicyManager();
+        ComplianceManager complianceManager = new ComplianceManager();
 
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
         List<String> policyIds = policyManager.getGovernancePolicies(organization)
@@ -80,10 +78,10 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
             throws GovernanceException {
 
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
-        GovernancePolicy policy = new PolicyManagerImpl().getGovernancePolicyByID(policyId);
+        GovernancePolicy policy = new PolicyManager().getGovernancePolicyByID(policyId);
 
         Map<ArtifactComplianceState, List<ArtifactInfo>> evaluatedArtifacts =
-                new ComplianceManagerImpl().getArtifactsComplianceForPolicy(policyId, organization,
+                new ComplianceManager().getArtifactsComplianceForPolicy(policyId, organization,
                         true);
 
         PolicyAdherenceDetailsDTO policyAdherenceDetailsDTO = new PolicyAdherenceDetailsDTO();
@@ -150,7 +148,7 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
         // Get the list of policies
-        List<GovernancePolicy> allPolicies = new PolicyManagerImpl().getGovernancePolicies(organization)
+        List<GovernancePolicy> allPolicies = new PolicyManager().getGovernancePolicies(organization)
                 .getGovernancePolicyList();
 
         // If the offset is greater than the total number of policies, set the offset to the default value
@@ -164,7 +162,7 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
 
         for (GovernancePolicy policy : policies) {
             Map<ArtifactComplianceState, List<ArtifactInfo>> evaluatedArtifactsByPolicy =
-                    new ComplianceManagerImpl().getArtifactsComplianceForPolicy(policy.getId(), organization,
+                    new ComplianceManager().getArtifactsComplianceForPolicy(policy.getId(), organization,
                             false);
 
             int compliantCount = evaluatedArtifactsByPolicy.get(ArtifactComplianceState.COMPLIANT).size();

@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.governance.impl;
 
-import org.wso2.carbon.apimgt.governance.api.PolicyManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
@@ -37,13 +36,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class represents the Governance Policy Manager Implementation
+ * This class represents the Governance Policy Manager
  */
-public class PolicyManagerImpl implements PolicyManager {
+public class PolicyManager {
 
     private final GovernancePolicyMgtDAO policyMgtDAO;
 
-    public PolicyManagerImpl() {
+    public PolicyManager() {
         policyMgtDAO = GovernancePolicyMgtDAOImpl.getInstance();
     }
 
@@ -55,7 +54,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @return GovernancePolicy Created object
      * @throws GovernanceException If an error occurs while creating the policy
      */
-    @Override
+
     public GovernancePolicy createGovernancePolicy(String organization, GovernancePolicy
             governancePolicy) throws GovernanceException {
 
@@ -74,7 +73,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @return GovernancePolicy Updated object
      * @throws GovernanceException If an error occurs while updating the policy
      */
-    @Override
+
     public GovernancePolicy updateGovernancePolicy(String policyId, GovernancePolicy governancePolicy)
             throws GovernanceException {
 
@@ -151,7 +150,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @param policyId Policy ID
      * @throws GovernanceException If an error occurs while deleting the policy
      */
-    @Override
+
     public void deletePolicy(String policyId) throws GovernanceException {
         policyMgtDAO.deletePolicy(policyId);
     }
@@ -163,7 +162,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @return GovernancePolicy
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
-    @Override
+
     public GovernancePolicy getGovernancePolicyByID(String policyID)
             throws GovernanceException {
         GovernancePolicy policyInfo = policyMgtDAO.getGovernancePolicyByID(policyID);
@@ -180,7 +179,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @return GovernancePolicyList
      * @throws GovernanceException If an error occurs while retrieving the policies
      */
-    @Override
+
     public GovernancePolicyList getGovernancePolicies(String organization) throws GovernanceException {
         return policyMgtDAO.getGovernancePolicies(organization);
     }
@@ -192,7 +191,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @return List of rulesets
      * @throws GovernanceException If an error occurs while getting the rulesets
      */
-    @Override
+
     public List<RulesetInfo> getRulesetsByPolicyId(String policyId) throws GovernanceException {
         return policyMgtDAO.getRulesetsByPolicyId(policyId);
     }
@@ -205,7 +204,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @return Map of Policy IDs, Policy Names
      * @throws GovernanceException If an error occurs while getting the policies
      */
-    @Override
+
     public Map<String, String> getPoliciesByLabel(String label, String organization)
             throws GovernanceException {
         return policyMgtDAO.getPoliciesByLabel(label, organization);
@@ -218,7 +217,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @return Map of Policy IDs, Policy Names
      * @throws GovernanceException If an error occurs while getting the policies
      */
-    @Override
+
     public Map<String, String> getOrganizationWidePolicies(String organization) throws GovernanceException {
         return policyMgtDAO.getGlobalPolicies(organization);
     }
@@ -232,7 +231,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @return List of policy IDs
      * @throws GovernanceException If an error occurs while getting the policies
      */
-    @Override
+
     public List<String> getPoliciesByLabelAndState(String label, GovernableState state, String organization)
             throws GovernanceException {
         return policyMgtDAO.getPoliciesByLabelAndState(label, state, organization);
@@ -246,7 +245,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @return List of policy IDs
      * @throws GovernanceException If an error occurs while getting the policies
      */
-    @Override
+
     public List<String> getOrganizationWidePoliciesByState(GovernableState state, String organization)
             throws GovernanceException {
         return policyMgtDAO.getGlobalPoliciesWithState(state, organization);
@@ -260,7 +259,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @return true if a blocking action is present, false otherwise
      * @throws GovernanceException If an error occurs while checking the presence of blocking action
      */
-    @Override
+
     public boolean isBlockingActionPresentForState(String policyId, GovernableState state)
             throws GovernanceException {
         boolean isBlockingActionPresent = false;
@@ -284,7 +283,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @return GovernancePolicyList
      * @throws GovernanceException If an error occurs while searching for policies
      */
-    @Override
+
     public GovernancePolicyList searchGovernancePolicies(String query, String organization)
             throws GovernanceException {
         Map<String, String> searchCriteria = getPolicySearchCriteria(query);
