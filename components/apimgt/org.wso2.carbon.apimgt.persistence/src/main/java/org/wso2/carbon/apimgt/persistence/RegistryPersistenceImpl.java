@@ -1292,6 +1292,10 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     }
                 }
                 apiInfo.setAvailableTierNames(availableTiers);
+                // Set available tiers for organizations
+                String organizationTiers = artifact.getAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS);
+                apiInfo.setAvailableTiersForOrganizations(
+                        RegistryPersistenceUtil.getOrganizationTiersFromString(organizationTiers));
                 apiInfo.setSubscriptionAvailability(
                         artifact.getAttribute(APIConstants.API_OVERVIEW_SUBSCRIPTION_AVAILABILITY));
                 apiInfo.setSubscriptionAvailableOrgs(

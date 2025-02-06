@@ -77,6 +77,7 @@ import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
+import org.wso2.carbon.apimgt.api.model.OrganizationTiers;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -3854,7 +3855,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
 
-        return searchPaginatedAPIs(searchQuery, start, end, org, userCtx);
+        return searchPaginatedAPIs(searchQuery, start, end, org, userCtx, null);
     }
     
     @Override
@@ -3867,14 +3868,19 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         UserContext userCtx = new UserContext(userNameWithoutChange,
                 new Organization(organizationInfo.getOrganizationId()), properties, roles);
 
-        return searchPaginatedAPIs(searchQuery, start, end, org, userCtx);
+        return searchPaginatedAPIs(searchQuery, start, end, org, userCtx, organizationInfo);
     }
 
 	private Map<String, Object> searchPaginatedAPIs(String searchQuery, int start, int end, Organization org,
-			UserContext userCtx) throws APIManagementException {
+			UserContext userCtx, OrganizationInfo orgInfo) throws APIManagementException {
 		Map<String, Object> result = new HashMap<String, Object>();
         if (log.isDebugEnabled()) {
             log.debug("Original search query received : " + searchQuery);
+        }
+        String organizationID = null;
+        if (orgInfo != null && !StringUtils.isEmpty(orgInfo.getOrganizationId())) {
+            organizationID = APIUtil.getOrganizationIdFromExternalReference(orgInfo.getOrganizationId(),
+                    orgInfo.getName(), tenantDomain);
         }
 
         try {
@@ -3889,6 +3895,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 List<Object> apiList = new ArrayList<>();
                 for (DevPortalAPIInfo devPortalAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
+                    APIUtil.updateAvailableTiersByOrganization(devPortalAPIInfo, organizationID);
                     try {
                         mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getUuid()));
                         Set<String> tierNameSet = devPortalAPIInfo.getAvailableTierNames();
@@ -4034,22 +4041,37 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         int tenantId = APIUtil.getInternalIdFromTenantDomainOrOrganization(organization);
         Set<Tier> tierNames = api.getAvailableTiers();
         Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+        Set<String> deniedTiers = getDeniedTiers(tenantId);
+        Set<Tier> availableTiers = getAvailableTiers(tierNames, deniedTiers, definedTiers);
+        api.removeAllTiers();
+        api.addAvailableTiers(availableTiers);
+
+        if (APIUtil.isOrganizationAccessControlEnabled() && api.getAvailableTiersForOrganizations() != null) {
+            Set<OrganizationTiers> organizationTiersSet = api.getAvailableTiersForOrganizations();
+            for (OrganizationTiers organizationTiers : organizationTiersSet) {
+                Set<Tier> tierNamesForOrganization = organizationTiers.getTiers();
+                Set<Tier> availableTiersForOrganization = getAvailableTiers(tierNamesForOrganization, deniedTiers,
+                        definedTiers);
+                organizationTiers.removeAllTiers();
+                organizationTiers.setTiers(availableTiersForOrganization);
+            }
+        }
+        return api;
+    }
+
+    private Set<Tier> getAvailableTiers(Set<Tier> tierNames, Set<String> deniedTiers, Map<String, Tier> definedTiers) {
 
         Set<Tier> availableTiers = new HashSet<Tier>();
-        Set<String> deniedTiers = getDeniedTiers(tenantId);
-
         for (Tier tierName : tierNames) {
             Tier definedTier = definedTiers.get(tierName.getName());
             if (definedTier != null && (!deniedTiers.contains(definedTier.getName()))) {
                 availableTiers.add(definedTier);
             } else {
-                log.warn("Unknown tier: " + tierName + " found on API: ");
+                log.warn("Unknown tier: " + tierName + " found");
             }
         }
         availableTiers.removeIf(tier -> deniedTiers.contains(tier.getName()));
-        api.removeAllTiers();
-        api.addAvailableTiers(availableTiers);
-        return api;
+        return  availableTiers;
     }
 
     private APIProduct addTiersToAPI(APIProduct apiProduct, String organization) throws APIManagementException {

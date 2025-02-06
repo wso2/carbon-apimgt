@@ -23,6 +23,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.OrganizationTiers;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
@@ -217,5 +219,27 @@ public class APIUtils {
         }
 
         return allowedList;
+    }
+
+    /**
+     * Update available tiers in the API according to the organization.
+     * @param api           API object
+     * @param organization  Organization name
+     */
+    public static void updateAvailableTiersByOrganization(API api, String organization) {
+
+        Set<Tier> availableTiers = api.getAvailableTiers();
+        Set<OrganizationTiers> availableTiersForOrganizations = api.getAvailableTiersForOrganizations();
+        if (organization != null) {
+            for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
+                String orgName = organizationTiers.getOrganizationID();
+                if (organization.equals(orgName)) {
+                    availableTiers = organizationTiers.getTiers();
+                    api.removeAllTiers();
+                    api.setAvailableTiers(availableTiers);
+                    break;
+                }
+            }
+        }
     }
 }
