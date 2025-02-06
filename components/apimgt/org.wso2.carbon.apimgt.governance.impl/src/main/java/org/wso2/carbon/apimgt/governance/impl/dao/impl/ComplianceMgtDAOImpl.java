@@ -25,8 +25,8 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationRequest;
+import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
-import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
@@ -671,7 +671,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     ruleViolation.setRulesetId(rulesetId);
                     ruleViolation.setRuleName(resultSet.getString("RULE_NAME"));
                     ruleViolation.setViolatedPath(resultSet.getString("VIOLATED_PATH"));
-                    ruleViolation.setSeverity(Severity.fromString(resultSet.getString("SEVERITY")));
+                    ruleViolation.setSeverity(RuleSeverity.fromString(resultSet.getString("SEVERITY")));
                     ruleViolation.setOrganization(organization);
                     ruleViolations.add(ruleViolation);
                 }
@@ -711,7 +711,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     ruleViolation.setRulesetId(resultSet.getString("RULESET_ID"));
                     ruleViolation.setRuleName(resultSet.getString("RULE_NAME"));
                     ruleViolation.setViolatedPath(resultSet.getString("VIOLATED_PATH"));
-                    ruleViolation.setSeverity(Severity.fromString(resultSet.getString("SEVERITY")));
+                    ruleViolation.setSeverity(RuleSeverity.fromString(resultSet.getString("SEVERITY")));
                     ruleViolation.setOrganization(organization);
                     ruleViolations.add(ruleViolation);
                 }

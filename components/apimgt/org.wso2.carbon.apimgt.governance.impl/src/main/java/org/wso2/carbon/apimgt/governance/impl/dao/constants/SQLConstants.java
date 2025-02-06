@@ -25,9 +25,13 @@ public class SQLConstants {
 
     public static final String CREATE_RULESET =
             "INSERT INTO GOV_RULESET (RULESET_ID, NAME, DESCRIPTION, " +
-                    "RULESET_CONTENT, RULE_CATEGORY, RULE_TYPE, ARTIFACT_TYPE, " +
+                    "RULE_CATEGORY, RULE_TYPE, ARTIFACT_TYPE, " +
                     "DOCUMENTATION_LINK, PROVIDER, ORGANIZATION, CREATED_BY) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    public static final String ADD_RULESET_CONTENT =
+            "INSERT INTO GOV_RULESET_CONTENT(RULESET_ID, CONTENT, CONTENT_TYPE, FILE_NAME) " +
+                    "VALUES (?, ?, ?, ?)";
 
     public static final String ADD_RULES =
             "INSERT INTO GOV_RULESET_RULE (RULESET_RULE_ID, RULESET_ID, " +
@@ -35,35 +39,39 @@ public class SQLConstants {
                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     public static final String GET_RULESETS =
-            "SELECT RULESET_ID, NAME, DESCRIPTION, RULESET_CONTENT, RULE_CATEGORY, RULE_TYPE, ARTIFACT_TYPE, " +
+            "SELECT RULESET_ID, NAME, DESCRIPTION, RULE_CATEGORY, RULE_TYPE, ARTIFACT_TYPE, " +
                     "DOCUMENTATION_LINK, PROVIDER, ORGANIZATION, CREATED_BY, CREATED_TIME, " +
                     "UPDATED_BY, LAST_UPDATED_TIME " +
                     "FROM GOV_RULESET WHERE ORGANIZATION = ?";
 
     public static final String GET_RULESET_BY_NAME =
-            "SELECT RULESET_ID, NAME, DESCRIPTION, RULESET_CONTENT, RULE_CATEGORY, RULE_TYPE, ARTIFACT_TYPE, " +
+            "SELECT RULESET_ID, NAME, DESCRIPTION, RULE_CATEGORY, RULE_TYPE, ARTIFACT_TYPE, " +
                     "DOCUMENTATION_LINK, PROVIDER, ORGANIZATION, CREATED_BY, CREATED_TIME, " +
                     "UPDATED_BY, LAST_UPDATED_TIME " +
                     "FROM GOV_RULESET WHERE NAME = ? AND ORGANIZATION = ?";
 
     public static final String GET_RULESETS_BY_ID =
-            "SELECT RULESET_ID, NAME, DESCRIPTION, RULESET_CONTENT,  RULE_CATEGORY, " +
+            "SELECT RULESET_ID, NAME, DESCRIPTION,  RULE_CATEGORY, " +
                     "RULE_TYPE, ARTIFACT_TYPE, DOCUMENTATION_LINK, " +
                     "PROVIDER, ORGANIZATION, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME " +
                     "FROM GOV_RULESET WHERE RULESET_ID = ?";
 
     public static final String GET_RULESET_CONTENT =
-            "SELECT RULESET_CONTENT FROM GOV_RULESET WHERE RULESET_ID = ?";
+            "SELECT CONTENT, CONTENT_TYPE, FILE_NAME FROM GOV_RULESET_CONTENT WHERE RULESET_ID = ?";
 
     public static final String UPDATE_RULESET =
-            "UPDATE GOV_RULESET SET NAME = ?, DESCRIPTION = ?, RULESET_CONTENT = ?, " +
+            "UPDATE GOV_RULESET SET NAME = ?, DESCRIPTION = ?, " +
                     "RULE_CATEGORY = ?, RULE_TYPE = ?, ARTIFACT_TYPE = " +
                     "?, DOCUMENTATION_LINK = ?, PROVIDER = ?, UPDATED_BY = ?, " +
                     "LAST_UPDATED_TIME = CURRENT_TIMESTAMP " +
                     "WHERE RULESET_ID = ?";
 
+    public static final String UPDATE_RULESET_CONTENT =
+            "UPDATE GOV_RULESET_CONTENT SET CONTENT = ?, CONTENT_TYPE = ?, FILE_NAME = ? " +
+                    "WHERE RULESET_ID = ?";
+
     public static final String SEARCH_RULESETS = "SELECT RULESET_ID, NAME, " +
-            "DESCRIPTION, RULESET_CONTENT, RULE_CATEGORY, " +
+            "DESCRIPTION, RULE_CATEGORY, " +
             "RULE_TYPE, ARTIFACT_TYPE, DOCUMENTATION_LINK, PROVIDER, ORGANIZATION, " +
             "CREATED_BY, CREATED_TIME, " +
             "UPDATED_BY, LAST_UPDATED_TIME FROM GOV_RULESET WHERE ORGANIZATION = ? " +
@@ -75,6 +83,9 @@ public class SQLConstants {
 
     public static final String DELETE_RULES =
             "DELETE FROM GOV_RULESET_RULE WHERE RULESET_ID = ?";
+
+    public static final String DELETE_RULESET_CONTENT =
+            "DELETE FROM GOV_RULESET_CONTENT WHERE RULESET_ID = ?";
 
     public static final String GET_RULES_WITHOUT_CONTENT =
             "SELECT RULESET_RULE_ID, RULESET_ID, RULE_NAME, RULE_MESSAGE, RULE_DESCRIPTION, SEVERITY " +
@@ -155,12 +166,22 @@ public class SQLConstants {
             "SELECT POLICY_ID FROM GOV_POLICY_RULESET WHERE RULESET_ID = ?";
 
     public static final String GET_RULESETS_BY_POLICY_ID =
-            "SELECT RULESET.RULESET_ID, RULESET.NAME, RULESET.RULESET_CONTENT, " +
+            "SELECT RULESET.RULESET_ID, RULESET.NAME, " +
                     "RULESET.RULE_CATEGORY, RULESET.RULE_TYPE, RULESET.ARTIFACT_TYPE " +
                     "FROM GOV_RULESET RULESET " +
                     "JOIN GOV_POLICY_RULESET POLICY_RULESET_MAPPING ON RULESET.RULESET_ID = " +
                     "POLICY_RULESET_MAPPING.RULESET_ID " +
                     "WHERE POLICY_RULESET_MAPPING.POLICY_ID = ?";
+    public static final String GET_RULESETS_WITH_CONTENT_BY_POLICY_ID =
+            "SELECT RULESET.RULESET_ID, RULESET.NAME, " +
+                    "RULESET.RULE_CATEGORY, RULESET.RULE_TYPE, RULESET.ARTIFACT_TYPE, " +
+                    "RC.CONTENT, RC.CONTENT_TYPE, RC.FILE_NAME " +
+                    "FROM GOV_RULESET RULESET " +
+                    "JOIN GOV_RULESET_CONTENT RC " +
+                    "ON RULESET.RULESET_ID = RC.RULESET_ID " +
+                    "JOIN GOV_POLICY_RULESET GPR " +
+                    "ON RULESET.RULESET_ID = GPR.RULESET_ID " +
+                    "WHERE GPR.POLICY_ID = ?";
 
     public static final String GET_RULESETS_IDS_BY_POLICY_ID =
             "SELECT RULESET.RULESET_ID " +

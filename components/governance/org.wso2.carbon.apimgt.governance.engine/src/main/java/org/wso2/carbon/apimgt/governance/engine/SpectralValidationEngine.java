@@ -29,12 +29,14 @@ import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
+import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
-import org.wso2.carbon.apimgt.governance.api.model.Severity;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 import org.wso2.rule.validator.validator.Validator;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +76,9 @@ public class SpectralValidationEngine implements ValidationEngine {
      */
     @Override
     public List<Rule> extractRulesFromRuleset(Ruleset ruleset) throws GovernanceException {
-        String ruleContentString = ruleset.getRulesetContent();
+        String ruleContentString = new String(ruleset.getRulesetContent().getContent(),
+                StandardCharsets.UTF_8);
+
         Map<String, Object> contentMap = GovernanceUtil.getMapFromYAMLStringContent(ruleContentString);
         List<Rule> rulesList = new ArrayList<>();
 
@@ -92,7 +96,7 @@ public class SpectralValidationEngine implements ValidationEngine {
                 String messageOnValidationFailure = (String) ruleDetails.get("message");
 
                 String severityString = (String) ruleDetails.get("severity");
-                Severity severity = Severity.fromString(severityString);
+                RuleSeverity severity = RuleSeverity.fromString(severityString);
 
                 ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
@@ -129,8 +133,11 @@ public class SpectralValidationEngine implements ValidationEngine {
     public List<RuleViolation> validate(String target, Ruleset ruleset) throws GovernanceException {
 
         try {
+            RulesetContent rulesetContent = ruleset.getRulesetContent();
+            String rulesetContentString = new String(rulesetContent.getContent(),
+                    StandardCharsets.UTF_8);
 
-            String resultJson = Validator.validateDocument(target, ruleset.getRulesetContent());
+            String resultJson = Validator.validateDocument(target, rulesetContentString);
             if (log.isDebugEnabled()) {
                 log.debug("Validation success for target: " + target);
             }
@@ -165,7 +172,7 @@ public class SpectralValidationEngine implements ValidationEngine {
                 violation.setRuleName(node.get("ruleName").asText());
                 violation.setViolatedPath(node.get("path").asText());
                 violation.setRuleMessage(node.get("message").asText());
-                violation.setSeverity(Severity.fromString(node.get("severity").asText()));
+                violation.setSeverity(RuleSeverity.fromString(node.get("severity").asText()));
                 violation.setRulesetId(ruleset.getId());
                 violations.add(violation);
             }

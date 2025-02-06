@@ -34,11 +34,11 @@ import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyAdherenceSate;
+import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
-import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
@@ -218,7 +218,9 @@ public class ComplianceManagerImpl implements ComplianceManager {
                                           List<String> govPolicies,
                                           String organization) throws GovernanceException {
 
-        complianceMgtDAO.addComplianceEvalRequest(artifactRefId, artifactType, govPolicies, organization);
+        if (govPolicies != null && !govPolicies.isEmpty()) {
+            complianceMgtDAO.addComplianceEvalRequest(artifactRefId, artifactType, govPolicies, organization);
+        }
 
     }
 
@@ -248,15 +250,15 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @throws GovernanceException If an error occurs while getting the rule violations
      */
     @Override
-    public Map<Severity, List<RuleViolation>> getSeverityBasedRuleViolationsForArtifact(String artifactRefId,
-                                                                                        ArtifactType artifactType,
-                                                                                        String organization)
+    public Map<RuleSeverity, List<RuleViolation>> getSeverityBasedRuleViolationsForArtifact(String artifactRefId,
+                                                                                            ArtifactType artifactType,
+                                                                                            String organization)
             throws GovernanceException {
         List<RuleViolation> ruleViolations = complianceMgtDAO.getRuleViolationsForArtifact(artifactRefId, artifactType,
                 organization);
-        Map<Severity, List<RuleViolation>> severityBasedRuleViolations = new HashMap<>();
+        Map<RuleSeverity, List<RuleViolation>> severityBasedRuleViolations = new HashMap<>();
         for (RuleViolation ruleViolation : ruleViolations) {
-            Severity severity = ruleViolation.getSeverity();
+            RuleSeverity severity = ruleViolation.getSeverity();
             if (severityBasedRuleViolations.containsKey(severity)) {
                 severityBasedRuleViolations.get(severity).add(ruleViolation);
             } else {
@@ -296,12 +298,12 @@ public class ComplianceManagerImpl implements ComplianceManager {
      */
     @Override
     public List<String> getEvaluatedRulesetsForArtifactAndPolicy(String artifactRefId, ArtifactType artifactType,
-                                                                 List<Ruleset> policyRulesets, String organization)
+                                                                 List<RulesetInfo> policyRulesets, String organization)
             throws GovernanceException {
         List<String> evaluatedRulesetsForArtifact =
                 complianceMgtDAO.getEvaluatedRulesetsForArtifact(artifactRefId, artifactType, organization);
         List<String> evaluatedRulesetsForPolicy = new ArrayList<>();
-        for (Ruleset ruleset : policyRulesets) {
+        for (RulesetInfo ruleset : policyRulesets) {
             if (evaluatedRulesetsForArtifact.contains(ruleset.getId())) {
                 evaluatedRulesetsForPolicy.add(ruleset.getId());
             }
@@ -514,7 +516,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
 
         for (String policyId : govPolicies) {
             GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId);
-            List<Ruleset> rulesets = policyMgtDAO.getRulesetsByPolicyId(policyId);
+            List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId);
 
             // Validate the artifact against each ruleset
             for (Ruleset ruleset : rulesets) {
@@ -599,7 +601,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
 
         for (String policyId : govPolicies) {
             GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId);
-            List<Ruleset> rulesets = policyMgtDAO.getRulesetsByPolicyId(policyId);
+            List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId);
 
             // Validate the artifact against each ruleset
             for (Ruleset ruleset : rulesets) {
@@ -655,7 +657,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
                                                  String organization) {
 
         // Identify blockable severities from the policy
-        List<Severity> blockableSeverities = new ArrayList<>();
+        List<RuleSeverity> blockableSeverities = new ArrayList<>();
         for (GovernanceAction governanceAction : policy.getActions()) {
 
             // If the state matches and action is block the violation is blockable
@@ -715,7 +717,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
             throws GovernanceException {
         Set<String> violatedPolicies = new HashSet<>();
         for (String policy : evaluatedPolicies) {
-            List<String> rulesets = policyMgtDAO.getRulesetsByPolicyId(policy).stream()
+            List<String> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policy).stream()
                     .map(Ruleset::getId).collect(Collectors.toList());
             if (violatedRulesets.stream().anyMatch(rulesets::contains)) {
                 violatedPolicies.add(policy);

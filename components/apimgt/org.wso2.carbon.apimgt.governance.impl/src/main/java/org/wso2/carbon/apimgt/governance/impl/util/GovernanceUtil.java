@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
@@ -43,6 +44,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -135,7 +137,6 @@ public class GovernanceUtil {
      * @param organization Organization
      */
     public static void loadDefaultRulesets(String organization) {
-        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         RulesetManager rulesetManager = new RulesetManagerImpl();
         try {
             // Fetch existing rulesets for the organization
@@ -153,16 +154,17 @@ public class GovernanceUtil {
             // Iterate through default ruleset files
             Files.list(pathToDefaultRulesets).forEach(path -> {
                 File file = path.toFile();
-                if (file.isFile() && file.getName().endsWith(GovernanceConstants.YAML_FILE_TYPE)) {
+                if (file.isFile() && (file.getName().endsWith(".yaml") || file.getName().endsWith(".yml"))) {
                     try {
-
+                        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
                         DefaultRuleset defaultRuleset = mapper.readValue(file, DefaultRuleset.class);
 
                         // Add ruleset if it doesn't already exist
                         if (!existingRuleNames.contains(defaultRuleset.getName())) {
                             log.info("Adding default ruleset: " + defaultRuleset.getName());
                             rulesetManager.createNewRuleset(
-                                    getRulesetFromDefaultRuleset(defaultRuleset), organization);
+                                    getRulesetFromDefaultRuleset(defaultRuleset,
+                                            file.getName().replaceAll("/", "_")), organization);
                         } else {
                             log.info("Ruleset " + defaultRuleset.getName() + " already exists in organization: "
                                     + organization + "; skipping.");
@@ -185,10 +187,12 @@ public class GovernanceUtil {
      * Get Ruleset from DefaultRuleset
      *
      * @param defaultRuleset DefaultRuleset
+     * @param fileName       File name
      * @return Ruleset
      * @throws GovernanceException if an error occurs while loading default ruleset content
      */
-    public static Ruleset getRulesetFromDefaultRuleset(DefaultRuleset defaultRuleset) throws GovernanceException {
+    public static Ruleset getRulesetFromDefaultRuleset(DefaultRuleset defaultRuleset,
+                                                       String fileName) throws GovernanceException {
         Ruleset ruleset = new Ruleset();
         ruleset.setId(defaultRuleset.getId());
         ruleset.setName(defaultRuleset.getName());
@@ -197,8 +201,13 @@ public class GovernanceUtil {
         ruleset.setRuleType(RuleType.fromString(defaultRuleset.getRuleType()));
         ruleset.setArtifactType(ExtendedArtifactType.fromString(defaultRuleset.getArtifactType()));
         ruleset.setProvider(defaultRuleset.getProvider());
-        ruleset.setRulesetContent(defaultRuleset.getRulesetContentString());
         ruleset.setDocumentationLink(defaultRuleset.getDocumentationLink());
+
+        RulesetContent rulesetContent = new RulesetContent();
+        rulesetContent.setFileName(fileName);
+        rulesetContent.setContent(defaultRuleset.getRulesetContentString().getBytes(StandardCharsets.UTF_8));
+        ruleset.setRulesetContent(rulesetContent);
+
         return ruleset;
     }
 

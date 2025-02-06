@@ -27,7 +27,7 @@ public class RuleViolation {
     private String rulesetId; // Ruleset which contains the violated rule
     private String ruleName;  // Code of the violated rule
     private String violatedPath; // Path in which the violation occurred
-    private Severity severity; // Severity of the violation
+    private RuleSeverity severity; // Severity of the violation
     private String ruleMessage; // Message of the violated rule
     private String organization; // Organization of the artifact
 
@@ -71,11 +71,11 @@ public class RuleViolation {
         this.violatedPath = violatedPath;
     }
 
-    public Severity getSeverity() {
+    public RuleSeverity getSeverity() {
         return severity;
     }
 
-    public void setSeverity(Severity severity) {
+    public void setSeverity(RuleSeverity severity) {
         this.severity = severity;
     }
 

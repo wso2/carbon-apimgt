@@ -27,10 +27,10 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyAdherenceSate;
+import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
-import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
-import org.wso2.carbon.apimgt.governance.api.model.Severity;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -128,14 +128,14 @@ public interface ComplianceManager {
      * Get the rule violations for the artifact based on severity
      *
      * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)
-     * @param artifactType        Artifact Type
-     * @param organization        Organization
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
      * @return Map of Rule Violations based on severity
      * @throws GovernanceException If an error occurs while getting the rule violations
      */
-    Map<Severity, List<RuleViolation>> getSeverityBasedRuleViolationsForArtifact(String artifactRefId,
-                                                                                 ArtifactType artifactType,
-                                                                                 String organization)
+    Map<RuleSeverity, List<RuleViolation>> getSeverityBasedRuleViolationsForArtifact(String artifactRefId,
+                                                                                     ArtifactType artifactType,
+                                                                                     String organization)
             throws GovernanceException;
 
     /**
@@ -161,7 +161,7 @@ public interface ComplianceManager {
      * @throws GovernanceException If an error occurs while getting the list of evaluated rulesets
      */
     List<String> getEvaluatedRulesetsForArtifactAndPolicy(String artifactRefId, ArtifactType artifactType,
-                                                          List<Ruleset> policyRulesets, String organization)
+                                                          List<RulesetInfo> policyRulesets, String organization)
             throws GovernanceException;
 
     /**

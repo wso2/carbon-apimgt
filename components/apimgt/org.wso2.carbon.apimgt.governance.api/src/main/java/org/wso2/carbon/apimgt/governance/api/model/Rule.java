@@ -25,7 +25,7 @@ public class Rule {
     private String id;
     private String name;
     private String description;
-    private Severity severity;
+    private RuleSeverity severity;
     private String messageOnFailure;
     private String content;
 
@@ -53,11 +53,11 @@ public class Rule {
         this.description = description;
     }
 
-    public Severity getSeverity() {
+    public RuleSeverity getSeverity() {
         return severity;
     }
 
-    public void setSeverity(Severity severity) {
+    public void setSeverity(RuleSeverity severity) {
         this.severity = severity;
     }
 

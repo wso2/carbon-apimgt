@@ -27,10 +27,9 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
+import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
-import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
-import org.wso2.carbon.apimgt.governance.api.model.Severity;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManagerImpl;
@@ -174,7 +173,7 @@ public class ComplianceAPIUtil {
         }
 
         // Retrieve rulesets tied to the policy
-        List<Ruleset> policyRulesets = policyManager.getRulesetsByPolicyId(policyId);
+        List<RulesetInfo> policyRulesets = policyManager.getRulesetsByPolicyId(policyId);
 
         // Retrieve the evaluated rulesets for the policy
         List<String> evaluatedRulesets =
@@ -185,7 +184,7 @@ public class ComplianceAPIUtil {
         List<RulesetValidationResultWithoutRulesDTO> rulesetValidationResults = new ArrayList<>();
 
         // Get ruleset validation results for each ruleset
-        for (Ruleset ruleset : policyRulesets) {
+        for (RulesetInfo ruleset : policyRulesets) {
             boolean isRulesetEvaluated = evaluatedRulesets.contains(ruleset.getId());
 
             RulesetValidationResultWithoutRulesDTO resultDTO = getRulesetValidationResultsDTO(ruleset, artifactRefId,
@@ -218,9 +217,9 @@ public class ComplianceAPIUtil {
      * @return RulesetValidationResultDTO
      * @throws GovernanceException if an error occurs while updating the ruleset validation results
      */
-    private static RulesetValidationResultWithoutRulesDTO getRulesetValidationResultsDTO(Ruleset ruleset, String
+    private static RulesetValidationResultWithoutRulesDTO getRulesetValidationResultsDTO(RulesetInfo ruleset, String
             artifactRefId, ArtifactType artifactType, String organization, boolean isRulesetEvaluated)
-    throws GovernanceException {
+            throws GovernanceException {
 
         ComplianceManager complianceManager = new ComplianceManagerImpl();
 
@@ -348,14 +347,14 @@ public class ComplianceAPIUtil {
         Set<String> violatedRulesets = new HashSet<>();
 
         // Retrieve rule violations categorized by severity for the current artifact
-        Map<Severity, List<RuleViolation>> ruleViolationsBySeverity = complianceManager
+        Map<RuleSeverity, List<RuleViolation>> ruleViolationsBySeverity = complianceManager
                 .getSeverityBasedRuleViolationsForArtifact(artifactRefId, artifactType, organization);
 
         List<SeverityBasedRuleViolationCountDTO> ruleViolationCounts = new ArrayList<>();
 
         // Process each severity level and its associated rule violations
-        for (Map.Entry<Severity, List<RuleViolation>> entry : ruleViolationsBySeverity.entrySet()) {
-            Severity severity = entry.getKey();
+        for (Map.Entry<RuleSeverity, List<RuleViolation>> entry : ruleViolationsBySeverity.entrySet()) {
+            RuleSeverity severity = entry.getKey();
             List<RuleViolation> ruleViolations = entry.getValue();
 
             // Create a DTO to store the count of violations for the current severity

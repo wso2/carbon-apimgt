@@ -26,8 +26,8 @@ import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
-import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
-import org.wso2.carbon.apimgt.governance.api.model.Severity;
+import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
@@ -123,7 +123,7 @@ public class PolicyManagerImpl implements PolicyManager {
         List<GovernableState> governableStates = policy.getGovernableStates();
         List<GovernanceAction> actions = policy.getActions();
         for (GovernableState state : governableStates) {
-            for (Severity severity : Severity.values()) {
+            for (RuleSeverity severity : RuleSeverity.values()) {
                 boolean isActionPresent = false;
                 for (GovernanceAction action : actions) {
                     if (state.equals(action.getGovernableState()) &&
@@ -193,7 +193,7 @@ public class PolicyManagerImpl implements PolicyManager {
      * @throws GovernanceException If an error occurs while getting the rulesets
      */
     @Override
-    public List<Ruleset> getRulesetsByPolicyId(String policyId) throws GovernanceException {
+    public List<RulesetInfo> getRulesetsByPolicyId(String policyId) throws GovernanceException {
         return policyMgtDAO.getRulesetsByPolicyId(policyId);
     }
 
