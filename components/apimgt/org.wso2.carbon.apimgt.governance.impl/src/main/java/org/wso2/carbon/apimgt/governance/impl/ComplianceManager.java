@@ -195,7 +195,7 @@ public class ComplianceManager {
      */
 
     public void handleRulesetChangeEvent(String rulesetId, String organization) throws GovernanceException {
-        List<String> policies = rulesetMgtDAO.getAssociatedPoliciesForRuleset(rulesetId);
+        List<String> policies = rulesetMgtDAO.getAssociatedPoliciesForRuleset(rulesetId, organization);
 
         for (String policyId : policies) {
             handlePolicyChangeEvent(policyId, organization);
@@ -603,7 +603,7 @@ public class ComplianceManager {
 
             // Validate the artifact against each ruleset
             for (Ruleset ruleset : rulesets) {
-                RulesetInfo rulesetInfo = rulesetMgtDAO.getRulesetById(ruleset.getId());
+                RulesetInfo rulesetInfo = rulesetMgtDAO.getRulesetById(ruleset.getId(), organization);
                 ExtendedArtifactType extendedArtifactType = ruleset.getArtifactType();
 
                 // Check if ruleset's artifact type matches with the artifact's type

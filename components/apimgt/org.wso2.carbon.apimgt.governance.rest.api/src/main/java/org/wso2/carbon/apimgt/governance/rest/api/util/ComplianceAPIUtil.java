@@ -448,7 +448,7 @@ public class ComplianceAPIUtil {
         ComplianceManager complianceManager = new ComplianceManager();
         RulesetManager rulesetManager = new RulesetManager();
 
-        RulesetInfo rulesetInfo = rulesetManager.getRulesetById(rulesetId);
+        RulesetInfo rulesetInfo = rulesetManager.getRulesetById(rulesetId, organization);
 
         // If the ruleset is not found, throw an exception
         if (rulesetInfo == null) {
@@ -472,7 +472,7 @@ public class ComplianceAPIUtil {
         List<RuleValidationResultDTO> followedRules = new ArrayList<>();
 
         // Fetch all rules within the current ruleset
-        List<Rule> allRules = rulesetManager.getRules(rulesetId);
+        List<Rule> allRules = rulesetManager.getRulesByRulesetId(rulesetId, organization);
         Map<String, Rule> rulesMap = allRules.stream()
                 .collect(Collectors.toMap(Rule::getName, rule -> rule));
 

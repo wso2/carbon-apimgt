@@ -166,7 +166,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             ruleset.setUpdatedBy(username);
 
             RulesetManager rulesetManager = new RulesetManager();
-            RulesetInfo updatedRuleset = rulesetManager.updateRuleset(rulesetId, ruleset);
+            RulesetInfo updatedRuleset = rulesetManager.updateRuleset(rulesetId, ruleset, organization);
 
             // Re-access policy compliance in the background
             new ComplianceManager().handleRulesetChangeEvent(rulesetId, organization);
@@ -193,7 +193,8 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     public Response deleteRuleset(String rulesetId, MessageContext messageContext) throws GovernanceException {
         RulesetManager rulesetManager = new RulesetManager();
 
-        rulesetManager.deleteRuleset(rulesetId);
+        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+        rulesetManager.deleteRuleset(rulesetId, organization);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 
@@ -209,7 +210,9 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     public Response getRulesetById(String rulesetId, MessageContext messageContext) throws GovernanceException {
         RulesetManager rulesetManager = new RulesetManager();
 
-        RulesetInfo ruleset = rulesetManager.getRulesetById(rulesetId);
+        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+
+        RulesetInfo ruleset = rulesetManager.getRulesetById(rulesetId, organization);
         RulesetInfoDTO rulesetInfoDTO = RulesetMappingUtil.fromRulesetInfoToRulesetInfoDTO(ruleset);
         return Response.status(Response.Status.OK).entity(rulesetInfoDTO).build();
     }
@@ -225,8 +228,9 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     @Override
     public Response getRulesetContent(String rulesetId, MessageContext messageContext) throws GovernanceException {
         RulesetManager rulesetManager = new RulesetManager();
+        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-        RulesetContent rulesetContent = rulesetManager.getRulesetContent(rulesetId);
+        RulesetContent rulesetContent = rulesetManager.getRulesetContent(rulesetId, organization);
 
         String fileName = rulesetContent.getFileName() != null ? rulesetContent.getFileName() : "ruleset.yaml";
         String contentTypeHeader = "application/x-yaml"; // Default content type
@@ -252,7 +256,9 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
     @Override
     public Response getRulesetUsage(String rulesetId, MessageContext messageContext) throws GovernanceException {
         RulesetManager rulesetManager = new RulesetManager();
-        List<String> policies = rulesetManager.getRulesetUsage(rulesetId);
+        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+
+        List<String> policies = rulesetManager.getRulesetUsage(rulesetId, organization);
         return Response.status(Response.Status.OK).entity(policies).build();
     }
 
