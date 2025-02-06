@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.api.model.policy.Policy;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -778,37 +777,6 @@ public class API implements Serializable {
 
     public void removeAllTiersForOrganizations() {
         availableTiersForOrganizations.clear();
-    }
-
-    public void setAvailableTiersForOrganizationsFromString(String tiersString) {
-
-        if (tiersString == null || tiersString.isEmpty()) {
-            return;
-        }
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            OrganizationTiers[] tiersArray = objectMapper.readValue(tiersString, OrganizationTiers[].class);
-            availableTiersForOrganizations = new LinkedHashSet<>(Arrays.asList(tiersArray));
-        } catch (Exception e) {
-            log.error("Error while converting string to availableTiersForOrganizations object for API : " + getUUID(),
-                    e);
-        }
-    }
-
-    public String getAvailableTiersForOrganizationsAsString() {
-        if (availableTiersForOrganizations == null || availableTiersForOrganizations.isEmpty()) {
-            return null;
-        }
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.writeValueAsString(availableTiersForOrganizations);
-        } catch (JsonProcessingException e) {
-            log.error("Error while converting availableTiersForOrganizations to string for API : " + getUUID(), e);
-            return null;
-        } catch (Exception e) {
-            log.error("Unexpected error while processing availableTiersForOrganizations for API : " + getUUID(), e);
-            return null;
-        }
     }
 
     public Set<URITemplate> getUriTemplates() {

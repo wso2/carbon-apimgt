@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -695,7 +696,7 @@ public final class APIUtil {
 
             // Set available tiers for organizations
             String organizationTiers = artifact.getAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS);
-            api.setAvailableTiersForOrganizationsFromString(organizationTiers);
+            api.setAvailableTiersForOrganizations(getAvailableTiersForOrganizationsFromString(organizationTiers));
 
             api.addAvailableTiers(availablePolicy);
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
@@ -824,7 +825,7 @@ public final class APIUtil {
 
             // Set available tiers for organizations
             String organizationTiers = artifact.getAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS);
-            api.setAvailableTiersForOrganizationsFromString(organizationTiers);
+            api.setAvailableTiersForOrganizations(getAvailableTiersForOrganizationsFromString(organizationTiers));
 
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             api.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
@@ -1005,9 +1006,9 @@ public final class APIUtil {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
             }
 
-            if (api.getAvailableTiersForOrganizationsAsString() != null) {
+            if (getAvailableTiersForOrganizationsAsString(api) != null) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS,
-                        api.getAvailableTiersForOrganizationsAsString());
+                        getAvailableTiersForOrganizationsAsString(api));
             }
 
             if (APIConstants.PUBLISHED.equals(apiStatus)) {
@@ -2724,7 +2725,7 @@ public final class APIUtil {
 
             // Set available tiers for organizations
             String organizationTiers = artifact.getAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS);
-            api.setAvailableTiersForOrganizationsFromString(organizationTiers);
+            api.setAvailableTiersForOrganizations(getAvailableTiersForOrganizationsFromString(organizationTiers));
 
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
@@ -11173,6 +11174,54 @@ public final class APIUtil {
 
         return Boolean.getBoolean(
                 APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
+    }
+
+    /**
+     * Get available tiers for organizations as a string.
+     *
+     * @param api API object
+     * @return String object of the organization based tiers
+     */
+    private static String getAvailableTiersForOrganizationsAsString(API api) {
+
+        Set<org.wso2.carbon.apimgt.api.model.OrganizationTiers> availableTiersForOrganizations
+                = api.getAvailableTiersForOrganizations();
+        if (availableTiersForOrganizations == null || availableTiersForOrganizations.isEmpty()) {
+            return null;
+        }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(availableTiersForOrganizations);
+        } catch (JsonProcessingException e) {
+            log.error("Error while converting availableTiersForOrganizations to string for API : " + api.getUuid(), e);
+            return null;
+        } catch (Exception e) {
+            log.error("Unexpected error while processing availableTiersForOrganizations for API : " + api.getUuid(), e);
+            return null;
+        }
+    }
+
+    /**
+     * Convert string object to a OrganizationTiers set.
+     *
+     * @param tiersString String object to be converted
+     * @return OrganziationTiers set
+     */
+    public static Set<org.wso2.carbon.apimgt.api.model.OrganizationTiers> getAvailableTiersForOrganizationsFromString(
+            String tiersString) {
+
+        if (tiersString == null || tiersString.isEmpty()) {
+            return new LinkedHashSet<>();
+        }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            org.wso2.carbon.apimgt.api.model.OrganizationTiers[] tiersArray = objectMapper.readValue(tiersString,
+                    org.wso2.carbon.apimgt.api.model.OrganizationTiers[].class);
+            return new LinkedHashSet<>(Arrays.asList(tiersArray));
+        } catch (Exception e) {
+            log.error("Error while converting string to availableTiersForOrganizations object", e);
+            return new LinkedHashSet<>();
+        }
     }
     
     public static synchronized String getOrganizationIdFromExternalReference(String referenceId,

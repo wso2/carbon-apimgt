@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.persistence.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.lang3.ArrayUtils;
@@ -40,6 +42,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
+import org.wso2.carbon.apimgt.persistence.dto.OrganizationTiers;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
@@ -85,6 +88,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -259,9 +263,9 @@ public class RegistryPersistenceUtil {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
             }
 
-            if (api.getAvailableTiersForOrganizationsAsString() != null) {
+            if (getAvailableTiersForOrganizationsAsString(api) != null) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS,
-                        api.getAvailableTiersForOrganizationsAsString());
+                        getAvailableTiersForOrganizationsAsString(api));
             }
 
             if (APIConstants.PUBLISHED.equals(apiStatus)) {
@@ -341,6 +345,101 @@ public class RegistryPersistenceUtil {
             throw new APIManagementException(msg, e);
         }
         return artifact;
+    }
+
+    /**
+     * Get available tiers for organizations as a string.
+     *
+     * @param api API object
+     * @return String object of the organization based tiers
+     */
+    private static String getAvailableTiersForOrganizationsAsString(API api) {
+
+        Set<org.wso2.carbon.apimgt.api.model.OrganizationTiers> availableTiersForOrganizations
+                = api.getAvailableTiersForOrganizations();
+        if (availableTiersForOrganizations == null || availableTiersForOrganizations.isEmpty()) {
+            return null;
+        }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(availableTiersForOrganizations);
+        } catch (JsonProcessingException e) {
+            log.error("Error while converting availableTiersForOrganizations to string for API : " + api.getUuid(), e);
+            return null;
+        } catch (Exception e) {
+            log.error("Unexpected error while processing availableTiersForOrganizations for API : " + api.getUuid(), e);
+            return null;
+        }
+    }
+
+    /**
+     * Convert string object to an org.wso2.carbon.apimgt.api.model.OrganizationTiers set.
+     *
+     * @param tiersString String object to be converted
+     * @return OrganziationTiers set
+     */
+    public static Set<org.wso2.carbon.apimgt.api.model.OrganizationTiers> getAvailableTiersForOrganizationsFromString(
+            String tiersString) {
+
+        if (tiersString == null || tiersString.isEmpty()) {
+            return new LinkedHashSet<>();
+        }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            org.wso2.carbon.apimgt.api.model.OrganizationTiers[] tiersArray = objectMapper.readValue(tiersString,
+                    org.wso2.carbon.apimgt.api.model.OrganizationTiers[].class);
+            return new LinkedHashSet<>(Arrays.asList(tiersArray));
+        } catch (Exception e) {
+            log.error("Error while converting string to availableTiersForOrganizations object", e);
+            return new LinkedHashSet<>();
+        }
+    }
+
+    /**
+     * Convert string object to an org.wso2.carbon.apimgt.persistence.dto.OrganizationTiers set.
+     *
+     * @param tiersString String object to be converted
+     * @return OrganziationTiers set
+     */
+    public static Set<OrganizationTiers> getOrganizationTiersFromString(String tiersString) {
+
+        Set<OrganizationTiers> availableTiersForOrganizations = new LinkedHashSet<>();;
+        if (tiersString == null || tiersString.isEmpty()) {
+            return availableTiersForOrganizations;
+        }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            org.wso2.carbon.apimgt.api.model.OrganizationTiers[] tiersArray = objectMapper.readValue(tiersString,
+                    org.wso2.carbon.apimgt.api.model.OrganizationTiers[].class);
+            for (org.wso2.carbon.apimgt.api.model.OrganizationTiers organizationTiersToMap : tiersArray) {
+                OrganizationTiers organizationTiers = getOrganizationTiers(organizationTiersToMap);
+                availableTiersForOrganizations.add(organizationTiers);
+            }
+        } catch (Exception e) {
+            log.error("Error while converting string to OrganizationTiers set.", e);
+        }
+        return availableTiersForOrganizations;
+    }
+
+    /**
+     * Map org.wso2.carbon.apimgt.api.model.OrganizationTiers to org.wso2.carbon.apimgt.persistence.dto.OrganizationTiers
+     *
+     * @param organizationTiersToMap org.wso2.carbon.apimgt.api.model.OrganizationTiers object
+     * @return org.wso2.carbon.apimgt.persistence.dto.OrganizationTiers object
+     */
+    private static OrganizationTiers getOrganizationTiers(
+            org.wso2.carbon.apimgt.api.model.OrganizationTiers organizationTiersToMap) {
+
+        OrganizationTiers organizationTiers = new OrganizationTiers();
+        organizationTiers.setOrganizationID(organizationTiersToMap.getOrganizationID());
+        organizationTiers.setOrganizationName(organizationTiersToMap.getOrganizationName());
+        Set<Tier> tiersToMap = organizationTiersToMap.getTiers();
+        Set<String> tiers = new LinkedHashSet<>();
+        for (Tier tierToMap : tiersToMap) {
+            tiers.add(tierToMap.getName());
+        }
+        organizationTiers.setTiers(tiers);
+        return organizationTiers;
     }
 
     private static String getWsUriMappingJsonFromDto(Map<String, String> wsUriMapping) {
@@ -745,7 +844,7 @@ public class RegistryPersistenceUtil {
 
             // Set available tiers for organizations
             String organizationTiers = artifact.getAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS);
-            api.setAvailableTiersForOrganizationsFromString(organizationTiers);
+            api.setAvailableTiersForOrganizations(getAvailableTiersForOrganizationsFromString(organizationTiers));
 
             // This contains the resolved context
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));

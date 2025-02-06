@@ -15,10 +15,8 @@
  */
 package org.wso2.carbon.apimgt.persistence.dto;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.model.Tier;
 
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -146,40 +144,6 @@ public class DevPortalAPIInfo {
 
     public void setAvailableTiersForOrganizations(Set<OrganizationTiers> availableTiersForOrganizations) {
         this.availableTiersForOrganizations = availableTiersForOrganizations;
-    }
-
-    public void setAvailableTiersForOrganizationsFromString(String tiersString) {
-
-        if (tiersString == null || tiersString.isEmpty()) {
-            return;
-        }
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            org.wso2.carbon.apimgt.api.model.OrganizationTiers[] tiersArray = objectMapper.readValue(tiersString,
-                    org.wso2.carbon.apimgt.api.model.OrganizationTiers[].class);
-            for (org.wso2.carbon.apimgt.api.model.OrganizationTiers organizationTiersToMap : tiersArray) {
-                OrganizationTiers organizationTiers = getOrganizationTiers(organizationTiersToMap);
-                availableTiersForOrganizations.add(organizationTiers);
-            }
-        } catch (Exception e) {
-            log.error("Error while converting string to availableTiersForOrganizations object for API : " + getId(),
-                    e);
-        }
-    }
-
-    private static OrganizationTiers getOrganizationTiers(
-            org.wso2.carbon.apimgt.api.model.OrganizationTiers organizationTiersToMap) {
-
-        OrganizationTiers organizationTiers = new OrganizationTiers();
-        organizationTiers.setOrganizationID(organizationTiersToMap.getOrganizationID());
-        organizationTiers.setOrganizationName(organizationTiersToMap.getOrganizationName());
-        Set<Tier> tiersToMap = organizationTiersToMap.getTiers();
-        Set<String> tiers = new LinkedHashSet<>();
-        for (Tier tierToMap : tiersToMap) {
-            tiers.add(tierToMap.getName());
-        }
-        organizationTiers.setTiers(tiers);
-        return organizationTiers;
     }
 
     public String getSubscriptionAvailableOrgs() {
