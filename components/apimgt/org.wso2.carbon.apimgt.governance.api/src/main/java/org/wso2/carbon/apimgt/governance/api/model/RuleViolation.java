@@ -22,21 +22,21 @@ package org.wso2.carbon.apimgt.governance.api.model;
  * This class represents a rule violation.
  */
 public class RuleViolation {
-    private String artifactId; // Artifact which contains the violation
+    private String artifactRefId; // Artifact which contains the violation
     private ArtifactType artifactType; // Type of the artifact (API)
     private String rulesetId; // Ruleset which contains the violated rule
     private String ruleName;  // Code of the violated rule
     private String violatedPath; // Path in which the violation occurred
-    private Severity severity; // Severity of the violation
+    private RuleSeverity severity; // Severity of the violation
     private String ruleMessage; // Message of the violated rule
     private String organization; // Organization of the artifact
 
-    public String getArtifactId() {
-        return artifactId;
+    public String getArtifactRefId() {
+        return artifactRefId;
     }
 
-    public void setArtifactId(String artifactId) {
-        this.artifactId = artifactId;
+    public void setArtifactRefId(String artifactRefId) {
+        this.artifactRefId = artifactRefId;
     }
 
     public ArtifactType getArtifactType() {
@@ -71,11 +71,11 @@ public class RuleViolation {
         this.violatedPath = violatedPath;
     }
 
-    public Severity getSeverity() {
+    public RuleSeverity getSeverity() {
         return severity;
     }
 
-    public void setSeverity(Severity severity) {
+    public void setSeverity(RuleSeverity severity) {
         this.severity = severity;
     }
 

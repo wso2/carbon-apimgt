@@ -29,15 +29,16 @@ import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
+import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
-import org.wso2.carbon.apimgt.governance.api.model.Severity;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
 
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -475,19 +476,58 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @throws GovernanceException If an error occurs while getting the rulesets
      */
     @Override
-    public List<Ruleset> getRulesetsByPolicyId(String policyId)
+    public List<Ruleset> getRulesetsWithContentByPolicyId(String policyId)
             throws GovernanceException {
         List<Ruleset> rulesetList = new ArrayList<>();
         try (Connection connection = GovernanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_RULESETS_BY_POLICY_ID)) {
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
+                     .GET_RULESETS_WITH_CONTENT_BY_POLICY_ID)) {
             prepStmt.setString(1, policyId);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
                     Ruleset ruleset = new Ruleset();
                     ruleset.setId(rs.getString("RULESET_ID"));
                     ruleset.setName(rs.getString("NAME"));
-                    byte[] rulesetContent = rs.getBytes("RULESET_CONTENT");
-                    ruleset.setRulesetContent(new String(rulesetContent, StandardCharsets.UTF_8));
+                    ruleset.setRuleCategory(RuleCategory.fromString(
+                            rs.getString("RULE_CATEGORY")));
+                    ruleset.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
+                    ruleset.setArtifactType(ExtendedArtifactType.fromString(
+                            rs.getString("ARTIFACT_TYPE")));
+
+                    RulesetContent rulesetContent = new RulesetContent();
+                    rulesetContent.setContent(rs.getBytes("CONTENT"));
+                    rulesetContent.setFileName(rs.getString("FILE_NAME"));
+                    ruleset.setRulesetContent(rulesetContent);
+
+                    rulesetList.add(ruleset);
+                }
+            }
+            return rulesetList;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.
+                    ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY,
+                    e, policyId);
+        }
+    }
+
+    /**
+     * Get the list of rulesets for a given policy
+     *
+     * @param policyId Policy ID
+     * @return List of rulesets
+     * @throws GovernanceException If an error occurs while getting the rulesets
+     */
+    @Override
+    public List<RulesetInfo> getRulesetsByPolicyId(String policyId) throws GovernanceException {
+        List<RulesetInfo> rulesetList = new ArrayList<>();
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_RULESETS_BY_POLICY_ID)) {
+            prepStmt.setString(1, policyId);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    RulesetInfo ruleset = new RulesetInfo();
+                    ruleset.setId(rs.getString("RULESET_ID"));
+                    ruleset.setName(rs.getString("NAME"));
                     ruleset.setRuleCategory(RuleCategory.fromString(
                             rs.getString("RULE_CATEGORY")));
                     ruleset.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
@@ -498,9 +538,8 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return rulesetList;
         } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.
-                    ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY,
-                    e, policyId);
+            throw new GovernanceException(GovernanceExceptionCodes
+                    .ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY, e, policyId);
         }
     }
 
@@ -660,7 +699,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     GovernanceAction action = new GovernanceAction();
                     action.setGovernableState(GovernableState.fromString(resultSet
                             .getString("STATE")));
-                    action.setRuleSeverity(Severity.fromString(resultSet.getString("SEVERITY")));
+                    action.setRuleSeverity(RuleSeverity.fromString(resultSet.getString("SEVERITY")));
                     action.setType(GovernanceActionType.fromString(resultSet.getString("TYPE")));
                     actions.add(action);
                 }
@@ -819,7 +858,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     GovernanceAction action = new GovernanceAction();
                     action.setGovernableState(GovernableState.fromString(resultSet
                             .getString("STATE")));
-                    action.setRuleSeverity(Severity.fromString(resultSet.getString("SEVERITY")));
+                    action.setRuleSeverity(RuleSeverity.fromString(resultSet.getString("SEVERITY")));
                     action.setType(GovernanceActionType.fromString(resultSet.getString("TYPE")));
                     actions.add(action);
                 }

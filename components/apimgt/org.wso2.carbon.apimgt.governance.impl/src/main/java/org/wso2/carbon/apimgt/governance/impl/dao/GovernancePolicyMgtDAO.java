@@ -24,6 +24,7 @@ import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 
 import java.util.List;
 import java.util.Map;
@@ -90,7 +91,16 @@ public interface GovernancePolicyMgtDAO {
      * @return List of rulesets
      * @throws GovernanceException If an error occurs while getting the rulesets
      */
-    List<Ruleset> getRulesetsByPolicyId(String policyId) throws GovernanceException;
+    List<Ruleset> getRulesetsWithContentByPolicyId(String policyId) throws GovernanceException;
+
+    /**
+     * Get the list of rulesets for a given policy
+     *
+     * @param policyId Policy ID
+     * @return List of rulesets
+     * @throws GovernanceException If an error occurs while getting the rulesets
+     */
+    List<RulesetInfo> getRulesetsByPolicyId(String policyId) throws GovernanceException;
 
     /**
      * Get the list of rulesets for a given policy

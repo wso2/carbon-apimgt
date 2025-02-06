@@ -28,7 +28,7 @@ public class ComplianceEvaluationRequest {
 
     private String id;
 
-    private String artifactId;
+    private String artifactRefId;
 
     private ArtifactType artifactType;
 
@@ -46,12 +46,12 @@ public class ComplianceEvaluationRequest {
         this.id = id;
     }
 
-    public String getArtifactId() {
-        return artifactId;
+    public String getArtifactRefId() {
+        return artifactRefId;
     }
 
-    public void setArtifactId(String artifactId) {
-        this.artifactId = artifactId;
+    public void setArtifactRefId(String artifactRefId) {
+        this.artifactRefId = artifactRefId;
     }
 
     public ArtifactType getArtifactType() {

@@ -79,7 +79,7 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
     }
 
     /**
-     * Get ruleset validation results by artifact ID
+     * Get ruleset validation results by Artifact Reference Id
      *
      * @param apiId          API ID
      * @param rulesetId      ruleset ID
