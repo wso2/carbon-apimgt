@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIComplianceException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -95,7 +96,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationRespons
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
@@ -128,8 +128,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import javax.validation.constraints.NotNull;
-
-import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils.checkGovernanceCompliance;
 
 /**
  * This class usesd to utility for Import API.
@@ -401,13 +399,14 @@ public class ImportUtils {
             }
 
             API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
-            Map<String, String> complianceResult = checkGovernanceCompliance(importedApi.getUuid(),
-                    GovernableState.API_CREATE, ArtifactType.fromString(apiType),
-                    importedApi.getOrganization(), null, null);
+            Map<String, String> complianceResult = PublisherCommonUtils
+                    .checkGovernanceComplianceSync(importedApi.getUuid(), GovernableState.API_CREATE,
+                            ArtifactType.fromString(apiType), importedApi.getOrganization(), null, null);
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                     && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
-                RestApiUtil.handleBadRequest(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+                throw new APIComplianceException(complianceResult
+                        .get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
             }
 
             apiProvider.updateAPI(importedApi, oldAPI);
@@ -533,6 +532,8 @@ public class ImportUtils {
                 log.info("Valid deployment environments were not found for the imported artifact. Only working copy "
                         + "was updated and not deployed in any of the gateway environments.");
             }
+            PublisherCommonUtils.checkGovernanceComplianceAsync(importedApi.getUuid(), GovernableState.API_CREATE,
+                    ArtifactType.fromString(apiType), organization);
             return new ImportedAPIDTO(importedApi, revisionId);
         } catch (CryptoException | IOException e) {
             throw new APIManagementException(
@@ -2794,14 +2795,18 @@ public class ImportUtils {
 
                 //Once the new revision successfully created, artifacts will be deployed in mentioned gateway
                 //environments
-                Map<String, String> complianceResult = checkGovernanceCompliance(importedApiProduct.getUuid(),
+                Map<String, String> complianceResult = PublisherCommonUtils.
+                        checkGovernanceComplianceSync(importedApiProduct.getUuid(),
                         GovernableState.API_CREATE, ArtifactType.API, organization, revisionId, null);
                 if (!complianceResult.isEmpty()
                         && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                         && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
-                    RestApiUtil.handleBadRequest(complianceResult
+                    throw new APIComplianceException(complianceResult
                             .get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+
                 }
+                PublisherCommonUtils.checkGovernanceComplianceAsync(importedAPIUuid, GovernableState.API_CREATE,
+                        ArtifactType.API, organization);
                 apiProvider.deployAPIProductRevision(importedAPIUuid, revisionId, apiProductRevisionDeployments);
             } else {
                 log.info("Valid deployment environments were not found for the imported artifact. Hence not deployed" +

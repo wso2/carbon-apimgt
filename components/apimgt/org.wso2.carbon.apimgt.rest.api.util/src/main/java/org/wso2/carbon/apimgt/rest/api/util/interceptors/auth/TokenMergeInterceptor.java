@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 
 import static org.wso2.carbon.apimgt.rest.api.common.RestApiConstants.REFERER_COOKIE_NAME;
+import static org.wso2.carbon.apimgt.rest.api.common.RestApiConstants.REST_API_GOVERNANCE_CONTEXT;
 
 /**
  * TokenMergeInterceptor class merge the token parts received from the request and from the cookies,
@@ -89,7 +90,7 @@ public class TokenMergeInterceptor extends AbstractPhaseInterceptor {
         String[] cookies = cookie.split(";");
         String tokenFromCookie = "";
         if (message.get("jaxrs.template.uri") != null &&
-                message.get("jaxrs.template.uri").toString().contains("/api/am/governance")) {
+                message.get("jaxrs.template.uri").toString().contains(REST_API_GOVERNANCE_CONTEXT)) {
 
             String referer = protocolMap.getOrDefault(REFERER_COOKIE_NAME, "").toString();
 

@@ -553,6 +553,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             PublisherAPI addedAPI = apiPersistenceInstance.addAPI(new Organization(api.getOrganization()),
                     APIMapper.INSTANCE.toPublisherApi(api));
+
             api.setUuid(addedAPI.getId());
             api.setCreatedTime(addedAPI.getCreatedTime());
         } catch (APIPersistenceException e) {

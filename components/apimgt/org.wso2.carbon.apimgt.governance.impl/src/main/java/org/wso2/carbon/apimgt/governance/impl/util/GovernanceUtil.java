@@ -61,7 +61,6 @@ import java.util.stream.Collectors;
 public class GovernanceUtil {
     private static final Log log = LogFactory.getLog(GovernanceUtil.class);
 
-
     /**
      * Generates a UUID
      *
@@ -127,7 +126,6 @@ public class GovernanceUtil {
         text = textBuilder.toString();
         return text;
     }
-
 
     /**
      * Load default rulesets from the default ruleset directory
@@ -306,7 +304,6 @@ public class GovernanceUtil {
 
         return policies; // Return a map of policy IDs and policy names
     }
-
 
     /**
      * Get all applicable policy IDs for an artifact given a specific state at which
@@ -494,7 +491,6 @@ public class GovernanceUtil {
         return getArtifactProjectWithRevision(artifactRefId, null, artifactType, organization);
     }
 
-
     /**
      * Extract project content into a map of RuleType and String
      *
@@ -527,7 +523,3 @@ public class GovernanceUtil {
     }
 
 }
-
-
-
-
