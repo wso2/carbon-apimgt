@@ -76,6 +76,8 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_KEY = "Authorization";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_API_DEFINITION_FILE_NAME = "mistral_api.yaml";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_DESCRIPTION = "Mistral AI service";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_REQUEST_MODEL = "requestModel";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_RESPONSE_MODEL = "responseModel";
         public static final String LLM_PROVIDER_SERVICE_METADATA_MODEL = "model";
         public static final String LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT = "promptTokenCount";
         public static final String LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT = "completionTokenCount";
@@ -93,5 +95,11 @@ public class APIConstants {
 
         public static final String TRAFFIC_FLOW_DIRECTION_IN = "IN";
         public static final String TRAFFIC_FLOW_DIRECTION_OUT = "OUT";
+        public static final String API_LLM_ENDPOINT = "_API_LLMEndpoint_";
+        public static final String TARGET_MODEL = "targetModel";
+        public static final String TARGET_ENDPOINT = "targetEndpoint";
+        public static final String SUSPEND_DURATION = "suspendDuration";
+        public static final String REMAINING_TOKEN_COUNT_HEADER = "x-ratelimit-remaining-tokens";
+        public static final String REMAINING_REQUEST_COUNT_HEADER = "x-ratelimit-remaining-requests";
     }
 }

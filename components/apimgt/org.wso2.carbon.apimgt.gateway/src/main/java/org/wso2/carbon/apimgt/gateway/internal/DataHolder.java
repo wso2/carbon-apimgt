@@ -18,10 +18,14 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.gdata.data.DateTime;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.gateway.RBEndpointDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
@@ -34,6 +38,7 @@ import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class DataHolder {
@@ -46,6 +51,9 @@ public class DataHolder {
     private Map<String,Map<String, API>> tenantAPIMap  = new HashMap<>();
     private Map<String, Boolean> tenantDeployStatus = new HashMap<>();
     private Map<String, LLMProviderInfo> llmProviderMap = new HashMap<>();
+    private final Cache<String, Long> suspendedEndpoints = CacheBuilder.newBuilder()
+            .expireAfterWrite(1, TimeUnit.HOURS)
+            .build();
     private boolean isAllGatewayPoliciesDeployed = false;
 
     private DataHolder() {
@@ -294,5 +302,39 @@ public class DataHolder {
         } catch (APIManagementException e) {
             log.error("Error while initializing tenant deployment status map", e);
         }
+    }
+
+    /**
+     * Suspends an endpoint for a specified duration.
+     *
+     * @param endpointId   The identifier of the endpoint.
+     * @param expiryMillis The duration in milliseconds after which the endpoint should be removed.
+     */
+    public void suspendEndpoint(String endpointId, long expiryMillis) {
+        suspendedEndpoints.put(endpointId, System.currentTimeMillis() + expiryMillis);
+    }
+
+    /**
+     * Checks if an endpoint is currently suspended.
+     *
+     * @param endpointId The identifier of the endpoint.
+     * @return {@code true} if the endpoint is suspended and has not expired, otherwise {@code false}.
+     */
+    public boolean isEndpointSuspended(String endpointId) {
+        Long expirationTime = suspendedEndpoints.getIfPresent(endpointId);
+        if (expirationTime == null || System.currentTimeMillis() > expirationTime) {
+            suspendedEndpoints.invalidate(endpointId); // Remove expired items proactively
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Removes an endpoint from the suspended list.
+     *
+     * @param endpointId The identifier of the endpoint.
+     */
+    public void removeSuspendedEndpoint(String endpointId) {
+        suspendedEndpoints.invalidate(endpointId);
     }
 }

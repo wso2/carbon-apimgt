@@ -2435,9 +2435,11 @@ public class ImportUtils {
 
         String jsonContent = null;
 
-        String pathToYamlFile = pathToArchive + File.separator + ImportExportConstants.ENDPOINTS_FILE
+        String pathToYamlFile = "/home/pasant/Desktop/git/wso2/product-apim/modules/distribution/product/target" +
+                "/wso2am-4.5.0-SNAPSHOT" + File.separator + ImportExportConstants.ENDPOINTS_FILE
                 + ImportExportConstants.YAML_EXTENSION;
-        String pathToJsonFile = pathToArchive + File.separator + ImportExportConstants.ENDPOINTS_FILE
+        String pathToJsonFile = "/home/pasant/Desktop/git/wso2/product-apim/modules/distribution/product/target" +
+         "/wso2am-4.5.0-SNAPSHOT" + File.separator + ImportExportConstants.ENDPOINTS_FILE
                 + ImportExportConstants.JSON_EXTENSION;
         try {
             // try loading file as YAML
