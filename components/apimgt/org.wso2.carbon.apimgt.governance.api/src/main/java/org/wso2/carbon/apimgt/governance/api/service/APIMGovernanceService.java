@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -98,14 +99,23 @@ public interface APIMGovernanceService {
      * Handle artifact label attach
      *
      * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)
-     * @param artifactType        Artifact type (ArtifactType.API)
-     * @param label               ID of the label to be attached
-     * @param organization        Organization
+     * @param artifactType  Artifact type (ArtifactType.API)
+     * @param labels        ID of the labels to be attached
+     * @param organization  Organization
      * @throws GovernanceException If an error occurs while attaching the label
      */
-    void evaluateComplianceOnLabelAttach(String artifactRefId, ArtifactType artifactType, String label,
+    void evaluateComplianceOnLabelAttach(String artifactRefId, ArtifactType artifactType, List<String> labels,
                                          String organization)
             throws GovernanceException;
+
+    /**
+     * Delete governance related data for the given label
+     *
+     * @param label        Label id to delete governance data
+     * @param organization Organization
+     * @throws GovernanceException If an error occurs while deleting governance data
+     */
+    void deleteGovernanceDataForLabel(String label, String organization) throws GovernanceException;
 
     /**
      * Delete all governance data related to the artifact

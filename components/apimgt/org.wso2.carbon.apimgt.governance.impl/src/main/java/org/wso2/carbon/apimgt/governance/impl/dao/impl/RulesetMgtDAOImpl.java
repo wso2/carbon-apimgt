@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.governance.impl.dao.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
@@ -35,7 +34,6 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
 
 import java.io.ByteArrayInputStream;
@@ -46,7 +44,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -81,12 +78,14 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * Create a new Governance Ruleset
      *
      * @param ruleset      Ruleset object
+     * @param rules        List of rules
      * @param organization Organization
      * @return RulesetInfo Created object
      * @throws GovernanceException If an error occurs while creating the ruleset
      */
     @Override
-    public RulesetInfo createRuleset(Ruleset ruleset, String organization) throws GovernanceException {
+    public RulesetInfo createRuleset(Ruleset ruleset, List<Rule> rules,
+                                     String organization) throws GovernanceException {
 
         String sqlQuery = SQLConstants.CREATE_RULESET;
         try (Connection connection = GovernanceDBUtil.getConnection()) {
@@ -106,44 +105,34 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     prepStmt.execute();
                 }
                 addRuleContent(connection, ruleset.getId(), ruleset.getRulesetContent());
+                addRules(ruleset.getId(), rules, connection);
 
-                ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
-                        .getValidationEngineService().getValidationEngine();
-                List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
-                if (rules.size() > 0) {
-                    addRules(ruleset.getId(), rules, connection);
-                } else {
-                    throw new GovernanceException(
-                            GovernanceExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
-                }
                 connection.commit();
-            } catch (SQLException | GovernanceException e) {
+            } catch (SQLException e) {
                 connection.rollback();
                 throw e;
-            }
-        } catch (SQLIntegrityConstraintViolationException e) {
-            if (getRulesetByName(ruleset.getName(), organization) != null) {
-                throw new GovernanceException(GovernanceExceptionCodes.RULESET_ALREADY_EXIST, ruleset.getName(),
-                        organization);
             }
         } catch (SQLException | IOException e) {
             throw new GovernanceException(GovernanceExceptionCodes.RULESET_CREATION_FAILED, e,
                     ruleset.getName(), organization
             );
         }
-        return getRulesetById(ruleset.getId()); // to return RulesetInfo object
+        return getRulesetById(ruleset.getId(), organization); // to return RulesetInfo object
     }
 
     /**
      * Update a Governance Ruleset
      *
-     * @param rulesetId Ruleset ID
-     * @param ruleset   Ruleset object
+     * @param rulesetId    Ruleset ID
+     * @param ruleset      Ruleset object
+     * @param rules        List of rules
+     * @param organization Organization
      * @return RulesetInfo Created object
      * @throws GovernanceException If an error occurs while updating the ruleset
      */
     @Override
-    public RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset)
+    public RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset, List<Rule> rules,
+                                     String organization)
             throws GovernanceException {
 
         try (Connection connection = GovernanceDBUtil.getConnection()) {
@@ -159,39 +148,28 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     prepStmt.setString(7, ruleset.getProvider());
                     prepStmt.setString(8, ruleset.getUpdatedBy());
                     prepStmt.setString(9, rulesetId);
-                    int rowsAffected = prepStmt.executeUpdate();
-                    if (rowsAffected == 0) {
-                        throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND,
-                                rulesetId);
-                    }
+                    prepStmt.setString(10, organization);
+                    prepStmt.executeUpdate();
                 }
                 updateRuleContent(connection, ruleset.getId(), ruleset.getRulesetContent());
 
                 // Delete existing rules and rule evaluation results related to this ruleset
-                deleteRuleViolationsForRuleset(rulesetId, connection);
-                deleteRulesetResultsForRuleset(rulesetId, connection);
-                deleteRules(rulesetId, connection);
+                deleteRuleViolationsForRuleset(connection, rulesetId);
+                deleteRulesetResultsForRuleset(connection, rulesetId);
+                deleteRules(connection, rulesetId);
 
                 // Insert updated rules to the database
-                ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
-                        .getValidationEngineService().getValidationEngine();
-                List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
-                if (rules.size() > 0) {
-                    addRules(ruleset.getId(), rules, connection);
-                } else {
-                    throw new GovernanceException(
-                            GovernanceExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
-                }
+                addRules(ruleset.getId(), rules, connection);
 
                 connection.commit();
-            } catch (SQLException | GovernanceException e) {
+            } catch (SQLException e) {
                 connection.rollback();
                 throw e;
             }
         } catch (SQLException | IOException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_UPDATING_RULESET, e, rulesetId);
         }
-        return getRulesetById(rulesetId); // to return all info of the updated ruleset
+        return getRulesetById(rulesetId, organization); // to return all info of the updated ruleset
     }
 
     /**
@@ -200,10 +178,10 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @param rulesetId  Ruleset ID
      * @param rules      List of rules
      * @param connection Database connection
-     * @throws GovernanceException If an error occurs while adding the rules
+     * @throws SQLException If an error occurs while adding the rules
      */
     private void addRules(String rulesetId, List<Rule> rules, Connection connection)
-            throws GovernanceException {
+            throws SQLException {
         String sqlQuery = SQLConstants.ADD_RULES;
         try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);) {
             for (Rule rule : rules) {
@@ -218,8 +196,6 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 prepStmt.addBatch();
             }
             prepStmt.executeBatch();
-        } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_INSERTING_RULES, e, rulesetId);
         }
 
     }
@@ -271,32 +247,30 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     /**
      * Delete a Governance Ruleset
      *
-     * @param rulesetId Ruleset ID
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
      * @throws GovernanceException If an error occurs while deleting the ruleset
      */
     @Override
-    public void deleteRuleset(String rulesetId) throws GovernanceException {
+    public void deleteRuleset(String rulesetId, String organization) throws GovernanceException {
 
         try (Connection connection = GovernanceDBUtil.getConnection()) {
-            try {
-                connection.setAutoCommit(false);
 
-                deleteRuleViolationsForRuleset(rulesetId, connection);
-                deleteRulesetResultsForRuleset(rulesetId, connection);
+            connection.setAutoCommit(false);
+            try {
+                deleteRuleViolationsForRuleset(connection, rulesetId);
+                deleteRulesetResultsForRuleset(connection, rulesetId);
                 deleteRulesetContent(connection, rulesetId);
-                deleteRules(rulesetId, connection);
+                deleteRules(connection, rulesetId);
 
                 try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_RULESET)) {
                     prepStmt.setString(1, rulesetId);
-                    int rowsAffected = prepStmt.executeUpdate();
-                    if (rowsAffected == 0) {
-                        throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND,
-                                rulesetId);
-                    }
+                    prepStmt.setString(2, organization);
+                    prepStmt.executeUpdate();
                 }
 
                 connection.commit();
-            } catch (SQLException | GovernanceException e) {
+            } catch (SQLException e) {
                 connection.rollback();
                 throw e;
             }
@@ -323,11 +297,11 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     /**
      * Delete rules related to a ruleset
      *
-     * @param rulesetId  Ruleset ID
      * @param connection Database connection
+     * @param rulesetId  Ruleset ID
      * @throws SQLException If an error occurs while deleting the rules
      */
-    private void deleteRules(String rulesetId, Connection connection) throws SQLException {
+    private void deleteRules(Connection connection, String rulesetId) throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_RULES)) {
             prepStmt.setString(1, rulesetId);
             prepStmt.executeUpdate();
@@ -337,11 +311,11 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     /**
      * Delete rule violations related to a ruleset
      *
-     * @param rulesetId  Ruleset ID
      * @param connection Database connection
+     * @param rulesetId  Ruleset ID
      * @throws SQLException If an error occurs while checking the association
      */
-    private void deleteRuleViolationsForRuleset(String rulesetId, Connection connection)
+    private void deleteRuleViolationsForRuleset(Connection connection, String rulesetId)
             throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                 .DELETE_RULE_VIOLATIONS_FOR_RULESET)) {
@@ -353,11 +327,11 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     /**
      * Delete rulseset results related to a ruleset
      *
-     * @param rulesetId  Ruleset ID
      * @param connection Database connection
+     * @param rulesetId  Ruleset ID
      * @throws SQLException If an error occurs while deleting
      */
-    private void deleteRulesetResultsForRuleset(String rulesetId, Connection connection)
+    private void deleteRulesetResultsForRuleset(Connection connection, String rulesetId)
             throws SQLException {
         try (PreparedStatement prepStmt = connection.
                 prepareStatement(SQLConstants.DELETE_RULESET_RUN_FOR_RULESET)) {
@@ -425,28 +399,28 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     /**
      * Retrieves a ruleset by ID.
      *
-     * @param rulesetId Ruleset ID of the ruleset
+     * @param rulesetId    Ruleset ID of the ruleset
+     * @param organization Organization whose ruleset is to be retrieved
      * @return the ruleset with the given ID
      * @throws GovernanceException if there is an error retrieving the ruleset
      */
     @Override
-    public RulesetInfo getRulesetById(String rulesetId) throws GovernanceException {
+    public RulesetInfo getRulesetById(String rulesetId, String organization) throws GovernanceException {
         String sqlQuery = SQLConstants.GET_RULESETS_BY_ID;
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, rulesetId);
+            prepStmt.setString(2, organization);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
                     return getRulesetInfoFromResultSet(rs);
-                } else {
-                    throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND,
-                            rulesetId);
                 }
             }
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
                     e);
         }
+        return null;
     }
 
     /**
@@ -467,12 +441,12 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, organization);
-            prepStmt.setString(2, "%" + searchCriteria
-                    .getOrDefault(GovernanceConstants.RulesetSearchAttributes.NAME, "") + "%");
-            prepStmt.setString(3, "%" + searchCriteria
-                    .getOrDefault(GovernanceConstants.RulesetSearchAttributes.RULE_TYPE, "") + "%");
-            prepStmt.setString(4, "%" + searchCriteria
-                    .getOrDefault(GovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, "") + "%");
+            prepStmt.setString(2, searchCriteria
+                    .getOrDefault(GovernanceConstants.RulesetSearchAttributes.NAME, ""));
+            prepStmt.setString(3, searchCriteria
+                    .getOrDefault(GovernanceConstants.RulesetSearchAttributes.RULE_TYPE, ""));
+            prepStmt.setString(4, searchCriteria
+                    .getOrDefault(GovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, ""));
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
                     rulesetInfoList.add(getRulesetInfoFromResultSet(rs));
@@ -516,25 +490,26 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     /**
      * Get the content of a Governance Ruleset
      *
-     * @param rulesetId Ruleset ID
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
      * @return String Content of the ruleset
      * @throws GovernanceException If an error occurs while getting the ruleset content
      */
     @Override
-    public RulesetContent getRulesetContent(String rulesetId) throws GovernanceException {
+    public RulesetContent getRulesetContent(String rulesetId, String organization) throws GovernanceException {
         String sqlQuery = SQLConstants.GET_RULESET_CONTENT;
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);) {
             prepStmt.setString(1, rulesetId);
+            prepStmt.setString(2, organization);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
                     RulesetContent rulesetContentObj = new RulesetContent();
                     rulesetContentObj.setFileName(rs.getString("FILE_NAME"));
                     rulesetContentObj.setContent(rs.getBytes("CONTENT"));
                     return rulesetContentObj;
-                } else {
-                    throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId);
                 }
+                return null;
             }
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
@@ -545,16 +520,19 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     /**
      * Get the associated policies for a Ruleset
      *
-     * @param rulesetId Ruleset ID
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
      * @return List of associated policies
      */
     @Override
-    public List<String> getAssociatedPoliciesForRuleset(String rulesetId) throws GovernanceException {
+    public List<String> getAssociatedPoliciesForRuleset(String rulesetId, String organization)
+            throws GovernanceException {
         List<String> policyIds = new ArrayList<>();
         String sqlQuery = SQLConstants.GET_POLICIES_FOR_RULESET;
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, rulesetId);
+            prepStmt.setString(2, organization);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
                     policyIds.add(rs.getString("POLICY_ID"));
@@ -570,16 +548,18 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     /**
      * Get the rules of a Ruleset (without the content)
      *
-     * @param rulesetId Ruleset ID
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
      * @return List of rules
      */
     @Override
-    public List<Rule> getRulesByRulesetId(String rulesetId) throws GovernanceException {
+    public List<Rule> getRulesByRulesetId(String rulesetId, String organization) throws GovernanceException {
         List<Rule> rules = new ArrayList<>();
         String sqlQuery = SQLConstants.GET_RULES_WITHOUT_CONTENT;
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, rulesetId);
+            prepStmt.setString(2, organization);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
                     Rule rule = new Rule();

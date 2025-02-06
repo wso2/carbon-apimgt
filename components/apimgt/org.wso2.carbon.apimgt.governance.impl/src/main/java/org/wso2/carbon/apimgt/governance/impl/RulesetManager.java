@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.governance.impl;
 
-import org.wso2.carbon.apimgt.governance.api.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
@@ -37,13 +36,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Implementation of the RulesetManager interface.
+ * This class implements the Ruleset Manager.
  */
-public class RulesetManagerImpl implements RulesetManager {
+public class RulesetManager {
 
     private RulesetMgtDAO rulesetMgtDAO;
 
-    public RulesetManagerImpl() {
+    public RulesetManager() {
         rulesetMgtDAO = RulesetMgtDAOImpl.getInstance();
     }
 
@@ -54,57 +53,84 @@ public class RulesetManagerImpl implements RulesetManager {
      * @param organization Organization
      * @return Ruleset Created object
      */
-    @Override
+
     public RulesetInfo createNewRuleset(Ruleset ruleset, String organization) throws GovernanceException {
+
+        if (rulesetMgtDAO.getRulesetByName(ruleset.getName(), organization) != null) {
+            throw new GovernanceException(GovernanceExceptionCodes.RULESET_ALREADY_EXIST, ruleset.getName(),
+                    organization);
+        }
         ruleset.setId(ruleset.getId() == null ? GovernanceUtil.generateUUID() : ruleset.getId());
+
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();
+
         boolean isRulesetContentValid = validationEngine.isRulesetValid(ruleset);
         if (!isRulesetContentValid) {
             throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT,
                     ruleset.getName());
         }
-        return rulesetMgtDAO.createRuleset(ruleset, organization);
+
+        validationEngine = ServiceReferenceHolder.getInstance()
+                .getValidationEngineService().getValidationEngine();
+        List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
+        if (rules.isEmpty()) {
+            throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT,
+                    ruleset.getName());
+        }
+
+        return rulesetMgtDAO.createRuleset(ruleset, rules, organization);
     }
 
     /**
      * Delete a Governance Ruleset
      *
-     * @param rulesetId Ruleset ID
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
      * @throws GovernanceException If an error occurs while deleting the ruleset
      */
-    @Override
-    public void deleteRuleset(String rulesetId) throws GovernanceException {
-        RulesetInfo ruleset = rulesetMgtDAO.getRulesetById(rulesetId);
-        if (isRulesetAssociatedWithPolicies(rulesetId)) {
+
+    public void deleteRuleset(String rulesetId, String organization) throws GovernanceException {
+        RulesetInfo ruleset = rulesetMgtDAO.getRulesetById(rulesetId, organization);
+        if (ruleset == null) {
+            throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId);
+        } else if (isRulesetAssociatedWithPolicies(rulesetId, organization)) {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_RULESET_ASSOCIATED_WITH_POLICIES,
                     ruleset.getId());
         }
-        rulesetMgtDAO.deleteRuleset(rulesetId);
+        rulesetMgtDAO.deleteRuleset(rulesetId, organization);
     }
 
     /**
      * Check if a ruleset is associated with any policies
      *
-     * @param rulesetId Ruleset ID
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
      * @return boolean True if the ruleset is associated with policies
      */
-    private boolean isRulesetAssociatedWithPolicies(String rulesetId) throws GovernanceException {
-        List<String> policyIds = rulesetMgtDAO.getAssociatedPoliciesForRuleset(rulesetId);
+    private boolean isRulesetAssociatedWithPolicies(String rulesetId, String organization)
+            throws GovernanceException {
+        List<String> policyIds = rulesetMgtDAO.getAssociatedPoliciesForRuleset(rulesetId, organization);
         return !policyIds.isEmpty();
     }
 
     /**
      * Update a Governance Ruleset
      *
-     * @param rulesetId Ruleset ID
-     * @param ruleset   Ruleset object
+     * @param rulesetId    Ruleset ID
+     * @param ruleset      Ruleset object
+     * @param organization Organization
      * @return Ruleset Updated object
      * @throws GovernanceException If an error occurs while updating the ruleset
      */
-    @Override
-    public RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset)
+
+    public RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset, String organization)
             throws GovernanceException {
+
+        RulesetInfo existingRuleset = rulesetMgtDAO.getRulesetById(rulesetId, organization);
+        if (existingRuleset == null) {
+            throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId);
+        }
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();
@@ -113,7 +139,16 @@ public class RulesetManagerImpl implements RulesetManager {
             throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT,
                     ruleset.getName());
         }
-        return rulesetMgtDAO.updateRuleset(rulesetId, ruleset);
+
+        validationEngine = ServiceReferenceHolder.getInstance()
+                .getValidationEngineService().getValidationEngine();
+        List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
+        if (rules.isEmpty()) {
+            throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT,
+                    ruleset.getName());
+        }
+
+        return rulesetMgtDAO.updateRuleset(rulesetId, ruleset, rules, organization);
     }
 
     /**
@@ -123,7 +158,7 @@ public class RulesetManagerImpl implements RulesetManager {
      * @return RulesetList object
      * @throws GovernanceException If an error occurs while getting the rulesets
      */
-    @Override
+
     public RulesetList getRulesets(String organization) throws GovernanceException {
         return rulesetMgtDAO.getRulesets(organization);
     }
@@ -131,25 +166,31 @@ public class RulesetManagerImpl implements RulesetManager {
     /**
      * Get a Governance Ruleset by ID
      *
-     * @param rulesetId Ruleset ID
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
      * @return RulesetInfo object
      * @throws GovernanceException If an error occurs while getting the ruleset
      */
-    @Override
-    public RulesetInfo getRulesetById(String rulesetId) throws GovernanceException {
-        return rulesetMgtDAO.getRulesetById(rulesetId);
+
+    public RulesetInfo getRulesetById(String rulesetId, String organization) throws GovernanceException {
+        RulesetInfo ruleset = rulesetMgtDAO.getRulesetById(rulesetId, organization);
+        if (ruleset == null) {
+            throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId);
+        }
+        return ruleset;
     }
 
     /**
      * Get the content of a Governance Ruleset
      *
-     * @param rulesetId Ruleset ID
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
      * @return Content of the ruleset
      * @throws GovernanceException If an error occurs while getting the ruleset content
      */
-    @Override
-    public RulesetContent getRulesetContent(String rulesetId) throws GovernanceException {
-        RulesetContent content = rulesetMgtDAO.getRulesetContent(rulesetId);
+
+    public RulesetContent getRulesetContent(String rulesetId, String organization) throws GovernanceException {
+        RulesetContent content = rulesetMgtDAO.getRulesetContent(rulesetId, organization);
         if (content == null) {
             throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId);
         }
@@ -160,25 +201,34 @@ public class RulesetManagerImpl implements RulesetManager {
     /**
      * Get the policies using the Governance Ruleset
      *
-     * @param rulesetId Ruleset ID
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
      * @return List of policies using the ruleset
      * @throws GovernanceException If an error occurs while getting the ruleset usage
      */
-    @Override
-    public List<String> getRulesetUsage(String rulesetId) throws GovernanceException {
-        return rulesetMgtDAO.getAssociatedPoliciesForRuleset(rulesetId);
+
+    public List<String> getRulesetUsage(String rulesetId, String organization) throws GovernanceException {
+        RulesetInfo ruleset = rulesetMgtDAO.getRulesetById(rulesetId, organization);
+        if (ruleset == null) {
+            throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId);
+        }
+        return rulesetMgtDAO.getAssociatedPoliciesForRuleset(rulesetId, organization);
     }
 
     /**
      * Get the rules using the Governance Ruleset
      *
-     * @param rulesetId Ruleset ID
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
      * @return List of rules using the ruleset
      * @throws GovernanceException If an error occurs while getting the ruleset usage
      */
-    @Override
-    public List<Rule> getRules(String rulesetId) throws GovernanceException {
-        return rulesetMgtDAO.getRulesByRulesetId(rulesetId);
+
+    public List<Rule> getRulesByRulesetId(String rulesetId, String organization) throws GovernanceException {
+        if (rulesetMgtDAO.getRulesetById(rulesetId, organization) == null) {
+            throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId);
+        }
+        return rulesetMgtDAO.getRulesByRulesetId(rulesetId, organization);
     }
 
     /**
@@ -189,7 +239,7 @@ public class RulesetManagerImpl implements RulesetManager {
      * @return List of RulesetInfo objects
      * @throws GovernanceException If an error occurs while searching for rulesets
      */
-    @Override
+
     public RulesetList searchRulesets(String query, String organization) throws GovernanceException {
         Map<String, String> searchCriteria = getRulesetSearchCriteria(query);
         return rulesetMgtDAO.searchRulesets(searchCriteria, organization);
