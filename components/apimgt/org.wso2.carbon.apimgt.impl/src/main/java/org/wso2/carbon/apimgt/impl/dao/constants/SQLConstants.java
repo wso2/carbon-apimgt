@@ -2761,8 +2761,17 @@ public class SQLConstants {
             "SET DISPLAY_NAME = ?, DESCRIPTION = ?, CONFIGURATION = ?" +
             "WHERE UUID = ?";
 
-    public static final String ADD_API_AWS_API_MAPPING = "INSERT INTO AM_API_AWS_API_MAPPING " +
+    public static final String ADD_API_AWS_API_MAPPING_SQL = "INSERT INTO AM_API_AWS_API_MAPPING " +
             "(API_ID, AWS_API_ID, GATEWAY_ENV_ID) VALUES (?, ?, ?)";
+
+    public static final String GET_API_AWS_API_MAPPING_BY_API_ID_SQL = "SELECT AWS_API_ID FROM " +
+            "AM_API_AWS_API_MAPPING WHERE API_ID = ? AND GATEWAY_ENV_ID = ?";
+
+    public static final String DELETE_API_AWS_API_MAPPING_SQL = "DELETE FROM AM_API_AWS_API_MAPPING WHERE API_ID = ? " +
+            "AND" +
+            " GATEWAY_ENV_ID = ?";
+
+    public static final String DELETE_API_AWS_API_MAPPINGS_SQL = "DELETE FROM AM_API_AWS_API_MAPPING WHERE API_ID = ?";
 
     public static final String ADD_GATEWAY_VISIBILITY_PERMISSION_SQL =
             " INSERT INTO" +

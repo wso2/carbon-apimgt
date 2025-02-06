@@ -75,7 +75,7 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
      */
     private void deployApi(DeployAPIInGatewayEvent deployAPIInGatewayEvent) throws NotifierException {
 
-        String deployedID;
+        boolean deployed;
         Set<String> gateways = deployAPIInGatewayEvent.getGatewayLabels();
         String apiId = deployAPIInGatewayEvent.getUuid();
 
@@ -88,16 +88,12 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
             for (String deploymentEnv : gateways) {
                 if (environments.containsKey(deploymentEnv)) {
                     ExternalGatewayDeployer deployer = ServiceReferenceHolder.getInstance().getExternalGatewayDeployer
-                            (environments.get(deploymentEnv).getProvider());
+                            (environments.get(deploymentEnv).getGatewayType());
                     if (deployer != null) {
                         try {
-                            Environment gatewayEnvironment = environments.get(deploymentEnv);
-                            deployedID = deployer.deploy(api, gatewayEnvironment);
-                            if (deployedID == null) {
+                            deployed = deployer.deploy(api, environments.get(deploymentEnv));
+                            if (!deployed) {
                                 throw new APIManagementException("Error while deploying API to the external gateway");
-                            }
-                            if (deployer.getType().equals(APIConstants.AWS_GATEWAY)) {
-                                APIUtil.addApiAWSApiMapping(apiId, deployedID, gatewayEnvironment.getUuid());
                             }
                         } catch (DeployerException e) {
                             throw new APIManagementException(e.getMessage());
@@ -131,10 +127,11 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
             for (String deploymentEnv : gateways) {
                 if (environments.containsKey(deploymentEnv)) {
                     ExternalGatewayDeployer deployer = ServiceReferenceHolder.getInstance().getExternalGatewayDeployer
-                            (environments.get(deploymentEnv).getProvider());
+                            (environments.get(deploymentEnv).getGatewayType());
                     if (deployer != null) {
                         try {
-                            deleted = deployer.undeploy(api.getId().getName(), api.getId().getVersion(),
+                            deleted = deployer.undeploy(api.getId().getUUID(), api.getId().getName(),
+                                    api.getId().getVersion(),
                                     api.getContext(), environments.get(deploymentEnv));
                             if (!deleted) {
                                 throw new NotifierException("Error while deleting API product from Solace broker");

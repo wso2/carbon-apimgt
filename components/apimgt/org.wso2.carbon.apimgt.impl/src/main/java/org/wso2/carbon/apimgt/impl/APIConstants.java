@@ -3207,6 +3207,39 @@ public final class APIConstants {
     public static final String WSO2_APK_GATEWAY = "wso2/apk";
     public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
     public static final String AWS_GATEWAY = "AWS";
+    public static final String SYNAPSE_GATEWAY_FEATURES = "{\n  \"runtime\": [\n    \"cors\",\n    " +
+            "\"schemaValidation\",\n    \"queryAnalysis\",\n    \"responseCaching\",\n    \"transportsHTTP\",\n    \"transportsHTTPS\",\n    \"transportsMutualSSL\",\n    \"oauth2\",\n    \"apikey\",\n    \"basicAuth\",\n    \"audienceValidation\",\n    \"backendThroughput\",\n    \"keyManagerConfig\"\n  ],\n  \"resources\": [\n    \"apiLevelRateLimiting\",\n    \"operationLevelRateLimiting\",\n    \"operationSecurity\"\n  ],\n  \"localScopes\": [\n    \"operationScopes\"\n  ],\n  \"monetization\": [\n    \"monetization\"\n  ],\n  \"subscriptions\": [\n    \"subscriptions\"\n  ],\n  \"endpoints\": [\n    \"http\",\n    \"service\",\n    \"address\",\n    \"default\",\n    \"INLINE\",\n    \"dynamic\",\n    \"awslambda\",\n    \"sequence_backend\",\n    \"advancedConfigurations\",\n    \"loadBalanceAndFailoverConfigurations\",\n    \"endpointSecurity\",\n    \"typePRODUCTION\",\n    \"typeSANDBOX\"\n  ]\n}";
+    public static final String APK_GATEWAY_FEATURES = "{\n  \"runtime\": [\n    \"cors\",\n    \"transportsHTTP\",\n    \"transportsHTTPS\",\n    \"transportsMutualSSL\",\n    \"oauth2\",\n    \"apikey\",\n    \"basicAuth\",\n    \"audienceValidation\"\n  ],\n  \"resources\": [\n    \"apiLevelRateLimiting\",\n    \"operationLevelRateLimiting\"\n  ],\n  \"localScopes\": [\n    \"operationScopes\"\n  ],\n  \"monetization\": [\n    \"monetization\"\n  ],\n  \"subscriptions\": [\n    \"subscriptions\"\n  ],\n  \"endpoints\": [\n    \"http\",\n    \"typePRODUCTION\",\n    \"typeSANDBOX\"\n  ]\n}";
+    public static final String API_DATA = "{\n" +
+            "        \"rest\": [\n" +
+            "            \"wso2/synapse\",\n" +
+            "            \"wso2/apk\"\n" +
+            "        ],\n" +
+            "        \"soap\": [\n" +
+            "            \"wso2/synapse\",\n" +
+            "            \"wso2/apk\"\n" +
+            "        ],\n" +
+            "        \"graphql\": [\n" +
+            "            \"wso2/synapse\",\n" +
+            "            \"wso2/apk\"\n" +
+            "        ],\n" +
+            "        \"ws\": [\n" +
+            "            \"wso2/synapse\",\n" +
+            "            \"wso2/apk\"\n" +
+            "            ],\n" +
+            "        \"wh\": [\n" +
+            "            \"wso2/synapse\",\n" +
+            "            \"wso2/apk\"\n" +
+            "        ],\n" +
+            "        \"sse\": [\n" +
+            "            \"wso2/synapse\",\n" +
+            "            \"wso2/apk\"\n" +
+            "        ],\n" +
+            "        \"ai\": [\n" +
+            "            \"wso2/synapse\",\n" +
+            "            \"wso2/apk\"\n" +
+            "        ]\n" +
+            "    }";
 
     public static final String PERMISSION_ALLOW = "ALLOW";
     public static final String PERMISSION_DENY = "DENY";

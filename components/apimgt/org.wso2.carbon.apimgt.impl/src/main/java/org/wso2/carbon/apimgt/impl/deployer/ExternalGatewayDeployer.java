@@ -17,11 +17,13 @@
 package org.wso2.carbon.apimgt.impl.deployer;
 
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class controls the API artifact deployments on the External gateways
@@ -35,19 +37,20 @@ public interface ExternalGatewayDeployer {
      * @param environment Environment to be deployed
      * @throws DeployerException if error occurs when deploying APIs to in the external gateway
      */
-    public String deploy(API api, Environment environment) throws DeployerException;
+    public boolean deploy(API api, Environment environment) throws DeployerException;
 
     /**
      * Undeploy API artifact from provided environment
      *
+     * @param apiID API ID to be undeployed from the external gateway
      * @param apiName     Name of the API to be undeployed from Solace broker
      * @param apiVersion  Version of the API to be undeployed from Solace broker
      * @param apiContext  Context of the API to be undeployed from Solace broker
      * @param environment Environment needed to be undeployed API from
      * @throws DeployerException if error occurs when undeploying APIs from Solace broker
      */
-    public boolean undeploy(String apiName, String apiVersion, String apiContext, Environment environment)
-            throws DeployerException;
+    public boolean undeploy(String apiID, String apiName, String apiVersion, String apiContext,
+                            Environment environment) throws DeployerException;
 
     /**
      * Undeploy API artifact from provided environment in the external gateway when Api is retired
@@ -71,4 +74,18 @@ public interface ExternalGatewayDeployer {
      * @return  List<ConfigurationDto> connectionConfigurations
      */
     public List<ConfigurationDto> getConnectionConfigurations();
+
+    /**
+     * This method returns the Gateway Feature Catalog
+     *
+     * @return JSON String Gateway Feature Catalog
+     */
+    public String getGatewayFeatureCatalog();
+
+    /**
+     * This method returns the validation result of a given API with the external gateway
+     *
+     * @return List<String> validation result
+     */
+    public List<String> validateApi(API api) throws DeployerException;
 }
