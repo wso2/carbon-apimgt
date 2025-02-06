@@ -14602,3 +14602,6 @@ components:
             apim:subscription_approval_view: Approve subscription creation requests
             apim:subscription_approval_manage: Approve subscription update requests
             apim:llm_provider_read: Read LLM Providers
+            apim:gov_policy_read: Retrieve governance policies
+            apim:gov_result_read: Retrieve governance results
+            apim:gov_rule_read: Retrieve governance rules
