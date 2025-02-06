@@ -133,7 +133,7 @@ public class OrganizationsApiServiceImpl implements OrganizationsApiService {
             if (orgInfo != null && orgInfo.getOrganizationId() != null) {
                 parentOrgId = orgInfo.getOrganizationId(); // set current users organization as parent id if available.
             }
-            if (organizationDTO.getParentOrganizationId() == null) {
+            if (parentOrgId == null) {
                 throw new APIManagementException("Parent Organization not found",
                         ExceptionCodes.MISSING_ORGANINATION);
             }
