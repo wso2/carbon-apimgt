@@ -152,20 +152,19 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      *
      * @param artifactType Artifact type (ExtendedArtifactType.REST_API, etc)
      *                     project
-     * @param filePath     File path of the artifact content (ZIP Path)
      * @param organization Organization
      * @return ArtifactComplianceDryRunInfo object
      * @throws GovernanceException If an error occurs while evaluating compliance
      */
     @Override
-    public ArtifactComplianceDryRunInfo evaluateComplianceDryRunSync(ExtendedArtifactType artifactType, byte[] zipArchive,
-                                                                     String organization) throws GovernanceException {
+    public ArtifactComplianceDryRunInfo evaluateComplianceDryRunSync(ExtendedArtifactType artifactType,
+                                                                     byte[] zipArchive, String organization)
+            throws GovernanceException {
 
         if (log.isDebugEnabled()) {
             log.debug("Evaluating compliance for the artifact with the file path ");
         }
 
-//        byte[] projectContent = GovernanceUtil.readArtifactProjectContent(filePath);
         Map<String, String> policies = policyManager.getOrganizationWidePolicies(organization);
 
         List<String> applicablePolicyIds = new ArrayList<>(policies.keySet());
@@ -174,7 +173,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         if (ExtendedArtifactType.isArtifactAPI(artifactType)) {
             Map<RuleType, String> contentMap = GovernanceUtil
                     .extractArtifactProjectContent(zipArchive, ArtifactType.API);
-            return complianceManager.handleComplianceEvaluationDryRun(artifactType, applicablePolicyIds,
+            return complianceManager.handleComplianceEvalDryRun(artifactType, applicablePolicyIds,
                     contentMap, organization);
         } else {
             throw new GovernanceException(GovernanceExceptionCodes.INVALID_ARTIFACT_TYPE, artifactType.toString());
