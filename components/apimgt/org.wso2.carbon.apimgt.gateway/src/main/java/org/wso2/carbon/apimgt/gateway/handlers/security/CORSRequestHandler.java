@@ -183,7 +183,11 @@ public class CORSRequestHandler extends AbstractHandler implements ManagedLifecy
                             Resource resource = dispatcher.findResource(messageContext, acceptableResources);
                             if (resource != null) {
                                 selectedResource = resource;
-                                break;
+                                if (selectedResource.getDispatcherHelper()
+                                        .getString() != null && !selectedResource.getDispatcherHelper().getString()
+                                        .contains("/*")) {
+                                    break;
+                                }
                             }
                         }
                         if (selectedResource == null) {

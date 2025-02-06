@@ -53,6 +53,7 @@ import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.ClonePolicyMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIDefinitionContentSearchResult;
@@ -8021,6 +8022,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while resuming workflow " + workflowReferenceID, e);
         }
+    }
+
+    @Override
+    public List<OrganizationDetailsDTO> getOrganizations(String orgId, String tenantDomain) throws APIManagementException {
+        List<OrganizationDetailsDTO> organizationsList = apiMgtDAO.getChildOrganizations(orgId, tenantDomain);
+        return organizationsList;
     }
 
     private void removeAPILabelMappings(String apiId) throws APIManagementException {

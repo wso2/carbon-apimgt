@@ -230,9 +230,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO createdApiDTO;
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             API createdApi = PublisherCommonUtils
                     .addAPIWithGeneratedSwaggerDefinition(body, oasVersion, RestApiCommonUtil.getLoggedInUsername(),
-                            organization);
+                            organization, orgInfo );
             createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
             //This URI used to set the location header of the POST response
             createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -254,7 +255,17 @@ public class ApisApiServiceImpl implements ApisApiService {
                            MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        OrganizationInfo organizationInfo = RestApiUtil.getOrganizationInfo(messageContext);
         APIDTO apiToReturn = getAPIByID(apiId, apiProvider, organization);
+        if (apiToReturn.getVisibleOrganizations() != null && organizationInfo != null
+                && organizationInfo.getOrganizationId() != null) {
+            // Remove current organization id from the visible org list.
+            List<String> orglist = apiToReturn.getVisibleOrganizations();
+            ArrayList<String> newOrgList = new ArrayList<String>(orglist);
+            newOrgList.remove(organizationInfo.getOrganizationId());
+            apiToReturn.setVisibleOrganizations(newOrgList);
+        }
+
         return Response.ok().entity(apiToReturn).build();
     }
 
@@ -734,6 +745,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            OrganizationInfo organizationInfo = RestApiUtil.getOrganizationInfo(messageContext);
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
             if (!PublisherCommonUtils.validateEndpointConfigs(body)) {
@@ -765,6 +777,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
             originalAPI.setOrganization(organization);
+
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(originalAPI.getStatus());
             Map<String, String> complianceResult = PublisherCommonUtils
@@ -777,7 +790,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
             }
 
-            API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes);
+            API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes, organizationInfo);
 
             PublisherCommonUtils.checkGovernanceComplianceAsync(originalAPI.getUuid(), GovernableState.API_UPDATE,
                     ArtifactType.API, originalAPI.getOrganization());
@@ -3815,7 +3828,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), true, isAiApi);
 
         if (apiInfo != null) {
-            List<String> apiPolicies = apiInfo.getPolicies();
+            List<String> apiPolicies = RestApiPublisherUtils.getSubscriptionPoliciesForOrganization(apiInfo, organizationID);
             List<Tier> apiThrottlingPolicies = ApisApiServiceImplUtils.filterAPIThrottlingPolicies(apiPolicies,
                     availableThrottlingPolicyList);
             return Response.ok().entity(apiThrottlingPolicies).build();

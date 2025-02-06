@@ -1013,8 +1013,8 @@ public class SQLConstants {
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +
             "   CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_TIME, " +
-                    "UUID, TOKEN_TYPE, ORGANIZATION)" +
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "UUID, TOKEN_TYPE, ORGANIZATION, SHARED_ORGANIZATION)" +
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String UPDATE_APPLICATION_SQL =
             " UPDATE " +
@@ -1026,7 +1026,8 @@ public class SQLConstants {
             "   DESCRIPTION = ?, " +
             "   UPDATED_BY = ?, " +
             "   UPDATED_TIME = ?, " +
-            "   TOKEN_TYPE = ? " +
+            "   TOKEN_TYPE = ?, " +
+            "   SHARED_ORGANIZATION = ? " +
             " WHERE" +
             "   APPLICATION_ID = ?";
 
@@ -1634,6 +1635,7 @@ public class SQLConstants {
             "   APP.TOKEN_TYPE," +
             "   APP.CREATED_BY," +
             "   APP.ORGANIZATION ORGANIZATION,"+
+            "   APP.SHARED_ORGANIZATION AS SHARED_ORGANIZATION, " +
             "   SUB.USER_ID " +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +
@@ -3885,6 +3887,32 @@ public class SQLConstants {
                         "AM_APPLICATION_KEY_MAPPING AAKM WHERE APPLICATION_ID=? AND AAKM.UUID = ? " +
                         "AND AKM.UUID=AAKM.KEY_MANAGER";
     }
+    
+    public static class OrganizationSqlConstants {
+        public static final String ADD_ORGANIZATION =
+                " INSERT INTO AM_ORGANIZATION_MAPPING" +
+                " (ORG_UUID,EXT_ORG_ID,DISPLAY_NAME,PARENT_ORG_UUID,DESCRIPTION,ROOT_ORGANIZATION,ORG_HANDLE) " +
+                "VALUES (?,?,?,?,?,?,?)";
+
+        public static final String UPDATE_ORGANIZATION =
+                "UPDATE AM_ORGANIZATION_MAPPING " +
+                "   SET DISPLAY_NAME = ?, DESCRIPTION = ?, EXT_ORG_ID=?, ORG_HANDLE=? WHERE ORG_UUID = ?";
+
+        public static final String DELETE_ORGANIZATION =
+                "DELETE FROM AM_ORGANIZATION_MAPPING WHERE ORG_UUID = ? AND ROOT_ORGANIZATION=?";
+
+        public static final String GET_ORGANIZATIONS_BY_PARENT_ORG_ID =
+                "SELECT * FROM AM_ORGANIZATION_MAPPING WHERE PARENT_ORG_UUID=? AND ROOT_ORGANIZATION=?";
+        
+        public static final String GET_ORGANIZATION_BY_ORG_ID =
+                "SELECT * FROM AM_ORGANIZATION_MAPPING WHERE ORG_UUID=? AND ROOT_ORGANIZATION=?";
+        
+        public static final String GET_ORGANIZATION_BY_EXTERNAL_ORG_ID =
+                "SELECT * FROM AM_ORGANIZATION_MAPPING WHERE EXT_ORG_ID=? AND ROOT_ORGANIZATION=?";
+        
+        public static final String GET_ORGANIZATIONS_BY_TENAND_DOMAIN =
+                "SELECT * FROM AM_ORGANIZATION_MAPPING WHERE ROOT_ORGANIZATION=?";
+    }
 
     /**
      * Static class to hold database queries related to AM_KEY_MANAGER_PERMISSIONS table
@@ -3905,6 +3933,25 @@ public class SQLConstants {
                         " WHERE KEY_MANAGER_UUID = ?";
     }
 
+    /**
+     * Static class to hold database queries related to AM_KEY_MANAGER_PERMISSIONS table
+     */
+    public static class KeyManagerOrgVisibilitySqlConstants {
+
+        public static final String ADD_KEY_MANAGER_ORG_VISIBILITY_SQL =
+                " INSERT INTO" +
+                        " AM_KEY_MANAGER_ALLOWED_ORGS (KEY_MANAGER_UUID, ALLOWED_ORGANIZATIONS)" +
+                        " VALUES(?, ?)";
+
+        public static final String DELETE_ALL_KEY_MANAGER_ORG_VISIBILITY_SQL = "DELETE FROM AM_KEY_MANAGER_ALLOWED_ORGS" +
+                " WHERE KEY_MANAGER_UUID = ?";
+
+        public static final String GET_KEY_MANAGER_ORG_VISIBILITY_SQL =
+                "SELECT ALLOWED_ORGANIZATIONS" +
+                        " FROM AM_KEY_MANAGER_ALLOWED_ORGS " +
+                        " WHERE KEY_MANAGER_UUID = ?";
+    }
+    
     /**
      * Static class to hold database queries related to AM_TENANT_THEMES table
      */

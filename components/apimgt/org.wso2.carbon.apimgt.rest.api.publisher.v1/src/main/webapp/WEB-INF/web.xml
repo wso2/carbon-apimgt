@@ -55,7 +55,8 @@
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.GatewayPoliciesApi,
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.WorkflowsApi,
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.LlmProvidersApi,
-                org.wso2.carbon.apimgt.rest.api.publisher.v1.LabelsApi
+                org.wso2.carbon.apimgt.rest.api.publisher.v1.LabelsApi,
+                org.wso2.carbon.apimgt.rest.api.publisher.v1.OrganizationsApi
             </param-value>
         </init-param>
         <init-param>

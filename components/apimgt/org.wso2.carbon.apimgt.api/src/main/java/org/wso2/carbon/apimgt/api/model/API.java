@@ -74,6 +74,7 @@ public class API implements Serializable {
     private Date lastUpdated;
     private String updatedBy;
     private Set<Tier> availableTiers = new LinkedHashSet<Tier>();
+    private Set<OrganizationTiers> availableTiersForOrganizations = new LinkedHashSet<>();
     private Set<Policy> availableSubscriptionLevelPolicies = new LinkedHashSet<Policy>();
     private String apiLevelPolicy;
     private AuthorizationPolicy authorizationPolicy;
@@ -102,6 +103,7 @@ public class API implements Serializable {
     private String visibility;
     private String visibleRoles;
     private String visibleTenants;
+    private String visibleOrganizations;
 
     private boolean endpointSecured = false;
     private boolean endpointAuthDigest = false;
@@ -765,8 +767,16 @@ public class API implements Serializable {
         availableSubscriptionLevelPolicies.clear();
     }
 
-    public void removeAvailableTiers(Set<Tier> availableTiers) {
-        this.availableTiers.removeAll(availableTiers);
+    public Set<OrganizationTiers> getAvailableTiersForOrganizations() {
+        return availableTiersForOrganizations;
+    }
+
+    public void setAvailableTiersForOrganizations(Set<OrganizationTiers> availableTiersForOrganizations) {
+        this.availableTiersForOrganizations = availableTiersForOrganizations;
+    }
+
+    public void removeAllTiersForOrganizations() {
+        availableTiersForOrganizations.clear();
     }
 
     public Set<URITemplate> getUriTemplates() {
@@ -1560,6 +1570,14 @@ public class API implements Serializable {
 
     public void setApiPolicies(List<OperationPolicy> apiPolicies) {
         this.apiPolicies = apiPolicies;
+    }
+    
+    public String getVisibleOrganizations() {
+        return visibleOrganizations;
+    }
+
+    public void setVisibleOrganizations(String visibleOrganizations) {
+        this.visibleOrganizations = visibleOrganizations;
     }
 
     /**

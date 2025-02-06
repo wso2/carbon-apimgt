@@ -58,6 +58,7 @@
             org.wso2.carbon.apimgt.rest.api.admin.v1.ApisApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.TransactionCountApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.LabelsApi,
+            org.wso2.carbon.apimgt.rest.api.admin.v1.OrganizationsApi
         </param-value>
     </init-param>
     <init-param>
