@@ -49,7 +49,7 @@ public abstract class AbstractMonetization implements Monetization {
      *
      * @param monetizationUsagePublishInfo monetization publish info
      * @return usage data from analytics provider
-     * @throws AnalyticsException if the action failed
+     * @throws MonetizationException if the action failed
      */
     public Object monetizationAnalyticsDataProvider(MonetizationUsagePublishInfo monetizationUsagePublishInfo) throws MonetizationException{
         Map<String,String> configs = configuration.getAnalyticsProperties();
