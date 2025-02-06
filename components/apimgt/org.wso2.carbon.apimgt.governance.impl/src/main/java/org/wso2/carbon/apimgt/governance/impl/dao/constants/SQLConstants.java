@@ -81,7 +81,7 @@ public class SQLConstants {
             "AND ARTIFACT_TYPE LIKE %?%";
 
     public static final String DELETE_RULESET =
-            "DELETE FROM GOV_RULESET WHERE RULESET_ID = ? WHERE ORGANIZATION = ?";
+            "DELETE FROM GOV_RULESET WHERE RULESET_ID = ? AND ORGANIZATION = ?";
 
     public static final String DELETE_RULES =
             "DELETE FROM GOV_RULESET_RULE WHERE RULESET_ID = ?";

@@ -1599,13 +1599,6 @@ components:
           type: string
           description: Version of the artifact.
           example: "1.0.0"
-
-
-
-
-  #####
-  # TODO: Fix scope validation logic. Currently scope validation is broken due to logic in apimgt.rest.api.common.RestAPICommonUtil
-  #####
   securitySchemes:
     OAuth2Security:
       type: oauth2
