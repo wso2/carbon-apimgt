@@ -75,7 +75,7 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
      * @throws DeployerException if error occurs when deploying APIs to Solace broker
      */
     @Override
-    public String deploy(API api, Environment environment) throws DeployerException {
+    public boolean deploy(API api, Environment environment) throws DeployerException {
         String apiDefinition = api.getAsyncApiDefinition();
         Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(apiDefinition);
         String apiNameForRegistration = api.getId().getApiName() + "-" + api.getId().getVersion();
@@ -106,7 +106,7 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
                     log.info("API product '" + apiNameWithContext + "' already found in Solace. No need to create "
                             + "again");
                 }
-                return "SUCCESS";
+                return true;
             } else if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
                 // api product not found in solace. check existence of registered API in solace
                 if (log.isDebugEnabled()) {
@@ -127,7 +127,7 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
                             environment.getName(), aai20Document, apiNameWithContext, apiNameForRegistration);
                     if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
                         log.info("API product " + apiNameWithContext + " has been created in Solace broker");
-                        return "SUCCESS";
+                        return true;
                     } else {
                         if (log.isDebugEnabled()) {
                             log.error("Error while creating API product" + apiNameWithContext + " in Solace." +
@@ -155,7 +155,7 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
                                 environment.getName(), aai20Document, apiNameWithContext, apiNameForRegistration);
                         if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
                             log.info("API product '" + apiNameWithContext + "' has been created in Solace broker");
-                            return "SUCCESS";
+                            return true;
                         } else {
                             if (log.isDebugEnabled()) {
                                 log.error("Error while creating API product in Solace. : " + response2.
@@ -212,6 +212,7 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
     /**
      * Undeploy API artifact from provided environment
      *
+     * @param apiID       API to be undeployed from Solace broker
      * @param apiName     Name of the API to be undeployed from Solace broker
      * @param apiVersion  Version of the API to be undeployed from Solace broker
      * @param apiContext  Context of the API to be undeployed from Solace broker
@@ -219,7 +220,8 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
      * @throws DeployerException if error occurs when undeploying APIs from Solace broker
      */
     @Override
-    public boolean undeploy(String apiName, String apiVersion, String apiContext, Environment environment)
+    public boolean undeploy(String apiID, String apiName, String apiVersion, String apiContext,
+                            Environment environment)
             throws DeployerException {
         String apiNameForRegistration = apiName + "-" + apiVersion;
         String[] apiContextParts = apiContext.split("/");
@@ -319,8 +321,8 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
         }
 
         // undeploy API from Solace
-        boolean deletedFromSolace = undeploy(api.getId().getName(), api.getId().getVersion(), api.getContext(),
-                environment);
+        boolean deletedFromSolace = undeploy(api.getUuid(), api.getId().getApiName(), api.getId().getVersion(),
+                api.getContext(), environment);
         if (!deletedFromSolace) {
             throw new DeployerException("Error while deleting API product of API " + api.getUuid() + "from Solace " +
                     "broker");
@@ -335,6 +337,26 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
      */
     @Override
     public List<ConfigurationDto> getConnectionConfigurations() {
+        return new ArrayList<>();
+    }
+
+    /**
+     * This method returns the Gateway Feature Catalog
+     *
+     * @return JSON String Gateway Feature Catalog
+     */
+    @Override
+    public String getGatewayFeatureCatalog() {
+        return "";
+    }
+
+    /**
+     * This method returns the validation result of a given API with the Solace gateway
+     *
+     * @return List<String> validation result
+     */
+    @Override
+    public List<String> validateApi(API api) {
         return new ArrayList<>();
     }
 

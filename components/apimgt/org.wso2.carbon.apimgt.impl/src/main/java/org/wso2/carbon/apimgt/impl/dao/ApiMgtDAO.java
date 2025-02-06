@@ -15621,7 +15621,7 @@ public class ApiMgtDAO {
             throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
-        String query = SQLConstants.ADD_API_AWS_API_MAPPING;
+        String query = SQLConstants.ADD_API_AWS_API_MAPPING_SQL;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -15644,6 +15644,106 @@ public class ApiMgtDAO {
                         + apiId + " AWS API ID: " + aWSApiId, ex);
             }
             handleException("Error while adding mapping between API ID: " + apiId + " and AWS API ID: " + aWSApiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
+    /**
+     * Get API - AWS API mapping by API ID
+     *
+     * @param apiId API ID
+     * @param environmentId Environment ID
+     * @throws APIManagementException if failed to get the mapping
+     */
+    public String getApiAWSApiMapping(String apiId, String environmentId)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(SQLConstants.GET_API_AWS_API_MAPPING_BY_API_ID_SQL)) {
+            statement.setString(1, apiId);
+            statement.setString(2, environmentId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("AWS_API_ID");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to fetch API - AWS API mapping for the API ID: " + apiId, e);
+        }
+        return null;
+    }
+
+    /**
+     * Delete API - AWS API mapping by API ID
+     *
+     * @param apiId API ID
+     * @param environmentId Environment ID
+     * @throws APIManagementException if failed to get the mapping
+     */
+    public void deleteApiAWSApiMapping(String apiId, String environmentId)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        String query = SQLConstants.DELETE_API_AWS_API_MAPPING_SQL;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, apiId);
+            prepStmt.setString(2, environmentId);
+            prepStmt.execute();
+
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                log.error("Failed to rollback the delete API - AWS API Mapping: API ID: "
+                        + apiId, ex);
+            }
+            handleException("Error while deleting API - AWS API mapping for API ID: " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
+    /**
+     * Delete all API - AWS API mapping for given API ID
+     *
+     * @param apiId API ID
+     * @throws APIManagementException if failed to get the mapping
+     */
+    public void deleteApiAWSApiMappings(String apiId)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        String query = SQLConstants.DELETE_API_AWS_API_MAPPINGS_SQL;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, apiId);
+            prepStmt.execute();
+
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                log.error("Failed to rollback the delete API - AWS API Mappings: API ID: "
+                        + apiId, ex);
+            }
+            handleException("Error while deleting API - AWS API mappings for API ID: " + apiId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }

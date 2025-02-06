@@ -278,6 +278,10 @@ public class APIMappingUtil {
         Set<Scope> scopes = getScopes(dto);
         model.setScopes(scopes);
 
+        if (dto.getGatewayType() != null) {
+            model.setGatewayType(dto.getGatewayType());
+        }
+
         //URI Templates
         // No default topics for AsyncAPIs. Therefore set URITemplates only for non-AsyncAPIs.
         Set<URITemplate> uriTemplates = getURITemplates(model, dto.getOperations());
@@ -497,10 +501,6 @@ public class APIMappingUtil {
         }
         if (dto.getGatewayVendor() != null) {
             model.setGatewayVendor(dto.getGatewayVendor());
-        }
-
-        if (dto.getGatewayType() != null) {
-            model.setGatewayType(dto.getGatewayType());
         }
 
         if (dto.getAsyncTransportProtocols() != null) {
@@ -1851,7 +1851,7 @@ public class APIMappingUtil {
         Set<URITemplate> uriTemplates = new LinkedHashSet<>();
 
         if (operations == null || operations.isEmpty()) {
-            operations = getDefaultOperationsList(model.getType());
+            operations = getDefaultOperationsList(model.getType(), model.getGatewayType());
         }
 
         for (APIOperationsDTO operation : operations) {
@@ -2451,7 +2451,7 @@ public class APIMappingUtil {
      *
      * @return a default operations list
      */
-    private static List<APIOperationsDTO> getDefaultOperationsList(String apiType) {
+    private static List<APIOperationsDTO> getDefaultOperationsList(String apiType, String gatewayType) {
 
         List<APIOperationsDTO> operationsDTOs = new ArrayList<>();
         String[] supportedMethods;
@@ -2478,7 +2478,12 @@ public class APIMappingUtil {
             if (apiType.equals((APIConstants.API_TYPE_WEBSUB))) {
                 operationsDTO.setTarget(APIConstants.WEBSUB_DEFAULT_TOPIC_NAME);
             } else {
-                operationsDTO.setTarget("/*");
+                // Wildcard resources are handled from "/" in AWS gateway
+                if (APIConstants.AWS_GATEWAY.equalsIgnoreCase(gatewayType)) {
+                    operationsDTO.setTarget("/");
+                } else {
+                    operationsDTO.setTarget("/*");
+                }
             }
             operationsDTO.setVerb(verb);
             operationsDTO.setThrottlingPolicy(defaultThrottlingPolicy);
