@@ -634,6 +634,7 @@ public class PublisherCommonUtils {
         apiToUpdate.setUUID(originalAPI.getUUID());
         apiToUpdate.setOrganization(originalAPI.getOrganization());
         validateScopes(apiToUpdate);
+        validateSubscriptionAvailability(originalAPI, apiToUpdate);
         apiToUpdate.setThumbnailUrl(originalAPI.getThumbnailUrl());
         if (apiDtoToUpdate.getKeyManagers() instanceof List) {
             apiToUpdate.setKeyManagers((List<String>) apiDtoToUpdate.getKeyManagers());
@@ -2545,6 +2546,7 @@ public class PublisherCommonUtils {
         }
 
         APIProduct product = APIMappingUtil.fromDTOtoAPIProduct(apiProductDtoToUpdate, username);
+        validateSubscriptionAvailabilityForProduct(originalAPIProduct, product);
         product.setState(originalAPIProduct.getState());
         //We do not allow to modify provider,name,version  and uuid. Set the origial value
         APIProductIdentifier productIdentifier = originalAPIProduct.getId();
@@ -2680,6 +2682,58 @@ public class PublisherCommonUtils {
 
         createdProduct = apiProvider.getAPIProduct(createdAPIProductIdentifier);
         return createdProduct;
+    }
+
+    /**
+     * Validate subscription availability when cross tenant subscription is disabled.
+     *
+     * @param originalAPI Original API
+     * @param apiToUpdate API to be updated
+     * @throws APIManagementException If an error occurs while validating availability
+     */
+    public static void validateSubscriptionAvailability(API originalAPI, API apiToUpdate)
+            throws APIManagementException {
+        if (originalAPI.getSubscriptionAvailability() != null && apiToUpdate.getSubscriptionAvailability() != null
+                && !APIUtil.isCrossTenantSubscriptionsEnabled()) {
+            if (!originalAPI.getSubscriptionAvailability()
+                    .equalsIgnoreCase(apiToUpdate.getSubscriptionAvailability())) {
+                if (!APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT
+                        .equalsIgnoreCase(apiToUpdate.getSubscriptionAvailability())) {
+                    throw new APIManagementException(
+                            ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WHILE_UPDATING_API,
+                            "Cannot set Subscription Availability to "
+                                    + apiToUpdate.getSubscriptionAvailability().toUpperCase()
+                                    + " when Cross Tenant Subscription is disabled"));
+                }
+            }
+        }
+    }
+
+    /**
+     * Validate subscription availability when cross tenant subscription is disabled.
+     *
+     * @param originalProduct Original API Product
+     * @param productToUpdate API Product to be updated
+     * @throws APIManagementException If an error occurs while validating availability
+     */
+    public static void validateSubscriptionAvailabilityForProduct(APIProduct originalProduct,
+                                                                  APIProduct productToUpdate)
+            throws APIManagementException {
+        if (originalProduct.getSubscriptionAvailability() != null
+                && productToUpdate.getSubscriptionAvailability() != null
+                && !APIUtil.isCrossTenantSubscriptionsEnabled()) {
+            if (!originalProduct.getSubscriptionAvailability()
+                    .equalsIgnoreCase(productToUpdate.getSubscriptionAvailability())) {
+                if (!APIConstants.SUBSCRIPTION_TO_CURRENT_TENANT
+                        .equalsIgnoreCase(productToUpdate.getSubscriptionAvailability())) {
+                    throw new APIManagementException(
+                            ExceptionCodes.from(ExceptionCodes.INTERNAL_ERROR_WHILE_UPDATING_API,
+                                    "Cannot set Subscription Availability to "
+                                            + productToUpdate.getSubscriptionAvailability().toUpperCase()
+                                            + " when Cross Tenant Subscription is disabled"));
+                }
+            }
+        }
     }
 
     private static void validateApiLifeCycleForApiProducts(API api) throws APIManagementException {
