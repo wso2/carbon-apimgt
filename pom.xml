@@ -2154,7 +2154,7 @@
         <org.slf4j.version>2.0.12</org.slf4j.version>
         <slf4j.api.version>2.0.12</slf4j.api.version>
         <spring-web.version>5.3.23</spring-web.version>
-        <hibernate-validator.version>6.2.1.Final</hibernate-validator.version>
+        <hibernate-validator.version>6.0.23.Final</hibernate-validator.version>
         <swagger-jaxrs.version>1.6.1</swagger-jaxrs.version>
         <junit.version>4.13.1</junit.version>
         <opensaml3.version>3.3.1</opensaml3.version>
