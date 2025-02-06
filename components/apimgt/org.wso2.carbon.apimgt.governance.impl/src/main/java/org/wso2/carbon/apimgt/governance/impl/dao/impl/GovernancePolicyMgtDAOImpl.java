@@ -744,10 +744,10 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.SEARCH_POLICIES)) {
             prepStmt.setString(1, organization);
-            prepStmt.setString(2, "%" + searchCriteria.getOrDefault(
-                    GovernanceConstants.PolicySearchAttributes.NAME, "") + "%");
-            prepStmt.setString(3, "%" + searchCriteria.getOrDefault(
-                    GovernanceConstants.PolicySearchAttributes.STATE, "") + "%");
+            prepStmt.setString(2, searchCriteria.getOrDefault(
+                    GovernanceConstants.PolicySearchAttributes.NAME, ""));
+            prepStmt.setString(3, searchCriteria.getOrDefault(
+                    GovernanceConstants.PolicySearchAttributes.STATE, ""));
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     GovernancePolicy policy = new GovernancePolicy();

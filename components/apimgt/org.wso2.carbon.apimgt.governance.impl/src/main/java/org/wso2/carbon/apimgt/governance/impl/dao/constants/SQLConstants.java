@@ -149,8 +149,8 @@ public class SQLConstants {
                     "JOIN GOV_POLICY_LABEL GPL ON GP.POLICY_ID = GPL.POLICY_ID " +
                     "JOIN GOV_POLICY_GOVERNABLE_STATE GPS ON GP.POLICY_ID = GPS.POLICY_ID " +
                     "WHERE GP.ORGANIZATION = ? " +
-                    "AND GP.NAME LIKE ? " +
-                    "AND GPS.STATE LIKE ?";
+                    "AND GP.NAME LIKE %?% " +
+                    "AND GPS.STATE LIKE %?%";
 
     public static final String UPDATE_POLICY =
             "UPDATE GOV_POLICY SET NAME = ?, DESCRIPTION = ?, UPDATED_BY = ?, IS_GLOBAL = ?, " +
