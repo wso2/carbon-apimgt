@@ -6,23 +6,19 @@ public class MonetizationDTO {
 
     Long currentTimestamp;
     String apiUuid;
-    String apiName;
-    String apiVersion;
     String tenantDomain;
     String applicationName;
     String applicationOwner;
-    HashMap<String, Object> customAttributes;
+    HashMap<String, Object> properties;
     Long requestCount;
 
-    public MonetizationDTO(Long currentTimestamp, String apiUuid, String apiName, String apiVersion, String tenantDomain, String applicationName, String applicationOwner, HashMap<String, Object> customAttributes, Long requestCount) {
+    public MonetizationDTO(Long currentTimestamp, String apiUuid, String tenantDomain, String applicationName, String applicationOwner, HashMap<String, Object> properties, Long requestCount) {
         this.currentTimestamp = currentTimestamp;
         this.apiUuid = apiUuid;
-        this.apiName = apiName;
-        this.apiVersion = apiVersion;
         this.tenantDomain = tenantDomain;
         this.applicationName = applicationName;
         this.applicationOwner = applicationOwner;
-        this.customAttributes = customAttributes;
+        this.properties = properties;
         this.requestCount = requestCount;
     }
 
@@ -40,22 +36,6 @@ public class MonetizationDTO {
 
     public void setApiUuid(String apiUuid) {
         this.apiUuid = apiUuid;
-    }
-
-    public String getApiName() {
-        return apiName;
-    }
-
-    public void setApiName(String apiName) {
-        this.apiName = apiName;
-    }
-
-    public String getApiVersion() {
-        return apiVersion;
-    }
-
-    public void setApiVersion(String apiVersion) {
-        this.apiVersion = apiVersion;
     }
 
     public String getTenantDomain() {
@@ -82,12 +62,12 @@ public class MonetizationDTO {
         this.applicationOwner = applicationOwner;
     }
 
-    public HashMap<String, Object> getCustomAttributes() {
-        return customAttributes;
+    public HashMap<String, Object> getProperties() {
+        return properties;
     }
 
-    public void setCustomAttributes(HashMap<String, Object> customAttributes) {
-        this.customAttributes = customAttributes;
+    public void setProperties(HashMap<String, Object> properties) {
+        this.properties = properties;
     }
 
     public Long getRequestCount() {
