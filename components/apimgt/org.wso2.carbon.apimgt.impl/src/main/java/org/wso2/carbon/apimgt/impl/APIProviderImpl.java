@@ -122,6 +122,8 @@ import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
+import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.dto.APIRevisionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
@@ -538,6 +540,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Validate Transports
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
+
+        //Validate API with Federated Gateway
+        validateApiWithFederatedGateway(api);
 
         //Set version timestamp to the API
         String latestTimestamp = calculateVersionTimestamp(provider, apiName,
@@ -982,6 +987,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
             migrateMediationPoliciesOfAPI(api, tenantDomain, false);
         }
+
+        //Validate API with Federated Gateway
+        validateApiWithFederatedGateway(api);
 
         //get product resource mappings on API before updating the API. Update uri templates on api will remove all
         //product mappings as well.
@@ -2035,6 +2043,36 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
+     * Validate Api with the federated gateways
+     *
+     * @param api API Object
+     */
+    private static void validateApiWithFederatedGateway(API api) throws APIManagementException {
+
+        ExternalGatewayDeployer deployer =
+                ServiceReferenceHolder.getInstance().getExternalGatewayDeployer(api.getGatewayType());
+        if (deployer != null) {
+            List<String> errorList = null;
+            try {
+                errorList = deployer.validateApi(api);
+                if (!errorList.isEmpty()) {
+                    throw new APIManagementException(
+                            "Error occurred while validating the API with the federated gateway: "
+                            + api.getGatewayType(),
+                            ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
+                                    api.getGatewayType(), errorList.toString()));
+                }
+            } catch (DeployerException e) {
+                throw new APIManagementException(
+                        "Error occurred while validating the API with the federated gateway: "
+                        + api.getGatewayType(), e,
+                        ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
+                        api.getGatewayType()));
+            }
+        }
+    }
+
+    /**
      * To validate the API Security options and set it.
      *
      * @param apiProduct Relevant APIProduct that need to be validated.
@@ -2502,6 +2540,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // DB delete operations
         if (!isError && api != null) {
             try {
+                // Delete mappings for AWS deployed APIs
+                if (api.getGatewayType().equalsIgnoreCase(APIConstants.AWS_GATEWAY)) {
+                    APIUtil.deleteApiAWSApiMappings(api.getUuid());
+                }
+
                 // Remove Custom Backend entries of the API
                 deleteCustomBackendByAPIID(apiUuid);
                 deleteAPIRevisions(apiUuid, organization);

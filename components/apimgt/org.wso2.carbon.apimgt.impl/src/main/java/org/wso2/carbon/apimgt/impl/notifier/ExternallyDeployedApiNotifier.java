@@ -20,6 +20,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -94,7 +95,7 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                 String deploymentEnv = deployment.getDeployment();
                 if (gatewayEnvironments.containsKey(deploymentEnv)) {
                     ExternalGatewayDeployer deployer = ServiceReferenceHolder.getInstance().getExternalGatewayDeployer
-                            (gatewayEnvironments.get(deploymentEnv).getProvider());
+                            (gatewayEnvironments.get(deploymentEnv).getGatewayType());
                     if (deployer != null) {
                         try {
                             deleted = deployer.undeployWhenRetire(api, gatewayEnvironments.get(deploymentEnv));
@@ -131,11 +132,12 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                 String deploymentEnv = deployment.getDeployment();
                 if (gatewayEnvironments.containsKey(deploymentEnv)) {
                     ExternalGatewayDeployer deployer = ServiceReferenceHolder.getInstance().getExternalGatewayDeployer
-                            (gatewayEnvironments.get(deploymentEnv).getProvider());
+                            (gatewayEnvironments.get(deploymentEnv).getGatewayType());
                     if (deployer != null) {
                         try {
-                            deleted = deployer.undeploy(apiEvent.getApiName(), apiEvent.getApiVersion(),
-                                    apiEvent.getApiContext(), gatewayEnvironments.get(deploymentEnv));
+                            deleted = deployer.undeploy(apiEvent.getUuid(), apiEvent.getApiName(),
+                                    apiEvent.getApiVersion(), apiEvent.getApiContext(),
+                                    gatewayEnvironments.get(deploymentEnv));
                             if (!deleted) {
                                 throw new NotifierException("Error while deleting API product from Solace broker");
                             }
