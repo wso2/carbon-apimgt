@@ -744,10 +744,10 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         try (Connection connection = GovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.SEARCH_POLICIES)) {
             prepStmt.setString(1, organization);
-            prepStmt.setString(2, "%" + searchCriteria.getOrDefault(
-                    GovernanceConstants.PolicySearchAttributes.NAME, "") + "%");
-            prepStmt.setString(3, "%" + searchCriteria.getOrDefault(
-                    GovernanceConstants.PolicySearchAttributes.STATE, "") + "%");
+            prepStmt.setString(2, searchCriteria.getOrDefault(
+                    GovernanceConstants.PolicySearchAttributes.NAME, ""));
+            prepStmt.setString(3, searchCriteria.getOrDefault(
+                    GovernanceConstants.PolicySearchAttributes.STATE, ""));
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     GovernancePolicy policy = new GovernancePolicy();
@@ -1000,6 +1000,27 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                 .DELETE_GOVERNANCE_POLICY_LABEL_MAPPING_BY_POLICY_ID)) {
             prepStmt.setString(1, policyId);
             prepStmt.executeUpdate();
+        }
+    }
+
+    /**
+     * Delete policy label mappings for a given label
+     *
+     * @param label        label
+     * @param organization organization
+     * @throws GovernanceException If an error occurs while deleting the mappings
+     */
+    @Override
+    public void deleteLabelPolicyMappings(String label, String organization) throws GovernanceException {
+        try (Connection connection = GovernanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
+                     .DELETE_GOVERNANCE_POLICIES_BY_LABEL)) {
+            prepStmt.setString(1, label);
+            prepStmt.setString(2, organization);
+            prepStmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes
+                    .ERROR_WHILE_DELETING_LABEL_POLICY_MAPPINGS, e, label);
         }
     }
 }

@@ -23,7 +23,6 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.springframework.http.HttpHeaders;
 import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
-import org.wso2.carbon.apimgt.governance.api.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
@@ -33,8 +32,8 @@ import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
-import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
-import org.wso2.carbon.apimgt.governance.impl.RulesetManagerImpl;
+import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
+import org.wso2.carbon.apimgt.governance.impl.RulesetManager;
 import org.wso2.carbon.apimgt.governance.rest.api.RulesetsApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetInfoDTO;
@@ -102,7 +101,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
             ruleset.setCreatedBy(username);
 
-            RulesetManager rulesetManager = new RulesetManagerImpl();
+            RulesetManager rulesetManager = new RulesetManager();
             RulesetInfo createdRuleset = rulesetManager.createNewRuleset(ruleset, organization);
 
             createdRulesetDTO = RulesetMappingUtil.fromRulesetInfoToRulesetInfoDTO(createdRuleset);
@@ -166,11 +165,11 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
             ruleset.setUpdatedBy(username);
 
-            RulesetManager rulesetManager = new RulesetManagerImpl();
-            RulesetInfo updatedRuleset = rulesetManager.updateRuleset(rulesetId, ruleset);
+            RulesetManager rulesetManager = new RulesetManager();
+            RulesetInfo updatedRuleset = rulesetManager.updateRuleset(rulesetId, ruleset, organization);
 
             // Re-access policy compliance in the background
-            new ComplianceManagerImpl().handleRulesetChangeEvent(rulesetId, organization);
+            new ComplianceManager().handleRulesetChangeEvent(rulesetId, organization);
 
             return Response.status(Response.Status.OK).entity(RulesetMappingUtil.
                     fromRulesetInfoToRulesetInfoDTO(updatedRuleset)).build();
@@ -192,9 +191,10 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      */
     @Override
     public Response deleteRuleset(String rulesetId, MessageContext messageContext) throws GovernanceException {
-        RulesetManager rulesetManager = new RulesetManagerImpl();
+        RulesetManager rulesetManager = new RulesetManager();
 
-        rulesetManager.deleteRuleset(rulesetId);
+        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+        rulesetManager.deleteRuleset(rulesetId, organization);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 
@@ -208,9 +208,11 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      */
     @Override
     public Response getRulesetById(String rulesetId, MessageContext messageContext) throws GovernanceException {
-        RulesetManager rulesetManager = new RulesetManagerImpl();
+        RulesetManager rulesetManager = new RulesetManager();
 
-        RulesetInfo ruleset = rulesetManager.getRulesetById(rulesetId);
+        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+
+        RulesetInfo ruleset = rulesetManager.getRulesetById(rulesetId, organization);
         RulesetInfoDTO rulesetInfoDTO = RulesetMappingUtil.fromRulesetInfoToRulesetInfoDTO(ruleset);
         return Response.status(Response.Status.OK).entity(rulesetInfoDTO).build();
     }
@@ -225,9 +227,10 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      */
     @Override
     public Response getRulesetContent(String rulesetId, MessageContext messageContext) throws GovernanceException {
-        RulesetManager rulesetManager = new RulesetManagerImpl();
+        RulesetManager rulesetManager = new RulesetManager();
+        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-        RulesetContent rulesetContent = rulesetManager.getRulesetContent(rulesetId);
+        RulesetContent rulesetContent = rulesetManager.getRulesetContent(rulesetId, organization);
 
         String fileName = rulesetContent.getFileName() != null ? rulesetContent.getFileName() : "ruleset.yaml";
         String contentTypeHeader = "application/x-yaml"; // Default content type
@@ -252,8 +255,10 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      */
     @Override
     public Response getRulesetUsage(String rulesetId, MessageContext messageContext) throws GovernanceException {
-        RulesetManager rulesetManager = new RulesetManagerImpl();
-        List<String> policies = rulesetManager.getRulesetUsage(rulesetId);
+        RulesetManager rulesetManager = new RulesetManager();
+        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+
+        List<String> policies = rulesetManager.getRulesetUsage(rulesetId, organization);
         return Response.status(Response.Status.OK).entity(policies).build();
     }
 
@@ -274,7 +279,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query != null ? query : "";
 
-        RulesetManager rulesetManager = new RulesetManagerImpl();
+        RulesetManager rulesetManager = new RulesetManager();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
         RulesetList rulesetList;

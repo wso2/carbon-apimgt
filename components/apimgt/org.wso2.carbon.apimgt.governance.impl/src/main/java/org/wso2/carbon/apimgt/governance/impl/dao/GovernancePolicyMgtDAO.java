@@ -187,6 +187,15 @@ public interface GovernancePolicyMgtDAO {
      * @throws GovernanceException If an error occurs while deleting the policy
      */
     void deletePolicy(String policyId) throws GovernanceException;
+
+    /**
+     * Delete policy label mappings for a given label
+     *
+     * @param label        label
+     * @param organization organization
+     * @throws GovernanceException If an error occurs while deleting the mappings
+     */
+    void deleteLabelPolicyMappings(String label, String organization) throws GovernanceException;
 }
 
 

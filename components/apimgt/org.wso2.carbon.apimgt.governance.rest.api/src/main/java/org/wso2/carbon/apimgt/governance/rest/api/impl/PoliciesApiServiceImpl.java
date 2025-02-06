@@ -21,13 +21,12 @@ package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
-import org.wso2.carbon.apimgt.governance.api.PolicyManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
-import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
-import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
+import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
+import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
 import org.wso2.carbon.apimgt.governance.rest.api.PoliciesApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyListDTO;
@@ -64,7 +63,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         URI createdPolicyURI;
 
         try {
-            PolicyManager policyManager = new PolicyManagerImpl();
+            PolicyManager policyManager = new PolicyManager();
             GovernancePolicy governancePolicy =
                     PolicyMappingUtil.fromDTOtoGovernancePolicy(governancePolicyDTO);
 
@@ -76,7 +75,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
                     governancePolicy);
 
             // Access policy compliance in the background
-            new ComplianceManagerImpl().handlePolicyChangeEvent(governancePolicy.getId(), organization);
+            new ComplianceManager().handlePolicyChangeEvent(governancePolicy.getId(), organization);
 
             createdPolicyDTO = PolicyMappingUtil.
                     fromGovernancePolicyToGovernancePolicyDTO(governancePolicy);
@@ -102,7 +101,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      */
     public Response updateGovernancePolicyById(String policyId, GovernancePolicyDTO
             governancePolicyDTO, MessageContext messageContext) throws GovernanceException {
-        PolicyManager policyManager = new PolicyManagerImpl();
+        PolicyManager policyManager = new PolicyManager();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
         String username = GovernanceAPIUtil.getLoggedInUsername();
 
@@ -118,7 +117,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
                 fromGovernancePolicyToGovernancePolicyDTO(updatedPolicy);
 
         // Re-access policy compliance in the background
-        new ComplianceManagerImpl().handlePolicyChangeEvent(policyId, organization);
+        new ComplianceManager().handlePolicyChangeEvent(policyId, organization);
 
         return Response.status(Response.Status.OK).entity(updatedPolicyDTO).build();
     }
@@ -132,7 +131,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @throws GovernanceException If an error occurs while deleting the policy
      */
     public Response deleteGovernancePolicy(String policyId, MessageContext messageContext) throws GovernanceException {
-        PolicyManager policyManager = new PolicyManagerImpl();
+        PolicyManager policyManager = new PolicyManager();
         policyManager.deletePolicy(policyId);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
@@ -146,7 +145,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
     public Response getGovernancePolicyById(String policyId, MessageContext messageContext) throws GovernanceException {
-        PolicyManager policyManager = new PolicyManagerImpl();
+        PolicyManager policyManager = new PolicyManager();
 
         GovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId);
         GovernancePolicyDTO policyDTO = PolicyMappingUtil.fromGovernancePolicyToGovernancePolicyDTO(policy);
@@ -169,7 +168,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query != null ? query : "";
 
-        PolicyManager policyManager = new PolicyManagerImpl();
+        PolicyManager policyManager = new PolicyManager();
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
 
         GovernancePolicyList policyList;

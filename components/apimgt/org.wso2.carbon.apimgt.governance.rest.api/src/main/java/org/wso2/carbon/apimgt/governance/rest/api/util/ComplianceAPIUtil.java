@@ -18,10 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.util;
 
-import org.wso2.carbon.apimgt.governance.api.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
-import org.wso2.carbon.apimgt.governance.api.PolicyManager;
-import org.wso2.carbon.apimgt.governance.api.RulesetManager;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
@@ -30,9 +27,9 @@ import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
-import org.wso2.carbon.apimgt.governance.impl.ComplianceManagerImpl;
-import org.wso2.carbon.apimgt.governance.impl.PolicyManagerImpl;
-import org.wso2.carbon.apimgt.governance.impl.RulesetManagerImpl;
+import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
+import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
+import org.wso2.carbon.apimgt.governance.impl.RulesetManager;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceDetailsDTO;
@@ -103,12 +100,12 @@ public class ComplianceAPIUtil {
         }
 
         // Get all policies evaluated for the artifact
-        List<String> evaluatedPolicies = new ComplianceManagerImpl().getEvaluatedPoliciesForArtifact(artifactRefId,
+        List<String> evaluatedPolicies = new ComplianceManager().getEvaluatedPoliciesForArtifact(artifactRefId,
                 artifactType, organization);
 
         // If the artifact is not evaluated yet, set the compliance status to not applicable/pending and return
         if (evaluatedPolicies.isEmpty()) {
-            boolean isEvaluationPending = new ComplianceManagerImpl()
+            boolean isEvaluationPending = new ComplianceManager()
                     .isEvaluationPendingForArtifact(artifactRefId, artifactType, organization);
             if (isEvaluationPending) {
                 artifactComplianceDetailsDTO.setStatus(ArtifactComplianceDetailsDTO.StatusEnum.PENDING);
@@ -159,8 +156,8 @@ public class ComplianceAPIUtil {
                                                                                boolean isPolicyEvaluated)
     throws GovernanceException {
 
-        PolicyManager policyManager = new PolicyManagerImpl();
-        ComplianceManager complianceManager = new ComplianceManagerImpl();
+        PolicyManager policyManager = new PolicyManager();
+        ComplianceManager complianceManager = new ComplianceManager();
 
         PolicyAdherenceWithRulesetsDTO policyAdherenceWithRulesetsDTO = new PolicyAdherenceWithRulesetsDTO();
         policyAdherenceWithRulesetsDTO.setId(policyId);
@@ -221,7 +218,7 @@ public class ComplianceAPIUtil {
             artifactRefId, ArtifactType artifactType, String organization, boolean isRulesetEvaluated)
             throws GovernanceException {
 
-        ComplianceManager complianceManager = new ComplianceManagerImpl();
+        ComplianceManager complianceManager = new ComplianceManager();
 
         RulesetValidationResultWithoutRulesDTO rulesetDTO = new RulesetValidationResultWithoutRulesDTO();
         rulesetDTO.setId(ruleset.getId());
@@ -305,7 +302,7 @@ public class ComplianceAPIUtil {
                                                                            String organization)
             throws GovernanceException {
 
-        ComplianceManager complianceManager = new ComplianceManagerImpl();
+        ComplianceManager complianceManager = new ComplianceManager();
 
         // Create a new DTO to store compliance status for the current API
         ArtifactComplianceStatusDTO complianceStatus = new ArtifactComplianceStatusDTO();
@@ -334,7 +331,7 @@ public class ComplianceAPIUtil {
 
         // If the artifact is not evaluated yet, set the compliance status to not applicable/pending and return
         if (evaluatedPolicies.isEmpty()) {
-            boolean isEvaluationPending = new ComplianceManagerImpl()
+            boolean isEvaluationPending = new ComplianceManager()
                     .isEvaluationPendingForArtifact(artifactRefId, artifactType, organization);
             if (isEvaluationPending) {
                 complianceStatus.setStatus(ArtifactComplianceStatusDTO.StatusEnum.PENDING);
@@ -448,10 +445,10 @@ public class ComplianceAPIUtil {
                                                                            String rulesetId, String organization)
             throws GovernanceException {
 
-        ComplianceManager complianceManager = new ComplianceManagerImpl();
-        RulesetManager rulesetManager = new RulesetManagerImpl();
+        ComplianceManager complianceManager = new ComplianceManager();
+        RulesetManager rulesetManager = new RulesetManager();
 
-        RulesetInfo rulesetInfo = rulesetManager.getRulesetById(rulesetId);
+        RulesetInfo rulesetInfo = rulesetManager.getRulesetById(rulesetId, organization);
 
         // If the ruleset is not found, throw an exception
         if (rulesetInfo == null) {
@@ -475,7 +472,7 @@ public class ComplianceAPIUtil {
         List<RuleValidationResultDTO> followedRules = new ArrayList<>();
 
         // Fetch all rules within the current ruleset
-        List<Rule> allRules = rulesetManager.getRules(rulesetId);
+        List<Rule> allRules = rulesetManager.getRulesByRulesetId(rulesetId, organization);
         Map<String, Rule> rulesMap = allRules.stream()
                 .collect(Collectors.toMap(Rule::getName, rule -> rule));
 
@@ -548,7 +545,7 @@ public class ComplianceAPIUtil {
 
         // Get total number of APIs that are compliant and non-compliant
         Map<ArtifactComplianceState, List<String>> compliancyMap =
-                new ComplianceManagerImpl().getComplianceStateOfEvaluatedArtifacts(
+                new ComplianceManager().getComplianceStateOfEvaluatedArtifacts(
                         artifactType, organization);
 
         int compliantArtifactCount = compliancyMap.get(ArtifactComplianceState.COMPLIANT).size();

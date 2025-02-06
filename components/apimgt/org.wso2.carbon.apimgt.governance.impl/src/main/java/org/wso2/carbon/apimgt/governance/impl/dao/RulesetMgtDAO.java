@@ -37,30 +37,33 @@ public interface RulesetMgtDAO {
      * Create a new Governance Ruleset
      *
      * @param ruleset      Ruleset object
+     * @param rules        List of rules
      * @param organization Organization
      * @return RulesetInfo Created object
      * @throws GovernanceException If an error occurs while creating the ruleset
      */
-    RulesetInfo createRuleset(Ruleset ruleset, String organization) throws GovernanceException;
+    RulesetInfo createRuleset(Ruleset ruleset, List<Rule> rules, String organization) throws GovernanceException;
 
     /**
      * Update a Governance Ruleset
      *
      * @param rulesetId Ruleset ID
      * @param ruleset   Ruleset object
+     * @param rules     List of rules
      * @return RulesetInfo Updated object
      * @throws GovernanceException If an error occurs while updating the ruleset
      */
-    RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset)
+    RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset, List<Rule> rules, String organization)
             throws GovernanceException;
 
     /**
      * Delete a Governance Ruleset
      *
-     * @param rulesetId Ruleset ID
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
      * @throws GovernanceException If an error occurs while deleting the ruleset
      */
-    void deleteRuleset(String rulesetId) throws GovernanceException;
+    void deleteRuleset(String rulesetId, String organization) throws GovernanceException;
 
     /**
      * Get all the Governance Rulesets of the organization
@@ -84,11 +87,12 @@ public interface RulesetMgtDAO {
     /**
      * Get a Governance Ruleset by ID
      *
-     * @param rulesetId Ruleset ID
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
      * @return RulesetInfo object
      * @throws GovernanceException If an error occurs while getting the ruleset
      */
-    RulesetInfo getRulesetById(String rulesetId) throws GovernanceException;
+    RulesetInfo getRulesetById(String rulesetId, String organization) throws GovernanceException;
 
     /**
      * Search for Governance Rulesets based on the search criteria
@@ -104,25 +108,28 @@ public interface RulesetMgtDAO {
     /**
      * Get the content of a Governance Ruleset
      *
-     * @param rulesetId Ruleset ID
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
      * @return Content of the ruleset
      * @throws GovernanceException If an error occurs while getting the ruleset content
      */
-    RulesetContent getRulesetContent(String rulesetId) throws GovernanceException;
+    RulesetContent getRulesetContent(String rulesetId, String organization) throws GovernanceException;
 
     /**
      * Get the associated policies for a Ruleset
      *
-     * @param rulesetId Ruleset ID
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
      * @return List of associated policies
      */
-    List<String> getAssociatedPoliciesForRuleset(String rulesetId) throws GovernanceException;
+    List<String> getAssociatedPoliciesForRuleset(String rulesetId, String organization) throws GovernanceException;
 
     /**
      * Get the rules of a Ruleset
      *
-     * @param rulesetId Ruleset ID
+     * @param rulesetId    Ruleset ID
+     * @param organization Organization
      * @return List of rules
      */
-    List<Rule> getRulesByRulesetId(String rulesetId) throws GovernanceException;
+    List<Rule> getRulesByRulesetId(String rulesetId, String organization) throws GovernanceException;
 }

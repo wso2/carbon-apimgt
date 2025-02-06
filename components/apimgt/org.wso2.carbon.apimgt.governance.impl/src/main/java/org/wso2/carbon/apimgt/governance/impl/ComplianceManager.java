@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.governance.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.governance.api.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
@@ -61,15 +60,15 @@ import java.util.stream.Collectors;
 /**
  * This class represents the Compliance Manager, which is responsible for managing compliance related operations
  */
-public class ComplianceManagerImpl implements ComplianceManager {
-    private static final Log log = LogFactory.getLog(ComplianceManagerImpl.class);
+public class ComplianceManager {
+    private static final Log log = LogFactory.getLog(ComplianceManager.class);
 
     private final ComplianceMgtDAO complianceMgtDAO;
     private final GovernancePolicyMgtDAO policyMgtDAO;
 
     private final RulesetMgtDAO rulesetMgtDAO;
 
-    public ComplianceManagerImpl() {
+    public ComplianceManager() {
         complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
         policyMgtDAO = GovernancePolicyMgtDAOImpl.getInstance();
         rulesetMgtDAO = RulesetMgtDAOImpl.getInstance();
@@ -82,7 +81,6 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @param policyId     Policy ID
      * @param organization Organization
      */
-    @Override
     public void handlePolicyChangeEvent(String policyId, String organization) throws GovernanceException {
 
         // Get the policy and its labels and associated governable states
@@ -195,9 +193,9 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @param rulesetId    Ruleset ID
      * @param organization Organization
      */
-    @Override
+
     public void handleRulesetChangeEvent(String rulesetId, String organization) throws GovernanceException {
-        List<String> policies = rulesetMgtDAO.getAssociatedPoliciesForRuleset(rulesetId);
+        List<String> policies = rulesetMgtDAO.getAssociatedPoliciesForRuleset(rulesetId, organization);
 
         for (String policyId : policies) {
             handlePolicyChangeEvent(policyId, organization);
@@ -213,7 +211,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @param organization  Organization
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
-    @Override
+
     public void handleComplianceEvalAsync(String artifactRefId, ArtifactType artifactType,
                                           List<String> govPolicies,
                                           String organization) throws GovernanceException {
@@ -234,7 +232,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @return List of Rule Violations
      * @throws GovernanceException If an error occurs while getting the rule violations
      */
-    @Override
+
     public List<RuleViolation> getRuleViolations(String artifactRefId, ArtifactType artifactType,
                                                  String rulesetId, String organization) throws GovernanceException {
         return complianceMgtDAO.getRuleViolations(artifactRefId, artifactType, rulesetId, organization);
@@ -249,7 +247,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @return Map of Rule Violations based on severity
      * @throws GovernanceException If an error occurs while getting the rule violations
      */
-    @Override
+
     public Map<RuleSeverity, List<RuleViolation>> getSeverityBasedRuleViolationsForArtifact(String artifactRefId,
                                                                                             ArtifactType artifactType,
                                                                                             String organization)
@@ -279,7 +277,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @return List of evaluated policy IDs
      * @throws GovernanceException If an error occurs while getting the list of evaluated policies
      */
-    @Override
+
     public List<String> getEvaluatedPoliciesForArtifact(String artifactRefId, ArtifactType
             artifactType, String organization)
             throws GovernanceException {
@@ -296,7 +294,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @return List of evaluated rulesets IDs
      * @throws GovernanceException If an error occurs while getting the list of evaluated rulesets
      */
-    @Override
+
     public List<String> getEvaluatedRulesetsForArtifactAndPolicy(String artifactRefId, ArtifactType artifactType,
                                                                  List<RulesetInfo> policyRulesets, String organization)
             throws GovernanceException {
@@ -320,7 +318,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @return Map of compliant and non-compliant artifacts
      * @throws GovernanceException If an error occurs while getting the compliant and non-compliant artifacts
      */
-    @Override
+
     public Map<ArtifactComplianceState, List<String>> getComplianceStateOfEvaluatedArtifacts(
             ArtifactType artifactType, String organization) throws GovernanceException {
         List<String> allComplianceEvaluatedArtifacts =
@@ -349,7 +347,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @return Map of policies followed and violated
      * @throws GovernanceException If an error occurs while getting the policy adherence
      */
-    @Override
+
     public Map<PolicyAdherenceSate, List<String>> getAdherenceStateofEvaluatedPolicies(String organization)
             throws GovernanceException {
         List<String> allComplianceEvaluatedPolicies = complianceMgtDAO
@@ -399,7 +397,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @return Map of artifacts evaluated by policy
      * @throws GovernanceException If an error occurs while getting the artifacts evaluated by policy
      */
-    @Override
+
     public Map<ArtifactComplianceState, List<ArtifactInfo>> getArtifactsComplianceForPolicy
     (String policyId, String organization, boolean resolveArtifactNameAndVersion) throws GovernanceException {
 
@@ -442,7 +440,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @return Whether the ruleset is evaluated for the artifact
      * @throws GovernanceException If an error occurs while checking whether the ruleset is evaluated for the artifact
      */
-    @Override
+
     public boolean isRulesetEvaluatedForArtifact(String artifactRefId, ArtifactType artifactType,
                                                  String rulesetId, String organization)
             throws GovernanceException {
@@ -464,7 +462,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @return ArtifactComplianceInfo object
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
-    @Override
+
     public ArtifactComplianceInfo handleComplianceEvalSync(String artifactRefId,
                                                            String revisionNo, ArtifactType artifactType,
                                                            List<String> govPolicies,
@@ -575,7 +573,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @return ArtifactComplianceDryRunInfo object
      * @throws GovernanceException If an error occurs while handling the API compliance evaluation
      */
-    @Override
+
     public ArtifactComplianceDryRunInfo handleComplianceEvalDryRun(ExtendedArtifactType artifactType,
                                                                    List<String> govPolicies, Map<RuleType, String>
                                                                            artifactProjectContent,
@@ -605,7 +603,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
 
             // Validate the artifact against each ruleset
             for (Ruleset ruleset : rulesets) {
-                RulesetInfo rulesetInfo = rulesetMgtDAO.getRulesetById(ruleset.getId());
+                RulesetInfo rulesetInfo = rulesetMgtDAO.getRulesetById(ruleset.getId(), organization);
                 ExtendedArtifactType extendedArtifactType = ruleset.getArtifactType();
 
                 // Check if ruleset's artifact type matches with the artifact's type
@@ -699,7 +697,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @param organization Organization
      * @throws GovernanceException If an error occurs while deleting the governance data
      */
-    @Override
+
     public void deleteArtifact(String artifactRefId, ArtifactType artifactType, String organization)
             throws GovernanceException {
         complianceMgtDAO.deleteArtifact(artifactRefId, artifactType, organization);
@@ -712,7 +710,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @param violatedRulesets  List of violated rulesets
      * @return List of violated policies
      */
-    @Override
+
     public List<String> identifyViolatedPolicies(List<String> evaluatedPolicies, List<String> violatedRulesets)
             throws GovernanceException {
         Set<String> violatedPolicies = new HashSet<>();
@@ -736,7 +734,7 @@ public class ComplianceManagerImpl implements ComplianceManager {
      * @throws GovernanceException If an error occurs while checking whether the evaluation
      *                             is pending for the artifact
      */
-    @Override
+
     public boolean isEvaluationPendingForArtifact(String artifactRefId, ArtifactType artifactType,
                                                   String organization) throws GovernanceException {
         String reqId = complianceMgtDAO.getPendingEvalRequest(artifactRefId, artifactType, organization);

@@ -56,7 +56,7 @@ public class ComplianceEvaluationScheduler {
 
     private static final Log log = LogFactory.getLog(ComplianceEvaluationScheduler.class);
     private static final int THREAD_POOL_SIZE = 10;
-    private static final int QUEUE_SIZE = 255;
+    private static final int QUEUE_SIZE = 20;
     private static final int CHECK_INTERVAL_MINUTES = 2;
     private static ScheduledExecutorService scheduler;
     private static ThreadPoolExecutor processorPool;
@@ -100,7 +100,7 @@ public class ComplianceEvaluationScheduler {
         }
 
         // TODO: Change long lasting processing requests to pending
-        List<ComplianceEvaluationRequest> pendingRequests = fetchPendingRequests();
+        List<ComplianceEvaluationRequest> pendingRequests = fetchPendingRequests(QUEUE_SIZE);
 
         if (pendingRequests == null || pendingRequests.isEmpty()) {
             if (log.isDebugEnabled()) {
@@ -153,11 +153,18 @@ public class ComplianceEvaluationScheduler {
     /**
      * Fetch pending requests from the database.
      *
+     * @param limit Maximum number of requests to fetch.
      * @return List of pending requests.
      */
-    private static List<ComplianceEvaluationRequest> fetchPendingRequests() {
+    private static List<ComplianceEvaluationRequest> fetchPendingRequests(Integer limit) {
         try {
-            return complianceMgtDAO.getPendingComplianceEvalRequests();
+            List<ComplianceEvaluationRequest> reqs = complianceMgtDAO
+                    .getPendingComplianceEvalRequests();
+            if (reqs.size() > limit) {
+                return reqs.subList(0, limit);
+            } else {
+                return reqs;
+            }
         } catch (GovernanceException e) {
             log.error("Error fetching pending requests: " + e.getMessage(), e);
         }
