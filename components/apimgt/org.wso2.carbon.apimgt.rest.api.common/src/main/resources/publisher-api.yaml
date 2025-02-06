@@ -1294,6 +1294,7 @@ paths:
         - $ref: '#/components/parameters/requestedTenant'
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/isAiApi'
+        - $ref: '#/components/parameters/organizationID'
       responses:
         200:
           description: |
@@ -3976,6 +3977,34 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/resource-paths"'
       operationId: getAPIResourcePaths
+
+  /organizations:
+    get:
+      tags:
+        - Organizations
+      summary: Get all registered Organizations
+      description: |
+        Get all Registered Organizations
+      responses:
+        200:
+          description: |
+            OK.
+            Organizations returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationList'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:api_import_export
+            - apim:api_product_import_export
+            - apim:publisher_organization_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/organizations"'
 
   /apis/{apiId}/auditapi:
     get:
@@ -10099,6 +10128,13 @@ components:
           x-otherScopes:
             - apim:api_publish
             - apim:api_manage
+        organizationPolicies:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationPolicies'
+          x-otherScopes:
+            - apim:api_publish
+            - apim:api_manage
         apiThrottlingPolicy:
           type: string
           description: The API level throttling policy selected for the particular
@@ -10155,6 +10191,12 @@ components:
             - apim:api_manage
         visibleTenants:
           type: array
+          example: []
+          items:
+            type: string
+        visibleOrganizations:
+          type: array
+          description: The organizations that are able to access the API in Developer Portal
           example: []
           items:
             type: string
@@ -12220,6 +12262,51 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Endpoint'
+    Organization:
+      title: Organization
+      required:
+        - organizationId
+      type: object
+      properties:
+        organizationId:
+          type: string
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+          readOnly: true
+          description: |
+            UUID of the organization.
+        externalOrganizationId:
+          type: string
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+          description: |
+            External id of the organization.
+        parentOrganizationId:
+          type: string
+          readOnly: true
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+          description: |
+            UUID of the parent organization if there is any.
+        displayName:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: My Organization
+        description:
+          maxLength: 1023
+          type: string
+          example: My Organization Description
+    OrganizationList:
+      title: Organization List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Organizationa returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Organization'
     Scope:
       title: Scope
       required:
@@ -12390,6 +12477,23 @@ components:
           example: ""
         operationPolicies:
           $ref: '#/components/schemas/APIOperationPolicies'
+    OrganizationPolicies:
+      title: Organization based Subscription Policies
+      type: object
+      required:
+        - organizationID
+      properties:
+        organizationID:
+          type: string
+          example: "36c87e00-57f0-4000-9f97-b379acc4e577"
+        organizationName:
+          type: string
+          example: "wso2"
+        policies:
+          type: array
+          example: ["Silver", "Gold", "Unlimited"]
+          items:
+            type: string
     ScopeList:
       title: Scope List
       type: object
@@ -13212,6 +13316,11 @@ components:
         IsJWTEnabledForLoginTokens:
           type: boolean
           default: false
+        orgAccessControlEnabled:
+          type: boolean
+          description: |
+            Is Organization-based access control configuration enabled
+          example: true
         allowSubscriptionValidationDisabling:
           type: boolean
           description: |
@@ -14203,6 +14312,13 @@ components:
       schema:
         type: boolean
         default: false
+    organizationID:
+      name: organizationID
+      in: query
+      description: |
+        Indicates the organization ID
+      schema:
+        type: string
     offset:
       name: offset
       in: query
@@ -14388,3 +14504,4 @@ components:
             apim:subscription_approval_view: Approve subscription creation requests
             apim:subscription_approval_manage: Approve subscription update requests
             apim:llm_provider_read: Read LLM Providers
+            apim:publisher_organization_read: Read organization

@@ -100,6 +100,7 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_CONTEXT(900346, "Invalid context provided", 400, "Invalid context provided for API: %s:%s"),
     INVALID_ENDPOINT_URL(900346, "Endpoint URL(s) is(are) not valid", 400, "Endpoint URL(s) is(are) not valid"),
     USER_ROLES_CANNOT_BE_NULL(900610, "Access control roles cannot be empty", 400, "Access control roles cannot be empty when visibility is restricted"),
+    ORGS_CANNOT_BE_NULL(900610, "Access control organizatoins cannot be empty", 400, "Access control organizations cannot be empty when visibility is restricted"),
     API_REVISION_NOT_FOUND(900347, "API Revision Not Found", 404, "Requested API Revision with id %s not found"),
     EXISTING_API_REVISION_DEPLOYMENT_FOUND(900348, "Can not delete API Revision ", 400, "Couldn't delete API revision since API revision is currently deployed to a gateway. " +
             "You need to undeploy the API Revision from the gateway before attempting deleting API Revision: %s "),
@@ -428,6 +429,10 @@ public enum ExceptionCodes implements ErrorHandler {
 
     // Tenant related
     INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found"),
+    
+    // Organization related
+    INVALID_ORGANINATION(901301,"Organization Not Found", 404, "Organization Not Found"),
+    MISSING_ORGANINATION(901302,"Organization Not Found", 403, "User does not belong to any organization"),
     // Key Manager Related
     INVALID_KEY_MANAGER_TYPE(901400, "Key Manager Type not configured", 400, "Key Manager Type not configured"),
     REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missing",400,"Missing " +

@@ -59,6 +59,8 @@ public class Tier implements Serializable, Comparable<Tier>{
         this.monetizationAttributes = monetizationAttributes;
     }
 
+    public Tier() {}
+
     public Tier(String name) {
         this.name = name;
     }

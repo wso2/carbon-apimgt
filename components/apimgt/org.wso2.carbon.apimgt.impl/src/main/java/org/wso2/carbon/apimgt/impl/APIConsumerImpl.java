@@ -76,6 +76,8 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
+import org.wso2.carbon.apimgt.api.model.OrganizationTiers;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -1664,6 +1666,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (StringUtils.isBlank(application.getCallbackUrl())) {
             application.setCallbackUrl(null);
         }
+        if (StringUtils.isEmpty(application.getSharedOrganization())) {
+            application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD);
+        }
         int applicationId = apiMgtDAO.addApplication(application, userId, organization);
         Application createdApplication = apiMgtDAO.getApplicationById(applicationId);
 
@@ -1894,6 +1899,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             application.setApplicationAttributes(null);
         }
         validateApplicationPolicy(application, existingApp.getOrganization());
+        if (StringUtils.isEmpty(application.getSharedOrganization())) {
+            application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD);
+        }
         apiMgtDAO.updateApplication(application);
         Application updatedApplication = apiMgtDAO.getApplicationById(application.getId());
         if (log.isDebugEnabled()) {
@@ -2786,19 +2794,20 @@ APIConstants.AuditLogConstants.DELETED, this.username);
      * @param sortColumn   The sort column.
      * @param sortOrder    The sort order.
      * @param organization Identifier of an Organization
+     * @param sharedOrganization 
      * @return Application[] The Applications.
      * @throws APIManagementException
      */
     @Override
     public Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start, int offset
-            , String search, String sortColumn, String sortOrder, String organization)
+            , String search, String sortColumn, String sortOrder, String organization, String sharedOrganization)
             throws APIManagementException {
 
         if (APIUtil.isOnPremResolver()) {
             organization = tenantDomain;
         }
         return apiMgtDAO.getApplicationsWithPagination(subscriber, groupingId, start, offset,
-                search, sortColumn, sortOrder, organization);
+                search, sortColumn, sortOrder, organization, sharedOrganization);
     }
 
     /**
@@ -3838,17 +3847,42 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
     @Override
     public Map<String, Object> searchPaginatedAPIs(String searchQuery, String organization, int start, int end)
-            throws APIManagementException {
-
-        Map<String, Object> result = new HashMap<String, Object>();
-        if (log.isDebugEnabled()) {
-            log.debug("Original search query received : " + searchQuery);
-        }
+                                                 throws APIManagementException {
+    	
         Organization org = new Organization(organization);
         String userName = (userNameWithoutChange != null) ? userNameWithoutChange : username;
         String[] roles = APIUtil.getListOfRoles(userName);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
         UserContext userCtx = new UserContext(userNameWithoutChange, org, properties, roles);
+
+        return searchPaginatedAPIs(searchQuery, start, end, org, userCtx, null);
+    }
+    
+    @Override
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, OrganizationInfo organizationInfo, int start, int end,
+                                                   String sortBy, String sortOrder) throws APIManagementException {
+        Organization org = new Organization(organizationInfo.getSuperOrganization());
+        String userName = (userNameWithoutChange != null) ? userNameWithoutChange : username;
+        String[] roles = APIUtil.getListOfRoles(userName);
+        Map<String, Object> properties = APIUtil.getUserProperties(userName);
+        UserContext userCtx = new UserContext(userNameWithoutChange,
+                new Organization(organizationInfo.getOrganizationId()), properties, roles);
+
+        return searchPaginatedAPIs(searchQuery, start, end, org, userCtx, organizationInfo);
+    }
+
+	private Map<String, Object> searchPaginatedAPIs(String searchQuery, int start, int end, Organization org,
+			UserContext userCtx, OrganizationInfo orgInfo) throws APIManagementException {
+		Map<String, Object> result = new HashMap<String, Object>();
+        if (log.isDebugEnabled()) {
+            log.debug("Original search query received : " + searchQuery);
+        }
+        String organizationID = null;
+        if (orgInfo != null && !StringUtils.isEmpty(orgInfo.getOrganizationId())) {
+            organizationID = APIUtil.getOrganizationIdFromExternalReference(orgInfo.getOrganizationId(),
+                    orgInfo.getName(), tenantDomain);
+        }
+
         try {
             DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery,
                     start, end, userCtx);
@@ -3861,6 +3895,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 List<Object> apiList = new ArrayList<>();
                 for (DevPortalAPIInfo devPortalAPIInfo : list) {
                     API mappedAPI = APIMapper.INSTANCE.toApi(devPortalAPIInfo);
+                    APIUtil.updateAvailableTiersByOrganization(devPortalAPIInfo, organizationID);
                     try {
                         mappedAPI.setRating(APIUtil.getAverageRating(mappedAPI.getUuid()));
                         Set<String> tierNameSet = devPortalAPIInfo.getAvailableTierNames();
@@ -3894,7 +3929,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             throw new APIManagementException("Error while searching the api ", e);
         }
         return result;
-    }
+}
 
     @Override
     public ApiTypeWrapper getAPIorAPIProductByUUID(String uuid, String organization) throws APIManagementException {
@@ -4006,22 +4041,37 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         int tenantId = APIUtil.getInternalIdFromTenantDomainOrOrganization(organization);
         Set<Tier> tierNames = api.getAvailableTiers();
         Map<String, Tier> definedTiers = APIUtil.getTiers(tenantId);
+        Set<String> deniedTiers = getDeniedTiers(tenantId);
+        Set<Tier> availableTiers = getAvailableTiers(tierNames, deniedTiers, definedTiers);
+        api.removeAllTiers();
+        api.addAvailableTiers(availableTiers);
+
+        if (APIUtil.isOrganizationAccessControlEnabled() && api.getAvailableTiersForOrganizations() != null) {
+            Set<OrganizationTiers> organizationTiersSet = api.getAvailableTiersForOrganizations();
+            for (OrganizationTiers organizationTiers : organizationTiersSet) {
+                Set<Tier> tierNamesForOrganization = organizationTiers.getTiers();
+                Set<Tier> availableTiersForOrganization = getAvailableTiers(tierNamesForOrganization, deniedTiers,
+                        definedTiers);
+                organizationTiers.removeAllTiers();
+                organizationTiers.setTiers(availableTiersForOrganization);
+            }
+        }
+        return api;
+    }
+
+    private Set<Tier> getAvailableTiers(Set<Tier> tierNames, Set<String> deniedTiers, Map<String, Tier> definedTiers) {
 
         Set<Tier> availableTiers = new HashSet<Tier>();
-        Set<String> deniedTiers = getDeniedTiers(tenantId);
-
         for (Tier tierName : tierNames) {
             Tier definedTier = definedTiers.get(tierName.getName());
             if (definedTier != null && (!deniedTiers.contains(definedTier.getName()))) {
                 availableTiers.add(definedTier);
             } else {
-                log.warn("Unknown tier: " + tierName + " found on API: ");
+                log.warn("Unknown tier: " + tierName + " found");
             }
         }
         availableTiers.removeIf(tier -> deniedTiers.contains(tier.getName()));
-        api.removeAllTiers();
-        api.addAvailableTiers(availableTiers);
-        return api;
+        return  availableTiers;
     }
 
     private APIProduct addTiersToAPI(APIProduct apiProduct, String organization) throws APIManagementException {
@@ -4189,6 +4239,30 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public Map<String, Object> searchPaginatedContent(String searchQuery, String organization, int start, int end)
             throws APIManagementException {
 
+        String userame = (userNameWithoutChange != null) ? userNameWithoutChange : username;
+        Organization org = new Organization(organization);
+        Map<String, Object> properties = APIUtil.getUserProperties(userame);
+        String[] roles = APIUtil.getFilteredUserRoles(userame);
+        UserContext ctx = new UserContext(userame, org, properties, roles);
+        return  searchPaginatedContent(org, searchQuery, start, end, ctx);
+    }
+
+    @Override
+    public Map<String, Object> searchPaginatedContent(String searchQuery, OrganizationInfo organizationInfo,
+                                                      int start, int end) throws APIManagementException {
+
+        String userName = (userNameWithoutChange != null) ? userNameWithoutChange : username;
+        Organization org = new Organization(organizationInfo.getSuperOrganization());
+        Map<String, Object> properties = APIUtil.getUserProperties(userName);
+        String[] roles = APIUtil.getFilteredUserRoles(userName);
+
+        UserContext ctx = new UserContext(userName, new Organization(organizationInfo.getOrganizationId()),
+                properties, roles);
+        return  searchPaginatedContent(org, searchQuery, start, end, ctx);
+    }
+
+    private Map<String, Object> searchPaginatedContent(Organization org, String searchQuery, int start, int end,
+                                                       UserContext ctx) throws APIManagementException {
         ArrayList<Object> compoundResult = new ArrayList<Object>();
         Map<Documentation, API> docMap = new HashMap<Documentation, API>();
         Map<String, Object> result = new HashMap<String, Object>();
@@ -4196,13 +4270,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         SortedSet<APIProduct> apiProductSet = new TreeSet<APIProduct>(new APIProductNameComparator());
         List<APIDefinitionContentSearchResult> defSearchList = new ArrayList<>();
         int totalLength = 0;
-
-        String userame = (userNameWithoutChange != null) ? userNameWithoutChange : username;
-        Organization org = new Organization(organization);
-        Map<String, Object> properties = APIUtil.getUserProperties(userame);
-        String[] roles = APIUtil.getFilteredUserRoles(userame);
-        ;
-        UserContext ctx = new UserContext(userame, org, properties, roles);
 
         try {
             DevPortalContentSearchResult sResults = apiPersistenceInstance.searchContentForDevPortal(org, searchQuery,

@@ -2031,7 +2031,7 @@
 
         <carbon.commons.version>4.9.11</carbon.commons.version>
 
-        <carbon.registry.version>4.8.36</carbon.registry.version>
+        <carbon.registry.version>4.8.40</carbon.registry.version>
         <carbon.mediation.version>4.7.228</carbon.mediation.version>
 
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
@@ -2083,7 +2083,7 @@
         <!-- P2 Plugin Version -->
         <carbon.p2.plugin.version>1.5.3</carbon.p2.plugin.version>
 
-        <maven-bundle-plugin.version>3.2.0</maven-bundle-plugin.version>
+        <maven-bundle-plugin.version>3.3.0</maven-bundle-plugin.version>
         <build-helper-maven-plugin.version>1.9.1</build-helper-maven-plugin.version>
         <axis2-java2wsdl-maven-plugin.version>1.6.3</axis2-java2wsdl-maven-plugin.version>
 

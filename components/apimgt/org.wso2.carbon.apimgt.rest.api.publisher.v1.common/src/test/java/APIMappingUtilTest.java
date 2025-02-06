@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationServiceImpl;
+import org.wso2.carbon.apimgt.impl.dto.OrgAccessControl;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -74,6 +75,7 @@ public class APIMappingUtilTest {
         apidto.setOperations(operationList);
         apidto.setLifeCycleStatus(APIConstants.CREATED);
         config = Mockito.mock(APIManagerConfiguration.class);
+        OrgAccessControl orgAccessControl = Mockito.mock(OrgAccessControl.class);
         APIManagerConfigurationService apiManagerConfigurationService = new APIManagerConfigurationServiceImpl(config);
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(apiManagerConfigurationService);
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
@@ -84,6 +86,8 @@ public class APIMappingUtilTest {
                 .thenReturn(ALLOW_METHOD);
         Mockito.when(config.getFirstProperty(APIConstants.CORS_CONFIGURATION_ACCESS_CTL_ALLOW_ORIGIN))
                 .thenReturn(ALLOW_ORIGIN);
+        Mockito.when(config.getOrgAccessControl()).thenReturn(orgAccessControl);
+        Mockito.when(orgAccessControl.isEnabled()).thenReturn(false);
     }
 
     @Test

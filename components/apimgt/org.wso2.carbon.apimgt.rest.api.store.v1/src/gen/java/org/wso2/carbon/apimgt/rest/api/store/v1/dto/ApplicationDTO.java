@@ -73,6 +73,38 @@ return null;
     private String createdTime = null;
     private String updatedTime = null;
 
+    @XmlType(name="VisibilityEnum")
+    @XmlEnum(String.class)
+    public enum VisibilityEnum {
+        PRIVATE("PRIVATE"),
+        SHARED_WITH_ORG("SHARED_WITH_ORG");
+        private String value;
+
+        VisibilityEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static VisibilityEnum fromValue(String v) {
+            for (VisibilityEnum b : VisibilityEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private VisibilityEnum visibility = null;
+
   /**
    **/
   public ApplicationDTO applicationId(String applicationId) {
@@ -334,6 +366,23 @@ return null;
     this.updatedTime = updatedTime;
   }
 
+  /**
+   **/
+  public ApplicationDTO visibility(VisibilityEnum visibility) {
+    this.visibility = visibility;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("visibility")
+  public VisibilityEnum getVisibility() {
+    return visibility;
+  }
+  public void setVisibility(VisibilityEnum visibility) {
+    this.visibility = visibility;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -358,12 +407,13 @@ return null;
         Objects.equals(owner, application.owner) &&
         Objects.equals(hashEnabled, application.hashEnabled) &&
         Objects.equals(createdTime, application.createdTime) &&
-        Objects.equals(updatedTime, application.updatedTime);
+        Objects.equals(updatedTime, application.updatedTime) &&
+        Objects.equals(visibility, application.visibility);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(applicationId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner, hashEnabled, createdTime, updatedTime);
+    return Objects.hash(applicationId, name, throttlingPolicy, description, tokenType, status, groups, subscriptionCount, keys, attributes, subscriptionScopes, owner, hashEnabled, createdTime, updatedTime, visibility);
   }
 
   @Override
@@ -386,6 +436,7 @@ return null;
     sb.append("    hashEnabled: ").append(toIndentedString(hashEnabled)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
+    sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("}");
     return sb.toString();
   }

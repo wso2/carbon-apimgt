@@ -221,6 +221,7 @@ public final class APIConstants {
     public static final String VISIBILITY = "visibility";
 
     public static final String API_RESTRICTED_VISIBILITY = "restricted";
+    public static final String API_RESTRICTED_BY_ORG = "restricted_by_org";
 
     public static final String API_PRIVATE_VISIBILITY = "private";
 
@@ -306,6 +307,7 @@ public final class APIConstants {
     public static final String API_OVERVIEW_THUMBNAIL_URL = "overview_thumbnail";
     public static final String API_OVERVIEW_STATUS = "overview_status";
     public static final String API_OVERVIEW_TIER = "overview_tier";
+    public static final String API_OVERVIEW_ORGANIZATION_TIERS = "overview_organizationTiers";
     public static final String API_OVERVIEW_SUB_POLICY = "overview_subPolicy";
     public static final String API_OVERVIEW_API_POLICY = "overview_apiPolicy";
     public static final String API_OVERVIEW_IS_LATEST = "overview_isLatest";
@@ -845,6 +847,7 @@ public final class APIConstants {
             "internal_application_mgt_delete", "internal_application_mgt_update", "internal_application_mgt_view",
             "internal_user_mgt_list"};
     public static final String KEY_MANAGER_CLIENT_APPLICATION_PREFIX = "wso2_apim_km_";
+    public static final String DEFAULT_APP_SHARING_KEYWORD = "private";
 
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";
@@ -2022,6 +2025,7 @@ public final class APIConstants {
     public static final String API_POLICY_API_LEVEL = "apiLevel";
 
     public static final String BILLING_PLAN_FREE = "FREE";
+    public static final String DEFAULT_VISIBLE_ORG = "all";
     public static final String POLICY_RESET = "reset";
 
     public static final String BLOCKING_EVENT_TYPE = "wso2event";
@@ -2357,6 +2361,7 @@ public final class APIConstants {
      * CustomIndexer property to indicate whether it is gone through API Custom Indexer.
      */
     public static final String CUSTOM_API_INDEXER_PROPERTY = "registry.customIndexer";
+    public static final String VISIBLE_ORGANIZATION_PROPERTY = "visible_organizations";
 
     /**
      * Parameter related with accessControl support.
@@ -3262,6 +3267,12 @@ public final class APIConstants {
         public static final String TOKEN_VALIDATION_CONFIG = "TokenValidation";
         public static final String ENFORCE_JWT_TYPE_HEADER_VALIDATION = "EnforceTypeHeaderValidation";
     }
+    
+    // For Organization access control Configuration
+    public static final String ORG_BASED_ACCESS_CONTROL = "OrganizationBasedAccessControl";
+    public static final String ORG_BASED_ACCESS_CONTROL_ENABLE = "Enable";
+    public static final String ORG_BASED_ACCESS_CONTROL_ORG_NAME_CLAIM = "OrganizationNameLocalClaim";
+    public static final String ORG_BASED_ACCESS_CONTROL_ORG_ID_CLAIM = "OrganizationIDLocalClaim";
 
     public static class TransactionCounter {
 
