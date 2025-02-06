@@ -1400,6 +1400,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         + organization, log);
                 return null;
             }
+            PublisherCommonUtils.clearArtifactComplianceInfo(apiId, RestApiConstants.RESOURCE_API , organization);
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the existence of the resource
@@ -3820,7 +3821,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response getAPISubscriptionPolicies(String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean isAiApi,
-                                               MessageContext messageContext) throws APIManagementException {
+                                               String organizationID, MessageContext messageContext)
+            throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIDTO apiInfo = getAPIByID(apiId, apiProvider, organization);
@@ -4838,6 +4840,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         String tenantDomain = RestApiUtil.getValidatedOrganization(messageContext);
         List<Label> updatedLabelList = apiProvider.attachApiLabels(apiId, requestLabelListDTO.getLabels(), tenantDomain);
         LabelListDTO updatedLabelListDTO = LabelMappingUtil.fromLabelListToLabelListDTO(updatedLabelList);
+        PublisherCommonUtils.executeGovernanceOnLabelAttach(updatedLabelList, RestApiConstants.RESOURCE_API,
+                apiId, tenantDomain);
         return Response.ok().entity(updatedLabelListDTO).build();
     }
 
@@ -4846,6 +4850,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         String tenantDomain = RestApiUtil.getValidatedOrganization(messageContext);
         List<Label> updatedLabelList = apiProvider.detachApiLabels(apiId, requestLabelListDTO.getLabels(), tenantDomain);
         LabelListDTO updatedLabelListDTO = LabelMappingUtil.fromLabelListToLabelListDTO(updatedLabelList);
+        PublisherCommonUtils.deleteGovernanceDataOnLabelDelete(updatedLabelList, tenantDomain);
         return Response.ok().entity(updatedLabelListDTO).build();
     }
 

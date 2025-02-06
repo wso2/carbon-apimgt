@@ -76,6 +76,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
@@ -3119,5 +3120,39 @@ public class PublisherCommonUtils {
             throw new RuntimeException("Error generating JSON response for governance compliance ", e);
         }
         return jsonViolations;
+    }
+
+    public static void executeGovernanceOnLabelAttach(List<Label> labels, String artifactType,  String artifactId,
+                                                      String organization) {
+        List<String> labelsIdList = new ArrayList<>();
+        for (Label label : labels) {
+            labelsIdList.add(label.getLabelId());
+        }
+        try {
+            apimGovernanceService.evaluateComplianceOnLabelAttach(artifactId, ArtifactType.fromString(artifactType),
+                    labelsIdList, organization);
+        } catch (GovernanceException e) {
+            log.info("Error occurred while executing governance on attached labels for API " + artifactId, e);
+        }
+    }
+
+    public static void deleteGovernanceDataOnLabelDelete(List<Label> label, String organization) {
+        try {
+            for (Label labelId : label) {
+                apimGovernanceService.deleteGovernanceDataForLabel(labelId.getLabelId(), organization);
+            }
+        } catch (GovernanceException e) {
+            log.info("Error occurred while deleting governance data on deletion of label " + label, e);
+        }
+    }
+
+    public static void clearArtifactComplianceInfo(String artifactId, String artifactType, String organization) {
+        try {
+            apimGovernanceService.clearArtifactComplianceInfo(artifactId, ArtifactType.fromString(artifactType),
+                    organization);
+        } catch (GovernanceException e) {
+            log.info("Error occurred while deleting governance data on deletion of  " + ArtifactType.API +
+                    " " + artifactId, e);
+        }
     }
 }
