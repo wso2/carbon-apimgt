@@ -54,6 +54,8 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.X_WSO2_BASEPATH;
 import static org.wso2.carbon.apimgt.impl.APIConstants.X_WSO2_DISABLE_SECURITY;
 import static org.wso2.carbon.apimgt.impl.APIConstants.X_WSO2_PRODUCTION_ENDPOINTS;
 import static org.wso2.carbon.apimgt.impl.APIConstants.X_WSO2_SANDBOX_ENDPOINTS;
+import static org.wso2.carbon.apimgt.rest.api.common.RestApiConstants.REST_API_GOVERNANCE_CONTEXT_FULL;
+import static org.wso2.carbon.apimgt.rest.api.common.RestApiConstants.REST_API_GOVERNANCE_VERSION;
 
 public class RestApiCommonUtil {
 
@@ -64,6 +66,7 @@ public class RestApiCommonUtil {
     private static Set<URITemplate> publisherResourceMappings;
     private static Set<URITemplate> adminAPIResourceMappings;
     private static Set<URITemplate> serviceCatalogAPIResourceMappings;
+    private static Set<URITemplate> governanceResourceMapping;
 
     public static void unsetThreadLocalRequestedTenant() {
 
@@ -188,6 +191,8 @@ public class RestApiCommonUtil {
             uriTemplates = RestApiCommonUtil.getServiceCatalogAPIResourceMapping();
         } else if (basePath.contains(RestApiConstants.REST_API_DCR_CONTEXT_FULL)) {
             uriTemplates = RestApiCommonUtil.getDCRAppResourceMapping();
+        } else if (basePath.contains(REST_API_GOVERNANCE_CONTEXT_FULL)) {
+            uriTemplates = RestApiCommonUtil.getGovernanceResourceMapping(REST_API_GOVERNANCE_VERSION);
         }
         return uriTemplates;
     }
@@ -263,6 +268,41 @@ public class RestApiCommonUtil {
             }
             return adminAPIResourceMappings;
         }
+    }
+
+    /**
+     * This is static method to return URI Templates map of API Governance REST API.
+     * This content need to load only one time and keep it in memory as content will not change
+     * during runtime.
+     *
+     * @return URITemplate set associated with API Manager Governance REST API
+     */
+    public static Set<URITemplate> getGovernanceResourceMapping(String version) {
+
+        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER,
+                RestApiConstants.REST_API_GOVERNANCE_CONTEXT, RestApiConstants.REST_API_GOVERNANCE_VERSION));
+
+        if (governanceResourceMapping == null) {
+            try {
+                String definition;
+                if (RestApiConstants.REST_API_ADMIN_VERSION_0.equals(version)) {
+                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/governance-api.json"),
+                            RestApiConstants.CHARSET);
+                } else {
+                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/governance-api.yaml"),
+                            RestApiConstants.CHARSET);
+                }
+                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+                //Get URL templates from swagger content we created
+                governanceResourceMapping = oasParser.getURITemplates(definition);
+            } catch (APIManagementException e) {
+                log.error("Error while reading resource mappings for Governance API: " + api.getId().getApiName(), e);
+            } catch (IOException e) {
+                log.error("Error while reading the swagger definition for Governance API: "
+                        + api.getId().getApiName(), e);
+            }
+        }
+        return governanceResourceMapping;
     }
 
     /**

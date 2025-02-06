@@ -143,6 +143,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -2972,11 +2973,13 @@ public class PublisherCommonUtils {
 
     public static void checkGovernanceComplianceAsync(String artifactID, GovernableState state, ArtifactType type,
                                                       String organization) {
-        try {
-            apimGovernanceService.evaluateComplianceAsync(artifactID, type, state, organization);
-        } catch (GovernanceException e) {
-            log.error("Error occurred while scheduling governance validatio for " + artifactID, e);
-        }
+        CompletableFuture.runAsync(() -> {
+            try {
+                apimGovernanceService.evaluateComplianceAsync(artifactID, type, state, organization);
+            } catch (GovernanceException e) {
+                log.error("Error occurred while scheduling governance validation for " + artifactID, e);
+            }
+        });
     }
 
     //mthod to invoke evaluateComplianceDryRunSync
@@ -2985,7 +2988,6 @@ public class PublisherCommonUtils {
         Map<String, String> responseMap = new HashMap<>(2);
 
         try {
-//           String filePath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
             byte[] fileBytes = IOUtils.toByteArray(fileInputStream);
 
             ArtifactComplianceDryRunInfo artifactComplianceDryRunInfo = apimGovernanceService
