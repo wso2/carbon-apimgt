@@ -631,10 +631,12 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         String sqlQuery = SQLConstants.ADD_RULE_VIOLATION;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             for (RuleViolation ruleViolation : ruleViolations) {
-                prepStmnt.setString(1, rulesetResultId);
-                prepStmnt.setString(2, ruleViolation.getRulesetId());
-                prepStmnt.setString(3, ruleViolation.getRuleName());
-                prepStmnt.setString(4, ruleViolation.getViolatedPath());
+                prepStmnt.setString(1, GovernanceUtil.generateUUID());
+                prepStmnt.setString(2, rulesetResultId);
+                prepStmnt.setString(3, ruleViolation.getRulesetId());
+                prepStmnt.setString(4, ruleViolation.getRuleName());
+                prepStmnt.setString(5, ruleViolation.getViolatedPath());
+                prepStmnt.setString(6, ruleViolation.getRuleMessage());
                 prepStmnt.addBatch();
             }
             prepStmnt.executeBatch();
@@ -671,6 +673,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     ruleViolation.setRulesetId(rulesetId);
                     ruleViolation.setRuleName(resultSet.getString("RULE_NAME"));
                     ruleViolation.setViolatedPath(resultSet.getString("VIOLATED_PATH"));
+                    ruleViolation.setRuleMessage(resultSet.getString("MESSAGE"));
                     ruleViolation.setSeverity(RuleSeverity.fromString(resultSet.getString("SEVERITY")));
                     ruleViolation.setOrganization(organization);
                     ruleViolations.add(ruleViolation);
@@ -711,6 +714,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     ruleViolation.setRulesetId(resultSet.getString("RULESET_ID"));
                     ruleViolation.setRuleName(resultSet.getString("RULE_NAME"));
                     ruleViolation.setViolatedPath(resultSet.getString("VIOLATED_PATH"));
+                    ruleViolation.setRuleMessage(resultSet.getString("MESSAGE"));
                     ruleViolation.setSeverity(RuleSeverity.fromString(resultSet.getString("SEVERITY")));
                     ruleViolation.setOrganization(organization);
                     ruleViolations.add(ruleViolation);
