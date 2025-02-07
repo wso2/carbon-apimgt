@@ -58,10 +58,6 @@ rulesetContent:
       description: ''
       targets:
         - formats:
-            - oas2
-          given:
-            - "$.paths[*]"
-        - formats:
             - oas3
           given:
             - "$.paths[*]"
