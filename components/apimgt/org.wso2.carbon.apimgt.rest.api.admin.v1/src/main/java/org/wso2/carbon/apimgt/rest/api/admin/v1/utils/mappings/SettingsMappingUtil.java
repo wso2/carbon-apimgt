@@ -153,9 +153,10 @@ public class SettingsMappingUtil {
             SettingsFederatedGatewayConfigurationDTO gateway = new SettingsFederatedGatewayConfigurationDTO();
             gateway.setType(type);
             gateway.setDisplayName(type);
-            list.add(gateway);
+            if (list.stream().noneMatch(obj -> obj.getType().equals(type))) {
+                list.add(gateway);
+            }
         }
-
         return list;
     }
 
