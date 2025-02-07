@@ -635,6 +635,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 prepStmnt.setString(2, ruleViolation.getRulesetId());
                 prepStmnt.setString(3, ruleViolation.getRuleName());
                 prepStmnt.setString(4, ruleViolation.getViolatedPath());
+                prepStmnt.setString(5, ruleViolation.getRuleMessage());
                 prepStmnt.addBatch();
             }
             prepStmnt.executeBatch();
@@ -671,6 +672,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     ruleViolation.setRulesetId(rulesetId);
                     ruleViolation.setRuleName(resultSet.getString("RULE_NAME"));
                     ruleViolation.setViolatedPath(resultSet.getString("VIOLATED_PATH"));
+                    ruleViolation.setRuleMessage(resultSet.getString("MESSAGE"));
                     ruleViolation.setSeverity(RuleSeverity.fromString(resultSet.getString("SEVERITY")));
                     ruleViolation.setOrganization(organization);
                     ruleViolations.add(ruleViolation);
@@ -711,6 +713,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     ruleViolation.setRulesetId(resultSet.getString("RULESET_ID"));
                     ruleViolation.setRuleName(resultSet.getString("RULE_NAME"));
                     ruleViolation.setViolatedPath(resultSet.getString("VIOLATED_PATH"));
+                    ruleViolation.setRuleMessage(resultSet.getString("MESSAGE"));
                     ruleViolation.setSeverity(RuleSeverity.fromString(resultSet.getString("SEVERITY")));
                     ruleViolation.setOrganization(organization);
                     ruleViolations.add(ruleViolation);

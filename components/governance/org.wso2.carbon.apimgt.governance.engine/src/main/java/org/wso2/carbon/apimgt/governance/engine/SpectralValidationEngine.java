@@ -93,7 +93,6 @@ public class SpectralValidationEngine implements ValidationEngine {
 
                 String name = entry.getKey();
                 String description = (String) ruleDetails.get("description");
-                String messageOnValidationFailure = (String) ruleDetails.get("message");
 
                 String severityString = (String) ruleDetails.get("severity");
                 RuleSeverity severity = RuleSeverity.fromString(severityString);
@@ -105,7 +104,6 @@ public class SpectralValidationEngine implements ValidationEngine {
                 rule.setName(name);
                 rule.setDescription(description);
                 rule.setSeverity(severity);
-                rule.setMessageOnFailure(messageOnValidationFailure);
                 try {
                     String contentString = objectMapper.writerWithDefaultPrettyPrinter()
                             .writeValueAsString(ruleDetails);

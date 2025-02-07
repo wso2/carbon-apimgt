@@ -35,8 +35,8 @@ public class SQLConstants {
 
     public static final String ADD_RULES =
             "INSERT INTO GOV_RULESET_RULE (RULESET_RULE_ID, RULESET_ID, " +
-                    "RULE_NAME, RULE_MESSAGE, RULE_DESCRIPTION, SEVERITY, RULE_CONTENT) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
+                    "RULE_NAME, RULE_DESCRIPTION, SEVERITY, RULE_CONTENT) " +
+                    "VALUES (?, ?, ?, ?, ?, ?)";
 
     public static final String GET_RULESETS =
             "SELECT RULESET_ID, NAME, DESCRIPTION, RULE_CATEGORY, RULE_TYPE, ARTIFACT_TYPE, " +
@@ -91,7 +91,7 @@ public class SQLConstants {
 
     public static final String GET_RULES_WITHOUT_CONTENT =
             "SELECT RR.RULESET_RULE_ID, RR.RULESET_ID, RR.RULE_NAME, " +
-                    "RR.RULE_MESSAGE, RR.RULE_DESCRIPTION, RR.SEVERITY " +
+                    "RR.RULE_DESCRIPTION, RR.SEVERITY " +
                     "FROM GOV_RULESET_RULE RR JOIN GOV_RULESET RS ON RR.RULESET_ID = RS.RULESET_ID " +
                     "WHERE RR.RULESET_ID = ? AND RS.ORGANIZATION = ?";
 
@@ -270,9 +270,13 @@ public class SQLConstants {
     public static final String DELETE_REQ_POLICY_MAPPING = "DELETE FROM GOV_REQUEST_POLICY " +
             "WHERE REQ_ID = ?";
 
-    public static final String DELETE_GOV_REQ_FOR_ARTIFACT = "DELETE FROM " +
-            "GOV_REQUEST GR JOIN GOV_ARTIFACT GA ON GR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
-            "WHERE GA.ARTIFACT_REF_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ?";
+    public static final String DELETE_GOV_REQ_FOR_ARTIFACT = "DELETE FROM GOV_REQUEST " +
+            "WHERE ARTIFACT_KEY IN (" +
+            "    SELECT GA.ARTIFACT_KEY " +
+            "    FROM GOV_ARTIFACT GA " +
+            "    WHERE GA.ARTIFACT_REF_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ?" +
+            ")";
+
 
     public static final String DELETE_REQ_POLICY_MAPPING_FOR_ARTIFACT = "DELETE FROM " +
             "GOV_REQUEST_POLICY GRP JOIN GOV_REQUEST GR ON GRP.REQ_ID = GR.REQ_ID " +
@@ -289,7 +293,7 @@ public class SQLConstants {
             "ARTIFACT_KEY, RULESET_ID, RESULT) VALUES (?, ?, ?, ?)";
 
     public static final String ADD_RULE_VIOLATION = "INSERT INTO GOV_RULE_VIOLATION (RULESET_RUN_ID, " +
-            "RULESET_ID, RULE_NAME, VIOLATED_PATH) VALUES (?, ?, ?, ?)";
+            "RULESET_ID, RULE_NAME, VIOLATED_PATH, MESSAGE) VALUES (?, ?, ?, ?, ?)";
 
     public static final String DELETE_POLICY_RUN_FOR_ARTIFACT_AND_POLICY = "DELETE FROM GOV_POLICY_RUN " +
             "WHERE ARTIFACT_KEY IN ( SELECT ARTIFACT_KEY FROM GOV_ARTIFACT WHERE ARTIFACT_REF_ID = ? " +
@@ -352,7 +356,7 @@ public class SQLConstants {
             "AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ? );";
 
     public static final String GET_RULE_VIOLATIONS =
-            "SELECT DISTINCT GV.RULE_NAME, GV.VIOLATED_PATH, GRULE.SEVERITY " +
+            "SELECT DISTINCT GV.RULE_NAME, GV.VIOLATED_PATH, GV.MESSAGE, GRULE.SEVERITY " +
                     "FROM GOV_RULE_VIOLATION GV " +
                     "JOIN GOV_RULESET_RUN GRR ON GV.RULESET_RUN_ID = GRR.RULESET_RUN_ID " +
                     "JOIN GOV_ARTIFACT GA ON GRR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
@@ -362,7 +366,7 @@ public class SQLConstants {
                     "GRR.RULESET_ID = ?";
 
     public static final String GET_RULE_VIOLATIONS_FOR_ARTIFACT =
-            "SELECT DISTINCT GV.RULESET_ID, GV.RULE_NAME, GV.VIOLATED_PATH, GRULE.SEVERITY " +
+            "SELECT DISTINCT GV.RULESET_ID, GV.RULE_NAME, GV.VIOLATED_PATH, GV.MESSAGE, GRULE.SEVERITY " +
                     "FROM GOV_RULE_VIOLATION GV " +
                     "JOIN GOV_RULESET_RUN GRR ON GV.RULESET_RUN_ID = GRR.RULESET_RUN_ID " +
                     "JOIN GOV_ARTIFACT GA ON GRR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +

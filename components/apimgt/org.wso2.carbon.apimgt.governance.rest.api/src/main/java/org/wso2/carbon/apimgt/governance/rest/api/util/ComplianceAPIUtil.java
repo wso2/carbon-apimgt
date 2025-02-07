@@ -99,17 +99,20 @@ public class ComplianceAPIUtil {
             return artifactComplianceDetailsDTO;
         }
 
+        // Check if the evaluation is pending
+        boolean isEvaluationPending = new ComplianceManager()
+                .isEvaluationPendingForArtifact(artifactRefId, artifactType, organization);
+        if (isEvaluationPending) {
+            artifactComplianceDetailsDTO.setStatus(ArtifactComplianceDetailsDTO.StatusEnum.PENDING);
+            return artifactComplianceDetailsDTO;
+        }
+
         // Get all policies evaluated for the artifact
         List<String> evaluatedPolicies = new ComplianceManager().getEvaluatedPoliciesForArtifact(artifactRefId,
                 artifactType, organization);
 
         // If the artifact is not evaluated yet, set the compliance status to not applicable/pending and return
         if (evaluatedPolicies.isEmpty()) {
-            boolean isEvaluationPending = new ComplianceManager()
-                    .isEvaluationPendingForArtifact(artifactRefId, artifactType, organization);
-            if (isEvaluationPending) {
-                artifactComplianceDetailsDTO.setStatus(ArtifactComplianceDetailsDTO.StatusEnum.PENDING);
-            }
             artifactComplianceDetailsDTO.setStatus(ArtifactComplianceDetailsDTO.StatusEnum.NOT_APPLICABLE);
             return artifactComplianceDetailsDTO;
         }
@@ -516,7 +519,7 @@ public class ComplianceAPIUtil {
         ruleValidationResultDTO.setName(rule.getName());
         ruleValidationResultDTO.setDescription(rule.getDescription());
         if (ruleViolation != null) {
-            ruleValidationResultDTO.setMessage(rule.getMessageOnFailure());
+            ruleValidationResultDTO.setMessage(ruleViolation.getRuleMessage());
             ruleValidationResultDTO.setStatus(RuleValidationResultDTO.StatusEnum.FAILED);
             ruleValidationResultDTO.setSeverity(RuleValidationResultDTO.SeverityEnum.valueOf(
                     String.valueOf(rule.getSeverity())));
