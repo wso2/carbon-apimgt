@@ -576,9 +576,9 @@ public class APIMappingUtil {
             ExternalGatewayDeployer gatewayDeployer = externalGatewayDeployers.get(environment.getProvider());
             context = gatewayDeployer != null ? "" : context;
             try {
-                String httpUrl = gatewayDeployer != null ? gatewayDeployer.getResolvedAPIInvocationUrl(
+                String httpUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(
                         apidto.getId(), vHost.getHttpUrl(), environment) : vHost.getHttpUrl();
-                String httpsUrl = gatewayDeployer != null ? gatewayDeployer.getResolvedAPIInvocationUrl(
+                String httpsUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(
                         apidto.getId(), vHost.getHttpsUrl(), environment) : vHost.getHttpsUrl();
 
                 if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
