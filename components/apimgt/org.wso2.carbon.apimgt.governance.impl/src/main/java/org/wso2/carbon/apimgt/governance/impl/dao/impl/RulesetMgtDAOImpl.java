@@ -188,10 +188,9 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 prepStmt.setString(1, rule.getId());
                 prepStmt.setString(2, rulesetId);
                 prepStmt.setString(3, rule.getName());
-                prepStmt.setString(4, rule.getMessageOnFailure());
-                prepStmt.setString(5, rule.getDescription());
-                prepStmt.setString(6, String.valueOf(rule.getSeverity()));
-                prepStmt.setBlob(7, new ByteArrayInputStream(rule.getContent()
+                prepStmt.setString(4, rule.getDescription());
+                prepStmt.setString(5, String.valueOf(rule.getSeverity()));
+                prepStmt.setBlob(6, new ByteArrayInputStream(rule.getContent()
                         .getBytes(Charset.defaultCharset())));
                 prepStmt.addBatch();
             }
@@ -566,7 +565,6 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     rule.setId(rs.getString("RULESET_RULE_ID"));
                     rule.setName(rs.getString("RULE_NAME"));
                     rule.setDescription(rs.getString("RULE_DESCRIPTION"));
-                    rule.setMessageOnFailure(rs.getString("RULE_MESSAGE"));
                     rule.setSeverity(RuleSeverity.fromString(rs.getString("SEVERITY")));
                     rules.add(rule);
                 }

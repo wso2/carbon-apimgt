@@ -190,7 +190,6 @@ public class GovernanceUtil {
     public static Ruleset getRulesetFromDefaultRuleset(DefaultRuleset defaultRuleset,
                                                        String fileName) throws GovernanceException {
         Ruleset ruleset = new Ruleset();
-        ruleset.setId(defaultRuleset.getId());
         ruleset.setName(defaultRuleset.getName());
         ruleset.setDescription(defaultRuleset.getDescription());
         ruleset.setRuleCategory(RuleCategory.fromString(defaultRuleset.getRuleCategory()));

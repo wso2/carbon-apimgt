@@ -60,7 +60,7 @@ public class RulesetManager {
             throw new GovernanceException(GovernanceExceptionCodes.RULESET_ALREADY_EXIST, ruleset.getName(),
                     organization);
         }
-        ruleset.setId(ruleset.getId() == null ? GovernanceUtil.generateUUID() : ruleset.getId());
+        ruleset.setId(GovernanceUtil.generateUUID());
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();

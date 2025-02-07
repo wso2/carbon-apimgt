@@ -26,7 +26,6 @@ public class Rule {
     private String name;
     private String description;
     private RuleSeverity severity;
-    private String messageOnFailure;
     private String content;
 
     public String getId() {
@@ -59,14 +58,6 @@ public class Rule {
 
     public void setSeverity(RuleSeverity severity) {
         this.severity = severity;
-    }
-
-    public String getMessageOnFailure() {
-        return messageOnFailure;
-    }
-
-    public void setMessageOnFailure(String messageOnFailure) {
-        this.messageOnFailure = messageOnFailure;
     }
 
     public String getContent() {
