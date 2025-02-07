@@ -49,6 +49,8 @@ import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 
+import static org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.API_LLM_ENDPOINT;
+
 public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
 
     private static Log log = LogFactory.getLog(APIGatewayAdmin.class);
@@ -800,7 +802,7 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
             for (String endpoint : gatewayAPIDTO.getEndpointEntriesToBeRemove()) {
                 if (endpointAdminServiceProxy.isEndpointExist(endpoint)) {
                     endpointAdminServiceProxy.deleteEndpoint(endpoint);
-                } else if (endpoint.contains(org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.API_LLM_ENDPOINT + "*")) {
+                } else if (endpoint.contains(API_LLM_ENDPOINT + "*")) {
                     String prefix = endpoint.replace("*", ".*");
                     String[] allEndpoints = endpointAdminServiceProxy.getEndpoints();
                     for (String existingEndpoint : allEndpoints) {

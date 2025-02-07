@@ -17,6 +17,7 @@ package org.wso2.carbon.apimgt.gateway.mediators;
 
 import com.jayway.jsonpath.JsonPath;
 import org.apache.axiom.om.OMElement;
+import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.ManagedLifecycle;
@@ -76,11 +77,11 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
     }
 
     /**
-     * Executes the mediation logic to extract metadata from the AI API request
-     * and store it in the message context.
+     * Mediates the AI API request and response by processing metadata, modifying the request payload,
+     * and handling response metadata extraction.
      *
-     * @param messageContext The Synapse message context for the current request.
-     * @return true if mediation is successful, false otherwise.
+     * @param messageContext the Synapse {@link MessageContext} containing the API request/response
+     * @return {@code true} if mediation is successful, {@code false} if an error occurs
      */
     @Override
     public boolean mediate(MessageContext messageContext) {
@@ -190,6 +191,18 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         return true;
     }
 
+    /**
+     * Modifies the request payload based on its content type. Supports JSON (via JSONPath)
+     * and plain text modifications; XML payloads remain unchanged.
+     *
+     * @param targetModel         the new value to set
+     * @param targetModelMetadata metadata containing the attribute identifier
+     * @param axis2MessageContext the Axis2 message context with the request payload
+     * @return {@code true} if modified, {@code false} if not possible, or {@code null} for XML/undefined content types
+     * @throws XMLStreamException if XML processing fails
+     * @throws IOException        if an I/O error occurs
+     */
+
     public static Boolean modifyRequestPayload(String targetModel, LLMProviderMetadata targetModelMetadata,
                                                org.apache.axis2.context.MessageContext axis2MessageContext)
             throws XMLStreamException, IOException {
@@ -216,23 +229,39 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
     }
 
     /**
-     * Modifies JSON payload based on the JSONPath.
+     * Modifies the value of a specified JSON field in the payload of the given
+     * Axis2 message context using a JSONPath expression.
+     *
+     * @param axis2MessageContext the Axis2 {@link org.apache.axis2.context.MessageContext}
+     *                            containing the JSON payload
+     * @param jsonPath            the JSONPath expression specifying the field to modify
+     * @param newValue            the new value to set for the specified JSON field
+     * @return {@code true} if the JSON payload was successfully modified, {@code false}
+     * if the message context does not contain a valid JSON payload
      */
     private static Boolean modifyJsonPayload(org.apache.axis2.context.MessageContext axis2MessageContext,
-                                             String jsonPath, String newValue) {
+                                             String jsonPath, String newValue) throws AxisFault {
 
         if (!JsonUtil.hasAJsonPayload(axis2MessageContext)) {
             return false;
         }
         String jsonPayload = JsonUtil.jsonPayloadToString(axis2MessageContext);
         String updatedJson = JsonPath.parse(jsonPayload).set(jsonPath, newValue).jsonString();
-        JsonUtil.newJsonPayload(axis2MessageContext, updatedJson, true, true);
+        JsonUtil.getNewJsonPayload(axis2MessageContext, updatedJson, true, true);
         return true;
     }
 
     /**
-     * Modifies plain text payload.
+     * Modifies the text content of the first element in the SOAP body of the given
+     * Axis2 message context.
+     *
+     * @param axis2MessageContext the Axis2 {@link org.apache.axis2.context.MessageContext}
+     *                            containing the SOAP envelope
+     * @param newValue            the new text value to set for the first element in the SOAP body
+     * @return {@code true} if the text was successfully modified, {@code false} if
+     * no first element was found in the SOAP body
      */
+
     private static Boolean modifyTextPayload(org.apache.axis2.context.MessageContext axis2MessageContext,
                                              String newValue) {
 
@@ -404,6 +433,16 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         return (Map<String, String>)
                 axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
     }
+
+    /**
+     * Finds and returns the {@link LLMProviderMetadata} object from the given list
+     * that matches the specified attribute name.
+     *
+     * @param metadataList  the list of {@link LLMProviderMetadata} objects to search
+     * @param attributeName the attribute name to match
+     * @return the first {@link LLMProviderMetadata} with the given attribute name,
+     * or {@code null} if no match is found
+     */
 
     public static LLMProviderMetadata findMetadataByAttributeName(List<LLMProviderMetadata> metadataList,
                                                                   String attributeName) {

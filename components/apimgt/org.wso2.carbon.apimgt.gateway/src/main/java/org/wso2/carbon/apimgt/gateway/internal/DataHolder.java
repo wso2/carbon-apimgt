@@ -323,7 +323,7 @@ public class DataHolder {
     public boolean isEndpointSuspended(String endpointId) {
         Long expirationTime = suspendedEndpoints.getIfPresent(endpointId);
         if (expirationTime == null || System.currentTimeMillis() > expirationTime) {
-            suspendedEndpoints.invalidate(endpointId); // Remove expired items proactively
+            suspendedEndpoints.invalidate(endpointId);
             return false;
         }
         return true;

@@ -19,7 +19,6 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.axiom.om.OMAttribute;
@@ -37,7 +36,6 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.TokenBasedThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
-import org.wso2.carbon.apimgt.api.dto.EndpointConfigDTO;
 import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
@@ -83,14 +81,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_SUBTYPE_AI_API;
+import static org.wso2.carbon.apimgt.impl.APIConstants.PRODUCTION;
 
 /**
  * This class used to utility for Template.
@@ -559,12 +558,9 @@ public class TemplateBuilderUtil {
         List<SoapToRestMediationDto> soapToRestOutMediationDtoList =
                 ImportUtils.retrieveSoapToRestFlowMediations(extractedFolderPath, ImportUtils.OUT);
         List<EndpointDTO> endpointDTOList = null;
-        if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
-            if (api.getPrimaryProductionEndpointId() == null && api.getPrimarySandboxEndpointId() == null) {
-                endpointDTOList = addDefaultEndpoints(api, tenantDomain);
-            } else {
-                endpointDTOList = ImportUtils.retrieveEndpointConfigs(extractedFolderPath);
-            }
+        if (API_SUBTYPE_AI_API.equals(api.getSubtype()) && api.getPrimaryProductionEndpointId() != null
+                || api.getPrimarySandboxEndpointId() != null) {
+            endpointDTOList = ImportUtils.retrieveEndpointConfigs(extractedFolderPath);
         }
         JSONObject originalProperties = api.getAdditionalProperties();
         JSONObject modifiedProperties = getModifiedProperties(originalProperties);
@@ -634,41 +630,6 @@ public class TemplateBuilderUtil {
             api.setAdditionalProperties(originalProperties);
         }
         return gatewayAPIDto;
-    }
-
-    /**
-     * Adds a default production or sandbox endpoint if no primary endpoint is set for the API.
-     *
-     * @param api             API containing endpoint config.
-     * @param tenantDomain    Tenant domain for the endpoint.
-     */
-    private static List<EndpointDTO> addDefaultEndpoints(API api, String tenantDomain) {
-
-        List<EndpointDTO> endpointDTOList = new ArrayList<>();
-        EndpointConfigDTO endpointConfigDTO = new Gson().fromJson(api.getEndpointConfig(), EndpointConfigDTO.class);
-        if (endpointConfigDTO.getProductionEndpoints() != null) {
-            EndpointDTO defaultProductionEndpoint = new EndpointDTO();
-            defaultProductionEndpoint.setEndpointName(APIConstants.DEFAULT + "_" + APIConstants.PRODUCTION);
-            defaultProductionEndpoint.setEndpointUuid(UUID.randomUUID().toString());
-            defaultProductionEndpoint.setEndpointType(APIConstants.API_TYPE_REST);
-            defaultProductionEndpoint.setEnvironment(APIConstants.PRODUCTION);
-            defaultProductionEndpoint.setOrganization(tenantDomain);
-            defaultProductionEndpoint.setEndpointConfig(new Gson().fromJson(api.getEndpointConfig(),
-                    EndpointConfigDTO.class));
-            endpointDTOList.add(defaultProductionEndpoint);
-        }
-        if (endpointConfigDTO.getSandboxEndpoints() != null) {
-            EndpointDTO defaultSandboxEndpoint = new EndpointDTO();
-            defaultSandboxEndpoint.setEndpointName(APIConstants.DEFAULT + "_" + APIConstants.SANDBOX);
-            defaultSandboxEndpoint.setEndpointUuid(UUID.randomUUID().toString());
-            defaultSandboxEndpoint.setEndpointType(APIConstants.API_TYPE_REST);
-            defaultSandboxEndpoint.setEnvironment(APIConstants.SANDBOX);
-            defaultSandboxEndpoint.setOrganization(tenantDomain);
-            defaultSandboxEndpoint.setEndpointConfig(new Gson().fromJson(api.getEndpointConfig(),
-                    EndpointConfigDTO.class));
-            endpointDTOList.add(defaultSandboxEndpoint);
-        }
-        return endpointDTOList;
     }
 
     public static GatewayAPIDTO retrieveGatewayAPIDto(API api, Environment environment, String tenantDomain,
@@ -1208,9 +1169,11 @@ public class TemplateBuilderUtil {
                                      List<EndpointDTO> endpointDTOList)
             throws APITemplateException, XMLStreamException {
 
-        if (API_SUBTYPE_AI_API.equals(api.getSubtype()) && !endpointDTOList.isEmpty()) {
+        if (endpointDTOList != null && !endpointDTOList.isEmpty()) {
             for (EndpointDTO endpointDTO : endpointDTOList) {
-                String endpointConfigContext = builder.getConfigStringForEndpointTemplate("http",
+                String endpointType = (Objects.equals(endpointDTO.getEnvironment(), PRODUCTION)) ?
+                        APIConstants.API_DATA_PRODUCTION_ENDPOINTS : APIConstants.API_DATA_SANDBOX_ENDPOINTS;
+                String endpointConfigContext = builder.getConfigStringForEndpointTemplate(endpointType,
                         endpointDTO);
                 GatewayContentDTO endpoint = new GatewayContentDTO();
                 endpoint.setName(getEndpointKey(api) + "_API_LLMEndpoint_" + endpointDTO.getEndpointUuid());

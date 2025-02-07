@@ -104,8 +104,7 @@ public class GatewayUtils {
                         .replace("_endpoints", "") + "Endpoint",
                 gatewayAPIDTO.getEndpointEntriesToBeRemove()));
         gatewayAPIDTO.setEndpointEntriesToBeRemove(addStringToList(
-                endpointName + "_API_LLMEndpoint_*",
-                gatewayAPIDTO.getEndpointEntriesToBeRemove()));
+                endpointName + "_API_LLMEndpoint_*", gatewayAPIDTO.getEndpointEntriesToBeRemove()));
     }
 
     /**

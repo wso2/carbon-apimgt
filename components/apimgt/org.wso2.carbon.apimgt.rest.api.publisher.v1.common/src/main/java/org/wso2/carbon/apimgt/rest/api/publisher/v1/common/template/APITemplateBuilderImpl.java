@@ -49,8 +49,6 @@ import java.util.Map;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_SUBTYPE_AI_API;
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_SUBTYPE_DEFAULT;
-import static org.wso2.carbon.apimgt.impl.APIConstants.PRODUCTION;
-import static org.wso2.carbon.apimgt.impl.APIConstants.SANDBOX;
 
 /**
  * Constructs API and resource configurations for the ESB/Synapse using a Apache velocity
@@ -112,7 +110,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             if (api != null) {
                 configcontext = createAIAPIConfigContext(api, environment, endpointDTOList);
             } else {
-                configcontext = createAIAPIConfigContext(apiProduct, environment);
+                configcontext = createAIAPIConfigContext(apiProduct, environment, endpointDTOList);
             }
 
             configcontext.validate();
@@ -272,11 +270,18 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
         try {
             ConfigContext configcontext = new APIConfigContext(this.api);
-            configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api);
             configcontext = new TemplateUtilContext(configcontext);
+
             if (API_SUBTYPE_DEFAULT.equals(api.getSubtype())) {
                 configcontext = new SecurityConfigContext(configcontext, api);
             }
+            if (endpointDTO != null) {
+                configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api,
+                        endpointDTO.getEndpointConfig());
+            } else if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+                configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api);
+            }
+
 
             configcontext.validate();
 
@@ -291,13 +296,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             initVelocityEngine(velocityengine);
 
             context.put("type", endpointType);
-            if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+            if (endpointDTO != null) {
                 context.put("endpointUuid", endpointDTO.getEndpointUuid());
-                if (PRODUCTION.equals(endpointDTO.getEnvironment())) {
-                    context.put("url", endpointDTO.getEndpointConfig().getProductionEndpoints().getUrl());
-                } else if (SANDBOX.equals(endpointDTO.getEnvironment())) {
-                    context.put("url", endpointDTO.getEndpointConfig().getSandboxEndpoints().getUrl());
-                }
             }
 
             Template template = velocityengine.getTemplate(this.getEndpointTemplatePath());
@@ -428,7 +428,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
      * @param environment The deployment environment associated with the API.
      * @return A fully initialized {@code ConfigContext} for the AI API Product.
      */
-    public ConfigContext createAIAPIConfigContext(APIProduct apiProduct, Environment environment) {
+    public ConfigContext createAIAPIConfigContext(APIProduct apiProduct, Environment environment,
+                                                  List<EndpointDTO> endpointDTOList) {
 
         ConfigContext configcontext = new APIConfigContext(apiProduct);
         configcontext = new TransportConfigContext(configcontext, apiProduct);
@@ -437,6 +438,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         configcontext = new EnvironmentConfigContext(configcontext, environment);
         configcontext = new TemplateUtilContext(configcontext);
         configcontext = new SecurityConfigContext(configcontext, apiProduct, associatedAPIMap);
+        configcontext = new EndpointsContext(configcontext, apiProduct, endpointDTOList);
 
         return configcontext;
     }

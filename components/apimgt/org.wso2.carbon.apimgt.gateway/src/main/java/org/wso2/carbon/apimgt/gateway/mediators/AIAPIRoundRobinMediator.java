@@ -7,8 +7,8 @@
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an "AS IS" BASIS,
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and limitations under the License.
  */
@@ -42,6 +42,11 @@ public class AIAPIRoundRobinMediator extends AbstractMediator implements Managed
     private static final Log log = LogFactory.getLog(AIAPIRoundRobinMediator.class);
     private String endpointList;
 
+    /**
+     * Initializes the mediator.
+     *
+     * @param synapseEnvironment Synapse environment context.
+     */
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
 
@@ -50,44 +55,44 @@ public class AIAPIRoundRobinMediator extends AbstractMediator implements Managed
         }
     }
 
+    /**
+     * Destroys the mediator.
+     */
     @Override
     public void destroy() {
-
+        // No resources to clean up.
     }
 
+    /**
+     * Processes the message and selects an appropriate endpoint for load balancing.
+     *
+     * @param messageContext Synapse message context.
+     * @return Always returns true to continue message mediation.
+     */
     @Override
     public boolean mediate(MessageContext messageContext) {
 
         if (log.isDebugEnabled()) {
             log.debug("AIAPIRoundRobinMediator mediation started.");
         }
-        endpointList = "{"
-                + "\"production\": ["
-                + "  {\"model\": \"gpt-4o-mini\", \"endpointId\": \"668b4278-665e-47df-9897-89490903de6c\", " +
-                "\"weight\": 0.5},"
-                + "  {\"model\": \"gpt-35-turbo\", \"endpointId\": \"299beac1-ec9e-4a9b-b9fd-8be60cdbaeda\", " +
-                "\"weight\": 0.5}"
-                + "],"
-                + "\"sandbox\": ["
-                + "  {\"model\": \"gpt-4o\", \"endpointId\": \"299beac1-ec9e-3a9b-b9fd-8be60cdbaeda\", \"weight\": 1}"
-                + "],"
-                + "\"suspendDuration\": 60"
-                + "}";
 
         RBEndpointsPolicyDTO endpoints = new Gson().fromJson(endpointList, RBEndpointsPolicyDTO.class);
         RBEndpointDTO nextEndpoint = getNextEndpoint(endpoints, messageContext);
-        messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, nextEndpoint.getEndpointId());
-        messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_MODEL, nextEndpoint.getModel());
-        messageContext.setProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION, endpoints.getSuspendDuration());
+
+        if (nextEndpoint != null) {
+            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, nextEndpoint.getEndpointId());
+            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_MODEL, nextEndpoint.getModel());
+            messageContext.setProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION, endpoints.getSuspendDuration());
+        }
         return true;
     }
 
     /**
-     * Retrieves the next available endpoint based on load balancing policy.
+     * Retrieves the next available endpoint based on the round-robin load balancing policy.
      *
-     * @param endpoints      RBEndpointsPolicyDTO Object.
+     * @param endpoints      RBEndpointsPolicyDTO object containing endpoint configurations.
      * @param messageContext Synapse message context.
-     * @return Selected RBEndpointDTO.
+     * @return The selected RBEndpointDTO, or null if no active endpoints are available.
      */
     public RBEndpointDTO getNextEndpoint(RBEndpointsPolicyDTO endpoints, MessageContext messageContext) {
 
@@ -101,13 +106,15 @@ public class AIAPIRoundRobinMediator extends AbstractMediator implements Managed
         if (selectedEndpoints == null || selectedEndpoints.isEmpty()) {
             return null;
         }
+
         List<RBEndpointDTO> activeEndpoints = new ArrayList<>();
         for (RBEndpointDTO endpoint : selectedEndpoints) {
-            if (!DataHolder.getInstance().isEndpointSuspended(endpoint.getEndpointId()
-                    + "_" + endpoint.getModel())) {
+            if (!DataHolder.getInstance()
+                    .isEndpointSuspended(endpoint.getEndpointId() + "_" + endpoint.getModel())) {
                 activeEndpoints.add(endpoint);
             }
         }
+
         if (activeEndpoints.isEmpty()) {
             return null;
         }
@@ -115,15 +122,16 @@ public class AIAPIRoundRobinMediator extends AbstractMediator implements Managed
     }
 
     /**
-     * Selects an endpoint using weighted random selection.
+     * Selects an endpoint using a weighted random selection mechanism.
      *
      * @param endpoints List of active endpoints.
-     * @return Selected RBEndpointDTO.
+     * @return The selected RBEndpointDTO based on weight.
      */
     private RBEndpointDTO getWeightedRandomEndpoint(List<RBEndpointDTO> endpoints) {
 
         float totalWeight = 0.0f;
         List<Float> cumulativeWeights = new ArrayList<>();
+
         for (RBEndpointDTO endpoint : endpoints) {
             double weight = Math.max(endpoint.getWeight(), 0.1f);
             totalWeight += weight;
@@ -132,6 +140,7 @@ public class AIAPIRoundRobinMediator extends AbstractMediator implements Managed
 
         Random random = new Random();
         float randomValue = random.nextFloat() * totalWeight;
+
         for (int i = 0; i < cumulativeWeights.size(); i++) {
             if (randomValue < cumulativeWeights.get(i)) {
                 return endpoints.get(i);
@@ -141,9 +150,9 @@ public class AIAPIRoundRobinMediator extends AbstractMediator implements Managed
     }
 
     /**
-     * Retrieves the endpoint list.
+     * Retrieves the endpoint list in JSON format.
      *
-     * @return Endpoint list as a JSON string.
+     * @return The endpoint list as a JSON string.
      */
     public String getEndpointList() {
 
@@ -151,9 +160,9 @@ public class AIAPIRoundRobinMediator extends AbstractMediator implements Managed
     }
 
     /**
-     * Sets the endpoint list.
+     * Sets the endpoint list as a JSON string.
      *
-     * @param endpointList Endpoint list as a JSON string.
+     * @param endpointList JSON string containing endpoint details.
      */
     public void setEndpointList(String endpointList) {
 
