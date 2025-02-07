@@ -45,6 +45,8 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import javax.xml.stream.XMLStreamException;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.NO_ENTITY_BODY;
+
 /**
  * AIAPIMediator is responsible for extracting payload metadata from AI API requests/response
  * and setting it in the message context for further processing.
@@ -111,11 +113,20 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                 metadataMap.put(APIConstants.AIAPIConstants.API_VERSION, provider.getApiVersion());
                 messageContext.setProperty(APIConstants.AIAPIConstants.AI_API_REQUEST_METADATA, metadataMap);
 
-                Object targetEndpoint = messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT);
+                Object targetEndpointObj = messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT);
                 Object targetModelObj = messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_MODEL);
 
-                if (targetEndpoint != null && targetModelObj instanceof String) {
-                    String targetModel = (String) targetModelObj;
+                String targetEndpoint = targetEndpointObj instanceof String ? (String) targetEndpointObj : null;
+                String targetModel = targetModelObj instanceof String ? (String) targetModelObj : null;
+
+                if (APIConstants.AIAPIConstants.REJECT_ENDPOINT.equals(targetEndpoint)) {
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                            .setProperty(APIMgtGatewayConstants.HTTP_SC, 503);
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                            .setProperty(NO_ENTITY_BODY, true);
+                    return false;
+                }
+                if (targetEndpoint != null && targetModel != null) {
                     LLMProviderMetadata targetModelMetadata = findMetadataByAttributeName(
                             providerConfiguration.getMetadata(),
                             APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_REQUEST_MODEL);
@@ -135,6 +146,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                                 targetModelMetadata.getInputSource() : "null") + " for attribute: " +
                                 (targetModelMetadata != null ? targetModelMetadata.getAttributeName() : "unknown"));
                     }
+                } else {
+                    messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
+                            APIConstants.AIAPIConstants.DEFAULT_ENDPOINT);
                 }
             } else if (APIConstants.AIAPIConstants.TRAFFIC_FLOW_DIRECTION_OUT.equals(direction)) {
                 String targetModel = (String)

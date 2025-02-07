@@ -83,6 +83,9 @@ public class AIAPIRoundRobinMediator extends AbstractMediator implements Managed
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, nextEndpoint.getEndpointId());
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_MODEL, nextEndpoint.getModel());
             messageContext.setProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION, endpoints.getSuspendDuration());
+        } else {
+            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
+                    APIConstants.AIAPIConstants.REJECT_ENDPOINT);
         }
         return true;
     }

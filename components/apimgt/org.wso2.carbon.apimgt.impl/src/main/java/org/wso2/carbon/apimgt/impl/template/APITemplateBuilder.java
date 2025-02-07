@@ -29,7 +29,7 @@ public interface APITemplateBuilder {
      * Generates a configuration string for AI API based on the given environment.
      *
      * @param environment     The deployment environment for which the configuration string is generated.
-     * @param endpointDTOList
+     * @param endpointDTOList List of Endpoint
      * @return A string representing the AI API configuration.
      * @throws APITemplateException If an error occurs while processing the Velocity template.
      */

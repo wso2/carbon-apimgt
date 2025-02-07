@@ -99,6 +99,8 @@ public class APIConstants {
         public static final String TARGET_MODEL = "targetModel";
         public static final String TARGET_ENDPOINT = "targetEndpoint";
         public static final String SUSPEND_DURATION = "suspendDuration";
+        public static final String REJECT_ENDPOINT = "REJECT";
+        public static final String DEFAULT_ENDPOINT = "DEFAULT";
         public static final String REMAINING_TOKEN_COUNT_HEADER = "x-ratelimit-remaining-tokens";
         public static final String REMAINING_REQUEST_COUNT_HEADER = "x-ratelimit-remaining-requests";
     }
