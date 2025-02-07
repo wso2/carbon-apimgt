@@ -3,6 +3,8 @@ package org.wso2.carbon.apimgt.api.dto;
 import com.google.gson.annotations.SerializedName;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 
+import java.util.List;
+
 /**
  * DTO object to represent endpoints.
  */
@@ -12,70 +14,71 @@ public class EndpointConfigDTO {
     private String endpointType;
 
     @SerializedName("sandbox_endpoints")
-    private EndpointUrl sandboxEndpoints;
+    private EndpointDetails sandboxEndpoints;
 
     @SerializedName("production_endpoints")
-    private EndpointUrl productionEndpoints;
+    private EndpointDetails productionEndpoints;
 
     @SerializedName("endpoint_security")
     private EndpointSecurityConfig endpointSecurity;
 
     public String getEndpointType() {
-
         return endpointType;
     }
 
     public void setEndpointType(String endpointType) {
-
         this.endpointType = endpointType;
     }
 
-    public EndpointUrl getSandboxEndpoints() {
-
+    public EndpointDetails getSandboxEndpoints() {
         return sandboxEndpoints;
     }
 
-    public void setSandboxEndpoints(EndpointUrl sandboxEndpoints) {
-
+    public void setSandboxEndpoints(EndpointDetails sandboxEndpoints) {
         this.sandboxEndpoints = sandboxEndpoints;
     }
 
-    public EndpointUrl getProductionEndpoints() {
-
+    public EndpointDetails getProductionEndpoints() {
         return productionEndpoints;
     }
 
-    public void setProductionEndpoints(EndpointUrl productionEndpoints) {
-
+    public void setProductionEndpoints(EndpointDetails productionEndpoints) {
         this.productionEndpoints = productionEndpoints;
     }
 
     public EndpointSecurityConfig getEndpointSecurity() {
-
         return endpointSecurity;
     }
 
     public void setEndpointSecurity(EndpointSecurityConfig endpointSecurity) {
-
         this.endpointSecurity = endpointSecurity;
     }
 
     /**
-     * Inner class to represent endpoint URLs.
+     * Inner class to represent endpoint details with URL and config.
      */
-    public static class EndpointUrl {
+    public static class EndpointDetails {
 
         @SerializedName("url")
         private String url;
 
-        public String getUrl() {
+        @SerializedName("config")
+        private Config config;
 
+        public String getUrl() {
             return url;
         }
 
         public void setUrl(String url) {
-
             this.url = url;
+        }
+
+        public Config getConfig() {
+            return config;
+        }
+
+        public void setConfig(Config config) {
+            this.config = config;
         }
     }
 
@@ -91,23 +94,125 @@ public class EndpointConfigDTO {
         private EndpointSecurity sandbox;
 
         public EndpointSecurity getProduction() {
-
             return production;
         }
 
         public void setProduction(EndpointSecurity production) {
-
             this.production = production;
         }
 
         public EndpointSecurity getSandbox() {
-
             return sandbox;
         }
 
         public void setSandbox(EndpointSecurity sandbox) {
-
             this.sandbox = sandbox;
         }
     }
+
+    /**
+     * Inner class to represent config object inside endpoints.
+     */
+    public static class Config {
+
+        @SerializedName("actionDuration")
+        private String actionDuration;
+
+        @SerializedName("actionSelect")
+        private String actionSelect;
+
+        @SerializedName("factor")
+        private String factor;
+
+        @SerializedName("retryDelay")
+        private String retryDelay;
+
+        @SerializedName("retryErroCode")
+        private List<String> retryErrorCode;
+
+        @SerializedName("retryTimeOut")
+        private String retryTimeout;
+
+        @SerializedName("suspendDuration")
+        private String suspendDuration;
+
+        @SerializedName("suspendErrorCode")
+        private List<String> suspendErrorCode;
+
+        @SerializedName("suspendMaxDuration")
+        private String suspendMaxDuration;
+
+        public String getActionDuration() {
+            return actionDuration;
+        }
+
+        public void setActionDuration(String actionDuration) {
+            this.actionDuration = actionDuration;
+        }
+
+        public String getActionSelect() {
+            return actionSelect;
+        }
+
+        public void setActionSelect(String actionSelect) {
+            this.actionSelect = actionSelect;
+        }
+
+        public String getFactor() {
+            return factor;
+        }
+
+        public void setFactor(String factor) {
+            this.factor = factor;
+        }
+
+        public String getRetryDelay() {
+            return retryDelay;
+        }
+
+        public void setRetryDelay(String retryDelay) {
+            this.retryDelay = retryDelay;
+        }
+
+        public List<String> getRetryErrorCode() {
+            return retryErrorCode;
+        }
+
+        public void setRetryErrorCode(List<String> retryErrorCode) {
+            this.retryErrorCode = retryErrorCode;
+        }
+
+        public String getRetryTimeout() {
+            return retryTimeout;
+        }
+
+        public void setRetryTimeout(String retryTimeout) {
+            this.retryTimeout = retryTimeout;
+        }
+
+        public String getSuspendDuration() {
+            return suspendDuration;
+        }
+
+        public void setSuspendDuration(String suspendDuration) {
+            this.suspendDuration = suspendDuration;
+        }
+
+        public List<String> getSuspendErrorCode() {
+            return suspendErrorCode;
+        }
+
+        public void setSuspendErrorCode(List<String> suspendErrorCode) {
+            this.suspendErrorCode = suspendErrorCode;
+        }
+
+        public String getSuspendMaxDuration() {
+            return suspendMaxDuration;
+        }
+
+        public void setSuspendMaxDuration(String suspendMaxDuration) {
+            this.suspendMaxDuration = suspendMaxDuration;
+        }
+    }
 }
+
