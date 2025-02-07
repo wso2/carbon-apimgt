@@ -2606,6 +2606,12 @@ paths:
                   type: string
                   description: Definition to uploads a file
                   format: binary
+                url:
+                  type: string
+                  description: Definition url
+                schema:
+                  type: string
+                  description: Definition schema
                 additionalProperties:
                   type: string
                   description: Additional attributes specified as a stringified JSON
@@ -2867,17 +2873,26 @@ paths:
       summary: Validate a GraphQL SDL
       description: |
         This operation can be used to validate a graphQL definition and retrieve a summary.
+      parameters:
+        - name: useIntrospection
+          in: query
+          description: |
+            Specify whether to use Introspection to obtain the GraphQL Schema
+          schema:
+            type: boolean
+            default: false
       requestBody:
         content:
           multipart/form-data:
             schema:
-              required:
-                - file
               properties:
                 file:
                   type: string
                   description: Definition to upload as a file
                   format: binary
+                url:
+                  type: string
+                  description: Definition to upload using url
         required: true
       responses:
         200:
@@ -7471,6 +7486,33 @@ paths:
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/me/roles/SW50ZXJuYWwvcHVibGlzaGVyCQ"'
 
+  /me/organization-information:
+    get:
+      tags:
+        - Users
+      summary: Get the Organization information of the user
+      description: |
+        Using this operation, logged-in user can get their organization information.
+      operationId: organizationInformation
+      responses:
+        200:
+          description: |
+            OK.
+            Key Manager list returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationInfo'
+        400:
+          $ref: '#/components/responses/BadRequest'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/publisher/v4/me/organization"'
   ######################################################
   # The "ExternalStore Collection" resource APIs
   ######################################################
@@ -13826,6 +13868,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OperationPolicy'
+    OrganizationInfo:
+      title: Organization Info
+      type: object
+      properties:
+        organizationId:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          type: string
+          example: My Organization
     GatewayPolicyMappings:
       title: Gateway Policy Mappings
       type: object
