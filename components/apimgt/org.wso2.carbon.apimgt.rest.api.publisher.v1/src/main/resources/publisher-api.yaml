@@ -8882,6 +8882,185 @@ paths:
       operationId: detachLabelsFromAPI
 
   ######################################################
+  # API themes related APIs
+  ######################################################
+  /apis/{apiId}/api-themes:
+    get:
+      operationId: getApiThemes
+      summary: Retrieve API themes
+      description: Returns the list of API themes and their publish status for the given API.
+      parameters:
+        - name: apiId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of API themes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContentPublishStatusResponse'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X GET -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://127.0.0.1:9443/api/am/publisher/v4/apis/{apiId}/api-themes"'
+
+    post:
+      operationId: importApiTheme
+      summary: Import API theme
+      description: Imports an API theme as a zip file.
+      parameters:
+        - name: apiId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  description: |
+                    The API theme zip file
+                  format: binary
+      responses:
+        200:
+          description: Successfully imported
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F "file=@api-theme.zip" "https://127.0.0.1:9443/api/am/publisher/v4/apis/{apiId}/api-themes"'
+
+  /apis/{apiId}/api-themes/{id}/content:
+    get:
+      operationId: getApiThemeContent
+      summary: Retrieve API theme as zip
+      description: Returns the API theme as a zip file for the given API ID.
+      parameters:
+        - name: apiId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns the API theme zip file
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X GET -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://127.0.0.1:9443/api/am/publisher/v4/apis/{apiId}/api-themes/{id}/content" -o api-theme.zip'
+
+  /apis/{apiId}/api-themes/{id}:
+    delete:
+      operationId: deleteApiTheme
+      summary: Delete an API theme
+      description: Deletes the API theme for the given API ID.
+      parameters:
+        - name: apiId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully deleted
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://127.0.0.1:9443/api/am/publisher/v4/apis/{apiId}/api-themes/{id}"'
+
+  /apis/{apiId}/api-themes/{id}/status:
+    post:
+      operationId: updateApiThemeStatus
+      summary: Update publish status of an API theme
+      description: Publishes or unpublishes an API theme for the given API ID.
+      parameters:
+        - name: apiId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentPublishStatus"
+      responses:
+        200:
+          description: Successfully updated status
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d ''{"ACTION": "PUBLISH"}'' "https://127.0.0.1:9443/api/am/publisher/v4/apis/{apiId}/api-themes/{id}/status"'
+
+  ######################################################
   # LLM Providers resource APIs
   ######################################################
   /llm-providers:
@@ -9993,6 +10172,23 @@ paths:
 
 components:
   schemas:
+    ContentPublishStatus:
+      type: object
+      properties:
+        ACTION:
+          type: string
+          enum:
+            - PUBLISH
+            - UNPUBLISH
+    ContentPublishStatusResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: UUID of the api-theme
+        published:
+          type: boolean
+          description: Publish status of the api-theme
     SequenceBackendList:
       title: Sequence Backend List
       type: object
