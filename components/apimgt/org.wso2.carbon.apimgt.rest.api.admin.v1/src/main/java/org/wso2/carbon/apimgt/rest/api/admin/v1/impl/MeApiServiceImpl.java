@@ -1,7 +1,7 @@
 /*
- * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2025, WSO2 LLc. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 LLC. licenses this file to you under the Apache License,
+ * WSO2 LLc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,43 +16,27 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIConsumer;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.store.v1.MeApiService;
-import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CurrentAndNewPasswordsDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.OrganizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.MeApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.OrganizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+
+
 public class MeApiServiceImpl implements MeApiService {
 
-    private static final Log log = LogFactory.getLog(MeApiServiceImpl.class);
-    private static final String SUPER_ORG = "super";
-
-    public Response changeUserPassword(CurrentAndNewPasswordsDTO body, MessageContext messageContext) throws APIManagementException {
-
-        String username = RestApiCommonUtil.getLoggedInUsername();
-        APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
-        apiConsumer.changeUserPassword(body.getCurrentPassword(), body.getNewPassword());
-        return Response.ok().build();
-    }
-
-    @Override
     public Response organizationInformation(MessageContext messageContext) throws APIManagementException {
         OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
         OrganizationInfoDTO dto = new OrganizationInfoDTO();
         String orgName = null;
         if (StringUtils.isEmpty(orgInfo.getName())
-                || (orgInfo.getName() != null && SUPER_ORG.equals(orgInfo.getName().toLowerCase()))) {
+                || (orgInfo.getName() != null && "super".equals(orgInfo.getName().toLowerCase()))) {
             orgName = RestApiUtil.getValidatedOrganization(messageContext); // set the super organization
         } else {
             orgName = orgInfo.getName();
