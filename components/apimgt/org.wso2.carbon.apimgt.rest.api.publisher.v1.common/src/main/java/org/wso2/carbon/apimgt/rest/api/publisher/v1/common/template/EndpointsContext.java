@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template;
 
+import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.VelocityContext;
@@ -66,13 +67,14 @@ public class EndpointsContext extends ConfigContextDecorator {
      *
      * @param configContext The base configuration context
      * @param apiProduct    The API product associated with the endpoints
-     * @param api           The API associated with the product
+     * @param endpointDTOList The list of endpoint DTOs
      */
-    public EndpointsContext(ConfigContext configContext, APIProduct apiProduct, API api) {
+    public EndpointsContext(ConfigContext configContext, APIProduct apiProduct,
+                            List<EndpointDTO> endpointDTOList) {
 
         super(configContext);
-        this.api = api;
         this.apiProduct = apiProduct;
+        this.endpointDTOList = endpointDTOList;
     }
 
     /**
@@ -97,31 +99,60 @@ public class EndpointsContext extends ConfigContextDecorator {
 
         VelocityContext context = super.getContext();
 
-        Map<String, List<SimplifiedEndpointDTO>> groupedEndpoints = simplifyEndpoints(this.endpointDTOList).stream()
-                .collect(Collectors.groupingBy(SimplifiedEndpointDTO::getEnvironment));
+        if (this.endpointDTOList != null) {
+            Map<String, List<SimplifiedEndpointDTO>> groupedEndpoints = simplifyEndpoints(this.endpointDTOList).stream()
+                    .collect(Collectors.groupingBy(SimplifiedEndpointDTO::getEnvironment));
 
-        List<SimplifiedEndpointDTO> sandboxEndpoints =
-                new ArrayList<>(groupedEndpoints.getOrDefault(APIConstants.SANDBOX, Collections.emptyList()));
-        List<SimplifiedEndpointDTO> productionEndpoints =
-                new ArrayList<>(groupedEndpoints.getOrDefault(APIConstants.PRODUCTION, Collections.emptyList()));
+            List<SimplifiedEndpointDTO> productionEndpoints =
+                    new ArrayList<>(groupedEndpoints.getOrDefault(APIConstants.PRODUCTION, Collections.emptyList()));
+            List<SimplifiedEndpointDTO> sandboxEndpoints =
+                    new ArrayList<>(groupedEndpoints.getOrDefault(APIConstants.SANDBOX, Collections.emptyList()));
 
-        SimplifiedEndpointDTO defaultSandboxEndpoint = Optional.ofNullable(api.getPrimarySandboxEndpointId())
-                .map(id -> findEndpointByUuid(sandboxEndpoints, id))
-                .orElseGet(() -> !sandboxEndpoints.isEmpty() ? sandboxEndpoints.get(0) : null);
+            SimplifiedEndpointDTO defaultProductionEndpoint = Optional.ofNullable(api.getPrimaryProductionEndpointId())
+                    .map(id -> findEndpointByUuid(productionEndpoints, id))
+                    .orElseGet(() -> !productionEndpoints.isEmpty() ? productionEndpoints.get(0) : null);
+            SimplifiedEndpointDTO defaultSandboxEndpoint = Optional.ofNullable(api.getPrimarySandboxEndpointId())
+                    .map(id -> findEndpointByUuid(sandboxEndpoints, id))
+                    .orElseGet(() -> !sandboxEndpoints.isEmpty() ? sandboxEndpoints.get(0) : null);
 
-        SimplifiedEndpointDTO defaultProductionEndpoint = Optional.ofNullable(api.getPrimaryProductionEndpointId())
-                .map(id -> findEndpointByUuid(productionEndpoints, id))
-                .orElseGet(() -> !productionEndpoints.isEmpty() ? productionEndpoints.get(0) : null);
 
-        sandboxEndpoints.removeIf(endpoint -> endpoint.equals(defaultSandboxEndpoint));
-        productionEndpoints.removeIf(endpoint -> endpoint.equals(defaultProductionEndpoint));
+            productionEndpoints.removeIf(endpoint -> endpoint.equals(defaultProductionEndpoint));
+            sandboxEndpoints.removeIf(endpoint -> endpoint.equals(defaultSandboxEndpoint));
+            context.put("productionEndpoints", productionEndpoints);
+            context.put("sandboxEndpoints", sandboxEndpoints);
+            context.put("defaultProductionEndpoint", defaultProductionEndpoint);
+            context.put("defaultSandboxEndpoint", defaultSandboxEndpoint);
+        } else if (api.getEndpointConfig() != null) {
+            EndpointConfigDTO endpointConfigDTO = new Gson().fromJson(api.getEndpointConfig(), EndpointConfigDTO.class);
+            if (endpointConfigDTO.getProductionEndpoints() != null) {
+                addDefaultEndpoint(context, APIConstants.PRODUCTION, api);
+            }
 
-        context.put("sandboxEndpoints", sandboxEndpoints);
-        context.put("productionEndpoints", productionEndpoints);
-        context.put("defaultSandboxEndpoint", defaultSandboxEndpoint);
-        context.put("defaultProductionEndpoint", defaultProductionEndpoint);
+            if (endpointConfigDTO.getSandboxEndpoints() != null) {
+                addDefaultEndpoint(context, APIConstants.SANDBOX, api);
+            }
+        }
 
         return context;
+    }
+
+    /**
+     * Adds a default endpoint to the context based on the provided environment.
+     *
+     * @param context     The context map to store the default endpoint.
+     * @param environment The environment type (Production/Sandbox).
+     * @param api         The API object containing endpoint configurations.
+     */
+    private static void addDefaultEndpoint(VelocityContext context, String environment, API api) {
+
+        EndpointDTO defaultEndpoint = new EndpointDTO();
+        defaultEndpoint.setEndpointType(APIConstants.API_TYPE_REST);
+        defaultEndpoint.setEnvironment(environment);
+        defaultEndpoint.setEndpointConfig(new Gson().fromJson(api.getEndpointConfig(), EndpointConfigDTO.class));
+
+        String contextKey = environment.equals(APIConstants.PRODUCTION) ? "defaultProductionEndpoint" :
+                "defaultSandboxEndpoint";
+        context.put(contextKey, new SimplifiedEndpointDTO(defaultEndpoint));
     }
 
 
@@ -163,8 +194,8 @@ public class EndpointsContext extends ConfigContextDecorator {
     public static class SimplifiedEndpointDTO {
 
         private String endpointUuid;
+        private boolean endpointSecurityEnabled;
         private String endpointName;
-        private String url;
         private String apiKeyIdentifier;
         private String apiKeyValue;
         private String apiKeyIdentifierType;
@@ -188,36 +219,28 @@ public class EndpointsContext extends ConfigContextDecorator {
                 this.environment = endpointDTO.getEnvironment();
 
                 if (endpointDTO.getEndpointConfig() != null) {
-
-                    EndpointConfigDTO.EndpointUrl endpoint = null;
-                    if (APIConstants.PRODUCTION.equals(environment)) {
-                        endpoint = endpointDTO.getEndpointConfig().getProductionEndpoints();
-                    } else if (APIConstants.SANDBOX.equals(environment)) {
-                        endpoint = endpointDTO.getEndpointConfig().getSandboxEndpoints();
-                    }
-                    this.url = endpoint.getUrl();
-
                     EndpointConfigDTO.EndpointSecurityConfig securityConfig =
                             endpointDTO.getEndpointConfig().getEndpointSecurity();
                     if (securityConfig != null) {
+                        this.endpointSecurityEnabled = true;
                         EndpointSecurity endpointSecurity = null;
                         if (APIConstants.PRODUCTION.equals(environment)) {
                             endpointSecurity = securityConfig.getProduction();
                         } else if (APIConstants.SANDBOX.equals(environment)) {
-                            endpointSecurity = securityConfig.getProduction();
+                            endpointSecurity = securityConfig.getSandbox();
                         }
                         if (endpointSecurity != null && endpointSecurity.isEnabled()) {
                             this.apiKeyIdentifier = endpointSecurity.getApiKeyIdentifier();
-                            if ((APIConstants.DEFAULT + "_" + APIConstants.PRODUCTION).equals(endpointName) ||
-                                    (APIConstants.DEFAULT + "_" + APIConstants.SANDBOX).equals(endpointName)) {
+                            if (endpointDTO.getEndpointUuid() == null) {
                                 this.apiKeyValue = endpointSecurity.getApiKeyValue();
                             } else {
-                                this.apiKeyValue =
-                                        new String(CryptoUtil.getDefaultCryptoUtil()
+                                this.apiKeyValue = new String(CryptoUtil.getDefaultCryptoUtil()
                                                 .base64DecodeAndDecrypt(endpointSecurity.getApiKeyValue()));
                             }
                             this.apiKeyIdentifierType = endpointSecurity.getApiKeyIdentifierType();
                         }
+                    } else {
+                        this.endpointSecurityEnabled = false;
                     }
                 }
             } catch (CryptoException e) {
@@ -241,11 +264,6 @@ public class EndpointsContext extends ConfigContextDecorator {
             return endpointName;
         }
 
-        public String getUrl() {
-
-            return url;
-        }
-
         public String getApiKeyIdentifier() {
 
             return apiKeyIdentifier;
@@ -261,6 +279,11 @@ public class EndpointsContext extends ConfigContextDecorator {
             return apiKeyIdentifierType;
         }
 
+        public boolean getEndpointSecurityEnabled() {
+
+            return endpointSecurityEnabled;
+        }
+
         /**
          * Returns a string representation of the simplified endpoint.
          *
@@ -270,9 +293,9 @@ public class EndpointsContext extends ConfigContextDecorator {
         public String toString() {
 
             return "SimplifiedEndpointDTO{" +
-                    "endpointUuid='" + endpointUuid + '\'' +
+                    "  endpointUuid='" + endpointUuid + '\'' +
+                    ", endpointSecurityEnabled=" + endpointSecurityEnabled +
                     ", endpointName='" + endpointName + '\'' +
-                    ", url='" + url + '\'' +
                     ", apiKeyIdentifier='" + apiKeyIdentifier + '\'' +
                     ", apiKeyValue='" + apiKeyValue + '\'' +
                     ", apiKeyIdentifierType='" + apiKeyIdentifierType + '\'' +
