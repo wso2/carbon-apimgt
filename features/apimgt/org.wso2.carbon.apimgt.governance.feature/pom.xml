@@ -166,7 +166,7 @@
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.governance.api</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.governance.impl</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.governance.engine</bundleDef>
-                                <bundleDef>org.wso2.carbon:rule.validator</bundleDef>
+                                <bundleDef>org.wso2.carbon:org.wso2.rule.validator</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>
