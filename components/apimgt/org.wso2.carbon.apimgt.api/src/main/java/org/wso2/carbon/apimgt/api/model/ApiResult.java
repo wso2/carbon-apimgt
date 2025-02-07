@@ -55,11 +55,11 @@ public class ApiResult {
   }
 
   public String getProvider() {
-    return provider;
+      return provider;
   }
 
   public void setProvider(String provider) {
-    this.provider = provider;
+      this.provider = provider;
   }
 
   public String getType() {

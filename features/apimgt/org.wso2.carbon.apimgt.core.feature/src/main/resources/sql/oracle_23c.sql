@@ -3919,21 +3919,21 @@ CREATE TABLE AM_TRANSACTION_RECORDS (
 /
 
 CREATE TABLE AM_LABEL (
-    UUID            VARCHAR(50)     NOT NULL,
-    NAME            VARCHAR(255)    NOT NULL,
-    DESCRIPTION     VARCHAR(1024),
-    TENANT_DOMAIN   VARCHAR(255)    DEFAULT 'carbon.super',
-    UNIQUE (NAME, TENANT_DOMAIN),
-    PRIMARY KEY (UUID)
+                          UUID            VARCHAR(50)     NOT NULL,
+                          NAME            VARCHAR(255)    NOT NULL,
+                          DESCRIPTION     VARCHAR(1024),
+                          TENANT_DOMAIN   VARCHAR(255)    DEFAULT 'carbon.super',
+                          UNIQUE (NAME, TENANT_DOMAIN),
+                          PRIMARY KEY (UUID)
 )
 /
 
 CREATE TABLE AM_API_LABEL_MAPPING (
-    API_UUID       VARCHAR(256)     NOT NULL,
-    LABEL_UUID     VARCHAR(50)      NOT NULL,
-    PRIMARY KEY (API_UUID, LABEL_UUID),
-    FOREIGN KEY (API_UUID) REFERENCES AM_API(API_UUID) ON DELETE CASCADE,
-    FOREIGN KEY (LABEL_UUID) REFERENCES AM_LABEL(UUID) ON DELETE RESTRICT
+                                      API_UUID       VARCHAR(256)     NOT NULL,
+                                      LABEL_UUID     VARCHAR(50)      NOT NULL,
+                                      PRIMARY KEY (API_UUID, LABEL_UUID),
+                                      FOREIGN KEY (API_UUID) REFERENCES AM_API(API_UUID) ON DELETE CASCADE,
+                                      FOREIGN KEY (LABEL_UUID) REFERENCES AM_LABEL(UUID) ON DELETE RESTRICT
 )
 /
 

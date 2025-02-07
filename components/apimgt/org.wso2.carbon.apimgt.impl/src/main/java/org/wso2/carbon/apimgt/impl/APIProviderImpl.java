@@ -7115,7 +7115,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public List<Label> attachApiLabels(String apiID, List<String> labelList, String tenantDomain) throws APIManagementException {
+    public List<Label> attachApiLabels(String apiID, List<String> labelList, String tenantDomain)
+            throws APIManagementException {
         API api = getAPIbyUUID(apiID, tenantDomain);
         if (api == null || api.isRevision()) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with ID: "
@@ -7141,7 +7142,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public List<Label> detachApiLabels(String apiID, List<String> labelList, String tenantDomain) throws APIManagementException {
+    public List<Label> detachApiLabels(String apiID, List<String> labelList, String tenantDomain)
+            throws APIManagementException {
         API api = getAPIbyUUID(apiID, tenantDomain);
         if (api == null || api.isRevision()) {
             throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with ID: "
