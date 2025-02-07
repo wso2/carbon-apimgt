@@ -3878,10 +3878,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
         String organizationID = null;
         if (orgInfo != null && !StringUtils.isEmpty(orgInfo.getOrganizationId())) {
-            organizationID = APIUtil.getOrganizationIdFromExternalReference(orgInfo.getOrganizationId(),
-                    orgInfo.getName(), tenantDomain);
+            organizationID = orgInfo.getOrganizationId();
         }
-
         try {
             DevPortalAPISearchResult searchAPIs = apiPersistenceInstance.searchAPIsForDevPortal(org, searchQuery,
                     start, end, userCtx);
