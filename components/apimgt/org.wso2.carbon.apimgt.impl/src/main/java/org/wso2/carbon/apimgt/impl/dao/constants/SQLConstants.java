@@ -3890,7 +3890,7 @@ public class SQLConstants {
 
         public static final String UPDATE_ORGANIZATION =
                 "UPDATE AM_ORGANIZATION_MAPPING " +
-                "   SET DISPLAY_NAME = ?, DESCRIPTION = ?, EXT_ORG_ID=?, ORG_HANDLE=? WHERE ORG_UUID = ?";
+                "   SET DISPLAY_NAME = ?, DESCRIPTION = ?, EXT_ORG_ID=?, ORG_HANDLE=?, PARENT_ORG_UUID=? WHERE ORG_UUID = ?";
 
         public static final String DELETE_ORGANIZATION =
                 "DELETE FROM AM_ORGANIZATION_MAPPING WHERE ORG_UUID = ? AND ROOT_ORGANIZATION=?";

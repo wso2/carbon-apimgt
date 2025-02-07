@@ -10419,7 +10419,8 @@ public class ApiMgtDAO {
         }
     }
     
-    public void updateOrganizationDetails(OrganizationDetailsDTO organizationDetailsDTO) throws APIManagementException {
+    public void updateOrganizationDetails(OrganizationDetailsDTO organizationDetailsDTO, String parentOrgId)
+            throws APIManagementException {
 
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
@@ -10429,7 +10430,8 @@ public class ApiMgtDAO {
                 preparedStatement.setString(2, organizationDetailsDTO.getDescription());
                 preparedStatement.setString(3, organizationDetailsDTO.getExternalOrganizationReference());
                 preparedStatement.setString(4, organizationDetailsDTO.getOrganizationHandle());
-                preparedStatement.setString(5, organizationDetailsDTO.getOrganizationId());
+                preparedStatement.setString(5, parentOrgId);
+                preparedStatement.setString(6, organizationDetailsDTO.getOrganizationId());
                 preparedStatement.executeUpdate();
                 conn.commit();
             }
