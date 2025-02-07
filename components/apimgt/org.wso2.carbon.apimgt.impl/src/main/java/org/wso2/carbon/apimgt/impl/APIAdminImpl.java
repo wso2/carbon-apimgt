@@ -24,7 +24,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.impl.Constants;
@@ -1241,18 +1241,16 @@ public class APIAdminImpl implements APIAdmin {
         return (int) (Integer) result.get("length");
     }
 
+    /**
+     * Adds a new label for the tenant
+     *
+     * @param label      label to add
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException if failed add label
+     */
     public Label addLabel(Label label, String tenantDomain) throws APIManagementException {
 
-        if (!org.apache.commons.lang3.StringUtils.isEmpty(label.getName())) {
-            String regExSpecialChars = "!@#$%^&*(),?\"{}[\\]|<>";
-            String regExSpecialCharsReplaced = regExSpecialChars.replaceAll(".", "\\\\$0");
-            Pattern pattern = Pattern.compile("[" + regExSpecialCharsReplaced + "\\s" + "]");
-            Matcher matcher = pattern.matcher(label.getName());
-            if (matcher.find()) {
-                throw new APIManagementException("Name field contains special characters.",
-                        ExceptionCodes.from(ExceptionCodes.LABEL_ADDING_FAILED,
-                                "Name field contains special characters."));
-            }
+        if (!StringUtils.isEmpty(label.getName())) {
             if (label.getName().length() > 255) {
                 throw new APIManagementException("Label name is too long.",
                         ExceptionCodes.from(ExceptionCodes.LABEL_ADDING_FAILED, "Label name is too long."));
@@ -1271,7 +1269,16 @@ public class APIAdminImpl implements APIAdmin {
         return labelsDAO.addLabel(label, tenantDomain);
     }
 
-    public Label updateLabel(String labelID, Label updateLabelBody, String tenantDomain) throws APIManagementException {
+    /**
+     * Updates a label
+     *
+     * @param labelID       label ID to update
+     * @param updateLabelBody   label data to update
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException if failed update label
+     */
+    public Label updateLabel(String labelID, Label updateLabelBody, String tenantDomain)
+            throws APIManagementException {
         Label labelOriginal = labelsDAO.getLabelByIdAndTenantDomain(labelID, tenantDomain);
         if (labelOriginal == null) {
             throw new APIManagementException("Label not found for the given label ID: " + labelID,
@@ -1283,16 +1290,7 @@ public class APIAdminImpl implements APIAdmin {
         //We allow to update Label name given that the new label name is not taken yet
         String oldName = labelOriginal.getName();
         String updatedName = updateLabelBody.getName();
-        if (!org.apache.commons.lang3.StringUtils.isEmpty(updatedName)) {
-            String regExSpecialChars = "!@#$%^&*(),?\"{}[\\]|<>";
-            String regExSpecialCharsReplaced = regExSpecialChars.replaceAll(".", "\\\\$0");
-            Pattern pattern = Pattern.compile("[" + regExSpecialCharsReplaced + "\\s" + "]");// include \n,\t, space
-            Matcher matcher = pattern.matcher(updatedName);
-            if (matcher.find()) {
-                throw new APIManagementException("Name field contains special characters.",
-                        ExceptionCodes.from(ExceptionCodes.LABEL_UPDATE_FAILED,
-                                "Name field contains special characters."));
-            }
+        if (!StringUtils.isEmpty(updatedName)) {
             if (updatedName.length() > 255) {
                 throw new APIManagementException("Label name is too long.",
                         ExceptionCodes.from(ExceptionCodes.LABEL_UPDATE_FAILED, "Label name is too long."));
@@ -1301,15 +1299,24 @@ public class APIAdminImpl implements APIAdmin {
             throw new APIManagementException("Label name is empty.",
                     ExceptionCodes.from(ExceptionCodes.LABEL_UPDATE_FAILED, "Label name is empty."));
         }
+
         if (!oldName.equals(updatedName) && labelsDAO.isLabelNameExists(updatedName,
                 labelID, tenantDomain)) {
             throw new APIManagementException("Label with name '" + updatedName + "' already exists",
                     ExceptionCodes.from(ExceptionCodes.LABEL_NAME_ALREADY_EXISTS, updatedName));
         }
+
         labelsDAO.updateLabel(updateLabelBody);
         return labelsDAO.getLabelByIdAndTenantDomain(labelID, tenantDomain);
     }
 
+    /**
+     * Delete a label
+     *
+     * @param labelID       label ID to delete
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException if failed delete label
+     */
     public void deleteLabel(String labelID, String tenantDomain) throws APIManagementException {
 
         Label labelOriginal = labelsDAO.getLabelByIdAndTenantDomain(labelID, tenantDomain);
@@ -1324,11 +1331,26 @@ public class APIAdminImpl implements APIAdmin {
         labelsDAO.deleteLabel(labelID);
     }
 
+    /**
+     * Returns all labels of the tenant
+     *
+     * @param tenantDomain  tenant domain
+     * @return List<Label> list of Label objects
+     * @throws APIManagementException if failed to get labels
+     */
     public List<Label> getAllLabelsOfTenant(String tenantDomain) throws APIManagementException {
 
         return labelsDAO.getAllLabels(tenantDomain);
     }
 
+    /**
+     * Get mapped APIs for the given label
+     *
+     * @param labelID label UUID
+     * @param tenantDomain  tenant domain
+     * @return List<ApiResult> list of ApiResult objects
+     * @throws APIManagementException
+     */
     public List<ApiResult> getMappedApisForLabel(String labelID, String tenantDomain) throws APIManagementException {
 
         Label labelOriginal = labelsDAO.getLabelByIdAndTenantDomain(labelID, tenantDomain);
