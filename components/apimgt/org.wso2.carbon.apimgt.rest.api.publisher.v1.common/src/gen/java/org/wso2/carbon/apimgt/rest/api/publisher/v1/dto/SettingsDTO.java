@@ -107,7 +107,7 @@ public class SettingsDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "{\"REGULAR\": {\"runtime\": [\"cors\", \"schemaValidation\", \"responseCaching\", \"transportsHTTP\", \"transportsHTTPS\", \"transportsMutualSSL\", \"oauth2\", \"apikey\", \"basicAuth\", \"audienceValidation\"], \"resources\": [\"apiLevelRateLimiting\", \"operationLevelRateLimiting\", \"operationSecurity\"], \"localScopes\": [\"operationScopes\"], \"policies\": [\"operationLevelPolicies\"], \"monetization\": [\"monetization\"], \"subscriptions\": [\"subscriptions\"], \"endpoints\": [\"restEndpoints\", \"serviceEndpoints\", \"soapEndpoints\", \"dynamicEndpoints\", \"mockEndpoints\", \"lambdaEndpoints\", \"sequenceEndpoints\"]}}", value = "")
   @JsonProperty("gatewayFeatureCatalog")
   public String getGatewayFeatureCatalog() {
@@ -350,14 +350,14 @@ public class SettingsDTO   {
   }
 
   /**
-   * Is Organization-based access control configuration enabled
+   * Is Organization-based access control configuration enabled 
    **/
   public SettingsDTO orgAccessControlEnabled(Boolean orgAccessControlEnabled) {
     this.orgAccessControlEnabled = orgAccessControlEnabled;
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "true", value = "Is Organization-based access control configuration enabled ")
   @JsonProperty("orgAccessControlEnabled")
   public Boolean isOrgAccessControlEnabled() {
@@ -437,8 +437,7 @@ public class SettingsDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes,
-            subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, customProperties);
+    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, customProperties);
   }
 
   @Override

@@ -3309,10 +3309,4 @@ public final class APIConstants {
 
     //Property for enabling application update capabilities for users in the same organization.
     public static final String ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED = "orgWideAppUpdateEnabled";
-
-    public static class FederatedGatewayConstants {
-
-        public static final String FEDERATED_GATEWAY_TYPE = "type";
-
-    }
 }

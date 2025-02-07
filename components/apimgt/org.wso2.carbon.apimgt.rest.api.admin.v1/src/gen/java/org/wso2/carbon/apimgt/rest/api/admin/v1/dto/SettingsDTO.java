@@ -85,14 +85,14 @@ public class SettingsDTO   {
   }
 
   /**
-   * Is Organization-based access control configuration enabled
+   * Is Organization-based access control configuration enabled 
    **/
   public SettingsDTO orgAccessControlEnabled(Boolean orgAccessControlEnabled) {
     this.orgAccessControlEnabled = orgAccessControlEnabled;
     return this;
   }
 
-
+  
   @ApiModelProperty(example = "true", value = "Is Organization-based access control configuration enabled ")
   @JsonProperty("orgAccessControlEnabled")
   public Boolean isOrgAccessControlEnabled() {
@@ -127,7 +127,7 @@ public class SettingsDTO   {
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("federatedGatewayConfiguration")

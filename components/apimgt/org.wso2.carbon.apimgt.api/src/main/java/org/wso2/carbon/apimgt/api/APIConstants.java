@@ -97,33 +97,4 @@ public class APIConstants {
         public static final String LLM_PROVIDER = "LLM_PROVIDER";
         public static final String LLM_PROVIDER_TENANT_ALL = "ALL";
     }
-
-    public static class FederatedGatewayConstants {
-        public static final String CORS_FEATURE = "cors";
-        public static final String SCHEMA_VALIDATION_FEATURE = "schemaValidation";
-        public static final String RESPONSE_CACHING_FEATURE = "responseCaching";
-        public static final String TRANSPORTS_HTTP_FEATURE = "transportsHTTP";
-        public static final String TRANSPORTS_HTTPS_FEATURE = "transportsHTTPS";
-        public static final String TRANSPORTS_MUTUAL_SSL_FEATURE = "transportsMutualSSL";
-        public static final String API_LEVEL_RATE_LIMITING_FEATURE = "apiLevelRateLimiting";
-        public static final String OPERATION_LEVEL_RATE_LIMITING_FEATURE = "operationLevelRateLimiting";
-        public static final String OPERATION_SECURITY_FEATURE = "operationSecurity";
-        public static final String OPERATION_SCOPES_FEATURE = "operationScopes";
-        public static final String OPERATION_LEVEL_POLICIES_FEATURE = "operationLevelPolicies";
-        public static final String MONETIZATION_FEATURE = "monetization";
-        public static final String SUBSCRIPTIONS_FEATURE = "subscriptions";
-        public static final String OAUTH2_FEATURE = "oauth2";
-        public static final String APIKEY_FEATURE = "apikey";
-        public static final String BASIC_AUTH_FEATURE = "basicAuth";
-        public static final String AUDIENCE_VALIDATION_FEATURE = "audienceValidation";
-        public static final String ENDPOINTS_REST_FEATURE = "restEndpoints";
-        public static final String ENDPOINTS_SERVICE_FEATURE = "serviceEndpoints";
-        public static final String ENDPOINTS_SOAP_FEATURE = "soapEndpoints";
-        public static final String ENDPOINTS_DYNAMIC_FEATURE = "dynamicEndpoints";
-        public static final String ENDPOINTS_MOCK_FEATURE = "mockEndpoints";
-        public static final String ENDPOINTS_LAMBDA_FEATURE = "lambdaEndpoints";
-        public static final String ENDPOINTS_SEQUENCE_BACKEND_FEATURE = "sequenceEndpoints";
-
-
-    }
 }
