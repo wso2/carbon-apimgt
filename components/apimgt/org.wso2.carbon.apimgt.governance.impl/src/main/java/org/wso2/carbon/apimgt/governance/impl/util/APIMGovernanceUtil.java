@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.DefaultRuleset;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
@@ -310,14 +310,14 @@ public class APIMGovernanceUtil {
      *
      * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType    Artifact Type
-     * @param governableState Governable state (The state at which the artifact should be governed)
+     * @param APIMGovernableState Governable state (The state at which the artifact should be governed)
      * @param organization    Organization
      * @return List of applicable policy IDs
      * @throws GovernanceException if an error occurs while checking for applicable policies
      */
     public static List<String> getApplicablePoliciesForArtifactWithState(String artifactRefId,
                                                                          ArtifactType artifactType,
-                                                                         GovernableState governableState,
+                                                                         APIMGovernableState APIMGovernableState,
                                                                          String organization)
             throws GovernanceException {
 
@@ -329,13 +329,13 @@ public class APIMGovernanceUtil {
         for (String label : labels) {
             // Get policies for the label and state
             List<String> policiesForLabel = policyManager
-                    .getPoliciesByLabelAndState(label, governableState, organization);
+                    .getPoliciesByLabelAndState(label, APIMGovernableState, organization);
             if (policiesForLabel != null) {
                 policies.addAll(policiesForLabel);
             }
         }
 
-        policies.addAll(policyManager.getOrganizationWidePoliciesByState(governableState,
+        policies.addAll(policyManager.getOrganizationWidePoliciesByState(APIMGovernableState,
                 organization));
 
         return new ArrayList<>(policies);
@@ -345,16 +345,16 @@ public class APIMGovernanceUtil {
      * Check for blocking actions in policies
      *
      * @param policyIds       List of policy IDs
-     * @param governableState Governable state
+     * @param APIMGovernableState Governable state
      * @return boolean
      * @throws GovernanceException if an error occurs while checking for blocking actions
      */
-    public static boolean isBlockingActionsPresent(List<String> policyIds, GovernableState governableState)
+    public static boolean isBlockingActionsPresent(List<String> policyIds, APIMGovernableState APIMGovernableState)
             throws GovernanceException {
         PolicyManager policyManager = new PolicyManager();
         boolean isBlocking = false;
         for (String policyId : policyIds) {
-            if (policyManager.isBlockingActionPresentForState(policyId, governableState)) {
+            if (policyManager.isBlockingActionPresentForState(policyId, APIMGovernableState)) {
                 isBlocking = true;
                 break;
             }

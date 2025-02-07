@@ -18,37 +18,43 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 /**
  * Enum class to represent the artifact types of a ruleset
  */
 public enum ExtendedArtifactType {
-    REST_API,
-    SOAP_API,
-    GRAPHQL_API,
-    ASYNC_API;
+    REST_API("rest_api"),
+    SOAP_API("soap_api"),
+    GRAPHQL_API("graphql_api"),
+    ASYNC_API("async_api");
 
-    public static ExtendedArtifactType fromString(String text) {
-        if ("rest_api".equalsIgnoreCase(text)) {
-            return REST_API;
-        } else if ("soap_api".equalsIgnoreCase(text)) {
-            return SOAP_API;
-        } else if ("graphql_api".equalsIgnoreCase(text)) {
-            return GRAPHQL_API;
-        } else if ("async_api".equalsIgnoreCase(text)) {
-            return ASYNC_API;
-        }
-        return null;
+    private static final Map<String, ExtendedArtifactType> STRING_TO_ENUM =
+            EnumSet.allOf(ExtendedArtifactType.class).stream()
+                    .collect(Collectors.toMap(e -> e.identifier, e -> e));
+
+    private final String identifier;
+
+    ExtendedArtifactType(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public static Optional<ExtendedArtifactType> fromString(String text) {
+        return Optional.ofNullable(STRING_TO_ENUM.get(text.toLowerCase()));
     }
 
     /**
-     * Check whether the artifact type is an API
+     * Check whether the artifact type is an API.
      *
      * @param artifactType Artifact type
      * @return True if the artifact type is an API
      */
     public static boolean isArtifactAPI(ExtendedArtifactType artifactType) {
-        return artifactType == REST_API || artifactType == SOAP_API
-                || artifactType == GRAPHQL_API || artifactType == ASYNC_API;
+        return EnumSet.of(REST_API, SOAP_API, GRAPHQL_API, ASYNC_API).contains(artifactType);
     }
 }
+
 

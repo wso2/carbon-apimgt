@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.mappings;
 
-import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
@@ -58,7 +58,7 @@ public class PolicyMappingUtil {
         govPolicy.setActions(fromActionDTOListtoActionList(dto.getActions()));
         govPolicy.setGovernableStates(dto.getGovernableStates().stream()
                 .map(Enum::name)
-                .map(GovernableState::fromString)
+                .map(APIMGovernableState::fromString)
                 .collect(Collectors.toList()));
 
         List<String> labels = dto.getLabels();
@@ -116,7 +116,7 @@ public class PolicyMappingUtil {
         List<GovernanceAction> governanceActions = new ArrayList<>();
         for (ActionDTO action : actions) {
             GovernanceAction governanceAction = new GovernanceAction();
-            governanceAction.setGovernableState(GovernableState.fromString(String.valueOf(
+            governanceAction.setGovernableState(APIMGovernableState.fromString(String.valueOf(
                     action.getState())));
             governanceAction.setRuleSeverity(RuleSeverity.fromString(String.valueOf(action.getRuleSeverity())));
             governanceAction.setType(GovernanceActionType.fromString(String.valueOf(action.getType())));

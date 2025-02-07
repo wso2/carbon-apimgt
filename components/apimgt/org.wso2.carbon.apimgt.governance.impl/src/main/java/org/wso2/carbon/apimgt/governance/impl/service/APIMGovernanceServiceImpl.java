@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
@@ -74,7 +74,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      */
     @Override
     public boolean isPoliciesWithBlockingActionExist(String artifactRefId,
-                                                     ArtifactType artifactType, GovernableState state,
+                                                     ArtifactType artifactType, APIMGovernableState state,
                                                      String organization)
             throws GovernanceException {
 
@@ -95,12 +95,12 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      */
     @Override
     public void evaluateComplianceAsync(String artifactRefId, ArtifactType artifactType,
-                                        GovernableState state, String organization) throws
+                                        APIMGovernableState state, String organization) throws
             GovernanceException {
 
-        List<GovernableState> dependentGovernableStates = GovernableState.getDependentGovernableStates(state);
+        List<APIMGovernableState> dependentAPIMGovernableStates = APIMGovernableState.getDependentGovernableStates(state);
 
-        for (GovernableState dependentState : dependentGovernableStates) {
+        for (APIMGovernableState dependentState : dependentAPIMGovernableStates) {
             List<String> applicablePolicyIds = APIMGovernanceUtil
                     .getApplicablePoliciesForArtifactWithState(artifactRefId,
                             artifactType, dependentState, organization);
@@ -129,7 +129,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      */
     @Override
     public ArtifactComplianceInfo evaluateComplianceSync(String artifactRefId, String revisionNo,
-                                                         ArtifactType artifactType, GovernableState state,
+                                                         ArtifactType artifactType, APIMGovernableState state,
                                                          Map<RuleType, String> artifactProjectContent,
                                                          String organization) throws GovernanceException {
 

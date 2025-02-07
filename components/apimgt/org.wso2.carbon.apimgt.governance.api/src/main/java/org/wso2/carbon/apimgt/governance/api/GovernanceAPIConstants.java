@@ -44,6 +44,11 @@ public class GovernanceAPIConstants {
 
     public static final String POLICY_ADHERENCE_GET_URL =
             POLICY_ADHERENCE_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM;
+    public static final String YAML_FILE_TYPE = ".yaml";
+    public static final String YML_FILE_TYPE = ".yml";
+    public static final String JSON_FILE_TYPE = ".json";
+    public static final String PATH_SEPARATOR = "/";
+    public static final String DELEM_UNDERSCORE = "_";
 
 }
 

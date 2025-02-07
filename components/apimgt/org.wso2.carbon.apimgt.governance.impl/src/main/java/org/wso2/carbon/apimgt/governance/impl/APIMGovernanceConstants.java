@@ -28,7 +28,7 @@ public class APIMGovernanceConstants {
     public static final String YAML_FILE_TYPE = ".yaml";
     public static final String MIGRATE = "migrate";
 
-    public static final String DEFINITIONS_FOLDER = "Definitions/";
+    public static final String DEFINITIONS_FOLDER = "Definitions";
     public static final String SWAGGER_FILE_NAME = "swagger.yaml";
     public static final String ASYNC_API_FILE_NAME = "asyncapi.yaml";
     public static final String API_FILE_NAME = "api.yaml";

@@ -91,7 +91,7 @@ public class DefaultRuleset {
         try {
             rulesetContentString = objectMapper.writeValueAsString(rulesetContent);
         } catch (JsonProcessingException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT, e);
         }
         return rulesetContentString;
     }

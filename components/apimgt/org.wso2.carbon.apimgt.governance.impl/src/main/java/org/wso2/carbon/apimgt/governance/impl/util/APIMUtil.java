@@ -31,7 +31,7 @@ import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -94,8 +94,8 @@ public class APIMUtil {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             return apiIdentifier.getApiName();
         } catch (APIManagementException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_INFO,
-                    apiId, e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_INFO, e,
+                    apiId);
         }
     }
 
@@ -112,8 +112,8 @@ public class APIMUtil {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             return apiIdentifier.getVersion();
         } catch (APIManagementException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_INFO,
-                    apiId, e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_INFO, e,
+                    apiId);
         }
     }
 
@@ -129,8 +129,8 @@ public class APIMUtil {
         try {
             return ApiMgtDAO.getInstance().getAPIStatusFromAPIUUID(apiId);
         } catch (APIManagementException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_LC_STATUS_OF_API,
-                    apiId, e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_LC_STATUS_OF_API, e,
+                    apiId);
         }
     }
 
@@ -184,8 +184,8 @@ public class APIMUtil {
                 ); // returns zip file
                 return Files.readAllBytes(apiProject.toPath());
             } catch (APIManagementException | APIImportExportException | IOException e) {
-                throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_APIM_PROJECT,
-                        apiId, e);
+                throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_APIM_PROJECT, e,
+                        apiId);
             }
         }
     }
@@ -195,25 +195,25 @@ public class APIMUtil {
      *
      * @param status           API status
      * @param isDeployed       API deployment status
-     * @param governableStates List of governable states
+     * @param APIMGovernableStates List of governable states
      * @return True if the API is governable
      */
-    public static boolean isAPIGovernable(String status, boolean isDeployed, List<GovernableState> governableStates) {
+    public static boolean isAPIGovernable(String status, boolean isDeployed, List<APIMGovernableState> APIMGovernableStates) {
 
         // If API is in any state we need to run created and update policies
-        boolean isGovernable = governableStates.contains(GovernableState.API_CREATE)
-                || governableStates.contains(GovernableState.API_UPDATE);
+        boolean isGovernable = APIMGovernableStates.contains(APIMGovernableState.API_CREATE)
+                || APIMGovernableStates.contains(APIMGovernableState.API_UPDATE);
 
         // If the API is deployed, we need to run deploy policies
         if (isDeployed) {
-            isGovernable |= governableStates.contains(GovernableState.API_DEPLOY);
+            isGovernable |= APIMGovernableStates.contains(APIMGovernableState.API_DEPLOY);
         }
 
         // If the API is in published, deprecated or blocked state, we need to run publish policies
         if (APIStatus.PUBLISHED.equals(APIStatus.valueOf(status)) ||
                 APIStatus.DEPRECATED.equals(APIStatus.valueOf(status)) ||
                 APIStatus.BLOCKED.equals(APIStatus.valueOf(status))) {
-            isGovernable |= governableStates.contains(GovernableState.API_PUBLISH);
+            isGovernable |= APIMGovernableStates.contains(APIMGovernableState.API_PUBLISH);
         }
 
         return isGovernable;
@@ -272,7 +272,7 @@ public class APIMUtil {
                 }
             }
         } catch (IOException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_EXTRACTING_API_METADATA);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_EXTRACTING_API_METADATA, e);
         }
         return null; // Return null if no matching metadata is found
     }
@@ -291,7 +291,7 @@ public class APIMUtil {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(apiProjectZip))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().contains(APIMGovernanceConstants.DEFINITIONS_FOLDER +
+                if (entry.getName().contains(APIMGovernanceConstants.DEFINITIONS_FOLDER + File.separator +
                         APIMGovernanceConstants.SWAGGER_FILE_NAME)) {
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     byte[] buffer = new byte[1024];
@@ -301,7 +301,7 @@ public class APIMUtil {
                     }
                     defContent = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
                     return defContent;
-                } else if (entry.getName().contains(APIMGovernanceConstants.DEFINITIONS_FOLDER +
+                } else if (entry.getName().contains(APIMGovernanceConstants.DEFINITIONS_FOLDER + File.separator +
                         APIMGovernanceConstants.ASYNC_API_FILE_NAME)) {
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     byte[] buffer = new byte[1024];
@@ -314,7 +314,7 @@ public class APIMUtil {
                 }
             }
         } catch (IOException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_EXTRACTING_API_DEFINITION);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_EXTRACTING_API_DEFINITION, e);
         }
         return null; // Return null if no matching swagger content is found
     }
@@ -330,7 +330,7 @@ public class APIMUtil {
         try {
             return LabelsDAO.getInstance().getMappedLabelIDsForApi(apiId);
         } catch (APIManagementException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_LABELS_FOR_API, apiId, e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_LABELS_FOR_API, e, apiId);
         }
     }
 
@@ -352,7 +352,7 @@ public class APIMUtil {
             return apiIds;
 
         } catch (APIManagementException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_APIS_FOR_LABEL, labelId, e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_APIS_FOR_LABEL, e, labelId);
         }
     }
 
@@ -374,7 +374,7 @@ public class APIMUtil {
             }
             return apiIds;
         } catch (APIManagementException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_LIST, organization, e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_LIST, e, organization);
         }
 
     }
@@ -397,8 +397,8 @@ public class APIMUtil {
             APIIdentifier apiIdentifier = new APIIdentifier(apiProvider, apiName, apiVersion);
             return apimgtDAO.getUUIDFromIdentifier(apiIdentifier);
         } catch (APIManagementException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_UUID_WITH_NAME_VERSION,
-                    apiName, apiVersion, e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_UUID_WITH_NAME_VERSION, e,
+                    apiName, apiVersion);
         }
     }
 
@@ -413,7 +413,7 @@ public class APIMUtil {
         try {
             return ApiMgtDAO.getInstance().getAPITypeFromUUID(apiId);
         } catch (APIManagementException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_TYPE, apiId, e);
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_TYPE, e, apiId);
         }
     }
 
