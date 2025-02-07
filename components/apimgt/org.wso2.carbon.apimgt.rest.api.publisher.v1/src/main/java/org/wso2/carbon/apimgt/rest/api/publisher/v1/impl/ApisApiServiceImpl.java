@@ -45,7 +45,7 @@ import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
@@ -631,7 +631,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         updatedAPI.setOrganization(organization);
         try {
             Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(updatedAPI.getUuid(),
-                    GovernableState.API_UPDATE, ArtifactType.API, organization, null, null);
+                    APIMGovernableState.API_UPDATE, ArtifactType.API, organization, null, null);
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                     && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
@@ -639,7 +639,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         .entity(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE)).build();
             }
             apiProvider.updateAPI(updatedAPI, existingAPI);
-            PublisherCommonUtils.checkGovernanceComplianceAsync(updatedAPI.getUuid(),GovernableState.API_UPDATE,
+            PublisherCommonUtils.checkGovernanceComplianceAsync(updatedAPI.getUuid(), APIMGovernableState.API_UPDATE,
                     ArtifactType.API, organization);
         } catch (FaultGatewaysException e) {
             String errorMessage = "Error while updating API : " + apiId;
@@ -781,7 +781,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(originalAPI.getStatus());
             Map<String, String> complianceResult = PublisherCommonUtils
-                    .checkGovernanceComplianceSync(originalAPI.getUuid(), GovernableState.API_UPDATE,
+                    .checkGovernanceComplianceSync(originalAPI.getUuid(), APIMGovernableState.API_UPDATE,
                             ArtifactType.fromString(originalAPI.getType()), originalAPI.getOrganization(),
                             null, null);
             if (!complianceResult.isEmpty()
@@ -792,7 +792,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes, organizationInfo);
 
-            PublisherCommonUtils.checkGovernanceComplianceAsync(originalAPI.getUuid(), GovernableState.API_UPDATE,
+            PublisherCommonUtils.checkGovernanceComplianceAsync(originalAPI.getUuid(), APIMGovernableState.API_UPDATE,
                     ArtifactType.API, originalAPI.getOrganization());
             return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
         } catch (APIManagementException e) {
@@ -2569,7 +2569,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     }
                     API originalAPI = provider.getAPIbyUUID(apiId, organization);
                     Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(api.getUuid(),
-                            GovernableState.API_UPDATE, ArtifactType.API, organization, null, null);
+                            APIMGovernableState.API_UPDATE, ArtifactType.API, organization, null, null);
                     if (!complianceResult.isEmpty()
                             && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                             && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
@@ -2583,7 +2583,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                             .getResourcePolicyFromRegistryResourceId(api, resourcePolicyId);
                     ResourcePolicyInfoDTO resourcePolicyInfoDTO = APIMappingUtil
                             .fromResourcePolicyStrToInfoDTO(updatedPolicyContent);
-                    PublisherCommonUtils.checkGovernanceComplianceAsync(api.getUuid(),GovernableState.API_UPDATE,
+                    PublisherCommonUtils.checkGovernanceComplianceAsync(api.getUuid(), APIMGovernableState.API_UPDATE,
                             ArtifactType.API, organization);
                     return Response.ok().entity(resourcePolicyInfoDTO).build();
                 } else {
@@ -3196,7 +3196,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiToAdd.setWsdlUrl(url);
             API createdApi = null;
             Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiToAdd.getUuid(),
-                    GovernableState.API_CREATE, ArtifactType.API, organization, null, null);
+                    APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                     && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
@@ -3220,7 +3220,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
             //This URI used to set the location header of the POST response
             createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
-            PublisherCommonUtils.checkGovernanceComplianceAsync(createdApi.getUuid(), GovernableState.API_CREATE,
+            PublisherCommonUtils.checkGovernanceComplianceAsync(createdApi.getUuid(), APIMGovernableState.API_CREATE,
                     ArtifactType.API, organization);
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (IOException | URISyntaxException e) {
@@ -3268,7 +3268,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //adding the api
             Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiToAdd.getUuid(),
-                    GovernableState.API_CREATE, ArtifactType.API,
+                    APIMGovernableState.API_CREATE, ArtifactType.API,
                     organization, null, null);
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
@@ -3296,7 +3296,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String apiDefinition = ApisApiServiceImplUtils.generateSOAPAPIDefinition(apiToAdd, soapOperation);
             apiProvider.saveSwaggerDefinition(apiToAdd, apiDefinition, organization);
             //Retrieve the newly added API to send in the response payload
-            PublisherCommonUtils.checkGovernanceComplianceAsync(apiToAdd.getUuid(), GovernableState.API_CREATE,
+            PublisherCommonUtils.checkGovernanceComplianceAsync(apiToAdd.getUuid(), APIMGovernableState.API_CREATE,
                     ArtifactType.API, organization);
             return apiProvider.getAPIbyUUID(apiToAdd.getUuid(), organization);
         } catch (APIManagementException e) {
@@ -3322,7 +3322,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //adding the api
             Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiToAdd.getUuid(),
-                    GovernableState.API_CREATE, ArtifactType.API,
+                    APIMGovernableState.API_CREATE, ArtifactType.API,
                     organization, null, null);
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
@@ -3331,7 +3331,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             API createdApi = apiProvider.addAPI(apiToAdd);
 
-            PublisherCommonUtils.checkGovernanceComplianceAsync(apiToAdd.getUuid(), GovernableState.API_CREATE,
+            PublisherCommonUtils.checkGovernanceComplianceAsync(apiToAdd.getUuid(), APIMGovernableState.API_CREATE,
                     ArtifactType.API, organization);
             String filename = null;
             if (fileDetail != null) {
@@ -3679,7 +3679,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //adding the api
             Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiToAdd.getUuid(),
-                    GovernableState.API_CREATE, ArtifactType.API, organization, null, null);
+                    APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
 
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
@@ -3694,7 +3694,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             //This URI used to set the location header of the POST response
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
-            PublisherCommonUtils.checkGovernanceComplianceAsync(createdApi.getUuid(), GovernableState.API_CREATE,
+            PublisherCommonUtils.checkGovernanceComplianceAsync(createdApi.getUuid(), APIMGovernableState.API_CREATE,
                     ArtifactType.API, organization);
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (APIManagementException e) {
@@ -3996,7 +3996,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevision.setApiUUID(apiId);
             apiRevision.setDescription(apIRevisionDTO.getDescription());
             Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiId,
-                    GovernableState.API_DEPLOY, ArtifactType.API, organization, null, null);
+                    APIMGovernableState.API_DEPLOY, ArtifactType.API, organization, null, null);
 
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
@@ -4014,7 +4014,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS
                     + "/" + createdApiRevisionDTO.getApiInfo().getId() + "/"
                     + RestApiConstants.RESOURCE_PATH_REVISIONS + "/" + createdApiRevisionDTO.getId());
-            PublisherCommonUtils.checkGovernanceComplianceAsync(apiId, GovernableState.API_DEPLOY,
+            PublisherCommonUtils.checkGovernanceComplianceAsync(apiId, APIMGovernableState.API_DEPLOY,
                     ArtifactType.API, organization);
             return Response.created(createdApiUri).entity(createdApiRevisionDTO).build();
         } catch (APIManagementException e) {
@@ -4137,7 +4137,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
         Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiId,
-                GovernableState.API_DEPLOY, ArtifactType.API, organization, null, null);
+                APIMGovernableState.API_DEPLOY, ArtifactType.API, organization, null, null);
         if (!complianceResult.isEmpty()
                 && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                 && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
@@ -4150,7 +4150,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             apiRevisionDeploymentDTOS.add(APIMappingUtil.fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
         }
         Response.Status status = Response.Status.CREATED;
-        PublisherCommonUtils.checkGovernanceComplianceAsync(apiId, GovernableState.API_DEPLOY,
+        PublisherCommonUtils.checkGovernanceComplianceAsync(apiId, APIMGovernableState.API_DEPLOY,
                 ArtifactType.API, organization);
         return Response.status(status).entity(apiRevisionDeploymentDTOS).build();
     }
@@ -4624,7 +4624,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         protocol));
                 artifactType = ArtifactType.API;
             }
-            Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiId, GovernableState.API_UPDATE,
+            Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiId, APIMGovernableState.API_UPDATE,
                     artifactType, organization, null, null);
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
@@ -4701,7 +4701,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiCommonUtil.getLoggedInUsername(), organization);
         boolean syncOperations = !apiDTOFromProperties.getOperations().isEmpty();
         Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiToAdd.getUuid(),
-                GovernableState.API_CREATE, ArtifactType.API, organization, null, null);
+                APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
         if (!complianceResult.isEmpty()
                 && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                 && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
@@ -4709,7 +4709,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         }
         API addedAPI = ApisApiServiceImplUtils.importAPIDefinition(apiToAdd, apiProvider, organization,
                 service, validationResponse, isServiceAPI, syncOperations);
-        PublisherCommonUtils.checkGovernanceComplianceAsync(addedAPI.getUuid(), GovernableState.API_CREATE,
+        PublisherCommonUtils.checkGovernanceComplianceAsync(addedAPI.getUuid(), APIMGovernableState.API_CREATE,
                 ArtifactType.API, organization);
         return APIMappingUtil.fromAPItoDTO(addedAPI);
     }
@@ -4742,7 +4742,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiDTOFromProperties.getId(),
-                    GovernableState.API_CREATE, ArtifactType.API, organization, null, null);
+                    APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
 
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null

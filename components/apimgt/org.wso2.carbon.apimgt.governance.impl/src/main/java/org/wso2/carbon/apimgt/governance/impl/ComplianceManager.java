@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
@@ -87,16 +87,16 @@ public class ComplianceManager {
         GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId);
 
         List<String> labels = policy.getLabels();
-        List<GovernableState> governableStates = policy.getGovernableStates();
+        List<APIMGovernableState> APIMGovernableStates = policy.getGovernableStates();
 
         // Get artifacts that should be governed by the policy
         List<ArtifactInfo> artifacts = new ArrayList<>();
 
         if (policy.isGlobal()) {
             // If the policy is a global policy, get all artifacts
-            artifacts.addAll(getArtifactsByGovernableStates(governableStates, organization));
+            artifacts.addAll(getArtifactsByGovernableStates(APIMGovernableStates, organization));
         } else if (labels != null && !labels.isEmpty()) {
-            artifacts.addAll(getArtifactsByLabelsAndGovernableStates(labels, governableStates));
+            artifacts.addAll(getArtifactsByLabelsAndGovernableStates(labels, APIMGovernableStates));
         }
 
         for (ArtifactInfo artifact : artifacts) {
@@ -110,25 +110,25 @@ public class ComplianceManager {
     /**
      * Get Artifacts by Governable States
      *
-     * @param governableStates List of governable states
+     * @param APIMGovernableStates List of governable states
      * @param organization     Organization
      * @return List of unique artifact information
      */
-    private List<ArtifactInfo> getArtifactsByGovernableStates(List<GovernableState> governableStates,
+    private List<ArtifactInfo> getArtifactsByGovernableStates(List<APIMGovernableState> APIMGovernableStates,
                                                               String organization) throws GovernanceException {
         Map<ArtifactType, List<String>> artifactsMap = APIMGovernanceUtil.getAllArtifacts(organization);
-        return filterAndCollectArtifacts(artifactsMap, governableStates);
+        return filterAndCollectArtifacts(artifactsMap, APIMGovernableStates);
     }
 
     /**
      * Get Artifacts by Labels and Governable State
      *
      * @param labels           List of labels
-     * @param governableStates List of governable states
+     * @param APIMGovernableStates List of governable states
      * @return List of unique artifact information
      */
     private List<ArtifactInfo> getArtifactsByLabelsAndGovernableStates(List<String> labels,
-                                                                       List<GovernableState> governableStates)
+                                                                       List<APIMGovernableState> APIMGovernableStates)
             throws GovernanceException {
         List<ArtifactInfo> artifactInfoList = new ArrayList<>();
         Set<String> artifactRefIds = new HashSet<>(); // Track unique artifact IDs
@@ -138,7 +138,7 @@ public class ComplianceManager {
             Map<ArtifactType, List<String>> artifactsMap = APIMGovernanceUtil.getArtifactsForLabel(label);
 
             // Collect artifacts by filtering based on governable states
-            List<ArtifactInfo> filteredArtifacts = filterAndCollectArtifacts(artifactsMap, governableStates);
+            List<ArtifactInfo> filteredArtifacts = filterAndCollectArtifacts(artifactsMap, APIMGovernableStates);
 
             // Add only unique artifacts based on artifactRefId
             for (ArtifactInfo artifactInfo : filteredArtifacts) {
@@ -155,11 +155,11 @@ public class ComplianceManager {
      * Filter and collect artifacts based on governable states
      *
      * @param artifactsMap     Map of artifact type to list of artifact IDs
-     * @param governableStates List of governable states
+     * @param APIMGovernableStates List of governable states
      * @return List of unique artifact information
      */
     private List<ArtifactInfo> filterAndCollectArtifacts(Map<ArtifactType, List<String>> artifactsMap,
-                                                         List<GovernableState> governableStates)
+                                                         List<APIMGovernableState> APIMGovernableStates)
             throws GovernanceException {
 
         List<ArtifactInfo> artifactInfoList = new ArrayList<>();
@@ -172,7 +172,7 @@ public class ComplianceManager {
                 for (String artifactRefId : artifactRefIds) {
                     String apiStatus = APIMUtil.getAPIStatus(artifactRefId);
                     boolean isDeployed = APIMUtil.isAPIDeployed(artifactRefId);
-                    boolean isAPIGovernable = APIMUtil.isAPIGovernable(apiStatus, isDeployed, governableStates);
+                    boolean isAPIGovernable = APIMUtil.isAPIGovernable(apiStatus, isDeployed, APIMGovernableStates);
                     // If the API should be governed by the policy
                     if (isAPIGovernable) {
                         ArtifactInfo artifactInfo = new ArtifactInfo();
@@ -467,7 +467,7 @@ public class ComplianceManager {
                                                            String revisionNo, ArtifactType artifactType,
                                                            List<String> govPolicies,
                                                            Map<RuleType, String> artifactProjectContent,
-                                                           GovernableState state, String organization)
+                                                           APIMGovernableState state, String organization)
             throws GovernanceException {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
@@ -649,7 +649,7 @@ public class ComplianceManager {
     private Map<GovernanceActionType, List<RuleViolation>>
     filterBlockableAndNonBlockableRuleViolations(String artifactRefId, ArtifactType artifactType,
                                                  GovernancePolicy policy,
-                                                 List<RuleViolation> ruleViolations, GovernableState state,
+                                                 List<RuleViolation> ruleViolations, APIMGovernableState state,
                                                  String organization) {
 
         // Identify blockable severities from the policy

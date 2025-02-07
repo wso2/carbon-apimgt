@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 
 import java.util.List;
@@ -45,7 +45,7 @@ public interface APIMGovernanceService {
      * @throws GovernanceException If an error occurs while checking for policies with blocking actions
      */
     boolean isPoliciesWithBlockingActionExist(String artifactRefId, ArtifactType artifactType,
-                                              GovernableState state, String organization) throws GovernanceException;
+                                              APIMGovernableState state, String organization) throws GovernanceException;
 
     /**
      * Evaluate compliance of the artifact asynchronously
@@ -57,7 +57,7 @@ public interface APIMGovernanceService {
      * @throws GovernanceException If an error occurs while evaluating compliance
      */
     void evaluateComplianceAsync(String artifactRefId, ArtifactType artifactType,
-                                 GovernableState state,
+                                 APIMGovernableState state,
                                  String organization) throws GovernanceException;
 
     /**
@@ -78,7 +78,7 @@ public interface APIMGovernanceService {
      * @throws GovernanceException If an error occurs while evaluating compliance
      */
     ArtifactComplianceInfo evaluateComplianceSync(String artifactRefId, String revisionNo, ArtifactType artifactType,
-                                                  GovernableState state, Map<RuleType, String> artifactProjectContent,
+                                                  APIMGovernableState state, Map<RuleType, String> artifactProjectContent,
                                                   String organization) throws GovernanceException;
 
     /**

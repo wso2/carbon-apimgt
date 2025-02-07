@@ -18,6 +18,12 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+import static org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants.DELEM_UNDERSCORE;
+import static org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants.JSON_FILE_TYPE;
+import static org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants.PATH_SEPARATOR;
+import static org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants.YAML_FILE_TYPE;
+import static org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants.YML_FILE_TYPE;
+
 /**
  * This class represents the Ruleset Content
  */
@@ -62,10 +68,10 @@ public class RulesetContent {
     }
 
     public void setFileName(String fileName) {
-        fileName = fileName.replaceAll("/", "_");
-        if (fileName.endsWith(".yaml") || fileName.endsWith(".yml")) {
+        fileName = fileName.replaceAll(PATH_SEPARATOR, DELEM_UNDERSCORE);
+        if (fileName.endsWith(YAML_FILE_TYPE) || fileName.endsWith(YML_FILE_TYPE)) {
             this.contentType = ContentType.YAML;
-        } else if (fileName.endsWith(".json")) {
+        } else if (fileName.endsWith(JSON_FILE_TYPE)) {
             this.contentType = ContentType.JSON;
         }
         this.fileName = fileName;

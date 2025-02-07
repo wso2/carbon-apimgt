@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
@@ -170,7 +170,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                 .CREATE_GOVERNANCE_POLICY_STATE_MAPPING)) {
-            for (GovernableState state : governancePolicy.getGovernableStates()) {
+            for (APIMGovernableState state : governancePolicy.getGovernableStates()) {
                 prepStmt.setString(1, governancePolicy.getId());
                 prepStmt.setString(2, String.valueOf(state));
                 prepStmt.addBatch();
@@ -323,11 +323,11 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             ps.executeUpdate();
         }
 
-        List<GovernableState> statesToAdd = governancePolicy.getGovernableStates();
+        List<APIMGovernableState> statesToAdd = governancePolicy.getGovernableStates();
         if (statesToAdd != null && !statesToAdd.isEmpty()) {
             try (PreparedStatement ps =
                          connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_STATE_MAPPING)) {
-                for (GovernableState state : statesToAdd) {
+                for (APIMGovernableState state : statesToAdd) {
                     ps.setString(1, policyId);
                     ps.setString(2, String.valueOf(state));
                     ps.addBatch();
@@ -505,8 +505,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             return rulesetList;
         } catch (SQLException e) {
             throw new GovernanceException(GovernanceExceptionCodes.
-                    ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY,
-                    e, policyId);
+                    ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY, e, policyId);
         }
     }
 
@@ -607,7 +606,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @return List of Policy IDs
      */
     @Override
-    public List<String> getPoliciesByLabelAndState(String label, GovernableState state, String organization)
+    public List<String> getPoliciesByLabelAndState(String label, APIMGovernableState state, String organization)
             throws GovernanceException {
         List<String> policyIds = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
@@ -647,7 +646,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return policyIds;
         } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES,
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
                     organization);
         }
     }
@@ -660,7 +659,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @return List of Policy IDs
      */
     @Override
-    public List<String> getGlobalPoliciesWithState(GovernableState state, String organization)
+    public List<String> getGlobalPoliciesWithState(APIMGovernableState state, String organization)
             throws GovernanceException {
         List<String> policyIds = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
@@ -676,7 +675,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return policyIds;
         } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES,
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
                     organization);
         }
     }
@@ -697,7 +696,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     GovernanceAction action = new GovernanceAction();
-                    action.setGovernableState(GovernableState.fromString(resultSet
+                    action.setGovernableState(APIMGovernableState.fromString(resultSet
                             .getString("STATE")));
                     action.setRuleSeverity(RuleSeverity.fromString(resultSet.getString("SEVERITY")));
                     action.setType(GovernanceActionType.fromString(resultSet.getString("TYPE")));
@@ -826,14 +825,14 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @return List of States
      * @throws SQLException If an error occurs while retrieving the states (Captured at higher level)
      */
-    private List<GovernableState> getStatesByPolicyId(String policyId, Connection connection) throws SQLException {
-        List<GovernableState> states = new ArrayList<>();
+    private List<APIMGovernableState> getStatesByPolicyId(String policyId, Connection connection) throws SQLException {
+        List<APIMGovernableState> states = new ArrayList<>();
         try (PreparedStatement prepStmt =
                      connection.prepareStatement(SQLConstants.GET_STATES_BY_POLICY_ID)) {
             prepStmt.setString(1, policyId);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
-                    states.add(GovernableState.fromString(resultSet.getString("STATE")));
+                    states.add(APIMGovernableState.fromString(resultSet.getString("STATE")));
                 }
             }
         }
@@ -856,7 +855,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     GovernanceAction action = new GovernanceAction();
-                    action.setGovernableState(GovernableState.fromString(resultSet
+                    action.setGovernableState(APIMGovernableState.fromString(resultSet
                             .getString("STATE")));
                     action.setRuleSeverity(RuleSeverity.fromString(resultSet.getString("SEVERITY")));
                     action.setType(GovernanceActionType.fromString(resultSet.getString("TYPE")));

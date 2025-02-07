@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.governance.impl;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
-import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
@@ -94,16 +94,16 @@ public class PolicyManager {
     private void checkForInvalidActions(GovernancePolicy policy)
             throws GovernanceException {
 
-        List<GovernableState> governableStates = policy.getGovernableStates();
+        List<APIMGovernableState> APIMGovernableStates = policy.getGovernableStates();
         List<GovernanceAction> actions = policy.getActions();
         for (GovernanceAction action : actions) {
-            if (!governableStates.contains(action.getGovernableState())) {
+            if (!APIMGovernableStates.contains(action.getGovernableState())) {
                 throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY,
                         "Invalid governable state found in the policy. Please update the policy");
             }
             if (GovernanceActionType.BLOCK.equals(action.getType()) &&
-                    (GovernableState.API_CREATE.equals(action.getGovernableState()) ||
-                            GovernableState.API_UPDATE.equals(action.getGovernableState()))) {
+                    (APIMGovernableState.API_CREATE.equals(action.getGovernableState()) ||
+                            APIMGovernableState.API_UPDATE.equals(action.getGovernableState()))) {
                 throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY,
                         "Creating policies with blocking actions for API" +
                                 " create/update is not allowed. Please update the policy");
@@ -119,9 +119,9 @@ public class PolicyManager {
      */
     private void addMissingNotifyActions(GovernancePolicy policy) {
 
-        List<GovernableState> governableStates = policy.getGovernableStates();
+        List<APIMGovernableState> APIMGovernableStates = policy.getGovernableStates();
         List<GovernanceAction> actions = policy.getActions();
-        for (GovernableState state : governableStates) {
+        for (APIMGovernableState state : APIMGovernableStates) {
             for (RuleSeverity severity : RuleSeverity.values()) {
                 boolean isActionPresent = false;
                 for (GovernanceAction action : actions) {
@@ -232,7 +232,7 @@ public class PolicyManager {
      * @throws GovernanceException If an error occurs while getting the policies
      */
 
-    public List<String> getPoliciesByLabelAndState(String label, GovernableState state, String organization)
+    public List<String> getPoliciesByLabelAndState(String label, APIMGovernableState state, String organization)
             throws GovernanceException {
         return policyMgtDAO.getPoliciesByLabelAndState(label, state, organization);
     }
@@ -246,7 +246,7 @@ public class PolicyManager {
      * @throws GovernanceException If an error occurs while getting the policies
      */
 
-    public List<String> getOrganizationWidePoliciesByState(GovernableState state, String organization)
+    public List<String> getOrganizationWidePoliciesByState(APIMGovernableState state, String organization)
             throws GovernanceException {
         return policyMgtDAO.getGlobalPoliciesWithState(state, organization);
     }
@@ -260,7 +260,7 @@ public class PolicyManager {
      * @throws GovernanceException If an error occurs while checking the presence of blocking action
      */
 
-    public boolean isBlockingActionPresentForState(String policyId, GovernableState state)
+    public boolean isBlockingActionPresentForState(String policyId, APIMGovernableState state)
             throws GovernanceException {
         boolean isBlockingActionPresent = false;
         List<GovernanceAction> actions = policyMgtDAO.getActionsByPolicyId(policyId);

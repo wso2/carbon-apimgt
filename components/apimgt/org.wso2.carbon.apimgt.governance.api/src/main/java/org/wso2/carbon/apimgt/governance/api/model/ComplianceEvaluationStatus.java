@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 /**
  * This class represents an evaluation status of a request
  */
@@ -25,12 +29,14 @@ public enum ComplianceEvaluationStatus {
     PENDING,
     PROCESSING;
 
+    private static final Map<String, ComplianceEvaluationStatus> STRING_TO_ENUM =
+            Stream.of(values())
+                    .collect(Collectors.toMap(status -> status.name().toLowerCase(), status -> status));
+
     public static ComplianceEvaluationStatus fromString(String statusString) {
-        if ("pending".equalsIgnoreCase(statusString)) {
-            return ComplianceEvaluationStatus.PENDING;
-        } else if ("processing".equalsIgnoreCase(statusString)) {
-            return ComplianceEvaluationStatus.PROCESSING;
-        }
-        return ComplianceEvaluationStatus.PENDING;
+        return STRING_TO_ENUM.getOrDefault(
+                statusString != null ? statusString.toLowerCase() : "",
+                PENDING
+        );
     }
 }
