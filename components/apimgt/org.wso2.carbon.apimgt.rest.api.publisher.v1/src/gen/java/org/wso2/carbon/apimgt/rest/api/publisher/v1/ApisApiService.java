@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityIn
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import java.util.List;
@@ -46,6 +47,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PatchRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PostRequestBodyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.RequestLabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
@@ -76,6 +78,7 @@ public interface ApisApiService {
       public Response apisApiIdAsyncapiPut(String apiId, String ifMatch, String apiDefinition, String url, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdEnvironmentsEnvIdKeysGet(String apiId, String envId, MessageContext messageContext) throws APIManagementException;
       public Response apisApiIdEnvironmentsEnvIdKeysPut(String apiId, String envId, Map<String, String> requestBody, MessageContext messageContext) throws APIManagementException;
+      public Response attachLabelsToAPI(String apiId, RequestLabelListDTO requestLabelListDTO, MessageContext messageContext) throws APIManagementException;
       public Response changeAPILifecycle(String action, String apiId, String lifecycleChecklist, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response createAPI(APIDTO APIDTO, String openAPIVersion, MessageContext messageContext) throws APIManagementException;
       public Response createAPIRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) throws APIManagementException;
@@ -90,6 +93,7 @@ public interface ApisApiService {
       public Response deleteAPISpecificOperationPolicyByPolicyId(String apiId, String operationPolicyId, MessageContext messageContext) throws APIManagementException;
       public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
+      public Response detachLabelsFromAPI(String apiId, RequestLabelListDTO requestLabelListDTO, MessageContext messageContext) throws APIManagementException;
       public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO, MessageContext messageContext) throws APIManagementException;
       public Response exportAPI(String apiId, String name, String version, String revisionNumber, String providerName, String format, Boolean preserveStatus, Boolean latestRevision, String gatewayEnvironment, MessageContext messageContext) throws APIManagementException;
       public Response generateInternalAPIKey(String apiId, MessageContext messageContext) throws APIManagementException;
@@ -129,6 +133,7 @@ public interface ApisApiService {
       public Response getGeneratedMockScriptsOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getGraphQLPolicyComplexityOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getGraphQLPolicyComplexityTypesOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response getLabelsOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getOperationPolicyForAPIByPolicyId(String apiId, String operationPolicyId, MessageContext messageContext) throws APIManagementException;
       public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit, Integer offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException;
       public Response getSequenceBackendContent(String type, String apiId, MessageContext messageContext) throws APIManagementException;

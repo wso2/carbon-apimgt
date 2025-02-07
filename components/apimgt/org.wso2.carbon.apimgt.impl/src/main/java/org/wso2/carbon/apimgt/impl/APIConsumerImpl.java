@@ -72,7 +72,6 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
-import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
@@ -4398,8 +4397,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
     @Override
     public String getAsyncAPIDefinitionForLabel(Identifier apiId, String labelName) throws APIManagementException {
-
-        List<Label> gatewayLabels;
         String updatedDefinition = null;
         Map<String, String> hostsWithSchemes;
         // TODO:
@@ -4561,43 +4558,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 if (url.startsWith(APIConstants.WS_PROTOCOL_URL_PREFIX)) {
                     hostsWithSchemes.put(APIConstants.WS_PROTOCOL, url);
                 }
-            }
-        }
-        return hostsWithSchemes;
-    }
-
-    /**
-     * Get gateway host names with transport scheme mapping.
-     *
-     * @param gatewayLabels gateway label list
-     * @param labelName     Label name
-     * @return Hostname with transport schemes
-     * @throws APIManagementException If an error occurs when getting gateway host names.
-     */
-    private Map<String, String> getHostWithSchemeMappingForLabelWS(List<Label> gatewayLabels, String labelName)
-            throws APIManagementException {
-
-        Map<String, String> hostsWithSchemes = new HashMap<>();
-        Label labelObj = null;
-        for (Label label : gatewayLabels) {
-            if (label.getName().equals(labelName)) {
-                labelObj = label;
-                break;
-            }
-        }
-        if (labelObj == null) {
-            handleException(
-                    "Could not find provided label '" + labelName + "'");
-            return null;
-        }
-
-        List<String> accessUrls = labelObj.getAccessUrls();
-        for (String url : accessUrls) {
-            if (url.startsWith(APIConstants.WSS_PROTOCOL_URL_PREFIX)) {
-                hostsWithSchemes.put(APIConstants.WSS_PROTOCOL, url);
-            }
-            if (url.startsWith(APIConstants.WS_PROTOCOL_URL_PREFIX)) {
-                hostsWithSchemes.put(APIConstants.WS_PROTOCOL, url);
             }
         }
         return hostsWithSchemes;

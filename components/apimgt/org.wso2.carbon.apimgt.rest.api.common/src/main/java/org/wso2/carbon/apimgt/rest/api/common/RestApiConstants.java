@@ -86,6 +86,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_COMMENTS = "comments";
     public static final String RESOURCE_MEDIATION_POLICY = "mediation-policy";
     public static final String RESOURCE_API_CATEGORY = "API Category";
+    public static final String RESOURCE_LABEL = "Label";
 
     public static final String API_ID_DELIMITER = "-";
     public static final String QUERY_PARAM = "{query}";
@@ -133,6 +134,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL = RESOURCE_PATH_THROTTLING_POLICIES
             + "/custom";
     public static final String RESOURCE_PATH_CATEGORY = "/categories";
+    public static final String RESOURCE_PATH_LABEL = "/labels";
     public static final String RESOURCE_PATH_LLM_PROVIDER = "/llm-providers";
     public static final String KEY_MANAGERS = "/key-managers";
     public static final String ORGANIZATIONS_PATH= "/organizations";

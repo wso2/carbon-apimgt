@@ -1558,7 +1558,7 @@ public class APIMappingUtil {
         }
         dto.setCategories(categoryNameList);
         dto.setKeyManagers(model.getKeyManagers());
-        
+
         if (model.getAudience() != null) {
             dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
         }
