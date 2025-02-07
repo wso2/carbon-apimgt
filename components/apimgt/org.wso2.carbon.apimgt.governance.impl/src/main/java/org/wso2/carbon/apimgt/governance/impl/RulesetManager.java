@@ -66,10 +66,8 @@ public class RulesetManager {
                 getValidationEngineService().getValidationEngine();
 
         validationEngine.validateRulesetContent(ruleset);
-
-        validationEngine = ServiceReferenceHolder.getInstance()
-                .getValidationEngineService().getValidationEngine();
         List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
+
         if (rules.isEmpty()) {
             throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT,
                     ruleset.getName());
@@ -132,10 +130,8 @@ public class RulesetManager {
                 getValidationEngineService().getValidationEngine();
 
         validationEngine.validateRulesetContent(ruleset);
-
-        validationEngine = ServiceReferenceHolder.getInstance()
-                .getValidationEngineService().getValidationEngine();
         List<Rule> rules = validationEngine.extractRulesFromRuleset(ruleset);
+
         if (rules.isEmpty()) {
             throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT,
                     ruleset.getName());
