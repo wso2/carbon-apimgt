@@ -360,4 +360,9 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
         return new ArrayList<>();
     }
 
+    @Override
+    public String getAPIExecutionURL(String apiId, String url, Environment environment) throws DeployerException {
+        return url;
+    }
+
 }

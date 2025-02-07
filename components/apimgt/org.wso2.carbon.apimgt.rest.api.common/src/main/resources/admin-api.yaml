@@ -4832,7 +4832,8 @@ components:
           maxLength: 255
           minLength: 1
           # hostname regex as per RFC 1123 (http://tools.ietf.org/html/rfc1123) and appended *
-          pattern: '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
+          # included {} to allow hostname templates
+          pattern: '^(([a-zA-Z0-9\{\}]|[a-zA-Z0-9\{\}][a-zA-Z0-9\-\{\}]*[a-zA-Z0-9\{\}])\.)*([A-Za-z0-9\{\}]|[A-Za-z0-9\{\}][A-Za-z0-9\-\{\}]*[A-Za-z0-9\{\}])$'
           type: string
           example: mg.wso2.com
         httpContext:

@@ -88,4 +88,11 @@ public interface ExternalGatewayDeployer {
      * @return List<String> validation result
      */
     public List<String> validateApi(API api) throws DeployerException;
+
+    /**
+     * This method returns the resolved API execution URL by replacing all placeholders appropriately
+     *
+     * @return String api execution url
+     */
+    public String getAPIExecutionURL(String apiId, String url, Environment environment) throws DeployerException;
 }
