@@ -36,10 +36,9 @@ public interface ValidationEngine {
      * Check if a ruleset is valid
      *
      * @param ruleset Ruleset
-     * @return True if the ruleset is valid, False otherwise
      * @throws GovernanceException If an error occurs while validating the ruleset
      */
-    boolean isRulesetValid(Ruleset ruleset) throws GovernanceException;
+    void validateRulesetContent(Ruleset ruleset) throws GovernanceException;
 
     /**
      * Extract rules from a ruleset
