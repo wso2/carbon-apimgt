@@ -278,10 +278,18 @@ public class SQLConstants {
             ")";
 
 
-    public static final String DELETE_REQ_POLICY_MAPPING_FOR_ARTIFACT = "DELETE FROM " +
-            "GOV_REQUEST_POLICY GRP JOIN GOV_REQUEST GR ON GRP.REQ_ID = GR.REQ_ID " +
-            "JOIN GOV_ARTIFACT GA ON GR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
-            "WHERE GA.ARTIFACT_REF_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ?";
+    public static final String DELETE_REQ_POLICY_MAPPING_FOR_ARTIFACT =
+            "DELETE FROM GOV_REQUEST_POLICY " +
+                    "WHERE REQ_ID = (" +
+                    "    SELECT GR.REQ_ID " +
+                    "    FROM GOV_REQUEST GR " +
+                    "    JOIN GOV_ARTIFACT GA ON GR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
+                    "    WHERE GA.ARTIFACT_REF_ID = ? " +
+                    "    AND GA.ARTIFACT_TYPE = ? " +
+                    "    AND GA.ORGANIZATION = ? " +
+                    "    LIMIT 1" +
+                    ")";
+
 
     public static final String DELETE_REQ_POLICY_MAPPING_FOR_POLICY = "DELETE FROM " +
             "GOV_REQUEST_POLICY WHERE POLICY_ID = ?";
@@ -292,8 +300,8 @@ public class SQLConstants {
     public static final String ADD_RULESET_RUN = "INSERT INTO GOV_RULESET_RUN (RULESET_RUN_ID, " +
             "ARTIFACT_KEY, RULESET_ID, RESULT) VALUES (?, ?, ?, ?)";
 
-    public static final String ADD_RULE_VIOLATION = "INSERT INTO GOV_RULE_VIOLATION (RULESET_RUN_ID, " +
-            "RULESET_ID, RULE_NAME, VIOLATED_PATH, MESSAGE) VALUES (?, ?, ?, ?, ?)";
+    public static final String ADD_RULE_VIOLATION = "INSERT INTO GOV_RULE_VIOLATION (ID, RULESET_RUN_ID, " +
+            "RULESET_ID, RULE_NAME, VIOLATED_PATH, MESSAGE) VALUES (?, ?, ?, ?, ?, ?)";
 
     public static final String DELETE_POLICY_RUN_FOR_ARTIFACT_AND_POLICY = "DELETE FROM GOV_POLICY_RUN " +
             "WHERE ARTIFACT_KEY IN ( SELECT ARTIFACT_KEY FROM GOV_ARTIFACT WHERE ARTIFACT_REF_ID = ? " +

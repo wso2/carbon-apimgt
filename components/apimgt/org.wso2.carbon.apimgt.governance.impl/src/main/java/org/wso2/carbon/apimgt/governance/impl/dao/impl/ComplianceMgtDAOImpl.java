@@ -631,11 +631,12 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         String sqlQuery = SQLConstants.ADD_RULE_VIOLATION;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             for (RuleViolation ruleViolation : ruleViolations) {
-                prepStmnt.setString(1, rulesetResultId);
-                prepStmnt.setString(2, ruleViolation.getRulesetId());
-                prepStmnt.setString(3, ruleViolation.getRuleName());
-                prepStmnt.setString(4, ruleViolation.getViolatedPath());
-                prepStmnt.setString(5, ruleViolation.getRuleMessage());
+                prepStmnt.setString(1, GovernanceUtil.generateUUID());
+                prepStmnt.setString(2, rulesetResultId);
+                prepStmnt.setString(3, ruleViolation.getRulesetId());
+                prepStmnt.setString(4, ruleViolation.getRuleName());
+                prepStmnt.setString(5, ruleViolation.getViolatedPath());
+                prepStmnt.setString(6, ruleViolation.getRuleMessage());
                 prepStmnt.addBatch();
             }
             prepStmnt.executeBatch();

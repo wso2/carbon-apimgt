@@ -28,7 +28,6 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
  * This class represents the default ruleset model.
  */
 public class DefaultRuleset {
-    private String id;
     private String name;
     private String description;
     private String ruleCategory;
@@ -37,14 +36,6 @@ public class DefaultRuleset {
     private String documentationLink;
     private String provider;
     private Object rulesetContent;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;
