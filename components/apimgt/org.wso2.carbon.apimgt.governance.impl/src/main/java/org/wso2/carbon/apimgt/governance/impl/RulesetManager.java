@@ -65,11 +65,7 @@ public class RulesetManager {
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();
 
-        boolean isRulesetContentValid = validationEngine.isRulesetValid(ruleset);
-        if (!isRulesetContentValid) {
-            throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT,
-                    ruleset.getName());
-        }
+        validationEngine.validateRulesetContent(ruleset);
 
         validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
@@ -134,11 +130,8 @@ public class RulesetManager {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();
-        boolean isRulesetContentValid = validationEngine.isRulesetValid(ruleset);
-        if (!isRulesetContentValid) {
-            throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT,
-                    ruleset.getName());
-        }
+
+        validationEngine.validateRulesetContent(ruleset);
 
         validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();

@@ -34,6 +34,8 @@ import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
+import org.wso2.rule.validator.InvalidContentTypeException;
+import org.wso2.rule.validator.InvalidRulesetException;
 import org.wso2.rule.validator.validator.Validator;
 
 import java.nio.charset.StandardCharsets;
@@ -57,14 +59,31 @@ public class SpectralValidationEngine implements ValidationEngine {
      * Check if a ruleset is valid
      *
      * @param ruleset Ruleset
-     * @return True if the ruleset is valid, False otherwise
      * @throws GovernanceException If an error occurs while validating the ruleset
      */
     @Override
-    public boolean isRulesetValid(Ruleset ruleset) throws GovernanceException {
-        // TODO: Call the Spectral engine to validate the ruleset
-        // Validator.validateRuleset(ruleset.getRulesetContent());
-        return true;
+    public void validateRulesetContent(Ruleset ruleset) throws GovernanceException {
+        RulesetContent content = ruleset.getRulesetContent();
+        String rulesetContentString = new String(content.getContent(),
+                StandardCharsets.UTF_8);
+        String jsonString;
+        try {
+            jsonString = Validator.validateRuleset(rulesetContentString);
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(jsonString);
+            boolean passed = rootNode.path("passed").asBoolean();
+            if (passed) {
+                return;
+            }
+            String message = rootNode.path("message").asText();
+            throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT_DETAILED,
+                    ruleset.getName(), message);
+        } catch (InvalidContentTypeException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
+        } catch (JsonProcessingException e) {
+            log.error("Error while parsing rulseset validation result JSON string", e);
+            throw new GovernanceException("Error while parsing ruleset validation result JSON string", e);
+        }
     }
 
     /**
@@ -140,6 +159,8 @@ public class SpectralValidationEngine implements ValidationEngine {
                 log.debug("Validation success for target: " + target);
             }
             return getRuleViolationsFromJsonResponse(resultJson, ruleset);
+        } catch (InvalidRulesetException | InvalidContentTypeException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
         } catch (Throwable e) {
             log.error("Error occurred while verifying governance compliance ", e);
             throw new GovernanceException("Error occurred while verifying governance compliance ", e);
