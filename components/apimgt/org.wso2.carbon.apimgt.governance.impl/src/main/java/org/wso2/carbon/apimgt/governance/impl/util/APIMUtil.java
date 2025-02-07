@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
-import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
+import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
@@ -260,7 +260,7 @@ public class APIMUtil {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(apiProjectZip))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().contains(GovernanceConstants.API_FILE_NAME)) {
+                if (entry.getName().contains(APIMGovernanceConstants.API_FILE_NAME)) {
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     byte[] buffer = new byte[1024];
                     int length;
@@ -291,8 +291,8 @@ public class APIMUtil {
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(apiProjectZip))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().contains(GovernanceConstants.DEFINITIONS_FOLDER +
-                        GovernanceConstants.SWAGGER_FILE_NAME)) {
+                if (entry.getName().contains(APIMGovernanceConstants.DEFINITIONS_FOLDER +
+                        APIMGovernanceConstants.SWAGGER_FILE_NAME)) {
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     byte[] buffer = new byte[1024];
                     int length;
@@ -301,8 +301,8 @@ public class APIMUtil {
                     }
                     defContent = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
                     return defContent;
-                } else if (entry.getName().contains(GovernanceConstants.DEFINITIONS_FOLDER +
-                        GovernanceConstants.ASYNC_API_FILE_NAME)) {
+                } else if (entry.getName().contains(APIMGovernanceConstants.DEFINITIONS_FOLDER +
+                        APIMGovernanceConstants.ASYNC_API_FILE_NAME)) {
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     byte[] buffer = new byte[1024];
                     int length;

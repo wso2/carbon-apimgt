@@ -30,13 +30,13 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
+import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceEvaluationScheduler;
-import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfiguration;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationService;
 import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.governance.impl.observer.GovernanceConfigDeployer;
-import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineService;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineServiceImpl;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
@@ -72,10 +72,10 @@ public class GovernanceComponent {
         GovernanceConfigurationServiceImpl configurationService =
                 new GovernanceConfigurationServiceImpl(configuration);
         ServiceReferenceHolder.getInstance().setGovernanceConfigurationService(configurationService);
-        GovernanceDBUtil.initialize();
+        APIMGovernanceDBUtil.initialize();
         ComplianceEvaluationScheduler.initialize();
 
-        String migrationEnabled = System.getProperty(GovernanceConstants.MIGRATE);
+        String migrationEnabled = System.getProperty(APIMGovernanceConstants.MIGRATE);
         if (migrationEnabled == null) {
             GovernanceConfigDeployer configDeployer = new GovernanceConfigDeployer();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);

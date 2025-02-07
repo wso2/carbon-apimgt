@@ -37,9 +37,9 @@ import javax.sql.DataSource;
 /**
  * Utility class for Governance database operations
  */
-public class GovernanceDBUtil {
+public class APIMGovernanceDBUtil {
 
-    private static final Log log = LogFactory.getLog(GovernanceDBUtil.class);
+    private static final Log log = LogFactory.getLog(APIMGovernanceDBUtil.class);
 
     private static volatile DataSource dataSource = null;
 
@@ -55,7 +55,7 @@ public class GovernanceDBUtil {
             return;
         }
 
-        synchronized (GovernanceDBUtil.class) {
+        synchronized (APIMGovernanceDBUtil.class) {
             if (dataSource == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Initializing data source");

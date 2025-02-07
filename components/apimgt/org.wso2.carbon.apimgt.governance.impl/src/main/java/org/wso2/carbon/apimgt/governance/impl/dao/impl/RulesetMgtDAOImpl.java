@@ -31,10 +31,10 @@ import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
-import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
+import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.governance.impl.util.GovernanceDBUtil;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -88,7 +88,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                                      String organization) throws GovernanceException {
 
         String sqlQuery = SQLConstants.CREATE_RULESET;
-        try (Connection connection = GovernanceDBUtil.getConnection()) {
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
                 try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
@@ -135,7 +135,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                                      String organization)
             throws GovernanceException {
 
-        try (Connection connection = GovernanceDBUtil.getConnection()) {
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
                 try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_RULESET)) {
@@ -253,7 +253,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     @Override
     public void deleteRuleset(String rulesetId, String organization) throws GovernanceException {
 
-        try (Connection connection = GovernanceDBUtil.getConnection()) {
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
 
             connection.setAutoCommit(false);
             try {
@@ -351,7 +351,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
         RulesetList rulesetList = new RulesetList();
         List<RulesetInfo> rulesetInfoList = new ArrayList<>();
         String sqlQuery = SQLConstants.GET_RULESETS;
-        try (Connection connection = GovernanceDBUtil.getConnection();
+        try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, organization);
             try (ResultSet rs = prepStmt.executeQuery()) {
@@ -379,7 +379,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     @Override
     public RulesetInfo getRulesetByName(String name, String organization) throws GovernanceException {
         String sqlQuery = SQLConstants.GET_RULESET_BY_NAME;
-        try (Connection connection = GovernanceDBUtil.getConnection();
+        try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, name);
             prepStmt.setString(2, organization);
@@ -406,7 +406,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     @Override
     public RulesetInfo getRulesetById(String rulesetId, String organization) throws GovernanceException {
         String sqlQuery = SQLConstants.GET_RULESETS_BY_ID;
-        try (Connection connection = GovernanceDBUtil.getConnection();
+        try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, rulesetId);
             prepStmt.setString(2, organization);
@@ -437,15 +437,15 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
         List<RulesetInfo> rulesetInfoList = new ArrayList<>();
 
         String sqlQuery = SQLConstants.SEARCH_RULESETS;
-        try (Connection connection = GovernanceDBUtil.getConnection();
+        try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, organization);
             prepStmt.setString(2, searchCriteria
-                    .getOrDefault(GovernanceConstants.RulesetSearchAttributes.NAME, ""));
+                    .getOrDefault(APIMGovernanceConstants.RulesetSearchAttributes.NAME, ""));
             prepStmt.setString(3, searchCriteria
-                    .getOrDefault(GovernanceConstants.RulesetSearchAttributes.RULE_TYPE, ""));
+                    .getOrDefault(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE, ""));
             prepStmt.setString(4, searchCriteria
-                    .getOrDefault(GovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, ""));
+                    .getOrDefault(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, ""));
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
                     rulesetInfoList.add(getRulesetInfoFromResultSet(rs));
@@ -497,7 +497,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     @Override
     public RulesetContent getRulesetContent(String rulesetId, String organization) throws GovernanceException {
         String sqlQuery = SQLConstants.GET_RULESET_CONTENT;
-        try (Connection connection = GovernanceDBUtil.getConnection();
+        try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);) {
             prepStmt.setString(1, rulesetId);
             prepStmt.setString(2, organization);
@@ -528,7 +528,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
             throws GovernanceException {
         List<String> policyIds = new ArrayList<>();
         String sqlQuery = SQLConstants.GET_POLICIES_FOR_RULESET;
-        try (Connection connection = GovernanceDBUtil.getConnection();
+        try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, rulesetId);
             prepStmt.setString(2, organization);
@@ -555,7 +555,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     public List<Rule> getRulesByRulesetId(String rulesetId, String organization) throws GovernanceException {
         List<Rule> rules = new ArrayList<>();
         String sqlQuery = SQLConstants.GET_RULES_WITHOUT_CONTENT;
-        try (Connection connection = GovernanceDBUtil.getConnection();
+        try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, rulesetId);
             prepStmt.setString(2, organization);

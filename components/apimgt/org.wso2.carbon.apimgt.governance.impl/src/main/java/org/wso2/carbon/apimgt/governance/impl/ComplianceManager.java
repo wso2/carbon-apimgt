@@ -45,8 +45,8 @@ import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulesetMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
-import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -116,7 +116,7 @@ public class ComplianceManager {
      */
     private List<ArtifactInfo> getArtifactsByGovernableStates(List<GovernableState> governableStates,
                                                               String organization) throws GovernanceException {
-        Map<ArtifactType, List<String>> artifactsMap = GovernanceUtil.getAllArtifacts(organization);
+        Map<ArtifactType, List<String>> artifactsMap = APIMGovernanceUtil.getAllArtifacts(organization);
         return filterAndCollectArtifacts(artifactsMap, governableStates);
     }
 
@@ -135,7 +135,7 @@ public class ComplianceManager {
 
         // Get Artifacts for each label and merge results
         for (String label : labels) {
-            Map<ArtifactType, List<String>> artifactsMap = GovernanceUtil.getArtifactsForLabel(label);
+            Map<ArtifactType, List<String>> artifactsMap = APIMGovernanceUtil.getArtifactsForLabel(label);
 
             // Collect artifacts by filtering based on governable states
             List<ArtifactInfo> filteredArtifacts = filterAndCollectArtifacts(artifactsMap, governableStates);
@@ -414,8 +414,8 @@ public class ComplianceManager {
             String artifactRefId = artifactInfo.getArtifactRefId();
             ArtifactType artifactType = artifactInfo.getArtifactType();
             if (resolveArtifactNameAndVersion) {
-                artifactInfo.setName(GovernanceUtil.getArtifactName(artifactRefId, artifactType));
-                artifactInfo.setVersion(GovernanceUtil.getArtifactVersion(artifactRefId, artifactType));
+                artifactInfo.setName(APIMGovernanceUtil.getArtifactName(artifactRefId, artifactType));
+                artifactInfo.setVersion(APIMGovernanceUtil.getArtifactVersion(artifactRefId, artifactType));
             }
 
             List<String> violatedRulesets = complianceMgtDAO.getViolatedRulesetsForArtifact
@@ -476,7 +476,7 @@ public class ComplianceManager {
         ArtifactComplianceInfo artifactComplianceInfo = new ArtifactComplianceInfo();
 
         ExtendedArtifactType extendedArtifactTypeForArtifact =
-                GovernanceUtil.getExtendedArtifactTypeForArtifact
+                APIMGovernanceUtil.getExtendedArtifactTypeForArtifact
                         (artifactRefId, artifactType); // API --> REST_API, ASYNC_API, etc
 
         // Check if artifact is SOAP or GRAPHQL
@@ -494,7 +494,7 @@ public class ComplianceManager {
                         ". Loading content from DB.");
             }
 
-            byte[] project = GovernanceUtil.getArtifactProjectWithRevision(artifactRefId, revisionNo, artifactType,
+            byte[] project = APIMGovernanceUtil.getArtifactProjectWithRevision(artifactRefId, revisionNo, artifactType,
                     organization);
 
             if (project == null) {
@@ -503,7 +503,7 @@ public class ComplianceManager {
             }
 
             // Only extract content if the artifact type requires it.
-            artifactProjectContent = GovernanceUtil.extractArtifactProjectContent(project, artifactType);
+            artifactProjectContent = APIMGovernanceUtil.extractArtifactProjectContent(project, artifactType);
 
 
             if (artifactProjectContent == null || artifactProjectContent.isEmpty()) {

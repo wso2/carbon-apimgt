@@ -30,8 +30,8 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManager;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
-import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceDetailsDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceStatusDTO;
@@ -75,7 +75,7 @@ public class ComplianceAPIUtil {
             throws GovernanceException {
 
         // Check if the artifact is available
-        if (!GovernanceUtil.isArtifactAvailable(artifactRefId, artifactType)) {
+        if (!APIMGovernanceUtil.isArtifactAvailable(artifactRefId, artifactType)) {
             throw new GovernanceException(GovernanceExceptionCodes.ARTIFACT_NOT_FOUND, artifactRefId, organization);
         }
 
@@ -85,13 +85,13 @@ public class ComplianceAPIUtil {
         artifactComplianceDetailsDTO.setId(artifactRefId);
 
         ArtifactInfoDTO infoDTO = new ArtifactInfoDTO();
-        infoDTO.setName(GovernanceUtil.getArtifactName(artifactRefId, artifactType));
-        infoDTO.setVersion(GovernanceUtil.getArtifactVersion(artifactRefId, artifactType));
+        infoDTO.setName(APIMGovernanceUtil.getArtifactName(artifactRefId, artifactType));
+        infoDTO.setVersion(APIMGovernanceUtil.getArtifactVersion(artifactRefId, artifactType));
         infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
         artifactComplianceDetailsDTO.setInfo(infoDTO);
 
         // Get all policies applicable to the artifact within the organization as a map of policy ID to policy name
-        Map<String, String> applicablePolicies = GovernanceUtil
+        Map<String, String> applicablePolicies = APIMGovernanceUtil
                 .getApplicablePoliciesForArtifact(artifactRefId, artifactType, organization);
 
         if (applicablePolicies.isEmpty()) {
@@ -313,13 +313,13 @@ public class ComplianceAPIUtil {
         complianceStatus.setId(artifactRefId);
 
         ArtifactInfoDTO infoDTO = new ArtifactInfoDTO();
-        infoDTO.setName(GovernanceUtil.getArtifactName(artifactRefId, artifactType));
-        infoDTO.setVersion(GovernanceUtil.getArtifactVersion(artifactRefId, artifactType));
+        infoDTO.setName(APIMGovernanceUtil.getArtifactName(artifactRefId, artifactType));
+        infoDTO.setVersion(APIMGovernanceUtil.getArtifactVersion(artifactRefId, artifactType));
         infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
         complianceStatus.setInfo(infoDTO);
 
         // Retrieve applicable policies for the current artifact
-        Map<String, String> applicablePolicies = GovernanceUtil
+        Map<String, String> applicablePolicies = APIMGovernanceUtil
                 .getApplicablePoliciesForArtifact(artifactRefId, artifactType, organization);
 
         // If no policies are applicable, set the compliance status to not applicable and return
@@ -544,7 +544,7 @@ public class ComplianceAPIUtil {
                                                                             String organization)
             throws GovernanceException {
 
-        int totalArtifactsCount = GovernanceUtil.getAllArtifacts(artifactType, organization).size();
+        int totalArtifactsCount = APIMGovernanceUtil.getAllArtifacts(artifactType, organization).size();
 
         // Get total number of APIs that are compliant and non-compliant
         Map<ArtifactComplianceState, List<String>> compliancyMap =
