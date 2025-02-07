@@ -76,8 +76,10 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -120,6 +122,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationRespons
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseGraphQLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -243,10 +246,19 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while updating the API
      * @throws FaultGatewaysException If an error occurs while updating manage of an existing API
      */
-    public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes)
+    public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes,
+            OrganizationInfo orginfo)
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
-
         API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
+        if (orginfo != null && orginfo.getOrganizationId() != null) {
+            String visibleOrgs = apiToUpdate.getVisibleOrganizations();
+            if (!StringUtils.isEmpty(visibleOrgs)
+                    && !APIConstants.DEFAULT_VISIBLE_ORG.equals(apiToUpdate.getVisibleOrganizations())) {
+                // set the current user organizatin as visible organization.
+                visibleOrgs = visibleOrgs + "," + orginfo.getOrganizationId();
+                apiToUpdate.setVisibleOrganizations(visibleOrgs);
+            }
+        }
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
         if (apiUpdated != null && !StringUtils.isEmpty(apiUpdated.getEndpointConfig())) {
@@ -472,6 +484,7 @@ public class PublisherCommonUtils {
         List<String> apiSecurity = apiDtoToUpdate.getSecurityScheme();
         //validation for tiers
         List<String> tiersFromDTO = apiDtoToUpdate.getPolicies();
+        List<OrganizationPoliciesDTO> organizationPoliciesDTOs = apiDtoToUpdate.getOrganizationPolicies();
         // Remove the subscriptionless tier if other tiers are available.
         if (tiersFromDTO != null && tiersFromDTO.size() > 1) {
             String tierToDrop = null;
@@ -521,9 +534,9 @@ public class PublisherCommonUtils {
             }
         }
 
+        Set<Tier> definedTiers = apiProvider.getTiers();
         if (tiersFromDTO != null && !tiersFromDTO.isEmpty()) {
             //check whether the added API's tiers are all valid
-            Set<Tier> definedTiers = apiProvider.getTiers();
             List<String> invalidTiers = getInvalidTierNames(definedTiers, tiersFromDTO);
             if (invalidTiers.size() > 0) {
                 throw new APIManagementException(
@@ -531,6 +544,65 @@ public class PublisherCommonUtils {
                         ExceptionCodes.TIER_NAME_INVALID);
             }
         }
+        // Organization based subscription policies
+        if (APIUtil.isOrganizationAccessControlEnabled()) {
+            for (OrganizationPoliciesDTO organizationPoliciesDTO : organizationPoliciesDTOs) {
+                List<String> organizationTiersFromDTO = organizationPoliciesDTO.getPolicies();
+
+                // Remove the subscriptionless tier if other tiers are available.
+                if (organizationTiersFromDTO != null && organizationTiersFromDTO.size() > 1) {
+                    String tierToDrop = null;
+                    for (String tier : organizationTiersFromDTO) {
+                        if (tier.contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
+                            tierToDrop = tier;
+                            break;
+                        }
+                    }
+                    if (tierToDrop != null) {
+                        organizationTiersFromDTO.remove(tierToDrop);
+                        organizationPoliciesDTO.setPolicies(tiersFromDTO);
+                    }
+                }
+                boolean conditionForOrganization = (
+                        (organizationTiersFromDTO == null || organizationTiersFromDTO.isEmpty() && !(
+                                APIConstants.CREATED.equals(originalStatus) || APIConstants.PROTOTYPED.equals(
+                                        originalStatus))) && !apiDtoToUpdate.getAdvertiseInfo().isAdvertised());
+                if (!APIUtil.isSubscriptionValidationDisablingAllowed(tenantDomain)) {
+                    if (apiSecurity != null && (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)
+                            || apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) && conditionForOrganization) {
+                        throw new APIManagementException("A tier should be defined if the API is not in CREATED "
+                                + "or PROTOTYPED state", ExceptionCodes.TIER_CANNOT_BE_NULL);
+                    }
+                } else {
+                    if (apiSecurity != null) {
+                        if (apiSecurity.contains(APIConstants.API_SECURITY_API_KEY) && conditionForOrganization) {
+                            throw new APIManagementException("A tier should be defined if the API is not in CREATED "
+                                    + "or PROTOTYPED state", ExceptionCodes.TIER_CANNOT_BE_NULL);
+                        } else if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
+                            // Internally set the default tier when no tiers are defined in order to support
+                            // subscription validation disabling for OAuth2 secured APIs
+                            if (organizationTiersFromDTO != null && organizationTiersFromDTO.isEmpty()) {
+                                if (isAsyncAPI) {
+                                    organizationTiersFromDTO.add(
+                                            APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS);
+                                } else {
+                                    organizationTiersFromDTO.add(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS);
+                                }
+                                organizationPoliciesDTO.setPolicies(organizationTiersFromDTO);
+                            }
+                        }
+                    }
+                }
+                if (organizationTiersFromDTO != null && !organizationTiersFromDTO.isEmpty()) {
+                    List<String> invalidTiers = getInvalidTierNames(definedTiers, organizationTiersFromDTO);
+                    if (invalidTiers.size() > 0) {
+                        throw new APIManagementException("Specified tier(s) " + Arrays.toString(invalidTiers.toArray())
+                                + " are invalid", ExceptionCodes.TIER_NAME_INVALID);
+                    }
+                }
+            }
+        }
+
         if (apiDtoToUpdate.getAccessControlRoles() != null) {
             String errorMessage = validateUserRoles(apiDtoToUpdate.getAccessControlRoles());
             if (!errorMessage.isEmpty()) {
@@ -1146,7 +1218,7 @@ public class PublisherCommonUtils {
      * @throws CryptoException        Error while encrypting
      */
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username,
-                                                           String organization)
+                                                           String organization, OrganizationInfo orgInfo)
             throws APIManagementException, CryptoException {
         String name = apiDto.getName();
         ArtifactType artifactType = null;
@@ -1261,6 +1333,15 @@ public class PublisherCommonUtils {
             AsyncApiParser asyncApiParser = new AsyncApiParser();
             String apiDefinition = asyncApiParser.generateAsyncAPIDefinition(apiToAdd);
             apiToAdd.setAsyncApiDefinition(apiDefinition);
+        }
+        if (orgInfo != null && orgInfo.getOrganizationId() != null) {
+            String visibleOrgs = apiToAdd.getVisibleOrganizations();
+            if (!StringUtils.isEmpty(visibleOrgs)
+                    && !APIConstants.DEFAULT_VISIBLE_ORG.equals(apiToAdd.getVisibleOrganizations())) {
+                // set the current user organizatin as visible organization.
+                visibleOrgs = visibleOrgs + "," + orgInfo.getOrganizationId();
+                apiToAdd.setVisibleOrganizations(visibleOrgs);
+            }
         }
 
         //adding the api
@@ -1554,6 +1635,7 @@ public class PublisherCommonUtils {
                 throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_USER_ROLES);
             }
         }
+
 
         //Get all existing versions of  api been adding
         List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(body.getName(),
@@ -3038,5 +3120,39 @@ public class PublisherCommonUtils {
             throw new RuntimeException("Error generating JSON response for governance compliance ", e);
         }
         return jsonViolations;
+    }
+
+    public static void executeGovernanceOnLabelAttach(List<Label> labels, String artifactType,  String artifactId,
+                                                      String organization) {
+        List<String> labelsIdList = new ArrayList<>();
+        for (Label label : labels) {
+            labelsIdList.add(label.getLabelId());
+        }
+        try {
+            apimGovernanceService.evaluateComplianceOnLabelAttach(artifactId, ArtifactType.fromString(artifactType),
+                    labelsIdList, organization);
+        } catch (GovernanceException e) {
+            log.info("Error occurred while executing governance on attached labels for API " + artifactId, e);
+        }
+    }
+
+    public static void deleteGovernanceDataOnLabelDelete(List<Label> label, String organization) {
+        try {
+            for (Label labelId : label) {
+                apimGovernanceService.deleteGovernanceDataForLabel(labelId.getLabelId(), organization);
+            }
+        } catch (GovernanceException e) {
+            log.info("Error occurred while deleting governance data on deletion of label " + label, e);
+        }
+    }
+
+    public static void clearArtifactComplianceInfo(String artifactId, String artifactType, String organization) {
+        try {
+            apimGovernanceService.clearArtifactComplianceInfo(artifactId, ArtifactType.fromString(artifactType),
+                    organization);
+        } catch (GovernanceException e) {
+            log.info("Error occurred while deleting governance data on deletion of  " + ArtifactType.API +
+                    " " + artifactId, e);
+        }
     }
 }
