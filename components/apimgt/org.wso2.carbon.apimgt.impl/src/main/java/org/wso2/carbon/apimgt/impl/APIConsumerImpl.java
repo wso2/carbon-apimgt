@@ -3624,14 +3624,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)
                         && vhost.getHttpPort() != -1) {
                     String httpUrl = gatewayDeployer != null ?
-                            gatewayDeployer.getResolvedAPIInvocationUrl(api.getUuid(), vhost.getHttpUrl(), environment) :
+                            gatewayDeployer.getAPIExecutionURL(api.getUuid(), vhost.getHttpUrl(), environment) :
                             vhost.getHttpUrl();
                     hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, httpUrl);
                 }
                 if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)
                         && vhost.getHttpsPort() != -1) {
                     String httpsUrl = gatewayDeployer != null ?
-                            gatewayDeployer.getResolvedAPIInvocationUrl(api.getUuid(), vhost.getHttpsUrl(), environment) :
+                            gatewayDeployer.getAPIExecutionURL(api.getUuid(), vhost.getHttpsUrl(), environment) :
                             vhost.getHttpsUrl();
                     hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, httpsUrl);
                 }
