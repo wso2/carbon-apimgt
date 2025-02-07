@@ -33,7 +33,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
-import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.rule.validator.InvalidContentTypeException;
 import org.wso2.rule.validator.InvalidRulesetException;
 import org.wso2.rule.validator.validator.Validator;
@@ -98,7 +98,7 @@ public class SpectralValidationEngine implements ValidationEngine {
         String ruleContentString = new String(ruleset.getRulesetContent().getContent(),
                 StandardCharsets.UTF_8);
 
-        Map<String, Object> contentMap = GovernanceUtil.getMapFromYAMLStringContent(ruleContentString);
+        Map<String, Object> contentMap = APIMGovernanceUtil.getMapFromYAMLStringContent(ruleContentString);
         List<Rule> rulesList = new ArrayList<>();
 
         // Check if 'rules' is present and not null
@@ -119,7 +119,7 @@ public class SpectralValidationEngine implements ValidationEngine {
                 ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
                 Rule rule = new Rule();
-                rule.setId(GovernanceUtil.generateUUID());
+                rule.setId(APIMGovernanceUtil.generateUUID());
                 rule.setName(name);
                 rule.setDescription(description);
                 rule.setSeverity(severity);

@@ -29,7 +29,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulesetMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +60,7 @@ public class RulesetManager {
             throw new GovernanceException(GovernanceExceptionCodes.RULESET_ALREADY_EXIST, ruleset.getName(),
                     organization);
         }
-        ruleset.setId(GovernanceUtil.generateUUID());
+        ruleset.setId(APIMGovernanceUtil.generateUUID());
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();
@@ -252,14 +252,14 @@ public class RulesetManager {
             if (parts.length == 2) {
                 String searchPrefix = parts[0];
                 String searchValue = parts[1];
-                
+
                 // Add valid prefixes to criteriaMap
-                if (searchPrefix.equalsIgnoreCase(GovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE)) {
-                    criteriaMap.put(GovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, searchValue);
-                } else if (searchPrefix.equalsIgnoreCase(GovernanceConstants.RulesetSearchAttributes.RULE_TYPE)) {
-                    criteriaMap.put(GovernanceConstants.RulesetSearchAttributes.RULE_TYPE, searchValue);
-                } else if (searchPrefix.equalsIgnoreCase(GovernanceConstants.RulesetSearchAttributes.NAME)) {
-                    criteriaMap.put(GovernanceConstants.RulesetSearchAttributes.NAME, searchValue);
+                if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE)) {
+                    criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, searchValue);
+                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE)) {
+                    criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE, searchValue);
+                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.NAME)) {
+                    criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.NAME, searchValue);
                 }
             }
         }

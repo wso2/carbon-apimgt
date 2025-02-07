@@ -23,7 +23,7 @@ import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
-import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
+import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ActionDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
 
@@ -63,7 +63,7 @@ public class PolicyMappingUtil {
 
         List<String> labels = dto.getLabels();
         if (labels != null && labels.stream().anyMatch(label -> label
-                .equalsIgnoreCase(GovernanceConstants.GLOBAL_LABEL))) {
+                .equalsIgnoreCase(APIMGovernanceConstants.GLOBAL_LABEL))) {
             govPolicy.setGlobal(true);
             govPolicy.setLabels(Collections.emptyList());
         } else {
@@ -99,7 +99,7 @@ public class PolicyMappingUtil {
                 .collect(Collectors.toList()));
         if (governancePolicy.isGlobal()) {
             governancePolicyDTO.setLabels(new ArrayList<>(Collections
-                    .singleton(GovernanceConstants.GLOBAL_LABEL)));
+                    .singleton(APIMGovernanceConstants.GLOBAL_LABEL)));
         } else {
             governancePolicyDTO.setLabels(governancePolicy.getLabels());
         }

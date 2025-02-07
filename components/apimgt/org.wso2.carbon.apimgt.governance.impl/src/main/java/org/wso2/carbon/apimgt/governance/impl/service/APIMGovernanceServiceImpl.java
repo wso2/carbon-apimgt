@@ -33,8 +33,8 @@ import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
-import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -78,9 +78,9 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                                                      String organization)
             throws GovernanceException {
 
-        List<String> applicablePolicyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactRefId,
+        List<String> applicablePolicyIds = APIMGovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactRefId,
                 artifactType, state, organization);
-        return GovernanceUtil.isBlockingActionsPresent(applicablePolicyIds, state);
+        return APIMGovernanceUtil.isBlockingActionsPresent(applicablePolicyIds, state);
     }
 
     /**
@@ -101,8 +101,9 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         List<GovernableState> dependentGovernableStates = GovernableState.getDependentGovernableStates(state);
 
         for (GovernableState dependentState : dependentGovernableStates) {
-            List<String> applicablePolicyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactRefId,
-                    artifactType, dependentState, organization);
+            List<String> applicablePolicyIds = APIMGovernanceUtil
+                    .getApplicablePoliciesForArtifactWithState(artifactRefId,
+                            artifactType, dependentState, organization);
             complianceManager.handleComplianceEvalAsync
                     (artifactRefId, artifactType, applicablePolicyIds, organization);
         }
@@ -132,7 +133,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                                                          Map<RuleType, String> artifactProjectContent,
                                                          String organization) throws GovernanceException {
 
-        List<String> applicablePolicyIds = GovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactRefId,
+        List<String> applicablePolicyIds = APIMGovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactRefId,
                 artifactType, state, organization);
 
         ArtifactComplianceInfo artifactComplianceInfo = complianceManager.handleComplianceEvalSync
@@ -171,7 +172,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
 
         // Only extract content if the artifact type requires it.
         if (ExtendedArtifactType.isArtifactAPI(artifactType)) {
-            Map<RuleType, String> contentMap = GovernanceUtil
+            Map<RuleType, String> contentMap = APIMGovernanceUtil
                     .extractArtifactProjectContent(zipArchive, ArtifactType.API);
             return complianceManager.handleComplianceEvalDryRun(artifactType, applicablePolicyIds,
                     contentMap, organization);

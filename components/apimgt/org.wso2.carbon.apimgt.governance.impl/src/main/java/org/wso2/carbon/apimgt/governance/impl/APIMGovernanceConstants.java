@@ -23,7 +23,7 @@ import java.io.File;
 /**
  * This class represents the Governance Constants
  */
-public class GovernanceConstants {
+public class APIMGovernanceConstants {
 
     public static final String YAML_FILE_TYPE = ".yaml";
     public static final String MIGRATE = "migrate";

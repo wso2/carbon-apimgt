@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.governance.impl.observer;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 
@@ -37,7 +37,7 @@ public class GovernanceConfigDeployer extends AbstractAxis2ConfigurationContextO
         final String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
 
         log.info("Starting to load default rulesets.");
-        GovernanceUtil.loadDefaultRulesets(tenantDomain);
+        APIMGovernanceUtil.loadDefaultRulesets(tenantDomain);
 
     }
 }

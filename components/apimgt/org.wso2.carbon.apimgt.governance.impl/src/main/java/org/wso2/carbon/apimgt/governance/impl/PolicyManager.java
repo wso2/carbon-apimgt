@@ -29,7 +29,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
-import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 
 import java.util.HashMap;
 import java.util.List;
@@ -58,7 +58,7 @@ public class PolicyManager {
     public GovernancePolicy createGovernancePolicy(String organization, GovernancePolicy
             governancePolicy) throws GovernanceException {
 
-        governancePolicy.setId(GovernanceUtil.generateUUID());
+        governancePolicy.setId(APIMGovernanceUtil.generateUUID());
         checkForInvalidActions(governancePolicy);
         addMissingNotifyActions(governancePolicy);
 
@@ -310,10 +310,10 @@ public class PolicyManager {
                 String searchValue = parts[1];
 
                 // Add valid prefixes to criteriaMap
-                if (searchPrefix.equalsIgnoreCase(GovernanceConstants.PolicySearchAttributes.STATE)) {
-                    criteriaMap.put(GovernanceConstants.PolicySearchAttributes.STATE, searchValue);
-                } else if (searchPrefix.equalsIgnoreCase(GovernanceConstants.PolicySearchAttributes.NAME)) {
-                    criteriaMap.put(GovernanceConstants.PolicySearchAttributes.NAME, searchValue);
+                if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.PolicySearchAttributes.STATE)) {
+                    criteriaMap.put(APIMGovernanceConstants.PolicySearchAttributes.STATE, searchValue);
+                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.PolicySearchAttributes.NAME)) {
+                    criteriaMap.put(APIMGovernanceConstants.PolicySearchAttributes.NAME, searchValue);
                 }
             }
         }

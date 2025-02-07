@@ -35,7 +35,7 @@ import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
-import org.wso2.carbon.apimgt.governance.impl.GovernanceConstants;
+import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManager;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -58,8 +58,8 @@ import java.util.stream.Collectors;
 /**
  * This class contains utility methods for Governance
  */
-public class GovernanceUtil {
-    private static final Log log = LogFactory.getLog(GovernanceUtil.class);
+public class APIMGovernanceUtil {
+    private static final Log log = LogFactory.getLog(APIMGovernanceUtil.class);
 
     /**
      * Generates a UUID
@@ -144,7 +144,7 @@ public class GovernanceUtil {
 
             // Define the path to default rulesets
             String pathToRulesets = CarbonUtils.getCarbonHome() + File.separator
-                    + GovernanceConstants.DEFAULT_RULESET_LOCATION;
+                    + APIMGovernanceConstants.DEFAULT_RULESET_LOCATION;
             Path pathToDefaultRulesets = Paths.get(pathToRulesets);
 
             // Iterate through default ruleset files
@@ -288,7 +288,7 @@ public class GovernanceUtil {
                                                                        ArtifactType artifactType,
                                                                        String organization) throws GovernanceException {
 
-        List<String> labels = GovernanceUtil.getLabelsForArtifact(artifactRefId, artifactType);
+        List<String> labels = APIMGovernanceUtil.getLabelsForArtifact(artifactRefId, artifactType);
         PolicyManager policyManager = new PolicyManager();
 
         Map<String, String> policies = new HashMap<>();
@@ -321,7 +321,7 @@ public class GovernanceUtil {
                                                                          String organization)
             throws GovernanceException {
 
-        List<String> labels = GovernanceUtil.getLabelsForArtifact(artifactRefId, artifactType);
+        List<String> labels = APIMGovernanceUtil.getLabelsForArtifact(artifactRefId, artifactType);
         PolicyManager policyManager = new PolicyManager();
 
         // Check for policies using labels and the state

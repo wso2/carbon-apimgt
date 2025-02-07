@@ -32,8 +32,8 @@ import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
-import org.wso2.carbon.apimgt.governance.impl.util.GovernanceUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.ArrayList;
@@ -185,7 +185,7 @@ public class ComplianceEvaluationScheduler {
 
         try {
             // Check if artifact exists
-            if (!GovernanceUtil.isArtifactAvailable(artifactRefId, artifactType)) {
+            if (!APIMGovernanceUtil.isArtifactAvailable(artifactRefId, artifactType)) {
                 log.warn("Artifact not found for artifact ID: " + artifactRefId + " " +
                         ". Skipping governance evaluation");
                 complianceMgtDAO.deleteComplianceEvalReqsForArtifact(artifactRefId, artifactType, organization);
@@ -207,7 +207,7 @@ public class ComplianceEvaluationScheduler {
             }
 
             // Get artifact project
-            byte[] artifactProject = GovernanceUtil.getArtifactProject(artifactRefId, artifactType, organization);
+            byte[] artifactProject = APIMGovernanceUtil.getArtifactProject(artifactRefId, artifactType, organization);
 
             // If artifact project does not exist, skip evaluation
             if (artifactProject == null) {
@@ -218,7 +218,7 @@ public class ComplianceEvaluationScheduler {
             }
 
             // Extract artifact project content to map
-            Map<RuleType, String> artifactProjectContentMap = GovernanceUtil.extractArtifactProjectContent
+            Map<RuleType, String> artifactProjectContentMap = APIMGovernanceUtil.extractArtifactProjectContent
                     (artifactProject, artifactType);
 
 
