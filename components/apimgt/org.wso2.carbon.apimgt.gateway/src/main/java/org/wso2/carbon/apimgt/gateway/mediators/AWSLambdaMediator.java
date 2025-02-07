@@ -141,24 +141,18 @@ public class AWSLambdaMediator extends AbstractMediator {
 
             String body = "{}";
             if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
-                String jsonPayload = JsonUtil.jsonPayloadToString(axis2MessageContext);
-                if (!isContentEncodingEnabled) {
-                    payload.add(BODY_PARAMETER, new JsonParser().parse(body).getAsJsonObject());
-                } else {
-                    payload.addProperty(BODY_PARAMETER, Base64.encodeBase64String(jsonPayload.getBytes()));
+                body = JsonUtil.jsonPayloadToString(axis2MessageContext);
+                if (isContentEncodingEnabled) {
+                    body = Base64.encodeBase64String(body.getBytes());
                 }
             } else {
                 String multipartContent = extractFormDataContent(axis2MessageContext);
                 if (StringUtils.isNotEmpty(multipartContent)) {
                     body = isContentEncodingEnabled ? Base64.encodeBase64String(multipartContent.getBytes()) :
                             multipartContent;
-                    payload.addProperty(BODY_PARAMETER, body);
-                } else {
-                    // If the request does not have a payload(as either a json payload or multipart content),
-                    // set an empty JSON object as the payload
-                    payload.add(BODY_PARAMETER, new JsonParser().parse(body).getAsJsonObject());
                 }
             }
+            payload.addProperty(BODY_PARAMETER, body);
             payload.addProperty(IS_BASE64_ENCODED_PARAMETER, isContentEncodingEnabled);
 
             if (log.isDebugEnabled()) {
