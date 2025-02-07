@@ -15225,8 +15225,8 @@ public class ApiMgtDAO {
                 prepStmt.setInt(1, id);
                 prepStmt.setString(2, vhost.getHost());
                 prepStmt.setString(3, vhost.getHttpContext());
-                prepStmt.setString(4, vhost.getHttpPort().toString());
-                prepStmt.setString(5, vhost.getHttpsPort().toString());
+                prepStmt.setString(4, (vhost.getHttpPort() != null) ? vhost.getHttpPort().toString() : "N/A");
+                prepStmt.setString(5, (vhost.getHttpsPort() != null) ? vhost.getHttpsPort().toString() : "N/A");
                 prepStmt.setString(6, (vhost.getWsPort() != null) ? vhost.getWsPort().toString() : "N/A");
                 prepStmt.setString(7, (vhost.getWssPort() != null) ? vhost.getWssPort().toString() : "N/A");
                 prepStmt.addBatch();
@@ -15271,8 +15271,24 @@ public class ApiMgtDAO {
                 while (rs.next()) {
                     String host = rs.getString("HOST");
                     String httpContext = rs.getString("HTTP_CONTEXT");
-                    Integer httpPort = rs.getInt("HTTP_PORT");
-                    Integer httpsPort = rs.getInt("HTTPS_PORT");
+                    Integer httpPort;
+                    String httpPortValue = rs.getString("HTTP_PORT");
+                    if ("N/A".equals(httpPortValue)) {
+                        // Handle the "N/A" case
+                        httpPort = null;
+                    } else {
+                        // Parse the integer value
+                        httpPort = Integer.parseInt(httpPortValue);
+                    }
+                    Integer httpsPort;
+                    String httpsPortValue = rs.getString("HTTPS_PORT");
+                    if ("N/A".equals(httpsPortValue)) {
+                        // Handle the "N/A" case
+                        httpsPort = null;
+                    } else {
+                        // Parse the integer value
+                        httpsPort = Integer.parseInt(httpsPortValue);
+                    }
                     Integer wsPort;
                     String wsPortValue = rs.getString("WS_PORT");
                     if ("N/A".equals(wsPortValue)) {
