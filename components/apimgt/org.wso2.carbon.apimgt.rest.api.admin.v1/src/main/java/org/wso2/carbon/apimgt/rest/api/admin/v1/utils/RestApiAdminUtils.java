@@ -301,6 +301,44 @@ public class RestApiAdminUtils {
     }
 
     /**
+     * Import the content of the provided tenant theme archive to the file system and the database.
+     *
+     * @param themeContentInputStream content relevant to the tenant theme
+     * @param organization            tenant to which the theme is imported
+     * @throws APIManagementException if an error occurs while importing the tenant theme
+     */
+    public static void importDraftedOrgTheme(InputStream themeContentInputStream, String organization)
+            throws APIManagementException {
+        APIAdmin apiAdmin = new APIAdminImpl();
+        apiAdmin.importDraftedOrgTheme(organization, themeContentInputStream);
+    }
+
+    /**
+     * Import the content of the provided tenant theme archive to the file system and the database.
+     *
+     * @param action                  whether it needs to publish or unpublish
+     * @param organization            tenant to which the theme is imported
+     * @throws APIManagementException if an error occurs while importing the tenant theme
+     */
+    public static void updateOrgThemeStatusAsPublishedOrUnpublished(String action, String organization)
+            throws APIManagementException {
+        APIAdmin apiAdmin = new APIAdminImpl();
+        apiAdmin.updateOrgThemeStatusAsPublishedOrUnpublished(organization, action);
+    }
+
+    /**
+     * Import the content of the provided tenant theme archive to the file system and the database.
+     *
+     * @param themeId                theme identifier
+     * @param organization            tenant to which the theme is imported
+     * @throws APIManagementException if an error occurs while importing the tenant theme
+     */
+    public static void deleteOrgTheme(String themeId, String organization) throws APIManagementException {
+        APIAdmin apiAdmin = new APIAdminImpl();
+        apiAdmin.deleteOrgTheme(organization, themeId);
+    }
+
+    /**
      * Retrieves the directory location in the file system where the tenant theme is imported
      *
      * @param tenantDomain tenant to which the theme is imported

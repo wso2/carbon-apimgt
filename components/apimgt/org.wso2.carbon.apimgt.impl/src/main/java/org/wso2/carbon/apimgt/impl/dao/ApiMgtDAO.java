@@ -17743,6 +17743,254 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Imports a drafted organization theme for the given organization.
+     *
+     * @param organization the organization name
+     * @param themeContent the theme content as InputStream
+     * @throws APIManagementException if a database error occurs
+     */
+    public void importDraftedOrgTheme(String organization, InputStream themeContent) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            if (isOrganizationExist(connection, organization)) {
+                if (isDraftedOrgThemeExist(connection, organization)) {
+                    String existingDraftedArtifact = getDraftedArtifactForOrg(connection, organization);
+                    removeArtifact(connection, existingDraftedArtifact);
+                }
+                String newUUID = addArtifact(connection, themeContent, "DRAFTED_ORG_THEME");
+                updateDraftedArtifactForOrg(connection, organization, newUUID);
+            } else {
+                String newUUID = addArtifact(connection, themeContent, "DRAFTED_ORG_THEME");
+                insertNewOrgWithDraftedArtifact(connection, organization, newUUID);
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            handleError("Failed to import drafted organization theme for tenant " + organization, e);
+        }
+    }
+
+    /**
+     * Updates the organization theme status as published or unpublished.
+     *
+     * @param organization the organization name
+     * @param action       the action to perform ("PUBLISH" or "UNPUBLISH")
+     * @throws APIManagementException if a database error occurs
+     */
+    public void updateOrgThemeStatusAsPublishedOrUnpublished(String organization, String action) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            if ("PUBLISH".equals(action)) {
+                String draftedArtifact = getDraftedArtifactForOrg(connection, organization);
+                if (draftedArtifact != null) {
+                    InputStream artifactContent = getArtifactContent(connection, draftedArtifact);
+                    String newUUID = addArtifact(connection, artifactContent, "PUBLISHED_ORG_THEME");
+                    updatePublishedArtifactForOrg(connection, organization, newUUID);
+                    removeArtifact(connection, draftedArtifact);
+                } else {
+                    log.warn("ID cannot be found in drafted state. Aborting the request");
+                }
+            } else {
+                String publishedArtifact = getPublishedArtifactForOrg(connection, organization);
+                if (publishedArtifact != null) {
+                    InputStream artifactContent = getArtifactContent(connection, publishedArtifact);
+                    String newUUID = addArtifact(connection, artifactContent, "DRAFTED_ORG_THEME");
+                    updateDraftedArtifactForOrg(connection, organization, newUUID);
+                    removeArtifact(connection, publishedArtifact);
+                } else {
+                    log.warn("ID cannot be found in published state. Aborting the request");
+                }
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            handleError("Failed to update organization theme status for tenant " + organization, e);
+        }
+    }
+
+    /**
+     * Deletes an organization theme.
+     *
+     * @param organization the organization name
+     * @param themeId      the theme ID to delete
+     * @throws APIManagementException if a database error occurs
+     */
+    public void deleteOrgTheme(String organization, String themeId) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            if (isThemeUsedByOrg(connection, organization, themeId)) {
+                removeThemeFromOrg(connection, organization, themeId);
+            } else {
+                removeOrg(connection, organization);
+            }
+            removeArtifact(connection, themeId);
+            connection.commit();
+        } catch (SQLException e) {
+            handleError("Failed to delete organization theme for tenant " + organization, e);
+        }
+    }
+
+    private boolean isOrganizationExist(Connection connection, String organization) throws SQLException {
+        String query = "SELECT COUNT(*) FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, organization);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean isDraftedOrgThemeExist(Connection connection, String organization) throws SQLException {
+        String query = "SELECT DRAFTED_ARTIFACT FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, organization);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next() && resultSet.getString(1) != null;
+            }
+        }
+    }
+
+    private String getDraftedArtifactForOrg(Connection connection, String organization) throws SQLException {
+        String query = "SELECT DRAFTED_ARTIFACT FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, organization);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString(1);
+                }
+            }
+        }
+        return null;
+    }
+
+    private void updateDraftedArtifactForOrg(Connection connection, String organization, String artifactUUID) throws SQLException {
+        String query = "UPDATE AM_DEVPORTAL_ORG_CONTENT SET DRAFTED_ARTIFACT = ? WHERE ORGANIZATION = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, artifactUUID);
+            preparedStatement.setString(2, organization);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    private void updatePublishedArtifactForOrg(Connection connection, String organization, String artifactUUID) throws SQLException {
+        String query = "UPDATE AM_DEVPORTAL_ORG_CONTENT SET PUBLISHED_ARTIFACT = ? WHERE ORGANIZATION = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, artifactUUID);
+            preparedStatement.setString(2, organization);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    private String getPublishedArtifactForOrg(Connection connection, String organization) throws SQLException {
+        String query = "SELECT PUBLISHED_ARTIFACT FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, organization);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString(1);
+                }
+            }
+        }
+        return null;
+    }
+
+    private String addArtifact(Connection connection, InputStream themeContent, String artifactType) throws SQLException {
+        String id = UUID.randomUUID().toString();
+        String query = "INSERT INTO AM_ARTIFACT (UUID, ARTIFACT, TYPE) VALUES (?, ?, ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, id);
+            preparedStatement.setBinaryStream(2, themeContent);
+            preparedStatement.setString(3, artifactType);
+            preparedStatement.executeUpdate();
+            return id;
+        }
+    }
+
+    private InputStream getArtifactContent(Connection connection, String artifactId) throws SQLException {
+        String query = "SELECT ARTIFACT FROM AM_ARTIFACT WHERE UUID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, artifactId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getBinaryStream(1);
+                }
+            }
+        }
+        return null;
+    }
+
+    private void removeArtifact(Connection connection, String artifactId) throws SQLException {
+        String query = "DELETE FROM AM_ARTIFACT WHERE UUID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, artifactId);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    private void insertNewOrgWithDraftedArtifact(Connection connection, String organization, String artifactUUID) throws SQLException {
+        String query = "INSERT INTO AM_DEVPORTAL_ORG_CONTENT (ORGANIZATION, DRAFTED_ARTIFACT) VALUES (?, ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, organization);
+            preparedStatement.setString(2, artifactUUID);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    private boolean isThemeUsedByOrg(Connection connection, String organization, String themeId) throws SQLException {
+        String query = "SELECT COUNT(*) FROM AM_DEVPORTAL_ORG_CONTENT WHERE (DRAFTED_ARTIFACT = ? OR PUBLISHED_ARTIFACT = ?) AND ORGANIZATION = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, themeId);
+            preparedStatement.setString(2, themeId);
+            preparedStatement.setString(3, organization);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void removeThemeFromOrg(Connection connection, String organization, String themeId) throws SQLException {
+        String checkQuery = "SELECT DRAFTED_ARTIFACT, PUBLISHED_ARTIFACT FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
+        try (PreparedStatement checkStmt = connection.prepareStatement(checkQuery)) {
+            checkStmt.setString(1, organization);
+            try (ResultSet resultSet = checkStmt.executeQuery()) {
+                if (resultSet.next()) {
+                    String draftedArtifact = resultSet.getString("DRAFTED_ARTIFACT");
+                    String publishedArtifact = resultSet.getString("PUBLISHED_ARTIFACT");
+                    if ((themeId.equals(draftedArtifact) && publishedArtifact == null) ||
+                            (themeId.equals(publishedArtifact) && draftedArtifact == null)) {
+                        removeOrg(connection, organization);
+                    } else if (themeId.equals(draftedArtifact) || themeId.equals(publishedArtifact)) {
+                        String updateQuery = "UPDATE AM_DEVPORTAL_ORG_CONTENT SET "
+                                + (themeId.equals(draftedArtifact) ? "DRAFTED_ARTIFACT = NULL" : "PUBLISHED_ARTIFACT = NULL")
+                                + " WHERE ORGANIZATION = ?";
+                        try (PreparedStatement updateStmt = connection.prepareStatement(updateQuery)) {
+                            updateStmt.setString(1, organization);
+                            updateStmt.executeUpdate();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void removeOrg(Connection connection, String organization) throws SQLException {
+        String query = "DELETE FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, organization);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    private void handleError(String message, Exception e) throws APIManagementException {
+        log.error(e.getMessage());
+        throw new APIManagementException(message, e);
+    }
+
+    /**
      * Deletes a tenant theme from the database
      *
      * @param tenantId tenant ID of user

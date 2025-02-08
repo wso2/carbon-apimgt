@@ -478,6 +478,12 @@ public enum ExceptionCodes implements ErrorHandler {
     TENANT_THEME_IMPORT_NOT_ALLOWED(901702, "Super Tenant not allowed to import tenant theme", 400,
             "Super Tenant %s is not allowed to import a tenant theme"),
 
+    ORG_THEME_IMPORT_FAILED(901700, "Failed to import organization theme of tenant %s", 500,
+            "%s"),
+    ORG_THEME_STATUS_UPDATE_FAILED(901700, "Failed to update status of theme of tenant %s", 500,
+            "%s"),
+    ORG_THEME_DELETE_FAILED(901700, "Failed to delete organization theme of tenant %s", 500,
+            "%s"),
     INVALID_API_IDENTIFIER(900851, "Provided API identifier (%s) is invalid", 400,
             "Provided API identifier (%s) is invalid"),
     API_NAME_OR_VERSION_NOT_NULL(900852, "name or version couldn't be null", 400, "name or version couldn't be null"),

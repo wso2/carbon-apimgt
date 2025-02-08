@@ -531,6 +531,12 @@ public interface APIAdmin  {
 
     String getTenantConfig(String organization) throws APIManagementException;
 
+    void importDraftedOrgTheme(String organization, InputStream themeContent) throws APIManagementException;
+
+    void updateOrgThemeStatusAsPublishedOrUnpublished(String organization, String action) throws APIManagementException;
+
+    void deleteOrgTheme(String organization, String themeId) throws APIManagementException;
+
     void updateTenantConfig(String organization, String config) throws APIManagementException;
 
     String getTenantConfigSchema(String organization);

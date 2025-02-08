@@ -2852,6 +2852,186 @@ paths:
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -F file=@theme.zip "https://127.0.0.1:9443/api/am/admin/v3/tenant-theme"'
 
+    ######################################################
+    # Organization theme of Devportal related APIs
+    ######################################################
+    /org-themes:
+      get:
+        operationId: getOrgThemes
+        summary: Retrieve UUIDs of org-theme contents
+        description: Returns the UUIDs of org-theme contents and their publish status.
+        parameters:
+          - name: publish
+            in: query
+            description: Filter themes based on published status
+            required: false
+            schema:
+              type: boolean
+        responses:
+          200:
+            description: List of org themes
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/ContentPublishStatusResponse'
+          403:
+            $ref: '#/components/responses/Forbidden'
+          500:
+            $ref: '#/components/responses/InternalServerError'
+        security:
+          - OAuth2Security:
+              - apim:admin
+              - apim:tenant_theme_manage
+        x-code-samples:
+          - lang: Curl
+            source: 'curl -k -X GET -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                  "https://127.0.0.1:9443/api/am/admin/v4/org-themes?publish=true"'
+
+      post:
+        operationId: importOrgTheme
+        summary: Import org theme
+        description: Imports a drafted zip of an org theme to APIM.
+        requestBody:
+          required: true
+          content:
+            multipart/form-data:
+              schema:
+                required:
+                  - file
+                properties:
+                  file:
+                    type: string
+                    description: |
+                      The org-content.zip file
+                    format: binary
+        responses:
+          200:
+            description: Successfully imported
+          400:
+            $ref: '#/components/responses/BadRequest'
+          403:
+            $ref: '#/components/responses/Forbidden'
+          413:
+            $ref: '#/components/responses/PayloadTooLarge'
+          500:
+            $ref: '#/components/responses/InternalServerError'
+        security:
+          - OAuth2Security:
+              - apim:admin
+              - apim:tenant_theme_manage
+        x-code-samples:
+          - lang: Curl
+            source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" 
+                  -F "file=@org-content.zip" 
+                  "https://127.0.0.1:9443/api/am/admin/v4/org-themes"'
+
+    /org-themes/{id}/content:
+      get:
+        operationId: getOrgThemeContent
+        summary: Retrieve org theme as zip
+        description: Returns the org theme as a zip file for the given ID.
+        parameters:
+          - name: id
+            in: path
+            required: true
+            schema:
+              type: string
+        responses:
+          200:
+            description: Returns the org theme zip
+            content:
+              application/zip:
+                schema:
+                  type: string
+                  format: binary
+          404:
+            $ref: '#/components/responses/NotFound'
+          400:
+            $ref: '#/components/responses/BadRequest'
+          403:
+            $ref: '#/components/responses/Forbidden'
+          500:
+            $ref: '#/components/responses/InternalServerError'
+        security:
+          - OAuth2Security:
+              - apim:admin
+              - apim:tenant_theme_manage
+        x-code-samples:
+          - lang: Curl
+            source: 'curl -k -X GET -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                  "https://127.0.0.1:9443/api/am/admin/v4/org-themes/{id}/content" 
+                  -o org-content.zip'
+
+    /org-themes/{id}:
+      delete:
+        operationId: deleteOrgTheme
+        summary: Delete an org theme
+        description: Deletes the org theme for the given ID.
+        parameters:
+          - name: id
+            in: path
+            required: true
+            schema:
+              type: string
+        responses:
+          200:
+            description: Successfully deleted
+          404:
+            $ref: '#/components/responses/NotFound'
+          400:
+            $ref: '#/components/responses/BadRequest'
+          403:
+            $ref: '#/components/responses/Forbidden'
+          500:
+            $ref: '#/components/responses/InternalServerError'
+        security:
+          - OAuth2Security:
+              - apim:admin
+              - apim:tenant_theme_manage
+        x-code-samples:
+          - lang: Curl
+            source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                  "https://127.0.0.1:9443/api/am/admin/v4/org-themes/{id}"'
+
+    /org-themes/{id}/status:
+      post:
+        operationId: updateOrgThemeStatus
+        summary: Update publish status of an org theme
+        description: Publishes or unpublishes an org theme to the dev portal.
+        parameters:
+          - name: id
+            in: path
+            required: true
+            schema:
+              type: string
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContentPublishStatus"
+        responses:
+          200:
+            description: Successfully updated status
+          400:
+            $ref: '#/components/responses/BadRequest'
+          403:
+            $ref: '#/components/responses/Forbidden'
+          500:
+            $ref: '#/components/responses/InternalServerError'
+        security:
+          - OAuth2Security:
+              - apim:admin
+              - apim:tenant_theme_manage
+        x-code-samples:
+          - lang: Curl
+            source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" 
+                  -H "Content-Type: application/json" 
+                  -d ''{"ACTION": "PUBLISH"}'' 
+                  "https://127.0.0.1:9443/api/am/admin/v4/org-themes/{id}/status"'
+
   ######################################################
   # The Tenant config resource APIs
   ######################################################

@@ -1,36 +1,31 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.*;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ContentPublishStatusDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ContentPublishStatusResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
-import java.io.File;
-
-import java.util.List;
-
+import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import java.io.InputStream;
-
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+
+
 
 
 public class OrgThemesApiServiceImpl implements OrgThemesApiService {
 
-    public Response deleteOrgTheme(String id, MessageContext messageContext) {
-        // remove errorObject and add implementation code!
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+    @Override
+    public Response deleteOrgTheme(String id, MessageContext messageContext) throws APIManagementException {
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        RestApiAdminUtils.deleteOrgTheme(id, tenantDomain);
+        return Response.status(Response.Status.OK).entity("Theme deleted successfully").build();
     }
 
+    @Override
     public Response getOrgThemeContent(String id, MessageContext messageContext) {
         // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
@@ -41,6 +36,7 @@ public class OrgThemesApiServiceImpl implements OrgThemesApiService {
         return Response.status(status).entity(errorObject).build();
     }
 
+    @Override
     public Response getOrgThemes(Boolean publish, MessageContext messageContext) {
         // remove errorObject and add implementation code!
         ErrorDTO errorObject = new ErrorDTO();
@@ -51,23 +47,20 @@ public class OrgThemesApiServiceImpl implements OrgThemesApiService {
         return Response.status(status).entity(errorObject).build();
     }
 
-    public Response importOrgTheme(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) {
-        // remove errorObject and add implementation code!
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+    @Override
+    public Response importOrgTheme(InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext)
+            throws APIManagementException {
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        RestApiAdminUtils.importDraftedOrgTheme(fileInputStream, tenantDomain);
+        return Response.status(Response.Status.OK).entity("Theme imported successfully").build();
     }
 
-    public Response updateOrgThemeStatus(String id, ContentPublishStatusDTO contentPublishStatusDTO, MessageContext messageContext) {
-        // remove errorObject and add implementation code!
-        ErrorDTO errorObject = new ErrorDTO();
-        Response.Status status = Response.Status.NOT_IMPLEMENTED;
-        errorObject.setCode((long) status.getStatusCode());
-        errorObject.setMessage(status.toString());
-        errorObject.setDescription("The requested resource has not been implemented");
-        return Response.status(status).entity(errorObject).build();
+    @Override
+    public Response updateOrgThemeStatus(String id, ContentPublishStatusDTO contentPublishStatusDTO, MessageContext messageContext)
+        throws APIManagementException {
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String action = contentPublishStatusDTO.getACTION().value();
+            RestApiAdminUtils.updateOrgThemeStatusAsPublishedOrUnpublished(action, tenantDomain);
+            return Response.status(Response.Status.OK).entity("Status updated successfully").build();
     }
 }
