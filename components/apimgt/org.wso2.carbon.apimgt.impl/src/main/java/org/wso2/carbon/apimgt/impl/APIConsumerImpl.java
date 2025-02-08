@@ -3908,10 +3908,10 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         devPortalApi.getVisibleRoles(), devPortalApi.getPublisherAccessControl(),
                         devPortalApi.getPublisherAccessControlRoles());
                 List<Documentation> existingDocs = getAllDocumentation(uuid, organization);
-                devPortalApi.setIsMarkdownOverview(false);
+                devPortalApi.setMarkdownOverview(false);
                 for (Documentation doc : existingDocs) {
                     if (doc.getOtherTypeName() != null && doc.getOtherTypeName().equals("_overview")) {
-                        devPortalApi.setIsMarkdownOverview(true);
+                        devPortalApi.setMarkdownOverview(true);
                         break;
                     }
                 }

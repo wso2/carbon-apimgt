@@ -349,11 +349,11 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.asyncTransportProtocols = asyncTransportProtocols;
     }
 
-    public Boolean isIsMarkdownOverview() {
+    public Boolean isMarkdownOverview() {
         return isMarkdownOverview;
     }
 
-    public void setIsMarkdownOverview(Boolean isMarkdownOverview) {
+    public void setMarkdownOverview(Boolean isMarkdownOverview) {
         this.isMarkdownOverview = isMarkdownOverview;
     }
 

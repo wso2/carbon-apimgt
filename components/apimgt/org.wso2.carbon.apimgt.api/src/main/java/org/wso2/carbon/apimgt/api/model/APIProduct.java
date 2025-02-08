@@ -718,11 +718,11 @@ public class APIProduct implements Serializable {
         isEgress = egress;
     }
 
-    public Boolean isIsMarkdownOverview() {
+    public Boolean isMarkdownOverview() {
         return isMarkdownOverview;
     }
 
-    public void setIsMarkdownOverview(Boolean isMarkdownOverview) {
+    public void setMarkdownOverview(Boolean isMarkdownOverview) {
         this.isMarkdownOverview = isMarkdownOverview;
     }
 }

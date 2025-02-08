@@ -1382,11 +1382,11 @@ public class API implements Serializable {
         this.testKey = testKey;
     }
 
-    public Boolean isIsMarkdownOverview() {
+    public Boolean isMarkdownOverview() {
         return isMarkdownOverview;
     }
 
-    public void setIsMarkdownOverview(Boolean isMarkdownOverview) {
+    public void setMarkdownOverview(Boolean isMarkdownOverview) {
         this.isMarkdownOverview = isMarkdownOverview;
     }
 
