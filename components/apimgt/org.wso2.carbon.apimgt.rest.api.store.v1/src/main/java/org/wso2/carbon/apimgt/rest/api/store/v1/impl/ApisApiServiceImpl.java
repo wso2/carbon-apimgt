@@ -1188,10 +1188,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             if (!api.isAPIProduct() && !StringUtils.isEmpty(userOrgInfo.getOrganizationId())) {
-                String organizationID = APIUtil.getOrganizationIdFromExternalReference(userOrgInfo.getOrganizationId(),
-                            userOrgInfo.getName(), organization);
                 org.wso2.carbon.apimgt.rest.api.store.v1.utils.APIUtils.updateAvailableTiersByOrganization(
-                        api.getApi(), organizationID);
+                        api.getApi(), userOrgInfo.getOrganizationId());
             }
 
             // Extracting clicked API name by the user, for the recommendation system
