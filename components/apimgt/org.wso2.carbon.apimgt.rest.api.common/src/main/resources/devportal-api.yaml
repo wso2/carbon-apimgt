@@ -836,6 +836,60 @@ paths:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/documents/0bcb7f05-599d-4e1a-adce-5cb89bfe58d5/content"
 
+  /apis/{apiId}/markdown-content:
+    get:
+      tags:
+        - APIs
+      summary: |
+        Get the Content of the API Overview Markdown Document
+      description: |
+        This operation can be used to retrieve the overview markdown document content of an API. You need to provide the Id of the API to retrieve it.
+
+        The content of the document will be retrieved in `text/plain` content type
+
+        `X-WSO2-Tenant` header can be used to retrieve the content of the overview markdown document of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
+
+        **NOTE:**
+        * This operation does not require an Authorization header by default. But in order to see a restricted API's overview markdown document content, you need to provide Authorization header.
+      operationId: getMarkdownContentOfAPI
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/requestedTenant'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Inline content returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource.
+                Used by caches, or in conditional requests.
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modified the last time.
+                Used by caches, or in conditional requests.
+              schema:
+                type: string
+          content: { }
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+          content: { }
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security: [ ]
+      x-code-samples:
+        - lang: Curl
+          source: curl -k "https://localhost:9443/api/am/devportal/v3/apis/890a4f4d-09eb-4877-a323-57f6ce2ed79b/markdown-content"
+
   /apis/{apiId}/thumbnail:
     get:
       tags:
@@ -4053,10 +4107,9 @@ components:
           description: |
             If the provider value is not given user invoking the api will be used as the provider.
           example: admin
-        markdownContentId:
-          type: string
-          description: UUID of the overview markdown document
-          example: 01234567-0123-0123-0123-012345678901
+        isMarkdownOverview:
+          type: boolean
+          example: true
         apiDefinition:
           type: string
           description: |

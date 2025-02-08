@@ -67,7 +67,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
     private String asyncTransportProtocols;
     private String publisherAccessControl;
     private String publisherAccessControlRoles;
-    private String markdownContentId;
+    private Boolean isMarkdownOverview;
 
     public String getContextTemplate() {
         return contextTemplate;
@@ -349,12 +349,12 @@ public class DevPortalAPI extends DevPortalAPIInfo {
         this.asyncTransportProtocols = asyncTransportProtocols;
     }
 
-    public String getMarkdownContentId() {
-        return markdownContentId;
+    public Boolean isIsMarkdownOverview() {
+        return isMarkdownOverview;
     }
 
-    public void setMarkdownContentId(String markdownContentId) {
-        this.markdownContentId = markdownContentId;
+    public void setIsMarkdownOverview(Boolean isMarkdownOverview) {
+        this.isMarkdownOverview = isMarkdownOverview;
     }
 
     @Override
@@ -374,7 +374,7 @@ public class DevPortalAPI extends DevPortalAPIInfo {
                 + additionalProperties + ", endpointConfig=" + endpointConfig + ", type=" + type + ", advertisedOnly="
                 + advertisedOnly + ", swaggerDefinition=" + swaggerDefinition + ", contextTemplate=" + contextTemplate
                 + ", apiSecurity=" + apiSecurity + ", visibility=" + visibility + ", visibleRoles=" + visibleRoles
-                + ", markdownContentId=" + markdownContentId + "]";
+                + ", isMarkdownOverview=" + isMarkdownOverview + "]";
     }
 
     public String getApiSecurity() {

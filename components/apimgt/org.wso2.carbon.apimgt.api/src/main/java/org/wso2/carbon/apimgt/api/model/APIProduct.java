@@ -65,7 +65,7 @@ public class APIProduct implements Serializable {
     private JSONObject monetizationProperties = new JSONObject();
     private boolean isMonetizationEnabled = false;
     private String versionTimestamp;
-    private String markdownContentId;
+    private Boolean isMarkdownOverview;
 
     /**
      * API security at the gateway level.
@@ -718,11 +718,11 @@ public class APIProduct implements Serializable {
         isEgress = egress;
     }
 
-    public String getMarkdownContentId() {
-        return markdownContentId;
+    public Boolean isIsMarkdownOverview() {
+        return isMarkdownOverview;
     }
 
-    public void setMarkdownContentId(String markdownContentId) {
-        this.markdownContentId = markdownContentId;
+    public void setIsMarkdownOverview(Boolean isMarkdownOverview) {
+        this.isMarkdownOverview = isMarkdownOverview;
     }
 }
