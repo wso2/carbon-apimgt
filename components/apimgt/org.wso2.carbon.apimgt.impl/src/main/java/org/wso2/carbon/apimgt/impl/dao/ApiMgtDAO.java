@@ -17828,6 +17828,55 @@ public class ApiMgtDAO {
         }
     }
 
+    /**
+     * Gets an organization theme.
+     *
+     * @param themeId      the theme ID to delete
+     * @param organization the organization name
+     * @throws APIManagementException if a database error occurs
+     */
+    public InputStream getOrgTheme(String themeId, String organization) throws APIManagementException {
+        InputStream tenantThemeContent = null;
+        String query = "SELECT * FROM AM_ARTIFACT WHERE UUID = ? AND TYPE IN (?, ?)";
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, themeId);
+            statement.setString(2, "DRAFTED_ORG_THEME");
+            statement.setString(3, "PUBLISHED_ORG_THEME");
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                tenantThemeContent = resultSet.getBinaryStream("ARTIFACT");
+            }
+        } catch (SQLException e) {
+            handleError("Failed to get organization theme for tenant " + organization, e);
+        }
+        return tenantThemeContent;
+    }
+
+    /**
+     * Gets org theme array.
+     *
+     * @param organization the organization name
+     * @throws APIManagementException if a database error occurs
+     */
+    public Map<String, String>  getOrgThemes(String organization) throws APIManagementException {
+        Map<String, String> themeMap = new HashMap<>();
+        String checkQuery = "SELECT DRAFTED_ARTIFACT, PUBLISHED_ARTIFACT FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(checkQuery)) {
+            preparedStatement.setString(1, organization);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    themeMap.put("drafted", resultSet.getString("DRAFTED_ARTIFACT"));
+                    themeMap.put("published", resultSet.getString("PUBLISHED_ARTIFACT"));
+                }
+            }
+        } catch (SQLException e) {
+            handleError("Failed to get organization theme array for " + organization, e);
+        }
+        return themeMap;
+    }
+
     private boolean isOrganizationExist(Connection connection, String organization) throws SQLException {
         String query = "SELECT COUNT(*) FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {

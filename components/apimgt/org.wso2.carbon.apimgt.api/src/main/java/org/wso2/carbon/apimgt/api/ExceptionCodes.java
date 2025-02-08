@@ -484,6 +484,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "%s"),
     ORG_THEME_DELETE_FAILED(901700, "Failed to delete organization theme of tenant %s", 500,
             "%s"),
+    ORG_THEME_EXPORT_FAILED(901701, "Failed to export org theme of tenant %s", 500,
+            "%s"),
     INVALID_API_IDENTIFIER(900851, "Provided API identifier (%s) is invalid", 400,
             "Provided API identifier (%s) is invalid"),
     API_NAME_OR_VERSION_NOT_NULL(900852, "name or version couldn't be null", 400, "name or version couldn't be null"),
