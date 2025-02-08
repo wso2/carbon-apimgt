@@ -689,6 +689,9 @@ public final class APIConstants {
     public static final String ORG_ALL_QUERY_PARAM = "ALL";
     public static final String JWT_HEADER_ACCESS_TOKEN_TYPE = "at+jwt";
 
+    public static final String GOVERNANCE_COMPLIANCE_KEY = "isCompliant";
+    public static final String GOVERNANCE_COMPLIANCE_ERROR_MESSAGE = "message";
+
     public static class TokenStatus {
 
         public static final String ACTIVE = "ACTIVE";

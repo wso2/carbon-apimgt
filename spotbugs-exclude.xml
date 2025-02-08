@@ -77,15 +77,27 @@
         <Bug pattern="EI_EXPOSE_REP2"/>
     </Match> 
         <Match>
-        <Class name="org.wso2.carbon.apimgt.cache.invalidation.APIMgtCacheInvalidationRequestSender"/>
-        <Bug pattern="EI_EXPOSE_REP2"/>
-    </Match> 
+            <Class name="org.wso2.carbon.apimgt.cache.invalidation.APIMgtCacheInvalidationRequestSender"/>
+            <Bug pattern="EI_EXPOSE_REP2"/>
+        </Match>
     <Match>
         <Package name="org.wso2.carbon.apimgt.common.gateway.dto.*"/>
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
     </Match>
     <Match>
         <Package name="org.wso2.carbon.apimgt.throttle.policy.deployer.dto.*"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Package name="org.wso2.carbon.apimgt.governance.rest.api.dto.*"/>
+        <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
+    </Match>
+    <Match>
+        <Class name="org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder"/>
+        <Bug pattern="MS_EXPOSE_REP, EI_EXPOSE_REP2, EI_EXPOSE_REP"/>
+    </Match>
+    <Match>
+        <Package name="org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfiguration"/>
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
     </Match>
 </FindBugsFilter>

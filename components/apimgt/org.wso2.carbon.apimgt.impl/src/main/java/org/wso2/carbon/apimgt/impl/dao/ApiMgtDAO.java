@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -54,6 +55,7 @@ import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
@@ -61,7 +63,6 @@ import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayPolicyData;
@@ -69,9 +70,8 @@ import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.AIConfiguration;
-import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
+import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
@@ -83,6 +83,7 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Pagination;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.SharedScopeUsage;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
@@ -23245,5 +23246,38 @@ public class ApiMgtDAO {
                     ExceptionCodes.INTERNAL_ERROR);
         }
         return APIConstants.API_SUBTYPE_DEFAULT;
+    }
+
+    /**
+     * Get All APIs within an organization
+     *
+     * @param organization Organization
+     * @return List of API Result objets
+     * @throws APIManagementException If an error occurs while getting APIs
+     */
+    public List<ApiResult> getAllAPIs(String organization) throws APIManagementException {
+        List<ApiResult> apis = new ArrayList<>();
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    SQLConstants.GET_ALL_APIS_OF_ORG)) {
+                preparedStatement.setString(1, organization);
+                try (ResultSet rs = preparedStatement.executeQuery()) {
+                    while (rs.next()) {
+                        ApiResult apiResult = new ApiResult();
+                        apiResult.setId(rs.getString("API_UUID"));
+                        apiResult.setName(rs.getString("API_NAME"));
+                        apiResult.setVersion(rs.getString("API_VERSION"));
+                        apiResult.setProvider(rs.getString("API_PROVIDER"));
+                        apiResult.setType(rs.getString("API_TYPE"));
+                        apis.add(apiResult);
+                    }
+                }
+            }
+            return apis;
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving apis for the organization " + organization, e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
     }
 }

@@ -467,7 +467,7 @@ public class LabelsDAO {
                     apiResult.setName(rs.getString("API_NAME"));
                     apiResult.setVersion(rs.getString("API_VERSION"));
                     apiResult.setProvider(rs.getString("API_PROVIDER"));
-
+                    apiResult.setType(rs.getString("API_TYPE"));
                     mappedApis.add(apiResult);
                 }
             }

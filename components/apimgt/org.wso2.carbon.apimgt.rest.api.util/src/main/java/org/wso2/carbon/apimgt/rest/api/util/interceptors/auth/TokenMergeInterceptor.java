@@ -32,6 +32,9 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
+import static org.wso2.carbon.apimgt.rest.api.common.RestApiConstants.REFERER_COOKIE_NAME;
+import static org.wso2.carbon.apimgt.rest.api.common.RestApiConstants.REST_API_GOVERNANCE_CONTEXT;
+
 /**
  * TokenMergeInterceptor class merge the token parts received from the request and from the cookies,
  * and then re-create the bearer authentication header in the request.
@@ -40,6 +43,7 @@ public class TokenMergeInterceptor extends AbstractPhaseInterceptor {
 
     private static final Log logger = LogFactory.getLog(TokenMergeInterceptor.class);
     private static final String QUERY_STRING = "org.apache.cxf.message.Message.QUERY_STRING";
+
     public TokenMergeInterceptor() {
         //We will use PRE_INVOKE phase as we need to process message before hit actual service
         super(Phase.PRE_INVOKE);
@@ -68,21 +72,46 @@ public class TokenMergeInterceptor extends AbstractPhaseInterceptor {
             return;
         }
 
-        ArrayList tokenCookie = (ArrayList) ((TreeMap) (message.get(Message.PROTOCOL_HEADERS)))
-                .get(RestApiConstants.COOKIE_HEADER_NAME);
+        TreeMap<Object, Object> protocolMap = (TreeMap<Object, Object>) message.get(Message.PROTOCOL_HEADERS);
+        if (protocolMap == null) {
+            return;
+        }
+
+        ArrayList tokenCookie = (ArrayList) (protocolMap).get(RestApiConstants.COOKIE_HEADER_NAME);
         if (tokenCookie == null) {
             return;
         }
-        
+
         String cookie = tokenCookie.get(0).toString();
         if (cookie == null) {
             return;
         }
-
         cookie = cookie.trim();
         String[] cookies = cookie.split(";");
-        String tokenFromCookie = Arrays.stream(cookies)
-                .filter(name -> name.contains(RestApiConstants.AUTH_COOKIE_NAME)).findFirst().orElse("");
+        String tokenFromCookie = "";
+        if (message.get("jaxrs.template.uri") != null &&
+                message.get("jaxrs.template.uri").toString().contains(REST_API_GOVERNANCE_CONTEXT)) {
+
+            String referer = protocolMap.getOrDefault(REFERER_COOKIE_NAME, "").toString();
+
+            if (referer.contains("/admin")) {
+                tokenFromCookie = Arrays.stream(cookies)
+                        .filter(name -> name.contains(RestApiConstants.GOVERNANCE_ADMIN_AUTH_COOKIE_NAME))
+                        .findFirst().orElse("");
+            } else if (referer.contains("/publisher")) {
+                tokenFromCookie = Arrays.stream(cookies)
+                        .filter(name -> name.contains(RestApiConstants.GOVERNANCE_PUBLISHER_AUTH_COOKIE_NAME))
+                        .findFirst().orElse("");
+            } else {
+                tokenFromCookie = Arrays.stream(cookies)
+                        .filter(name -> name.contains(RestApiConstants.AUTH_COOKIE_NAME))
+                        .findFirst().orElse("");
+            }
+        } else {
+            tokenFromCookie = Arrays.stream(cookies)
+                    .filter(name -> name.contains(RestApiConstants.AUTH_COOKIE_NAME))
+                    .findFirst().orElse("");
+        }
         String[] tokenParts = tokenFromCookie.split("=");
         if (tokenParts.length == 2) {
             accessToken += tokenParts[1]; // Append the token section from cookie to token part from Auth header

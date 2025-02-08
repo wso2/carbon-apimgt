@@ -185,6 +185,8 @@ public final class RestApiConstants {
     public static final String REST_API_PUBLISHER_CONTEXT_FULL =
             REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION;
     public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
+    public static final String REST_API_GOVERNANCE_CONTEXT = "api/am/governance/";
+    public static final String REST_API_GOVERNANCE_VERSION = "v1";
     public static final String REST_API_ADMIN_VERSION_0 = "v0.16";
     public static final String REST_API_ADMIN_VERSION = "v4";
     public static final String REST_API_DCR_CONTEXT_FULL = "/client-registration/v0.17";
@@ -192,6 +194,7 @@ public final class RestApiConstants {
     public static final String REST_API_DCR_VERSION = "v0.17";
     public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION_0;
     public static final String REST_API_ADMIN_CONTEXT_FULL = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;
+    public static final String REST_API_GOVERNANCE_CONTEXT_FULL = REST_API_GOVERNANCE_CONTEXT + REST_API_GOVERNANCE_VERSION;
     public static final String REST_API_SERVICE_CATALOG_CONTEXT_FULL = "/api/am/service-catalog";
     public static final String REST_API_PROVIDER = "admin";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
@@ -200,6 +203,9 @@ public final class RestApiConstants {
     public static final Pattern REGEX_BEARER_PATTERN = Pattern.compile("Bearer\\s");
     public static final String COOKIE_HEADER_NAME = "cookie";
     public static final String AUTH_COOKIE_NAME = "AM_ACC_TOKEN_DEFAULT_P2"; // This cookie name should be used when setting the cookie for SPA app in SPA app user authentication response to REST API context as path directive
+    public static final String REFERER_COOKIE_NAME = "referer";
+    public static final String GOVERNANCE_ADMIN_AUTH_COOKIE_NAME = "AM_ADMIN_ACC_TOKEN_DEFAULT_P2";
+    public static final String GOVERNANCE_PUBLISHER_AUTH_COOKIE_NAME = "AM_PUBLISHER_ACC_TOKEN_DEFAULT_P2";
 
     public static final String API_VERSION = "API_VERSION";
     public static final String REQUEST_URL = "org.apache.cxf.request.uri";
