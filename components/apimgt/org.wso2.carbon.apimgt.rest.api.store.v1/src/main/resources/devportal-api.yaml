@@ -4456,6 +4456,11 @@ components:
           type: string
           readOnly: true
           example: 1651555310208
+        visibility:
+          type: string
+          enum:
+            - PRIVATE
+            - SHARED_WITH_ORG
     ApplicationInfo:
       title: Application info object with basic application details
       type: object
@@ -5644,6 +5649,11 @@ components:
         IsJWTEnabledForLoginTokens: 
           type: boolean
           default: false
+        orgAccessControlEnabled:
+          type: boolean
+          description: |
+            Is Organization-based access control configuration enabled
+          example: true
         userStorePasswordPattern:
           type: string
           description: The 'PasswordJavaRegEx' cofigured in the UserStoreManager

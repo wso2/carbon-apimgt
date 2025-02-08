@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -28,9 +26,7 @@ import java.util.Objects;
 public class Label {
     private String labelId;
     private String name;
-    private String tenantId;
     private String description;
-    private List<String> accessUrls = new ArrayList<>();
 
     public Label() {
     }
@@ -51,22 +47,6 @@ public class Label {
         this.name = name;
     }
 
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(String tenantId) {
-        this.tenantId = tenantId;
-    }
-
-    public List<String> getAccessUrls() {
-        return accessUrls;
-    }
-
-    public void setAccessUrls(List<String> accessUrls) {
-        this.accessUrls = accessUrls;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -83,12 +63,10 @@ public class Label {
         if (!Objects.equals(this.name, other.name)) return false;
         if (!Objects.equals(this.labelId, other.labelId)) return false;
         if (!Objects.equals(this.description, other.description)) return false;
-        if (!Objects.equals(this.tenantId, other.tenantId)) return false;
-        if (!Objects.equals(this.accessUrls, other.accessUrls)) return false;
         return true;
     }
 
     public int hashCode() {
-        return Objects.hash(super.hashCode(), labelId, name, tenantId, description, accessUrls);
+        return Objects.hash(super.hashCode(), labelId, name, description);
     }
 }

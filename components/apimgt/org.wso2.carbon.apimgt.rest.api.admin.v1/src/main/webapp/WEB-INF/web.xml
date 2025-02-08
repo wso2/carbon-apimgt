@@ -56,7 +56,9 @@
             org.wso2.carbon.apimgt.rest.api.admin.v1.TenantConfigSchemaApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.GlobalKeyManagersApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.ApisApi,
-            org.wso2.carbon.apimgt.rest.api.admin.v1.TransactionCountApi
+            org.wso2.carbon.apimgt.rest.api.admin.v1.TransactionCountApi,
+            org.wso2.carbon.apimgt.rest.api.admin.v1.OrganizationsApi,
+            org.wso2.carbon.apimgt.rest.api.admin.v1.LabelsApi,
         </param-value>
     </init-param>
     <init-param>

@@ -79,13 +79,13 @@ import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.*;
 import java.nio.file.Files;
 import java.util.*;
@@ -214,9 +214,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         APIDTO createdApiDTO;
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             API createdApi = PublisherCommonUtils
                     .addAPIWithGeneratedSwaggerDefinition(body, oasVersion, RestApiCommonUtil.getLoggedInUsername(),
-                            organization);
+                            organization, orgInfo );
             createdApiDTO = APIMappingUtil.fromAPItoDTO(createdApi);
             //This URI used to set the location header of the POST response
             createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -238,7 +239,17 @@ public class ApisApiServiceImpl implements ApisApiService {
             MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        OrganizationInfo organizationInfo = RestApiUtil.getOrganizationInfo(messageContext);
         APIDTO apiToReturn = getAPIByID(apiId, apiProvider, organization);
+        if (apiToReturn.getVisibleOrganizations() != null && organizationInfo != null
+                && organizationInfo.getOrganizationId() != null) {
+            // Remove current organization id from the visible org list.
+            List<String> orglist = apiToReturn.getVisibleOrganizations();
+            ArrayList<String> newOrgList = new ArrayList<String>(orglist);
+            newOrgList.remove(organizationInfo.getOrganizationId());
+            apiToReturn.setVisibleOrganizations(newOrgList);
+        }
+
         return Response.ok().entity(apiToReturn).build();
     }
 
@@ -708,6 +719,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            OrganizationInfo organizationInfo = RestApiUtil.getOrganizationInfo(messageContext);
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
             if (!PublisherCommonUtils.validateEndpointConfigs(body)) {
@@ -739,9 +751,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
             API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
             originalAPI.setOrganization(organization);
+            
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(originalAPI.getStatus());
-            API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes);
+            API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes, organizationInfo);
             return Response.ok().entity(APIMappingUtil.fromAPItoDTO(updatedApi)).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
@@ -3709,7 +3722,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
     @Override
     public Response getAPISubscriptionPolicies(String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean isAiApi,
-            MessageContext messageContext) throws APIManagementException {
+            String organizationID, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIDTO apiInfo = getAPIByID(apiId, apiProvider, organization);
@@ -3717,7 +3730,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), true, isAiApi);
 
         if (apiInfo != null) {
-            List<String> apiPolicies = apiInfo.getPolicies();
+            List<String> apiPolicies = RestApiPublisherUtils.getSubscriptionPoliciesForOrganization(apiInfo, organizationID);
             List<Tier> apiThrottlingPolicies = ApisApiServiceImplUtils.filterAPIThrottlingPolicies(apiPolicies,
                     availableThrottlingPolicyList);
             return Response.ok().entity(apiThrottlingPolicies).build();
@@ -4663,6 +4676,29 @@ public class ApisApiServiceImpl implements ApisApiService {
         String jsonContent = new Gson().toJson(properties);
 
         return Response.ok().entity(jsonContent).build();
+    }
+
+    public Response getLabelsOfAPI(String apiId, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        List<Label> labelList = apiProvider.getAllLabelsOfApi(apiId);
+        LabelListDTO labelListDTO = LabelMappingUtil.fromLabelListToLabelListDTO(labelList);
+        return Response.ok().entity(labelListDTO).build();
+    }
+
+    public Response attachLabelsToAPI(String apiId, RequestLabelListDTO requestLabelListDTO, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiUtil.getValidatedOrganization(messageContext);
+        List<Label> updatedLabelList = apiProvider.attachApiLabels(apiId, requestLabelListDTO.getLabels(), tenantDomain);
+        LabelListDTO updatedLabelListDTO = LabelMappingUtil.fromLabelListToLabelListDTO(updatedLabelList);
+        return Response.ok().entity(updatedLabelListDTO).build();
+    }
+
+    public Response detachLabelsFromAPI(String apiId, RequestLabelListDTO requestLabelListDTO, MessageContext messageContext) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String tenantDomain = RestApiUtil.getValidatedOrganization(messageContext);
+        List<Label> updatedLabelList = apiProvider.detachApiLabels(apiId, requestLabelListDTO.getLabels(), tenantDomain);
+        LabelListDTO updatedLabelListDTO = LabelMappingUtil.fromLabelListToLabelListDTO(updatedLabelList);
+        return Response.ok().entity(updatedLabelListDTO).build();
     }
 
     private void validateEnvironment(String organization, String envId) throws APIManagementException {

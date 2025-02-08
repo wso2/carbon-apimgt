@@ -39,6 +39,7 @@ public final class RestApiConstants {
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
     public static final String HEADER_X_WSO2_TENANT = "x-wso2-tenant";
     public static final String ORGANIZATION = "organization";
+    public static final String ORGANIZATION_INFO = "organization_info";
     public static final String SUB_ORGANIZATION = "sub_organization";
     public static final String MASKED_TOKEN = "maskedToken";
 
@@ -85,6 +86,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_COMMENTS = "comments";
     public static final String RESOURCE_MEDIATION_POLICY = "mediation-policy";
     public static final String RESOURCE_API_CATEGORY = "API Category";
+    public static final String RESOURCE_LABEL = "Label";
 
     public static final String API_ID_DELIMITER = "-";
     public static final String QUERY_PARAM = "{query}";
@@ -132,8 +134,10 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL = RESOURCE_PATH_THROTTLING_POLICIES
             + "/custom";
     public static final String RESOURCE_PATH_CATEGORY = "/categories";
+    public static final String RESOURCE_PATH_LABEL = "/labels";
     public static final String RESOURCE_PATH_LLM_PROVIDER = "/llm-providers";
     public static final String KEY_MANAGERS = "/key-managers";
+    public static final String ORGANIZATIONS_PATH= "/organizations";
 
     // Used in XACML authentication interceptor: Deprecated
     public static final String SERVER_URL = "server_url";

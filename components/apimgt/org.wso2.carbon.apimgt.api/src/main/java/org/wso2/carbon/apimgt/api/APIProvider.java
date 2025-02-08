@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.api.model.*;
@@ -1546,6 +1547,46 @@ public interface APIProvider extends APIManager {
     Environment getEnvironment(String organization, String uuid) throws APIManagementException;
 
     /**
+     * Returns all labels of the tenant
+     *
+     * @param tenantDomain    tenant domain
+     * @return List<Label> list of Label objects
+     * @throws APIManagementException if failed to get labels
+     */
+    List<Label> getAllLabels(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Returns all attached labels of the API
+     *
+     * @param apiID      API UUID
+     * @return List<Label> list of Label objects
+     * @throws APIManagementException if failed to get labels
+     */
+    List<Label> getAllLabelsOfApi(String apiID) throws APIManagementException;
+
+    /**
+     * Attach labels to an API
+     *
+     * @param apiID        API UUID
+     * @param labelList    List of Labels
+     * @param tenantDomain Tenant domain
+     * @return List<String> list of Label IDs
+     * @throws APIManagementException if failed to get labels
+     */
+    List<Label> attachApiLabels(String apiID, List<String> labelList, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Detach labels from an API
+     *
+     * @param apiID        API UUID
+     * @param labelList    List of Labels
+     * @param tenantDomain Tenant domain
+     * @return List<String> list of Label IDs
+     * @throws APIManagementException if failed to get labels
+     */
+    List<Label> detachApiLabels(String apiID, List<String> labelList, String tenantDomain) throws APIManagementException;
+
+    /**
      * Set existing operation policy mapping to the URI Templates
      *
      * @param apiId        API UUID
@@ -2064,4 +2105,14 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     WorkflowDTO retrieveWorkflow(String workflowReferenceID) throws APIManagementException;
+
+    /**
+     * 
+     * Retrieves list of organizations available for the given parent organization.
+     * 
+     * @param parentOrgId parent organization id
+     * @param tenantDomain super domain
+     * @return organization list
+     */
+    List<OrganizationDetailsDTO> getOrganizations(String orgId, String superOrganization) throws APIManagementException;
 }

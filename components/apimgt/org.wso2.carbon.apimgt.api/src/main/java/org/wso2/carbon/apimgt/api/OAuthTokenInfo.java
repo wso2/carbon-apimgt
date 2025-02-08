@@ -17,6 +17,8 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
+
 /**
  * Details about an oauth Access Token.
  */
@@ -33,6 +35,8 @@ public class OAuthTokenInfo {
     private long validityPeriod;
 
     private String endUserName;
+    
+    private OrganizationInfo userOrganizationInfo;
 
     public boolean isTokenValid() {
         return isTokenValid;
@@ -91,6 +95,14 @@ public class OAuthTokenInfo {
 
     public void setConsumerKey(String consumerKey) {
         this.consumerKey = consumerKey;
+    }
+
+    public OrganizationInfo getUserOrganizationInfo() {
+        return userOrganizationInfo;
+    }
+
+    public void setUserOrganizationInfo(OrganizationInfo userOrganizationInfo) {
+        this.userOrganizationInfo = userOrganizationInfo;
     }
 }
 

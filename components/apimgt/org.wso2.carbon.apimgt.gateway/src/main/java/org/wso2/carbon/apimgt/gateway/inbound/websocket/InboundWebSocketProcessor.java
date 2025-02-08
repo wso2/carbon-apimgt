@@ -331,12 +331,16 @@ public class InboundWebSocketProcessor {
                     Resource resource = dispatcher.findResource(synCtx, acceptableResources);
                     if (resource != null) {
                         selectedResource = resource;
-                        if (APIUtil.isAnalyticsEnabled()) {
-                            WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS,
-                                    WebSocketUtils.getEndpointUrl(resource, synCtx));
+                        if (selectedResource.getDispatcherHelper()
+                                .getString() != null && !selectedResource.getDispatcherHelper().getString()
+                                .contains("/*")) {
+                            break;
                         }
-                        break;
                     }
+                }
+                if (selectedResource != null && APIUtil.isAnalyticsEnabled()) {
+                    WebSocketUtils.setApiPropertyToChannel(ctx, APIMgtGatewayConstants.SYNAPSE_ENDPOINT_ADDRESS,
+                            WebSocketUtils.getEndpointUrl(selectedResource, synCtx));
                 }
             }
             setApiPropertiesToChannel(ctx, inboundMessageContext);

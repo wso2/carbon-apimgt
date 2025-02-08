@@ -1013,8 +1013,8 @@ public class SQLConstants {
     public static final String APP_APPLICATION_SQL =
             " INSERT INTO AM_APPLICATION (NAME, SUBSCRIBER_ID, APPLICATION_TIER, " +
             "   CALLBACK_URL, DESCRIPTION, APPLICATION_STATUS, GROUP_ID, CREATED_BY, CREATED_TIME, UPDATED_TIME, " +
-                    "UUID, TOKEN_TYPE, ORGANIZATION)" +
-            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "UUID, TOKEN_TYPE, ORGANIZATION, SHARED_ORGANIZATION)" +
+            " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String UPDATE_APPLICATION_SQL =
             " UPDATE " +
@@ -1026,7 +1026,8 @@ public class SQLConstants {
             "   DESCRIPTION = ?, " +
             "   UPDATED_BY = ?, " +
             "   UPDATED_TIME = ?, " +
-            "   TOKEN_TYPE = ? " +
+            "   TOKEN_TYPE = ?, " +
+            "   SHARED_ORGANIZATION = ? " +
             " WHERE" +
             "   APPLICATION_ID = ?";
 
@@ -1634,6 +1635,7 @@ public class SQLConstants {
             "   APP.TOKEN_TYPE," +
             "   APP.CREATED_BY," +
             "   APP.ORGANIZATION ORGANIZATION,"+
+            "   APP.SHARED_ORGANIZATION AS SHARED_ORGANIZATION, " +
             "   SUB.USER_ID " +
             " FROM " +
             "   AM_SUBSCRIBER SUB," +
@@ -2905,6 +2907,49 @@ public class SQLConstants {
 
     public static final String GET_KEY_MANAGERS_BY_ORGANIZATION = "SELECT * FROM AM_KEY_MANAGER WHERE ORGANIZATION IN (?)";
 
+    /** Label related constants **/
+
+    public static final String ADD_LABEL_SQL = "INSERT INTO AM_LABEL (UUID, NAME, DESCRIPTION, TENANT_DOMAIN) " +
+            "VALUES (?, ?, ?, ?)";
+
+    public static final String GET_LABELS_BY_TENANT_DOMAIN_SQL = "SELECT UUID, NAME, DESCRIPTION, TENANT_DOMAIN " +
+            "FROM AM_LABEL WHERE TENANT_DOMAIN = ? ORDER BY NAME";
+
+    public static final String GET_LABEL_IDS_BY_TENANT_DOMAIN_SQL = "SELECT UUID FROM AM_LABEL WHERE TENANT_DOMAIN = ?";
+
+    public static final String IS_LABEL_NAME_EXISTS_SQL = "SELECT COUNT(UUID) AS LABEL_COUNT FROM AM_LABEL " +
+            "WHERE LOWER(NAME) = LOWER(?) AND TENANT_DOMAIN = ?";
+
+    public static final String IS_LABEL_NAME_EXISTS_FOR_ANOTHER_UUID_SQL = "SELECT COUNT(UUID) AS LABEL_COUNT FROM AM_LABEL " +
+            "WHERE LOWER(NAME) = LOWER(?) AND TENANT_DOMAIN = ? AND UUID != ?";
+
+    public static final String GET_LABEL_BY_UUID_AND_TENANT_DOMAIN__SQL = "SELECT * FROM AM_LABEL WHERE UUID = ? AND TENANT_DOMAIN = ?";
+
+    public static final String UPDATE_LABEL_SQL = "UPDATE AM_LABEL " +
+            "SET NAME = ?, DESCRIPTION = ? WHERE UUID = ?";
+
+    public static final String DELETE_LABEL_SQL = "DELETE FROM AM_LABEL WHERE UUID = ?";
+
+    public static final String ADD_API_LABEL_MAPPING_SQL = "INSERT INTO AM_API_LABEL_MAPPING (API_UUID, LABEL_UUID) " +
+            "VALUES (?, ?)";
+
+    public static final String GET_MAPPED_LABEL_IDS_BY_API_ID_SQL = "SELECT LABEL_UUID FROM AM_API_LABEL_MAPPING " +
+            "WHERE API_UUID = ?";
+
+    public static final String GET_MAPPED_APIS_BY_LABEL_UUID_SQL = "SELECT AM_API.API_UUID, AM_API.API_NAME, AM_API.API_VERSION, " +
+            "AM_API.API_PROVIDER FROM AM_API_LABEL_MAPPING JOIN AM_API ON AM_API_LABEL_MAPPING.API_UUID = AM_API.API_UUID " +
+            "WHERE AM_API_LABEL_MAPPING.LABEL_UUID = ?";
+
+    public static final String GET_MAPPED_LABELS_BY_API_UUID_SQL = "SELECT AM_LABEL.UUID, AM_LABEL.NAME, " +
+            "AM_LABEL.DESCRIPTION, AM_LABEL.TENANT_DOMAIN FROM AM_API_LABEL_MAPPING JOIN AM_LABEL ON " +
+            "AM_API_LABEL_MAPPING.LABEL_UUID = AM_LABEL.UUID WHERE AM_API_LABEL_MAPPING.API_UUID = ?";
+
+    public static final String IS_ANY_MAPPING_EXISTS_FOR_LABEL_SQL = "SELECT COUNT(*) AS MAPPING_COUNT FROM AM_API_LABEL_MAPPING " +
+            "WHERE LABEL_UUID = ?";
+
+    public static final String DELETE_API_LABEL_MAPPING_SQL = "DELETE FROM AM_API_LABEL_MAPPING " +
+            "WHERE API_UUID = ? AND LABEL_UUID = ?";
+
     /** API Categories related constants **/
 
     public static final String ADD_CATEGORY_SQL = "INSERT INTO AM_API_CATEGORIES "
@@ -3836,6 +3881,32 @@ public class SQLConstants {
                         "AM_APPLICATION_KEY_MAPPING AAKM WHERE APPLICATION_ID=? AND AAKM.UUID = ? " +
                         "AND AKM.UUID=AAKM.KEY_MANAGER";
     }
+    
+    public static class OrganizationSqlConstants {
+        public static final String ADD_ORGANIZATION =
+                " INSERT INTO AM_ORGANIZATION_MAPPING" +
+                " (ORG_UUID,EXT_ORG_ID,DISPLAY_NAME,PARENT_ORG_UUID,DESCRIPTION,ROOT_ORGANIZATION,ORG_HANDLE) " +
+                "VALUES (?,?,?,?,?,?,?)";
+
+        public static final String UPDATE_ORGANIZATION =
+                "UPDATE AM_ORGANIZATION_MAPPING " +
+                "   SET DISPLAY_NAME = ?, DESCRIPTION = ?, EXT_ORG_ID=?, ORG_HANDLE=?, PARENT_ORG_UUID=? WHERE ORG_UUID = ?";
+
+        public static final String DELETE_ORGANIZATION =
+                "DELETE FROM AM_ORGANIZATION_MAPPING WHERE ORG_UUID = ? AND ROOT_ORGANIZATION=?";
+
+        public static final String GET_ORGANIZATIONS_BY_PARENT_ORG_ID =
+                "SELECT * FROM AM_ORGANIZATION_MAPPING WHERE PARENT_ORG_UUID=? AND ROOT_ORGANIZATION=?";
+        
+        public static final String GET_ORGANIZATION_BY_ORG_ID =
+                "SELECT * FROM AM_ORGANIZATION_MAPPING WHERE ORG_UUID=? AND ROOT_ORGANIZATION=?";
+        
+        public static final String GET_ORGANIZATION_BY_EXTERNAL_ORG_ID =
+                "SELECT * FROM AM_ORGANIZATION_MAPPING WHERE EXT_ORG_ID=? AND ROOT_ORGANIZATION=?";
+        
+        public static final String GET_ORGANIZATIONS_BY_TENAND_DOMAIN =
+                "SELECT * FROM AM_ORGANIZATION_MAPPING WHERE ROOT_ORGANIZATION=?";
+    }
 
     /**
      * Static class to hold database queries related to AM_KEY_MANAGER_PERMISSIONS table
@@ -3856,6 +3927,25 @@ public class SQLConstants {
                         " WHERE KEY_MANAGER_UUID = ?";
     }
 
+    /**
+     * Static class to hold database queries related to AM_KEY_MANAGER_PERMISSIONS table
+     */
+    public static class KeyManagerOrgVisibilitySqlConstants {
+
+        public static final String ADD_KEY_MANAGER_ORG_VISIBILITY_SQL =
+                " INSERT INTO" +
+                        " AM_KEY_MANAGER_ALLOWED_ORGS (KEY_MANAGER_UUID, ALLOWED_ORGANIZATIONS)" +
+                        " VALUES(?, ?)";
+
+        public static final String DELETE_ALL_KEY_MANAGER_ORG_VISIBILITY_SQL = "DELETE FROM AM_KEY_MANAGER_ALLOWED_ORGS" +
+                " WHERE KEY_MANAGER_UUID = ?";
+
+        public static final String GET_KEY_MANAGER_ORG_VISIBILITY_SQL =
+                "SELECT ALLOWED_ORGANIZATIONS" +
+                        " FROM AM_KEY_MANAGER_ALLOWED_ORGS " +
+                        " WHERE KEY_MANAGER_UUID = ?";
+    }
+    
     /**
      * Static class to hold database queries related to AM_TENANT_THEMES table
      */

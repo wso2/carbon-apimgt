@@ -20,11 +20,14 @@ package org.wso2.carbon.apimgt.api;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.Workflow;
@@ -266,6 +269,53 @@ public interface APIAdmin  {
      * @throws APIManagementException
      */
     APICategory getAPICategoryByID(String apiCategoryId) throws APIManagementException;
+
+    /**
+     * Adds a new label for the tenant
+     *
+     * @param label      label to add
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException if failed add label
+     */
+    Label addLabel(Label label, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Updates a label
+     *
+     * @param labelID       label ID to update
+     * @param updateLabelBody   label data to update
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException if failed update label
+     */
+    Label updateLabel(String labelID, Label updateLabelBody, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Delete a label
+     *
+     * @param labelID       label ID to delete
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException if failed delete label
+     */
+    void deleteLabel(String labelID, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Returns all labels of the tenant
+     *
+     * @param tenantDomain  tenant domain
+     * @return List<Label> list of Label objects
+     * @throws APIManagementException if failed to get labels
+     */
+    List<Label> getAllLabelsOfTenant(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get mapped APIs for the given label
+     *
+     * @param labelID label UUID
+     * @param tenantDomain  tenant domain
+     * @return List<ApiResult> list of ApiResult objects
+     * @throws APIManagementException
+     */
+    List<ApiResult> getMappedApisForLabel(String labelID, String tenantDomain) throws APIManagementException;
 
     /**
      * The method converts the date into timestamp
@@ -603,4 +653,54 @@ public interface APIAdmin  {
      * @throws APIManagementException If retrieval fails.
      */
     LLMProvider getLLMProvider(String organization, String llmProviderId) throws APIManagementException;
+
+    /**
+     * 
+     * Retrieves list of organizations available for the given parent organization.
+     * 
+     * @param parentOrgId parent organization id
+     * @param tenantDomain super domain
+     * @return organization list
+     */
+    List<OrganizationDetailsDTO> getOrganizations(String parentOrgId, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Add new organization 
+     * @param orgDto organization details
+     * @param parentOrgId organization id of the parent
+     * @param tenantDomain super organization domain
+     * @return organization details
+     * @throws APIManagementException
+     */
+    OrganizationDetailsDTO addOrganization(OrganizationDetailsDTO orgDto, String parentOrgId, String tenantDomain)
+            throws APIManagementException;
+
+    /**
+     * Get organization details 
+     * @param organizationId organization id
+     * @param tenantDomain tenant domain
+     * @return
+     * @throws APIManagementException
+     */
+    OrganizationDetailsDTO getOrganizationDetails(String organizationId, String tenantDomain)
+            throws APIManagementException;
+
+    /**
+     * Update organization details 
+     * @param organizationInfoDTO organization details
+     * @param parentOrgId organization id of the parent
+     * @param tenantDomain uper organization domain
+     * @return updated organization details
+     * @throws APIManagementException
+     */
+    OrganizationDetailsDTO updateOrganization(OrganizationDetailsDTO organizationInfoDTO, String parentOrgId,
+            String tenantDomain) throws APIManagementException;
+
+    /**
+     * Delete organization
+     * @param organizationId organization
+     * @param tenantDomain tenantDomain
+     */
+    void deleteOrganization(String organizationId, String tenantDomain) throws APIManagementException;
+
 }
