@@ -19,8 +19,8 @@
 package org.wso2.carbon.apimgt.governance.api.model;
 
 import java.util.EnumSet;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -42,8 +42,12 @@ public enum ExtendedArtifactType {
         this.identifier = identifier;
     }
 
-    public static Optional<ExtendedArtifactType> fromString(String text) {
-        return Optional.ofNullable(STRING_TO_ENUM.get(text.toLowerCase()));
+    public static ExtendedArtifactType fromString(String text) {
+        try {
+            return ExtendedArtifactType.valueOf(text.toUpperCase(Locale.ENGLISH));
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     /**

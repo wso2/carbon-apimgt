@@ -31,7 +31,7 @@ public class GovernancePolicy {
     private String description;
     private List<String> rulesetIds;
     private List<String> labels;
-    private List<APIMGovernableState> APIMGovernableStates;
+    private List<APIMGovernableState> apimGovernableStates;
     private List<GovernanceAction> actions;
     private String createdBy;
     private String createdTime;
@@ -85,12 +85,12 @@ public class GovernancePolicy {
 
     public List<APIMGovernableState> getGovernableStates() {
 
-        return new ArrayList<>(APIMGovernableStates);
+        return new ArrayList<>(apimGovernableStates);
     }
 
-    public void setGovernableStates(List<APIMGovernableState> APIMGovernableStates) {
+    public void setGovernableStates(List<APIMGovernableState> apimGovernableStates) {
 
-        this.APIMGovernableStates = Collections.unmodifiableList(new ArrayList<>(APIMGovernableStates));
+        this.apimGovernableStates = Collections.unmodifiableList(new ArrayList<>(apimGovernableStates));
     }
 
     public List<GovernanceAction> getActions() {

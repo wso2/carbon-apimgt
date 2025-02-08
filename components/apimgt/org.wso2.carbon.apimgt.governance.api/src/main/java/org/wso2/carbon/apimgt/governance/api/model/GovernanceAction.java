@@ -22,17 +22,16 @@ package org.wso2.carbon.apimgt.governance.api.model;
  * This class represents a governance action
  */
 public class GovernanceAction {
-    private APIMGovernableState APIMGovernableState;
+    private APIMGovernableState apimGovernableState;
     private RuleSeverity ruleSeverity;
     private GovernanceActionType type;
 
     public APIMGovernableState getGovernableState() {
-        return APIMGovernableState;
+        return apimGovernableState;
     }
 
-    public void setGovernableState(APIMGovernableState APIMGovernableState) {
-        this.APIMGovernableState
-                = APIMGovernableState;
+    public void setGovernableState(APIMGovernableState apimGovernableState) {
+        this.apimGovernableState = apimGovernableState;
     }
 
     public RuleSeverity getRuleSeverity() {

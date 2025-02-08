@@ -94,10 +94,10 @@ public class PolicyManager {
     private void checkForInvalidActions(GovernancePolicy policy)
             throws GovernanceException {
 
-        List<APIMGovernableState> APIMGovernableStates = policy.getGovernableStates();
+        List<APIMGovernableState> apimGovernableStates = policy.getGovernableStates();
         List<GovernanceAction> actions = policy.getActions();
         for (GovernanceAction action : actions) {
-            if (!APIMGovernableStates.contains(action.getGovernableState())) {
+            if (!apimGovernableStates.contains(action.getGovernableState())) {
                 throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY,
                         "Invalid governable state found in the policy. Please update the policy");
             }
@@ -119,9 +119,9 @@ public class PolicyManager {
      */
     private void addMissingNotifyActions(GovernancePolicy policy) {
 
-        List<APIMGovernableState> APIMGovernableStates = policy.getGovernableStates();
+        List<APIMGovernableState> apimGovernableStates = policy.getGovernableStates();
         List<GovernanceAction> actions = policy.getActions();
-        for (APIMGovernableState state : APIMGovernableStates) {
+        for (APIMGovernableState state : apimGovernableStates) {
             for (RuleSeverity severity : RuleSeverity.values()) {
                 boolean isActionPresent = false;
                 for (GovernanceAction action : actions) {

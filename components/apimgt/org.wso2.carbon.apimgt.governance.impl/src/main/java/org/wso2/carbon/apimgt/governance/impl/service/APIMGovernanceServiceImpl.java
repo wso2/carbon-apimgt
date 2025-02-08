@@ -23,11 +23,11 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
@@ -98,7 +98,8 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                                         APIMGovernableState state, String organization) throws
             GovernanceException {
 
-        List<APIMGovernableState> dependentAPIMGovernableStates = APIMGovernableState.getDependentGovernableStates(state);
+        List<APIMGovernableState> dependentAPIMGovernableStates =
+                APIMGovernableState.getDependentGovernableStates(state);
 
         for (APIMGovernableState dependentState : dependentAPIMGovernableStates) {
             List<String> applicablePolicyIds = APIMGovernanceUtil

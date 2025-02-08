@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,7 +34,7 @@ public enum APIMGovernableState {
 
     public static APIMGovernableState fromString(String stateString) {
         try {
-            return APIMGovernableState.valueOf(stateString.toUpperCase());
+            return APIMGovernableState.valueOf(stateString.toUpperCase(Locale.ENGLISH));
         } catch (IllegalArgumentException e) {
             return null;
         }
@@ -43,7 +43,7 @@ public enum APIMGovernableState {
     /**
      * Returns all governable states that should be evaluated when a request to a single governable state is made.
      * That is, we need to run all policies for the requested state and all states before it.
-     *
+     * <p>
      * Example:
      * - API_CREATE  -> [API_CREATE]
      * - API_UPDATE  -> [API_CREATE, API_UPDATE]

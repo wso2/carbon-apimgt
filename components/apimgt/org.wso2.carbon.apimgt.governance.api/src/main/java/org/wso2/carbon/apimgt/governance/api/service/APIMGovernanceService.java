@@ -19,11 +19,11 @@
 package org.wso2.carbon.apimgt.governance.api.service;
 
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 
 import java.util.List;
@@ -45,15 +45,16 @@ public interface APIMGovernanceService {
      * @throws GovernanceException If an error occurs while checking for policies with blocking actions
      */
     boolean isPoliciesWithBlockingActionExist(String artifactRefId, ArtifactType artifactType,
-                                              APIMGovernableState state, String organization) throws GovernanceException;
+                                              APIMGovernableState state, String organization)
+            throws GovernanceException;
 
     /**
      * Evaluate compliance of the artifact asynchronously
      *
      * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)
-     * @param artifactType        Artifact type (ArtifactType.API)
-     * @param state               State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
-     * @param organization        Organization
+     * @param artifactType  Artifact type (ArtifactType.API)
+     * @param state         State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
+     * @param organization  Organization
      * @throws GovernanceException If an error occurs while evaluating compliance
      */
     void evaluateComplianceAsync(String artifactRefId, ArtifactType artifactType,
@@ -63,7 +64,7 @@ public interface APIMGovernanceService {
     /**
      * Evaluate compliance of the artifact synchronously
      *
-     * @param artifactRefId    Artifact Reference ID (ID of artifact on APIM side)
+     * @param artifactRefId          Artifact Reference ID (ID of artifact on APIM side)
      * @param revisionNo             Revision number
      * @param artifactType           Artifact type (ArtifactType.REST_API)
      * @param state                  State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
@@ -78,7 +79,8 @@ public interface APIMGovernanceService {
      * @throws GovernanceException If an error occurs while evaluating compliance
      */
     ArtifactComplianceInfo evaluateComplianceSync(String artifactRefId, String revisionNo, ArtifactType artifactType,
-                                                  APIMGovernableState state, Map<RuleType, String> artifactProjectContent,
+                                                  APIMGovernableState state,
+                                                  Map<RuleType, String> artifactProjectContent,
                                                   String organization) throws GovernanceException;
 
     /**
@@ -87,7 +89,7 @@ public interface APIMGovernanceService {
      * against all the global policies configured in the system.
      *
      * @param artifactType Artifact type (ExtendedArtifactType.REST_API, etc)
-     * @param zipArchive     File path of the artifact content (ZIP path)
+     * @param zipArchive   File path of the artifact content (ZIP path)
      * @param organization Organization
      * @return ArtifactComplianceDryRunInfo object
      * @throws GovernanceException If an error occurs while evaluating compliance
