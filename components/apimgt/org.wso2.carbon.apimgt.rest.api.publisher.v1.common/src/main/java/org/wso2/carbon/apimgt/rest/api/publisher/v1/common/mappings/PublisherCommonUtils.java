@@ -88,11 +88,11 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
@@ -2849,8 +2849,8 @@ public class PublisherCommonUtils {
                 throw new APIComplianceException(complianceResult
                         .get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
             }
-            PublisherCommonUtils.checkGovernanceComplianceAsync(apiTypeWrapper.getUuid(), APIMGovernableState.API_PUBLISH,
-                    ArtifactType.API, organization);
+            PublisherCommonUtils.checkGovernanceComplianceAsync(apiTypeWrapper.getUuid(),
+                    APIMGovernableState.API_PUBLISH, ArtifactType.API, organization);
         }
         String[] nextAllowedStates = (String[]) apiLCData.get(APIConstants.LC_NEXT_STATES);
         if (!ArrayUtils.contains(nextAllowedStates, action)) {

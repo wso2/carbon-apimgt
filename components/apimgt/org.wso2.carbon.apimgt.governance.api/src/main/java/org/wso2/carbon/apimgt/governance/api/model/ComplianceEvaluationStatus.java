@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,11 +32,11 @@ public enum ComplianceEvaluationStatus {
 
     private static final Map<String, ComplianceEvaluationStatus> STRING_TO_ENUM =
             Stream.of(values())
-                    .collect(Collectors.toMap(status -> status.name().toLowerCase(), status -> status));
+                    .collect(Collectors.toMap(status -> status.name().toLowerCase(Locale.ENGLISH), status -> status));
 
     public static ComplianceEvaluationStatus fromString(String statusString) {
         return STRING_TO_ENUM.getOrDefault(
-                statusString != null ? statusString.toLowerCase() : "",
+                statusString != null ? statusString.toLowerCase(Locale.ENGLISH) : "",
                 PENDING
         );
     }

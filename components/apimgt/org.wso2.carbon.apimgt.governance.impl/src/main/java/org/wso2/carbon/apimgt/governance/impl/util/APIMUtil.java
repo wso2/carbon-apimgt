@@ -30,8 +30,8 @@ import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
-import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -195,25 +195,26 @@ public class APIMUtil {
      *
      * @param status           API status
      * @param isDeployed       API deployment status
-     * @param APIMGovernableStates List of governable states
+     * @param apimGovernableStates List of governable states
      * @return True if the API is governable
      */
-    public static boolean isAPIGovernable(String status, boolean isDeployed, List<APIMGovernableState> APIMGovernableStates) {
+    public static boolean isAPIGovernable(String status, boolean isDeployed,
+                                          List<APIMGovernableState> apimGovernableStates) {
 
         // If API is in any state we need to run created and update policies
-        boolean isGovernable = APIMGovernableStates.contains(APIMGovernableState.API_CREATE)
-                || APIMGovernableStates.contains(APIMGovernableState.API_UPDATE);
+        boolean isGovernable = apimGovernableStates.contains(APIMGovernableState.API_CREATE)
+                || apimGovernableStates.contains(APIMGovernableState.API_UPDATE);
 
         // If the API is deployed, we need to run deploy policies
         if (isDeployed) {
-            isGovernable |= APIMGovernableStates.contains(APIMGovernableState.API_DEPLOY);
+            isGovernable |= apimGovernableStates.contains(APIMGovernableState.API_DEPLOY);
         }
 
         // If the API is in published, deprecated or blocked state, we need to run publish policies
         if (APIStatus.PUBLISHED.equals(APIStatus.valueOf(status)) ||
                 APIStatus.DEPRECATED.equals(APIStatus.valueOf(status)) ||
                 APIStatus.BLOCKED.equals(APIStatus.valueOf(status))) {
-            isGovernable |= APIMGovernableStates.contains(APIMGovernableState.API_PUBLISH);
+            isGovernable |= apimGovernableStates.contains(APIMGovernableState.API_PUBLISH);
         }
 
         return isGovernable;
