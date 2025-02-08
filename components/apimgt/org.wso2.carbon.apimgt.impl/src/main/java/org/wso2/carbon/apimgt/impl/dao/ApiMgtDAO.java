@@ -17817,11 +17817,11 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             if (isThemeUsedByOrg(connection, organization, themeId)) {
-                removeThemeFromOrg(connection, organization, themeId);
+                removeArtifact(connection, themeId); // Due to DB rules, foreign ID will also set to NULL
+                removeOrgIfNoData(connection, organization, themeId);
             } else {
-                removeOrg(connection, organization);
+                log.warn("User's organization does not use the theme. Aborting the request");
             }
-            removeArtifact(connection, themeId);
             connection.commit();
         } catch (SQLException e) {
             handleError("Failed to delete organization theme for tenant " + organization, e);
@@ -17952,26 +17952,14 @@ public class ApiMgtDAO {
         return false;
     }
 
-    private void removeThemeFromOrg(Connection connection, String organization, String themeId) throws SQLException {
+    private void removeOrgIfNoData(Connection connection, String organization, String themeId) throws SQLException {
         String checkQuery = "SELECT DRAFTED_ARTIFACT, PUBLISHED_ARTIFACT FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
-        try (PreparedStatement checkStmt = connection.prepareStatement(checkQuery)) {
-            checkStmt.setString(1, organization);
-            try (ResultSet resultSet = checkStmt.executeQuery()) {
-                if (resultSet.next()) {
-                    String draftedArtifact = resultSet.getString("DRAFTED_ARTIFACT");
-                    String publishedArtifact = resultSet.getString("PUBLISHED_ARTIFACT");
-                    if ((themeId.equals(draftedArtifact) && publishedArtifact == null) ||
-                            (themeId.equals(publishedArtifact) && draftedArtifact == null)) {
-                        removeOrg(connection, organization);
-                    } else if (themeId.equals(draftedArtifact) || themeId.equals(publishedArtifact)) {
-                        String updateQuery = "UPDATE AM_DEVPORTAL_ORG_CONTENT SET "
-                                + (themeId.equals(draftedArtifact) ? "DRAFTED_ARTIFACT = NULL" : "PUBLISHED_ARTIFACT = NULL")
-                                + " WHERE ORGANIZATION = ?";
-                        try (PreparedStatement updateStmt = connection.prepareStatement(updateQuery)) {
-                            updateStmt.setString(1, organization);
-                            updateStmt.executeUpdate();
-                        }
-                    }
+        try (PreparedStatement preparedStatement = connection.prepareStatement(checkQuery)) {
+            preparedStatement.setString(1, organization);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next() && resultSet.getString("DRAFTED_ARTIFACT") == null &&
+                        resultSet.getString("PUBLISHED_ARTIFACT") == null) {
+                    removeOrg(connection, organization);
                 }
             }
         }
