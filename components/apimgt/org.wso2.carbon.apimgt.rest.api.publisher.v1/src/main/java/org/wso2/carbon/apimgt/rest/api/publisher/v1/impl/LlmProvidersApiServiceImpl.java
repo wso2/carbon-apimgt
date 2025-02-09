@@ -95,6 +95,21 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
 
     }
 
+    @Override
+    public Response getLLMProviderModels(String llmProviderId, MessageContext messageContext)
+            throws APIManagementException {
+        APIAdmin adpAdmin = new APIAdminImpl();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        try {
+            LLMProvider provider = adpAdmin.getLLMProvider(organization, llmProviderId);
+            List<String> modelList = provider.getModelList();
+            return Response.ok().entity(modelList).build();
+        } catch (APIManagementException e) {
+            log.warn("Error while trying to retrieve LLM Provider's models");
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     public Response getLLMProviders(MessageContext messageContext)
             throws APIManagementException {
 

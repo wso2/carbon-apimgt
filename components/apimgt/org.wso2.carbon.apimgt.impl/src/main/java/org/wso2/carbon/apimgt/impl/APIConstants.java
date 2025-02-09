@@ -3286,4 +3286,12 @@ public final class APIConstants {
 
     //Property for enabling application update capabilities for users in the same organization.
     public static final String ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED = "orgWideAppUpdateEnabled";
+
+    public static class APIEndpoint {
+        public static final String PRODUCTION = "PRODUCTION";
+        public static final String SANDBOX = "SANDBOX";
+        public static final String PRIMARY_ENDPOINT_ID_SEPARATOR = "--";
+        public static final String DEFAULT_PROD_ENDPOINT = "Default Production Endpoint";
+        public static final String DEFAULT_SANDBOX_ENDPOINT = "Default Sandbox Endpoint";
+    }
 }

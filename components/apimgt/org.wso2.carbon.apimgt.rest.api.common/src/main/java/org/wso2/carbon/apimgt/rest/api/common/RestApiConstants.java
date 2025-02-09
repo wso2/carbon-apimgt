@@ -165,6 +165,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_PRODUCT_DOCUMENT_CONTENT = RESOURCE_PATH_PRODUCT_DOCUMENTS_DOCUMENT_ID + "/content";
     public static final String RESOURCE_PATH_RESOURCE_PATHS = "/resource-paths";
     public static final String RESOURCE_PATH_COMMENTS = "/comments";
+    public static final String RESOURCE_PATH_API_ENDPOINT = "/endpoints";
     public static final String RESOURCE_PATH_SWAGGER= "/swagger.yaml";
     public static final String REST_API_STORE_VERSION_0 ="v0.16";
     public static final String RESOURCE_PATH_API_CATEGORIES = "/api-categories";
@@ -358,7 +359,7 @@ public final class RestApiConstants {
     public static final int TAG_OFFSET_DEFAULT = 0;
 
     public static final String RESOURCE_PATH_OPERATION_POLICIES = "operation-policies";
-
+    public static final String RESOURCE_PATH_API_ENDPOINTS = "api-endpoints";
     public static final String RESOURCE_PATH_GATEWAY_POLICIES = "gateway-policies";
 
     public static final String AUTH_TOKEN_INFO = "AUTH_TOKEN_INFO";
