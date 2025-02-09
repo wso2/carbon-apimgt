@@ -37,9 +37,9 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE_PRODUCTION;
 /**
  * Mediator for AI API Round Robin load balancing.
  */
-public class AIAPIRoundRobinMediator extends AbstractMediator implements ManagedLifecycle {
+public class WeightedRoundRobinMediator extends AbstractMediator implements ManagedLifecycle {
 
-    private static final Log log = LogFactory.getLog(AIAPIRoundRobinMediator.class);
+    private static final Log log = LogFactory.getLog(WeightedRoundRobinMediator.class);
     private String endpointList;
 
     /**
@@ -60,7 +60,7 @@ public class AIAPIRoundRobinMediator extends AbstractMediator implements Managed
      */
     @Override
     public void destroy() {
-        // No resources to clean up.
+
     }
 
     /**
