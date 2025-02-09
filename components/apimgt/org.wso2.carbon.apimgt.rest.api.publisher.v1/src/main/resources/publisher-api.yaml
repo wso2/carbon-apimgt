@@ -14279,6 +14279,9 @@ components:
           items:
             type: string
             example: REST
+#        subType:
+#          type: string
+#          example: AI
         isAPISpecific:
           type: boolean
           example: true

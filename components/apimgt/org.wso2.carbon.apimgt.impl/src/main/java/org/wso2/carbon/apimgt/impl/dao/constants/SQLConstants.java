@@ -4636,7 +4636,7 @@ public class SQLConstants {
     }
 
     /**
-     * Static class to hold database queries related to AM_API_ENDPOINTS and AM_API_PRIMARY_ENDPOINT_MAPPING tables
+     * Static class to hold database queries related to AM_API_ENDPOINTS and AM_API_PRIMARY_EP_MAPPING tables
      */
     public static class APIEndpointsSQLConstants {
         public static final String GET_ALL_API_ENDPOINTS_BY_API_UUID =
@@ -4702,19 +4702,19 @@ public class SQLConstants {
 
         public static final String GET_MAPPED_API_ENDPOINTS_UUIDS =
                 "SELECT AMAE.ENDPOINT_UUID " +
-                        "FROM AM_API_ENDPOINTS AMAE INNER JOIN AM_API_PRIMARY_ENDPOINT_MAPPING AMPM " +
+                        "FROM AM_API_ENDPOINTS AMAE INNER JOIN AM_API_PRIMARY_EP_MAPPING AMPM " +
                         "ON AMPM.ENDPOINT_UUID = AMAE.ENDPOINT_UUID " +
                         "WHERE AMAE.API_UUID = ? AND AMAE.REVISION_UUID = 'Current API'";
 
         public static final String DELETE_PRIMARY_ENDPOINT_MAPPING =
-                "DELETE FROM AM_API_PRIMARY_ENDPOINT_MAPPING WHERE ENDPOINT_UUID = ?";
+                "DELETE FROM AM_API_PRIMARY_EP_MAPPING WHERE ENDPOINT_UUID = ?";
 
         public static final String ADD_PRIMARY_ENDPOINT_MAPPING =
-                "INSERT INTO AM_API_PRIMARY_ENDPOINT_MAPPING (API_UUID, ENDPOINT_UUID) VALUES(?,?)";
+                "INSERT INTO AM_API_PRIMARY_EP_MAPPING (API_UUID, ENDPOINT_UUID) VALUES(?,?)";
 
         public static final String GET_API_PRIMARY_ENDPOINT_UUID_BY_API_UUID_AND_ENV =
                 "SELECT AME.ENDPOINT_UUID " +
-                        "FROM AM_API_ENDPOINTS AME INNER JOIN AM_API_PRIMARY_ENDPOINT_MAPPING AMPM " +
+                        "FROM AM_API_ENDPOINTS AME INNER JOIN AM_API_PRIMARY_EP_MAPPING AMPM " +
                         "ON AMPM.ENDPOINT_UUID = AME.ENDPOINT_UUID " +
                         "WHERE " +
                         "AME.API_UUID = ? " +
@@ -4723,7 +4723,7 @@ public class SQLConstants {
 
         public static final String GET_API_PRIMARY_ENDPOINT_UUID_BY_API_UUID_AND_ENV_REVISION =
                 "SELECT AME.ENDPOINT_UUID " +
-                        "FROM AM_API_ENDPOINTS AME INNER JOIN AM_API_PRIMARY_ENDPOINT_MAPPING AMPM " +
+                        "FROM AM_API_ENDPOINTS AME INNER JOIN AM_API_PRIMARY_EP_MAPPING AMPM " +
                         "ON AMPM.ENDPOINT_UUID = AME.ENDPOINT_UUID " +
                         "WHERE " +
                         "AME.API_UUID = ? " +

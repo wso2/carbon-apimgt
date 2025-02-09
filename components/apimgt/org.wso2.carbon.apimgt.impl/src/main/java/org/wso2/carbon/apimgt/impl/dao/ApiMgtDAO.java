@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIKey;
@@ -141,7 +142,13 @@ import org.wso2.carbon.utils.DBUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
@@ -19692,7 +19699,7 @@ public class ApiMgtDAO {
                 addResourceScopeMapping.executeBatch();
                 cleanUnusedClonedOperationPolicies(connection, usedClonedPolicies, apiRevision.getApiUUID());
 
-                // Restoring AM_API_PRIMARY_ENDPOINT_MAPPING entries
+                // Restoring AM_API_PRIMARY_EP_MAPPING entries
                 String apiUUID = apiRevision.getApiUUID();
                 PreparedStatement addPrimaryMapping = connection
                         .prepareStatement(SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING);
@@ -23598,9 +23605,8 @@ public class ApiMgtDAO {
                     deleteEndpointMappingStmt.addBatch();
                 }
                 deleteEndpointMappingStmt.executeBatch();
-                connection.commit();
-                addPrimaryEndpointsToAPIEndpoint(apiUUID, api, connection);
                 addPrimaryEndpointMapping(apiUUID, api, connection);
+                connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Error while deleting primary Endpoint(s) Mapping for API : " + api.getId(), e);
@@ -23612,76 +23618,19 @@ public class ApiMgtDAO {
         }
     }
 
-    /**
-     * Add production and/or sandbox primary endpoints to AM_API_ENDPOINTS table if not present already. This logic will
-     * only execute when endpoints are maintained in the EndpointConfig object and are not present in the
-     * AM_API_ENDPOINTS table.
-     *
-     * @param apiUUID      API uuid
-     * @param api        API object
-     * @param connection Existing DB Connection
-     * @throws SQLException
-     * @throws APIManagementException
-     */
-    private void addPrimaryEndpointsToAPIEndpoint(String apiUUID, API api, Connection connection)
-            throws SQLException, APIManagementException {
-        String primaryProductionEndpointId = api.getPrimaryProductionEndpointId();
-        String primarySandboxEndpointId = api.getPrimarySandboxEndpointId();
-
-        if (primaryProductionEndpointId != null) {
-            addEndpointConfigAsAPIEndpoint(apiUUID, api, primaryProductionEndpointId,
-                    APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT, APIConstants.APIEndpoint.PRODUCTION, connection);
-        }
-
-        if (primarySandboxEndpointId != null) {
-            addEndpointConfigAsAPIEndpoint(apiUUID, api, primarySandboxEndpointId,
-                    APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT, APIConstants.APIEndpoint.SANDBOX, connection);
-        }
-    }
-
-    /**
-     * This method will add a new API endpoint using the EndpointConfig of the provided API.
-     *
-     * @param apiUUID
-     * @param api
-     * @param endpointId
-     * @param endpointName
-     * @param environment
-     * @param connection
-     * @throws SQLException
-     * @throws APIManagementException
-     */
-    private void addEndpointConfigAsAPIEndpoint(String apiUUID, API api, String endpointId, String endpointName,
-            String environment, Connection connection) throws SQLException, APIManagementException {
-
-        APIEndpointInfo apiEndpointInfo = new APIEndpointInfo();
-        apiEndpointInfo.setEndpointUuid(endpointId);
-        apiEndpointInfo.setEndpointName(endpointName);
-        apiEndpointInfo.setEnvironment(environment);
-        apiEndpointInfo.setOrganization(api.getOrganization());
-
-        Gson gson = new Gson();
-        Type type = new TypeToken<Map<String, Object>>(){}.getType();
-        Map<String, Object> endpointConfigMap = gson.fromJson(api.getEndpointConfig(), type);
-        apiEndpointInfo.setEndpointConfig(endpointConfigMap);
-        addAPIEndpoint(apiUUID, connection, apiEndpointInfo);
-    }
-
     private void addPrimaryEndpointMapping(String apiUUID, API api, Connection connection)
             throws SQLException, APIManagementException {
-        List<String> endpointIdList = new ArrayList<>();
+
+        PreparedStatement addPrimaryMapping = connection
+                .prepareStatement(SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING);
         if (api.getPrimaryProductionEndpointId() != null) {
-            endpointIdList.add(api.getPrimaryProductionEndpointId());
+            addPrimaryMapping.setString(1, apiUUID);
+            addPrimaryMapping.setString(2, api.getPrimaryProductionEndpointId());
+            addPrimaryMapping.addBatch();
         }
         if (api.getPrimarySandboxEndpointId() != null) {
-            endpointIdList.add(api.getPrimarySandboxEndpointId());
-        }
-
-        PreparedStatement addPrimaryMapping = connection.prepareStatement(
-                SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING);
-        for (String endpointUUID : endpointIdList) {
             addPrimaryMapping.setString(1, apiUUID);
-            addPrimaryMapping.setString(2, endpointUUID);
+            addPrimaryMapping.setString(2, api.getPrimarySandboxEndpointId());
             addPrimaryMapping.addBatch();
         }
         addPrimaryMapping.executeBatch();
