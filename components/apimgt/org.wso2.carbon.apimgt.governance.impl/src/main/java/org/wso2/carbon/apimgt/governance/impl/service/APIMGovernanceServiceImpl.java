@@ -80,7 +80,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
 
         List<String> applicablePolicyIds = APIMGovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactRefId,
                 artifactType, state, organization);
-        return APIMGovernanceUtil.isBlockingActionsPresent(applicablePolicyIds, state);
+        return APIMGovernanceUtil.isBlockingActionsPresent(applicablePolicyIds, state, organization);
     }
 
     /**
@@ -212,7 +212,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
             boolean isDeployed = APIMUtil.isAPIDeployed(artifactRefId);
 
             for (String policyId : allPoliciesForLabel) {
-                GovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId);
+                GovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId, organization);
                 boolean isAPIGovernable = APIMUtil.isAPIGovernable(apiStatus, isDeployed, policy.getGovernableStates());
                 // If the API should be governed by the policy
                 if (isAPIGovernable) {

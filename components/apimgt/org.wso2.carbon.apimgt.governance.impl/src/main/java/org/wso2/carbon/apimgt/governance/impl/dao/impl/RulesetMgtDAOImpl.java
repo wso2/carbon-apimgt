@@ -56,11 +56,9 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     private static final Log log = LogFactory.getLog(RulesetMgtDAOImpl.class);
 
     private RulesetMgtDAOImpl() {
-
     }
 
     private static class SingletonHelper {
-
         private static final RulesetMgtDAO INSTANCE = new RulesetMgtDAOImpl();
     }
 

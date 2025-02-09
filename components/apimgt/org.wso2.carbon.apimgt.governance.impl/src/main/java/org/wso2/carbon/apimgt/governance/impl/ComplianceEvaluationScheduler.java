@@ -266,7 +266,8 @@ public class ComplianceEvaluationScheduler {
                 .getValidationEngineService().getValidationEngine();
 
         // Validate the artifact against each ruleset
-        List<Ruleset> rulesets = GovernancePolicyMgtDAOImpl.getInstance().getRulesetsWithContentByPolicyId(policyId);
+        List<Ruleset> rulesets = GovernancePolicyMgtDAOImpl.getInstance()
+                .getRulesetsWithContentByPolicyId(policyId, organization);
 
         Map<String, List<RuleViolation>> rulesetViolationsMap = new HashMap<>();
 

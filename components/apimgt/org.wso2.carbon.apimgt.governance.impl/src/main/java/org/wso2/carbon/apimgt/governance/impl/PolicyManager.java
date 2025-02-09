@@ -58,6 +58,11 @@ public class PolicyManager {
     public GovernancePolicy createGovernancePolicy(String organization, GovernancePolicy
             governancePolicy) throws GovernanceException {
 
+        if (policyMgtDAO.getGovernancePolicyByName(governancePolicy.getName(), organization) != null) {
+            throw new GovernanceException(GovernanceExceptionCodes.POLICY_ALREADY_EXISTS,
+                    governancePolicy.getName(), organization);
+        }
+
         governancePolicy.setId(APIMGovernanceUtil.generateUUID());
         checkForInvalidActions(governancePolicy);
         addMissingNotifyActions(governancePolicy);
@@ -70,17 +75,29 @@ public class PolicyManager {
      *
      * @param policyId         Policy ID
      * @param governancePolicy Governance Policy
+     * @param organization     Organization
      * @return GovernancePolicy Updated object
      * @throws GovernanceException If an error occurs while updating the policy
      */
 
-    public GovernancePolicy updateGovernancePolicy(String policyId, GovernancePolicy governancePolicy)
+    public GovernancePolicy updateGovernancePolicy(String policyId, GovernancePolicy governancePolicy,
+                                                   String organization)
             throws GovernanceException {
+
+        if (policyMgtDAO.getGovernancePolicyByID(policyId, organization) == null) {
+            throw new GovernanceException(GovernanceExceptionCodes.POLICY_NOT_FOUND, policyId);
+        }
+
+        String newName = governancePolicy.getName();
+        GovernancePolicy policyWithNewName = policyMgtDAO.getGovernancePolicyByName(newName, organization);
+        if (policyWithNewName != null && !policyWithNewName.getId().equals(policyId)) {
+            throw new GovernanceException(GovernanceExceptionCodes.POLICY_ALREADY_EXISTS, newName, organization);
+        }
 
         checkForInvalidActions(governancePolicy);
         addMissingNotifyActions(governancePolicy);
 
-        return policyMgtDAO.updateGovernancePolicy(policyId, governancePolicy);
+        return policyMgtDAO.updateGovernancePolicy(policyId, governancePolicy, organization);
     }
 
     /**
@@ -147,27 +164,33 @@ public class PolicyManager {
     /**
      * Delete a Governance Policy
      *
-     * @param policyId Policy ID
+     * @param policyId     Policy ID
+     * @param organization Organization
      * @throws GovernanceException If an error occurs while deleting the policy
      */
 
-    public void deletePolicy(String policyId) throws GovernanceException {
-        policyMgtDAO.deletePolicy(policyId);
+    public void deletePolicy(String policyId, String organization) throws GovernanceException {
+        if (policyMgtDAO.getGovernancePolicyByID(policyId, organization) == null) {
+            throw new GovernanceException(GovernanceExceptionCodes.POLICY_NOT_FOUND, policyId);
+        }
+
+        policyMgtDAO.deletePolicy(policyId, organization);
     }
 
     /**
      * Get Governance Policy by Name
      *
-     * @param policyID Policy ID
+     * @param policyId     Policy ID
+     * @param organization Organization
      * @return GovernancePolicy
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
 
-    public GovernancePolicy getGovernancePolicyByID(String policyID)
+    public GovernancePolicy getGovernancePolicyByID(String policyId, String organization)
             throws GovernanceException {
-        GovernancePolicy policyInfo = policyMgtDAO.getGovernancePolicyByID(policyID);
+        GovernancePolicy policyInfo = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
         if (policyInfo == null) {
-            throw new GovernanceException(GovernanceExceptionCodes.POLICY_NOT_FOUND, policyID);
+            throw new GovernanceException(GovernanceExceptionCodes.POLICY_NOT_FOUND, policyId);
         }
         return policyInfo;
     }
@@ -187,13 +210,17 @@ public class PolicyManager {
     /**
      * Get the list of rulesets for a given policy
      *
-     * @param policyId Policy ID
+     * @param policyId     Policy ID
+     * @param organization Organization
      * @return List of rulesets
      * @throws GovernanceException If an error occurs while getting the rulesets
      */
 
-    public List<RulesetInfo> getRulesetsByPolicyId(String policyId) throws GovernanceException {
-        return policyMgtDAO.getRulesetsByPolicyId(policyId);
+    public List<RulesetInfo> getRulesetsByPolicyId(String policyId, String organization) throws GovernanceException {
+        if (policyMgtDAO.getGovernancePolicyByID(policyId, organization) == null) {
+            throw new GovernanceException(GovernanceExceptionCodes.POLICY_NOT_FOUND, policyId);
+        }
+        return policyMgtDAO.getRulesetsByPolicyId(policyId, organization);
     }
 
     /**
@@ -254,14 +281,18 @@ public class PolicyManager {
     /**
      * This method checks whether a blocking action is present for a given governable state of a policy
      *
-     * @param policyId Policy ID
-     * @param state    Governable State
+     * @param policyId     Policy ID
+     * @param state        Governable State
+     * @param organization Organization
      * @return true if a blocking action is present, false otherwise
      * @throws GovernanceException If an error occurs while checking the presence of blocking action
      */
 
-    public boolean isBlockingActionPresentForState(String policyId, APIMGovernableState state)
+    public boolean isBlockingActionPresentForState(String policyId, APIMGovernableState state, String organization)
             throws GovernanceException {
+        if (policyMgtDAO.getGovernancePolicyByID(policyId, organization) == null) {
+            throw new GovernanceException(GovernanceExceptionCodes.POLICY_NOT_FOUND, policyId);
+        }
         boolean isBlockingActionPresent = false;
         List<GovernanceAction> actions = policyMgtDAO.getActionsByPolicyId(policyId);
         for (GovernanceAction action : actions) {

@@ -242,12 +242,13 @@ public interface ComplianceMgtDAO {
     /**
      * Get list of all evaluated artifacts for a policy
      *
-     * @param policyId Policy ID
+     * @param policyId     Policy ID
+     * @param organization Organization
      * @return List of all evaluated artifacts for a policy
      * @throws GovernanceException If an error occurs while getting the list of all
      *                             evaluated artifacts for a policy
      */
-    List<ArtifactInfo> getEvaluatedArtifactsForPolicy(String policyId)
+    List<ArtifactInfo> getEvaluatedArtifactsForPolicy(String policyId, String organization)
             throws GovernanceException;
 
     /**

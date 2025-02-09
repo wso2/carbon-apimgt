@@ -173,7 +173,7 @@ public class ComplianceAPIUtil {
         }
 
         // Retrieve rulesets tied to the policy
-        List<RulesetInfo> policyRulesets = policyManager.getRulesetsByPolicyId(policyId);
+        List<RulesetInfo> policyRulesets = policyManager.getRulesetsByPolicyId(policyId, organization);
 
         // Retrieve the evaluated rulesets for the policy
         List<String> evaluatedRulesets =
@@ -374,7 +374,7 @@ public class ComplianceAPIUtil {
 
         // Identify violated policies
         List<String> violatedPolicies = complianceManager
-                .identifyViolatedPolicies(evaluatedPolicies, new ArrayList<>(violatedRulesets));
+                .identifyViolatedPolicies(evaluatedPolicies, new ArrayList<>(violatedRulesets), organization);
 
         // Set policy adherence summary
         PolicyAdherenceSummaryDTO policyAdherenceSummaryDTO = new PolicyAdherenceSummaryDTO();

@@ -57,11 +57,12 @@ public interface GovernancePolicyMgtDAO {
     /**
      * Get Governance Policy by ID
      *
-     * @param policyID Policy ID
+     * @param policyID     Policy ID
+     * @param organization Organization
      * @return GovernancePolicy
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
-    GovernancePolicy getGovernancePolicyByID(String policyID) throws GovernanceException;
+    GovernancePolicy getGovernancePolicyByID(String policyID, String organization) throws GovernanceException;
 
     /**
      * Get all the Governance Policies
@@ -77,11 +78,21 @@ public interface GovernancePolicyMgtDAO {
      *
      * @param policyId         Policy ID
      * @param governancePolicy Governance Policy
+     * @param organization     Organization
      * @return GovernancePolicy Updated object
      * @throws GovernanceException If an error occurs while updating the policy
      */
-    GovernancePolicy updateGovernancePolicy(String policyId, GovernancePolicy
-            governancePolicy)
+    GovernancePolicy updateGovernancePolicy(String policyId, GovernancePolicy governancePolicy,
+                                            String organization) throws GovernanceException;
+
+    /**
+     * Get the list of rulesets for a given policy
+     *
+     * @param policyId Policy ID
+     * @return List of rulesets
+     * @throws GovernanceException If an error occurs while getting the rulesets
+     */
+    List<Ruleset> getRulesetsWithContentByPolicyId(String policyId, String organization)
             throws GovernanceException;
 
     /**
@@ -91,25 +102,7 @@ public interface GovernancePolicyMgtDAO {
      * @return List of rulesets
      * @throws GovernanceException If an error occurs while getting the rulesets
      */
-    List<Ruleset> getRulesetsWithContentByPolicyId(String policyId) throws GovernanceException;
-
-    /**
-     * Get the list of rulesets for a given policy
-     *
-     * @param policyId Policy ID
-     * @return List of rulesets
-     * @throws GovernanceException If an error occurs while getting the rulesets
-     */
-    List<RulesetInfo> getRulesetsByPolicyId(String policyId) throws GovernanceException;
-
-    /**
-     * Get the list of rulesets for a given policy
-     *
-     * @param policyId Policy ID
-     * @return List of rulesets IDs
-     * @throws GovernanceException If an error occurs while getting the rulesets
-     */
-    List<String> getRulesetsIdsByPolicyId(String policyId) throws GovernanceException;
+    List<RulesetInfo> getRulesetsByPolicyId(String policyId, String organization) throws GovernanceException;
 
     /**
      * Get the list of policies by label
@@ -161,15 +154,6 @@ public interface GovernancePolicyMgtDAO {
     List<GovernanceAction> getActionsByPolicyId(String policyId) throws GovernanceException;
 
     /**
-     * Get the labels of a policy
-     *
-     * @param policyId Policy ID
-     * @return List of Labels
-     * @throws GovernanceException If an error occurs while getting the labels
-     */
-    List<String> getLabelsByPolicyId(String policyId) throws GovernanceException;
-
-    /**
      * Search for Governance Policies
      *
      * @param searchCriteria Search criteria
@@ -183,10 +167,11 @@ public interface GovernancePolicyMgtDAO {
     /**
      * Delete a Governance Policy
      *
-     * @param policyId Policy ID
+     * @param policyId     Policy ID
+     * @param organization Organization
      * @throws GovernanceException If an error occurs while deleting the policy
      */
-    void deletePolicy(String policyId) throws GovernanceException;
+    void deletePolicy(String policyId, String organization) throws GovernanceException;
 
     /**
      * Delete policy label mappings for a given label

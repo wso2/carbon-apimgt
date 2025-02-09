@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.impl.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -234,6 +236,7 @@ public class APIMUtil {
 
         String apiMetadata = extractAPIMetadata(apiProjectZip);
         String apiDefinition = extractAPIDefinition(apiProjectZip);
+        String docData = extractDocData(apiProjectZip);
 
         if (apiMetadata == null) {
             throw new GovernanceException(GovernanceExceptionCodes.API_DETAILS_NOT_FOUND);
@@ -244,6 +247,11 @@ public class APIMUtil {
             throw new GovernanceException(GovernanceExceptionCodes.API_DEFINITION_NOT_FOUND);
         } else {
             apiProjectContentMap.put(RuleType.API_DEFINITION, apiDefinition);
+        }
+        if (docData == null) {
+            throw new GovernanceException(GovernanceExceptionCodes.API_DOCUMENT_DATA_NOT_FOUND);
+        } else {
+            apiProjectContentMap.put(RuleType.API_DOCUMENTATION, docData);
         }
 
         return apiProjectContentMap;
@@ -288,22 +296,13 @@ public class APIMUtil {
      */
     public static String extractAPIDefinition(byte[] apiProjectZip)
             throws GovernanceException {
+        String rootFolder = APIMGovernanceConstants.DEFINITIONS_FOLDER + File.separator;
         String defContent;
         try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(apiProjectZip))) {
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {
-                if (entry.getName().contains(APIMGovernanceConstants.DEFINITIONS_FOLDER + File.separator +
-                        APIMGovernanceConstants.SWAGGER_FILE_NAME)) {
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[1024];
-                    int length;
-                    while ((length = zipInputStream.read(buffer)) != -1) {
-                        outputStream.write(buffer, 0, length);
-                    }
-                    defContent = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
-                    return defContent;
-                } else if (entry.getName().contains(APIMGovernanceConstants.DEFINITIONS_FOLDER + File.separator +
-                        APIMGovernanceConstants.ASYNC_API_FILE_NAME)) {
+                if ((entry.getName().contains(rootFolder + APIMGovernanceConstants.SWAGGER_FILE_NAME)) ||
+                        entry.getName().contains(rootFolder + APIMGovernanceConstants.ASYNC_API_FILE_NAME)) {
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     byte[] buffer = new byte[1024];
                     int length;
@@ -318,6 +317,51 @@ public class APIMUtil {
             throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_EXTRACTING_API_DEFINITION, e);
         }
         return null; // Return null if no matching swagger content is found
+    }
+
+    /**
+     * Extracts the document data from the API project ZIP file.
+     *
+     * @param apiProjectZip API project ZIP file as a byte array
+     * @return Document data as a YAML string
+     * @throws GovernanceException If an error occurs while extracting the document data
+     */
+    public static String extractDocData(byte[] apiProjectZip) throws GovernanceException {
+        ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+
+        String rootFolder = APIMGovernanceConstants.DOCS_FOLDER + File.separator;
+        String docMetadataFile = APIMGovernanceConstants.DOC_META_DATA_FILE_NAME;
+        List<Object> docsList = new ArrayList<>();
+        int count = 0;
+
+        try (ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(apiProjectZip))) {
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                if (entry.getName().contains(rootFolder) && entry.getName().endsWith(docMetadataFile)) {
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = zipInputStream.read(buffer)) != -1) {
+                        outputStream.write(buffer, 0, length);
+                    }
+                    String yamlContent = new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+                    Object parsedYamlContent = yamlMapper.readTree(yamlContent);
+                    if (parsedYamlContent != null) {
+                        count++;
+                        docsList.add(parsedYamlContent);
+                    }
+                }
+            }
+            // Create the final YAML structure with a root element "docs", "count"
+            HashMap<String, Object> root = new HashMap<>();
+            root.put("count", count);
+            if (docsList.size() > 0) {
+                root.put("docs", docsList);
+            }
+            return yamlMapper.writeValueAsString(root);
+        } catch (IOException e) {
+            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_EXTRACTING_DOC_DATA, e);
+        }
     }
 
     /**

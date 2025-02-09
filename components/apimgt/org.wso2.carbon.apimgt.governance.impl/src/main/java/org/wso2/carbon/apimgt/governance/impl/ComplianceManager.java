@@ -84,7 +84,7 @@ public class ComplianceManager {
     public void handlePolicyChangeEvent(String policyId, String organization) throws GovernanceException {
 
         // Get the policy and its labels and associated governable states
-        GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId);
+        GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
 
         List<String> labels = policy.getLabels();
         List<APIMGovernableState> apimGovernableStates = policy.getGovernableStates();
@@ -356,7 +356,8 @@ public class ComplianceManager {
         // Get a map of policies to their rulesets
         Map<String, List<String>> policyRulesetsMap = new HashMap<>();
         for (String policyId : allComplianceEvaluatedPolicies) {
-            List<String> rulesets = policyMgtDAO.getRulesetsIdsByPolicyId(policyId);
+            List<String> rulesets = policyMgtDAO.getRulesetsByPolicyId(policyId, organization)
+                    .stream().map(RulesetInfo::getId).collect(Collectors.toList());
             policyRulesetsMap.put(policyId, rulesets);
         }
 
@@ -407,8 +408,9 @@ public class ComplianceManager {
         complianceStateOfEvaluatedArtifacts.put(ArtifactComplianceState.COMPLIANT, new ArrayList<>());
         complianceStateOfEvaluatedArtifacts.put(ArtifactComplianceState.NON_COMPLIANT, new ArrayList<>());
 
-        List<ArtifactInfo> evaluatedArtifacts = complianceMgtDAO.getEvaluatedArtifactsForPolicy(policyId);
-        List<String> applicableRulesets = policyMgtDAO.getRulesetsIdsByPolicyId(policyId);
+        List<ArtifactInfo> evaluatedArtifacts = complianceMgtDAO.getEvaluatedArtifactsForPolicy(policyId, organization);
+        List<String> applicableRulesets = policyMgtDAO.getRulesetsByPolicyId(policyId, organization).
+                stream().map(RulesetInfo::getId).collect(Collectors.toList());
 
         for (ArtifactInfo artifactInfo : evaluatedArtifacts) {
             String artifactRefId = artifactInfo.getArtifactRefId();
@@ -513,8 +515,8 @@ public class ComplianceManager {
         }
 
         for (String policyId : govPolicies) {
-            GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId);
-            List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId);
+            GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
+            List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId, organization);
 
             // Validate the artifact against each ruleset
             for (Ruleset ruleset : rulesets) {
@@ -596,8 +598,8 @@ public class ComplianceManager {
         }
 
         for (String policyId : govPolicies) {
-            GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId);
-            List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId);
+            GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
+            List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId, organization);
 
             // Validate the artifact against each ruleset
             for (Ruleset ruleset : rulesets) {
@@ -706,14 +708,15 @@ public class ComplianceManager {
      *
      * @param evaluatedPolicies List of evaluated policies
      * @param violatedRulesets  List of violated rulesets
+     * @param organization      Organization
      * @return List of violated policies
      */
 
-    public List<String> identifyViolatedPolicies(List<String> evaluatedPolicies, List<String> violatedRulesets)
-            throws GovernanceException {
+    public List<String> identifyViolatedPolicies(List<String> evaluatedPolicies, List<String> violatedRulesets,
+                                                 String organization) throws GovernanceException {
         Set<String> violatedPolicies = new HashSet<>();
         for (String policy : evaluatedPolicies) {
-            List<String> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policy).stream()
+            List<String> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policy, organization).stream()
                     .map(Ruleset::getId).collect(Collectors.toList());
             if (violatedRulesets.stream().anyMatch(rulesets::contains)) {
                 violatedPolicies.add(policy);

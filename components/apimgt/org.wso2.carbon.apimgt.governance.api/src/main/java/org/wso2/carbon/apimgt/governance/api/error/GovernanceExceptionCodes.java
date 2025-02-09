@@ -219,6 +219,12 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
 
     ERROR_WHILE_GETTING_API_TYPE(700012, "Error while getting API type.",
             500, "Error while getting API type for API with ID: %s", true),
+
+    ERROR_WHILE_EXTRACTING_DOC_DATA(700013, "Error while extracting API documentation data.",
+            500, "Error while extracting API documentation data from zip", true),
+
+    API_DOCUMENT_DATA_NOT_FOUND(700014, "API document data not found.",
+            404, "API document data not found in API project"),
     ;
 
     private final long errorCode;

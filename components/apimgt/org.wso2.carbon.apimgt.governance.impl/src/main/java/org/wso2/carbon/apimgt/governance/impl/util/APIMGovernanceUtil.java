@@ -344,17 +344,19 @@ public class APIMGovernanceUtil {
     /**
      * Check for blocking actions in policies
      *
-     * @param policyIds       List of policy IDs
+     * @param policyIds           List of policy IDs
      * @param apimGovernableState Governable state
+     * @param organization        Organization
      * @return boolean
      * @throws GovernanceException if an error occurs while checking for blocking actions
      */
-    public static boolean isBlockingActionsPresent(List<String> policyIds, APIMGovernableState apimGovernableState)
+    public static boolean isBlockingActionsPresent(List<String> policyIds, APIMGovernableState apimGovernableState,
+                                                   String organization)
             throws GovernanceException {
         PolicyManager policyManager = new PolicyManager();
         boolean isBlocking = false;
         for (String policyId : policyIds) {
-            if (policyManager.isBlockingActionPresentForState(policyId, apimGovernableState)) {
+            if (policyManager.isBlockingActionPresentForState(policyId, apimGovernableState, organization)) {
                 isBlocking = true;
                 break;
             }

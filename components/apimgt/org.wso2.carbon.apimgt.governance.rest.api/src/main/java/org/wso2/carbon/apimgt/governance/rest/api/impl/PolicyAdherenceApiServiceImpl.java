@@ -78,7 +78,7 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
             throws GovernanceException {
 
         String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
-        GovernancePolicy policy = new PolicyManager().getGovernancePolicyByID(policyId);
+        GovernancePolicy policy = new PolicyManager().getGovernancePolicyByID(policyId, organization);
 
         Map<ArtifactComplianceState, List<ArtifactInfo>> evaluatedArtifacts =
                 new ComplianceManager().getArtifactsComplianceForPolicy(policyId, organization,

@@ -126,6 +126,12 @@ public class RulesetManager {
             throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId);
         }
 
+        String newName = ruleset.getName();
+        RulesetInfo existingRulesetByName = rulesetMgtDAO.getRulesetByName(newName, organization);
+        if (existingRulesetByName != null && !existingRulesetByName.getId().equals(rulesetId)) {
+            throw new GovernanceException(GovernanceExceptionCodes.RULESET_ALREADY_EXIST, newName, organization);
+        }
+
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();
 
