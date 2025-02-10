@@ -30,8 +30,8 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.DeployedAPIRevision;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
@@ -96,7 +96,7 @@ public class APIMUtil {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             return apiIdentifier.getApiName();
         } catch (APIManagementException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_INFO, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_INFO, e,
                     apiId);
         }
     }
@@ -114,7 +114,7 @@ public class APIMUtil {
             APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
             return apiIdentifier.getVersion();
         } catch (APIManagementException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_INFO, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_INFO, e,
                     apiId);
         }
     }
@@ -131,7 +131,7 @@ public class APIMUtil {
         try {
             return ApiMgtDAO.getInstance().getAPIStatusFromAPIUUID(apiId);
         } catch (APIManagementException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_LC_STATUS_OF_API, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_LC_STATUS_OF_API, e,
                     apiId);
         }
     }
@@ -186,7 +186,7 @@ public class APIMUtil {
                 ); // returns zip file
                 return Files.readAllBytes(apiProject.toPath());
             } catch (APIManagementException | APIImportExportException | IOException e) {
-                throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_APIM_PROJECT, e,
+                throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_APIM_PROJECT, e,
                         apiId);
             }
         }
@@ -239,17 +239,17 @@ public class APIMUtil {
         String docData = extractDocData(apiProjectZip);
 
         if (apiMetadata == null) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.API_DETAILS_NOT_FOUND);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.API_DETAILS_NOT_FOUND);
         } else {
             apiProjectContentMap.put(RuleType.API_METADATA, apiMetadata);
         }
         if (apiDefinition == null) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.API_DEFINITION_NOT_FOUND);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.API_DEFINITION_NOT_FOUND);
         } else {
             apiProjectContentMap.put(RuleType.API_DEFINITION, apiDefinition);
         }
         if (docData == null) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.API_DOCUMENT_DATA_NOT_FOUND);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.API_DOCUMENT_DATA_NOT_FOUND);
         } else {
             apiProjectContentMap.put(RuleType.API_DOCUMENTATION, docData);
         }
@@ -281,7 +281,7 @@ public class APIMUtil {
                 }
             }
         } catch (IOException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_EXTRACTING_API_METADATA, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_EXTRACTING_API_METADATA, e);
         }
         return null; // Return null if no matching metadata is found
     }
@@ -314,7 +314,7 @@ public class APIMUtil {
                 }
             }
         } catch (IOException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_EXTRACTING_API_DEFINITION, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_EXTRACTING_API_DEFINITION, e);
         }
         return null; // Return null if no matching swagger content is found
     }
@@ -360,7 +360,7 @@ public class APIMUtil {
             }
             return yamlMapper.writeValueAsString(root);
         } catch (IOException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_EXTRACTING_DOC_DATA, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_EXTRACTING_DOC_DATA, e);
         }
     }
 
@@ -375,7 +375,7 @@ public class APIMUtil {
         try {
             return LabelsDAO.getInstance().getMappedLabelIDsForApi(apiId);
         } catch (APIManagementException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_LABELS_FOR_API, e, apiId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_LABELS_FOR_API, e, apiId);
         }
     }
 
@@ -397,7 +397,7 @@ public class APIMUtil {
             return apiIds;
 
         } catch (APIManagementException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_APIS_FOR_LABEL, e, labelId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_APIS_FOR_LABEL, e, labelId);
         }
     }
 
@@ -419,7 +419,7 @@ public class APIMUtil {
             }
             return apiIds;
         } catch (APIManagementException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_LIST, e, organization);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_LIST, e, organization);
         }
 
     }
@@ -442,7 +442,7 @@ public class APIMUtil {
             APIIdentifier apiIdentifier = new APIIdentifier(apiProvider, apiName, apiVersion);
             return apimgtDAO.getUUIDFromIdentifier(apiIdentifier);
         } catch (APIManagementException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes
+            throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_GETTING_API_UUID_WITH_NAME_VERSION, e,
                     apiName, apiVersion);
         }
@@ -459,7 +459,7 @@ public class APIMUtil {
         try {
             return ApiMgtDAO.getInstance().getAPITypeFromUUID(apiId);
         } catch (APIManagementException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_API_TYPE, e, apiId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_TYPE, e, apiId);
         }
     }
 

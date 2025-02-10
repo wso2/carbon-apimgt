@@ -21,8 +21,8 @@ package org.wso2.carbon.apimgt.governance.impl.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
@@ -178,7 +178,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
             return complianceManager.handleComplianceEvalDryRun(artifactType, applicablePolicyIds,
                     contentMap, organization);
         } else {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.INVALID_ARTIFACT_TYPE, artifactType.toString());
+            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_ARTIFACT_TYPE, artifactType.toString());
         }
 
 

@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.governance.api.error;
 /**
  * This enum class contains the error codes and error messages for the governance component.
  */
-public enum GovernanceExceptionCodes implements ErrorHandler {
+public enum APIMGovExceptionCodes implements ErrorHandler {
 
     // General exceptions
     INTERNAL_SERVER_ERROR(100000, "Internal server error.",
@@ -242,8 +242,8 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
      *                         a http status code keep it blank.
      * @param errorDescription The error description.
      */
-    GovernanceExceptionCodes(long errorCode, String msg, int httpErrorCode, String errorDescription,
-                             boolean stackTrace) {
+    APIMGovExceptionCodes(long errorCode, String msg, int httpErrorCode, String errorDescription,
+                          boolean stackTrace) {
 
         this.errorCode = errorCode;
         this.errorMessage = msg;
@@ -259,7 +259,7 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
      *                         a http status code keep it blank.
      * @param errorDescription The error description.
      */
-    GovernanceExceptionCodes(long errorCode, String msg, int httpErrorCode, String errorDescription) {
+    APIMGovExceptionCodes(long errorCode, String msg, int httpErrorCode, String errorDescription) {
 
         this.errorCode = errorCode;
         this.errorMessage = msg;

@@ -23,8 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.DefaultRuleset;
@@ -86,7 +86,7 @@ public class APIMGovernanceUtil {
         try {
             rulesetMap = yamlReader.readValue(content, Map.class);
         } catch (JsonProcessingException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONTENT, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONTENT, e);
         }
         return rulesetMap;
     }
@@ -519,7 +519,7 @@ public class APIMGovernanceUtil {
         try {
             return Files.readAllBytes(path);
         } catch (IOException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_FAILED_TO_READ_ARTIFACT_PROJECT, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_FAILED_TO_READ_ARTIFACT_PROJECT, e);
         }
     }
 

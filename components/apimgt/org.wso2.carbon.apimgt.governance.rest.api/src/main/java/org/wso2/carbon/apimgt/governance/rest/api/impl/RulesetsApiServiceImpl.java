@@ -23,8 +23,8 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.springframework.http.HttpHeaders;
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
@@ -112,7 +112,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         } catch (URISyntaxException e) {
             String error = String.format("Error while creating URI for new Ruleset %s",
                     name);
-            throw new APIMGovernanceException(error, e, GovernanceExceptionCodes.INTERNAL_SERVER_ERROR);
+            throw new APIMGovernanceException(error, e, APIMGovExceptionCodes.INTERNAL_SERVER_ERROR);
         } catch (IOException e) {
             throw new APIMGovernanceException("Error while converting ruleset content stream", e);
         } finally {

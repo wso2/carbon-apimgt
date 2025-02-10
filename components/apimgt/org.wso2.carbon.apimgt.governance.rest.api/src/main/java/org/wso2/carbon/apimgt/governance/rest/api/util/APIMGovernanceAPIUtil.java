@@ -20,9 +20,9 @@ package org.wso2.carbon.apimgt.governance.rest.api.util;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.ErrorHandler;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.context.CarbonContext;
 
@@ -42,7 +42,7 @@ public class APIMGovernanceAPIUtil {
         String organization = (String) ctx.get(APIMGovernanceAPIConstants.ORGANIZATION);
         if (organization == null) {
             throw new APIMGovernanceException(
-                    "Organization is not found in the request", GovernanceExceptionCodes
+                    "Organization is not found in the request", APIMGovExceptionCodes
                     .ORGANIZATION_NOT_FOUND);
         }
         return organization;

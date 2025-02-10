@@ -20,8 +20,8 @@ package org.wso2.carbon.apimgt.governance.impl.dao.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
@@ -111,7 +111,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 throw e;
             }
         } catch (SQLException | IOException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.RULESET_CREATION_FAILED, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_CREATION_FAILED, e,
                     ruleset.getName(), organization
             );
         }
@@ -165,7 +165,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 throw e;
             }
         } catch (SQLException | IOException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_UPDATING_RULESET, e, rulesetId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_RULESET, e, rulesetId);
         }
         return getRulesetById(rulesetId, organization); // to return all info of the updated ruleset
     }
@@ -272,7 +272,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_RULESET,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_DELETING_RULESET,
                     e, rulesetId);
         }
     }
@@ -358,7 +358,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESETS,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESETS,
                     e, organization);
         }
         rulesetList.setCount(rulesetInfoList.size());
@@ -387,7 +387,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_NAME,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_NAME,
                     e, organization);
         }
         return null;
@@ -414,7 +414,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
                     e);
         }
         return null;
@@ -450,7 +450,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_SEARCHING_RULESETS,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_SEARCHING_RULESETS,
                     e, organization);
         }
         rulesetList.setCount(rulesetInfoList.size());
@@ -509,7 +509,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 return null;
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
                     e);
         }
     }
@@ -536,7 +536,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICIES,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICIES,
                     e, rulesetId);
         }
         return policyIds;
@@ -569,7 +569,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
             }
             return rules;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULES_BY_RULESET_ID
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULES_BY_RULESET_ID
                     , e, rulesetId);
         }
     }

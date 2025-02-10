@@ -19,8 +19,8 @@
 package org.wso2.carbon.apimgt.governance.rest.api.util;
 
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
@@ -76,7 +76,7 @@ public class ComplianceAPIUtil {
 
         // Check if the artifact is available
         if (!APIMGovernanceUtil.isArtifactAvailable(artifactRefId, artifactType)) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ARTIFACT_NOT_FOUND, artifactRefId, organization);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ARTIFACT_NOT_FOUND, artifactRefId, organization);
         }
 
         // Initialize the response DTO
@@ -455,7 +455,7 @@ public class ComplianceAPIUtil {
 
         // If the ruleset is not found, throw an exception
         if (rulesetInfo == null) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_NOT_FOUND, rulesetId);
         }
 
         RulesetValidationResultDTO rulesetValidationResultDTO = new RulesetValidationResultDTO();

@@ -37,17 +37,17 @@ public class APIMGovernanceException extends Exception {
 
     public APIMGovernanceException(String msg) {
         super(msg);
-        this.errorHandler = GovernanceExceptionCodes.INTERNAL_SERVER_ERROR;
+        this.errorHandler = APIMGovExceptionCodes.INTERNAL_SERVER_ERROR;
     }
 
     public APIMGovernanceException(String msg, Throwable e) {
         super(msg, e);
-        this.errorHandler = GovernanceExceptionCodes.INTERNAL_SERVER_ERROR;
+        this.errorHandler = APIMGovExceptionCodes.INTERNAL_SERVER_ERROR;
     }
 
     public APIMGovernanceException(Throwable throwable) {
         super(throwable);
-        this.errorHandler = GovernanceExceptionCodes.INTERNAL_SERVER_ERROR;
+        this.errorHandler = APIMGovExceptionCodes.INTERNAL_SERVER_ERROR;
     }
 
     /**

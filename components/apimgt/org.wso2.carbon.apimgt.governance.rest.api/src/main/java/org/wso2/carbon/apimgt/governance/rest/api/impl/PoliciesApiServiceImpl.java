@@ -21,8 +21,8 @@ package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
@@ -85,7 +85,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         } catch (URISyntaxException e) {
             String error = String.format("Error while creating URI for new Governance Policy %s",
                     governancePolicyDTO.getName());
-            throw new APIMGovernanceException(error, e, GovernanceExceptionCodes.INTERNAL_SERVER_ERROR);
+            throw new APIMGovernanceException(error, e, APIMGovExceptionCodes.INTERNAL_SERVER_ERROR);
         }
         return Response.created(createdPolicyURI).entity(createdPolicyDTO).build();
     }

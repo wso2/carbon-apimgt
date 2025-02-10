@@ -26,8 +26,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
@@ -76,10 +76,10 @@ public class SpectralValidationEngine implements ValidationEngine {
                 return;
             }
             String message = rootNode.path("message").asText();
-            throw new APIMGovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT_DETAILED,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT_DETAILED,
                     ruleset.getName(), message);
         } catch (InvalidContentTypeException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT, e, ruleset.getName());
+            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT, e, ruleset.getName());
         } catch (JsonProcessingException e) {
             log.error("Error while parsing rulseset validation result JSON string", e);
             throw new APIMGovernanceException("Error while parsing ruleset validation result JSON string", e);
@@ -130,7 +130,7 @@ public class SpectralValidationEngine implements ValidationEngine {
                     rule.setContent(contentString);
                     rulesList.add(rule);
                 } catch (JsonProcessingException e) {
-                    throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_EXTRACTING_RULE_CONTENT, e);
+                    throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_EXTRACTING_RULE_CONTENT, e);
                 }
 
             }
@@ -161,7 +161,7 @@ public class SpectralValidationEngine implements ValidationEngine {
             }
             return getRuleViolationsFromJsonResponse(resultJson, ruleset);
         } catch (InvalidRulesetException | InvalidContentTypeException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
+            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT, ruleset.getName());
         } catch (Throwable e) {
             log.error("Error occurred while verifying governance compliance ", e);
             throw new APIMGovernanceException("Error occurred while verifying governance compliance ", e);

@@ -20,8 +20,8 @@ package org.wso2.carbon.apimgt.governance.impl.dao.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceActionType;
@@ -104,7 +104,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_CREATING_POLICY, e, organization);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_CREATING_POLICY, e, organization);
         }
         return getGovernancePolicyByID(governancePolicy.getId(), organization);
     }
@@ -219,7 +219,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_UPDATING_POLICY, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY, e,
                     policyId);
         }
         return getGovernancePolicyByID(policyId, organization);
@@ -377,7 +377,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return policy;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_BY_NAME,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_BY_NAME,
                     e, policyName, organization);
         }
     }
@@ -417,7 +417,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return policy;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_BY_ID,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_BY_ID,
                     e, policyID);
         }
     }
@@ -458,7 +458,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             policyListObj.setGovernancePolicyList(policyList);
             return policyListObj;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES,
                     e, organization);
         }
     }
@@ -501,7 +501,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return rulesetList;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.
+            throw new APIMGovernanceException(APIMGovExceptionCodes.
                     ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY, e, policyId);
         }
     }
@@ -537,7 +537,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return rulesetList;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes
+            throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY, e, policyId);
         }
     }
@@ -566,7 +566,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return policyIds;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
                     organization);
         }
 
@@ -596,7 +596,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return policyIds;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
                     organization);
         }
     }
@@ -621,7 +621,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return policyIds;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
                     organization);
         }
     }
@@ -650,7 +650,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return policyIds;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
                     organization);
         }
     }
@@ -667,7 +667,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             return getActionsByPolicyId(connection, policyId);
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_ACTIONS_BY_POLICY_ID,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_ACTIONS_BY_POLICY_ID,
                     e, policyId);
         }
     }
@@ -713,7 +713,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             policyListObj.setGovernancePolicyList(policyList);
             return policyListObj;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_SEARCHING_POLICIES,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_SEARCHING_POLICIES,
                     e, organization);
         }
     }
@@ -846,7 +846,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_POLICY,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_DELETING_POLICY,
                     e, policyId);
         }
     }
@@ -963,7 +963,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             prepStmt.setString(2, organization);
             prepStmt.executeUpdate();
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes
+            throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_DELETING_LABEL_POLICY_MAPPINGS, e, label);
         }
     }

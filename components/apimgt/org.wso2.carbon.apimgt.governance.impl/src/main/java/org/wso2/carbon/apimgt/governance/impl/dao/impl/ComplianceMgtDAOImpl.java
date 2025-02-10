@@ -20,8 +20,8 @@ package org.wso2.carbon.apimgt.governance.impl.dao.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationRequest;
@@ -110,7 +110,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
 
         } catch (SQLException e) {
             throw new APIMGovernanceException(
-                    GovernanceExceptionCodes.ERROR_WHILE_ADDING_NEW_GOV_EVAL_REQUEST, e, artifactRefId);
+                    APIMGovExceptionCodes.ERROR_WHILE_ADDING_NEW_GOV_EVAL_REQUEST, e, artifactRefId);
         }
     }
 
@@ -234,7 +234,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         } catch (SQLIntegrityConstraintViolationException e) {
             return false;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes
+            throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_UPDATING_GOV_EVAL_REQUEST, e, requestId);
         }
     }
@@ -252,7 +252,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
              PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             prepStmnt.executeUpdate();
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes
+            throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_CHANGING_PROCESSING_REQ_TO_PENDING, e);
         }
     }
@@ -288,7 +288,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes
+            throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_DELETING_GOVERNANCE_EVAL_REQUEST,
                     e, requestId);
         }
@@ -332,7 +332,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes
+            throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_DELETING_GOVERNANCE_EVAL_REQUESTS, e);
         }
     }
@@ -365,7 +365,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
 
             return complianceEvaluationRequests;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes
+            throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_GETTING_GOV_EVAL_REQUESTS, e);
         }
     }
@@ -386,7 +386,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             return getPendingEvalRequest(connection, artifactRefId, artifactType, organization);
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes
+            throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_GETTING_GOV_EVAL_REQUEST_FOR_ARTIFACT, e, artifactRefId);
         }
     }
@@ -415,7 +415,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             }
             return artifactIds;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes
+            throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_GETTING_COMPLIANCE_PENDING_ARTIFACTS, e);
         }
     }
@@ -485,7 +485,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             }
 
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_SAVING_GOVERNANCE_RESULT,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_SAVING_GOVERNANCE_RESULT,
                     e, artifactRefId);
         }
     }
@@ -700,7 +700,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             }
             return ruleViolations;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_RULE_VIOLATIONS,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_RULE_VIOLATIONS,
                     e);
         }
     }
@@ -741,7 +741,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             }
             return ruleViolations;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_RULE_VIOLATIONS,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_RULE_VIOLATIONS,
                     e);
         }
     }
@@ -773,7 +773,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             }
             return policyIds;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
         }
     }
 
@@ -803,7 +803,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
         }
         return rulesetIds;
     }
@@ -833,7 +833,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 return resultSet.next();
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
         }
     }
 
@@ -860,7 +860,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
         }
         return new ArrayList<>(artifactRefIds);
     }
@@ -888,7 +888,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
         }
         return new ArrayList<>(artifactRefIds);
     }
@@ -914,7 +914,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
         }
         return new ArrayList<>(policyIds);
     }
@@ -940,7 +940,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
         }
         return rulesetIds;
     }
@@ -971,7 +971,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
         }
         return rulesetIds;
     }
@@ -1005,7 +1005,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             }
             return artifactInfos;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
         }
     }
 
@@ -1078,7 +1078,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(GovernanceExceptionCodes
+            throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_DELETING_GOVERNANCE_DATA, e, artifactRefId);
         }
     }
