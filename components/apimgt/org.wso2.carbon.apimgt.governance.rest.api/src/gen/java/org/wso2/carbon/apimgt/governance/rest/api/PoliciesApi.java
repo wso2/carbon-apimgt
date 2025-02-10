@@ -1,8 +1,8 @@
 package org.wso2.carbon.apimgt.governance.rest.api;
 
+import org.wso2.carbon.apimgt.governance.rest.api.dto.APIMGovernancePolicyDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.APIMGovernancePolicyListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.PoliciesApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.impl.PoliciesApiServiceImpl;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
@@ -41,19 +41,19 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Creates a new governance policy.", notes = "Creates a new governance policy for the user's organization.", response = GovernancePolicyDTO.class, authorizations = {
+    @ApiOperation(value = "Creates a new governance policy.", notes = "Creates a new governance policy for the user's organization.", response = APIMGovernancePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
         })
     }, tags={ "Governance Policies",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 201, message = "OK. Governance policy created successfully.", response = GovernancePolicyDTO.class),
+        @ApiResponse(code = 201, message = "OK. Governance policy created successfully.", response = APIMGovernancePolicyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response createGovernancePolicy(@ApiParam(value = "JSON object containing the details of the new governance policy." ,required=true) GovernancePolicyDTO governancePolicyDTO) throws GovernanceException{
-        return delegate.createGovernancePolicy(governancePolicyDTO, securityContext);
+    public Response createGovernancePolicy(@ApiParam(value = "JSON object containing the details of the new governance policy." ,required=true) APIMGovernancePolicyDTO apIMGovernancePolicyDTO) throws GovernanceException{
+        return delegate.createGovernancePolicy(apIMGovernancePolicyDTO, securityContext);
     }
 
     @DELETE
@@ -79,13 +79,13 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieves a list of all governance policies.", notes = "Retrieves a list of governance policies for the user's organization.", response = GovernancePolicyListDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieves a list of all governance policies.", notes = "Retrieves a list of governance policies for the user's organization.", response = APIMGovernancePolicyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies")
         })
     }, tags={ "Governance Policies",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Successful response with a list of governance policies.", response = GovernancePolicyListDTO.class),
+        @ApiResponse(code = 200, message = "OK. Successful response with a list of governance policies.", response = APIMGovernancePolicyListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
@@ -98,13 +98,13 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Path("/{policyId}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get a specific governance policy", notes = "Retrieves details of a specific governance policy identified by the policyId.", response = GovernancePolicyDTO.class, authorizations = {
+    @ApiOperation(value = "Get a specific governance policy", notes = "Retrieves details of a specific governance policy identified by the policyId.", response = APIMGovernancePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies")
         })
     }, tags={ "Governance Policies",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Governance policy details retrieved successfully.", response = GovernancePolicyDTO.class),
+        @ApiResponse(code = 200, message = "OK. Governance policy details retrieved successfully.", response = APIMGovernancePolicyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
@@ -117,18 +117,18 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Path("/{policyId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Update a specific governance policy", notes = "Updates the details of an existing governance policy identified by the policyId.", response = GovernancePolicyDTO.class, authorizations = {
+    @ApiOperation(value = "Update a specific governance policy", notes = "Updates the details of an existing governance policy identified by the policyId.", response = APIMGovernancePolicyDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
         })
     }, tags={ "Governance Policies" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Governance policy updated successfully.", response = GovernancePolicyDTO.class),
+        @ApiResponse(code = 200, message = "OK. Governance policy updated successfully.", response = APIMGovernancePolicyDTO.class),
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response updateGovernancePolicyById(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId, @ApiParam(value = "JSON object containing the updated governance policy details." ,required=true) GovernancePolicyDTO governancePolicyDTO) throws GovernanceException{
-        return delegate.updateGovernancePolicyById(policyId, governancePolicyDTO, securityContext);
+    public Response updateGovernancePolicyById(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId, @ApiParam(value = "JSON object containing the updated governance policy details." ,required=true) APIMGovernancePolicyDTO apIMGovernancePolicyDTO) throws GovernanceException{
+        return delegate.updateGovernancePolicyById(policyId, apIMGovernancePolicyDTO, securityContext);
     }
 }

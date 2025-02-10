@@ -24,11 +24,11 @@ import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
@@ -212,7 +212,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
             boolean isDeployed = APIMUtil.isAPIDeployed(artifactRefId);
 
             for (String policyId : allPoliciesForLabel) {
-                GovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId, organization);
+                APIMGovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId, organization);
                 boolean isAPIGovernable = APIMUtil.isAPIGovernable(apiStatus, isDeployed, policy.getGovernableStates());
                 // If the API should be governed by the policy
                 if (isAPIGovernable) {

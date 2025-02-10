@@ -8,8 +8,8 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceDetailsD
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.util.APIMGovernanceAPIUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.ComplianceAPIUtil;
-import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
 import javax.ws.rs.core.Response;
@@ -29,7 +29,7 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
     public Response getComplianceByAPIId(String apiId, MessageContext messageContext) throws GovernanceException {
 
         ArtifactType artifactType = ArtifactType.API;
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 
         ArtifactComplianceDetailsDTO detailsDTO = ComplianceAPIUtil.getArtifactComplianceDetailsDTO
                 (apiId, artifactType, organization);
@@ -52,7 +52,7 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
 
         ArtifactType artifactType = ArtifactType.API;
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 
         ArtifactComplianceListDTO complianceListDTO = ComplianceAPIUtil
                 .getArtifactComplianceListDTO(artifactType, organization, limit, offset);
@@ -69,7 +69,7 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
      */
     public Response getComplianceSummaryForAPIs(MessageContext messageContext) throws GovernanceException {
 
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
         ArtifactType artifactType = ArtifactType.API;
 
         ArtifactComplianceSummaryDTO summaryDTO = ComplianceAPIUtil.getArtifactComplianceSummary(artifactType,
@@ -90,7 +90,7 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
     public Response getRulesetValidationResultsByAPIId(String apiId, String rulesetId, MessageContext messageContext)
             throws GovernanceException {
 
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
         ArtifactType artifactType = ArtifactType.API;
 
         RulesetValidationResultDTO rulesetValidationResultDTO = ComplianceAPIUtil

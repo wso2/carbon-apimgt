@@ -23,11 +23,11 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceAction;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceActionType;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
-import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
@@ -76,10 +76,10 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      *
      * @param governancePolicy Governance Policy Info with Ruleset Ids
      * @param organization     Organization
-     * @return GovernancePolicy Created object
+     * @return APIMGovernancePolicy Created object
      */
     @Override
-    public GovernancePolicy createGovernancePolicy(GovernancePolicy governancePolicy, String organization)
+    public APIMGovernancePolicy createGovernancePolicy(APIMGovernancePolicy governancePolicy, String organization)
             throws GovernanceException {
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -116,7 +116,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @param governancePolicy Governance Policy
      * @throws SQLException If an error occurs while inserting the mappings (Captured at higher level)
      */
-    private void insertPolicyRulesetMapping(Connection connection, GovernancePolicy governancePolicy)
+    private void insertPolicyRulesetMapping(Connection connection, APIMGovernancePolicy governancePolicy)
             throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                 .CREATE_POLICY_RULESET_MAPPING)) {
@@ -136,7 +136,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @param governancePolicy Governance Policy
      * @throws SQLException If an error occurs while inserting the mappings (Captured at higher level)
      */
-    private void insertPolicyLabels(Connection connection, GovernancePolicy governancePolicy)
+    private void insertPolicyLabels(Connection connection, APIMGovernancePolicy governancePolicy)
             throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                 .CREATE_GOVERNANCE_POLICY_LABEL_MAPPING)) {
@@ -156,7 +156,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @param governancePolicy Governance Policy
      * @throws SQLException If an error occurs while inserting the mappings
      */
-    private void insertPolicyStatesAndActions(Connection connection, GovernancePolicy governancePolicy)
+    private void insertPolicyStatesAndActions(Connection connection, APIMGovernancePolicy governancePolicy)
             throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                 .CREATE_GOVERNANCE_POLICY_STATE_MAPPING)) {
@@ -170,7 +170,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
 
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                 .CREATE_GOVERNANCE_POLICY_ACTION_MAPPING)) {
-            for (GovernanceAction action : governancePolicy.getActions()) {
+            for (APIMGovernanceAction action : governancePolicy.getActions()) {
                 prepStmt.setString(1, governancePolicy.getId());
                 prepStmt.setString(2, String.valueOf(action.getGovernableState()));
                 prepStmt.setString(3, String.valueOf(action.getRuleSeverity()));
@@ -187,12 +187,12 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @param policyId         Policy ID
      * @param governancePolicy Governance Policy
      * @param organization     Organization
-     * @return GovernancePolicy Updated object
+     * @return APIMGovernancePolicy Updated object
      * @throws GovernanceException If an error occurs while updating the policy
      */
     @Override
-    public GovernancePolicy updateGovernancePolicy(String policyId, GovernancePolicy governancePolicy,
-                                                   String organization)
+    public APIMGovernancePolicy updateGovernancePolicy(String policyId, APIMGovernancePolicy governancePolicy,
+                                                       String organization)
             throws GovernanceException {
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -212,7 +212,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                 updateStatesAndPolicyActions(connection, policyId, governancePolicy);
                 deletePolicyResultsForPolicy(connection, policyId);
 
-                // return updated GovernancePolicy object
+                // return updated APIMGovernancePolicy object
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -234,7 +234,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @throws SQLException If an error occurs while deleting the policy (Captured at higher level)
      */
     private void updatePolicyRulesetMappings(Connection connection, String policyId,
-                                             GovernancePolicy governancePolicy) throws SQLException {
+                                             APIMGovernancePolicy governancePolicy) throws SQLException {
 
         // Delete old mappings and add new mappings
         try (PreparedStatement ps =
@@ -266,7 +266,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @throws SQLException If an error occurs while updating the labels (Captured at higher level)
      */
     private void updatePolicyLabels(Connection connection, String policyId,
-                                    GovernancePolicy governancePolicy) throws SQLException {
+                                    APIMGovernancePolicy governancePolicy) throws SQLException {
         // Delete old mappings and add new mappings
         try (PreparedStatement ps =
                      connection.prepareStatement(SQLConstants
@@ -298,7 +298,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @throws SQLException If an error occurs while updating the actions (Captured at higher level)
      */
     private void updateStatesAndPolicyActions(Connection connection, String policyId,
-                                              GovernancePolicy governancePolicy) throws SQLException {
+                                              APIMGovernancePolicy governancePolicy) throws SQLException {
 
         // Delete old mappings and add new mappings
         try (PreparedStatement ps =
@@ -328,11 +328,11 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
         }
 
-        List<GovernanceAction> actionsToAdd = governancePolicy.getActions();
+        List<APIMGovernanceAction> actionsToAdd = governancePolicy.getActions();
         if (actionsToAdd != null && !actionsToAdd.isEmpty()) {
             try (PreparedStatement ps =
                          connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_ACTION_MAPPING)) {
-                for (GovernanceAction action : actionsToAdd) {
+                for (APIMGovernanceAction action : actionsToAdd) {
                     ps.setString(1, policyId);
                     ps.setString(2, String.valueOf(action.getGovernableState()));
                     ps.setString(3, String.valueOf(action.getRuleSeverity()));
@@ -350,21 +350,21 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      *
      * @param policyName   Policy Name
      * @param organization Organization
-     * @return GovernancePolicy
+     * @return APIMGovernancePolicy
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
     @Override
-    public GovernancePolicy getGovernancePolicyByName(String policyName, String organization)
+    public APIMGovernancePolicy getGovernancePolicyByName(String policyName, String organization)
             throws GovernanceException {
 
-        GovernancePolicy policy = null;
+        APIMGovernancePolicy policy = null;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICY_BY_NAME)) {
             prepStmt.setString(1, organization);
             prepStmt.setString(2, policyName);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 if (resultSet.next()) {
-                    policy = new GovernancePolicy();
+                    policy = new APIMGovernancePolicy();
                     policy.setId(resultSet.getString("POLICY_ID"));
                     policy.setName(resultSet.getString("NAME"));
                     policy.setDescription(resultSet.getString("DESCRIPTION"));
@@ -387,20 +387,20 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      *
      * @param policyID     Policy ID
      * @param organization Organization
-     * @return GovernancePolicy
+     * @return APIMGovernancePolicy
      * @throws GovernanceException If an error occurs while retrieving the policy
      */
     @Override
-    public GovernancePolicy getGovernancePolicyByID(String policyID, String organization)
+    public APIMGovernancePolicy getGovernancePolicyByID(String policyID, String organization)
             throws GovernanceException {
-        GovernancePolicy policy = null;
+        APIMGovernancePolicy policy = null;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICY_BY_ID)) {
             prepStmt.setString(1, policyID);
             prepStmt.setString(2, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 if (resultSet.next()) {
-                    policy = new GovernancePolicy();
+                    policy = new APIMGovernancePolicy();
                     policy.setId(resultSet.getString("POLICY_ID"));
                     policy.setName(resultSet.getString("NAME"));
                     policy.setDescription(resultSet.getString("DESCRIPTION"));
@@ -426,19 +426,19 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * Get all the Governance Policies
      *
      * @param organization Organization
-     * @return GovernancePolicyList object
+     * @return APIMGovernancePolicyList object
      * @throws GovernanceException If an error occurs while getting the policies
      */
     @Override
-    public GovernancePolicyList getGovernancePolicies(String organization) throws GovernanceException {
-        GovernancePolicyList policyListObj = new GovernancePolicyList();
-        List<GovernancePolicy> policyList = new ArrayList<>();
+    public APIMGovernancePolicyList getGovernancePolicies(String organization) throws GovernanceException {
+        APIMGovernancePolicyList policyListObj = new APIMGovernancePolicyList();
+        List<APIMGovernancePolicy> policyList = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICIES)) {
             prepStmt.setString(1, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
-                    GovernancePolicy policy = new GovernancePolicy();
+                    APIMGovernancePolicy policy = new APIMGovernancePolicy();
                     policy.setId(resultSet.getString("POLICY_ID"));
                     policy.setName(resultSet.getString("NAME"));
                     policy.setDescription(resultSet.getString("DESCRIPTION"));
@@ -663,7 +663,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @throws GovernanceException If an error occurs while getting the actions
      */
     @Override
-    public List<GovernanceAction> getActionsByPolicyId(String policyId) throws GovernanceException {
+    public List<APIMGovernanceAction> getActionsByPolicyId(String policyId) throws GovernanceException {
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             return getActionsByPolicyId(connection, policyId);
         } catch (SQLException e) {
@@ -677,14 +677,14 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      *
      * @param searchCriteria Search criteria
      * @param organization   Organization
-     * @return GovernancePolicyList object
+     * @return APIMGovernancePolicyList object
      * @throws GovernanceException If an error occurs while searching for policies
      */
     @Override
-    public GovernancePolicyList searchPolicies(Map<String, String> searchCriteria,
-                                               String organization) throws GovernanceException {
-        GovernancePolicyList policyListObj = new GovernancePolicyList();
-        List<GovernancePolicy> policyList = new ArrayList<>();
+    public APIMGovernancePolicyList searchPolicies(Map<String, String> searchCriteria,
+                                                   String organization) throws GovernanceException {
+        APIMGovernancePolicyList policyListObj = new APIMGovernancePolicyList();
+        List<APIMGovernancePolicy> policyList = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.SEARCH_POLICIES)) {
             prepStmt.setString(1, organization);
@@ -694,7 +694,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     APIMGovernanceConstants.PolicySearchAttributes.STATE, ""));
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
-                    GovernancePolicy policy = new GovernancePolicy();
+                    APIMGovernancePolicy policy = new APIMGovernancePolicy();
                     policy.setId(resultSet.getString("POLICY_ID"));
                     policy.setName(resultSet.getString("NAME"));
                     policy.setDescription(resultSet.getString("DESCRIPTION"));
@@ -792,18 +792,19 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
      * @return List of Actions
      * @throws SQLException If an error occurs while retrieving the actions (Captured at higher level)
      */
-    private List<GovernanceAction> getActionsByPolicyId(Connection connection, String policyId) throws SQLException {
-        List<GovernanceAction> actions = new ArrayList<>();
+    private List<APIMGovernanceAction> getActionsByPolicyId(Connection connection,
+                                                            String policyId) throws SQLException {
+        List<APIMGovernanceAction> actions = new ArrayList<>();
         try (PreparedStatement prepStmt =
                      connection.prepareStatement(SQLConstants.GET_ACTIONS_BY_POLICY_ID)) {
             prepStmt.setString(1, policyId);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
-                    GovernanceAction action = new GovernanceAction();
+                    APIMGovernanceAction action = new APIMGovernanceAction();
                     action.setGovernableState(APIMGovernableState.fromString(resultSet
                             .getString("STATE")));
                     action.setRuleSeverity(RuleSeverity.fromString(resultSet.getString("SEVERITY")));
-                    action.setType(GovernanceActionType.fromString(resultSet.getString("TYPE")));
+                    action.setType(APIMGovernanceActionType.fromString(resultSet.getString("TYPE")));
                     actions.add(action);
                 }
             }

@@ -32,10 +32,10 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceEvaluationScheduler;
-import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfiguration;
-import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationService;
-import org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfigurationServiceImpl;
-import org.wso2.carbon.apimgt.governance.impl.observer.GovernanceConfigDeployer;
+import org.wso2.carbon.apimgt.governance.impl.config.APIMGovernanceConfig;
+import org.wso2.carbon.apimgt.governance.impl.config.APIMGovernanceConfigService;
+import org.wso2.carbon.apimgt.governance.impl.config.APIMGovernanceConfigServiceImpl;
+import org.wso2.carbon.apimgt.governance.impl.observer.APIMGovernanceConfigDeployer;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineService;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineServiceImpl;
@@ -55,7 +55,7 @@ public class GovernanceComponent {
     private static final Log log = LogFactory.getLog(GovernanceComponent.class);
     ServiceRegistration registration;
 
-    private GovernanceConfiguration configuration = new GovernanceConfiguration();
+    private APIMGovernanceConfig configuration = new APIMGovernanceConfig();
 
     @Activate
     protected void activate(ComponentContext componentContext) throws Exception {
@@ -69,19 +69,19 @@ public class GovernanceComponent {
         String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
         configuration.load(filePath);
 
-        GovernanceConfigurationServiceImpl configurationService =
-                new GovernanceConfigurationServiceImpl(configuration);
+        APIMGovernanceConfigServiceImpl configurationService =
+                new APIMGovernanceConfigServiceImpl(configuration);
         ServiceReferenceHolder.getInstance().setGovernanceConfigurationService(configurationService);
         APIMGovernanceDBUtil.initialize();
         ComplianceEvaluationScheduler.initialize();
 
         String migrationEnabled = System.getProperty(APIMGovernanceConstants.MIGRATE);
         if (migrationEnabled == null) {
-            GovernanceConfigDeployer configDeployer = new GovernanceConfigDeployer();
+            APIMGovernanceConfigDeployer configDeployer = new APIMGovernanceConfigDeployer();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
         }
         registration = componentContext.getBundleContext()
-                .registerService(GovernanceConfigurationService.class.getName(),
+                .registerService(APIMGovernanceConfigService.class.getName(),
                         configurationService, null);
     }
 

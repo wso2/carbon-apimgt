@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.util;
 
-import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
+import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
@@ -416,13 +416,13 @@ public class ComplianceAPIUtil {
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = GovernanceAPIUtil.getArtifactCompliancePageURL(
-                    GovernanceAPIConstants.ARTIFACT_COMPLIANCE_GET_URL,
+            paginatedPrevious = APIMGovernanceAPIUtil.getArtifactCompliancePageURL(
+                    APIMGovernanceAPIConstants.ARTIFACT_COMPLIANCE_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                     paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), artifactType);
         }
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = GovernanceAPIUtil.getArtifactCompliancePageURL(GovernanceAPIConstants
+            paginatedNext = APIMGovernanceAPIUtil.getArtifactCompliancePageURL(APIMGovernanceAPIConstants
                             .ARTIFACT_COMPLIANCE_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                     paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), artifactType);

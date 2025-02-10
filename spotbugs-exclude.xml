@@ -97,7 +97,7 @@
         <Bug pattern="MS_EXPOSE_REP, EI_EXPOSE_REP2, EI_EXPOSE_REP"/>
     </Match>
     <Match>
-        <Package name="org.wso2.carbon.apimgt.governance.impl.config.GovernanceConfiguration"/>
+        <Package name="org.wso2.carbon.apimgt.governance.impl.config.APIMGovernanceConfig"/>
         <Bug pattern="EI_EXPOSE_REP, EI_EXPOSE_REP2"/>
     </Match>
 </FindBugsFilter>

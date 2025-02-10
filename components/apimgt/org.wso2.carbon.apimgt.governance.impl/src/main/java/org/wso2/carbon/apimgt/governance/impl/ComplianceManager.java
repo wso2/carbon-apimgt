@@ -23,15 +23,15 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceAction;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceActionType;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
-import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyAdherenceSate;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
@@ -84,7 +84,7 @@ public class ComplianceManager {
     public void handlePolicyChangeEvent(String policyId, String organization) throws GovernanceException {
 
         // Get the policy and its labels and associated governable states
-        GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
+        APIMGovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
 
         List<String> labels = policy.getLabels();
         List<APIMGovernableState> apimGovernableStates = policy.getGovernableStates();
@@ -528,7 +528,7 @@ public class ComplianceManager {
         }
 
         for (String policyId : govPolicies) {
-            GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
+            APIMGovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
             List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId, organization);
 
             // Validate the artifact against each ruleset
@@ -552,15 +552,15 @@ public class ComplianceManager {
                     List<RuleViolation> ruleViolations = validationEngine.validate(
                             contentToValidate, ruleset);
 
-                    Map<GovernanceActionType, List<RuleViolation>> blockableAndNonBlockableViolations =
+                    Map<APIMGovernanceActionType, List<RuleViolation>> blockableAndNonBlockableViolations =
                             filterBlockableAndNonBlockableRuleViolations(artifactRefId,
                                     artifactType, policy, ruleViolations, state, organization);
 
                     // Add the rule violations to the compliance info
                     artifactComplianceInfo.addBlockingViolations(blockableAndNonBlockableViolations
-                            .get(GovernanceActionType.BLOCK));
+                            .get(APIMGovernanceActionType.BLOCK));
                     artifactComplianceInfo.addNonBlockingViolations(blockableAndNonBlockableViolations
-                            .get(GovernanceActionType.NOTIFY));
+                            .get(APIMGovernanceActionType.NOTIFY));
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug("Ruleset artifact type does not match with the artifact's type. Skipping " +
@@ -611,7 +611,7 @@ public class ComplianceManager {
         }
 
         for (String policyId : govPolicies) {
-            GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
+            APIMGovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
             List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId, organization);
 
             // Validate the artifact against each ruleset
@@ -661,24 +661,24 @@ public class ComplianceManager {
      * @param organization   Organization
      * @return Map of blockable and non-blockable rule violations
      */
-    private Map<GovernanceActionType, List<RuleViolation>>
+    private Map<APIMGovernanceActionType, List<RuleViolation>>
     filterBlockableAndNonBlockableRuleViolations(String artifactRefId, ArtifactType artifactType,
-                                                 GovernancePolicy policy,
+                                                 APIMGovernancePolicy policy,
                                                  List<RuleViolation> ruleViolations, APIMGovernableState state,
                                                  String organization) {
 
         // Identify blockable severities from the policy
         List<RuleSeverity> blockableSeverities = new ArrayList<>();
-        for (GovernanceAction governanceAction : policy.getActions()) {
+        for (APIMGovernanceAction governanceAction : policy.getActions()) {
 
             // If the state matches and action is block the violation is blockable
             if (state.equals(governanceAction.getGovernableState()) &&
-                    GovernanceActionType.BLOCK.equals(governanceAction.getType())) {
+                    APIMGovernanceActionType.BLOCK.equals(governanceAction.getType())) {
                 blockableSeverities.add(governanceAction.getRuleSeverity());
             }
         }
 
-        Map<GovernanceActionType, List<RuleViolation>> blockableAndNonBlockableViolations = new HashMap<>();
+        Map<APIMGovernanceActionType, List<RuleViolation>> blockableAndNonBlockableViolations = new HashMap<>();
 
         List<RuleViolation> blockableViolations = new ArrayList<>();
         List<RuleViolation> nonBlockingViolations = new ArrayList<>();
@@ -696,8 +696,8 @@ public class ComplianceManager {
             }
         }
 
-        blockableAndNonBlockableViolations.put(GovernanceActionType.BLOCK, blockableViolations);
-        blockableAndNonBlockableViolations.put(GovernanceActionType.NOTIFY, nonBlockingViolations);
+        blockableAndNonBlockableViolations.put(APIMGovernanceActionType.BLOCK, blockableViolations);
+        blockableAndNonBlockableViolations.put(APIMGovernanceActionType.NOTIFY, nonBlockingViolations);
 
         return blockableAndNonBlockableViolations;
     }

@@ -38,7 +38,7 @@
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
-            <bean class="org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceExceptionMapper,"/>
+            <bean class="org.wso2.carbon.apimgt.governance.rest.api.util.APIMGovernanceExceptionMapper,"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper"/>
             <ref bean="cors-filter"/>
         </jaxrs:providers>

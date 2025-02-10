@@ -24,7 +24,7 @@ import javax.validation.Valid;
 
 @ApiModel(description = "Detailed information about a governance policy.")
 
-public class GovernancePolicyDTO   {
+public class APIMGovernancePolicyDTO   {
   
     private String id = null;
     private String name = null;
@@ -74,7 +74,7 @@ return null;
   /**
    * UUID of the governance policy.
    **/
-  public GovernancePolicyDTO id(String id) {
+  public APIMGovernancePolicyDTO id(String id) {
     this.id = id;
     return this;
   }
@@ -92,7 +92,7 @@ return null;
   /**
    * Name of the governance policy.
    **/
-  public GovernancePolicyDTO name(String name) {
+  public APIMGovernancePolicyDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -111,7 +111,7 @@ return null;
   /**
    * A brief description of the governance policy.
    **/
-  public GovernancePolicyDTO description(String description) {
+  public APIMGovernancePolicyDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -129,7 +129,7 @@ return null;
   /**
    * List of states at which the governance policy should be enforced.
    **/
-  public GovernancePolicyDTO governableStates(List<GovernableStatesEnum> governableStates) {
+  public APIMGovernancePolicyDTO governableStates(List<GovernableStatesEnum> governableStates) {
     this.governableStates = governableStates;
     return this;
   }
@@ -148,7 +148,7 @@ return null;
   /**
    * List of actions taken when the governance policy is violated. An action is defined by the state and rule severity. If an action is not specified to each state and rule severity, the default action is &#x60;NOTIFY&#x60;.
    **/
-  public GovernancePolicyDTO actions(List<ActionDTO> actions) {
+  public APIMGovernancePolicyDTO actions(List<ActionDTO> actions) {
     this.actions = actions;
     return this;
   }
@@ -168,7 +168,7 @@ return null;
   /**
    * List of rulesets associated with the governance policy.
    **/
-  public GovernancePolicyDTO rulesets(List<String> rulesets) {
+  public APIMGovernancePolicyDTO rulesets(List<String> rulesets) {
     this.rulesets = rulesets;
     return this;
   }
@@ -187,7 +187,7 @@ return null;
   /**
    * List of labels IDs associated with the governance policy.
    **/
-  public GovernancePolicyDTO labels(List<String> labels) {
+  public APIMGovernancePolicyDTO labels(List<String> labels) {
     this.labels = labels;
     return this;
   }
@@ -206,7 +206,7 @@ return null;
   /**
    * Identifier of the user who created the governance policy.
    **/
-  public GovernancePolicyDTO createdBy(String createdBy) {
+  public APIMGovernancePolicyDTO createdBy(String createdBy) {
     this.createdBy = createdBy;
     return this;
   }
@@ -224,7 +224,7 @@ return null;
   /**
    * Timestamp when the governance policy was created.
    **/
-  public GovernancePolicyDTO createdTime(String createdTime) {
+  public APIMGovernancePolicyDTO createdTime(String createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -242,7 +242,7 @@ return null;
   /**
    * Identifier of the user who last updated the governance policy.
    **/
-  public GovernancePolicyDTO updatedBy(String updatedBy) {
+  public APIMGovernancePolicyDTO updatedBy(String updatedBy) {
     this.updatedBy = updatedBy;
     return this;
   }
@@ -260,7 +260,7 @@ return null;
   /**
    * Timestamp when the governance policy was last updated.
    **/
-  public GovernancePolicyDTO updatedTime(String updatedTime) {
+  public APIMGovernancePolicyDTO updatedTime(String updatedTime) {
     this.updatedTime = updatedTime;
     return this;
   }
@@ -284,18 +284,18 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    GovernancePolicyDTO governancePolicy = (GovernancePolicyDTO) o;
-    return Objects.equals(id, governancePolicy.id) &&
-        Objects.equals(name, governancePolicy.name) &&
-        Objects.equals(description, governancePolicy.description) &&
-        Objects.equals(governableStates, governancePolicy.governableStates) &&
-        Objects.equals(actions, governancePolicy.actions) &&
-        Objects.equals(rulesets, governancePolicy.rulesets) &&
-        Objects.equals(labels, governancePolicy.labels) &&
-        Objects.equals(createdBy, governancePolicy.createdBy) &&
-        Objects.equals(createdTime, governancePolicy.createdTime) &&
-        Objects.equals(updatedBy, governancePolicy.updatedBy) &&
-        Objects.equals(updatedTime, governancePolicy.updatedTime);
+    APIMGovernancePolicyDTO apIMGovernancePolicy = (APIMGovernancePolicyDTO) o;
+    return Objects.equals(id, apIMGovernancePolicy.id) &&
+        Objects.equals(name, apIMGovernancePolicy.name) &&
+        Objects.equals(description, apIMGovernancePolicy.description) &&
+        Objects.equals(governableStates, apIMGovernancePolicy.governableStates) &&
+        Objects.equals(actions, apIMGovernancePolicy.actions) &&
+        Objects.equals(rulesets, apIMGovernancePolicy.rulesets) &&
+        Objects.equals(labels, apIMGovernancePolicy.labels) &&
+        Objects.equals(createdBy, apIMGovernancePolicy.createdBy) &&
+        Objects.equals(createdTime, apIMGovernancePolicy.createdTime) &&
+        Objects.equals(updatedBy, apIMGovernancePolicy.updatedBy) &&
+        Objects.equals(updatedTime, apIMGovernancePolicy.updatedTime);
   }
 
   @Override
@@ -306,7 +306,7 @@ return null;
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class GovernancePolicyDTO {\n");
+    sb.append("class APIMGovernancePolicyDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");

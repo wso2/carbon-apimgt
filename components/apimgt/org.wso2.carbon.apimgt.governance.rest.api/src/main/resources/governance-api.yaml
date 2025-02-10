@@ -402,7 +402,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GovernancePolicyList'
+                $ref: '#/components/schemas/APIMGovernancePolicyList'
         "400":
           description: Bad Request
           content:
@@ -442,14 +442,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GovernancePolicy'
+              $ref: '#/components/schemas/APIMGovernancePolicy'
       responses:
         "201":
           description: OK. Governance policy created successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GovernancePolicy'
+                $ref: '#/components/schemas/APIMGovernancePolicy'
         "400":
           description: Bad Request
           content:
@@ -492,7 +492,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GovernancePolicy'
+                $ref: '#/components/schemas/APIMGovernancePolicy'
         "400":
           description: Bad Request
           content:
@@ -534,14 +534,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GovernancePolicy'
+              $ref: '#/components/schemas/APIMGovernancePolicy'
       responses:
         "200":
           description: OK. Governance policy updated successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GovernancePolicy'
+                $ref: '#/components/schemas/APIMGovernancePolicy'
         "400":
           description: Bad Request
           content:
@@ -1110,7 +1110,7 @@ components:
         - ruleType
         - artifactType
         - provider
-    GovernancePolicy:
+    APIMGovernancePolicy:
       type: object
       description: Detailed information about a governance policy.
       properties:
@@ -1221,7 +1221,7 @@ components:
             - BLOCK
             - NOTIFY
           example: "BLOCK"
-    GovernancePolicyList:
+    APIMGovernancePolicyList:
       type: object
       description: A list of governance policies.
       properties:
@@ -1233,7 +1233,7 @@ components:
           type: array
           description: List of governance policies.
           items:
-            $ref: '#/components/schemas/GovernancePolicy'
+            $ref: '#/components/schemas/APIMGovernancePolicy'
         pagination:
           $ref: '#/components/schemas/Pagination'
     ArtifactComplianceSummary:

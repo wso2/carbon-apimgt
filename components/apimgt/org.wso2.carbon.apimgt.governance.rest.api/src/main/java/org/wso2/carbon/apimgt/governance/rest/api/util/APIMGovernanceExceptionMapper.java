@@ -33,9 +33,9 @@ import javax.ws.rs.ext.ExceptionMapper;
 /**
  * This is the custom exception mapper for Governance.
  */
-public class GovernanceExceptionMapper implements ExceptionMapper<Throwable> {
+public class APIMGovernanceExceptionMapper implements ExceptionMapper<Throwable> {
 
-    private static final Log log = LogFactory.getLog(GovernanceExceptionMapper.class);
+    private static final Log log = LogFactory.getLog(APIMGovernanceExceptionMapper.class);
 
     @Override
     public Response toResponse(Throwable e) {
@@ -80,7 +80,7 @@ public class GovernanceExceptionMapper implements ExceptionMapper<Throwable> {
                     }
                 }
 
-                ErrorDTO errorDTO = GovernanceAPIUtil.getErrorDTO(selectedErrorHandler);
+                ErrorDTO errorDTO = APIMGovernanceAPIUtil.getErrorDTO(selectedErrorHandler);
                 return Response
                         .status(Response.Status.fromStatusCode(selectedErrorHandler.getHttpStatusCode()))
                         .type(MediaType.APPLICATION_JSON_TYPE)

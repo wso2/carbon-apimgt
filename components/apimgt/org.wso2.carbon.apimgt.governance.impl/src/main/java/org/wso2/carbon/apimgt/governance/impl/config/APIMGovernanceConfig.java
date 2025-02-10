@@ -47,25 +47,25 @@ import javax.xml.stream.XMLStreamException;
  * Governance configuration from an XML file and providing access to the configuration
  * properties.
  */
-public class GovernanceConfiguration {
+public class APIMGovernanceConfig {
 
-    private static final Log log = LogFactory.getLog(GovernanceConfiguration.class);
+    private static final Log log = LogFactory.getLog(APIMGovernanceConfig.class);
 
     private Map<String, List<String>> configuration = new ConcurrentHashMap<>();
     private SecretResolver secretResolver;
     private boolean initialized;
 
-    public GovernanceConfiguration() {
+    public APIMGovernanceConfig() {
 
     }
 
     /**
-     * Create a new GovernanceConfiguration instance by copying the configuration from the given
+     * Create a new APIMGovernanceConfig instance by copying the configuration from the given
      * instance.
      *
-     * @param other GovernanceConfiguration instance
+     * @param other APIMGovernanceConfig instance
      */
-    public GovernanceConfiguration(GovernanceConfiguration other) {
+    public APIMGovernanceConfig(APIMGovernanceConfig other) {
 
         this.configuration = new ConcurrentHashMap<>(other.configuration);
         this.secretResolver = other.secretResolver;
@@ -74,7 +74,7 @@ public class GovernanceConfiguration {
 
     /**
      * Populate this configuration by reading an XML file at the given location. This method
-     * can be executed only once on a given GovernanceConfiguration instance. Once invoked and
+     * can be executed only once on a given APIMGovernanceConfig instance. Once invoked and
      * successfully populated, it will ignore all subsequent invocations.
      *
      * @param filePath Path of the XML descriptor file
