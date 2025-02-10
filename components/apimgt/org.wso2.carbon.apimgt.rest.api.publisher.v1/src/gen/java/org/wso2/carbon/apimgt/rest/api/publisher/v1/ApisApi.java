@@ -1379,8 +1379,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "List of API themes", response = ContentPublishStatusResponseDTO.class, responseContainer = "List"),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response getApiThemes(@ApiParam(value = "",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
-        return delegate.getApiThemes(apiId, securityContext);
+    public Response getApiThemes(@ApiParam(value = "",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Filter themes based on published status")  @QueryParam("publish") Boolean publish) throws APIManagementException{
+        return delegate.getApiThemes(apiId, publish, securityContext);
     }
 
     @GET

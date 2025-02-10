@@ -136,7 +136,7 @@ public interface ApisApiService {
       public Response getAllPublishedExternalStoresByAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAmazonResourceNamesOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getApiThemeContent(String apiId, String id, MessageContext messageContext) throws APIManagementException;
-      public Response getApiThemes(String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response getApiThemes(String apiId, Boolean publish, MessageContext messageContext) throws APIManagementException;
       public Response getApiEndpoint(String apiId, String endpointId, MessageContext messageContext) throws APIManagementException;
       public Response getApiEndpoints(String apiId, Integer limit, Integer offset, MessageContext messageContext) throws APIManagementException;
       public Response getAuditReportOfAPI(String apiId, String accept, MessageContext messageContext) throws APIManagementException;

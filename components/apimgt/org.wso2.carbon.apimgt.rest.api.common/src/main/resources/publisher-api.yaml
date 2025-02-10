@@ -8890,6 +8890,12 @@ paths:
       summary: Retrieve API themes
       description: Returns the list of API themes and their publish status for the given API.
       parameters:
+        - name: publish
+          in: query
+          description: Filter themes based on published status
+          required: false
+          schema:
+            type: boolean
         - name: apiId
           in: path
           required: true

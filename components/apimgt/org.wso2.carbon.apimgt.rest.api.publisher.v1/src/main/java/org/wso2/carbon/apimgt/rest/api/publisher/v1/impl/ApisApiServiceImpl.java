@@ -5068,7 +5068,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getApiThemes(String apiId, MessageContext messageContext) throws APIManagementException {
+    public Response getApiThemes(String apiId, Boolean publish, MessageContext messageContext) throws APIManagementException {
         return null;
     }
 
