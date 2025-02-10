@@ -26,6 +26,7 @@ public class ArtifactComplianceSummaryDTO   {
     private Integer total = null;
     private Integer compliant = null;
     private Integer nonCompliant = null;
+    private Integer pending = null;
     private Integer notApplicable = null;
 
   /**
@@ -83,6 +84,24 @@ public class ArtifactComplianceSummaryDTO   {
   }
 
   /**
+   * Number of artifacts pending for compliance.
+   **/
+  public ArtifactComplianceSummaryDTO pending(Integer pending) {
+    this.pending = pending;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "0", value = "Number of artifacts pending for compliance.")
+  @JsonProperty("pending")
+  public Integer getPending() {
+    return pending;
+  }
+  public void setPending(Integer pending) {
+    this.pending = pending;
+  }
+
+  /**
    * Number of artifacts not applicable for compliance yet.
    **/
   public ArtifactComplianceSummaryDTO notApplicable(Integer notApplicable) {
@@ -113,12 +132,13 @@ public class ArtifactComplianceSummaryDTO   {
     return Objects.equals(total, artifactComplianceSummary.total) &&
         Objects.equals(compliant, artifactComplianceSummary.compliant) &&
         Objects.equals(nonCompliant, artifactComplianceSummary.nonCompliant) &&
+        Objects.equals(pending, artifactComplianceSummary.pending) &&
         Objects.equals(notApplicable, artifactComplianceSummary.notApplicable);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(total, compliant, nonCompliant, notApplicable);
+    return Objects.hash(total, compliant, nonCompliant, pending, notApplicable);
   }
 
   @Override
@@ -129,6 +149,7 @@ public class ArtifactComplianceSummaryDTO   {
     sb.append("    total: ").append(toIndentedString(total)).append("\n");
     sb.append("    compliant: ").append(toIndentedString(compliant)).append("\n");
     sb.append("    nonCompliant: ").append(toIndentedString(nonCompliant)).append("\n");
+    sb.append("    pending: ").append(toIndentedString(pending)).append("\n");
     sb.append("    notApplicable: ").append(toIndentedString(notApplicable)).append("\n");
     sb.append("}");
     return sb.toString();

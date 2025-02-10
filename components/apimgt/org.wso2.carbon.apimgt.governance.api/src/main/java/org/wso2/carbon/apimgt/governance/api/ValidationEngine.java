@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.api;
 
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
@@ -36,18 +36,18 @@ public interface ValidationEngine {
      * Check if a ruleset is valid
      *
      * @param ruleset Ruleset
-     * @throws GovernanceException If an error occurs while validating the ruleset
+     * @throws APIMGovernanceException If an error occurs while validating the ruleset
      */
-    void validateRulesetContent(Ruleset ruleset) throws GovernanceException;
+    void validateRulesetContent(Ruleset ruleset) throws APIMGovernanceException;
 
     /**
      * Extract rules from a ruleset
      *
      * @param ruleset Ruleset
      * @return List of rules
-     * @throws GovernanceException If an error occurs while extracting rules
+     * @throws APIMGovernanceException If an error occurs while extracting rules
      */
-    List<Rule> extractRulesFromRuleset(Ruleset ruleset) throws GovernanceException;
+    List<Rule> extractRulesFromRuleset(Ruleset ruleset) throws APIMGovernanceException;
 
     /**
      * Validate a target against a ruleset
@@ -55,7 +55,7 @@ public interface ValidationEngine {
      * @param target  Target to be validated
      * @param ruleset Ruleset
      * @return List of rule violations
-     * @throws GovernanceException If an error occurs while validating the target
+     * @throws APIMGovernanceException If an error occurs while validating the target
      */
-    List<RuleViolation> validate(String target, Ruleset ruleset) throws GovernanceException;
+    List<RuleViolation> validate(String target, Ruleset ruleset) throws APIMGovernanceException;
 }

@@ -6,7 +6,7 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetInfoDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.RulesetsApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.impl.RulesetsApiServiceImpl;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -53,7 +53,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response createRuleset(@Multipart(value = "name")  String name,  @Multipart(value = "rulesetContent") InputStream rulesetContentInputStream, @Multipart(value = "rulesetContent" ) Attachment rulesetContentDetail, @Multipart(value = "ruleType")  String ruleType, @Multipart(value = "artifactType")  String artifactType, @Multipart(value = "description", required = false)  String description, @Multipart(value = "ruleCategory", required = false)  String ruleCategory, @Multipart(value = "documentationLink", required = false)  String documentationLink, @Multipart(value = "provider", required = false)  String provider) throws GovernanceException{
+    public Response createRuleset(@Multipart(value = "name")  String name,  @Multipart(value = "rulesetContent") InputStream rulesetContentInputStream, @Multipart(value = "rulesetContent" ) Attachment rulesetContentDetail, @Multipart(value = "ruleType")  String ruleType, @Multipart(value = "artifactType")  String artifactType, @Multipart(value = "description", required = false)  String description, @Multipart(value = "ruleCategory", required = false)  String ruleCategory, @Multipart(value = "documentationLink", required = false)  String documentationLink, @Multipart(value = "provider", required = false)  String provider) throws APIMGovernanceException{
         return delegate.createRuleset(name, rulesetContentInputStream, rulesetContentDetail, ruleType, artifactType, description, ruleCategory, documentationLink, provider, securityContext);
     }
 
@@ -72,7 +72,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response deleteRuleset(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
+    public Response deleteRuleset(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId) throws APIMGovernanceException{
         return delegate.deleteRuleset(rulesetId, securityContext);
     }
 
@@ -91,7 +91,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getRulesetById(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
+    public Response getRulesetById(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId) throws APIMGovernanceException{
         return delegate.getRulesetById(rulesetId, securityContext);
     }
 
@@ -110,7 +110,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getRulesetContent(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
+    public Response getRulesetContent(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId) throws APIMGovernanceException{
         return delegate.getRulesetContent(rulesetId, securityContext);
     }
 
@@ -129,7 +129,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getRulesetUsage(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
+    public Response getRulesetUsage(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId) throws APIMGovernanceException{
         return delegate.getRulesetUsage(rulesetId, securityContext);
     }
 
@@ -148,7 +148,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getRulesets( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "You can search for rulesets using the following format:    - \"query=name:{NAME}\" searches rulesets by name.   - \"query=artifactType:{ARTIFACT_TYPE}\" searches rulesets by artifact type.   - \"query=ruleType:{RULE_TYPE}\" searches rulesets by rule type.  You can combine multiple attributes to search for rulesets:   - \"query=name:{NAME} artifactType:{ARTIFACT_TYPE} ruleType:{RULE_TYPE}\" searches rulesets by name, artifact type, and rule type.  Remember to use URL encoding if your client does not support it (e.g., curl). ")  @QueryParam("query") String query) throws GovernanceException{
+    public Response getRulesets( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "You can search for rulesets using the following format:    - \"query=name:{NAME}\" searches rulesets by name.   - \"query=artifactType:{ARTIFACT_TYPE}\" searches rulesets by artifact type.   - \"query=ruleType:{RULE_TYPE}\" searches rulesets by rule type.  You can combine multiple attributes to search for rulesets:   - \"query=name:{NAME} artifactType:{ARTIFACT_TYPE} ruleType:{RULE_TYPE}\" searches rulesets by name, artifact type, and rule type.  Remember to use URL encoding if your client does not support it (e.g., curl). ")  @QueryParam("query") String query) throws APIMGovernanceException{
         return delegate.getRulesets(limit, offset, query, securityContext);
     }
 
@@ -167,7 +167,7 @@ RulesetsApiService delegate = new RulesetsApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response updateRulesetById(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId, @Multipart(value = "name")  String name,  @Multipart(value = "rulesetContent") InputStream rulesetContentInputStream, @Multipart(value = "rulesetContent" ) Attachment rulesetContentDetail, @Multipart(value = "ruleType")  String ruleType, @Multipart(value = "artifactType")  String artifactType, @Multipart(value = "description", required = false)  String description, @Multipart(value = "ruleCategory", required = false)  String ruleCategory, @Multipart(value = "documentationLink", required = false)  String documentationLink, @Multipart(value = "provider", required = false)  String provider) throws GovernanceException{
+    public Response updateRulesetById(@ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId, @Multipart(value = "name")  String name,  @Multipart(value = "rulesetContent") InputStream rulesetContentInputStream, @Multipart(value = "rulesetContent" ) Attachment rulesetContentDetail, @Multipart(value = "ruleType")  String ruleType, @Multipart(value = "artifactType")  String artifactType, @Multipart(value = "description", required = false)  String description, @Multipart(value = "ruleCategory", required = false)  String ruleCategory, @Multipart(value = "documentationLink", required = false)  String documentationLink, @Multipart(value = "provider", required = false)  String provider) throws APIMGovernanceException{
         return delegate.updateRulesetById(rulesetId, name, rulesetContentInputStream, rulesetContentDetail, ruleType, artifactType, description, ruleCategory, documentationLink, provider, securityContext);
     }
 }

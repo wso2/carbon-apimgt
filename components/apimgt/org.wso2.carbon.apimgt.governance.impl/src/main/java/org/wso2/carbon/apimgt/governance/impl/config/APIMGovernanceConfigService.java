@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.governance.impl.config;
 /**
  * This interface represents the Governance Configuration Service
  */
-public interface GovernanceConfigurationService {
+public interface APIMGovernanceConfigService {
 
-    GovernanceConfiguration getGovernanceConfiguration();
+    APIMGovernanceConfig getGovernanceConfig();
 }

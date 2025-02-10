@@ -20,8 +20,8 @@ package org.wso2.carbon.apimgt.governance.impl.dao.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
@@ -56,11 +56,9 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     private static final Log log = LogFactory.getLog(RulesetMgtDAOImpl.class);
 
     private RulesetMgtDAOImpl() {
-
     }
 
     private static class SingletonHelper {
-
         private static final RulesetMgtDAO INSTANCE = new RulesetMgtDAOImpl();
     }
 
@@ -81,11 +79,11 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @param rules        List of rules
      * @param organization Organization
      * @return RulesetInfo Created object
-     * @throws GovernanceException If an error occurs while creating the ruleset
+     * @throws APIMGovernanceException If an error occurs while creating the ruleset
      */
     @Override
     public RulesetInfo createRuleset(Ruleset ruleset, List<Rule> rules,
-                                     String organization) throws GovernanceException {
+                                     String organization) throws APIMGovernanceException {
 
         String sqlQuery = SQLConstants.CREATE_RULESET;
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
@@ -113,7 +111,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 throw e;
             }
         } catch (SQLException | IOException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.RULESET_CREATION_FAILED, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_CREATION_FAILED, e,
                     ruleset.getName(), organization
             );
         }
@@ -128,12 +126,12 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @param rules        List of rules
      * @param organization Organization
      * @return RulesetInfo Created object
-     * @throws GovernanceException If an error occurs while updating the ruleset
+     * @throws APIMGovernanceException If an error occurs while updating the ruleset
      */
     @Override
     public RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset, List<Rule> rules,
                                      String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -167,7 +165,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 throw e;
             }
         } catch (SQLException | IOException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_UPDATING_RULESET, e, rulesetId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_RULESET, e, rulesetId);
         }
         return getRulesetById(rulesetId, organization); // to return all info of the updated ruleset
     }
@@ -248,10 +246,10 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      *
      * @param rulesetId    Ruleset ID
      * @param organization Organization
-     * @throws GovernanceException If an error occurs while deleting the ruleset
+     * @throws APIMGovernanceException If an error occurs while deleting the ruleset
      */
     @Override
-    public void deleteRuleset(String rulesetId, String organization) throws GovernanceException {
+    public void deleteRuleset(String rulesetId, String organization) throws APIMGovernanceException {
 
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
 
@@ -274,7 +272,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_DELETING_RULESET,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_DELETING_RULESET,
                     e, rulesetId);
         }
     }
@@ -344,10 +342,10 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      *
      * @param organization Organization whose rulesets are to be retrieved
      * @return a list of rulesets associated with the organization
-     * @throws GovernanceException if there is an error retrieving the rulesets
+     * @throws APIMGovernanceException if there is an error retrieving the rulesets
      */
     @Override
-    public RulesetList getRulesets(String organization) throws GovernanceException {
+    public RulesetList getRulesets(String organization) throws APIMGovernanceException {
         RulesetList rulesetList = new RulesetList();
         List<RulesetInfo> rulesetInfoList = new ArrayList<>();
         String sqlQuery = SQLConstants.GET_RULESETS;
@@ -360,7 +358,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESETS,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESETS,
                     e, organization);
         }
         rulesetList.setCount(rulesetInfoList.size());
@@ -374,10 +372,10 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @param name         Name of the ruleset
      * @param organization Organization whose ruleset is to be retrieved
      * @return the ruleset with the given name
-     * @throws GovernanceException if there is an error retrieving the ruleset
+     * @throws APIMGovernanceException if there is an error retrieving the ruleset
      */
     @Override
-    public RulesetInfo getRulesetByName(String name, String organization) throws GovernanceException {
+    public RulesetInfo getRulesetByName(String name, String organization) throws APIMGovernanceException {
         String sqlQuery = SQLConstants.GET_RULESET_BY_NAME;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
@@ -389,7 +387,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_NAME,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_NAME,
                     e, organization);
         }
         return null;
@@ -401,10 +399,10 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @param rulesetId    Ruleset ID of the ruleset
      * @param organization Organization whose ruleset is to be retrieved
      * @return the ruleset with the given ID
-     * @throws GovernanceException if there is an error retrieving the ruleset
+     * @throws APIMGovernanceException if there is an error retrieving the ruleset
      */
     @Override
-    public RulesetInfo getRulesetById(String rulesetId, String organization) throws GovernanceException {
+    public RulesetInfo getRulesetById(String rulesetId, String organization) throws APIMGovernanceException {
         String sqlQuery = SQLConstants.GET_RULESETS_BY_ID;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
@@ -416,7 +414,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
                     e);
         }
         return null;
@@ -428,11 +426,11 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @param searchCriteria Search attributes
      * @param organization   Organization
      * @return List of RulesetInfo objects
-     * @throws GovernanceException If an error occurs while searching for rulesets
+     * @throws APIMGovernanceException If an error occurs while searching for rulesets
      */
     @Override
     public RulesetList searchRulesets(Map<String, String> searchCriteria, String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
         RulesetList rulesetList = new RulesetList();
         List<RulesetInfo> rulesetInfoList = new ArrayList<>();
 
@@ -452,7 +450,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_SEARCHING_RULESETS,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_SEARCHING_RULESETS,
                     e, organization);
         }
         rulesetList.setCount(rulesetInfoList.size());
@@ -492,10 +490,10 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @param rulesetId    Ruleset ID
      * @param organization Organization
      * @return String Content of the ruleset
-     * @throws GovernanceException If an error occurs while getting the ruleset content
+     * @throws APIMGovernanceException If an error occurs while getting the ruleset content
      */
     @Override
-    public RulesetContent getRulesetContent(String rulesetId, String organization) throws GovernanceException {
+    public RulesetContent getRulesetContent(String rulesetId, String organization) throws APIMGovernanceException {
         String sqlQuery = SQLConstants.GET_RULESET_CONTENT;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);) {
@@ -511,7 +509,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 return null;
             }
         } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
                     e);
         }
     }
@@ -525,7 +523,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      */
     @Override
     public List<String> getAssociatedPoliciesForRuleset(String rulesetId, String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
         List<String> policyIds = new ArrayList<>();
         String sqlQuery = SQLConstants.GET_POLICIES_FOR_RULESET;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
@@ -538,7 +536,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICIES,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICIES,
                     e, rulesetId);
         }
         return policyIds;
@@ -552,7 +550,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @return List of rules
      */
     @Override
-    public List<Rule> getRulesByRulesetId(String rulesetId, String organization) throws GovernanceException {
+    public List<Rule> getRulesByRulesetId(String rulesetId, String organization) throws APIMGovernanceException {
         List<Rule> rules = new ArrayList<>();
         String sqlQuery = SQLConstants.GET_RULES_WITHOUT_CONTENT;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
@@ -571,7 +569,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
             }
             return rules;
         } catch (SQLException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_RETRIEVING_RULES_BY_RULESET_ID
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULES_BY_RULESET_ID
                     , e, rulesetId);
         }
     }

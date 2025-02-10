@@ -21,15 +21,15 @@ package org.wso2.carbon.apimgt.governance.api.model;
 /**
  * This enum represents a governance action type
  */
-public enum GovernanceActionType {
+public enum APIMGovernanceActionType {
     BLOCK,
     NOTIFY;
 
-    public static GovernanceActionType fromString(String actionTypeString) {
+    public static APIMGovernanceActionType fromString(String actionTypeString) {
         if ("block".equalsIgnoreCase(actionTypeString)) {
-            return GovernanceActionType.BLOCK;
+            return APIMGovernanceActionType.BLOCK;
         } else if ("notify".equalsIgnoreCase(actionTypeString)) {
-            return GovernanceActionType.NOTIFY;
+            return APIMGovernanceActionType.NOTIFY;
         }
         return null;
     }

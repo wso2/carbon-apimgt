@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.governance.api;
 /**
  * This class represents a governance API constants
  */
-public class GovernanceAPIConstants {
+public class APIMGovernanceAPIConstants {
     public static final String ORGANIZATION = "organization";
     public static final String RULESET_PATH = "/rulesets";
     public static final String POLICY_PATH = "/policies";

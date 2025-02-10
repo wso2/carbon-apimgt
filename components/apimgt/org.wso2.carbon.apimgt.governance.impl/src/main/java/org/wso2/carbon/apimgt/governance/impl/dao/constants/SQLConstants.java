@@ -113,7 +113,7 @@ public class SQLConstants {
             "INSERT INTO GOV_POLICY_ACTION (POLICY_ID, STATE, SEVERITY, TYPE) VALUES (?, ?, ?, ?)";
 
     public static final String DELETE_GOVERNANCE_POLICY =
-            "DELETE FROM GOV_POLICY WHERE POLICY_ID = ?";
+            "DELETE FROM GOV_POLICY WHERE POLICY_ID = ? AND ORGANIZATION = ?";
 
     public static final String DELETE_GOVERNANCE_POLICY_LABEL_MAPPING_BY_POLICY_ID =
             "DELETE FROM GOV_POLICY_LABEL WHERE POLICY_ID = ?";
@@ -136,7 +136,7 @@ public class SQLConstants {
 
     public static final String GET_POLICY_BY_ID =
             "SELECT POLICY_ID, NAME, DESCRIPTION, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME, IS_GLOBAL " +
-                    "FROM GOV_POLICY WHERE POLICY_ID = ?";
+                    "FROM GOV_POLICY WHERE POLICY_ID = ? AND ORGANIZATION = ?";
 
     public static final String GET_POLICIES =
             "SELECT POLICY_ID, NAME, DESCRIPTION, CREATED_BY, CREATED_TIME, UPDATED_BY, LAST_UPDATED_TIME, IS_GLOBAL " +
@@ -155,7 +155,7 @@ public class SQLConstants {
     public static final String UPDATE_POLICY =
             "UPDATE GOV_POLICY SET NAME = ?, DESCRIPTION = ?, UPDATED_BY = ?, IS_GLOBAL = ?, " +
                     "LAST_UPDATED_TIME = CURRENT_TIMESTAMP " +
-                    "WHERE POLICY_ID = ?";
+                    "WHERE POLICY_ID = ? AND ORGANIZATION = ?";
 
     public static final String GET_RULESET_IDS_BY_POLICY_ID =
             "SELECT RULESET_ID FROM GOV_POLICY_RULESET WHERE POLICY_ID = ?";
@@ -180,7 +180,7 @@ public class SQLConstants {
                     "FROM GOV_RULESET RULESET " +
                     "JOIN GOV_POLICY_RULESET POLICY_RULESET_MAPPING ON RULESET.RULESET_ID = " +
                     "POLICY_RULESET_MAPPING.RULESET_ID " +
-                    "WHERE POLICY_RULESET_MAPPING.POLICY_ID = ?";
+                    "WHERE POLICY_RULESET_MAPPING.POLICY_ID = ? AND RULESET.ORGANIZATION = ?";
     public static final String GET_RULESETS_WITH_CONTENT_BY_POLICY_ID =
             "SELECT RULESET.RULESET_ID, RULESET.NAME, " +
                     "RULESET.RULE_CATEGORY, RULESET.RULE_TYPE, RULESET.ARTIFACT_TYPE, " +
@@ -190,15 +190,7 @@ public class SQLConstants {
                     "ON RULESET.RULESET_ID = RC.RULESET_ID " +
                     "JOIN GOV_POLICY_RULESET GPR " +
                     "ON RULESET.RULESET_ID = GPR.RULESET_ID " +
-                    "WHERE GPR.POLICY_ID = ?";
-
-    public static final String GET_RULESETS_IDS_BY_POLICY_ID =
-            "SELECT RULESET.RULESET_ID " +
-                    "FROM GOV_RULESET RULESET " +
-                    "JOIN GOV_POLICY_RULESET POLICY_RULESET_MAPPING ON RULESET.RULESET_ID = " +
-                    "POLICY_RULESET_MAPPING.RULESET_ID " +
-                    "WHERE POLICY_RULESET_MAPPING.POLICY_ID = ?";
-
+                    "WHERE GPR.POLICY_ID = ? AND RULESET.ORGANIZATION = ?";
     public static final String GET_POLICIES_BY_LABEL =
             "SELECT DISTINCT GOV_POLICY.POLICY_ID, GOV_POLICY.NAME " +
                     "FROM GOV_POLICY " +
@@ -243,6 +235,11 @@ public class SQLConstants {
     public static final String GET_PENDING_REQ_FOR_ARTIFACT = "SELECT REQ_ID FROM GOV_REQUEST GR " +
             "JOIN GOV_ARTIFACT GA ON GR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
             "WHERE GA.ARTIFACT_REF_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ? AND GR.STATUS = 'PENDING'";
+
+    public static final String GET_COMPLIANCE_PENDING_ARTIFACTS = "SELECT DISTINCT GA.ARTIFACT_REF_ID " +
+            "FROM GOV_ARTIFACT GA " +
+            "JOIN GOV_REQUEST GR ON GA.ARTIFACT_KEY = GR.ARTIFACT_KEY " +
+            "WHERE GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ? AND GR.STATUS = 'PENDING'";
     public static final String ADD_GOV_EVAL_REQ = "INSERT INTO GOV_REQUEST " +
             "(REQ_ID, ARTIFACT_KEY) VALUES (?, ?)";
 
@@ -396,7 +393,7 @@ public class SQLConstants {
     public static final String GET_ARITFCATS_FOR_POLICY_RUN = "SELECT DISTINCT GA.ARTIFACT_REF_ID, GA.ARTIFACT_TYPE " +
             "FROM GOV_ARTIFACT GA " +
             "JOIN GOV_POLICY_RUN GPR ON GA.ARTIFACT_KEY = GPR.ARTIFACT_KEY " +
-            "WHERE GPR.POLICY_ID = ?";
+            "WHERE GPR.POLICY_ID = ? AND GA.ORGANIZATION = ?";
 
 
 }

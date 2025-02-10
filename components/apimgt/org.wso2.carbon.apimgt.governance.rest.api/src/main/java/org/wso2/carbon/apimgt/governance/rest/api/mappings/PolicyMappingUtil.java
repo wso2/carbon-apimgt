@@ -19,13 +19,13 @@
 package org.wso2.carbon.apimgt.governance.rest.api.mappings;
 
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
-import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
-import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceAction;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceActionType;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.APIMGovernancePolicyDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ActionDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,14 +39,14 @@ public class PolicyMappingUtil {
 
     /**
      * Converts a GovernancePolicyDTO object to
-     * a GovernancePolicy object
+     * a APIMGovernancePolicy object
      *
      * @param dto GovernancePolicyDTO object
-     * @return GovernancePolicy object
+     * @return APIMGovernancePolicy object
      */
-    public static GovernancePolicy fromDTOtoGovernancePolicy
-    (GovernancePolicyDTO dto) {
-        GovernancePolicy govPolicy = new GovernancePolicy();
+    public static APIMGovernancePolicy fromDTOtoGovernancePolicy
+    (APIMGovernancePolicyDTO dto) {
+        APIMGovernancePolicy govPolicy = new APIMGovernancePolicy();
         govPolicy.setId(dto.getId());
         govPolicy.setName(dto.getName());
         govPolicy.setDescription(dto.getDescription());
@@ -74,14 +74,14 @@ public class PolicyMappingUtil {
     }
 
     /**
-     * Converts a GovernancePolicy object to a GovernancePolicyDTO object
+     * Converts a APIMGovernancePolicy object to a GovernancePolicyDTO object
      *
-     * @param governancePolicy GovernancePolicy object
+     * @param governancePolicy APIMGovernancePolicy object
      * @return GovernancePolicyDTO object
      */
-    public static GovernancePolicyDTO fromGovernancePolicyToGovernancePolicyDTO
-    (GovernancePolicy governancePolicy) {
-        GovernancePolicyDTO governancePolicyDTO = new GovernancePolicyDTO();
+    public static APIMGovernancePolicyDTO fromGovernancePolicyToGovernancePolicyDTO
+    (APIMGovernancePolicy governancePolicy) {
+        APIMGovernancePolicyDTO governancePolicyDTO = new APIMGovernancePolicyDTO();
         governancePolicyDTO.setId(governancePolicy.getId());
         governancePolicyDTO.setName(governancePolicy.getName());
         governancePolicyDTO.setDescription(governancePolicy.getDescription());
@@ -95,7 +95,7 @@ public class PolicyMappingUtil {
                 fromActionListtoActionDTOList(governancePolicy.getActions()));
         governancePolicyDTO.setGovernableStates(governancePolicy.getGovernableStates().stream()
                 .map(Enum::name)
-                .map(GovernancePolicyDTO.GovernableStatesEnum::valueOf)
+                .map(APIMGovernancePolicyDTO.GovernableStatesEnum::valueOf)
                 .collect(Collectors.toList()));
         if (governancePolicy.isGlobal()) {
             governancePolicyDTO.setLabels(new ArrayList<>(Collections
@@ -107,33 +107,33 @@ public class PolicyMappingUtil {
     }
 
     /**
-     * Converts a list of ActionDTO objects to a list of GovernanceAction objects
+     * Converts a list of ActionDTO objects to a list of APIMGovernanceAction objects
      *
      * @param actions List of ActionDTO objects
-     * @return List of GovernanceAction objects
+     * @return List of APIMGovernanceAction objects
      */
-    public static List<GovernanceAction> fromActionDTOListtoActionList(List<ActionDTO> actions) {
-        List<GovernanceAction> governanceActions = new ArrayList<>();
+    public static List<APIMGovernanceAction> fromActionDTOListtoActionList(List<ActionDTO> actions) {
+        List<APIMGovernanceAction> governanceActions = new ArrayList<>();
         for (ActionDTO action : actions) {
-            GovernanceAction governanceAction = new GovernanceAction();
+            APIMGovernanceAction governanceAction = new APIMGovernanceAction();
             governanceAction.setGovernableState(APIMGovernableState.fromString(String.valueOf(
                     action.getState())));
             governanceAction.setRuleSeverity(RuleSeverity.fromString(String.valueOf(action.getRuleSeverity())));
-            governanceAction.setType(GovernanceActionType.fromString(String.valueOf(action.getType())));
+            governanceAction.setType(APIMGovernanceActionType.fromString(String.valueOf(action.getType())));
             governanceActions.add(governanceAction);
         }
         return governanceActions;
     }
 
     /**
-     * Converts a list of GovernanceAction objects to a list of ActionDTO objects
+     * Converts a list of APIMGovernanceAction objects to a list of ActionDTO objects
      *
-     * @param actions List of GovernanceAction objects
+     * @param actions List of APIMGovernanceAction objects
      * @return List of ActionDTO objects
      */
-    public static List<ActionDTO> fromActionListtoActionDTOList(List<GovernanceAction> actions) {
+    public static List<ActionDTO> fromActionListtoActionDTOList(List<APIMGovernanceAction> actions) {
         List<ActionDTO> actionDTOs = new ArrayList<>();
-        for (GovernanceAction action : actions) {
+        for (APIMGovernanceAction action : actions) {
             ActionDTO actionDTO = new ActionDTO();
             String governableState = String.valueOf(action.getGovernableState());
             actionDTO.setState(ActionDTO.StateEnum.valueOf(governableState));
