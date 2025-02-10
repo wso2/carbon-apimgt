@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.impl.dao;
 
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
@@ -40,9 +40,9 @@ public interface RulesetMgtDAO {
      * @param rules        List of rules
      * @param organization Organization
      * @return RulesetInfo Created object
-     * @throws GovernanceException If an error occurs while creating the ruleset
+     * @throws APIMGovernanceException If an error occurs while creating the ruleset
      */
-    RulesetInfo createRuleset(Ruleset ruleset, List<Rule> rules, String organization) throws GovernanceException;
+    RulesetInfo createRuleset(Ruleset ruleset, List<Rule> rules, String organization) throws APIMGovernanceException;
 
     /**
      * Update a Governance Ruleset
@@ -51,28 +51,28 @@ public interface RulesetMgtDAO {
      * @param ruleset   Ruleset object
      * @param rules     List of rules
      * @return RulesetInfo Updated object
-     * @throws GovernanceException If an error occurs while updating the ruleset
+     * @throws APIMGovernanceException If an error occurs while updating the ruleset
      */
     RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset, List<Rule> rules, String organization)
-            throws GovernanceException;
+            throws APIMGovernanceException;
 
     /**
      * Delete a Governance Ruleset
      *
      * @param rulesetId    Ruleset ID
      * @param organization Organization
-     * @throws GovernanceException If an error occurs while deleting the ruleset
+     * @throws APIMGovernanceException If an error occurs while deleting the ruleset
      */
-    void deleteRuleset(String rulesetId, String organization) throws GovernanceException;
+    void deleteRuleset(String rulesetId, String organization) throws APIMGovernanceException;
 
     /**
      * Get all the Governance Rulesets of the organization
      *
      * @param organization Organization
      * @return RulesetList object
-     * @throws GovernanceException If an error occurs while getting the rulesets
+     * @throws APIMGovernanceException If an error occurs while getting the rulesets
      */
-    RulesetList getRulesets(String organization) throws GovernanceException;
+    RulesetList getRulesets(String organization) throws APIMGovernanceException;
 
     /**
      * Get a Governance Ruleset by name
@@ -80,9 +80,9 @@ public interface RulesetMgtDAO {
      * @param name         Ruleset name
      * @param organization Organization
      * @return RulesetInfo object
-     * @throws GovernanceException If an error occurs while getting the ruleset
+     * @throws APIMGovernanceException If an error occurs while getting the ruleset
      */
-    RulesetInfo getRulesetByName(String name, String organization) throws GovernanceException;
+    RulesetInfo getRulesetByName(String name, String organization) throws APIMGovernanceException;
 
     /**
      * Get a Governance Ruleset by ID
@@ -90,9 +90,9 @@ public interface RulesetMgtDAO {
      * @param rulesetId    Ruleset ID
      * @param organization Organization
      * @return RulesetInfo object
-     * @throws GovernanceException If an error occurs while getting the ruleset
+     * @throws APIMGovernanceException If an error occurs while getting the ruleset
      */
-    RulesetInfo getRulesetById(String rulesetId, String organization) throws GovernanceException;
+    RulesetInfo getRulesetById(String rulesetId, String organization) throws APIMGovernanceException;
 
     /**
      * Search for Governance Rulesets based on the search criteria
@@ -100,10 +100,10 @@ public interface RulesetMgtDAO {
      * @param searchCriteria Search attributes
      * @param organization   Organization
      * @return List of RulesetInfo objects
-     * @throws GovernanceException If an error occurs while searching for rulesets
+     * @throws APIMGovernanceException If an error occurs while searching for rulesets
      */
     RulesetList searchRulesets(Map<String, String> searchCriteria, String organization)
-            throws GovernanceException;
+            throws APIMGovernanceException;
 
     /**
      * Get the content of a Governance Ruleset
@@ -111,9 +111,9 @@ public interface RulesetMgtDAO {
      * @param rulesetId    Ruleset ID
      * @param organization Organization
      * @return Content of the ruleset
-     * @throws GovernanceException If an error occurs while getting the ruleset content
+     * @throws APIMGovernanceException If an error occurs while getting the ruleset content
      */
-    RulesetContent getRulesetContent(String rulesetId, String organization) throws GovernanceException;
+    RulesetContent getRulesetContent(String rulesetId, String organization) throws APIMGovernanceException;
 
     /**
      * Get the associated policies for a Ruleset
@@ -122,7 +122,7 @@ public interface RulesetMgtDAO {
      * @param organization Organization
      * @return List of associated policies
      */
-    List<String> getAssociatedPoliciesForRuleset(String rulesetId, String organization) throws GovernanceException;
+    List<String> getAssociatedPoliciesForRuleset(String rulesetId, String organization) throws APIMGovernanceException;
 
     /**
      * Get the rules of a Ruleset
@@ -131,5 +131,5 @@ public interface RulesetMgtDAO {
      * @param organization Organization
      * @return List of rules
      */
-    List<Rule> getRulesByRulesetId(String rulesetId, String organization) throws GovernanceException;
+    List<Rule> getRulesByRulesetId(String rulesetId, String organization) throws APIMGovernanceException;
 }

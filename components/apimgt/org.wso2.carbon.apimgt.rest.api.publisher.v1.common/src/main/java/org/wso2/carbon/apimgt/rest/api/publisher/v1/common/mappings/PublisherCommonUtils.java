@@ -87,7 +87,7 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
@@ -3047,7 +3047,7 @@ public class PublisherCommonUtils {
                     return responseMap;
                 }
             }
-        } catch (GovernanceException e) {
+        } catch (APIMGovernanceException e) {
             log.error("Error occurred while executing governance for API " + artifactID, e);
         }
         return responseMap;
@@ -3058,7 +3058,7 @@ public class PublisherCommonUtils {
         CompletableFuture.runAsync(() -> {
             try {
                 apimGovernanceService.evaluateComplianceAsync(artifactID, type, state, organization);
-            } catch (GovernanceException e) {
+            } catch (APIMGovernanceException e) {
                 log.error("Error occurred while scheduling governance validation for " + artifactID, e);
             }
         });
@@ -3073,9 +3073,9 @@ public class PublisherCommonUtils {
             byte[] fileBytes = IOUtils.toByteArray(fileInputStream);
 
             ArtifactComplianceDryRunInfo artifactComplianceDryRunInfo = apimGovernanceService
-                       .evaluateComplianceDryRunSync(ExtendedArtifactType.REST_API, fileBytes, organization);
-               return responseMap;
-        } catch (GovernanceException e) {
+                    .evaluateComplianceDryRunSync(ExtendedArtifactType.REST_API, fileBytes, organization);
+            return responseMap;
+        } catch (APIMGovernanceException e) {
             log.error("Error occurred while executing governance ", e);
         } finally {
             return responseMap;
@@ -3131,7 +3131,7 @@ public class PublisherCommonUtils {
         try {
             apimGovernanceService.evaluateComplianceOnLabelAttach(artifactId, ArtifactType.fromString(artifactType),
                     labelsIdList, organization);
-        } catch (GovernanceException e) {
+        } catch (APIMGovernanceException e) {
             log.info("Error occurred while executing governance on attached labels for API " + artifactId, e);
         }
     }
@@ -3141,7 +3141,7 @@ public class PublisherCommonUtils {
             for (Label labelId : label) {
                 apimGovernanceService.deleteGovernanceDataForLabel(labelId.getLabelId(), organization);
             }
-        } catch (GovernanceException e) {
+        } catch (APIMGovernanceException e) {
             log.info("Error occurred while deleting governance data on deletion of label " + label, e);
         }
     }
@@ -3150,7 +3150,7 @@ public class PublisherCommonUtils {
         try {
             apimGovernanceService.clearArtifactComplianceInfo(artifactId, ArtifactType.fromString(artifactType),
                     organization);
-        } catch (GovernanceException e) {
+        } catch (APIMGovernanceException e) {
             log.info("Error occurred while deleting governance data on deletion of  " + ArtifactType.API +
                     " " + artifactId, e);
         }

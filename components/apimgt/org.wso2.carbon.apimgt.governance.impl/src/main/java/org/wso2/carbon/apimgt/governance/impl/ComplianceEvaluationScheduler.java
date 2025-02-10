@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.governance.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationRequest;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
@@ -165,7 +165,7 @@ public class ComplianceEvaluationScheduler {
             } else {
                 return reqs;
             }
-        } catch (GovernanceException e) {
+        } catch (APIMGovernanceException e) {
             log.error("Error fetching pending requests: " + e.getMessage(), e);
         }
         return null;
@@ -242,7 +242,7 @@ public class ComplianceEvaluationScheduler {
 
             // Delete the evaluation request after processing completes
             complianceMgtDAO.deleteComplianceEvalRequest(requestId);
-        } catch (GovernanceException e) {
+        } catch (APIMGovernanceException e) {
             log.error("Error processing evaluation request for artifact ID: " + artifactRefId, e);
         }
 
@@ -256,11 +256,11 @@ public class ComplianceEvaluationScheduler {
      * @param policyId                  ID of the policy.
      * @param artifactProjectContentMap Content of the artifact project.
      * @param organization              Organization of the artifact.
-     * @throws GovernanceException If an error occurs while evaluating the artifact.
+     * @throws APIMGovernanceException If an error occurs while evaluating the artifact.
      */
     private static void evaluteArtifactWithPolicy(String artifactRefId, ArtifactType artifactType, String policyId,
                                                   Map<RuleType, String> artifactProjectContentMap, String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
@@ -320,7 +320,7 @@ public class ComplianceEvaluationScheduler {
         try {
             complianceMgtDAO.addComplianceEvalResults(artifactRefId, artifactType, policyId, rulesetViolationsMap,
                     organization);
-        } catch (GovernanceException e) {
+        } catch (APIMGovernanceException e) {
             log.error("Error saving governance results for artifact ID: " + artifactRefId, e);
         }
     }

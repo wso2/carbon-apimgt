@@ -7,7 +7,7 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.impl.ArtifactComplianceApiServiceImpl;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -54,7 +54,7 @@ ArtifactComplianceApiService delegate = new ArtifactComplianceApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getComplianceByAPIId(@ApiParam(value = "**UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws GovernanceException{
+    public Response getComplianceByAPIId(@ApiParam(value = "**UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIMGovernanceException{
         return delegate.getComplianceByAPIId(apiId, securityContext);
     }
 
@@ -73,7 +73,7 @@ ArtifactComplianceApiService delegate = new ArtifactComplianceApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getComplianceStatusListOfAPIs( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws GovernanceException{
+    public Response getComplianceStatusListOfAPIs( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIMGovernanceException{
         return delegate.getComplianceStatusListOfAPIs(limit, offset, securityContext);
     }
 
@@ -92,7 +92,7 @@ ArtifactComplianceApiService delegate = new ArtifactComplianceApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getComplianceSummaryForAPIs() throws GovernanceException{
+    public Response getComplianceSummaryForAPIs() throws APIMGovernanceException{
         return delegate.getComplianceSummaryForAPIs(securityContext);
     }
 
@@ -111,7 +111,7 @@ ArtifactComplianceApiService delegate = new ArtifactComplianceApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getRulesetValidationResultsByAPIId(@ApiParam(value = "**UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId) throws GovernanceException{
+    public Response getRulesetValidationResultsByAPIId(@ApiParam(value = "**UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**UUID** of the Ruleset. ",required=true) @PathParam("rulesetId") String rulesetId) throws APIMGovernanceException{
         return delegate.getRulesetValidationResultsByAPIId(apiId, rulesetId, securityContext);
     }
 }

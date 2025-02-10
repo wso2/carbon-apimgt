@@ -23,7 +23,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.springframework.http.HttpHeaders;
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
@@ -72,14 +72,14 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      * @param documentationLink         Documentation link
      * @param messageContext            MessageContext
      * @return Response object
-     * @throws GovernanceException If an error occurs while creating the ruleset
+     * @throws APIMGovernanceException If an error occurs while creating the ruleset
      */
     @Override
     public Response createRuleset(String name, InputStream rulesetContentInputStream,
                                   Attachment rulesetContentDetail, String ruleType,
                                   String artifactType, String description, String ruleCategory,
                                   String documentationLink, String provider,
-                                  MessageContext messageContext) throws GovernanceException {
+                                  MessageContext messageContext) throws APIMGovernanceException {
         RulesetInfoDTO createdRulesetDTO;
         URI createdRulesetURI;
         Ruleset ruleset = new Ruleset();
@@ -112,9 +112,9 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         } catch (URISyntaxException e) {
             String error = String.format("Error while creating URI for new Ruleset %s",
                     name);
-            throw new GovernanceException(error, e, GovernanceExceptionCodes.INTERNAL_SERVER_ERROR);
+            throw new APIMGovernanceException(error, e, GovernanceExceptionCodes.INTERNAL_SERVER_ERROR);
         } catch (IOException e) {
-            throw new GovernanceException("Error while converting ruleset content stream", e);
+            throw new APIMGovernanceException("Error while converting ruleset content stream", e);
         } finally {
             IOUtils.closeQuietly(rulesetContentInputStream);
         }
@@ -136,14 +136,14 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      * @param documentationLink         Documentation link
      * @param messageContext            MessageContext
      * @return Response object
-     * @throws GovernanceException If an error occurs while updating the ruleset
+     * @throws APIMGovernanceException If an error occurs while updating the ruleset
      */
     @Override
     public Response updateRulesetById(String rulesetId, String name, InputStream rulesetContentInputStream,
                                       Attachment rulesetContentDetail, String ruleType, String artifactType,
                                       String description, String ruleCategory, String documentationLink,
                                       String provider, MessageContext messageContext)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         try {
             Ruleset ruleset = new Ruleset();
@@ -174,7 +174,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             return Response.status(Response.Status.OK).entity(RulesetMappingUtil.
                     fromRulesetInfoToRulesetInfoDTO(updatedRuleset)).build();
         } catch (IOException e) {
-            throw new GovernanceException("Error while converting ruleset content stream", e);
+            throw new APIMGovernanceException("Error while converting ruleset content stream", e);
         } finally {
             IOUtils.closeQuietly(rulesetContentInputStream);
         }
@@ -187,10 +187,10 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      * @param rulesetId      Ruleset ID
      * @param messageContext MessageContext
      * @return Response object
-     * @throws GovernanceException If an error occurs while deleting the ruleset
+     * @throws APIMGovernanceException If an error occurs while deleting the ruleset
      */
     @Override
-    public Response deleteRuleset(String rulesetId, MessageContext messageContext) throws GovernanceException {
+    public Response deleteRuleset(String rulesetId, MessageContext messageContext) throws APIMGovernanceException {
         RulesetManager rulesetManager = new RulesetManager();
 
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
@@ -204,10 +204,10 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      * @param rulesetId      Ruleset ID
      * @param messageContext MessageContext
      * @return Response object
-     * @throws GovernanceException If an error occurs while getting the ruleset
+     * @throws APIMGovernanceException If an error occurs while getting the ruleset
      */
     @Override
-    public Response getRulesetById(String rulesetId, MessageContext messageContext) throws GovernanceException {
+    public Response getRulesetById(String rulesetId, MessageContext messageContext) throws APIMGovernanceException {
         RulesetManager rulesetManager = new RulesetManager();
 
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
@@ -223,10 +223,10 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      * @param rulesetId      Ruleset ID
      * @param messageContext MessageContext
      * @return Response object
-     * @throws GovernanceException If an error occurs while getting the ruleset content
+     * @throws APIMGovernanceException If an error occurs while getting the ruleset content
      */
     @Override
-    public Response getRulesetContent(String rulesetId, MessageContext messageContext) throws GovernanceException {
+    public Response getRulesetContent(String rulesetId, MessageContext messageContext) throws APIMGovernanceException {
         RulesetManager rulesetManager = new RulesetManager();
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 
@@ -251,10 +251,10 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      * @param rulesetId      Ruleset ID
      * @param messageContext MessageContext
      * @return Response object
-     * @throws GovernanceException If an error occurs while getting the ruleset usage
+     * @throws APIMGovernanceException If an error occurs while getting the ruleset usage
      */
     @Override
-    public Response getRulesetUsage(String rulesetId, MessageContext messageContext) throws GovernanceException {
+    public Response getRulesetUsage(String rulesetId, MessageContext messageContext) throws APIMGovernanceException {
         RulesetManager rulesetManager = new RulesetManager();
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 
@@ -270,10 +270,10 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
      * @param query          Query for filtering
      * @param messageContext MessageContext
      * @return Response object
-     * @throws GovernanceException If an error occurs while getting the rulesets
+     * @throws APIMGovernanceException If an error occurs while getting the rulesets
      */
     public Response getRulesets(Integer limit, Integer offset, String query, MessageContext messageContext)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;

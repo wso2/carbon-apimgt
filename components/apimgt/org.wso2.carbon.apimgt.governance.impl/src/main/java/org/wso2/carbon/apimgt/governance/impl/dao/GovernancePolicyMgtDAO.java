@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.impl.dao;
 
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceAction;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
@@ -42,7 +42,7 @@ public interface GovernancePolicyMgtDAO {
      * @return APIMGovernancePolicy Created object
      */
     APIMGovernancePolicy createGovernancePolicy(APIMGovernancePolicy governancePolicy,
-                                                String organization) throws GovernanceException;
+                                                String organization) throws APIMGovernanceException;
 
     /**
      * Get Governance Policy by Name
@@ -50,9 +50,10 @@ public interface GovernancePolicyMgtDAO {
      * @param policyName   Policy Name
      * @param organization Organization
      * @return APIMGovernancePolicy
-     * @throws GovernanceException If an error occurs while retrieving the policy
+     * @throws APIMGovernanceException If an error occurs while retrieving the policy
      */
-    APIMGovernancePolicy getGovernancePolicyByName(String policyName, String organization) throws GovernanceException;
+    APIMGovernancePolicy getGovernancePolicyByName(String policyName,
+                                                   String organization) throws APIMGovernanceException;
 
     /**
      * Get Governance Policy by ID
@@ -60,18 +61,18 @@ public interface GovernancePolicyMgtDAO {
      * @param policyID     Policy ID
      * @param organization Organization
      * @return APIMGovernancePolicy
-     * @throws GovernanceException If an error occurs while retrieving the policy
+     * @throws APIMGovernanceException If an error occurs while retrieving the policy
      */
-    APIMGovernancePolicy getGovernancePolicyByID(String policyID, String organization) throws GovernanceException;
+    APIMGovernancePolicy getGovernancePolicyByID(String policyID, String organization) throws APIMGovernanceException;
 
     /**
      * Get all the Governance Policies
      *
      * @param organization Organization
      * @return APIMGovernancePolicyList object
-     * @throws GovernanceException If an error occurs while getting the policies
+     * @throws APIMGovernanceException If an error occurs while getting the policies
      */
-    APIMGovernancePolicyList getGovernancePolicies(String organization) throws GovernanceException;
+    APIMGovernancePolicyList getGovernancePolicies(String organization) throws APIMGovernanceException;
 
     /**
      * Update a Governance Policy
@@ -80,29 +81,29 @@ public interface GovernancePolicyMgtDAO {
      * @param governancePolicy Governance Policy
      * @param organization     Organization
      * @return APIMGovernancePolicy Updated object
-     * @throws GovernanceException If an error occurs while updating the policy
+     * @throws APIMGovernanceException If an error occurs while updating the policy
      */
     APIMGovernancePolicy updateGovernancePolicy(String policyId, APIMGovernancePolicy governancePolicy,
-                                                String organization) throws GovernanceException;
+                                                String organization) throws APIMGovernanceException;
 
     /**
      * Get the list of rulesets for a given policy
      *
      * @param policyId Policy ID
      * @return List of rulesets
-     * @throws GovernanceException If an error occurs while getting the rulesets
+     * @throws APIMGovernanceException If an error occurs while getting the rulesets
      */
     List<Ruleset> getRulesetsWithContentByPolicyId(String policyId, String organization)
-            throws GovernanceException;
+            throws APIMGovernanceException;
 
     /**
      * Get the list of rulesets for a given policy
      *
      * @param policyId Policy ID
      * @return List of rulesets
-     * @throws GovernanceException If an error occurs while getting the rulesets
+     * @throws APIMGovernanceException If an error occurs while getting the rulesets
      */
-    List<RulesetInfo> getRulesetsByPolicyId(String policyId, String organization) throws GovernanceException;
+    List<RulesetInfo> getRulesetsByPolicyId(String policyId, String organization) throws APIMGovernanceException;
 
     /**
      * Get the list of policies by label
@@ -110,9 +111,9 @@ public interface GovernancePolicyMgtDAO {
      * @param label        label
      * @param organization organization
      * @return Map of policy IDs, policy names
-     * @throws GovernanceException If an error occurs while getting the policies
+     * @throws APIMGovernanceException If an error occurs while getting the policies
      */
-    Map<String, String> getPoliciesByLabel(String label, String organization) throws GovernanceException;
+    Map<String, String> getPoliciesByLabel(String label, String organization) throws APIMGovernanceException;
 
     /**
      * Get PolicyIds by label
@@ -123,7 +124,7 @@ public interface GovernancePolicyMgtDAO {
      * @return List of Policy IDs
      */
     List<String> getPoliciesByLabelAndState(String label, APIMGovernableState state, String organization)
-            throws GovernanceException;
+            throws APIMGovernanceException;
 
     /**
      * Get Policies without labels
@@ -132,7 +133,7 @@ public interface GovernancePolicyMgtDAO {
      * @return Map of Policy IDs, Policy Names
      */
     Map<String, String> getGlobalPolicies(String organization)
-            throws GovernanceException;
+            throws APIMGovernanceException;
 
     /**
      * Get Policies without labels by state
@@ -142,16 +143,16 @@ public interface GovernancePolicyMgtDAO {
      * @return List of Policy IDs
      */
     List<String> getGlobalPoliciesWithState(APIMGovernableState state, String organization)
-            throws GovernanceException;
+            throws APIMGovernanceException;
 
     /**
      * Get the actions of a policy
      *
      * @param policyId Policy ID
      * @return List of Governance Actions
-     * @throws GovernanceException If an error occurs while getting the actions
+     * @throws APIMGovernanceException If an error occurs while getting the actions
      */
-    List<APIMGovernanceAction> getActionsByPolicyId(String policyId) throws GovernanceException;
+    List<APIMGovernanceAction> getActionsByPolicyId(String policyId) throws APIMGovernanceException;
 
     /**
      * Search for Governance Policies
@@ -159,28 +160,28 @@ public interface GovernancePolicyMgtDAO {
      * @param searchCriteria Search criteria
      * @param organization   Organization
      * @return APIMGovernancePolicyList object
-     * @throws GovernanceException If an error occurs while searching for policies
+     * @throws APIMGovernanceException If an error occurs while searching for policies
      */
     APIMGovernancePolicyList searchPolicies(Map<String, String> searchCriteria, String organization)
-            throws GovernanceException;
+            throws APIMGovernanceException;
 
     /**
      * Delete a Governance Policy
      *
      * @param policyId     Policy ID
      * @param organization Organization
-     * @throws GovernanceException If an error occurs while deleting the policy
+     * @throws APIMGovernanceException If an error occurs while deleting the policy
      */
-    void deletePolicy(String policyId, String organization) throws GovernanceException;
+    void deletePolicy(String policyId, String organization) throws APIMGovernanceException;
 
     /**
      * Delete policy label mappings for a given label
      *
      * @param label        label
      * @param organization organization
-     * @throws GovernanceException If an error occurs while deleting the mappings
+     * @throws APIMGovernanceException If an error occurs while deleting the mappings
      */
-    void deleteLabelPolicyMappings(String label, String organization) throws GovernanceException;
+    void deleteLabelPolicyMappings(String label, String organization) throws APIMGovernanceException;
 }
 
 

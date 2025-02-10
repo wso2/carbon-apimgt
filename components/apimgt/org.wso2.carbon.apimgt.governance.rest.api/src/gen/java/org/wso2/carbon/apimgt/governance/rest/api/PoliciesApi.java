@@ -5,7 +5,7 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.APIMGovernancePolicyListDT
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.PoliciesApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.impl.PoliciesApiServiceImpl;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -52,7 +52,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response createGovernancePolicy(@ApiParam(value = "JSON object containing the details of the new governance policy." ,required=true) APIMGovernancePolicyDTO apIMGovernancePolicyDTO) throws GovernanceException{
+    public Response createGovernancePolicy(@ApiParam(value = "JSON object containing the details of the new governance policy." ,required=true) APIMGovernancePolicyDTO apIMGovernancePolicyDTO) throws APIMGovernanceException{
         return delegate.createGovernancePolicy(apIMGovernancePolicyDTO, securityContext);
     }
 
@@ -71,7 +71,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response deleteGovernancePolicy(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId) throws GovernanceException{
+    public Response deleteGovernancePolicy(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId) throws APIMGovernanceException{
         return delegate.deleteGovernancePolicy(policyId, securityContext);
     }
 
@@ -90,7 +90,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getGovernancePolicies( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "You can search for governance policies using following format.    - \"query=name:{NAME}\" searches policies by name.   - \"query=state:{STATE} \" searches policies by state.  You can also use multiple attributes to search for policies.   - \"query=name:{NAME} state:{STATE}\" searches policies by name, state, and label.  Remember to use URL encoding if your client doesn't support it (e.g., curl). ")  @QueryParam("query") String query) throws GovernanceException{
+    public Response getGovernancePolicies( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "You can search for governance policies using following format.    - \"query=name:{NAME}\" searches policies by name.   - \"query=state:{STATE} \" searches policies by state.  You can also use multiple attributes to search for policies.   - \"query=name:{NAME} state:{STATE}\" searches policies by name, state, and label.  Remember to use URL encoding if your client doesn't support it (e.g., curl). ")  @QueryParam("query") String query) throws APIMGovernanceException{
         return delegate.getGovernancePolicies(limit, offset, query, securityContext);
     }
 
@@ -109,7 +109,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getGovernancePolicyById(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId) throws GovernanceException{
+    public Response getGovernancePolicyById(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId) throws APIMGovernanceException{
         return delegate.getGovernancePolicyById(policyId, securityContext);
     }
 
@@ -128,7 +128,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response updateGovernancePolicyById(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId, @ApiParam(value = "JSON object containing the updated governance policy details." ,required=true) APIMGovernancePolicyDTO apIMGovernancePolicyDTO) throws GovernanceException{
+    public Response updateGovernancePolicyById(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId, @ApiParam(value = "JSON object containing the updated governance policy details." ,required=true) APIMGovernancePolicyDTO apIMGovernancePolicyDTO) throws APIMGovernanceException{
         return delegate.updateGovernancePolicyById(policyId, apIMGovernancePolicyDTO, securityContext);
     }
 }

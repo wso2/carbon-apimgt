@@ -2,7 +2,7 @@ package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
@@ -39,9 +39,9 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
      *
      * @param messageContext The message context
      * @return The policy adherence summary
-     * @throws GovernanceException If an error occurs while getting the policy adherence summary
+     * @throws APIMGovernanceException If an error occurs while getting the policy adherence summary
      */
-    public Response getPolicyAdherenceSummary(MessageContext messageContext) throws GovernanceException {
+    public Response getPolicyAdherenceSummary(MessageContext messageContext) throws APIMGovernanceException {
 
 
         PolicyManager policyManager = new PolicyManager();
@@ -72,10 +72,10 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
      * @param policyId       The policy ID
      * @param messageContext The message context
      * @return The policy adherence for the given policy ID
-     * @throws GovernanceException If an error occurs while getting the policy adherence for the given policy ID
+     * @throws APIMGovernanceException If an error occurs while getting the policy adherence for the given policy ID
      */
     public Response getPolicyAdherenceByPolicyId(String policyId, MessageContext messageContext)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
         APIMGovernancePolicy policy = new PolicyManager().getGovernancePolicyByID(policyId, organization);
@@ -140,10 +140,10 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
      * @param offset         The offset
      * @param messageContext The message context
      * @return The policy adherence for all policies
-     * @throws GovernanceException If an error occurs while getting the policy adherence for all policies
+     * @throws APIMGovernanceException If an error occurs while getting the policy adherence for all policies
      */
     public Response getPolicyAdherenceForAllPolicies(Integer limit, Integer offset, MessageContext messageContext)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 

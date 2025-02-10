@@ -21,8 +21,8 @@ package org.wso2.carbon.apimgt.governance.rest.api.util;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.ErrorHandler;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 
 import java.util.List;
@@ -40,13 +40,13 @@ public class APIMGovernanceExceptionMapper implements ExceptionMapper<Throwable>
     @Override
     public Response toResponse(Throwable e) {
 
-        if (e instanceof GovernanceException) {
+        if (e instanceof APIMGovernanceException) {
 
             ErrorHandler selectedErrorHandler = null;
             List<Throwable> throwableList = ExceptionUtils.getThrowableList(e);
             for (Throwable t : throwableList) {
-                if (t instanceof GovernanceException) {
-                    GovernanceException govException = (GovernanceException) t;
+                if (t instanceof APIMGovernanceException) {
+                    APIMGovernanceException govException = (APIMGovernanceException) t;
                     ErrorHandler errorHandler = govException.getErrorHandler();
                     if (errorHandler != null) {
                         if (selectedErrorHandler == null) {

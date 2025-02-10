@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.governance.api.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 
 /**
@@ -85,13 +85,13 @@ public class DefaultRuleset {
         this.artifactType = artifactType;
     }
 
-    public String getRulesetContentString() throws GovernanceException {
+    public String getRulesetContentString() throws APIMGovernanceException {
         ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
         String rulesetContentString;
         try {
             rulesetContentString = objectMapper.writeValueAsString(rulesetContent);
         } catch (JsonProcessingException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT, e);
+            throw new APIMGovernanceException(GovernanceExceptionCodes.ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT, e);
         }
         return rulesetContentString;
     }

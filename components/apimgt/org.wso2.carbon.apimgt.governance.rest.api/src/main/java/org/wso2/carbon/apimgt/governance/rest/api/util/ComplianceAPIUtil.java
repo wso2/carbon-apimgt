@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.governance.rest.api.util;
 
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
@@ -67,16 +67,16 @@ public class ComplianceAPIUtil {
      * @param artifactType  artifact type
      * @param organization  organization
      * @return ArtifactComplianceDetailsDTO
-     * @throws GovernanceException if an error occurs while getting the artifact compliance details
+     * @throws APIMGovernanceException if an error occurs while getting the artifact compliance details
      */
     public static ArtifactComplianceDetailsDTO getArtifactComplianceDetailsDTO(String artifactRefId,
                                                                                ArtifactType artifactType,
                                                                                String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         // Check if the artifact is available
         if (!APIMGovernanceUtil.isArtifactAvailable(artifactRefId, artifactType)) {
-            throw new GovernanceException(GovernanceExceptionCodes.ARTIFACT_NOT_FOUND, artifactRefId, organization);
+            throw new APIMGovernanceException(GovernanceExceptionCodes.ARTIFACT_NOT_FOUND, artifactRefId, organization);
         }
 
         // Initialize the response DTO
@@ -150,14 +150,14 @@ public class ComplianceAPIUtil {
      * @param organization      organization
      * @param isPolicyEvaluated whether the policy has been evaluated
      * @return PolicyAdherenceWithRulesetsDTO
-     * @throws GovernanceException if an error occurs while getting the policy adherence results
+     * @throws APIMGovernanceException if an error occurs while getting the policy adherence results
      */
     private static PolicyAdherenceWithRulesetsDTO getPolicyAdherenceResultsDTO(String policyId, String policyName,
                                                                                String artifactRefId,
                                                                                ArtifactType artifactType,
                                                                                String organization,
                                                                                boolean isPolicyEvaluated)
-    throws GovernanceException {
+            throws APIMGovernanceException {
 
         PolicyManager policyManager = new PolicyManager();
         ComplianceManager complianceManager = new ComplianceManager();
@@ -210,16 +210,16 @@ public class ComplianceAPIUtil {
      * Get ruleset validation results
      *
      * @param ruleset            ruleset
-     * @param artifactRefId         Artifact Reference Id
+     * @param artifactRefId      Artifact Reference Id
      * @param artifactType       artifact type
      * @param organization       organization
      * @param isRulesetEvaluated whether the ruleset has been evaluated
      * @return RulesetValidationResultDTO
-     * @throws GovernanceException if an error occurs while updating the ruleset validation results
+     * @throws APIMGovernanceException if an error occurs while updating the ruleset validation results
      */
     private static RulesetValidationResultWithoutRulesDTO getRulesetValidationResultsDTO(RulesetInfo ruleset, String
             artifactRefId, ArtifactType artifactType, String organization, boolean isRulesetEvaluated)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         ComplianceManager complianceManager = new ComplianceManager();
 
@@ -255,11 +255,11 @@ public class ComplianceAPIUtil {
      * @param limit        limit
      * @param offset       offset
      * @return ArtifactComplianceListDTO
-     * @throws GovernanceException if an error occurs while getting the artifact compliance list
+     * @throws APIMGovernanceException if an error occurs while getting the artifact compliance list
      */
     public static ArtifactComplianceListDTO getArtifactComplianceListDTO(ArtifactType artifactType,
                                                                          String organization, int limit,
-                                                                         int offset) throws GovernanceException {
+                                                                         int offset) throws APIMGovernanceException {
 
         List<ArtifactComplianceStatusDTO> complianceStatusList = new ArrayList<>();
         int totalArtifactCount = 0;
@@ -298,12 +298,12 @@ public class ComplianceAPIUtil {
      * @param artifactType artifact type
      * @param organization organization
      * @return ArtifactComplianceStatusDTO
-     * @throws GovernanceException if an error occurs while getting the artifact compliance status
+     * @throws APIMGovernanceException if an error occurs while getting the artifact compliance status
      */
     private static ArtifactComplianceStatusDTO getArtifactComplianceStatus(String artifactRefId,
                                                                            ArtifactType artifactType,
                                                                            String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         ComplianceManager complianceManager = new ComplianceManager();
 
@@ -441,12 +441,12 @@ public class ComplianceAPIUtil {
      * @param rulesetId    ruleset ID
      * @param organization organization
      * @return RulesetValidationResultDTO object
-     * @throws GovernanceException if an error occurs while getting the ruleset validation result
+     * @throws APIMGovernanceException if an error occurs while getting the ruleset validation result
      */
     public static RulesetValidationResultDTO getRulesetValidationResultDTO(String artifactRefId,
                                                                            ArtifactType artifactType,
                                                                            String rulesetId, String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         ComplianceManager complianceManager = new ComplianceManager();
         RulesetManager rulesetManager = new RulesetManager();
@@ -455,7 +455,7 @@ public class ComplianceAPIUtil {
 
         // If the ruleset is not found, throw an exception
         if (rulesetInfo == null) {
-            throw new GovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId);
+            throw new APIMGovernanceException(GovernanceExceptionCodes.RULESET_NOT_FOUND, rulesetId);
         }
 
         RulesetValidationResultDTO rulesetValidationResultDTO = new RulesetValidationResultDTO();
@@ -542,7 +542,7 @@ public class ComplianceAPIUtil {
      */
     public static ArtifactComplianceSummaryDTO getArtifactComplianceSummary(ArtifactType artifactType,
                                                                             String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         ComplianceManager complianceManager = new ComplianceManager();
 

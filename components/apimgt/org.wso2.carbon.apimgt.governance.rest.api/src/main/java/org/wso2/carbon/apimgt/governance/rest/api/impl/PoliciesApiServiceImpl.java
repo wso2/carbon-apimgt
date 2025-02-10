@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicyList;
@@ -54,10 +54,10 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @param governancePolicyDTO Governance Policy  with Ruleset Ids
      * @param messageContext      Message Context
      * @return Response
-     * @throws GovernanceException If an error occurs while creating the policy
+     * @throws APIMGovernanceException If an error occurs while creating the policy
      */
     public Response createGovernancePolicy(APIMGovernancePolicyDTO governancePolicyDTO,
-                                           MessageContext messageContext) throws GovernanceException {
+                                           MessageContext messageContext) throws APIMGovernanceException {
 
         APIMGovernancePolicyDTO createdPolicyDTO;
         URI createdPolicyURI;
@@ -85,7 +85,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         } catch (URISyntaxException e) {
             String error = String.format("Error while creating URI for new Governance Policy %s",
                     governancePolicyDTO.getName());
-            throw new GovernanceException(error, e, GovernanceExceptionCodes.INTERNAL_SERVER_ERROR);
+            throw new APIMGovernanceException(error, e, GovernanceExceptionCodes.INTERNAL_SERVER_ERROR);
         }
         return Response.created(createdPolicyURI).entity(createdPolicyDTO).build();
     }
@@ -97,10 +97,10 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @param governancePolicyDTO Governance Policy  with Ruleset Ids
      * @param messageContext      Message Context
      * @return Response
-     * @throws GovernanceException If an error occurs while updating the policy
+     * @throws APIMGovernanceException If an error occurs while updating the policy
      */
     public Response updateGovernancePolicyById(String policyId, APIMGovernancePolicyDTO
-            governancePolicyDTO, MessageContext messageContext) throws GovernanceException {
+            governancePolicyDTO, MessageContext messageContext) throws APIMGovernanceException {
         PolicyManager policyManager = new PolicyManager();
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
         String username = APIMGovernanceAPIUtil.getLoggedInUsername();
@@ -128,9 +128,10 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @param policyId       Policy ID
      * @param messageContext Message Context
      * @return Response
-     * @throws GovernanceException If an error occurs while deleting the policy
+     * @throws APIMGovernanceException If an error occurs while deleting the policy
      */
-    public Response deleteGovernancePolicy(String policyId, MessageContext messageContext) throws GovernanceException {
+    public Response deleteGovernancePolicy(String policyId, MessageContext messageContext)
+            throws APIMGovernanceException {
         PolicyManager policyManager = new PolicyManager();
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 
@@ -144,9 +145,10 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @param policyId       Policy ID
      * @param messageContext Message Context
      * @return Response
-     * @throws GovernanceException If an error occurs while retrieving the policy
+     * @throws APIMGovernanceException If an error occurs while retrieving the policy
      */
-    public Response getGovernancePolicyById(String policyId, MessageContext messageContext) throws GovernanceException {
+    public Response getGovernancePolicyById(String policyId, MessageContext messageContext)
+            throws APIMGovernanceException {
         PolicyManager policyManager = new PolicyManager();
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 
@@ -163,10 +165,10 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
      * @param query          Query for filtering
      * @param messageContext Message Context
      * @return Response
-     * @throws GovernanceException If an error occurs while retrieving the policies
+     * @throws APIMGovernanceException If an error occurs while retrieving the policies
      */
     public Response getGovernancePolicies(Integer limit, Integer offset, String query, MessageContext messageContext)
-            throws GovernanceException {
+            throws APIMGovernanceException {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query != null ? query : "";
