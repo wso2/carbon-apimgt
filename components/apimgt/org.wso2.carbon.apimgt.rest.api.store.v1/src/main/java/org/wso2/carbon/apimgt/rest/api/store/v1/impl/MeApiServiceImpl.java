@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.store.v1.impl;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
@@ -36,7 +35,6 @@ import javax.ws.rs.core.Response;
 public class MeApiServiceImpl implements MeApiService {
 
     private static final Log log = LogFactory.getLog(MeApiServiceImpl.class);
-    private static final String SUPER_ORG = "super";
 
     public Response changeUserPassword(CurrentAndNewPasswordsDTO body, MessageContext messageContext) throws APIManagementException {
 
@@ -50,14 +48,7 @@ public class MeApiServiceImpl implements MeApiService {
     public Response organizationInformation(MessageContext messageContext) throws APIManagementException {
         OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
         OrganizationInfoDTO dto = new OrganizationInfoDTO();
-        String orgName = null;
-        if (StringUtils.isEmpty(orgInfo.getName())
-                || (orgInfo.getName() != null && SUPER_ORG.equals(orgInfo.getName().toLowerCase()))) {
-            orgName = RestApiUtil.getValidatedOrganization(messageContext); // set the super organization
-        } else {
-            orgName = orgInfo.getName();
-        }
-        dto.setName(orgName);
+        dto.setName(orgInfo.getName());
         dto.setOrganizationId(orgInfo.getOrganizationId());
         return Response.ok().entity(dto).build();
     }

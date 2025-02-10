@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
@@ -34,14 +33,7 @@ public class MeApiServiceImpl implements MeApiService {
     public Response organizationInformation(MessageContext messageContext) throws APIManagementException {
         OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
         OrganizationInfoDTO dto = new OrganizationInfoDTO();
-        String orgName = null;
-        if (StringUtils.isEmpty(orgInfo.getName())
-                || (orgInfo.getName() != null && "super".equals(orgInfo.getName().toLowerCase()))) {
-            orgName = RestApiUtil.getValidatedOrganization(messageContext); // set the super organization
-        } else {
-            orgName = orgInfo.getName();
-        }
-        dto.setName(orgName);
+        dto.setName(orgInfo.getName());
         dto.setOrganizationId(orgInfo.getOrganizationId());
         return Response.ok().entity(dto).build();
     }
