@@ -221,16 +221,13 @@ public enum ExceptionCodes implements ErrorHandler {
 
 
     // Labels related codes
-    LABEL_INFORMATION_CANNOT_BE_NULL(900650, "Label information cannot be null", 400, "Label information cannot be " +
-            "null"),
-    LABEL_EXCEPTION(900651, "Label Error", 500, "Error occurred while retrieving label information"),
-    LABEL_NOT_FOUND(900652, "Label Not Found", 404, "Label with specified name cannot be found."),
-    LABEL_NOT_FOUND_IN_API(900653, "Label Not Found In API", 404, "Label with specified name"
-            + " cannot be found in the API."),
-    LABEL_ADDING_FAILED(900654, "Label Error", 500, "Error occurred while trying to add label"),
-    LABEL_UPDATE_FAILED(900655, "Label Error", 500, "Error occurred while trying to update label"),
-    LABEL_DELETION_FAILED(900656, "Label Error", 500, "Error occurred while trying to delete label"),
-
+    LABEL_NAME_ALREADY_EXISTS(900650, "Label Name Already Exists", 409, "Label with name '%s' already exists", false),
+    LABEL_NOT_FOUND(900651, "Label Not Found", 404, "Label not found for the given label ID: %s", false),
+    LABEL_ADDING_FAILED(900652, "Failed To Create Label", 400, "Error occurred while trying to add label. %s", false),
+    LABEL_UPDATE_FAILED(900653, "Failed To Update Label", 400, "Error occurred while trying to update label. %s", false),
+    LABEL_CANNOT_DELETE_ASSOCIATED(900654, "Label Deletion Failed", 409, "The label cannot be deleted as it is associated with API(s).", false),
+    LABEL_ATTACHMENT_FAILED(900655, "Label Attachment Failed", 400, "Error occurred while attaching label(s) to API. %s", false),
+    LABEL_DETACHMENT_FAILED(900656, "Label Detachment Failed", 400, "Error occurred while detaching label(s) from API. %s", false),
 
     //WSDL related codes
     INVALID_WSDL_URL_EXCEPTION(900675, "Invalid WSDL", 400, "Invalid WSDL URL"),
@@ -287,12 +284,17 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_SORT_CRITERIA(900707, "Invalid sort criteria", 400, "Sort criteria contain a non-allowable value"),
 
     //GraphQL API related codes
-    API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
-    GRAPHQL_SCHEMA_CANNOT_BE_NULL(900801, "GraphQL Schema cannot be empty or nul", 400,
+    API_NOT_GRAPHQL(900870, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
+    GRAPHQL_SCHEMA_CANNOT_BE_NULL(900871, "GraphQL Schema cannot be empty or nul", 400,
             "GraphQL Schema cannot be empty or null"),
-    UNSUPPORTED_GRAPHQL_FILE_EXTENSION(900802, "Unsupported GraphQL Schema File Extension", 400,
+    UNSUPPORTED_GRAPHQL_FILE_EXTENSION(900872, "Unsupported GraphQL Schema File Extension", 400,
             "Unsupported extension. Only supported extensions are .graphql, .txt and .sdl"),
-
+    INVALID_GRAPHQL_FILE(900873, "GraphQL filename cannot be null or invalid", 400,
+            "GraphQL filename cannot be null or invalid"),
+    GENERATE_GRAPHQL_SCHEMA_FROM_INTROSPECTION_ERROR(900874, "Error while generating GraphQL schema from introspection",
+            400, "Error while generating GraphQL schema from introspection"),
+    RETRIEVE_GRAPHQL_SCHEMA_FROM_URL_ERROR(900875, "Error while retrieving GraphQL schema from URL", 400,
+            "Error while retrieving GraphQL schema from URL"),
 
     // Oauth related codes
     AUTH_GENERAL_ERROR(900900, "Authorization Error", 403, " Error in authorization"),
@@ -581,6 +583,7 @@ public enum ExceptionCodes implements ErrorHandler {
     AI_SERVICE_QUOTA_EXCEEDED(903102, "Quota exceeded for AI service", 429, "Quota exceeded for AI service"),
     DOCUMENT_NAME_ILLEGAL_CHARACTERS(902016, "Document name cannot contain illegal characters", 400, "Document name contains one or more illegal characters"),
 
+    COMPLIANCE_VIOLATION_ERROR(903300, "Compliance violation error", 400, "Compliance violation error. %s", false),
     // Subscriptions related
     SUBSCRIPTION_ID_NOT_SPECIFIED(902017, "Subscription ID not specified.", 400,
             "Subscription ID not specified."),

@@ -217,6 +217,22 @@ public class RegistrySearchUtil {
                         if (!searchValue.startsWith("*")) {
                             searchValue = "*" + searchValue;
                         }
+                    } else {
+                        if (CONTEXT_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey)) {
+                            //Remove quotation marks and forward slash to get the context for exact search.
+                            searchValue = searchValue.substring(1, searchValue.length() - 1);
+                            if (searchValue.startsWith("/")) {
+                                searchValue = searchValue.substring(1);
+                            }
+                            if (searchValue.endsWith("/")) {
+                                searchValue = searchValue.substring(0, searchValue.length() - 1);
+                            }
+                            if (!searchValue.isEmpty()) {
+                                searchValue = "(*\\/" + searchValue + "\\/*" + " OR " + "\\/" + searchValue + ")";
+                            } else {
+                                searchValue = "\"\"";
+                            }
+                        }
                     }
                 }
 

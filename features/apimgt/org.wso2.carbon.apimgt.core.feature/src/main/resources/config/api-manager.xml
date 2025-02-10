@@ -538,6 +538,14 @@
                 <URI>/api/am/store/{version}/api-categories</URI>
                 <HTTPMethods>GET</HTTPMethods>
             </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/governance/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/governance/{version}/swagger.json</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
         </AllowedURIs>
         <ETagSkipList>
             <ETagSkipURI>

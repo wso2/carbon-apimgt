@@ -420,7 +420,11 @@ public class APIKeyValidator {
                         Resource resource = dispatcher.findResource(synCtx, acceptableResources);
                         if (resource != null && Arrays.asList(resource.getMethods()).contains(httpMethod)) {
                             selectedResource = resource;
-                            break;
+                            if (selectedResource.getDispatcherHelper()
+                                    .getString() != null && !selectedResource.getDispatcherHelper().getString()
+                                    .contains("/*")) {
+                                break;
+                            }
                         }
                     }
                 }

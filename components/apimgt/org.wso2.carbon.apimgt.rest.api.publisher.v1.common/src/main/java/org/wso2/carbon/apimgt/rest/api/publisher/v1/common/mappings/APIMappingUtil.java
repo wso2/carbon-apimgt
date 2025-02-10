@@ -350,7 +350,7 @@ public class APIMappingUtil {
                 model.setVisibleTenants(visibleTenants);
             }
         }
-        
+
         if (dto.getVisibleOrganizations() != null && !dto.getVisibleOrganizations().isEmpty()) {
             String visibleOrgs = StringUtils.join(dto.getVisibleOrganizations(), ',');
             model.setVisibleOrganizations(visibleOrgs);
@@ -1146,7 +1146,6 @@ public class APIMappingUtil {
         dto.setRevisionId(model.getRevisionId());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
         dto.setEnableSubscriberVerification(model.isEnableSubscriberVerification());
-
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
         advertiseInfoDTO.setApiExternalProductionEndpoint(model.getApiExternalProductionEndpoint());
@@ -1284,14 +1283,12 @@ public class APIMappingUtil {
             inMedPolicy.setId(mediationPolicyUUID);
             mediationPolicies.add(inMedPolicy);
         }
-
         String outMedPolicyName = model.getOutSequence();
         if (outMedPolicyName != null && !outMedPolicyName.isEmpty()) {
             String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT;
             Mediation mediation = model.getOutSequenceMediation();
             String mediationPolicyUUID = (mediation != null) ? mediation.getUuid() : null;
             boolean sharedStatus = (mediation != null) ? mediation.isGlobal() : false;
-
             MediationPolicyDTO outMedPolicy = new MediationPolicyDTO();
             outMedPolicy.setName(outMedPolicyName);
             outMedPolicy.setType(type.toUpperCase());
@@ -1299,14 +1296,12 @@ public class APIMappingUtil {
             outMedPolicy.setId(mediationPolicyUUID);
             mediationPolicies.add(outMedPolicy);
         }
-
         String faultSequenceName = model.getFaultSequence();
         if (faultSequenceName != null && !faultSequenceName.isEmpty()) {
             String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT;
             Mediation mediation = model.getFaultSequenceMediation();
             String mediationPolicyUUID = (mediation != null) ? mediation.getUuid() : null;
             boolean sharedStatus = (mediation != null) ? mediation.isGlobal() : false;
-
             MediationPolicyDTO faultMedPolicy = new MediationPolicyDTO();
             faultMedPolicy.setName(faultSequenceName);
             faultMedPolicy.setType(type.toUpperCase());
@@ -1314,30 +1309,24 @@ public class APIMappingUtil {
             faultMedPolicy.setId(mediationPolicyUUID);
             mediationPolicies.add(faultMedPolicy);
         }
-
         dto.setMediationPolicies(mediationPolicies);
         dto.setLifeCycleStatus(model.getStatus());
-
         if (model.getApiPolicies() != null) {
             dto.setApiPolicies(OperationPolicyMappingUtil.fromOperationPolicyListToDTO(model.getApiPolicies()));
         }
-
         String subscriptionAvailability = model.getSubscriptionAvailability();
         if (subscriptionAvailability != null) {
             dto.setSubscriptionAvailability(mapSubscriptionAvailabilityFromAPItoDTO(subscriptionAvailability));
         }
-
         if (model.getSubscriptionAvailableTenants() != null) {
             dto.setSubscriptionAvailableTenants(Arrays.asList(model.getSubscriptionAvailableTenants().split(",")));
         }
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(model.getId()
                 .getProviderName()));
-
         boolean isAsyncAPI = APIDTO.TypeEnum.WS.toString().equals(model.getType())
                 || APIDTO.TypeEnum.WEBSUB.toString().equals(model.getType())
                 || APIDTO.TypeEnum.SSE.toString().equals(model.getType())
                 || APIDTO.TypeEnum.ASYNC.toString().equals(model.getType());
-
         //Get Swagger definition which has URL templates, scopes and resource details
         model.getId().setUuid(model.getUuid());
         if (!isAsyncAPI) {
@@ -1349,16 +1338,13 @@ public class APIMappingUtil {
             } else {
                 apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getUuid(), tenantDomain);
             }
-
             //We will fetch operations from the swagger definition and not from the AM_API_URL_MAPPING table: table
             //entries may have API level throttling tiers listed in case API level throttling is selected for the API.
             //This will lead the x-throttling-tiers of API definition to get overwritten. (wso2/product-apim#11240)
             apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
-
             //since the operation details goes missing after fetching operations list from the swagger definition, we
             //have to set them back from the original API model.
             setOperationPoliciesToOperationsDTO(model, apiOperationsDTO);
-
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
@@ -1366,7 +1352,6 @@ public class APIMappingUtil {
             // Get from asyncapi definition
             List<APIOperationsDTO> apiOperationsDTO = getOperationsFromAPI(model);
             dto.setOperations(apiOperationsDTO);
-
             String asyncAPIDefinition;
             if (model.getAsyncApiDefinition() != null) {
                 asyncAPIDefinition = model.getAsyncApiDefinition();
@@ -1383,7 +1368,6 @@ public class APIMappingUtil {
         List<String> tagsToReturn = new ArrayList<>();
         tagsToReturn.addAll(apiTags);
         dto.setTags(tagsToReturn);
-
         Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = model.getAvailableTiers();
         List<String> tiersToReturn = new ArrayList<>();
         for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
@@ -1409,7 +1393,6 @@ public class APIMappingUtil {
         } else {
             dto.setType(APIDTO.TypeEnum.fromValue(model.getType()));
         }
-
         if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
             if (StringUtils.isEmpty(model.getTransports())) {
                 List<String> transports = new ArrayList<>();
@@ -1423,15 +1406,13 @@ public class APIMappingUtil {
             dto.setVisibility(APIDTO.VisibilityEnum.PUBLIC);
         }
         dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
-
         if (model.getVisibleRoles() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleRoles().split(",")));
         }
-
         if (model.getVisibleTenants() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
         }
-        
+
         if (model.getVisibleOrganizations() != null
                 || !APIConstants.DEFAULT_VISIBLE_ORG.equals(model.getVisibleOrganizations())) {
             dto.setVisibleOrganizations(Arrays.asList(model.getVisibleOrganizations().split(",")));
@@ -1558,7 +1539,7 @@ public class APIMappingUtil {
         }
         dto.setCategories(categoryNameList);
         dto.setKeyManagers(model.getKeyManagers());
-        
+
         if (model.getAudience() != null) {
             dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
         }

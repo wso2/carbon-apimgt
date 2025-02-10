@@ -689,6 +689,9 @@ public final class APIConstants {
     public static final String ORG_ALL_QUERY_PARAM = "ALL";
     public static final String JWT_HEADER_ACCESS_TOKEN_TYPE = "at+jwt";
 
+    public static final String GOVERNANCE_COMPLIANCE_KEY = "isCompliant";
+    public static final String GOVERNANCE_COMPLIANCE_ERROR_MESSAGE = "message";
+
     public static class TokenStatus {
 
         public static final String ACTIVE = "ACTIVE";
@@ -1401,6 +1404,7 @@ public final class APIConstants {
     public static final String GRAPHQL_ACCESS_CONTROL_POLICY = "WSO2GraphQLAccessControlPolicy";
     public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
     public static final String GRAPHQL_ADDITIONAL_TYPE_PREFIX = "WSO2";
+    public static final String GRAPHQL_INTROSPECTION_QUERY_FILE = "graphql/introspection_query.graphql";
 
     public static final String VELOCITY_GRAPHQL_API_SUBSCRIPTION_AVAILABLE = "isSubscriptionAvailable";
     public static final String VELOCITY_API_WEBSOCKET_TOPIC_MAPPINGS = "topicMappings";
@@ -2229,6 +2233,7 @@ public final class APIConstants {
         public static final String TENANT_CONFIG_INFO = "User updated Tenant Config";
 
         public static final String API_CATEGORIES = "APICategories";
+        public static final String LABELS = "Labels";
         public static final String APPLICATIONS = "Applications";
         public static final String GATEWAY_ENVIRONMENTS = "GatewayEnvironments";
         public static final String ROLES_FOR_SCOPE = "RolesForScope";

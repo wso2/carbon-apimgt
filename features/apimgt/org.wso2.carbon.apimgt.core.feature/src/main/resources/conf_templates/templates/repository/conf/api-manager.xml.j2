@@ -886,6 +886,14 @@
                 <URI>/api/am/devportal/{version}/marketplace-assistant/chat</URI>
                 <HTTPMethods>POST</HTTPMethods>
             </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/governance/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/governance/{version}/swagger.json</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
         </AllowedURIs>
         <BasicAuthBlockedURIs>
         <!--Configure Basic Auth blocked URIs of REST API. URIs included cannot be invoked with basic auth-->

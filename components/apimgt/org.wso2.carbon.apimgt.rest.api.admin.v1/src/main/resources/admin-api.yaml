@@ -2163,7 +2163,34 @@ paths:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v4/organizations/d7cf8523-9180-4255-84fa-6cb171c1f779"'
-
+ 
+  /me/organization-information:
+    get:
+      tags:
+        - Users
+      summary: Get the Organization information of the user
+      description: |
+        Using this operation, logged-in user can get their organization information.
+      operationId: organizationInformation
+      responses:
+        200:
+          description: |
+            OK.
+            Key Manager list returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationInfo'
+        400:
+          $ref: '#/components/responses/BadRequest'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_settings
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/publisher/v4/me/organization"'
   ######################################################
   # The Bot Detection Data API resources
   ######################################################
@@ -3953,6 +3980,173 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+  ######################################################
+  # The "Label Collection" resource API
+  ######################################################
+  /labels:
+    get:
+      tags:
+        - Labels (Collection)
+      summary: Get all Labels
+      description: |
+        Get all Labels
+      responses:
+        200:
+          description: |
+            OK.
+            Labels returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelList'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/labels"'
+      operationId: getAllLabels
+
+    post:
+      tags:
+        - Label (Individual)
+      summary: Add a new Label
+      description: |
+        Add a new Label
+      requestBody:
+        description: |
+            Label object that should to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Label'
+        required: true
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Label'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        409:
+            $ref: '#/components/responses/Conflict'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/labels"'
+      operationId: createLabel
+
+  ######################################################
+  # The "Individual Label" resource APIs
+  ######################################################
+  /labels/{labelId}:
+    put:
+      tags:
+        - Label (Individual)
+      summary: Update a Label
+      description: |
+        Update a Label by label id
+      parameters:
+        - $ref: '#/components/parameters/labelId'
+      requestBody:
+        description: |
+          Label object with updated information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Label'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Label updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Label'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/labels/d7cf8523-9180-4255-84fa-6cb171c1f779"'
+      operationId: updateLabel
+
+    delete:
+      tags:
+        - Label (Individual)
+      summary: Delete a Label
+      description: |
+        Delete a Label by label id
+      parameters:
+        - $ref: '#/components/parameters/labelId'
+      responses:
+        200:
+          description: |
+            OK.
+            Label successfully deleted.
+          content: {}
+        409:
+          $ref: '#/components/responses/Conflict'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/labels/d7cf8523-9180-4255-84fa-6cb171c1f779"'
+      operationId: deleteLabel
+
+  ######################################################
+  # The "Label Usage Individual" resource API
+  ######################################################
+  /labels/{labelId}/usage:
+    get:
+      tags:
+        - Label (Individual)
+      summary: Get a Label Usage
+      description: |
+        Retrieve a single Label Usage. We should provide the Id of the Label as a path parameter.
+      parameters:
+        - $ref: '#/components/parameters/labelId'
+      responses:
+        200:
+          description: |
+            OK.
+            Label Usage returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelUsage'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/labels/d7cf8523-9180-4255-84fa-6cb171c1f779/usage"'
+      operationId: getLabelUsage
+
 components:
   schemas:
     Error:
@@ -5952,6 +6146,16 @@ components:
           type: string
           description: The IP of the client
           example: 127.0.0.1
+    OrganizationInfo:
+      title: Organization Info
+      type: object
+      properties:
+        organizationId:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          type: string
+          example: My Organization
     RoleAliasList:
       title: Role alias list
       type: object
@@ -6060,6 +6264,59 @@ components:
         count:
           type: integer
           example: 120
+    Label:
+      title: Label
+      required:
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: d7cf8523-9180-4255-84fa-6cb171c1f779
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: Health
+        description:
+          maxLength: 1024
+          type: string
+          example: Health related APIs
+    LabelList:
+      title: Label List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Number of labels returned.
+          example: 1
+        list:
+          type: array
+          description: List of labels.
+          items:
+            $ref: '#/components/schemas/Label'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    LabelUsage:
+      title: Label Usage
+      type: object
+      properties:
+        apis:
+          type: object
+          description: |
+            List of APIs associated with the label.
+          properties:
+            count:
+              type: integer
+              description: Number of APIs associated with the label.
+              example: 1
+            list:
+              type: array
+              description: List of APIs associated with the label.
+              items:
+                $ref: '#/components/schemas/ApiResult'
+
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -6383,6 +6640,14 @@ components:
       required: true
       schema:
         type: string
+    labelId:
+      name: labelId
+      in: path
+      description: |
+        Label UUID
+      required: true
+      schema:
+        type: string
   securitySchemes:
     OAuth2Security:
       type: oauth2
@@ -6426,5 +6691,10 @@ components:
             apim:keymanagers_manage: Manage Key Managers
             apim:api_provider_change: Retrieve and manage applications
             apim:llm_provider_manage: Manage LLM Providers
+            apim:gov_policy_read: Retrieve governance policies
+            apim:gov_policy_manage: Manage governance policies
+            apim:gov_result_read: Retrieve governance results
+            apim:gov_rule_read: Retrieve governance rules
+            apim:gov_rule_manage: Manage governance rules
             apim:organization_manage: Manage Organizations
             apim:organization_read: Read Organizations
