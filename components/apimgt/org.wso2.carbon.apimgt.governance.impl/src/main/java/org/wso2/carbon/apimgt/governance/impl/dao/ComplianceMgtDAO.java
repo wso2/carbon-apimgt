@@ -67,6 +67,17 @@ public interface ComplianceMgtDAO {
     String getPendingEvalRequest(String artifactRefId, ArtifactType artifactType, String organization)
             throws GovernanceException;
 
+    /**
+     * Get compliance pending artifacts
+     *
+     * @param artifactType Artifact Type
+     * @param organization Organization
+     * @return List of compliance pending artifacts
+     * @throws GovernanceException If an error occurs while getting the compliance pending artifacts
+     */
+    List<String> getCompliancePendingArtifacts(ArtifactType artifactType, String organization)
+            throws GovernanceException;
+
 
     /**
      * Update the evaluation status of a pending request to processing

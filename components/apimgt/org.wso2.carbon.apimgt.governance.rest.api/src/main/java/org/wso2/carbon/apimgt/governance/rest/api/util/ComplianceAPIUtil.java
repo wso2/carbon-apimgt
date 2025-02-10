@@ -544,13 +544,23 @@ public class ComplianceAPIUtil {
                                                                             String organization)
             throws GovernanceException {
 
+        ComplianceManager complianceManager = new ComplianceManager();
+
+        // Get total number of artifacts
         int totalArtifactsCount = APIMGovernanceUtil.getAllArtifacts(artifactType, organization).size();
 
         // Get total number of APIs that are compliant and non-compliant
-        Map<ArtifactComplianceState, List<String>> compliancyMap =
-                new ComplianceManager().getComplianceStateOfEvaluatedArtifacts(
-                        artifactType, organization);
+        Map<ArtifactComplianceState, List<String>> compliancyMap = complianceManager
+                .getComplianceStateOfEvaluatedArtifacts(artifactType, organization);
 
+        // Get pending artifacts
+        List<String> pendingArtifacts = complianceManager.getCompliancePendingArtifacts(artifactType, organization);
+
+        // Filter out the pending artifacts from compliant and non-compliant artifacts
+        compliancyMap.get(ArtifactComplianceState.COMPLIANT).removeAll(pendingArtifacts);
+        compliancyMap.get(ArtifactComplianceState.NON_COMPLIANT).removeAll(pendingArtifacts);
+
+        int pendingArtifactCount = pendingArtifacts.size();
         int compliantArtifactCount = compliancyMap.get(ArtifactComplianceState.COMPLIANT).size();
         int nonCompliantArtifactCount = compliancyMap.get(ArtifactComplianceState.NON_COMPLIANT).size();
 
@@ -558,8 +568,9 @@ public class ComplianceAPIUtil {
         summaryDTO.setTotal(totalArtifactsCount);
         summaryDTO.setCompliant(compliantArtifactCount);
         summaryDTO.setNonCompliant(nonCompliantArtifactCount);
-        summaryDTO.setNotApplicable(totalArtifactsCount - compliantArtifactCount -
-                nonCompliantArtifactCount);
+        summaryDTO.setPending(pendingArtifactCount);
+        summaryDTO.setNotApplicable(totalArtifactsCount - (compliantArtifactCount + nonCompliantArtifactCount +
+                pendingArtifactCount));
         return summaryDTO;
     }
 

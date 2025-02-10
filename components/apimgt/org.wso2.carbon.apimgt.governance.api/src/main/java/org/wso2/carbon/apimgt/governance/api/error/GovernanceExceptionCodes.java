@@ -136,6 +136,8 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
             500, "Error while deleting governance evaluation requests."),
     ERROR_WHILE_CHANGING_PROCESSING_REQ_TO_PENDING(400007, "Error while changing processing requests to pending.",
             500, "Error while changing processing requests to pending", true),
+    ERROR_WHILE_GETTING_COMPLIANCE_PENDING_ARTIFACTS(400008, "Error while getting compliance pending artifacts.",
+            500, "Error while getting compliance pending artifacts", true),
 
     // Result related codes
     ERROR_WHILE_SAVING_GOVERNANCE_RESULT(500001, "Error while saving governance result.",

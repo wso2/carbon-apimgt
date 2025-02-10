@@ -392,6 +392,35 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
+     * Get compliance pending artifacts
+     *
+     * @param artifactType Artifact Type
+     * @param organization Organization
+     * @return List of compliance pending artifacts
+     * @throws GovernanceException If an error occurs while getting the compliance pending artifacts
+     */
+    @Override
+    public List<String> getCompliancePendingArtifacts(ArtifactType artifactType, String organization)
+            throws GovernanceException {
+        String sqlQuery = SQLConstants.GET_COMPLIANCE_PENDING_ARTIFACTS;
+        List<String> artifactIds = new ArrayList<>();
+        try (Connection connection = APIMGovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
+            prepStmnt.setString(1, String.valueOf(artifactType));
+            prepStmnt.setString(2, organization);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    artifactIds.add(resultSet.getString("ARTIFACT_REF_ID"));
+                }
+            }
+            return artifactIds;
+        } catch (SQLException e) {
+            throw new GovernanceException(GovernanceExceptionCodes
+                    .ERROR_WHILE_GETTING_COMPLIANCE_PENDING_ARTIFACTS, e);
+        }
+    }
+
+    /**
      * Get policy IDs for a request
      *
      * @param connection Connection

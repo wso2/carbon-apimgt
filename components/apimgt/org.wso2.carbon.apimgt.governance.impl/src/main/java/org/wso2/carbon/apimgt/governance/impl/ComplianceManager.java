@@ -311,6 +311,19 @@ public class ComplianceManager {
     }
 
     /**
+     * Get list of compliance pending artifacts
+     *
+     * @param artifactType Artifact Type
+     * @param organization Organization
+     * @return List of compliance pending artifacts
+     * @throws GovernanceException If an error occurs while getting the compliance pending artifacts
+     */
+    public List<String> getCompliancePendingArtifacts(ArtifactType artifactType, String organization)
+            throws GovernanceException {
+        return complianceMgtDAO.getCompliancePendingArtifacts(artifactType, organization);
+    }
+
+    /**
      * Get a map of compliant and non-compliant artifacts
      *
      * @param artifactType Artifact Type

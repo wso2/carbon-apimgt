@@ -43,8 +43,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,11 +90,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     prepStmt.setString(3, governancePolicy.getDescription());
                     prepStmt.setString(4, organization);
                     prepStmt.setString(5, governancePolicy.getCreatedBy());
-
-                    Timestamp currentTime = Timestamp.from(Instant.now());
-                    prepStmt.setTimestamp(6, currentTime);
-
-                    prepStmt.setInt(7, governancePolicy.isGlobal() ? 1 : 0);
+                    prepStmt.setInt(6, governancePolicy.isGlobal() ? 1 : 0);
                     prepStmt.execute();
                 }
 
