@@ -81,7 +81,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
@@ -89,7 +88,6 @@ import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_SUBTYPE_AI_API;
-import static org.wso2.carbon.apimgt.impl.APIConstants.PRODUCTION;
 
 /**
  * This class used to utility for Template.
@@ -1171,10 +1169,9 @@ public class TemplateBuilderUtil {
 
         if (endpointDTOList != null && !endpointDTOList.isEmpty()) {
             for (EndpointDTO endpointDTO : endpointDTOList) {
-                String endpointType = (Objects.equals(endpointDTO.getEnvironment(), PRODUCTION)) ?
-                        APIConstants.API_DATA_PRODUCTION_ENDPOINTS : APIConstants.API_DATA_SANDBOX_ENDPOINTS;
-                String endpointConfigContext = builder.getConfigStringForEndpointTemplate(endpointType,
-                        endpointDTO);
+                String endpointConfigContext = builder
+                        .getConfigStringForEndpointTemplate(endpointDTO.getEnvironment().toLowerCase(),
+                                endpointDTO.getEndpointUuid(), endpointDTO.getEndpointConfig());
                 GatewayContentDTO endpoint = new GatewayContentDTO();
                 endpoint.setName(getEndpointKey(api) + "_API_LLMEndpoint_" + endpointDTO.getEndpointUuid());
                 endpoint.setContent(endpointConfigContext);
@@ -1185,7 +1182,7 @@ public class TemplateBuilderUtil {
         } else {
             ArrayList<String> arrayListToAdd = getEndpointType(api);
             for (String type : arrayListToAdd) {
-                String endpointConfigContext = builder.getConfigStringForEndpointTemplate(type, null);
+                String endpointConfigContext = builder.getConfigStringForEndpointTemplate(type, null, null);
                 GatewayContentDTO endpoint = new GatewayContentDTO();
                 endpoint.setName(getEndpointName(endpointConfigContext));
                 endpoint.setContent(endpointConfigContext);
