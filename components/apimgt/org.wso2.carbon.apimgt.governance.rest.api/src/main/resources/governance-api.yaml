@@ -1592,7 +1592,7 @@ components:
         name:
           type: string
           description: Name of the artifact.
-          example: "API1"
+          example: "Test API"
         type:
           type: string
           description: Type of the artifact.
@@ -1603,6 +1603,10 @@ components:
           type: string
           description: Version of the artifact.
           example: "1.0.0"
+        owner:
+          type: string
+          description: Owner of the artifact.
+          example: "admin"
   securitySchemes:
     OAuth2Security:
       type: oauth2
