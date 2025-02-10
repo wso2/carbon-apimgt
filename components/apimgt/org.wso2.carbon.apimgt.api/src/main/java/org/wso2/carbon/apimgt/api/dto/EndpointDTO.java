@@ -27,18 +27,7 @@ public class EndpointDTO {
     private String endpointName;
     private String organization;
     private String environment;
-    private String endpointType;
     private EndpointConfigDTO endpointConfig;
-
-    public String getEndpointType() {
-
-        return endpointType;
-    }
-
-    public void setEndpointType(String endpointType) {
-
-        this.endpointType = endpointType;
-    }
 
     /**
      * To get the tier name which the certificate is subscribed to.
