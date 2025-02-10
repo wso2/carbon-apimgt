@@ -12683,9 +12683,6 @@ components:
         organizationID:
           type: string
           example: "36c87e00-57f0-4000-9f97-b379acc4e577"
-        organizationName:
-          type: string
-          example: "wso2"
         policies:
           type: array
           example: ["Silver", "Gold", "Unlimited"]
