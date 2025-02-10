@@ -17743,6 +17743,25 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Deletes a tenant theme from the database
+     *
+     * @param tenantId tenant ID of user
+     * @throws APIManagementException if an error occurs when deleting a tenant theme from the database
+     */
+    public void deleteTenantTheme(int tenantId) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.TenantThemeConstants.DELETE_TENANT_THEME)) {
+            statement.setInt(1, tenantId);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to delete tenant theme of tenant "
+                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
+        }
+    }
+
+    /**
      * Imports a drafted organization theme for the given organization.
      *
      * @param organization Organization name.
@@ -18109,25 +18128,6 @@ public class ApiMgtDAO {
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, organization);
             preparedStatement.executeUpdate();
-        }
-    }
-
-    /**
-     * Deletes a tenant theme from the database
-     *
-     * @param tenantId tenant ID of user
-     * @throws APIManagementException if an error occurs when deleting a tenant theme from the database
-     */
-    public void deleteTenantTheme(int tenantId) throws APIManagementException {
-
-        try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement statement = connection
-                     .prepareStatement(SQLConstants.TenantThemeConstants.DELETE_TENANT_THEME)) {
-            statement.setInt(1, tenantId);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            handleException("Failed to delete tenant theme of tenant "
-                    + APIUtil.getTenantDomainFromTenantId(tenantId), e);
         }
     }
 
