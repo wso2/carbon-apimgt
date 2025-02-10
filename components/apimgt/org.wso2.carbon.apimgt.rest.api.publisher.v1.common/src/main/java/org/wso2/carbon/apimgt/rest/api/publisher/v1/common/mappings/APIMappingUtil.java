@@ -324,7 +324,6 @@ public class APIMappingUtil {
                     apiTiersForOrganization.add(new Tier(tier));
                 }
                 organizationTiers.setOrganizationID(organizationPoliciesDTO.getOrganizationID());
-                organizationTiers.setOrganizationName(organizationPoliciesDTO.getOrganizationName());
                 organizationTiers.setTiers(apiTiersForOrganization);
                 organizationAPITiers.add(organizationTiers);
             }
@@ -2754,7 +2753,6 @@ public class APIMappingUtil {
         }
         organizationPoliciesDTO.setPolicies(tiersToReturn);
         organizationPoliciesDTO.setOrganizationID(organizationTiers.getOrganizationID());
-        organizationPoliciesDTO.setOrganizationName(organizationTiers.getOrganizationName());
         return organizationPoliciesDTO;
     }
 
