@@ -23,6 +23,7 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.wso2.carbon.apimgt.api.dto.EndpointConfigDTO;
 import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -263,7 +264,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
      * @throws APITemplateException Thrown if an error occurred
      */
     @Override
-    public String getConfigStringForEndpointTemplate(String endpointType, EndpointDTO endpointDTO)
+    public String getConfigStringForEndpointTemplate(String endpointType, String endpointUuid,
+                                                     EndpointConfigDTO endpointConfig)
             throws APITemplateException {
 
         StringWriter writer = new StringWriter();
@@ -274,12 +276,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             if (API_SUBTYPE_DEFAULT.equals(api.getSubtype())) {
                 configcontext = new SecurityConfigContext(configcontext, api);
-            }
-            if (endpointDTO != null) {
-                configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api,
-                        endpointDTO.getEndpointConfig());
-            } else if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
                 configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api);
+            } else if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+                configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api, endpointConfig);
             }
 
 
@@ -296,8 +295,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             initVelocityEngine(velocityengine);
 
             context.put("type", endpointType);
-            if (endpointDTO != null) {
-                context.put("endpointUuid", endpointDTO.getEndpointUuid());
+            if (endpointUuid != null) {
+                context.put("endpointUuid", endpointUuid);
             }
 
             Template template = velocityengine.getTemplate(this.getEndpointTemplatePath());

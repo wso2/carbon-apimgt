@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl.template;
 
+import org.wso2.carbon.apimgt.api.dto.EndpointConfigDTO;
 import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 import org.wso2.carbon.apimgt.api.model.Environment;
 
@@ -37,7 +38,7 @@ public interface APITemplateBuilder {
 
     String getConfigStringForPrototypeScriptAPI(Environment environment) throws APITemplateException;
 
-    String getConfigStringForEndpointTemplate(String endpointType, EndpointDTO endpointName) throws APITemplateException;
+    String getConfigStringForEndpointTemplate(String endpointType, String endpointUuid, EndpointConfigDTO endpointConfig) throws APITemplateException;
 
     String getConfigStringForWebSocketEndpointTemplate(String endpointType, String resourceKey, String endpointUrl) throws APITemplateException;
 

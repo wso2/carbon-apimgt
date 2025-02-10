@@ -2508,11 +2508,9 @@ public class ImportUtils {
 
         String jsonContent = null;
 
-        String pathToYamlFile = "/home/pasant/Desktop/git/wso2/product-apim/modules/distribution/product/target" +
-                "/wso2am-4.5.0-SNAPSHOT" + File.separator + ImportExportConstants.ENDPOINTS_FILE
+        String pathToYamlFile = pathToArchive + File.separator + ImportExportConstants.ENDPOINTS_FILE
                 + ImportExportConstants.YAML_EXTENSION;
-        String pathToJsonFile = "/home/pasant/Desktop/git/wso2/product-apim/modules/distribution/product/target" +
-         "/wso2am-4.5.0-SNAPSHOT" + File.separator + ImportExportConstants.ENDPOINTS_FILE
+        String pathToJsonFile = pathToArchive + File.separator + ImportExportConstants.ENDPOINTS_FILE
                 + ImportExportConstants.JSON_EXTENSION;
         try {
             // try loading file as YAML
@@ -2523,7 +2521,8 @@ public class ImportUtils {
             } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
                 // load as a json fallback
                 log.debug("Found endpoint file " + pathToJsonFile);
-                jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
+                jsonContent = FileUtils.
+                        readFileToString(new File(pathToJsonFile)).replace("{}", "\"{}\"");
             }
             if (jsonContent == null) {
                 log.debug("No endpoint file found to be added, skipping");
