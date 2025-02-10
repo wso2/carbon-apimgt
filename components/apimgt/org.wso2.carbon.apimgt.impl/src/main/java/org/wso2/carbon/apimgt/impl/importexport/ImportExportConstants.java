@@ -320,4 +320,8 @@ public final class ImportExportConstants {
 
     public static final String POLICY_TYPE_API = "api";
     public static final String POLICY_TYPE_COMMON = "common";
+
+    // API Endpoints related constants
+    public static final String API_ENDPOINTS_TYPE = "endpoints";
+    public static final String API_ENDPOINTS_FILE_LOCATION = File.separator + "endpoints";
 }

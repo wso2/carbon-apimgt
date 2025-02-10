@@ -1524,6 +1524,7 @@ paths:
         description: |
           LLM provider object that should to be added
         content:
+#          application/json:
           multipart/form-data:
             schema:
               required:
@@ -1571,6 +1572,7 @@ paths:
           LLM Provider object with updated information
         content:
           multipart/form-data:
+#          application/json:
             schema:
               required:
                 - apiDefinition
@@ -4146,6 +4148,9 @@ components:
           type: string
           description: OpenAPI specification
           format: binary
+        modelList:
+          type: string
+          description: List of models supported by the LLM Provider as a stringified JSON array
     LLMProviderSummaryResponse:
       title: LLMProviderSummaryResponse
       type: object
@@ -4215,6 +4220,11 @@ components:
         apiDefinition:
           type: string
           description: OpenAPI specification
+        modelList:
+          type: array
+          items:
+            type: string
+          description: List of models supported by the LLM Provider
     VHost:
       title: Virtual Host
       required:

@@ -624,6 +624,15 @@ public interface APIAdmin  {
     List<LLMProvider> getLLMProviders(String organization, String name, String apiVersion, Boolean builtInSupport) throws APIManagementException;
 
     /**
+     * Retrieves the list of models registered under the LLM provider
+     *
+     * @param llmProviderId The ID of the LLM provider
+     * @return list of models registered under the LLM provider
+     * @throws APIManagementException
+     */
+    List<String> getLLMProviderModels(String llmProviderId) throws APIManagementException;
+
+    /**
      * Deletes an LLM Provider by ID for the given organization.
      *
      * @param organization The organization name.

@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIDefinitionContentSearchResult;
+import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -1132,6 +1133,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
         }
         updateAPIResources(api, tenantId);
+        updateAPIPrimaryEndpointsMapping(api);
+    }
+
+    /**
+     * Update primary endpoints of an API.
+     *
+     * @param api API to update
+     * @throws APIManagementException If fails to update primary endpoints of the API.
+     */
+    private void updateAPIPrimaryEndpointsMapping(API api) throws APIManagementException {
+        apiMgtDAO.updateAPIPrimaryEndpointsMapping(api);
     }
 
     /**
@@ -5430,6 +5442,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateSubtypeConfiguration(api);
                 populateDefaultVersion(api);
                 populatePolicyTypeInAPI(api);
+                populateAPIPrimaryEndpointsMapping(api, uuid);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -6205,21 +6218,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return null;
     }
 
-    /**
-     * Validates if the provided LLM provider ID exists in the organization.
-     *
-     * @param llmProviderId LLM provider UUID
-     * @param organization  Organization to which the API belongs
-     * @throws APIManagementException if the LLM provider is not found
-     */
-    private void validateLlmProviderById(String llmProviderId, String organization)
-            throws APIManagementException {
-
-        LLMProvider provider = apiMgtDAO.getLLMProvider(organization, llmProviderId);
-        if (provider == null) {
-            throw new APIManagementException("Incorrect LLM Provider UUID: " + llmProviderId);
-        }
-    }
+//    /**
+//     * Validates if the provided LLM provider ID exists in the organization.
+//     *
+//     * @param llmProviderId LLM provider UUID
+//     * @param organization  Organization to which the API belongs
+//     * @throws APIManagementException if the LLM provider is not found
+//     */
+//    private void validateLlmProviderById(String llmProviderId, String organization)
+//            throws APIManagementException {
+//
+//        LLMProvider provider = apiMgtDAO.getLLMProvider(organization, llmProviderId);
+//        if (provider == null) {
+//            throw new APIManagementException("Incorrect LLM Provider UUID: " + llmProviderId);
+//        }
+//    }
 
     /**
      * Util method to read and return the max revision count per API, using the tenant configs
@@ -8054,4 +8067,60 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while validating attached labels", e);
         }
     }
+
+    @Override
+    public String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint) throws APIManagementException {
+        String endpointUUID = UUID.randomUUID().toString();
+        apiEndpoint.setEndpointUuid(endpointUUID);
+        return apiMgtDAO.addAPIEndpoint(apiUUID, apiEndpoint);
+    }
+
+    @Override
+    public APIEndpointInfo getAPIEndpointByUUID(String apiUUID, String endpointUUID) throws APIManagementException {
+        return apiMgtDAO.getAPIEndpoint(apiUUID, endpointUUID);
+    }
+
+    @Override
+    public APIEndpointInfo updateAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint)
+            throws APIManagementException {
+        return apiMgtDAO.updateAPIEndpoint(apiUUID, apiEndpoint);
+    }
+
+    @Override
+    public void deleteAPIEndpointById(String endpointUUID) throws APIManagementException {
+        apiMgtDAO.deleteAPIEndpointByEndpointId(endpointUUID);
+    }
+
+    @Override
+    public List<APIEndpointInfo> getAllAPIEndpointsByUUID(String uuid) throws APIManagementException {
+        return apiMgtDAO.getAPIEndpoints(uuid);
+    }
+
+    /**
+     * It fetches the primary endpoint mappings of an API and populate their UUIDs.
+     *
+     * @param api API model Object
+     * @param uuid unique identifier of an API
+     * @throws APIManagementException
+     */
+    private void populateAPIPrimaryEndpointsMapping(API api, String uuid) throws APIManagementException {
+        String currentApiUuid;
+        String revisionUuid = null;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+            revisionUuid = apiRevision.getRevisionUUID();
+        } else {
+            currentApiUuid = uuid;
+        }
+        // Get primary production Endpoint mapping
+        String productionEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
+                APIConstants.APIEndpoint.PRODUCTION, revisionUuid);
+        api.setPrimaryProductionEndpointId(productionEndpointId);
+        // Get primary sandbox endpoint endpoint
+        String sandboxEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
+                APIConstants.APIEndpoint.SANDBOX, revisionUuid);
+        api.setPrimarySandboxEndpointId(sandboxEndpointId);
+    }
+
 }
