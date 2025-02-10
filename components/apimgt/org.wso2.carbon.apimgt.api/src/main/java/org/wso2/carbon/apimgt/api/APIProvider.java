@@ -1575,6 +1575,54 @@ public interface APIProvider extends APIManager {
     List<Label> detachApiLabels(String apiID, List<String> labelList, String tenantDomain) throws APIManagementException;
 
     /**
+     * Get endpoint details by providing API UUID. If provided UUID is an API revision UUID, it returns the revision
+     * endpoint details.
+     *
+     * @param uuid Unique identifier of API
+     * @return List<APIEndpointInfo> List of APIEndpointInfo objects
+     * @throws APIManagementException if an error occurs while retrieving endpoints details
+     */
+    List<APIEndpointInfo> getAllAPIEndpointsByUUID(String uuid) throws APIManagementException;
+
+    /**
+     * Get endpoint details by providing API UUID and Endpoint UUID.
+     *
+     * @param apiUUID      Unique identifier of API
+     * @param endpointUUID Unique identifier of Endpoint
+     * @return APIEndpointInfo Object with endpoint details
+     * @throws APIManagementException if an error occurs while retrieving endpoint details
+     */
+    APIEndpointInfo getAPIEndpointByUUID(String apiUUID, String endpointUUID) throws APIManagementException;
+
+    /**
+     * Add an endpoint to an API.
+     *
+     * @param apiUUID     Unique identifier of API
+     * @param apiEndpoint API endpoint details
+     * @return created endpoint UUID
+     * @throws APIManagementException if an error occurs while inserting endpoint detail.
+     */
+    String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint) throws APIManagementException;
+
+    /**
+     * Delete an API endpoint by providing the endpoint UUID.
+     *
+     * @param endpointUUID Unique identifier of Endpoint
+     * @throws APIManagementException if an error occurs while deleting the endpoint.
+     */
+    void deleteAPIEndpointById(String endpointUUID) throws APIManagementException;
+
+    /**
+     * Update an API endpoint.
+     *
+     * @param apiId       API UUID
+     * @param apiEndpoint Endpoint with updated details
+     * @return Updated APIEndpointInfo object
+     * @throws APIManagementException if an error occurs while updating the endpoint.
+     */
+    APIEndpointInfo updateAPIEndpoint(String apiId, APIEndpointInfo apiEndpoint) throws APIManagementException;
+
+    /**
      * Set existing operation policy mapping to the URI Templates
      *
      * @param apiId        API UUID

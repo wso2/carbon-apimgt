@@ -3267,6 +3267,8 @@ public final class APIConstants {
     //Property for enabling tenant aware sub claims when invoking APIs with API key
     public static final String ENABLE_TENANT_AWARE_SUB_CLAIM= "enable.tenant.aware.subclaim";
 
+    public static final String PRODUCTION = "PRODUCTION";
+    public static final String SANDBOX = "SANDBOX";
     public static class TokenValidationConstants {
         public static final String TOKEN_VALIDATION_CONFIG = "TokenValidation";
         public static final String ENFORCE_JWT_TYPE_HEADER_VALIDATION = "EnforceTypeHeaderValidation";
@@ -3286,4 +3288,12 @@ public final class APIConstants {
 
     //Property for enabling application update capabilities for users in the same organization.
     public static final String ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED = "orgWideAppUpdateEnabled";
+
+    public static class APIEndpoint {
+        public static final String PRODUCTION = "PRODUCTION";
+        public static final String SANDBOX = "SANDBOX";
+        public static final String PRIMARY_ENDPOINT_ID_SEPARATOR = "--";
+        public static final String DEFAULT_PROD_ENDPOINT = "Default Production Endpoint";
+        public static final String DEFAULT_SANDBOX_ENDPOINT = "Default Sandbox Endpoint";
+    }
 }
