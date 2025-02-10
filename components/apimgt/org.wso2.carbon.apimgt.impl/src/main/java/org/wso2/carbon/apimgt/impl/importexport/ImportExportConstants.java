@@ -88,6 +88,7 @@ public final class ImportExportConstants {
     public static final String ENDPOINTS_CERTIFICATE_FILE = File.separator + "endpoint_certificates";
 
     public static final String CLIENT_CERTIFICATE_FILE = File.separator + "client_certificates";
+    public static final String ENDPOINTS_FILE = "endpoints";
 
     public static final String APIS_DIRECTORY = "APIs";
 
