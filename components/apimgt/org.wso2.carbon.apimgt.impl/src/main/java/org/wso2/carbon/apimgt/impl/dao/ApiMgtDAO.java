@@ -17772,8 +17772,8 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             if (isOrganizationExist(connection, organization)) {
-                if (isDraftedOrgThemeExist(connection, organization)) {
-                    String existingDraftedArtifact = getDraftedArtifactForOrg(connection, organization);
+                String existingDraftedArtifact = getDraftedArtifactForOrg(connection, organization);
+                if (existingDraftedArtifact != null) {
                     removeArtifact(connection, existingDraftedArtifact);
                 }
                 String newUUID = addArtifact(connection, themeContent, "DRAFTED_ORG_THEME");
@@ -17916,23 +17916,6 @@ public class ApiMgtDAO {
             }
         }
         return false;
-    }
-
-    /**
-     * Check whether the drafted theme is available for the organization.
-     *
-     * @param connection   DB connection.
-     * @param organization Organization name.
-     * @return Boolean of draft theme availability.
-     */
-    private boolean isDraftedOrgThemeExist(Connection connection, String organization) throws SQLException {
-        String query = "SELECT DRAFTED_ARTIFACT FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, organization);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                return resultSet.next() && resultSet.getString(1) != null;
-            }
-        }
     }
 
     /**
@@ -18127,6 +18110,330 @@ public class ApiMgtDAO {
         String query = "DELETE FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, organization);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    /**
+     * Imports a drafted api theme for the given organization and API ID.
+     *
+     * @param organization Organization name.
+     * @param themeContent Theme content as InputStream.
+     * @param apiId        API Identifier.
+     * @throws APIManagementException If a database error occurs.
+     */
+    public void importDraftedApiTheme(String organization, InputStream themeContent, String apiId)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            if (isApiAndOrganizationExist(connection, organization, apiId)) {
+                String existingDraftedArtifact = getDraftedArtifactForApi(connection, organization, apiId);
+                if (existingDraftedArtifact != null) {
+                    removeArtifact(connection, existingDraftedArtifact);
+                }
+                String newUUID = addArtifact(connection, themeContent, "DRAFTED_API_THEME");
+                updateDraftedArtifactForApi(connection, organization, newUUID, apiId);
+            } else {
+                String newUUID = addArtifact(connection, themeContent, "DRAFTED_API_THEME");
+                insertNewApiWithDraftedArtifact(connection, organization, newUUID, apiId);
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Failed to import drafted organization theme for tenant " + organization, e);
+        }
+    }
+
+    /**
+     * Updates the api theme status as published or unpublished.
+     *
+     * @param organization Organization name.
+     * @param action       Action to perform ("PUBLISH" or "UNPUBLISH").
+     * @param apiId        API Identifier.
+     * @throws APIManagementException If a database error occurs.
+     */
+    public void updateApiThemeStatusAsPublishedOrUnpublished(String organization, String action, String apiId) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            if ("PUBLISH".equals(action)) {
+                String draftedArtifact = getDraftedArtifactForApi(connection, organization, apiId);
+                if (draftedArtifact != null) {
+                    InputStream artifactContent = getArtifactContent(connection, draftedArtifact);
+                    String newUUID = addArtifact(connection, artifactContent, "PUBLISHED_API_THEME");
+                    updatePublishedArtifactForApi(connection, organization, newUUID, apiId);
+                    removeArtifact(connection, draftedArtifact);
+                } else {
+                    log.warn("ID cannot be found in drafted state. Aborting the request");
+                }
+            } else {
+                String publishedArtifact = getPublishedArtifactForApi(connection, organization, apiId);
+                if (publishedArtifact != null) {
+                    InputStream artifactContent = getArtifactContent(connection, publishedArtifact);
+                    String newUUID = addArtifact(connection, artifactContent, "DRAFTED_API_THEME");
+                    updateDraftedArtifactForApi(connection, organization, newUUID, apiId);
+                    removeArtifact(connection, publishedArtifact);
+                } else {
+                    log.warn("ID cannot be found in published state. Aborting the request");
+                }
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Failed to update API theme status for tenant " + organization, e);
+        }
+    }
+
+    /**
+     * Deletes an API theme.
+     *
+     * @param organization Organization name.
+     * @param themeId      Theme ID to delete.
+     * @param apiId        API Identifier.
+     * @throws APIManagementException If a database error occurs.
+     */
+    public void deleteApiTheme(String organization, String themeId, String apiId) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            if (isThemeUsedByApi(connection, organization, themeId, apiId)) {
+                removeArtifact(connection, themeId); // Due to DB rules, foreign ID will also set to NULL
+                removeApiIfNoData(connection, organization, apiId);
+            } else {
+                log.warn("API does not have a theme. Aborting the request");
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Failed to delete API theme for tenant " + organization, e);
+        }
+    }
+
+    /**
+     * Gets an API theme.
+     *
+     * @param themeId      Theme ID to retrieve.
+     * @param organization Organization name.
+     * @param apiId        API Identifier.
+     * @return Input stream of API theme.
+     * @throws APIManagementException If a database error occurs.
+     */
+    public InputStream getApiTheme(String themeId, String organization, String apiId) throws APIManagementException {
+        InputStream tenantThemeContent = null;
+        String query = "SELECT * FROM AM_ARTIFACT WHERE UUID = ? AND TYPE IN (?, ?)";
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, themeId);
+            statement.setString(2, "DRAFTED_API_THEME");
+            statement.setString(3, "PUBLISHED_API_THEME");
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                tenantThemeContent = resultSet.getBinaryStream("ARTIFACT");
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get API theme for API ID: " + apiId + " and Organization: " + organization, e);
+        }
+        return tenantThemeContent;
+    }
+
+    /**
+     * Gets API theme array.
+     *
+     * @param organization Organization name.
+     * @param apiId        API Identifier.
+     * @return Hash map of publish unpublish state and theme IDs.
+     * @throws APIManagementException If a database error occurs.
+     */
+    public Map<String, String>  getApiThemes(String organization, String apiId) throws APIManagementException {
+        Map<String, String> themeMap = new HashMap<>();
+        String checkQuery = "SELECT DRAFTED_ARTIFACT, PUBLISHED_ARTIFACT FROM AM_DEVPORTAL_API_CONTENT WHERE ORGANIZATION = ? AND API_UUID = ?";
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(checkQuery)) {
+            preparedStatement.setString(1, organization);
+            preparedStatement.setString(2, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    themeMap.put("drafted", resultSet.getString("DRAFTED_ARTIFACT"));
+                    themeMap.put("published", resultSet.getString("PUBLISHED_ARTIFACT"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get API theme array for " + organization, e);
+        }
+        return themeMap;
+    }
+
+    /**
+     * Check whether API and it' Organization is available in the AM_DEVPORTAL_API_CONTENT Table.
+     *
+     * @param connection   DB connection.
+     * @param organization Organization name.
+     * @param apiId        API Identifier.
+     * @return Boolean of organization availability.
+     */
+    private boolean isApiAndOrganizationExist(Connection connection, String organization, String apiId) throws SQLException {
+        String query = "SELECT COUNT(*) FROM AM_DEVPORTAL_API_CONTENT WHERE ORGANIZATION = ? AND API_UUID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, organization);
+            preparedStatement.setString(2, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Get drafted artifact ID for API.
+     *
+     * @param connection   DB connection.
+     * @param organization Organization name.
+     * @param apiId        API Identifier.
+     * @return String of drafted content ID.
+     */
+    private String getDraftedArtifactForApi(Connection connection, String organization, String apiId) throws SQLException {
+        String query = "SELECT DRAFTED_ARTIFACT FROM AM_DEVPORTAL_API_CONTENT WHERE ORGANIZATION = ? AND API_UUID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, organization);
+            preparedStatement.setString(2, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString(1);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Update drafted artifact ID in AM_DEVPORTAL_API_CONTENT table.
+     *
+     * @param connection   DB connection.
+     * @param organization Organization name.
+     * @param apiId        API Identifier.
+     */
+    private void updateDraftedArtifactForApi(Connection connection, String organization, String artifactUUID, String apiId) throws SQLException {
+        String query = "UPDATE AM_DEVPORTAL_API_CONTENT SET DRAFTED_ARTIFACT = ? WHERE ORGANIZATION = ? AND API_UUID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, artifactUUID);
+            preparedStatement.setString(2, organization);
+            preparedStatement.setString(3, apiId);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    /**
+     * Update published artifact ID in AM_DEVPORTAL_API_CONTENT table.
+     *
+     * @param connection   DB connection.
+     * @param organization Organization name.
+     * @param apiId        API Identifier.
+     */
+    private void updatePublishedArtifactForApi(Connection connection, String organization, String artifactUUID, String apiId) throws SQLException {
+        String query = "UPDATE AM_DEVPORTAL_API_CONTENT SET PUBLISHED_ARTIFACT = ? WHERE ORGANIZATION = ? AND API_UUID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, artifactUUID);
+            preparedStatement.setString(2, organization);
+            preparedStatement.setString(3, apiId);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    /**
+     * Get published artifact ID for API.
+     *
+     * @param connection   DB connection.
+     * @param organization Organization name.
+     * @param apiId        API Identifier.
+     * @return String of published artifact content ID.
+     */
+    private String getPublishedArtifactForApi(Connection connection, String organization, String apiId) throws SQLException {
+        String query = "SELECT PUBLISHED_ARTIFACT FROM AM_DEVPORTAL_API_CONTENT WHERE ORGANIZATION = ? AND API_UUID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, organization);
+            preparedStatement.setString(2, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString(1);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Insert a fresh API with drafted artifact's ID to AM_DEVPORTAL_API_CONTENT.
+     *
+     * @param connection   DB connection.
+     * @param organization Organization name.
+     * @param apiId        API Identifier.
+     * @param artifactUUID Artifact's ID.
+     */
+    private void insertNewApiWithDraftedArtifact(Connection connection, String organization, String artifactUUID, String apiId) throws SQLException {
+        String query = "INSERT INTO AM_DEVPORTAL_API_CONTENT (API_UUID, ORGANIZATION, DRAFTED_ARTIFACT) VALUES (?, ?, ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, apiId);
+            preparedStatement.setString(2, organization);
+            preparedStatement.setString(3, artifactUUID);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    /**
+     * Check whether if a theme is available for the api.
+     *
+     * @param connection   DB connection.
+     * @param organization Organization name.
+     * @param themeId      Theme content's ID.
+     * @param apiId        API Identifier.
+     * @return Boolean of the theme availability.
+     */
+    private boolean isThemeUsedByApi(Connection connection, String organization, String themeId, String apiId) throws SQLException {
+        String query = "SELECT COUNT(*) FROM AM_DEVPORTAL_API_CONTENT WHERE (DRAFTED_ARTIFACT = ? OR PUBLISHED_ARTIFACT = ?) AND ORGANIZATION = ? AND API_UUID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, themeId);
+            preparedStatement.setString(2, themeId);
+            preparedStatement.setString(3, organization);
+            preparedStatement.setString(4, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt(1) > 0;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Remove API if there is no IDs for the API.
+     *
+     * @param connection   DB connection.
+     * @param organization Organization name.
+     * @param apiId        API Identifier.
+     */
+    private void removeApiIfNoData(Connection connection, String organization, String apiId) throws SQLException {
+        String checkQuery = "SELECT DRAFTED_ARTIFACT, PUBLISHED_ARTIFACT FROM AM_DEVPORTAL_API_CONTENT WHERE ORGANIZATION = ? AND API_UUID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(checkQuery)) {
+            preparedStatement.setString(1, organization);
+            preparedStatement.setString(2, apiId);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next() && resultSet.getString("DRAFTED_ARTIFACT") == null &&
+                        resultSet.getString("PUBLISHED_ARTIFACT") == null) {
+                    removeApi(connection, organization, apiId);
+                }
+            }
+        }
+    }
+
+    /**
+     * Remove API.
+     *
+     * @param connection   DB connection.
+     * @param organization Organization name.
+     * @param apiId        API Identifier.
+     */
+    private void removeApi(Connection connection, String organization, String apiId) throws SQLException {
+        String query = "DELETE FROM AM_DEVPORTAL_API_CONTENT WHERE ORGANIZATION = ? AND API_UUID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, organization);
+            preparedStatement.setString(2, apiId);
             preparedStatement.executeUpdate();
         }
     }
