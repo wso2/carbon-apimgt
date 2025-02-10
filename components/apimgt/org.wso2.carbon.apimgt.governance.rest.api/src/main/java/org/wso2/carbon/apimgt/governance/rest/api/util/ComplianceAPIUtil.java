@@ -88,6 +88,7 @@ public class ComplianceAPIUtil {
         infoDTO.setName(APIMGovernanceUtil.getArtifactName(artifactRefId, artifactType));
         infoDTO.setVersion(APIMGovernanceUtil.getArtifactVersion(artifactRefId, artifactType));
         infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
+        infoDTO.setOwner(APIMGovernanceUtil.getArtifactOwner(artifactRefId, artifactType, organization));
         artifactComplianceDetailsDTO.setInfo(infoDTO);
 
         // Get all policies applicable to the artifact within the organization as a map of policy ID to policy name
@@ -316,6 +317,7 @@ public class ComplianceAPIUtil {
         infoDTO.setName(APIMGovernanceUtil.getArtifactName(artifactRefId, artifactType));
         infoDTO.setVersion(APIMGovernanceUtil.getArtifactVersion(artifactRefId, artifactType));
         infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
+        infoDTO.setOwner(APIMGovernanceUtil.getArtifactOwner(artifactRefId, artifactType, organization));
         complianceStatus.setInfo(infoDTO);
 
         // Retrieve applicable policies for the current artifact

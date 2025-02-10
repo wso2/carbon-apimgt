@@ -419,6 +419,25 @@ public class APIMGovernanceUtil {
     }
 
     /**
+     * Get artifact owner
+     *
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
+     * @return String
+     * @throws APIMGovernanceException If an error occurs while getting the artifact owner
+     */
+    public static String getArtifactOwner(String artifactRefId, ArtifactType artifactType, String organization)
+            throws APIMGovernanceException {
+
+        String artifactOwner = null;
+        if (ArtifactType.API.equals(artifactType)) {
+            artifactOwner = APIMUtil.getAPIOwner(artifactRefId, organization);
+        }
+        return artifactOwner;
+    }
+
+    /**
      * Get artifact id from artifact name, version, type and organization
      *
      * @param artifactName    Artifact name

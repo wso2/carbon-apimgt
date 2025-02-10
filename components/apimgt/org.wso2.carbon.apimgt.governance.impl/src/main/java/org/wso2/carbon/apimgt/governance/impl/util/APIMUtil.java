@@ -120,6 +120,28 @@ public class APIMUtil {
     }
 
     /**
+     * Get the API owner
+     *
+     * @param apiId API ID
+     * @return API owner/ technical owner
+     * @throws APIMGovernanceException If an error occurs while getting the API provider
+     */
+    public static String getAPIOwner(String apiId, String organization) throws APIMGovernanceException {
+        try {
+            APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+            APIProvider apiProvider = APIManagerFactory.getInstance()
+                    .getAPIProvider(apiIdentifier.getProviderName());
+            API api = apiProvider.getAPIbyUUID(apiId, organization);
+            String techOwner = api.getTechnicalOwnerEmail();
+            String apiOwner = api.getApiOwner();
+            return techOwner != null ? techOwner : apiOwner;
+        } catch (APIManagementException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_INFO, e,
+                    apiId);
+        }
+    }
+
+    /**
      * Get the status of the API
      *
      * @param apiId API ID

@@ -56,6 +56,7 @@ return null;
     } 
     private TypeEnum type = null;
     private String version = null;
+    private String owner = null;
 
   /**
    * Name of the artifact.
@@ -66,7 +67,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "API1", value = "Name of the artifact.")
+  @ApiModelProperty(example = "Test API", value = "Name of the artifact.")
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -111,6 +112,24 @@ return null;
     this.version = version;
   }
 
+  /**
+   * Owner of the artifact.
+   **/
+  public ArtifactInfoDTO owner(String owner) {
+    this.owner = owner;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "admin", value = "Owner of the artifact.")
+  @JsonProperty("owner")
+  public String getOwner() {
+    return owner;
+  }
+  public void setOwner(String owner) {
+    this.owner = owner;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -123,12 +142,13 @@ return null;
     ArtifactInfoDTO artifactInfo = (ArtifactInfoDTO) o;
     return Objects.equals(name, artifactInfo.name) &&
         Objects.equals(type, artifactInfo.type) &&
-        Objects.equals(version, artifactInfo.version);
+        Objects.equals(version, artifactInfo.version) &&
+        Objects.equals(owner, artifactInfo.owner);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, type, version);
+    return Objects.hash(name, type, version, owner);
   }
 
   @Override
@@ -139,6 +159,7 @@ return null;
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
+    sb.append("    owner: ").append(toIndentedString(owner)).append("\n");
     sb.append("}");
     return sb.toString();
   }
