@@ -176,6 +176,18 @@ public class RulesetManager {
     }
 
     /**
+     * Get a Governance Ruleset by name
+     *
+     * @param name         Name of the ruleset
+     * @param organization Organization
+     * @return RulesetInfo object
+     * @throws APIMGovernanceException If an error occurs while getting the ruleset
+     */
+    public RulesetInfo getRulesetByName(String name, String organization) throws APIMGovernanceException {
+        return rulesetMgtDAO.getRulesetByName(name, organization);
+    }
+
+    /**
      * Get the content of a Governance Ruleset
      *
      * @param rulesetId    Ruleset ID

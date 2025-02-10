@@ -100,7 +100,7 @@ public class ComplianceAPIUtil {
             return artifactComplianceDetailsDTO;
         }
 
-        // Check if the evaluation is pending
+        // If the evaluation is pending, set the compliance status to pending and return
         boolean isEvaluationPending = new ComplianceManager()
                 .isEvaluationPendingForArtifact(artifactRefId, artifactType, organization);
         if (isEvaluationPending) {
@@ -330,17 +330,20 @@ public class ComplianceAPIUtil {
             return complianceStatus;
         }
 
+        // If the evaluation is pending, set the compliance status to pending and return
+        boolean isEvaluationPending = new ComplianceManager()
+                .isEvaluationPendingForArtifact(artifactRefId, artifactType, organization);
+        if (isEvaluationPending) {
+            complianceStatus.setStatus(ArtifactComplianceStatusDTO.StatusEnum.PENDING);
+            return complianceStatus;
+        }
+
         // Get evaluated policies for the current artifact
         List<String> evaluatedPolicies = complianceManager.getEvaluatedPoliciesForArtifact(artifactRefId, artifactType,
                 organization);
 
-        // If the artifact is not evaluated yet, set the compliance status to not applicable/pending and return
+        // If the artifact is not evaluated yet, set the compliance status to not applicable and return
         if (evaluatedPolicies.isEmpty()) {
-            boolean isEvaluationPending = new ComplianceManager()
-                    .isEvaluationPendingForArtifact(artifactRefId, artifactType, organization);
-            if (isEvaluationPending) {
-                complianceStatus.setStatus(ArtifactComplianceStatusDTO.StatusEnum.PENDING);
-            }
             complianceStatus.setStatus(ArtifactComplianceStatusDTO.StatusEnum.NOT_APPLICABLE);
             return complianceStatus;
         }

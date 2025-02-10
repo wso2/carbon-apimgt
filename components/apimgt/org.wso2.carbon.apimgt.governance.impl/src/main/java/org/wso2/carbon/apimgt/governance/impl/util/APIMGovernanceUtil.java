@@ -25,7 +25,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.APIMDefaultGovPolicy;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.DefaultRuleset;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
@@ -36,6 +38,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
+import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManager;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -47,6 +50,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -159,8 +163,7 @@ public class APIMGovernanceUtil {
                         if (!existingRuleNames.contains(defaultRuleset.getName())) {
                             log.info("Adding default ruleset: " + defaultRuleset.getName());
                             rulesetManager.createNewRuleset(
-                                    getRulesetFromDefaultRuleset(defaultRuleset,
-                                            file.getName().replaceAll("/", "_")), organization);
+                                    getRulesetFromDefaultRuleset(defaultRuleset, file.getName()), organization);
                         } else {
                             log.info("Ruleset " + defaultRuleset.getName() + " already exists in organization: "
                                     + organization + "; skipping.");
@@ -176,6 +179,57 @@ public class APIMGovernanceUtil {
             log.error("Error while accessing default ruleset directory", e);
         } catch (APIMGovernanceException e) {
             log.error("Error while retrieving existing rulesets for organization: " + organization, e);
+        }
+    }
+
+    /**
+     * Load default policies from the default policy directory
+     *
+     * @param organization Organization
+     */
+    public static void loadDefaultPolicies(String organization) {
+        PolicyManager policyManager = new PolicyManager();
+        try {
+            // Fetch existing policies for the organization
+            Map<String, String> existingPolicies = policyManager.getOrganizationWidePolicies(organization);
+
+            // Define the path to default policies
+            String pathToPolicies = CarbonUtils.getCarbonHome() + File.separator
+                    + APIMGovernanceConstants.DEFAULT_POLICY_LOCATION;
+            Path pathToDefaultPolicies = Paths.get(pathToPolicies);
+
+            // Iterate through default policy files
+            Files.list(pathToDefaultPolicies).forEach(path -> {
+                File file = path.toFile();
+                if (file.isFile() && (file.getName().endsWith(".yaml") || file.getName().endsWith(".yml"))) {
+                    try {
+                        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+                        APIMDefaultGovPolicy defaultPolicy = mapper.readValue(file, APIMDefaultGovPolicy.class);
+
+                        // Add policy if it doesn't already exist
+                        if (!existingPolicies.containsValue(defaultPolicy.getName())) {
+                            log.info("Adding default policy: " + defaultPolicy.getName());
+                            APIMGovernancePolicy policy = getGovPolicyFromDefaultGovPolicy(defaultPolicy, organization);
+                            APIMGovernancePolicy createdPolicy = policyManager.createGovernancePolicy(organization,
+                                    policy);
+                            if (createdPolicy != null) {
+                                new ComplianceManager().handlePolicyChangeEvent(createdPolicy.getId(), organization);
+                            }
+                        } else {
+                            log.info("Policy " + defaultPolicy.getName() + " already exists in organization: "
+                                    + organization + "; skipping.");
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while loading default policy from file: " + file.getName(), e);
+                    } catch (APIMGovernanceException e) {
+                        log.error("Error while adding default policy: " + file.getName(), e);
+                    }
+                }
+            });
+        } catch (IOException e) {
+            log.error("Error while accessing default policy directory", e);
+        } catch (APIMGovernanceException e) {
+            log.error("Error while retrieving existing policies for organization: " + organization, e);
         }
     }
 
@@ -204,6 +258,52 @@ public class APIMGovernanceUtil {
         ruleset.setRulesetContent(rulesetContent);
 
         return ruleset;
+    }
+
+    /**
+     * Get APIMGovernancePolicy from APIMDefaultGovPolicy
+     *
+     * @param defaultPolicy Default Policy
+     * @param organization  Organization
+     * @return APIMGovernancePolicy object
+     */
+    public static APIMGovernancePolicy getGovPolicyFromDefaultGovPolicy(APIMDefaultGovPolicy defaultPolicy,
+                                                                        String organization) {
+        APIMGovernancePolicy policy = new APIMGovernancePolicy();
+        RulesetManager rulesetManager = new RulesetManager();
+
+        policy.setName(defaultPolicy.getName());
+        policy.setDescription(defaultPolicy.getDescription());
+        List<String> labels = defaultPolicy.getLabels();
+        if (labels != null && labels.stream().anyMatch(label -> label
+                .equalsIgnoreCase(APIMGovernanceConstants.GLOBAL_LABEL))) {
+            policy.setGlobal(true);
+            policy.setLabels(Collections.emptyList());
+        } else {
+            policy.setLabels(labels);
+        }
+        policy.setGovernableStates(defaultPolicy.getGovernableStates().stream()
+                .map(APIMGovernableState::fromString)
+                .collect(Collectors.toList()));
+        List<String> rulesetIds = new ArrayList<>();
+        for (String rulesetName : defaultPolicy.getRulesetNames()) {
+            try {
+                RulesetInfo ruleset = rulesetManager.getRulesetByName(rulesetName, organization);
+                if (ruleset != null) {
+                    rulesetIds.add(ruleset.getId());
+                } else {
+                    log.warn("Provided ruleset name: " + rulesetName + " does not exist in organization: "
+                            + organization + ". Skipping ruleset while creating policy: " + defaultPolicy.getName());
+                }
+            } catch (APIMGovernanceException e) {
+                log.error("Error while getting ruleset ID for ruleset name: " + rulesetName, e);
+            }
+        }
+        policy.setRulesetIds(rulesetIds);
+        // For now actions are empty, notify actions are set by default by the policy manager down the line
+        policy.setActions(Collections.emptyList());
+
+        return policy;
     }
 
     /**
