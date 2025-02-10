@@ -1,0 +1,35 @@
+package {{package}}.impl;
+
+import {{package}}.*;
+import {{modelPackage}}.*;
+
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.apache.cxf.jaxrs.ext.MessageContext;
+
+{{#imports}}import {{import}};
+{{/imports}}
+
+import java.util.List;
+
+import java.io.InputStream;
+
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
+{{>generatedAnnotation}}
+{{#operations}}
+public class {{classname}}ServiceImpl implements {{classname}}Service {
+    {{#operation}}
+
+    public Response {{nickname}}({{#allParams}}{{>serviceQueryParams}}{{>servicePathParams}}{{>serviceHeaderParams}}{{>serviceBodyParams}}{{>serviceFormParams}}, {{/allParams}}MessageContext messageContext) {
+        // remove errorObject and add implementation code!
+        ErrorDTO errorObject = new ErrorDTO();
+        Response.Status status = Response.Status.NOT_IMPLEMENTED;
+        errorObject.setCode((long) status.getStatusCode());
+        errorObject.setMessage(status.toString());
+        errorObject.setDescription("The requested resource has not been implemented");
+        return Response.status(status).entity(errorObject).build();
+    }
+    {{/operation}}
+}
+{{/operations}}

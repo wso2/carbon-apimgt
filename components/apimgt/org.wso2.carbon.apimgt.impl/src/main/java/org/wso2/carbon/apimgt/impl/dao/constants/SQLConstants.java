@@ -2936,9 +2936,9 @@ public class SQLConstants {
     public static final String GET_MAPPED_LABEL_IDS_BY_API_ID_SQL = "SELECT LABEL_UUID FROM AM_API_LABEL_MAPPING " +
             "WHERE API_UUID = ?";
 
-    public static final String GET_MAPPED_APIS_BY_LABEL_UUID_SQL = "SELECT AM_API.API_UUID, AM_API.API_NAME, AM_API.API_VERSION, " +
-            "AM_API.API_PROVIDER FROM AM_API_LABEL_MAPPING JOIN AM_API ON AM_API_LABEL_MAPPING.API_UUID = AM_API.API_UUID " +
-            "WHERE AM_API_LABEL_MAPPING.LABEL_UUID = ?";
+    public static final String GET_MAPPED_APIS_BY_LABEL_UUID_SQL = "SELECT AM_API.API_UUID, AM_API.API_NAME, " +
+            "AM_API.API_VERSION, AM_API.API_PROVIDER, AM_API.API_TYPE FROM AM_API_LABEL_MAPPING " +
+            "JOIN AM_API ON AM_API_LABEL_MAPPING.API_UUID = AM_API.API_UUID WHERE AM_API_LABEL_MAPPING.LABEL_UUID = ?";
 
     public static final String GET_MAPPED_LABELS_BY_API_UUID_SQL = "SELECT AM_LABEL.UUID, AM_LABEL.NAME, " +
             "AM_LABEL.DESCRIPTION, AM_LABEL.TENANT_DOMAIN FROM AM_API_LABEL_MAPPING JOIN AM_LABEL ON " +
@@ -3300,26 +3300,31 @@ public class SQLConstants {
                     "   AND API.ORGANIZATION = ?" +
                     "   AND SUBS.SUB_STATUS != '" + APIConstants.SubscriptionStatus.REJECTED + "'";
 
-    /** Throttle related constants**/
+    public static final String GET_ALL_APIS_OF_ORG = "SELECT API_UUID, API_NAME, API_VERSION, API_PROVIDER, API_TYPE " +
+            "FROM AM_API WHERE ORGANIZATION = ?";
 
-    public static class ThrottleSQLConstants{
+    /**
+     * Throttle related constants
+     **/
 
-    	public static final String QUOTA_TYPE_BANDWIDTH = PolicyConstants.BANDWIDTH_TYPE;
+    public static class ThrottleSQLConstants {
 
-    	public static final String QUOTA_TYPE_REQUESTCOUNT = PolicyConstants.REQUEST_COUNT_TYPE;
+        public static final String QUOTA_TYPE_BANDWIDTH = PolicyConstants.BANDWIDTH_TYPE;
 
-		public static final String GET_POLICY_NAMES = " SELECT " + "   NAME " + "FROM " + "   AM_API_THROTTLE_POLICY"
-				+ " WHERE" + "   TYPE = ?" + "   AND TENANT_ID =?";
+        public static final String QUOTA_TYPE_REQUESTCOUNT = PolicyConstants.REQUEST_COUNT_TYPE;
 
-		public static final String GET_EXISTING_POLICY_SQL = "SELECT POLICY_ID FROM AM_API_THROTTLE_POLICY WHERE NAME = ? AND TENANT_ID = ? ";
+        public static final String GET_POLICY_NAMES = " SELECT " + "   NAME " + "FROM " + "   AM_API_THROTTLE_POLICY"
+                + " WHERE" + "   TYPE = ?" + "   AND TENANT_ID =?";
 
-		public static final String INSERT_API_POLICY_SQL = "INSERT INTO AM_API_THROTTLE_POLICY (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_TYPE, \n"
-				+ "  DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT , IS_DEPLOYED, UUID, APPLICABLE_LEVEL) \n"
-				+ " VALUES (?,?,?,?,? ,?,?,?,?,? ,?,?)";
+        public static final String GET_EXISTING_POLICY_SQL = "SELECT POLICY_ID FROM AM_API_THROTTLE_POLICY WHERE NAME = ? AND TENANT_ID = ? ";
 
-		public static final String INSERT_API_POLICY_WITH_ID_SQL = "INSERT INTO AM_API_THROTTLE_POLICY (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_TYPE, \n"
-				+ " DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, \n"
-				+ " IS_DEPLOYED, UUID, APPLICABLE_LEVEL, POLICY_ID) \n" + "VALUES (?,?,?,?,?, ?,?,?,?,? ,?,?,?)";
+        public static final String INSERT_API_POLICY_SQL = "INSERT INTO AM_API_THROTTLE_POLICY (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_TYPE, \n"
+                + "  DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT , IS_DEPLOYED, UUID, APPLICABLE_LEVEL) \n"
+                + " VALUES (?,?,?,?,? ,?,?,?,?,? ,?,?)";
+
+        public static final String INSERT_API_POLICY_WITH_ID_SQL = "INSERT INTO AM_API_THROTTLE_POLICY (NAME, DISPLAY_NAME, TENANT_ID, DESCRIPTION, DEFAULT_QUOTA_TYPE, \n"
+                + " DEFAULT_QUOTA, DEFAULT_QUOTA_UNIT, DEFAULT_UNIT_TIME, DEFAULT_TIME_UNIT, \n"
+                + " IS_DEPLOYED, UUID, APPLICABLE_LEVEL, POLICY_ID) \n" + "VALUES (?,?,?,?,?, ?,?,?,?,? ,?,?,?)";
 
 
         public static final String UPDATE_API_POLICY_BY_UUID_SQL = "UPDATE AM_API_THROTTLE_POLICY SET DISPLAY_NAME = ?, "
@@ -3890,7 +3895,7 @@ public class SQLConstants {
 
         public static final String UPDATE_ORGANIZATION =
                 "UPDATE AM_ORGANIZATION_MAPPING " +
-                "   SET DISPLAY_NAME = ?, DESCRIPTION = ?, EXT_ORG_ID=?, ORG_HANDLE=? WHERE ORG_UUID = ?";
+                "   SET DISPLAY_NAME = ?, DESCRIPTION = ?, EXT_ORG_ID=?, ORG_HANDLE=?, PARENT_ORG_UUID=? WHERE ORG_UUID = ?";
 
         public static final String DELETE_ORGANIZATION =
                 "DELETE FROM AM_ORGANIZATION_MAPPING WHERE ORG_UUID = ? AND ROOT_ORGANIZATION=?";

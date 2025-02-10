@@ -30,6 +30,7 @@ public class ApiResult {
   private String name = null;
   private String version = null;
   private String id = null;
+  private String type = null;
 
   public String getId() {
     return id;
@@ -48,15 +49,25 @@ public class ApiResult {
   public String getVersion() {
     return version;
   }
+
   public void setVersion(String version) {
     this.version = version;
   }
 
   public String getProvider() {
-      return provider;
+    return provider;
   }
+
   public void setProvider(String provider) {
-      this.provider = provider;
+    this.provider = provider;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
   }
 
   @Override
@@ -68,11 +79,12 @@ public class ApiResult {
     if (!Objects.equals(this.name, other.name)) return false;
     if (!Objects.equals(this.version, other.version)) return false;
     if (!Objects.equals(this.provider, other.provider)) return false;
+    if (!Objects.equals(this.type, other.type)) return false;
     return true;
   }
 
   public int hashCode() {
-    return Objects.hash(super.hashCode(), id, name, version, provider);
+    return Objects.hash(super.hashCode(), id, name, version, provider, type);
   }
 }
 

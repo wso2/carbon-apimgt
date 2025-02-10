@@ -1984,7 +1984,7 @@ public class APIAdminImpl implements APIAdmin {
         if (savedOrgInfo != null) {
             orgDto.setOrganizationHandle(APIUtil.getOrganizationHandle(orgDto.getName()));
             orgDto.setOrganizationId(savedOrgInfo.getOrganizationId());
-            apiMgtDAO.updateOrganizationDetails(orgDto);
+            apiMgtDAO.updateOrganizationDetails(orgDto, parentOrgId);
         } else {
             orgDto.setOrganizationHandle(APIUtil.getOrganizationHandle(orgDto.getName()));
             savedOrgInfo = apiMgtDAO.addOrganization(orgDto, parentOrgId, tenantDomain);
@@ -2004,7 +2004,7 @@ public class APIAdminImpl implements APIAdmin {
     public OrganizationDetailsDTO updateOrganization(OrganizationDetailsDTO organizationInfoDTO, String parentOrgId,
             String tenantDomain) throws APIManagementException {
         organizationInfoDTO.setOrganizationHandle(APIUtil.getOrganizationHandle(organizationInfoDTO.getName()));
-        apiMgtDAO.updateOrganizationDetails(organizationInfoDTO);
+        apiMgtDAO.updateOrganizationDetails(organizationInfoDTO, parentOrgId);
         return apiMgtDAO.getOrganizationDetails(organizationInfoDTO.getOrganizationId(),
                 tenantDomain);
     }
