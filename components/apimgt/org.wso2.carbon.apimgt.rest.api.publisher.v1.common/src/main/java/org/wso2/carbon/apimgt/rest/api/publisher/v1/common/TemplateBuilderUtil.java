@@ -1169,8 +1169,10 @@ public class TemplateBuilderUtil {
 
         if (endpointDTOList != null && !endpointDTOList.isEmpty()) {
             for (EndpointDTO endpointDTO : endpointDTOList) {
+                String endpointType = (APIConstants.PRODUCTION.equals(endpointDTO.getEnvironment())) ?
+                        APIConstants.API_DATA_PRODUCTION_ENDPOINTS : APIConstants.API_DATA_SANDBOX_ENDPOINTS;
                 String endpointConfigContext = builder
-                        .getConfigStringForEndpointTemplate(endpointDTO.getEnvironment().toLowerCase(),
+                        .getConfigStringForEndpointTemplate(endpointType,
                                 endpointDTO.getEndpointUuid(), endpointDTO.getEndpointConfig());
                 GatewayContentDTO endpoint = new GatewayContentDTO();
                 endpoint.setName(getEndpointKey(api) + "_API_LLMEndpoint_" + endpointDTO.getEndpointUuid());

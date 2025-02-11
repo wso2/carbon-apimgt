@@ -27,8 +27,6 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
-import org.wso2.carbon.core.util.CryptoException;
-import org.wso2.carbon.core.util.CryptoUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -142,7 +140,6 @@ public class EndpointsContext extends ConfigContextDecorator {
     private static void addDefaultEndpoint(VelocityContext context, String environment, API api) {
 
         EndpointDTO defaultEndpoint = new EndpointDTO();
-        defaultEndpoint.setEndpointType(APIConstants.API_TYPE_REST);
         defaultEndpoint.setEnvironment(environment);
         defaultEndpoint.setEndpointConfig(new Gson().fromJson(api.getEndpointConfig(), EndpointConfigDTO.class));
 
@@ -204,44 +201,34 @@ public class EndpointsContext extends ConfigContextDecorator {
          */
         public SimplifiedEndpointDTO(EndpointDTO endpointDTO) {
 
-            try {
-                if (endpointDTO == null) {
-                    return;
-                }
-
-                this.endpointUuid = endpointDTO.getEndpointUuid();
-                this.endpointName = endpointDTO.getEndpointName();
-                this.environment = endpointDTO.getEnvironment();
-
-                if (endpointDTO.getEndpointConfig() != null) {
-                    EndpointConfigDTO.EndpointSecurityConfig securityConfig =
-                            endpointDTO.getEndpointConfig().getEndpointSecurity();
-                    if (securityConfig != null) {
-                        this.endpointSecurityEnabled = true;
-                        EndpointSecurity endpointSecurity = null;
-                        if (APIConstants.PRODUCTION.equals(environment)) {
-                            endpointSecurity = securityConfig.getProduction();
-                        } else if (APIConstants.SANDBOX.equals(environment)) {
-                            endpointSecurity = securityConfig.getSandbox();
-                        }
-                        if (endpointSecurity != null && endpointSecurity.isEnabled()) {
-                            this.apiKeyIdentifier = endpointSecurity.getApiKeyIdentifier();
-                            if (endpointDTO.getEndpointUuid() == null) {
-                                this.apiKeyValue = endpointSecurity.getApiKeyValue();
-                            } else {
-                                this.apiKeyValue = new String(CryptoUtil.getDefaultCryptoUtil()
-                                        .base64DecodeAndDecrypt(endpointSecurity.getApiKeyValue()));
-                            }
-                            this.apiKeyIdentifierType = endpointSecurity.getApiKeyIdentifierType();
-                        }
-                    } else {
-                        this.endpointSecurityEnabled = false;
-                    }
-                }
-            } catch (CryptoException e) {
-                log.error("Error occurred during decrypting API Key value");
+            if (endpointDTO == null) {
+                return;
             }
 
+            this.endpointUuid = endpointDTO.getEndpointUuid();
+            this.endpointName = endpointDTO.getEndpointName();
+            this.environment = endpointDTO.getEnvironment();
+
+            if (endpointDTO.getEndpointConfig() != null) {
+                EndpointConfigDTO.EndpointSecurityConfig securityConfig =
+                        endpointDTO.getEndpointConfig().getEndpointSecurity();
+                if (securityConfig != null) {
+                    this.endpointSecurityEnabled = true;
+                    EndpointSecurity endpointSecurity = null;
+                    if (APIConstants.PRODUCTION.equals(environment)) {
+                        endpointSecurity = securityConfig.getProduction();
+                    } else if (APIConstants.SANDBOX.equals(environment)) {
+                        endpointSecurity = securityConfig.getSandbox();
+                    }
+                    if (endpointSecurity != null && endpointSecurity.isEnabled()) {
+                        this.apiKeyIdentifier = endpointSecurity.getApiKeyIdentifier();
+                        this.apiKeyValue = endpointSecurity.getApiKeyValue();
+                        this.apiKeyIdentifierType = endpointSecurity.getApiKeyIdentifierType();
+                    }
+                } else {
+                    this.endpointSecurityEnabled = false;
+                }
+            }
         }
 
         public String getEnvironment() {

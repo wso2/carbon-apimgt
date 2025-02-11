@@ -25,14 +25,10 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.gateway.RBEndpointDTO;
 import org.wso2.carbon.apimgt.api.gateway.RBEndpointsPolicyDTO;
-import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
+import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE;
-import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE_PRODUCTION;
 
 /**
  * Mediator for AI API Round Robin load balancing.
@@ -40,7 +36,7 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE_PRODUCTION;
 public class RoundRobinMediator extends AbstractMediator implements ManagedLifecycle {
 
     private static final Log log = LogFactory.getLog(RoundRobinMediator.class);
-    private String endpointList;
+    private String roundRobinConfigs;
     private final AtomicInteger counter = new AtomicInteger(0);
 
     /**
@@ -50,6 +46,7 @@ public class RoundRobinMediator extends AbstractMediator implements ManagedLifec
      */
     @Override
     public void init(SynapseEnvironment synapseEnvironment) {
+
         if (log.isDebugEnabled()) {
             log.debug("RoundRobinMediator initialized.");
         }
@@ -71,53 +68,24 @@ public class RoundRobinMediator extends AbstractMediator implements ManagedLifec
      */
     @Override
     public boolean mediate(MessageContext messageContext) {
+
         if (log.isDebugEnabled()) {
             log.debug("RoundRobinMediator mediation started.");
         }
 
-        RBEndpointsPolicyDTO endpoints = new Gson().fromJson(endpointList, RBEndpointsPolicyDTO.class);
-        RBEndpointDTO nextEndpoint = getNextEndpoint(endpoints, messageContext);
+        RBEndpointsPolicyDTO endpoints = new Gson().fromJson(roundRobinConfigs, RBEndpointsPolicyDTO.class);
+        List<RBEndpointDTO> activeEndpoints = Utils.getActiveEndpoints(endpoints, messageContext);
 
-        if (nextEndpoint != null) {
+        if (activeEndpoints != null && !activeEndpoints.isEmpty()) {
+            RBEndpointDTO nextEndpoint = getRoundRobinEndpoint(activeEndpoints);
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, nextEndpoint.getEndpointId());
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_MODEL, nextEndpoint.getModel());
             messageContext.setProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION, endpoints.getSuspendDuration());
         } else {
-            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, APIConstants.AIAPIConstants.REJECT_ENDPOINT);
+            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
+                    APIConstants.AIAPIConstants.REJECT_ENDPOINT);
         }
         return true;
-    }
-
-    /**
-     * Retrieves the next available endpoint based on the round-robin load balancing policy.
-     *
-     * @param endpoints      RBEndpointsPolicyDTO object containing endpoint configurations.
-     * @param messageContext Synapse message context.
-     * @return The selected RBEndpointDTO, or null if no active endpoints are available.
-     */
-    public RBEndpointDTO getNextEndpoint(RBEndpointsPolicyDTO endpoints, MessageContext messageContext) {
-        List<RBEndpointDTO> productionEndpoints = endpoints.getProduction();
-        List<RBEndpointDTO> sandboxEndpoints = endpoints.getSandbox();
-
-        List<RBEndpointDTO> selectedEndpoints = API_KEY_TYPE_PRODUCTION.equals(messageContext.getProperty(API_KEY_TYPE))
-                ? productionEndpoints
-                : sandboxEndpoints;
-
-        if (selectedEndpoints == null || selectedEndpoints.isEmpty()) {
-            return null;
-        }
-
-        List<RBEndpointDTO> activeEndpoints = new ArrayList<>();
-        for (RBEndpointDTO endpoint : selectedEndpoints) {
-            if (!DataHolder.getInstance().isEndpointSuspended(endpoint.getEndpointId() + "_" + endpoint.getModel())) {
-                activeEndpoints.add(endpoint);
-            }
-        }
-
-        if (activeEndpoints.isEmpty()) {
-            return null;
-        }
-        return getRoundRobinEndpoint(activeEndpoints);
     }
 
     /**
@@ -127,6 +95,7 @@ public class RoundRobinMediator extends AbstractMediator implements ManagedLifec
      * @return The selected RBEndpointDTO based on round-robin order.
      */
     private RBEndpointDTO getRoundRobinEndpoint(List<RBEndpointDTO> endpoints) {
+
         int index = counter.getAndIncrement() % endpoints.size();
         return endpoints.get(index);
     }
@@ -136,17 +105,19 @@ public class RoundRobinMediator extends AbstractMediator implements ManagedLifec
      *
      * @return The endpoint list as a JSON string.
      */
-    public String getEndpointList() {
-        return endpointList;
+    public String getRoundRobinConfigs() {
+
+        return roundRobinConfigs;
     }
 
     /**
      * Sets the endpoint list as a JSON string.
      *
-     * @param endpointList JSON string containing endpoint details.
+     * @param roundRobinConfigs JSON string containing endpoint details.
      */
-    public void setEndpointList(String endpointList) {
-        this.endpointList = endpointList;
+    public void setRoundRobinConfigs(String roundRobinConfigs) {
+
+        this.roundRobinConfigs = roundRobinConfigs;
     }
 }
 

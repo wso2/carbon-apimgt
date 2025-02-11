@@ -50,6 +50,8 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.gateway.RBEndpointDTO;
+import org.wso2.carbon.apimgt.api.gateway.RBEndpointsPolicyDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
@@ -96,6 +98,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
+
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE_PRODUCTION;
 
 public class Utils {
 
@@ -867,6 +872,39 @@ public class Utils {
             selectedResource = resource;
         }
         return selectedResource;
+    }
+
+    /**
+     * Retrieves available endpoints for round robin policies.
+     *
+     * @param endpoints      RBEndpointsPolicyDTO object containing endpoint configurations.
+     * @param messageContext Synapse message context.
+     * @return The selected RBEndpointDTO list, or null if no active endpoints are available.
+     */
+    public static List<RBEndpointDTO> getActiveEndpoints(RBEndpointsPolicyDTO endpoints, MessageContext messageContext) {
+
+        List<RBEndpointDTO> productionEndpoints = endpoints.getProduction();
+        List<RBEndpointDTO> sandboxEndpoints = endpoints.getSandbox();
+
+        List<RBEndpointDTO> selectedEndpoints = API_KEY_TYPE_PRODUCTION.equals(messageContext.getProperty(API_KEY_TYPE))
+                ? productionEndpoints
+                : sandboxEndpoints;
+
+        if (selectedEndpoints == null || selectedEndpoints.isEmpty()) {
+            return null;
+        }
+
+        List<RBEndpointDTO> activeEndpoints = new ArrayList<>();
+        for (RBEndpointDTO endpoint : selectedEndpoints) {
+            if (!DataHolder.getInstance().isEndpointSuspended(endpoint.getEndpointId() + "_" + endpoint.getModel())) {
+                activeEndpoints.add(endpoint);
+            }
+        }
+
+        if (activeEndpoints.isEmpty()) {
+            return null;
+        }
+        return activeEndpoints;
     }
 
 }
