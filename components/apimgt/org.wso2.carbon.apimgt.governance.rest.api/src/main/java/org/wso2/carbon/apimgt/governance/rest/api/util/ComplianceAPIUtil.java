@@ -109,7 +109,7 @@ public class ComplianceAPIUtil {
         }
 
         // Get all policy attachments evaluated for the artifact
-        List<String> evaluatedAttachment = new ComplianceManager().getEvaluatedPoliciesForArtifact(artifactRefId,
+        List<String> evaluatedAttachment = new ComplianceManager().getEvaluatedPolicyAttachmentsForArtifact(artifactRefId,
                 artifactType, organization);
 
         // If the artifact is not evaluated yet, set the compliance status to not applicable/pending and return
@@ -235,8 +235,8 @@ public class ComplianceAPIUtil {
             return policyDTO;
         }
 
-        policyDTO.setRuleType(PolicyValidationResultWithoutRulesDTO
-                .RuleTypeEnum.fromValue(policy.getPolicyType().name()));
+        policyDTO.setPolicyType(PolicyValidationResultWithoutRulesDTO
+                .PolicyTypeEnum.fromValue(policy.getPolicyType().name()));
 
         policyDTO.setStatus(policyViolations.isEmpty() ?
                 PolicyValidationResultWithoutRulesDTO.StatusEnum.PASSED :
@@ -327,8 +327,8 @@ public class ComplianceAPIUtil {
         }
 
         // Get evaluated policy attachments for the current artifact
-        List<String> evaluatedAttachments = complianceManager.getEvaluatedPoliciesForArtifact(artifactRefId, artifactType,
-                organization);
+        List<String> evaluatedAttachments = complianceManager.getEvaluatedPolicyAttachmentsForArtifact(artifactRefId,
+                artifactType, organization);
 
         // If the artifact is not evaluated yet, set the compliance status to not applicable/pending and return
         if (evaluatedAttachments.isEmpty()) {

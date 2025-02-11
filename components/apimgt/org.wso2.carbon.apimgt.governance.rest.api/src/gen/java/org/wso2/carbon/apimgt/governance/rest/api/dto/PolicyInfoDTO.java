@@ -58,15 +58,15 @@ return null;
     } 
     private RuleCategoryEnum ruleCategory = null;
 
-          @XmlType(name="RuleTypeEnum")
+          @XmlType(name="PolicyTypeEnum")
     @XmlEnum(String.class)
-    public enum RuleTypeEnum {
+    public enum PolicyTypeEnum {
         API_METADATA("API_METADATA"),
         API_DEFINITION("API_DEFINITION"),
         API_DOCUMENTATION("API_DOCUMENTATION");
         private String value;
 
-        RuleTypeEnum (String v) {
+        PolicyTypeEnum (String v) {
             value = v;
         }
 
@@ -80,8 +80,8 @@ return null;
         }
 
         @JsonCreator
-        public static RuleTypeEnum fromValue(String v) {
-            for (RuleTypeEnum b : RuleTypeEnum.values()) {
+        public static PolicyTypeEnum fromValue(String v) {
+            for (PolicyTypeEnum b : PolicyTypeEnum.values()) {
                 if (String.valueOf(b.value).equals(v)) {
                     return b;
                 }
@@ -89,7 +89,7 @@ return null;
 return null;
         }
     } 
-    private RuleTypeEnum ruleType = null;
+    private PolicyTypeEnum policyType = null;
 
           @XmlType(name="ArtifactTypeEnum")
     @XmlEnum(String.class)
@@ -205,20 +205,20 @@ return null;
   /**
    * Context or area to which the policy applies.
    **/
-  public PolicyInfoDTO ruleType(RuleTypeEnum ruleType) {
-    this.ruleType = ruleType;
+  public PolicyInfoDTO policyType(PolicyTypeEnum policyType) {
+    this.policyType = policyType;
     return this;
   }
 
   
   @ApiModelProperty(example = "API_DEFINITION", required = true, value = "Context or area to which the policy applies.")
-  @JsonProperty("ruleType")
+  @JsonProperty("policyType")
   @NotNull
-  public RuleTypeEnum getRuleType() {
-    return ruleType;
+  public PolicyTypeEnum getPolicyType() {
+    return policyType;
   }
-  public void setRuleType(RuleTypeEnum ruleType) {
-    this.ruleType = ruleType;
+  public void setPolicyType(PolicyTypeEnum policyType) {
+    this.policyType = policyType;
   }
 
   /**
@@ -363,7 +363,7 @@ return null;
         Objects.equals(name, policyInfo.name) &&
         Objects.equals(description, policyInfo.description) &&
         Objects.equals(ruleCategory, policyInfo.ruleCategory) &&
-        Objects.equals(ruleType, policyInfo.ruleType) &&
+        Objects.equals(policyType, policyInfo.policyType) &&
         Objects.equals(artifactType, policyInfo.artifactType) &&
         Objects.equals(documentationLink, policyInfo.documentationLink) &&
         Objects.equals(provider, policyInfo.provider) &&
@@ -375,7 +375,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, ruleCategory, ruleType, artifactType, documentationLink, provider, createdBy, createdTime, updatedBy, updatedTime);
+    return Objects.hash(id, name, description, ruleCategory, policyType, artifactType, documentationLink, provider, createdBy, createdTime, updatedBy, updatedTime);
   }
 
   @Override
@@ -387,7 +387,7 @@ return null;
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    ruleCategory: ").append(toIndentedString(ruleCategory)).append("\n");
-    sb.append("    ruleType: ").append(toIndentedString(ruleType)).append("\n");
+    sb.append("    policyType: ").append(toIndentedString(policyType)).append("\n");
     sb.append("    artifactType: ").append(toIndentedString(artifactType)).append("\n");
     sb.append("    documentationLink: ").append(toIndentedString(documentationLink)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
