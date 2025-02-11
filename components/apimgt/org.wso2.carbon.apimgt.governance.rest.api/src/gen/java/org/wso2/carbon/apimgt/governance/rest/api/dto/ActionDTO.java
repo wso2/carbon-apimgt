@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 /**
- * Action to be taken when a governance policy is violated.
+ * Action to be taken when a governance policy attachment is violated.
  **/
 
 import io.swagger.annotations.*;
@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Action to be taken when a governance policy is violated.")
+@ApiModel(description = "Action to be taken when a governance policy attachment is violated.")
 
 public class ActionDTO   {
   
@@ -160,7 +160,7 @@ return null;
   }
 
   /**
-   * The type of action to be taken when a governance policy is violated in the given state withe given rule severity.
+   * The type of action to be taken when a governance policy attachment is violated in the given state withe given rule severity.
    **/
   public ActionDTO type(TypeEnum type) {
     this.type = type;
@@ -168,7 +168,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "BLOCK", value = "The type of action to be taken when a governance policy is violated in the given state withe given rule severity.")
+  @ApiModelProperty(example = "BLOCK", value = "The type of action to be taken when a governance policy attachment is violated in the given state withe given rule severity.")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;

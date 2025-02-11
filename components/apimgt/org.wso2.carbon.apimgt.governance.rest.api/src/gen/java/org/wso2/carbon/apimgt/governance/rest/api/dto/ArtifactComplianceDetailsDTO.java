@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactInfoDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceWithRulesetsDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAttachmentAdherenceWithPoliciesDTO;
 import javax.validation.constraints.*;
 
 /**
@@ -63,7 +63,7 @@ return null;
     } 
     private StatusEnum status = null;
     private ArtifactInfoDTO info = null;
-    private List<PolicyAdherenceWithRulesetsDTO> governedPolicies = new ArrayList<PolicyAdherenceWithRulesetsDTO>();
+    private List<PolicyAttachmentAdherenceWithPoliciesDTO> governedPolicyAttachments = new ArrayList<PolicyAttachmentAdherenceWithPoliciesDTO>();
 
   /**
    * UUID of the artifact.
@@ -120,22 +120,22 @@ return null;
   }
 
   /**
-   * List of policies under which the artifact was governed.
+   * List of policy attachments under which the artifact was governed.
    **/
-  public ArtifactComplianceDetailsDTO governedPolicies(List<PolicyAdherenceWithRulesetsDTO> governedPolicies) {
-    this.governedPolicies = governedPolicies;
+  public ArtifactComplianceDetailsDTO governedPolicyAttachments(List<PolicyAttachmentAdherenceWithPoliciesDTO> governedPolicyAttachments) {
+    this.governedPolicyAttachments = governedPolicyAttachments;
     return this;
   }
 
   
-  @ApiModelProperty(value = "List of policies under which the artifact was governed.")
+  @ApiModelProperty(value = "List of policy attachments under which the artifact was governed.")
       @Valid
-  @JsonProperty("governedPolicies")
-  public List<PolicyAdherenceWithRulesetsDTO> getGovernedPolicies() {
-    return governedPolicies;
+  @JsonProperty("governedPolicyAttachments")
+  public List<PolicyAttachmentAdherenceWithPoliciesDTO> getGovernedPolicyAttachments() {
+    return governedPolicyAttachments;
   }
-  public void setGovernedPolicies(List<PolicyAdherenceWithRulesetsDTO> governedPolicies) {
-    this.governedPolicies = governedPolicies;
+  public void setGovernedPolicyAttachments(List<PolicyAttachmentAdherenceWithPoliciesDTO> governedPolicyAttachments) {
+    this.governedPolicyAttachments = governedPolicyAttachments;
   }
 
 
@@ -151,12 +151,12 @@ return null;
     return Objects.equals(id, artifactComplianceDetails.id) &&
         Objects.equals(status, artifactComplianceDetails.status) &&
         Objects.equals(info, artifactComplianceDetails.info) &&
-        Objects.equals(governedPolicies, artifactComplianceDetails.governedPolicies);
+        Objects.equals(governedPolicyAttachments, artifactComplianceDetails.governedPolicyAttachments);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, status, info, governedPolicies);
+    return Objects.hash(id, status, info, governedPolicyAttachments);
   }
 
   @Override
@@ -167,7 +167,7 @@ return null;
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    info: ").append(toIndentedString(info)).append("\n");
-    sb.append("    governedPolicies: ").append(toIndentedString(governedPolicies)).append("\n");
+    sb.append("    governedPolicyAttachments: ").append(toIndentedString(governedPolicyAttachments)).append("\n");
     sb.append("}");
     return sb.toString();
   }

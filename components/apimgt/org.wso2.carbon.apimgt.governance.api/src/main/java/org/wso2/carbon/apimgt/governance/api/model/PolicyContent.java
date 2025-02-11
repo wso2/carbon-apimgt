@@ -27,7 +27,7 @@ import static org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants.Y
 /**
  * This class represents the Ruleset Content
  */
-public class RulesetContent {
+public class PolicyContent {
     byte[] content;
     ContentType contentType;
     String fileName;
@@ -40,10 +40,10 @@ public class RulesetContent {
         JSON
     }
 
-    public RulesetContent() {
+    public PolicyContent() {
     }
 
-    public RulesetContent(RulesetContent other) {
+    public PolicyContent(PolicyContent other) {
         if (other != null) {
             this.content = other.content != null ? other.content.clone() : null;
             this.contentType = other.contentType;

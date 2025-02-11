@@ -7,7 +7,7 @@ import org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceDetailsDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyValidationResultDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.util.APIMGovernanceAPIUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.ComplianceAPIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -87,15 +87,15 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
      * @return Response
      * @throws APIMGovernanceException if an error occurs while getting the ruleset validation results
      */
-    public Response getRulesetValidationResultsByAPIId(String apiId, String rulesetId, MessageContext messageContext)
+    public Response getPolicyValidationResultsByAPIId(String apiId, String rulesetId, MessageContext messageContext)
             throws APIMGovernanceException {
 
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
         ArtifactType artifactType = ArtifactType.API;
 
-        RulesetValidationResultDTO rulesetValidationResultDTO = ComplianceAPIUtil
-                .getRulesetValidationResultDTO(apiId, artifactType, rulesetId, organization);
+        PolicyValidationResultDTO policyValidationResultDTO = ComplianceAPIUtil
+                .getPolicyValidationResultDTO(apiId, artifactType, rulesetId, organization);
 
-        return Response.ok().entity(rulesetValidationResultDTO).build();
+        return Response.ok().entity(policyValidationResultDTO).build();
     }
 }

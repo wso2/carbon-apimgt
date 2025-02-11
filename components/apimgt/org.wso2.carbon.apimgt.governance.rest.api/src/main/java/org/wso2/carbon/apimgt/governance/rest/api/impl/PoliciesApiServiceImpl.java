@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com).
  *
@@ -19,156 +18,263 @@
 
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.apache.cxf.jaxrs.ext.multipart.Attachment;
+import org.springframework.http.HttpHeaders;
 import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
-import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
-import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicyList;
+import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyCategory;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
+import org.wso2.carbon.apimgt.governance.api.model.Policy;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyContent;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyInfo;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyList;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
 import org.wso2.carbon.apimgt.governance.rest.api.PoliciesApiService;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.APIMGovernancePolicyDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.APIMGovernancePolicyListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyInfoDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.mappings.PolicyMappingUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.APIMGovernanceAPIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
 
 /**
- * This is the implementation class for the Governance Policies API.
+ * This is the implementation class for the Policys API.
  */
 public class PoliciesApiServiceImpl implements PoliciesApiService {
 
     /**
      * Create a new Governance Policy
      *
-     * @param governancePolicyDTO Governance Policy  with Ruleset Ids
-     * @param messageContext      Message Context
-     * @return Response
+     * @param name                      Name
+     * @param policyContentInputStream Policy content input stream
+     * @param policyContentDetail      Policy content detail
+     * @param policyCategory              Policy category
+     * @param policyType                  Policy type
+     * @param artifactType              Artifact type
+     * @param provider                  Provider
+     * @param description               Description
+     * @param documentationLink         Documentation link
+     * @param messageContext            MessageContext
+     * @return Response object
      * @throws APIMGovernanceException If an error occurs while creating the policy
      */
-    public Response createGovernancePolicy(APIMGovernancePolicyDTO governancePolicyDTO,
-                                           MessageContext messageContext) throws APIMGovernanceException {
-
-        APIMGovernancePolicyDTO createdPolicyDTO;
+    @Override
+    public Response createPolicy(String name, InputStream policyContentInputStream,
+                                 Attachment policyContentDetail, String policyType,
+                                 String artifactType, String description, String policyCategory,
+                                 String documentationLink, String provider,
+                                 MessageContext messageContext) throws APIMGovernanceException {
+        PolicyInfoDTO createdPolicyDTO;
         URI createdPolicyURI;
-
+        Policy policy = new Policy();
         try {
-            PolicyManager policyManager = new PolicyManager();
-            APIMGovernancePolicy governancePolicy =
-                    PolicyMappingUtil.fromDTOtoGovernancePolicy(governancePolicyDTO);
+            policy.setName(name);
+            policy.setPolicyCategory(PolicyCategory.fromString(policyCategory));
+            policy.setPolicyType(PolicyType.fromString(policyType));
+            policy.setArtifactType(ExtendedArtifactType.fromString(artifactType));
+            policy.setProvider(provider);
+            policy.setDescription(description);
+            policy.setDocumentationLink(documentationLink);
+
+            PolicyContent policyContent = new PolicyContent();
+            policyContent.setContent(IOUtils.toByteArray(policyContentInputStream));
+            policyContent.setFileName(policyContentDetail.getContentDisposition().getFilename());
+            policy.setPolicyContent(policyContent);
 
             String username = APIMGovernanceAPIUtil.getLoggedInUsername();
             String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+            policy.setCreatedBy(username);
 
-            governancePolicy.setCreatedBy(username);
-            governancePolicy = policyManager.createGovernancePolicy(organization,
-                    governancePolicy);
+            PolicyManager policyManager = new PolicyManager();
+            PolicyInfo createdPolicy = policyManager.createNewPolicy(policy, organization);
 
-            // Access policy compliance in the background
-            new ComplianceManager().handlePolicyChangeEvent(governancePolicy.getId(), organization);
-
-            createdPolicyDTO = PolicyMappingUtil.
-                    fromGovernancePolicyToGovernancePolicyDTO(governancePolicy);
+            createdPolicyDTO = PolicyMappingUtil.fromPolicyInfoToPolicyInfoDTO(createdPolicy);
             createdPolicyURI = new URI(
                     APIMGovernanceAPIConstants.POLICY_PATH + "/" + createdPolicyDTO.getId());
+            return Response.created(createdPolicyURI).entity(createdPolicyDTO).build();
 
         } catch (URISyntaxException e) {
-            String error = String.format("Error while creating URI for new Governance Policy %s",
-                    governancePolicyDTO.getName());
+            String error = String.format("Error while creating URI for new Policy %s",
+                    name);
             throw new APIMGovernanceException(error, e, APIMGovExceptionCodes.INTERNAL_SERVER_ERROR);
+        } catch (IOException e) {
+            throw new APIMGovernanceException("Error while converting policy content stream", e);
+        } finally {
+            IOUtils.closeQuietly(policyContentInputStream);
         }
-        return Response.created(createdPolicyURI).entity(createdPolicyDTO).build();
     }
+
 
     /**
      * Update a Governance Policy
      *
-     * @param policyId            Policy ID
-     * @param governancePolicyDTO Governance Policy  with Ruleset Ids
-     * @param messageContext      Message Context
-     * @return Response
+     * @param policyId                 Policy ID
+     * @param name                      Name
+     * @param policyContentInputStream Policy content input stream
+     * @param policyContentDetail      Policy content detail
+     * @param policyCategory              Policy category
+     * @param policyType                  Policy type
+     * @param artifactType              Artifact type
+     * @param provider                  Provider
+     * @param description               Description
+     * @param documentationLink         Documentation link
+     * @param messageContext            MessageContext
+     * @return Response object
      * @throws APIMGovernanceException If an error occurs while updating the policy
      */
-    public Response updateGovernancePolicyById(String policyId, APIMGovernancePolicyDTO
-            governancePolicyDTO, MessageContext messageContext) throws APIMGovernanceException {
-        PolicyManager policyManager = new PolicyManager();
-        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
-        String username = APIMGovernanceAPIUtil.getLoggedInUsername();
+    @Override
+    public Response updatePolicyById(String policyId, String name, InputStream policyContentInputStream,
+                                      Attachment policyContentDetail, String policyType, String artifactType,
+                                      String description, String policyCategory, String documentationLink,
+                                      String provider, MessageContext messageContext)
+            throws APIMGovernanceException {
 
-        APIMGovernancePolicy governancePolicy =
-                PolicyMappingUtil.
-                        fromDTOtoGovernancePolicy(governancePolicyDTO);
+        try {
+            Policy policy = new Policy();
+            policy.setName(name);
+            policy.setPolicyCategory(PolicyCategory.fromString(policyCategory));
+            policy.setPolicyType(PolicyType.fromString(policyType));
+            policy.setArtifactType(ExtendedArtifactType.fromString(artifactType));
+            policy.setProvider(provider);
+            policy.setId(policyId);
+            policy.setDescription(description);
+            policy.setDocumentationLink(documentationLink);
 
-        governancePolicy.setUpdatedBy(username);
-        APIMGovernancePolicy updatedPolicy = policyManager.updateGovernancePolicy
-                (policyId, governancePolicy, organization);
+            PolicyContent policyContent = new PolicyContent();
+            policyContent.setContent(IOUtils.toByteArray(policyContentInputStream));
+            policyContent.setFileName(policyContentDetail.getContentDisposition().getFilename());
+            policy.setPolicyContent(policyContent);
 
-        APIMGovernancePolicyDTO updatedPolicyDTO = PolicyMappingUtil.
-                fromGovernancePolicyToGovernancePolicyDTO(updatedPolicy);
+            String username = APIMGovernanceAPIUtil.getLoggedInUsername();
+            String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+            policy.setUpdatedBy(username);
 
-        // Re-access policy compliance in the background
-        new ComplianceManager().handlePolicyChangeEvent(policyId, organization);
+            PolicyManager policyManager = new PolicyManager();
+            PolicyInfo updatedPolicy = policyManager.updatePolicy(policyId, policy, organization);
 
-        return Response.status(Response.Status.OK).entity(updatedPolicyDTO).build();
+            // Re-access policy compliance in the background
+            new ComplianceManager().handlePolicyChangeEvent(policyId, organization);
+
+            return Response.status(Response.Status.OK).entity(PolicyMappingUtil.
+                    fromPolicyInfoToPolicyInfoDTO(updatedPolicy)).build();
+        } catch (IOException e) {
+            throw new APIMGovernanceException("Error while converting policy content stream", e);
+        } finally {
+            IOUtils.closeQuietly(policyContentInputStream);
+        }
+
     }
 
     /**
      * Delete a Governance Policy
      *
-     * @param policyId       Policy ID
-     * @param messageContext Message Context
-     * @return Response
+     * @param policyId      Policy ID
+     * @param messageContext MessageContext
+     * @return Response object
      * @throws APIMGovernanceException If an error occurs while deleting the policy
      */
-    public Response deleteGovernancePolicy(String policyId, MessageContext messageContext)
-            throws APIMGovernanceException {
+    @Override
+    public Response deletePolicy(String policyId, MessageContext messageContext) throws APIMGovernanceException {
         PolicyManager policyManager = new PolicyManager();
-        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
         policyManager.deletePolicy(policyId, organization);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     /**
-     * Get Governance Policy by ID
+     * Get a Governance Policy by ID
      *
-     * @param policyId       Policy ID
-     * @param messageContext Message Context
-     * @return Response
-     * @throws APIMGovernanceException If an error occurs while retrieving the policy
+     * @param policyId      Policy ID
+     * @param messageContext MessageContext
+     * @return Response object
+     * @throws APIMGovernanceException If an error occurs while getting the policy
      */
-    public Response getGovernancePolicyById(String policyId, MessageContext messageContext)
-            throws APIMGovernanceException {
+    @Override
+    public Response getPolicyById(String policyId, MessageContext messageContext) throws APIMGovernanceException {
         PolicyManager policyManager = new PolicyManager();
+
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-        APIMGovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId, organization);
-        APIMGovernancePolicyDTO policyDTO = PolicyMappingUtil.fromGovernancePolicyToGovernancePolicyDTO(policy);
-        return Response.status(Response.Status.OK).entity(policyDTO).build();
+        PolicyInfo policy = policyManager.getPolicyById(policyId, organization);
+        PolicyInfoDTO policyInfoDTO = PolicyMappingUtil.fromPolicyInfoToPolicyInfoDTO(policy);
+        return Response.status(Response.Status.OK).entity(policyInfoDTO).build();
     }
 
     /**
-     * Get all Governance Policies
+     * Get the content of a Governance Policy
      *
-     * @param limit          Limit for Pagination
-     * @param offset         Offset for Pagination
-     * @param query          Query for filtering
-     * @param messageContext Message Context
-     * @return Response
-     * @throws APIMGovernanceException If an error occurs while retrieving the policies
+     * @param policyId      Policy ID
+     * @param messageContext MessageContext
+     * @return Response object
+     * @throws APIMGovernanceException If an error occurs while getting the policy content
      */
-    public Response getGovernancePolicies(Integer limit, Integer offset, String query, MessageContext messageContext)
+    @Override
+    public Response getPolicyContent(String policyId, MessageContext messageContext) throws APIMGovernanceException {
+        PolicyManager policyManager = new PolicyManager();
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+
+        PolicyContent policyContent = policyManager.getPolicyContent(policyId, organization);
+
+        String fileName = policyContent.getFileName() != null ? policyContent.getFileName() : "policy.yaml";
+        String contentTypeHeader = "application/x-yaml"; // Default content type
+
+        if (PolicyContent.ContentType.JSON.equals(policyContent.getContentType())) {
+            contentTypeHeader = "application/json";
+        }
+        
+        return Response.status(Response.Status.OK)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + fileName)
+                .header(HttpHeaders.CONTENT_TYPE, contentTypeHeader)
+                .entity(new String(policyContent.getContent(), StandardCharsets.UTF_8)).build();
+    }
+
+    /**
+     * Get the list of policies using the Policy
+     *
+     * @param policyId      Policy ID
+     * @param messageContext MessageContext
+     * @return Response object
+     * @throws APIMGovernanceException If an error occurs while getting the policy usage
+     */
+    @Override
+    public Response getPolicyUsage(String policyId, MessageContext messageContext) throws APIMGovernanceException {
+        PolicyManager policyManager = new PolicyManager();
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+
+        List<String> policies = policyManager.getPolicyUsage(policyId, organization);
+        return Response.status(Response.Status.OK).entity(policies).build();
+    }
+
+    /**
+     * Get all the Governance Policys
+     *
+     * @param limit          Limit
+     * @param offset         Offset
+     * @param query          Query for filtering
+     * @param messageContext MessageContext
+     * @return Response object
+     * @throws APIMGovernanceException If an error occurs while getting the policies
+     */
+    public Response getPolicies(Integer limit, Integer offset, String query, MessageContext messageContext)
             throws APIMGovernanceException {
+
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         query = query != null ? query : "";
@@ -176,33 +282,30 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         PolicyManager policyManager = new PolicyManager();
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-        APIMGovernancePolicyList policyList;
+        PolicyList policyList;
         if (!query.isEmpty()) {
-            policyList = policyManager.searchGovernancePolicies(query, organization);
+            policyList = policyManager.searchPolicies(query, organization);
         } else {
-            policyList = policyManager.getGovernancePolicies(organization);
+            policyList = policyManager.getPolicies(organization);
         }
+        PolicyListDTO paginatedPolicyList = getPaginatedPolicies(policyList, limit, offset, query);
 
-        APIMGovernancePolicyListDTO policyListDTO = getPaginatedPolicyList(policyList, limit, offset, query);
-
-        return Response.status(Response.Status.OK).entity(policyListDTO).build();
+        return Response.status(Response.Status.OK).entity(paginatedPolicyList).build();
     }
 
     /**
-     * Get a paginated list of Governance Policies
+     * Get the paginated list of Governance Policys
      *
-     * @param policyList List of Governance Policies
-     * @param limit      Limit for Pagination
-     * @param offset     Offset for Pagination
-     * @param query      Query for filtering
-     * @return Paginated Governance Policy List
+     * @param policyList PolicyList object
+     * @param limit       Limit
+     * @param offset      Offset
+     * @param query       Query for filtering
+     * @return PolicyListDTO object
      */
-    private APIMGovernancePolicyListDTO getPaginatedPolicyList(APIMGovernancePolicyList policyList, int limit,
-                                                               int offset,
-                                                               String query) {
+    private PolicyListDTO getPaginatedPolicies(PolicyList policyList, int limit, int offset, String query) {
         int policyCount = policyList.getCount();
-        List<APIMGovernancePolicyDTO> policies = new ArrayList<>();
-        APIMGovernancePolicyListDTO paginatedPolicyListDTO = new APIMGovernancePolicyListDTO();
+        List<PolicyInfoDTO> paginatedPolicys = new ArrayList<>();
+        PolicyListDTO paginatedPolicyListDTO = new PolicyListDTO();
         paginatedPolicyListDTO.setCount(Math.min(policyCount, limit));
 
         // If the provided offset value exceeds the offset, reset the offset to default.
@@ -214,11 +317,11 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         int start = offset;
         int end = Math.min(policyCount, start + limit);
         for (int i = start; i < end; i++) {
-            APIMGovernancePolicy policy = policyList.getGovernancePolicyList().get(i);
-            APIMGovernancePolicyDTO policyDTO = PolicyMappingUtil.fromGovernancePolicyToGovernancePolicyDTO(policy);
-            policies.add(policyDTO);
+            PolicyInfo policyInfo = policyList.getPolicyList().get(i);
+            PolicyInfoDTO policyInfoDTO = PolicyMappingUtil.fromPolicyInfoToPolicyInfoDTO(policyInfo);
+            paginatedPolicys.add(policyInfoDTO);
         }
-        paginatedPolicyListDTO.setList(policies);
+        paginatedPolicyListDTO.setList(paginatedPolicys);
 
         PaginationDTO paginationDTO = new PaginationDTO();
         paginationDTO.setLimit(limit);
@@ -233,13 +336,13 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
             paginatedPrevious = APIMGovernanceAPIUtil.getPaginatedURLWithQuery
-                    (APIMGovernanceAPIConstants.POLICIES_GET_URL,
+                    (APIMGovernanceAPIConstants.POLICY_GET_URL,
                             paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT), query);
         }
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
             paginatedNext = APIMGovernanceAPIUtil.getPaginatedURLWithQuery
-                    (APIMGovernanceAPIConstants.POLICIES_GET_URL,
+                    (APIMGovernanceAPIConstants.POLICY_GET_URL,
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                             paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT), query);
         }

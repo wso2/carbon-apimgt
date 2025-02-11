@@ -18,22 +18,26 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
- * This class represents a governance Ruleset Information excluding the ruleset content
+ * This class represents a governance Policy Attachment
  */
-public class RulesetInfo {
+public class APIMGovernancePolicyAttachment {
     private String id;
     private String name;
     private String description;
-    private RuleCategory ruleCategory;
-    private RuleType ruleType;
-    private ExtendedArtifactType artifactType;
-    private String documentationLink;
-    private String provider;
+    private List<String> policyIds;
+    private List<String> labels;
+    private List<APIMGovernableState> apimGovernableStates;
+    private List<APIMGovernanceAction> actions;
     private String createdBy;
     private String createdTime;
     private String updatedBy;
     private String updatedTime;
+    private boolean isGlobal = false;
 
     public String getId() {
         return id;
@@ -59,36 +63,44 @@ public class RulesetInfo {
         this.description = description;
     }
 
-    public RuleType getRuleType() {
-        return ruleType;
+    public List<String> getPolicyIds() {
+
+        return new ArrayList<>(policyIds);
     }
 
-    public void setRuleType(RuleType ruleType) {
-        this.ruleType = ruleType;
+    public void setPolicyIds(List<String> policyIds) {
+
+        this.policyIds = Collections.unmodifiableList(new ArrayList<>(policyIds));
     }
 
-    public ExtendedArtifactType getArtifactType() {
-        return artifactType;
+    public List<String> getLabels() {
+
+        return new ArrayList<>(labels);
     }
 
-    public void setArtifactType(ExtendedArtifactType artifactType) {
-        this.artifactType = artifactType;
+    public void setLabels(List<String> labels) {
+
+        this.labels = Collections.unmodifiableList(new ArrayList<>(labels));
     }
 
-    public String getDocumentationLink() {
-        return documentationLink;
+    public List<APIMGovernableState> getGovernableStates() {
+
+        return new ArrayList<>(apimGovernableStates);
     }
 
-    public void setDocumentationLink(String documentationLink) {
-        this.documentationLink = documentationLink;
+    public void setGovernableStates(List<APIMGovernableState> apimGovernableStates) {
+
+        this.apimGovernableStates = Collections.unmodifiableList(new ArrayList<>(apimGovernableStates));
     }
 
-    public String getProvider() {
-        return provider;
+    public List<APIMGovernanceAction> getActions() {
+
+        return new ArrayList<>(actions);
     }
 
-    public void setProvider(String provider) {
-        this.provider = provider;
+    public void setActions(List<APIMGovernanceAction> actions) {
+
+        this.actions = Collections.unmodifiableList(new ArrayList<>(actions));
     }
 
     public String getCreatedBy() {
@@ -123,11 +135,11 @@ public class RulesetInfo {
         this.updatedTime = updatedTime;
     }
 
-    public RuleCategory getRuleCategory() {
-        return ruleCategory;
+    public boolean isGlobal() {
+        return isGlobal;
     }
 
-    public void setRuleCategory(RuleCategory ruleCategory) {
-        this.ruleCategory = ruleCategory;
+    public void setGlobal(boolean global) {
+        isGlobal = global;
     }
 }

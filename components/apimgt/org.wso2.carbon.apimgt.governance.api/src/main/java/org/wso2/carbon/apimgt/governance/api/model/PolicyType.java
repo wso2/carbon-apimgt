@@ -21,18 +21,18 @@ package org.wso2.carbon.apimgt.governance.api.model;
 /**
  * This class represents a governance rule type
  */
-public enum RuleType {
+public enum PolicyType {
     API_METADATA,
     API_DEFINITION,
     API_DOCUMENTATION;
 
-    public static RuleType fromString(String ruleTypeString) {
+    public static PolicyType fromString(String ruleTypeString) {
         if ("api_metadata".equalsIgnoreCase(ruleTypeString)) {
-            return RuleType.API_METADATA;
+            return PolicyType.API_METADATA;
         } else if ("api_definition".equalsIgnoreCase(ruleTypeString)) {
-            return RuleType.API_DEFINITION;
+            return PolicyType.API_DEFINITION;
         } else if ("api_documentation".equalsIgnoreCase(ruleTypeString)) {
-            return RuleType.API_DOCUMENTATION;
+            return PolicyType.API_DOCUMENTATION;
         }
         return null;
     }

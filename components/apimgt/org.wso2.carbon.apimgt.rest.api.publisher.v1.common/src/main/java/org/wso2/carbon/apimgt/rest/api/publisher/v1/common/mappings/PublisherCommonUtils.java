@@ -93,7 +93,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.RuleType;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -3029,7 +3029,7 @@ public class PublisherCommonUtils {
 
     public static Map<String, String> checkGovernanceComplianceSync(String artifactID, APIMGovernableState state,
                                                                     ArtifactType type, String organization,
-                                                                    String revisionId, Map<RuleType,
+                                                                    String revisionId, Map<PolicyType,
             String> artifactProjectContent) throws APIManagementException {
         Map<String, String> responseMap = new HashMap<>(2);
 

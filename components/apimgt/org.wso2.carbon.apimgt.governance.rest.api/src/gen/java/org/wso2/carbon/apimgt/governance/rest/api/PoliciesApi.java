@@ -1,8 +1,9 @@
 package org.wso2.carbon.apimgt.governance.rest.api;
 
-import org.wso2.carbon.apimgt.governance.rest.api.dto.APIMGovernancePolicyDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.APIMGovernancePolicyListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
+import java.io.File;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyInfoDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.PoliciesApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.impl.PoliciesApiServiceImpl;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
@@ -39,96 +40,134 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
 
     @POST
     
-    @Consumes({ "application/json" })
+    @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Creates a new governance policy.", notes = "Creates a new governance policy for the user's organization.", response = APIMGovernancePolicyDTO.class, authorizations = {
+    @ApiOperation(value = "Create a new policy.", notes = "Creates a new policy in the user's organization.", response = PolicyInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
+            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance policies")
         })
-    }, tags={ "Governance Policies",  })
+    }, tags={ "Policy",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 201, message = "OK. Governance policy created successfully.", response = APIMGovernancePolicyDTO.class),
+        @ApiResponse(code = 201, message = "OK. Policy created successfully.", response = PolicyInfoDTO.class),
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response createGovernancePolicy(@ApiParam(value = "JSON object containing the details of the new governance policy." ,required=true) APIMGovernancePolicyDTO apIMGovernancePolicyDTO) throws APIMGovernanceException{
-        return delegate.createGovernancePolicy(apIMGovernancePolicyDTO, securityContext);
+    public Response createPolicy(@Multipart(value = "name")  String name,  @Multipart(value = "policyContent") InputStream policyContentInputStream, @Multipart(value = "policyContent" ) Attachment policyContentDetail, @Multipart(value = "ruleType")  String ruleType, @Multipart(value = "artifactType")  String artifactType, @Multipart(value = "description", required = false)  String description, @Multipart(value = "ruleCategory", required = false)  String ruleCategory, @Multipart(value = "documentationLink", required = false)  String documentationLink, @Multipart(value = "provider", required = false)  String provider) throws APIMGovernanceException{
+        return delegate.createPolicy(name, policyContentInputStream, policyContentDetail, ruleType, artifactType, description, ruleCategory, documentationLink, provider, securityContext);
     }
 
     @DELETE
     @Path("/{policyId}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Delete a specific governance policy", notes = "Deletes an existing governance policy identified by the policyId.", response = Void.class, authorizations = {
+    @ApiOperation(value = "Deletes a specific policy.", notes = "Deletes an existing policy identified by the policyId.", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
+            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance policies")
         })
-    }, tags={ "Governance Policies",  })
+    }, tags={ "Policy",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 204, message = "OK. Governance policy deleted successfully.", response = Void.class),
+        @ApiResponse(code = 204, message = "OK. Policy deleted successfully.", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response deleteGovernancePolicy(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId) throws APIMGovernanceException{
-        return delegate.deleteGovernancePolicy(policyId, securityContext);
+    public Response deletePolicy(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId) throws APIMGovernanceException{
+        return delegate.deletePolicy(policyId, securityContext);
     }
 
     @GET
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieves a list of all governance policies.", notes = "Retrieves a list of governance policies for the user's organization.", response = APIMGovernancePolicyListDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieves a list of policies.", notes = "Returns a list of all policies associated with the requested organization.", response = PolicyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies")
+            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance policies")
         })
-    }, tags={ "Governance Policies",  })
+    }, tags={ "Policies",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Successful response with a list of governance policies.", response = APIMGovernancePolicyListDTO.class),
+        @ApiResponse(code = 200, message = "OK. Successful response with a list of policies.", response = PolicyListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getGovernancePolicies( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "You can search for governance policies using following format.    - \"query=name:{NAME}\" searches policies by name.   - \"query=state:{STATE} \" searches policies by state.  You can also use multiple attributes to search for policies.   - \"query=name:{NAME} state:{STATE}\" searches policies by name, state, and label.  Remember to use URL encoding if your client doesn't support it (e.g., curl). ")  @QueryParam("query") String query) throws APIMGovernanceException{
-        return delegate.getGovernancePolicies(limit, offset, query, securityContext);
+    public Response getPolicies( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "You can search for policies using the following format:    - \"query=name:{NAME}\" searches policies by name.   - \"query=artifactType:{ARTIFACT_TYPE}\" searches policies by artifact type.   - \"query=ruleType:{RULE_TYPE}\" searches policies by rule type.  You can combine multiple attributes to search for policies:   - \"query=name:{NAME} artifactType:{ARTIFACT_TYPE} ruleType:{RULE_TYPE}\" searches policies by name, artifact type, and rule type.  Remember to use URL encoding if your client does not support it (e.g., curl). ")  @QueryParam("query") String query) throws APIMGovernanceException{
+        return delegate.getPolicies(limit, offset, query, securityContext);
     }
 
     @GET
     @Path("/{policyId}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get a specific governance policy", notes = "Retrieves details of a specific governance policy identified by the policyId.", response = APIMGovernancePolicyDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieves details of a specific policy.", notes = "Retrieves details of the policy identified by the policyId.", response = PolicyInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies")
+            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance policies")
         })
-    }, tags={ "Governance Policies",  })
+    }, tags={ "Policy",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Governance policy details retrieved successfully.", response = APIMGovernancePolicyDTO.class),
+        @ApiResponse(code = 200, message = "OK. Policy details retrieved successfully.", response = PolicyInfoDTO.class),
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getGovernancePolicyById(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId) throws APIMGovernanceException{
-        return delegate.getGovernancePolicyById(policyId, securityContext);
+    public Response getPolicyById(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId) throws APIMGovernanceException{
+        return delegate.getPolicyById(policyId, securityContext);
+    }
+
+    @GET
+    @Path("/{policyId}/content")
+    
+    @Produces({ "application/x-yaml", "application/json" })
+    @ApiOperation(value = "Retrieves the content of a specific policy.", notes = "Retrieves the content of the policy identified by the policyId.", response = String.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance policies")
+        })
+    }, tags={ "Policy",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Policy content retrieved successfully.", response = String.class),
+        @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
+    public Response getPolicyContent(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId) throws APIMGovernanceException{
+        return delegate.getPolicyContent(policyId, securityContext);
+    }
+
+    @GET
+    @Path("/{policyId}/usage")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieves the policy attachment usage of a specific policy.", notes = "Retrieves the list of policy attachments using the policy identified by the policyId.", response = String.class, responseContainer = "List", authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance policies")
+        })
+    }, tags={ "Policy",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Policy usage retrieved successfully.", response = String.class, responseContainer = "List"),
+        @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
+    public Response getPolicyUsage(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId) throws APIMGovernanceException{
+        return delegate.getPolicyUsage(policyId, securityContext);
     }
 
     @PUT
     @Path("/{policyId}")
-    @Consumes({ "application/json" })
+    @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Update a specific governance policy", notes = "Updates the details of an existing governance policy identified by the policyId.", response = APIMGovernancePolicyDTO.class, authorizations = {
+    @ApiOperation(value = "Updates a specific policy.", notes = "Updates the details of the policy identified by the `policyId`.", response = PolicyInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
+            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance policies")
         })
-    }, tags={ "Governance Policies" })
+    }, tags={ "Policy" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Governance policy updated successfully.", response = APIMGovernancePolicyDTO.class),
+        @ApiResponse(code = 200, message = "OK. Policy updated successfully.", response = PolicyInfoDTO.class),
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response updateGovernancePolicyById(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId, @ApiParam(value = "JSON object containing the updated governance policy details." ,required=true) APIMGovernancePolicyDTO apIMGovernancePolicyDTO) throws APIMGovernanceException{
-        return delegate.updateGovernancePolicyById(policyId, apIMGovernancePolicyDTO, securityContext);
+    public Response updatePolicyById(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId, @Multipart(value = "name")  String name,  @Multipart(value = "policyContent") InputStream policyContentInputStream, @Multipart(value = "policyContent" ) Attachment policyContentDetail, @Multipart(value = "ruleType")  String ruleType, @Multipart(value = "artifactType")  String artifactType, @Multipart(value = "description", required = false)  String description, @Multipart(value = "ruleCategory", required = false)  String ruleCategory, @Multipart(value = "documentationLink", required = false)  String documentationLink, @Multipart(value = "provider", required = false)  String provider) throws APIMGovernanceException{
+        return delegate.updatePolicyById(policyId, name, policyContentInputStream, policyContentDetail, ruleType, artifactType, description, ruleCategory, documentationLink, provider, securityContext);
     }
 }

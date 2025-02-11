@@ -23,12 +23,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * This class represents a list of governance Rulesets
+ * This class represents a list of governance Policies
  */
-public class RulesetList {
+public class APIMGovernancePolicyAttachmentList {
     private Integer count;
-
-    private List<RulesetInfo> rulesetList = new ArrayList<>();
+    private List<APIMGovernancePolicyAttachment> governancePolicyAttachmentList = new ArrayList<>();
 
     public Integer getCount() {
         return count;
@@ -38,13 +37,14 @@ public class RulesetList {
         this.count = count;
     }
 
-    public List<RulesetInfo> getRulesetList() {
+    public List<APIMGovernancePolicyAttachment> getGovernancePolicyAttachmentList() {
 
-        return new ArrayList<>(rulesetList);
+        return new ArrayList<>(governancePolicyAttachmentList);
     }
 
-    public void setRulesetList(List<RulesetInfo> rulesetList) {
+    public void setGovernancePolicyAttachmentList(List<APIMGovernancePolicyAttachment> governancePolicyAttachmentList) {
 
-        this.rulesetList = Collections.unmodifiableList(new ArrayList<>(rulesetList));
+        this.governancePolicyAttachmentList = Collections
+                .unmodifiableList(new ArrayList<>(governancePolicyAttachmentList));
     }
 }

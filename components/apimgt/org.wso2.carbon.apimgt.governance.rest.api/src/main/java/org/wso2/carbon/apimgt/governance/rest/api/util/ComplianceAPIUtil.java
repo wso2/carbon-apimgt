@@ -26,10 +26,10 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
-import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyInfo;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
+import org.wso2.carbon.apimgt.governance.impl.PolicyAttachmentManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
-import org.wso2.carbon.apimgt.governance.impl.RulesetManager;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceDetailsDTO;
@@ -38,12 +38,12 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceStatusDT
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactInfoDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceSummaryDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceWithRulesetsDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAttachmentAdherenceSummaryDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAttachmentAdherenceWithPoliciesDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyValidationResultDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RuleValidationResultDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RuleValidationResultViolatedPathDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultWithoutRulesDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyValidationResultWithoutRulesDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.SeverityBasedRuleViolationCountDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -90,7 +90,7 @@ public class ComplianceAPIUtil {
         infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
         artifactComplianceDetailsDTO.setInfo(infoDTO);
 
-        // Get all policies applicable to the artifact within the organization as a map of policy ID to policy name
+        // Get all policy attachments applicable to the artifact within the organization as a map of policy ID to policy name
         Map<String, String> applicablePolicies = APIMGovernanceUtil
                 .getApplicablePoliciesForArtifact(artifactRefId, artifactType, organization);
 
@@ -107,7 +107,7 @@ public class ComplianceAPIUtil {
             return artifactComplianceDetailsDTO;
         }
 
-        // Get all policies evaluated for the artifact
+        // Get all policy attachments evaluated for the artifact
         List<String> evaluatedPolicies = new ComplianceManager().getEvaluatedPoliciesForArtifact(artifactRefId,
                 artifactType, organization);
 
@@ -117,31 +117,31 @@ public class ComplianceAPIUtil {
             return artifactComplianceDetailsDTO;
         }
 
-        List<PolicyAdherenceWithRulesetsDTO> policyAdherenceDetails = new ArrayList<>();
+        List<PolicyAttachmentAdherenceWithPoliciesDTO> policyAttachmentAdherenceDetails = new ArrayList<>();
 
         // Get policy adherence results for each policy
         for (Map.Entry<String, String> entry : applicablePolicies.entrySet()) {
             String policyId = entry.getKey();
             String policyName = entry.getValue();
             boolean isPolicyEvaluated = evaluatedPolicies.contains(policyId);
-            PolicyAdherenceWithRulesetsDTO policyAdherence = getPolicyAdherenceResultsDTO(policyId,
+            PolicyAttachmentAdherenceWithPoliciesDTO policyAttachmentAdherence = getPolicyAttachmentAdherenceResultsDTO(policyId,
                     policyName, artifactRefId, artifactType, organization, isPolicyEvaluated);
-            policyAdherenceDetails.add(policyAdherence);
+            policyAttachmentAdherenceDetails.add(policyAttachmentAdherence);
 
             // If the policy is violated, set the artifact compliance status to non-compliant
-            if (policyAdherence.getStatus() == PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED) {
+            if (policyAttachmentAdherence.getStatus() == PolicyAttachmentAdherenceWithPoliciesDTO.StatusEnum.VIOLATED) {
                 artifactComplianceDetailsDTO.setStatus(ArtifactComplianceDetailsDTO
                         .StatusEnum.NON_COMPLIANT);
             }
 
         }
 
-        artifactComplianceDetailsDTO.setGovernedPolicies(policyAdherenceDetails);
+        artifactComplianceDetailsDTO.setGovernedPolicyAttachments(policyAttachmentAdherenceDetails);
         return artifactComplianceDetailsDTO;
     }
 
     /**
-     * Get how rulesets run against an artifact adhering to a policy
+     * Get how policies run against an artifact adhering to a policy
      *
      * @param policyId          policy ID
      * @param policyName        policy name
@@ -149,61 +149,63 @@ public class ComplianceAPIUtil {
      * @param artifactType      artifact type
      * @param organization      organization
      * @param isPolicyEvaluated whether the policy has been evaluated
-     * @return PolicyAdherenceWithRulesetsDTO
+     * @return PolicyAttachmentAdherenceWithPoliciesDTO
      * @throws APIMGovernanceException if an error occurs while getting the policy adherence results
      */
-    private static PolicyAdherenceWithRulesetsDTO getPolicyAdherenceResultsDTO(String policyId, String policyName,
-                                                                               String artifactRefId,
-                                                                               ArtifactType artifactType,
-                                                                               String organization,
-                                                                               boolean isPolicyEvaluated)
+    private static PolicyAttachmentAdherenceWithPoliciesDTO
+    getPolicyAttachmentAdherenceResultsDTO(String policyId,
+                                           String policyName,
+                                           String artifactRefId,
+                                           ArtifactType artifactType,
+                                           String organization,
+                                           boolean isPolicyEvaluated)
             throws APIMGovernanceException {
 
-        PolicyManager policyManager = new PolicyManager();
+        PolicyAttachmentManager policyAttachmentManager = new PolicyAttachmentManager();
         ComplianceManager complianceManager = new ComplianceManager();
 
-        PolicyAdherenceWithRulesetsDTO policyAdherenceWithRulesetsDTO = new PolicyAdherenceWithRulesetsDTO();
-        policyAdherenceWithRulesetsDTO.setId(policyId);
-        policyAdherenceWithRulesetsDTO.setName(policyName);
+        PolicyAttachmentAdherenceWithPoliciesDTO policyAttachmentAdherenceWithPoliciesDTO = new PolicyAttachmentAdherenceWithPoliciesDTO();
+        policyAttachmentAdherenceWithPoliciesDTO.setId(policyId);
+        policyAttachmentAdherenceWithPoliciesDTO.setName(policyName);
 
         // If the policy has not been evaluated, set the policy adherence status to unapplied
         if (!isPolicyEvaluated) {
-            policyAdherenceWithRulesetsDTO.setStatus(PolicyAdherenceWithRulesetsDTO.StatusEnum.UNAPPLIED);
-            return policyAdherenceWithRulesetsDTO;
+            policyAttachmentAdherenceWithPoliciesDTO.setStatus(PolicyAttachmentAdherenceWithPoliciesDTO.StatusEnum.UNAPPLIED);
+            return policyAttachmentAdherenceWithPoliciesDTO;
         }
 
-        // Retrieve rulesets tied to the policy
-        List<RulesetInfo> policyRulesets = policyManager.getRulesetsByPolicyId(policyId, organization);
+        // Retrieve policies tied to the policy
+        List<PolicyInfo> policyRulesets = policyAttachmentManager.getPoliciesByPolicyAttachmentId(policyId, organization);
 
-        // Retrieve the evaluated rulesets for the policy
+        // Retrieve the evaluated policies for the policy
         List<String> evaluatedRulesets =
                 complianceManager.getEvaluatedRulesetsForArtifactAndPolicy(artifactRefId, artifactType,
                         policyRulesets, organization);
 
         // Store the ruleset validation results
-        List<RulesetValidationResultWithoutRulesDTO> rulesetValidationResults = new ArrayList<>();
+        List<PolicyValidationResultWithoutRulesDTO> rulesetValidationResults = new ArrayList<>();
 
         // Get ruleset validation results for each ruleset
-        for (RulesetInfo ruleset : policyRulesets) {
+        for (PolicyInfo ruleset : policyRulesets) {
             boolean isRulesetEvaluated = evaluatedRulesets.contains(ruleset.getId());
 
-            RulesetValidationResultWithoutRulesDTO resultDTO = getRulesetValidationResultsDTO(ruleset, artifactRefId,
+            PolicyValidationResultWithoutRulesDTO resultDTO = getRulesetValidationResultsDTO(ruleset, artifactRefId,
                     artifactType, organization, isRulesetEvaluated);
             rulesetValidationResults.add(resultDTO);
         }
 
-        // If all rulesets are passed, set the policy adherence status to passed
+        // If all policies are passed, set the policy adherence status to passed
         if (rulesetValidationResults.stream().allMatch(
                 rulesetValidationResultDTO -> rulesetValidationResultDTO.getStatus() ==
-                        RulesetValidationResultWithoutRulesDTO.StatusEnum.PASSED)) {
-            policyAdherenceWithRulesetsDTO.setStatus(PolicyAdherenceWithRulesetsDTO.StatusEnum.FOLLOWED);
+                        PolicyValidationResultWithoutRulesDTO.StatusEnum.PASSED)) {
+            policyAttachmentAdherenceWithPoliciesDTO.setStatus(PolicyAttachmentAdherenceWithPoliciesDTO.StatusEnum.FOLLOWED);
         } else {
-            policyAdherenceWithRulesetsDTO.setStatus(PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED);
+            policyAttachmentAdherenceWithPoliciesDTO.setStatus(PolicyAttachmentAdherenceWithPoliciesDTO.StatusEnum.VIOLATED);
         }
 
-        policyAdherenceWithRulesetsDTO.setRulesetValidationResults(rulesetValidationResults);
+        policyAttachmentAdherenceWithPoliciesDTO.setPolicyValidationResults(rulesetValidationResults);
 
-        return policyAdherenceWithRulesetsDTO;
+        return policyAttachmentAdherenceWithPoliciesDTO;
     }
 
     /**
@@ -214,16 +216,16 @@ public class ComplianceAPIUtil {
      * @param artifactType       artifact type
      * @param organization       organization
      * @param isRulesetEvaluated whether the ruleset has been evaluated
-     * @return RulesetValidationResultDTO
+     * @return PolicyValidationResultDTO
      * @throws APIMGovernanceException if an error occurs while updating the ruleset validation results
      */
-    private static RulesetValidationResultWithoutRulesDTO getRulesetValidationResultsDTO(RulesetInfo ruleset, String
+    private static PolicyValidationResultWithoutRulesDTO getRulesetValidationResultsDTO(PolicyInfo ruleset, String
             artifactRefId, ArtifactType artifactType, String organization, boolean isRulesetEvaluated)
             throws APIMGovernanceException {
 
         ComplianceManager complianceManager = new ComplianceManager();
 
-        RulesetValidationResultWithoutRulesDTO rulesetDTO = new RulesetValidationResultWithoutRulesDTO();
+        PolicyValidationResultWithoutRulesDTO rulesetDTO = new PolicyValidationResultWithoutRulesDTO();
         rulesetDTO.setId(ruleset.getId());
         rulesetDTO.setName(ruleset.getName());
 
@@ -233,16 +235,16 @@ public class ComplianceAPIUtil {
 
         // If the ruleset has not been evaluated, set the ruleset validation status to unapplied
         if (!isRulesetEvaluated) {
-            rulesetDTO.setStatus(RulesetValidationResultWithoutRulesDTO.StatusEnum.UNAPPLIED);
+            rulesetDTO.setStatus(PolicyValidationResultWithoutRulesDTO.StatusEnum.UNAPPLIED);
             return rulesetDTO;
         }
 
-        rulesetDTO.setRuleType(RulesetValidationResultWithoutRulesDTO
-                .RuleTypeEnum.fromValue(ruleset.getRuleType().name()));
+        rulesetDTO.setRuleType(PolicyValidationResultWithoutRulesDTO
+                .RuleTypeEnum.fromValue(ruleset.getPolicyType().name()));
 
         rulesetDTO.setStatus(ruleViolations.isEmpty() ?
-                RulesetValidationResultWithoutRulesDTO.StatusEnum.PASSED :
-                RulesetValidationResultWithoutRulesDTO.StatusEnum.FAILED);
+                PolicyValidationResultWithoutRulesDTO.StatusEnum.PASSED :
+                PolicyValidationResultWithoutRulesDTO.StatusEnum.FAILED);
 
         return rulesetDTO;
     }
@@ -318,17 +320,17 @@ public class ComplianceAPIUtil {
         infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
         complianceStatus.setInfo(infoDTO);
 
-        // Retrieve applicable policies for the current artifact
+        // Retrieve applicable policy attachments for the current artifact
         Map<String, String> applicablePolicies = APIMGovernanceUtil
                 .getApplicablePoliciesForArtifact(artifactRefId, artifactType, organization);
 
-        // If no policies are applicable, set the compliance status to not applicable and return
+        // If no policy attachments are applicable, set the compliance status to not applicable and return
         if (applicablePolicies.isEmpty()) {
             complianceStatus.setStatus(ArtifactComplianceStatusDTO.StatusEnum.NOT_APPLICABLE);
             return complianceStatus;
         }
 
-        // Get evaluated policies for the current artifact
+        // Get evaluated policy attachments for the current artifact
         List<String> evaluatedPolicies = complianceManager.getEvaluatedPoliciesForArtifact(artifactRefId, artifactType,
                 organization);
 
@@ -366,24 +368,24 @@ public class ComplianceAPIUtil {
 
             ruleViolationCounts.add(violationCountDTO);
 
-            // Track the IDs of violated rulesets
+            // Track the IDs of violated policies
             for (RuleViolation ruleViolation : ruleViolations) {
                 violatedRulesets.add(ruleViolation.getRulesetId());
             }
         }
 
-        // Identify violated policies
+        // Identify violated policy attachments
         List<String> violatedPolicies = complianceManager
                 .identifyViolatedPolicies(evaluatedPolicies, new ArrayList<>(violatedRulesets), organization);
 
         // Set policy adherence summary
-        PolicyAdherenceSummaryDTO policyAdherenceSummaryDTO = new PolicyAdherenceSummaryDTO();
-        policyAdherenceSummaryDTO.setTotal(applicablePolicies.size());
-        policyAdherenceSummaryDTO.setViolated(violatedPolicies.size());
-        policyAdherenceSummaryDTO.setFollowed(evaluatedPolicies.size() - violatedPolicies.size());
-        policyAdherenceSummaryDTO.setUnApplied(applicablePolicies.size() - evaluatedPolicies.size());
+        PolicyAttachmentAdherenceSummaryDTO policyAttachmentAdherenceSummaryDTO = new PolicyAttachmentAdherenceSummaryDTO();
+        policyAttachmentAdherenceSummaryDTO.setTotal(applicablePolicies.size());
+        policyAttachmentAdherenceSummaryDTO.setViolated(violatedPolicies.size());
+        policyAttachmentAdherenceSummaryDTO.setFollowed(evaluatedPolicies.size() - violatedPolicies.size());
+        policyAttachmentAdherenceSummaryDTO.setUnApplied(applicablePolicies.size() - evaluatedPolicies.size());
 
-        complianceStatus.setPolicyAdherenceSummary(policyAdherenceSummaryDTO);
+        complianceStatus.setPolicyAttachmentAdherenceSummary(policyAttachmentAdherenceSummaryDTO);
         complianceStatus.setSeverityBasedRuleViolationSummary(ruleViolationCounts);
         complianceStatus.setStatus(violatedPolicies.isEmpty() ?
                 ArtifactComplianceStatusDTO.StatusEnum.COMPLIANT :
@@ -440,33 +442,33 @@ public class ComplianceAPIUtil {
      * @param artifactType artifact type
      * @param rulesetId    ruleset ID
      * @param organization organization
-     * @return RulesetValidationResultDTO object
+     * @return PolicyValidationResultDTO object
      * @throws APIMGovernanceException if an error occurs while getting the ruleset validation result
      */
-    public static RulesetValidationResultDTO getRulesetValidationResultDTO(String artifactRefId,
-                                                                           ArtifactType artifactType,
-                                                                           String rulesetId, String organization)
+    public static PolicyValidationResultDTO getPolicyValidationResultDTO(String artifactRefId,
+                                                                         ArtifactType artifactType,
+                                                                         String rulesetId, String organization)
             throws APIMGovernanceException {
 
         ComplianceManager complianceManager = new ComplianceManager();
-        RulesetManager rulesetManager = new RulesetManager();
+        PolicyManager policyManager = new PolicyManager();
 
-        RulesetInfo rulesetInfo = rulesetManager.getRulesetById(rulesetId, organization);
+        PolicyInfo policyInfo = policyManager.getPolicyById(rulesetId, organization);
 
         // If the ruleset is not found, throw an exception
-        if (rulesetInfo == null) {
+        if (policyInfo == null) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_NOT_FOUND, rulesetId);
         }
 
-        RulesetValidationResultDTO rulesetValidationResultDTO = new RulesetValidationResultDTO();
+        PolicyValidationResultDTO rulesetValidationResultDTO = new PolicyValidationResultDTO();
         rulesetValidationResultDTO.setId(rulesetId);
-        rulesetValidationResultDTO.setName(rulesetInfo.getName());
+        rulesetValidationResultDTO.setName(policyInfo.getName());
 
         // If the ruleset has not been evaluated, set the ruleset validation status to unapplied
         boolean isRulesetEvaluatedForArtifact = complianceManager
                 .isRulesetEvaluatedForArtifact(artifactRefId, artifactType, rulesetId, organization);
         if (!isRulesetEvaluatedForArtifact) {
-            rulesetValidationResultDTO.setStatus(RulesetValidationResultDTO.StatusEnum.UNAPPLIED);
+            rulesetValidationResultDTO.setStatus(PolicyValidationResultDTO.StatusEnum.UNAPPLIED);
             return rulesetValidationResultDTO;
         }
 
@@ -475,7 +477,7 @@ public class ComplianceAPIUtil {
         List<RuleValidationResultDTO> followedRules = new ArrayList<>();
 
         // Fetch all rules within the current ruleset
-        List<Rule> allRules = rulesetManager.getRulesByRulesetId(rulesetId, organization);
+        List<Rule> allRules = policyManager.getRulesByPolicyId(rulesetId, organization);
         Map<String, Rule> rulesMap = allRules.stream()
                 .collect(Collectors.toMap(Rule::getName, rule -> rule));
 
@@ -499,8 +501,8 @@ public class ComplianceAPIUtil {
         rulesetValidationResultDTO.setViolatedRules(violatedRules);
         rulesetValidationResultDTO.setFollowedRules(followedRules);
         rulesetValidationResultDTO.setStatus(violatedRules.isEmpty() ?
-                RulesetValidationResultDTO.StatusEnum.PASSED :
-                RulesetValidationResultDTO.StatusEnum.FAILED);
+                PolicyValidationResultDTO.StatusEnum.PASSED :
+                PolicyValidationResultDTO.StatusEnum.FAILED);
 
         return rulesetValidationResultDTO;
     }

@@ -24,15 +24,15 @@ import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
-import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
-import org.wso2.carbon.apimgt.governance.api.model.RuleType;
-import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
-import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
-import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
-import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
+import org.wso2.carbon.apimgt.governance.api.model.Policy;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyContent;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyInfo;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyList;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
-import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
+import org.wso2.carbon.apimgt.governance.impl.dao.PolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil;
 
@@ -51,15 +51,15 @@ import java.util.Map;
 /**
  * Implementation of the RulesetMgtDAO interface.
  */
-public class RulesetMgtDAOImpl implements RulesetMgtDAO {
+public class PolicyMgtDAOImpl implements PolicyMgtDAO {
 
-    private static final Log log = LogFactory.getLog(RulesetMgtDAOImpl.class);
+    private static final Log log = LogFactory.getLog(PolicyMgtDAOImpl.class);
 
-    private RulesetMgtDAOImpl() {
+    private PolicyMgtDAOImpl() {
     }
 
     private static class SingletonHelper {
-        private static final RulesetMgtDAO INSTANCE = new RulesetMgtDAOImpl();
+        private static final PolicyMgtDAO INSTANCE = new PolicyMgtDAOImpl();
     }
 
     /**
@@ -67,7 +67,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      *
      * @return RulesetMgtDAOImpl instance
      */
-    public static RulesetMgtDAO getInstance() {
+    public static PolicyMgtDAO getInstance() {
 
         return SingletonHelper.INSTANCE;
     }
@@ -75,35 +75,35 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     /**
      * Create a new Governance Ruleset
      *
-     * @param ruleset      Ruleset object
+     * @param policy      Ruleset object
      * @param rules        List of rules
      * @param organization Organization
      * @return RulesetInfo Created object
      * @throws APIMGovernanceException If an error occurs while creating the ruleset
      */
     @Override
-    public RulesetInfo createRuleset(Ruleset ruleset, List<Rule> rules,
-                                     String organization) throws APIMGovernanceException {
+    public PolicyInfo createPolicy(Policy policy, List<Rule> rules,
+                                   String organization) throws APIMGovernanceException {
 
-        String sqlQuery = SQLConstants.CREATE_RULESET;
+        String sqlQuery = SQLConstants.CREATE_POLICY;
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             try {
                 connection.setAutoCommit(false);
                 try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
-                    prepStmt.setString(1, ruleset.getId());
-                    prepStmt.setString(2, ruleset.getName());
-                    prepStmt.setString(3, ruleset.getDescription());
-                    prepStmt.setString(4, String.valueOf(ruleset.getRuleCategory()));
-                    prepStmt.setString(5, String.valueOf(ruleset.getRuleType()));
-                    prepStmt.setString(6, String.valueOf(ruleset.getArtifactType()));
-                    prepStmt.setString(7, ruleset.getDocumentationLink());
-                    prepStmt.setString(8, ruleset.getProvider());
+                    prepStmt.setString(1, policy.getId());
+                    prepStmt.setString(2, policy.getName());
+                    prepStmt.setString(3, policy.getDescription());
+                    prepStmt.setString(4, String.valueOf(policy.getPolicyCategory()));
+                    prepStmt.setString(5, String.valueOf(policy.getPolicyType()));
+                    prepStmt.setString(6, String.valueOf(policy.getArtifactType()));
+                    prepStmt.setString(7, policy.getDocumentationLink());
+                    prepStmt.setString(8, policy.getProvider());
                     prepStmt.setString(9, organization);
-                    prepStmt.setString(10, ruleset.getCreatedBy());
+                    prepStmt.setString(10, policy.getCreatedBy());
                     prepStmt.execute();
                 }
-                addRuleContent(connection, ruleset.getId(), ruleset.getRulesetContent());
-                addRules(ruleset.getId(), rules, connection);
+                addRuleContent(connection, policy.getId(), policy.getPolicyContent());
+                addRules(policy.getId(), rules, connection);
 
                 connection.commit();
             } catch (SQLException e) {
@@ -112,44 +112,44 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
             }
         } catch (SQLException | IOException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_CREATION_FAILED, e,
-                    ruleset.getName(), organization
+                    policy.getName(), organization
             );
         }
-        return getRulesetById(ruleset.getId(), organization); // to return RulesetInfo object
+        return getPolicyById(policy.getId(), organization); // to return RulesetInfo object
     }
 
     /**
      * Update a Governance Ruleset
      *
      * @param rulesetId    Ruleset ID
-     * @param ruleset      Ruleset object
+     * @param policy      Ruleset object
      * @param rules        List of rules
      * @param organization Organization
      * @return RulesetInfo Created object
      * @throws APIMGovernanceException If an error occurs while updating the ruleset
      */
     @Override
-    public RulesetInfo updateRuleset(String rulesetId, Ruleset ruleset, List<Rule> rules,
-                                     String organization)
+    public PolicyInfo updatePolicy(String rulesetId, Policy policy, List<Rule> rules,
+                                   String organization)
             throws APIMGovernanceException {
 
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_RULESET)) {
-                    prepStmt.setString(1, ruleset.getName());
-                    prepStmt.setString(2, ruleset.getDescription());
-                    prepStmt.setString(3, String.valueOf(ruleset.getRuleCategory()));
-                    prepStmt.setString(4, String.valueOf(ruleset.getRuleType()));
-                    prepStmt.setString(5, String.valueOf(ruleset.getArtifactType()));
-                    prepStmt.setString(6, ruleset.getDocumentationLink());
-                    prepStmt.setString(7, ruleset.getProvider());
-                    prepStmt.setString(8, ruleset.getUpdatedBy());
+                try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_POLICY)) {
+                    prepStmt.setString(1, policy.getName());
+                    prepStmt.setString(2, policy.getDescription());
+                    prepStmt.setString(3, String.valueOf(policy.getPolicyCategory()));
+                    prepStmt.setString(4, String.valueOf(policy.getPolicyType()));
+                    prepStmt.setString(5, String.valueOf(policy.getArtifactType()));
+                    prepStmt.setString(6, policy.getDocumentationLink());
+                    prepStmt.setString(7, policy.getProvider());
+                    prepStmt.setString(8, policy.getUpdatedBy());
                     prepStmt.setString(9, rulesetId);
                     prepStmt.setString(10, organization);
                     prepStmt.executeUpdate();
                 }
-                updateRuleContent(connection, ruleset.getId(), ruleset.getRulesetContent());
+                updateRuleContent(connection, policy.getId(), policy.getPolicyContent());
 
                 // Delete existing rules and rule evaluation results related to this ruleset
                 deleteRuleViolationsForRuleset(connection, rulesetId);
@@ -157,7 +157,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 deleteRules(connection, rulesetId);
 
                 // Insert updated rules to the database
-                addRules(ruleset.getId(), rules, connection);
+                addRules(policy.getId(), rules, connection);
 
                 connection.commit();
             } catch (SQLException e) {
@@ -167,7 +167,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
         } catch (SQLException | IOException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_RULESET, e, rulesetId);
         }
-        return getRulesetById(rulesetId, organization); // to return all info of the updated ruleset
+        return getPolicyById(rulesetId, organization); // to return all info of the updated ruleset
     }
 
     /**
@@ -202,19 +202,19 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      *
      * @param connection     Database connection
      * @param rulesetId      Ruleset ID
-     * @param rulesetContent Ruleset content
+     * @param policyContent Ruleset content
      * @throws SQLException If an error occurs while adding the ruleset content
      * @throws IOException  If an error occurs while adding the ruleset content
      */
-    private void addRuleContent(Connection connection, String rulesetId, RulesetContent rulesetContent)
+    private void addRuleContent(Connection connection, String rulesetId, PolicyContent policyContent)
             throws SQLException, IOException {
-        String sqlQuery = SQLConstants.ADD_RULESET_CONTENT;
+        String sqlQuery = SQLConstants.ADD_POLICY_CONTENT;
         try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);
-             InputStream rulesetContentStream = new ByteArrayInputStream(rulesetContent.getContent())) {
+             InputStream rulesetContentStream = new ByteArrayInputStream(policyContent.getContent())) {
             prepStmt.setString(1, rulesetId);
             prepStmt.setBlob(2, rulesetContentStream);
-            prepStmt.setString(3, rulesetContent.getContentType().toString());
-            prepStmt.setString(4, rulesetContent.getFileName());
+            prepStmt.setString(3, policyContent.getContentType().toString());
+            prepStmt.setString(4, policyContent.getFileName());
             prepStmt.execute();
         }
     }
@@ -224,18 +224,18 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      *
      * @param connection     Database connection
      * @param rulesetId      Ruleset ID
-     * @param rulesetContent Ruleset content
+     * @param policyContent Ruleset content
      * @throws SQLException If an error occurs while updating the ruleset content
      * @throws IOException  If an error occurs while updating the ruleset content
      */
-    private void updateRuleContent(Connection connection, String rulesetId, RulesetContent rulesetContent)
+    private void updateRuleContent(Connection connection, String rulesetId, PolicyContent policyContent)
             throws SQLException, IOException {
-        String sqlQuery = SQLConstants.UPDATE_RULESET_CONTENT;
+        String sqlQuery = SQLConstants.UPDATE_POLICY_CONTENT;
         try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);
-             InputStream rulesetContentStream = new ByteArrayInputStream(rulesetContent.getContent())) {
+             InputStream rulesetContentStream = new ByteArrayInputStream(policyContent.getContent())) {
             prepStmt.setBlob(1, rulesetContentStream);
-            prepStmt.setString(2, rulesetContent.getContentType().toString());
-            prepStmt.setString(3, rulesetContent.getFileName());
+            prepStmt.setString(2, policyContent.getContentType().toString());
+            prepStmt.setString(3, policyContent.getFileName());
             prepStmt.setString(4, rulesetId);
             prepStmt.execute();
         }
@@ -249,7 +249,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @throws APIMGovernanceException If an error occurs while deleting the ruleset
      */
     @Override
-    public void deleteRuleset(String rulesetId, String organization) throws APIMGovernanceException {
+    public void deletePolicy(String rulesetId, String organization) throws APIMGovernanceException {
 
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
 
@@ -260,7 +260,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 deleteRulesetContent(connection, rulesetId);
                 deleteRules(connection, rulesetId);
 
-                try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_RULESET)) {
+                try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_POLICY)) {
                     prepStmt.setString(1, rulesetId);
                     prepStmt.setString(2, organization);
                     prepStmt.executeUpdate();
@@ -285,7 +285,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @throws SQLException If an error occurs while deleting the ruleset content
      */
     private void deleteRulesetContent(Connection connection, String rulesetId) throws SQLException {
-        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_RULESET_CONTENT)) {
+        try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_POLICY_CONTENT)) {
             prepStmt.setString(1, rulesetId);
             prepStmt.executeUpdate();
         }
@@ -315,7 +315,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     private void deleteRuleViolationsForRuleset(Connection connection, String rulesetId)
             throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
-                .DELETE_RULE_VIOLATIONS_FOR_RULESET)) {
+                .DELETE_RULE_VIOLATIONS_FOR_POLICY)) {
             prepStmt.setString(1, rulesetId);
             prepStmt.executeUpdate();
         }
@@ -331,39 +331,39 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
     private void deleteRulesetResultsForRuleset(Connection connection, String rulesetId)
             throws SQLException {
         try (PreparedStatement prepStmt = connection.
-                prepareStatement(SQLConstants.DELETE_RULESET_RUN_FOR_RULESET)) {
+                prepareStatement(SQLConstants.DELETE_POLICY_RUN_FOR_POLICY)) {
             prepStmt.setString(1, rulesetId);
             prepStmt.executeUpdate();
         }
     }
 
     /**
-     * Retrieves rulesets in the organization.
+     * Retrieves policies in the organization.
      *
-     * @param organization Organization whose rulesets are to be retrieved
-     * @return a list of rulesets associated with the organization
-     * @throws APIMGovernanceException if there is an error retrieving the rulesets
+     * @param organization Organization whose policies are to be retrieved
+     * @return a list of policies associated with the organization
+     * @throws APIMGovernanceException if there is an error retrieving the policies
      */
     @Override
-    public RulesetList getRulesets(String organization) throws APIMGovernanceException {
-        RulesetList rulesetList = new RulesetList();
-        List<RulesetInfo> rulesetInfoList = new ArrayList<>();
-        String sqlQuery = SQLConstants.GET_RULESETS;
+    public PolicyList getPolicies(String organization) throws APIMGovernanceException {
+        PolicyList policyList = new PolicyList();
+        List<PolicyInfo> policyInfoList = new ArrayList<>();
+        String sqlQuery = SQLConstants.GET_POLICIES;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, organization);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
-                    rulesetInfoList.add(getRulesetInfoFromResultSet(rs));
+                    policyInfoList.add(getRulesetInfoFromResultSet(rs));
                 }
             }
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESETS,
                     e, organization);
         }
-        rulesetList.setCount(rulesetInfoList.size());
-        rulesetList.setRulesetList(rulesetInfoList);
-        return rulesetList;
+        policyList.setCount(policyInfoList.size());
+        policyList.setPolicyList(policyInfoList);
+        return policyList;
     }
 
     /**
@@ -375,8 +375,8 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @throws APIMGovernanceException if there is an error retrieving the ruleset
      */
     @Override
-    public RulesetInfo getRulesetByName(String name, String organization) throws APIMGovernanceException {
-        String sqlQuery = SQLConstants.GET_RULESET_BY_NAME;
+    public PolicyInfo getPolicyByName(String name, String organization) throws APIMGovernanceException {
+        String sqlQuery = SQLConstants.GET_POLICY_BY_NAME;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, name);
@@ -402,8 +402,8 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @throws APIMGovernanceException if there is an error retrieving the ruleset
      */
     @Override
-    public RulesetInfo getRulesetById(String rulesetId, String organization) throws APIMGovernanceException {
-        String sqlQuery = SQLConstants.GET_RULESETS_BY_ID;
+    public PolicyInfo getPolicyById(String rulesetId, String organization) throws APIMGovernanceException {
+        String sqlQuery = SQLConstants.GET_POLICIES_BY_ID;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, rulesetId);
@@ -426,15 +426,15 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @param searchCriteria Search attributes
      * @param organization   Organization
      * @return List of RulesetInfo objects
-     * @throws APIMGovernanceException If an error occurs while searching for rulesets
+     * @throws APIMGovernanceException If an error occurs while searching for policies
      */
     @Override
-    public RulesetList searchRulesets(Map<String, String> searchCriteria, String organization)
+    public PolicyList searchPolicies(Map<String, String> searchCriteria, String organization)
             throws APIMGovernanceException {
-        RulesetList rulesetList = new RulesetList();
-        List<RulesetInfo> rulesetInfoList = new ArrayList<>();
+        PolicyList policyList = new PolicyList();
+        List<PolicyInfo> policyInfoList = new ArrayList<>();
 
-        String sqlQuery = SQLConstants.SEARCH_RULESETS;
+        String sqlQuery = SQLConstants.SEARCH_POLICIES;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, organization);
@@ -446,16 +446,16 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     .getOrDefault(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, ""));
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
-                    rulesetInfoList.add(getRulesetInfoFromResultSet(rs));
+                    policyInfoList.add(getRulesetInfoFromResultSet(rs));
                 }
             }
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_SEARCHING_RULESETS,
                     e, organization);
         }
-        rulesetList.setCount(rulesetInfoList.size());
-        rulesetList.setRulesetList(rulesetInfoList);
-        return rulesetList;
+        policyList.setCount(policyInfoList.size());
+        policyList.setPolicyList(policyInfoList);
+        return policyList;
     }
 
     /**
@@ -465,23 +465,23 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @return RulesetInfo object
      * @throws SQLException If an error occurs while retrieving the ruleset
      */
-    private RulesetInfo getRulesetInfoFromResultSet(ResultSet rs) throws SQLException {
-        RulesetInfo rulesetInfo = new RulesetInfo();
-        rulesetInfo.setId(rs.getString("RULESET_ID"));
-        rulesetInfo.setName(rs.getString("NAME"));
-        rulesetInfo.setDescription(rs.getString("DESCRIPTION"));
-        rulesetInfo.setRuleCategory(RuleCategory.fromString(
+    private PolicyInfo getRulesetInfoFromResultSet(ResultSet rs) throws SQLException {
+        PolicyInfo policyInfo = new PolicyInfo();
+        policyInfo.setId(rs.getString("RULESET_ID"));
+        policyInfo.setName(rs.getString("NAME"));
+        policyInfo.setDescription(rs.getString("DESCRIPTION"));
+        policyInfo.setPolicyCategory(PolicyCategory.fromString(
                 rs.getString("RULE_CATEGORY")));
-        rulesetInfo.setRuleType(RuleType.fromString(rs.getString("RULE_TYPE")));
-        rulesetInfo.setArtifactType(ExtendedArtifactType.fromString(
+        policyInfo.setPolicyType(PolicyType.fromString(rs.getString("RULE_TYPE")));
+        policyInfo.setArtifactType(ExtendedArtifactType.fromString(
                 rs.getString("ARTIFACT_TYPE")));
-        rulesetInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
-        rulesetInfo.setProvider(rs.getString("PROVIDER"));
-        rulesetInfo.setCreatedBy(rs.getString("CREATED_BY"));
-        rulesetInfo.setCreatedTime(rs.getString("CREATED_TIME"));
-        rulesetInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
-        rulesetInfo.setUpdatedTime(rs.getString("LAST_UPDATED_TIME"));
-        return rulesetInfo;
+        policyInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
+        policyInfo.setProvider(rs.getString("PROVIDER"));
+        policyInfo.setCreatedBy(rs.getString("CREATED_BY"));
+        policyInfo.setCreatedTime(rs.getString("CREATED_TIME"));
+        policyInfo.setUpdatedBy(rs.getString("UPDATED_BY"));
+        policyInfo.setUpdatedTime(rs.getString("LAST_UPDATED_TIME"));
+        return policyInfo;
     }
 
     /**
@@ -493,18 +493,18 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @throws APIMGovernanceException If an error occurs while getting the ruleset content
      */
     @Override
-    public RulesetContent getRulesetContent(String rulesetId, String organization) throws APIMGovernanceException {
-        String sqlQuery = SQLConstants.GET_RULESET_CONTENT;
+    public PolicyContent getPolicyContent(String rulesetId, String organization) throws APIMGovernanceException {
+        String sqlQuery = SQLConstants.GET_POLICY_CONTENT;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);) {
             prepStmt.setString(1, rulesetId);
             prepStmt.setString(2, organization);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
-                    RulesetContent rulesetContentObj = new RulesetContent();
-                    rulesetContentObj.setFileName(rs.getString("FILE_NAME"));
-                    rulesetContentObj.setContent(rs.getBytes("CONTENT"));
-                    return rulesetContentObj;
+                    PolicyContent policyContentObj = new PolicyContent();
+                    policyContentObj.setFileName(rs.getString("FILE_NAME"));
+                    policyContentObj.setContent(rs.getBytes("CONTENT"));
+                    return policyContentObj;
                 }
                 return null;
             }
@@ -522,10 +522,10 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @return List of associated policies
      */
     @Override
-    public List<String> getAssociatedPoliciesForRuleset(String rulesetId, String organization)
+    public List<String> getAssociatedPolicyAttachmentForPolicy(String rulesetId, String organization)
             throws APIMGovernanceException {
         List<String> policyIds = new ArrayList<>();
-        String sqlQuery = SQLConstants.GET_POLICIES_FOR_RULESET;
+        String sqlQuery = SQLConstants.GET_POLICIES_FOR_POLICY;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, rulesetId);
@@ -550,7 +550,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
      * @return List of rules
      */
     @Override
-    public List<Rule> getRulesByRulesetId(String rulesetId, String organization) throws APIMGovernanceException {
+    public List<Rule> getPolicyByPolicyId(String rulesetId, String organization) throws APIMGovernanceException {
         List<Rule> rules = new ArrayList<>();
         String sqlQuery = SQLConstants.GET_RULES_WITHOUT_CONTENT;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();

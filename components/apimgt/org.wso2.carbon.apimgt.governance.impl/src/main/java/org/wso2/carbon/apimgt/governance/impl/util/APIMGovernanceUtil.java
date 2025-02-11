@@ -29,15 +29,15 @@ import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.DefaultRuleset;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
-import org.wso2.carbon.apimgt.governance.api.model.RuleType;
-import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
-import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
-import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
-import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyCategory;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
+import org.wso2.carbon.apimgt.governance.api.model.Policy;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyContent;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyInfo;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyList;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
+import org.wso2.carbon.apimgt.governance.impl.PolicyAttachmentManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
-import org.wso2.carbon.apimgt.governance.impl.RulesetManager;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
@@ -133,13 +133,13 @@ public class APIMGovernanceUtil {
      * @param organization Organization
      */
     public static void loadDefaultRulesets(String organization) {
-        RulesetManager rulesetManager = new RulesetManager();
+        PolicyManager policyManager = new PolicyManager();
         try {
             // Fetch existing rulesets for the organization
-            RulesetList existingRulesets = rulesetManager.getRulesets(organization);
-            List<RulesetInfo> rulesetInfos = existingRulesets.getRulesetList();
-            List<String> existingRuleNames = rulesetInfos.stream()
-                    .map(RulesetInfo::getName)
+            PolicyList existingRulesets = policyManager.getPolicies(organization);
+            List<PolicyInfo> policyInfos = existingRulesets.getPolicyList();
+            List<String> existingRuleNames = policyInfos.stream()
+                    .map(PolicyInfo::getName)
                     .collect(Collectors.toList());
 
             // Define the path to default rulesets
@@ -158,7 +158,7 @@ public class APIMGovernanceUtil {
                         // Add ruleset if it doesn't already exist
                         if (!existingRuleNames.contains(defaultRuleset.getName())) {
                             log.info("Adding default ruleset: " + defaultRuleset.getName());
-                            rulesetManager.createNewRuleset(
+                            policyManager.createNewPolicy(
                                     getRulesetFromDefaultRuleset(defaultRuleset,
                                             file.getName().replaceAll("/", "_")), organization);
                         } else {
@@ -187,23 +187,23 @@ public class APIMGovernanceUtil {
      * @return Ruleset
      * @throws APIMGovernanceException if an error occurs while loading default ruleset content
      */
-    public static Ruleset getRulesetFromDefaultRuleset(DefaultRuleset defaultRuleset,
-                                                       String fileName) throws APIMGovernanceException {
-        Ruleset ruleset = new Ruleset();
-        ruleset.setName(defaultRuleset.getName());
-        ruleset.setDescription(defaultRuleset.getDescription());
-        ruleset.setRuleCategory(RuleCategory.fromString(defaultRuleset.getRuleCategory()));
-        ruleset.setRuleType(RuleType.fromString(defaultRuleset.getRuleType()));
-        ruleset.setArtifactType(ExtendedArtifactType.fromString(defaultRuleset.getArtifactType()));
-        ruleset.setProvider(defaultRuleset.getProvider());
-        ruleset.setDocumentationLink(defaultRuleset.getDocumentationLink());
+    public static Policy getRulesetFromDefaultRuleset(DefaultRuleset defaultRuleset,
+                                                      String fileName) throws APIMGovernanceException {
+        Policy policy = new Policy();
+        policy.setName(defaultRuleset.getName());
+        policy.setDescription(defaultRuleset.getDescription());
+        policy.setPolicyCategory(PolicyCategory.fromString(defaultRuleset.getRuleCategory()));
+        policy.setPolicyType(PolicyType.fromString(defaultRuleset.getRuleType()));
+        policy.setArtifactType(ExtendedArtifactType.fromString(defaultRuleset.getArtifactType()));
+        policy.setProvider(defaultRuleset.getProvider());
+        policy.setDocumentationLink(defaultRuleset.getDocumentationLink());
 
-        RulesetContent rulesetContent = new RulesetContent();
-        rulesetContent.setFileName(fileName);
-        rulesetContent.setContent(defaultRuleset.getRulesetContentString().getBytes(StandardCharsets.UTF_8));
-        ruleset.setRulesetContent(rulesetContent);
+        PolicyContent policyContent = new PolicyContent();
+        policyContent.setFileName(fileName);
+        policyContent.setContent(defaultRuleset.getRulesetContentString().getBytes(StandardCharsets.UTF_8));
+        policy.setPolicyContent(policyContent);
 
-        return ruleset;
+        return policy;
     }
 
     /**
@@ -289,17 +289,17 @@ public class APIMGovernanceUtil {
             throws APIMGovernanceException {
 
         List<String> labels = APIMGovernanceUtil.getLabelsForArtifact(artifactRefId, artifactType);
-        PolicyManager policyManager = new PolicyManager();
+        PolicyAttachmentManager policyAttachmentManager = new PolicyAttachmentManager();
 
         Map<String, String> policies = new HashMap<>();
         for (String label : labels) {
-            Map<String, String> policiesForLabel = policyManager.getPoliciesByLabel(label, organization);
+            Map<String, String> policiesForLabel = policyAttachmentManager.getPoliciesByLabel(label, organization);
             if (policiesForLabel != null) {
                 policies.putAll(policiesForLabel);
             }
         }
 
-        policies.putAll(policyManager.getOrganizationWidePolicies(organization));
+        policies.putAll(policyAttachmentManager.getOrganizationWidePolicyAttachments(organization));
 
         return policies; // Return a map of policy IDs and policy names
     }
@@ -322,20 +322,20 @@ public class APIMGovernanceUtil {
             throws APIMGovernanceException {
 
         List<String> labels = APIMGovernanceUtil.getLabelsForArtifact(artifactRefId, artifactType);
-        PolicyManager policyManager = new PolicyManager();
+        PolicyAttachmentManager policyAttachmentManager = new PolicyAttachmentManager();
 
         // Check for policies using labels and the state
         Set<String> policies = new HashSet<>();
         for (String label : labels) {
             // Get policies for the label and state
-            List<String> policiesForLabel = policyManager
-                    .getPoliciesByLabelAndState(label, apimGovernableState, organization);
+            List<String> policiesForLabel = policyAttachmentManager
+                    .getPolicyAttachmentByLabelAndState(label, apimGovernableState, organization);
             if (policiesForLabel != null) {
                 policies.addAll(policiesForLabel);
             }
         }
 
-        policies.addAll(policyManager.getOrganizationWidePoliciesByState(apimGovernableState,
+        policies.addAll(policyAttachmentManager.getOrganizationWidePolicyAttachmentByState(apimGovernableState,
                 organization));
 
         return new ArrayList<>(policies);
@@ -353,10 +353,10 @@ public class APIMGovernanceUtil {
     public static boolean isBlockingActionsPresent(List<String> policyIds, APIMGovernableState apimGovernableState,
                                                    String organization)
             throws APIMGovernanceException {
-        PolicyManager policyManager = new PolicyManager();
+        PolicyAttachmentManager policyAttachmentManager = new PolicyAttachmentManager();
         boolean isBlocking = false;
         for (String policyId : policyIds) {
-            if (policyManager.isBlockingActionPresentForState(policyId, apimGovernableState, organization)) {
+            if (policyAttachmentManager.isBlockingActionPresentForState(policyId, apimGovernableState, organization)) {
                 isBlocking = true;
                 break;
             }
@@ -499,7 +499,7 @@ public class APIMGovernanceUtil {
      * @param artifactType Artifact Type
      * @return Map of RuleType and String
      */
-    public static Map<RuleType, String> extractArtifactProjectContent(byte[] project, ArtifactType artifactType)
+    public static Map<PolicyType, String> extractArtifactProjectContent(byte[] project, ArtifactType artifactType)
             throws APIMGovernanceException {
         if (ArtifactType.API.equals(artifactType)) {
             return APIMUtil.extractAPIProjectContent(project);

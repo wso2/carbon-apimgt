@@ -21,15 +21,15 @@ package org.wso2.carbon.apimgt.governance.api.model;
 /**
  * This class represents a governance Ruleset
  */
-public class Ruleset extends RulesetInfo {
-    private RulesetContent rulesetContent;
+public class Policy extends PolicyInfo {
+    private PolicyContent policyContent;
 
-    public RulesetContent getRulesetContent() {
-        return new RulesetContent(rulesetContent);
+    public PolicyContent getPolicyContent() {
+        return new PolicyContent(policyContent);
     }
 
-    public void setRulesetContent(RulesetContent rulesetContent) {
-        this.rulesetContent = new RulesetContent(rulesetContent);
+    public void setPolicyContent(PolicyContent policyContent) {
+        this.policyContent = new PolicyContent(policyContent);
     }
 }
 

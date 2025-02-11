@@ -9,9 +9,10 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 
-import org.wso2.carbon.apimgt.governance.rest.api.dto.APIMGovernancePolicyDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.APIMGovernancePolicyListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
+import java.io.File;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyInfoDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyListDTO;
 
 import java.util.List;
 
@@ -22,9 +23,11 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface PoliciesApiService {
-      public Response createGovernancePolicy(APIMGovernancePolicyDTO apIMGovernancePolicyDTO, MessageContext messageContext) throws APIMGovernanceException;
-      public Response deleteGovernancePolicy(String policyId, MessageContext messageContext) throws APIMGovernanceException;
-      public Response getGovernancePolicies(Integer limit, Integer offset, String query, MessageContext messageContext) throws APIMGovernanceException;
-      public Response getGovernancePolicyById(String policyId, MessageContext messageContext) throws APIMGovernanceException;
-      public Response updateGovernancePolicyById(String policyId, APIMGovernancePolicyDTO apIMGovernancePolicyDTO, MessageContext messageContext) throws APIMGovernanceException;
+      public Response createPolicy(String name, InputStream policyContentInputStream, Attachment policyContentDetail, String ruleType, String artifactType, String description, String ruleCategory, String documentationLink, String provider, MessageContext messageContext) throws APIMGovernanceException;
+      public Response deletePolicy(String policyId, MessageContext messageContext) throws APIMGovernanceException;
+      public Response getPolicies(Integer limit, Integer offset, String query, MessageContext messageContext) throws APIMGovernanceException;
+      public Response getPolicyById(String policyId, MessageContext messageContext) throws APIMGovernanceException;
+      public Response getPolicyContent(String policyId, MessageContext messageContext) throws APIMGovernanceException;
+      public Response getPolicyUsage(String policyId, MessageContext messageContext) throws APIMGovernanceException;
+      public Response updatePolicyById(String policyId, String name, InputStream policyContentInputStream, Attachment policyContentDetail, String ruleType, String artifactType, String description, String ruleCategory, String documentationLink, String provider, MessageContext messageContext) throws APIMGovernanceException;
 }

@@ -24,7 +24,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.RuleType;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
 
 import java.util.List;
 import java.util.Map;
@@ -80,7 +80,7 @@ public interface APIMGovernanceService {
      */
     ArtifactComplianceInfo evaluateComplianceSync(String artifactRefId, String revisionNo, ArtifactType artifactType,
                                                   APIMGovernableState state,
-                                                  Map<RuleType, String> artifactProjectContent,
+                                                  Map<PolicyType, String> artifactProjectContent,
                                                   String organization) throws APIMGovernanceException;
 
     /**

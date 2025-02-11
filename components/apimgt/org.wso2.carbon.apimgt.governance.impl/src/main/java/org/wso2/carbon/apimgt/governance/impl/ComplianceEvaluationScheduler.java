@@ -25,9 +25,9 @@ import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationRequest;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.RuleType;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
-import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.model.Policy;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
@@ -218,7 +218,7 @@ public class ComplianceEvaluationScheduler {
             }
 
             // Extract artifact project content to map
-            Map<RuleType, String> artifactProjectContentMap = APIMGovernanceUtil.extractArtifactProjectContent
+            Map<PolicyType, String> artifactProjectContentMap = APIMGovernanceUtil.extractArtifactProjectContent
                     (artifactProject, artifactType);
 
 
@@ -259,47 +259,47 @@ public class ComplianceEvaluationScheduler {
      * @throws APIMGovernanceException If an error occurs while evaluating the artifact.
      */
     private static void evaluteArtifactWithPolicy(String artifactRefId, ArtifactType artifactType, String policyId,
-                                                  Map<RuleType, String> artifactProjectContentMap, String organization)
+                                                  Map<PolicyType, String> artifactProjectContentMap, String organization)
             throws APIMGovernanceException {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
 
         // Validate the artifact against each ruleset
-        List<Ruleset> rulesets = GovernancePolicyMgtDAOImpl.getInstance()
-                .getRulesetsWithContentByPolicyId(policyId, organization);
+        List<Policy> policies = GovernancePolicyMgtDAOImpl.getInstance()
+                .getPoliciesWithContentByPolicyAttachmentId(policyId, organization);
 
         Map<String, List<RuleViolation>> rulesetViolationsMap = new HashMap<>();
 
-        for (Ruleset ruleset : rulesets) {
+        for (Policy policy : policies) {
             List<RuleViolation> ruleViolations = new ArrayList<>();
 
             // Check if ruleset's artifact type matches with the artifact's type
-            ExtendedArtifactType extendedArtifactType = ruleset.getArtifactType();
+            ExtendedArtifactType extendedArtifactType = policy.getArtifactType();
             if (ArtifactType.API.equals(artifactType) && extendedArtifactType.equals(
                     APIMUtil.getExtendedArtifactTypeForAPI(APIMUtil.getAPIType(artifactRefId)))) {
 
                 // Get target file content from artifact project based on ruleType
-                RuleType ruleType = ruleset.getRuleType();
-                String contentToValidate = artifactProjectContentMap.get(ruleType);
+                PolicyType policyType = policy.getPolicyType();
+                String contentToValidate = artifactProjectContentMap.get(policyType);
 
                 if (contentToValidate == null) {
-                    log.warn(ruleType + " content not found in artifact project for artifact ID: " +
-                            artifactRefId + ". Skipping governance evaluation for ruleset ID: " + ruleset.getId());
+                    log.warn(policyType + " content not found in artifact project for artifact ID: " +
+                            artifactRefId + ". Skipping governance evaluation for ruleset ID: " + policy.getId());
                     continue;
                 }
 
                 // Send target content and ruleset for validation
-                List<RuleViolation> violations = validationEngine.validate(contentToValidate, ruleset);
+                List<RuleViolation> violations = validationEngine.validate(contentToValidate, policy);
                 ruleViolations.addAll(violations);
 
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("Ruleset artifact type does not match with the artifact's type. Skipping " +
-                            "governance evaluation for ruleset ID: " + ruleset.getId());
+                            "governance evaluation for ruleset ID: " + policy.getId());
                 }
             }
-            rulesetViolationsMap.put(ruleset.getId(), ruleViolations);
+            rulesetViolationsMap.put(policy.getId(), ruleViolations);
         }
         savePolicyEvaluationResults(artifactRefId, artifactType, policyId, rulesetViolationsMap,
                 organization);

@@ -24,15 +24,15 @@ import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
-import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicyAttachment;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.RuleType;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
-import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
+import org.wso2.carbon.apimgt.governance.impl.PolicyAttachmentManager;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
 
@@ -54,12 +54,12 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
 
     private static final Log log = LogFactory.getLog(APIMGovernanceServiceImpl.class);
     private final ComplianceManager complianceManager;
-    private final PolicyManager policyManager;
+    private final PolicyAttachmentManager policyAttachmentManager;
 
     public APIMGovernanceServiceImpl() {
 
         complianceManager = new ComplianceManager();
-        policyManager = new PolicyManager();
+        policyAttachmentManager = new PolicyAttachmentManager();
     }
 
     /**
@@ -131,7 +131,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
     @Override
     public ArtifactComplianceInfo evaluateComplianceSync(String artifactRefId, String revisionNo,
                                                          ArtifactType artifactType, APIMGovernableState state,
-                                                         Map<RuleType, String> artifactProjectContent,
+                                                         Map<PolicyType, String> artifactProjectContent,
                                                          String organization) throws APIMGovernanceException {
 
         List<String> applicablePolicyIds = APIMGovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactRefId,
@@ -167,13 +167,13 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
             log.debug("Evaluating compliance for the artifact with the file path ");
         }
 
-        Map<String, String> policies = policyManager.getOrganizationWidePolicies(organization);
+        Map<String, String> policies = policyAttachmentManager.getOrganizationWidePolicyAttachments(organization);
 
         List<String> applicablePolicyIds = new ArrayList<>(policies.keySet());
 
         // Only extract content if the artifact type requires it.
         if (ExtendedArtifactType.isArtifactAPI(artifactType)) {
-            Map<RuleType, String> contentMap = APIMGovernanceUtil
+            Map<PolicyType, String> contentMap = APIMGovernanceUtil
                     .extractArtifactProjectContent(zipArchive, ArtifactType.API);
             return complianceManager.handleComplianceEvalDryRun(artifactType, applicablePolicyIds,
                     contentMap, organization);
@@ -201,7 +201,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
 
         Set<String> allPoliciesForLabel = new HashSet<>();
         for (String label : labels) {
-            allPoliciesForLabel.addAll(new ArrayList<>(policyManager
+            allPoliciesForLabel.addAll(new ArrayList<>(policyAttachmentManager
                     .getPoliciesByLabel(label, organization).keySet()));
         }
 
@@ -213,7 +213,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
             boolean isDeployed = APIMUtil.isAPIDeployed(artifactRefId);
 
             for (String policyId : allPoliciesForLabel) {
-                APIMGovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId, organization);
+                APIMGovernancePolicyAttachment policy = policyAttachmentManager.getGovernancePolicyAttachmentByID(policyId, organization);
                 boolean isAPIGovernable = APIMUtil.isAPIGovernable(apiStatus, isDeployed, policy.getGovernableStates());
                 // If the API should be governed by the policy
                 if (isAPIGovernable) {
@@ -233,7 +233,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      */
     @Override
     public void deleteGovernanceDataForLabel(String label, String organization) throws APIMGovernanceException {
-        policyManager.deleteLabelPolicyMappings(label, organization);
+        policyAttachmentManager.deleteLabelPolicyAttachmentMappings(label, organization);
     }
 
     /**

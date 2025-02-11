@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactInfoDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceSummaryDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAttachmentAdherenceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.SeverityBasedRuleViolationCountDTO;
 import javax.validation.constraints.*;
 
@@ -64,7 +64,7 @@ return null;
     } 
     private StatusEnum status = null;
     private ArtifactInfoDTO info = null;
-    private PolicyAdherenceSummaryDTO policyAdherenceSummary = null;
+    private PolicyAttachmentAdherenceSummaryDTO policyAttachmentAdherenceSummary = null;
     private List<SeverityBasedRuleViolationCountDTO> severityBasedRuleViolationSummary = new ArrayList<SeverityBasedRuleViolationCountDTO>();
 
   /**
@@ -123,20 +123,20 @@ return null;
 
   /**
    **/
-  public ArtifactComplianceStatusDTO policyAdherenceSummary(PolicyAdherenceSummaryDTO policyAdherenceSummary) {
-    this.policyAdherenceSummary = policyAdherenceSummary;
+  public ArtifactComplianceStatusDTO policyAttachmentAdherenceSummary(PolicyAttachmentAdherenceSummaryDTO policyAttachmentAdherenceSummary) {
+    this.policyAttachmentAdherenceSummary = policyAttachmentAdherenceSummary;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("policyAdherenceSummary")
-  public PolicyAdherenceSummaryDTO getPolicyAdherenceSummary() {
-    return policyAdherenceSummary;
+  @JsonProperty("policyAttachmentAdherenceSummary")
+  public PolicyAttachmentAdherenceSummaryDTO getPolicyAttachmentAdherenceSummary() {
+    return policyAttachmentAdherenceSummary;
   }
-  public void setPolicyAdherenceSummary(PolicyAdherenceSummaryDTO policyAdherenceSummary) {
-    this.policyAdherenceSummary = policyAdherenceSummary;
+  public void setPolicyAttachmentAdherenceSummary(PolicyAttachmentAdherenceSummaryDTO policyAttachmentAdherenceSummary) {
+    this.policyAttachmentAdherenceSummary = policyAttachmentAdherenceSummary;
   }
 
   /**
@@ -171,13 +171,13 @@ return null;
     return Objects.equals(id, artifactComplianceStatus.id) &&
         Objects.equals(status, artifactComplianceStatus.status) &&
         Objects.equals(info, artifactComplianceStatus.info) &&
-        Objects.equals(policyAdherenceSummary, artifactComplianceStatus.policyAdherenceSummary) &&
+        Objects.equals(policyAttachmentAdherenceSummary, artifactComplianceStatus.policyAttachmentAdherenceSummary) &&
         Objects.equals(severityBasedRuleViolationSummary, artifactComplianceStatus.severityBasedRuleViolationSummary);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, status, info, policyAdherenceSummary, severityBasedRuleViolationSummary);
+    return Objects.hash(id, status, info, policyAttachmentAdherenceSummary, severityBasedRuleViolationSummary);
   }
 
   @Override
@@ -188,7 +188,7 @@ return null;
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    info: ").append(toIndentedString(info)).append("\n");
-    sb.append("    policyAdherenceSummary: ").append(toIndentedString(policyAdherenceSummary)).append("\n");
+    sb.append("    policyAttachmentAdherenceSummary: ").append(toIndentedString(policyAttachmentAdherenceSummary)).append("\n");
     sb.append("    severityBasedRuleViolationSummary: ").append(toIndentedString(severityBasedRuleViolationSummary)).append("\n");
     sb.append("}");
     return sb.toString();

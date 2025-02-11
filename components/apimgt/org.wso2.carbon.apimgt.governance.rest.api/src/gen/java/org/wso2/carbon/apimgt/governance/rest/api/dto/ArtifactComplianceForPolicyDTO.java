@@ -8,7 +8,7 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactInfoDTO;
 import javax.validation.constraints.*;
 
 /**
- * Compliance status of an artifact for a specific policy.
+ * Compliance status of an artifact for a specific policy attachment.
  **/
 
 import io.swagger.annotations.*;
@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Compliance status of an artifact for a specific policy.")
+@ApiModel(description = "Compliance status of an artifact for a specific policy attachment.")
 
 public class ArtifactComplianceForPolicyDTO   {
   
@@ -79,7 +79,7 @@ return null;
   }
 
   /**
-   * Status of the artifact&#39;s compliance to the policy.
+   * Status of the artifact&#39;s compliance to the policy attachment.
    **/
   public ArtifactComplianceForPolicyDTO status(StatusEnum status) {
     this.status = status;
@@ -87,7 +87,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "COMPLIANT", value = "Status of the artifact's compliance to the policy.")
+  @ApiModelProperty(example = "COMPLIANT", value = "Status of the artifact's compliance to the policy attachment.")
   @JsonProperty("status")
   public StatusEnum getStatus() {
     return status;

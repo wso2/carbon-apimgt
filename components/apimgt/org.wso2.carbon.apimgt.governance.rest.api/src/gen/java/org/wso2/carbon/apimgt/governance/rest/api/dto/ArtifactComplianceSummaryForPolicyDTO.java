@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 /**
- * Summary of compliance of artifacts evaluated against a specific policy.
+ * Summary of compliance of artifacts evaluated against a specific policy attachment.
  **/
 
 import io.swagger.annotations.*;
@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Summary of compliance of artifacts evaluated against a specific policy.")
+@ApiModel(description = "Summary of compliance of artifacts evaluated against a specific policy attachment.")
 
 public class ArtifactComplianceSummaryForPolicyDTO   {
   

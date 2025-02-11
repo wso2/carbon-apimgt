@@ -194,7 +194,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                                           String requestId, List<String> policyIds)
             throws SQLException {
 
-        String sqlQuery = SQLConstants.ADD_REQ_POLICY_MAPPING;
+        String sqlQuery = SQLConstants.ADD_REQ_POLICY_ATTACHMENT_MAPPING;
 
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             for (String policyId : policyIds) {
@@ -270,7 +270,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             connection.setAutoCommit(false);
 
             try {
-                String sqlQuery = SQLConstants.DELETE_REQ_POLICY_MAPPING;
+                String sqlQuery = SQLConstants.DELETE_REQ_POLICY_ATTACHMENT_MAPPING;
                 try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
                     prepStmnt.setString(1, requestId);
                     prepStmnt.executeUpdate();
@@ -310,7 +310,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             connection.setAutoCommit(false);
 
             try {
-                String sqlQuery = SQLConstants.DELETE_REQ_POLICY_MAPPING_FOR_ARTIFACT;
+                String sqlQuery = SQLConstants.DELETE_REQ_POLICY_ATTACHMENT_MAPPING_FOR_ARTIFACT;
                 try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
                     prepStmnt.setString(1, artifactRefId);
                     prepStmnt.setString(2, String.valueOf(artifactType));
@@ -430,7 +430,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
      */
     private List<String> getPolicyIdsForRequest(Connection connection, String requestId) throws SQLException {
 
-        String sqlQuery = SQLConstants.GET_REQ_POLICY_MAPPING;
+        String sqlQuery = SQLConstants.GET_REQ_POLICY_ATTACHMENT_MAPPING;
         List<String> policyIds = new ArrayList<>();
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             prepStmnt.setString(1, requestId);
@@ -504,7 +504,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                                    String policyId, String organization)
             throws SQLException {
 
-        String sqlQuery = SQLConstants.DELETE_POLICY_RUN_FOR_ARTIFACT_AND_POLICY;
+        String sqlQuery = SQLConstants.DELETE_POLICY_ATTACHMENT_RUN_FOR_ARTIFACT_AND_POLICY_ATTACHMENT;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             prepStmnt.setString(1, artifactRefId);
             prepStmnt.setString(2, String.valueOf(artifactType));
@@ -527,7 +527,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     private void clearOldRulesetRuns(Connection connection, String artifactRefId, ArtifactType artifactType,
                                      List<String> rulesetIds, String organization) throws SQLException {
 
-        String sqlQuery = SQLConstants.DELETE_RULESET_RUN_FOR_ARTIFACT_AND_RULESET;
+        String sqlQuery = SQLConstants.DELETE_POLICY_RUN_FOR_ARTIFACT_AND_POLICY;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             for (String rulesetId : rulesetIds) {
                 prepStmnt.setString(1, artifactRefId);
@@ -541,7 +541,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Clear rule violations for the artifact and rulesets
+     * Clear rule violations for the artifact and policies
      *
      * @param connection    Connection
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
@@ -553,7 +553,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     private void clearOldRuleViolations(Connection connection, String artifactRefId, ArtifactType artifactType,
                                         List<String> rulesetIds, String organization) throws SQLException {
 
-        String sqlQuery = SQLConstants.DELETE_RULE_VIOLATIONS_FOR_ARTIFACT_AND_RULESET;
+        String sqlQuery = SQLConstants.DELETE_RULE_VIOLATIONS_FOR_ARTIFACT_AND_POLICY;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             for (String rulesetId : rulesetIds) {
                 prepStmnt.setString(1, artifactRefId);
@@ -603,7 +603,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
      */
     private void addPolicyRun(Connection connection, String artifactKey, String policyId) throws SQLException {
 
-        String sqlQuery = SQLConstants.ADD_POLICY_RUN;
+        String sqlQuery = SQLConstants.ADD_POLICY_ATTACHMENT_RUN;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             prepStmnt.setString(1, artifactKey);
             prepStmnt.setString(2, policyId);
@@ -624,7 +624,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     private String addRulesetRuns(Connection connection, String artifactKey, String rulesetId,
                                   boolean isRulesetEvalSuccess) throws SQLException {
 
-        String sqlQuery = SQLConstants.ADD_RULESET_RUN;
+        String sqlQuery = SQLConstants.ADD_POLICY_RUN;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             String rulesetResultId = APIMGovernanceUtil.generateUUID();
             prepStmnt.setString(1, rulesetResultId);
@@ -759,7 +759,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     public List<String> getEvaluatedPoliciesForArtifact(String artifactRefId, ArtifactType artifactType,
                                                         String organization) throws APIMGovernanceException {
 
-        String sqlQuery = SQLConstants.GET_POLICY_RUNS_FOR_ARTIFACT;
+        String sqlQuery = SQLConstants.GET_POLICY_ATTACHMENT_RUNS_FOR_ARTIFACT;
         List<String> policyIds = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
@@ -783,14 +783,14 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact Type
      * @param organization  Organization
-     * @return List of evaluated rulesets
+     * @return List of evaluated policies
      * @throws APIMGovernanceException If an error occurs while getting the compliance evaluation results
      */
     @Override
     public List<String> getEvaluatedRulesetsForArtifact(String artifactRefId, ArtifactType artifactType,
                                                         String organization)
             throws APIMGovernanceException {
-        String sqlQuery = SQLConstants.GET_RULESET_RUNS_FOR_ARTIFACT;
+        String sqlQuery = SQLConstants.GET_POLICY_RUNS_FOR_ARTIFACT;
         List<String> rulesetIds = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
@@ -822,7 +822,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     public boolean isRulesetEvaluatedForArtifact(String artifactRefId, ArtifactType artifactType,
                                                  String rulesetId, String organization)
             throws APIMGovernanceException {
-        String sqlQuery = SQLConstants.GET_RULESET_RUN_FOR_ARTIFACT_AND_RULESET;
+        String sqlQuery = SQLConstants.GET_POLICY_RUN_FOR_ARTIFACT_AND_POLICY;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             prepStmnt.setString(1, artifactRefId);
@@ -903,7 +903,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     @Override
     public List<String> getAllComplianceEvaluatedPolicies(String organization) throws APIMGovernanceException {
 
-        String sqlQuery = SQLConstants.GET_POLICY_RUNS;
+        String sqlQuery = SQLConstants.GET_POLICY_ATTACHMENT_RUNS;
         Set<String> policyIds = new HashSet<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
@@ -920,16 +920,16 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Get list of all violated rulesets
+     * Get list of all violated policies
      *
      * @param organization Organization
-     * @return List of all violated rulesets
-     * @throws APIMGovernanceException If an error occurs while getting the list of all violated rulesets
+     * @return List of all violated policies
+     * @throws APIMGovernanceException If an error occurs while getting the list of all violated policies
      */
     @Override
     public List<String> getViolatedRulesets(String organization) throws APIMGovernanceException {
 
-        String sqlQuery = SQLConstants.GET_FAILED_RULESET_RUNS;
+        String sqlQuery = SQLConstants.GET_FAILED_POLICY_RUNS;
         List<String> rulesetIds = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
@@ -946,19 +946,19 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Get list of all violated rulesets for an artifact
+     * Get list of all violated policies for an artifact
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact Type
      * @param organization  Organization
-     * @return List of all violated rulesets for an artifact
+     * @return List of all violated policies for an artifact
      * @throws APIMGovernanceException If an error occurs while getting the list of all
-     *                                 violated rulesets for an artifact
+     *                                 violated policies for an artifact
      */
     @Override
     public List<String> getViolatedRulesetsForArtifact(String artifactRefId, ArtifactType artifactType,
                                                        String organization) throws APIMGovernanceException {
-        String sqlQuery = SQLConstants.GET_FAILED_RULESET_RUNS_FOR_ARTIFACT;
+        String sqlQuery = SQLConstants.GET_FAILED_POLICY_RUNS_FOR_ARTIFACT;
         List<String> rulesetIds = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
@@ -988,7 +988,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     @Override
     public List<ArtifactInfo> getEvaluatedArtifactsForPolicy(String policyId, String organization)
             throws APIMGovernanceException {
-        String sqlQuery = SQLConstants.GET_ARITFCATS_FOR_POLICY_RUN;
+        String sqlQuery = SQLConstants.GET_ARTIFACTS_FOR_POLICY_ATTACHMENT_RUN;
         List<ArtifactInfo> artifactInfos = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
@@ -1033,7 +1033,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 }
 
                 try (PreparedStatement prepStmnt = connection.prepareStatement(SQLConstants
-                        .DELETE_RULESET_RUNS_FOR_ARTIFACT)) {
+                        .DELETE_POLICY_ATTACHMENT_RUNS_FOR_ARTIFACT)) {
                     prepStmnt.setString(1, artifactRefId);
                     prepStmnt.setString(2, String.valueOf(artifactType));
                     prepStmnt.setString(3, organization);
@@ -1049,7 +1049,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 }
 
                 try (PreparedStatement prepStmnt = connection.prepareStatement(SQLConstants
-                        .DELETE_REQ_POLICY_MAPPING_FOR_ARTIFACT)) {
+                        .DELETE_REQ_POLICY_ATTACHMENT_MAPPING_FOR_ARTIFACT)) {
                     prepStmnt.setString(1, artifactRefId);
                     prepStmnt.setString(2, String.valueOf(artifactType));
                     prepStmnt.setString(3, organization);

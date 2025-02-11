@@ -174,7 +174,7 @@ public interface ComplianceMgtDAO {
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact Type
      * @param organization  Organization
-     * @return List of evaluated rulesets
+     * @return List of evaluated policies
      * @throws APIMGovernanceException If an error occurs while getting the compliance evaluation results
      */
     List<String> getEvaluatedRulesetsForArtifact(String artifactRefId, ArtifactType artifactType,
@@ -228,23 +228,23 @@ public interface ComplianceMgtDAO {
     List<String> getAllComplianceEvaluatedPolicies(String organization) throws APIMGovernanceException;
 
     /**
-     * Get list of all violated rulesets
+     * Get list of all violated policies
      *
      * @param organization Organization
-     * @return List of all violated rulesets
-     * @throws APIMGovernanceException If an error occurs while getting the list of all violated rulesets
+     * @return List of all violated policies
+     * @throws APIMGovernanceException If an error occurs while getting the list of all violated policies
      */
     List<String> getViolatedRulesets(String organization) throws APIMGovernanceException;
 
     /**
-     * Get list of all violated rulesets for an artifact
+     * Get list of all violated policies for an artifact
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact Type
      * @param organization  Organization
-     * @return List of all violated rulesets for an artifact
+     * @return List of all violated policies for an artifact
      * @throws APIMGovernanceException If an error occurs while getting the list of all
-     *                                 violated rulesets for an artifact
+     *                                 violated policies for an artifact
      */
     List<String> getViolatedRulesetsForArtifact(String artifactRefId, ArtifactType artifactType,
                                                 String organization)

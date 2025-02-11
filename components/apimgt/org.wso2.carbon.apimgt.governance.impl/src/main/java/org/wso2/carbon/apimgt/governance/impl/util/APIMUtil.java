@@ -34,7 +34,7 @@ import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.RuleType;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -229,10 +229,10 @@ public class APIMUtil {
      * @return A map of API project contents.
      * @throws APIMGovernanceException if errors occur while extracting content.
      */
-    public static Map<RuleType, String> extractAPIProjectContent(byte[] apiProjectZip)
+    public static Map<PolicyType, String> extractAPIProjectContent(byte[] apiProjectZip)
             throws APIMGovernanceException {
 
-        Map<RuleType, String> apiProjectContentMap = new HashMap<>();
+        Map<PolicyType, String> apiProjectContentMap = new HashMap<>();
 
         String apiMetadata = extractAPIMetadata(apiProjectZip);
         String apiDefinition = extractAPIDefinition(apiProjectZip);
@@ -241,17 +241,17 @@ public class APIMUtil {
         if (apiMetadata == null) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.API_DETAILS_NOT_FOUND);
         } else {
-            apiProjectContentMap.put(RuleType.API_METADATA, apiMetadata);
+            apiProjectContentMap.put(PolicyType.API_METADATA, apiMetadata);
         }
         if (apiDefinition == null) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.API_DEFINITION_NOT_FOUND);
         } else {
-            apiProjectContentMap.put(RuleType.API_DEFINITION, apiDefinition);
+            apiProjectContentMap.put(PolicyType.API_DEFINITION, apiDefinition);
         }
         if (docData == null) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.API_DOCUMENT_DATA_NOT_FOUND);
         } else {
-            apiProjectContentMap.put(RuleType.API_DOCUMENTATION, docData);
+            apiProjectContentMap.put(PolicyType.API_DOCUMENTATION, docData);
         }
 
         return apiProjectContentMap;

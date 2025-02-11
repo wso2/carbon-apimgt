@@ -30,24 +30,24 @@ info:
 servers:
   - url: https://apis.wso2.com/api/am/governance/v1
 tags:
-  - name: Rulesets
-    description: for managing rulesets.
-  - name: Governance Policies
-    description: for managing governance policies.
+  - name: Policy Attachments
+    description: for managing policies.
+  - name: Governance Policy Attachments
+    description: for managing governance policy attachments.
   - name: Artifact Compliance
     description: for accessing artifact compliance.
-  - name: Policy Adherence
-    description: for accessing policy adherence.
+  - name: Policy Attachment Adherence
+    description: for accessing policy attachments adherence.
   - name: Deprecated
     description: resources that are deprecated.
 paths:
-  /rulesets:
+  /policies:
     get:
-      summary: Retrieves a list of rulesets.
-      description: Returns a list of all rulesets associated with the requested organization.
-      operationId: getRulesets
+      summary: Retrieves a list of policies.
+      description: Returns a list of all policies associated with the requested organization.
+      operationId: getPolicies
       tags:
-        - Rulesets
+        - Policies
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
@@ -57,23 +57,23 @@ paths:
             type: string
             example: "name:WSO2 Security Practices artifactType:REST_API ruleType:API_DEFINITION"
           description: |
-            You can search for rulesets using the following format:
+            You can search for policies using the following format:
 
-              - "query=name:{NAME}" searches rulesets by name.
-              - "query=artifactType:{ARTIFACT_TYPE}" searches rulesets by artifact type.
-              - "query=ruleType:{RULE_TYPE}" searches rulesets by rule type.
+              - "query=name:{NAME}" searches policies by name.
+              - "query=artifactType:{ARTIFACT_TYPE}" searches policies by artifact type.
+              - "query=ruleType:{RULE_TYPE}" searches policies by rule type.
 
-            You can combine multiple attributes to search for rulesets:
-              - "query=name:{NAME} artifactType:{ARTIFACT_TYPE} ruleType:{RULE_TYPE}" searches rulesets by name, artifact type, and rule type.
+            You can combine multiple attributes to search for policies:
+              - "query=name:{NAME} artifactType:{ARTIFACT_TYPE} ruleType:{RULE_TYPE}" searches policies by name, artifact type, and rule type.
 
             Remember to use URL encoding if your client does not support it (e.g., curl).
       responses:
         "200":
-          description: OK. Successful response with a list of rulesets.
+          description: OK. Successful response with a list of policies.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RulesetList'
+                $ref: '#/components/schemas/PolicyList'
         "400":
           description: Bad Request
           content:
@@ -102,25 +102,25 @@ paths:
         - OAuth2Security:
             - apim:gov_rule_read
     post:
-      summary: Create a new ruleset.
-      description: Creates a new ruleset in the user's organization.
-      operationId: createRuleset
+      summary: Create a new policy.
+      description: Creates a new policy in the user's organization.
+      operationId: createPolicy
       tags:
-        - Rulesets
+        - Policy
       requestBody:
         required: true
-        description: JSON object containing the details of the new ruleset.
+        description: JSON object containing the details of the new policy.
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/RulesetInput'
+              $ref: '#/components/schemas/PolicyInput'
       responses:
         "201":
-          description: OK. Ruleset created successfully.
+          description: OK. Policy created successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RulesetInfo'
+                $ref: '#/components/schemas/PolicyInfo'
         "400":
           description: Bad Request
           content:
@@ -148,22 +148,22 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_manage
-  /rulesets/{rulesetId}:
+  /policies/{policyId}:
     get:
-      summary: Retrieves details of a specific ruleset.
-      description: Retrieves details of the ruleset identified by the rulesetId.
-      operationId: getRulesetById
+      summary: Retrieves details of a specific policy.
+      description: Retrieves details of the policy identified by the policyId.
+      operationId: getPolicyById
       tags:
-        - Rulesets
+        - Policy
       parameters:
-        - $ref: '#/components/parameters/rulesetId'
+        - $ref: '#/components/parameters/policyId'
       responses:
         "200":
-          description: OK. Ruleset details retrieved successfully.
+          description: OK. Policy details retrieved successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RulesetInfo'
+                $ref: '#/components/schemas/PolicyInfo'
         "400":
           description: Bad Request
           content:
@@ -192,27 +192,27 @@ paths:
         - OAuth2Security:
             - apim:gov_rule_read
     put:
-      summary: Updates a specific ruleset.
-      description: Updates the details of the ruleset identified by the `rulesetId`.
-      operationId: updateRulesetById
+      summary: Updates a specific policy.
+      description: Updates the details of the policy identified by the `policyId`.
+      operationId: updatePolicyById
       tags:
-        - Rulesets
+        - Policy
       parameters:
-        - $ref: '#/components/parameters/rulesetId'
+        - $ref: '#/components/parameters/policyId'
       requestBody:
         required: true
-        description: JSON object containing the updated ruleset details.
+        description: JSON object containing the updated policy details.
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/RulesetInput'
+              $ref: '#/components/schemas/PolicyInput'
       responses:
         "200":
-          description: OK. Ruleset updated successfully.
+          description: OK. Policy updated successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RulesetInfo'
+                $ref: '#/components/schemas/PolicyInfo'
         "400":
           description: Bad Request
           content:
@@ -241,16 +241,16 @@ paths:
         - OAuth2Security:
             - apim:gov_rule_manage
     delete:
-      summary: Deletes a specific ruleset.
-      description: Deletes an existing ruleset identified by the rulesetId.
-      operationId: deleteRuleset
+      summary: Deletes a specific policy.
+      description: Deletes an existing policy identified by the policyId.
+      operationId: deletePolicy
       tags:
-        - Rulesets
+        - Policy
       parameters:
-        - $ref: '#/components/parameters/rulesetId'
+        - $ref: '#/components/parameters/policyId'
       responses:
         '204':
-          description: OK. Ruleset deleted successfully.
+          description: OK. Policy deleted successfully.
         "400":
           description: Bad Request
           content:
@@ -278,18 +278,18 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_manage
-  /rulesets/{rulesetId}/content:
+  /policies/{policyId}/content:
     get:
-      summary: Retrieves the content of a specific ruleset.
-      description: Retrieves the content of the ruleset identified by the rulesetId.
-      operationId: getRulesetContent
+      summary: Retrieves the content of a specific policy.
+      description: Retrieves the content of the policy identified by the policyId.
+      operationId: getPolicyContent
       tags:
-        - Rulesets
+        - Policy
       parameters:
-        - $ref: '#/components/parameters/rulesetId'
+        - $ref: '#/components/parameters/policyId'
       responses:
         "200":
-          description: OK. Ruleset content retrieved successfully.
+          description: OK. Policy content retrieved successfully.
           content:
             application/x-yaml:
               schema:
@@ -324,23 +324,23 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_read
-  /rulesets/{rulesetId}/usage:
+  /policies/{policyId}/usage:
     get:
-      summary: Retrieves the policy usage of a specific ruleset.
-      description: Retrieves the list of policies using the ruleset identified by the rulesetId.
-      operationId: getRulesetUsage
+      summary: Retrieves the policy attachment usage of a specific policy.
+      description: Retrieves the list of policy attachments using the policy identified by the policyId.
+      operationId: getPolicyUsage
       tags:
-        - Rulesets
+        - Policy
       parameters:
-        - $ref: '#/components/parameters/rulesetId'
+        - $ref: '#/components/parameters/policyId'
       responses:
         "200":
-          description: OK. Ruleset usage retrieved successfully.
+          description: OK. Policy usage retrieved successfully.
           content:
             application/json:
               schema:
                 type: array
-                description: List of artifacts using the ruleset.
+                description: List of artifacts using the policy.
                 items:
                   type: string
                   example: "123e4567-e89b-12d3-a456-426614174000"
@@ -371,13 +371,13 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_rule_read
-  /policies:
+  /policy-attachments:
     get:
-      summary: Retrieves a list of all governance policies.
-      description: Retrieves a list of governance policies for the user's organization.
-      operationId: getGovernancePolicies
+      summary: Retrieves a list of all governance policy-attachments.
+      description: Retrieves a list of governance policy-attachments for the user's organization.
+      operationId: getGovernancePolicyAttachments
       tags:
-        - Governance Policies
+        - Governance Policy Attachments
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
@@ -387,22 +387,22 @@ paths:
             type: string
             example: "name:WSO2 Best Practices state:API_CREATE label:GLOBAL"
           description: |
-            You can search for governance policies using following format.
+            You can search for governance policy attachments using following format.
 
-              - "query=name:{NAME}" searches policies by name.
-              - "query=state:{STATE} " searches policies by state.
+              - "query=name:{NAME}" searches policy attachments by name.
+              - "query=state:{STATE} " searches policy attachments by state.
             
-            You can also use multiple attributes to search for policies.
-              - "query=name:{NAME} state:{STATE}" searches policies by name, state, and label.
+            You can also use multiple attributes to search for policy attachments.
+              - "query=name:{NAME} state:{STATE}" searches policy attachments by name, state, and label.
 
             Remember to use URL encoding if your client doesn't support it (e.g., curl).
       responses:
         "200":
-          description: OK. Successful response with a list of governance policies.
+          description: OK. Successful response with a list of governance policy attachments.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/APIMGovernancePolicyList'
+                $ref: '#/components/schemas/APIMGovernancePolicyAttachmentList'
         "400":
           description: Bad Request
           content:
@@ -431,25 +431,25 @@ paths:
         - OAuth2Security:
             - apim:gov_policy_read
     post:
-      summary: Creates a new governance policy.
-      description: Creates a new governance policy for the user's organization.
-      operationId: createGovernancePolicy
+      summary: Creates a new governance policy attachment.
+      description: Creates a new governance policy attachment for the user's organization.
+      operationId: createGovernancePolicyAttachment
       tags:
-        - Governance Policies
+        - Governance Policy Attachments
       requestBody:
         required: true
-        description: JSON object containing the details of the new governance policy.
+        description: JSON object containing the details of the new governance policy attachment.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/APIMGovernancePolicy'
+              $ref: '#/components/schemas/APIMGovernancePolicyAttachment'
       responses:
         "201":
-          description: OK. Governance policy created successfully.
+          description: OK. Governance policy attachment created successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/APIMGovernancePolicy'
+                $ref: '#/components/schemas/APIMGovernancePolicyAttachment'
         "400":
           description: Bad Request
           content:
@@ -477,22 +477,22 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_policy_manage
-  /policies/{policyId}:
+  /policy-attachments/{policyAttachmentId}:
     get:
-      summary: Get a specific governance policy
-      description: Retrieves details of a specific governance policy identified by the policyId.
-      operationId: getGovernancePolicyById
+      summary: Get a specific governance policy attachment
+      description: Retrieves details of a specific governance policy attachment identified by the policyAttachmentId.
+      operationId: getGovernancePolicyAttachmentById
       tags:
-        - Governance Policies
+        - Governance Policy Attachments
       parameters:
-        - $ref: '#/components/parameters/policyId'
+        - $ref: '#/components/parameters/policyAttachmentId'
       responses:
         "200":
-          description: OK. Governance policy details retrieved successfully.
+          description: OK. Governance policy attachment details retrieved successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/APIMGovernancePolicy'
+                $ref: '#/components/schemas/APIMGovernancePolicyAttachment'
         "400":
           description: Bad Request
           content:
@@ -521,27 +521,27 @@ paths:
         - OAuth2Security:
             - apim:gov_policy_read
     put:
-      summary: Update a specific governance policy
-      description: Updates the details of an existing governance policy identified by the policyId.
-      operationId: updateGovernancePolicyById
+      summary: Update a specific governance policy attachment
+      description: Updates the details of an existing governance policy attachment identified by the policyAttachmentId.
+      operationId: updateGovernancePolicyAttachmentById
       tags:
-        - Governance Policies
+        - Governance Policy Attachments
       parameters:
-        - $ref: '#/components/parameters/policyId'
+        - $ref: '#/components/parameters/policyAttachmentId'
       requestBody:
         required: true
-        description: JSON object containing the updated governance policy details.
+        description: JSON object containing the updated governance policy attachment details.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/APIMGovernancePolicy'
+              $ref: '#/components/schemas/APIMGovernancePolicyAttachment'
       responses:
         "200":
-          description: OK. Governance policy updated successfully.
+          description: OK. Governance policy attachment updated successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/APIMGovernancePolicy'
+                $ref: '#/components/schemas/APIMGovernancePolicyAttachment'
         "400":
           description: Bad Request
           content:
@@ -570,16 +570,16 @@ paths:
         - OAuth2Security:
             - apim:gov_policy_manage
     delete:
-      summary: Delete a specific governance policy
-      description: Deletes an existing governance policy identified by the policyId.
-      operationId: deleteGovernancePolicy
+      summary: Delete a specific governance policy attachment
+      description: Deletes an existing governance policy attachment identified by the policyAttachmentId.
+      operationId: deleteGovernancePolicyAttachment
       tags:
-        - Governance Policies
+        - Governance Policy Attachments
       parameters:
-        - $ref: '#/components/parameters/policyId'
+        - $ref: '#/components/parameters/policyAttachmentId'
       responses:
         '204':
-          description: OK. Governance policy deleted successfully.
+          description: OK. Governance policy attachment deleted successfully.
         "400":
           description: Bad Request
           content:
@@ -735,23 +735,23 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_result_read
-  /artifact-compliance/api/{apiId}/ruleset-validation-results/{rulesetId}:
+  /artifact-compliance/api/{apiId}/policy-validation-results/{policyId}:
     get:
-      summary: Retrieve ruleset validation results for a specific API
-      description: Retrieve ruleset validation results associated with a specific API using its unique UUID.
-      operationId: getRulesetValidationResultsByAPIId
+      summary: Retrieve policy validation results for a specific API
+      description: Retrieve policy validation results associated with a specific API using its unique UUID.
+      operationId: getPolicyValidationResultsByAPIId
       tags:
         - Artifact Compliance
       parameters:
         - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/rulesetId'
+        - $ref: '#/components/parameters/policyId'
       responses:
         "200":
-          description: Successful response with ruleset validation results for the specified API.
+          description: Successful response with policy validation results for the specified API.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RulesetValidationResult'
+                $ref: '#/components/schemas/PolicyValidationResult'
         "400":
           description: Bad request
           content:
@@ -779,23 +779,23 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_result_read
-  /policy-adherence:
+  /policy-attachment-adherence:
     get:
-      summary: Retrieve adherence status for all policies
-      description: Retrieve adherence status of all governance policies within the organization.
-      operationId: getPolicyAdherenceForAllPolicies
+      summary: Retrieve adherence status for all policy attachments
+      description: Retrieve adherence status of all governance policy attachments within the organization.
+      operationId: getPolicyAttachmentAdherenceForAllPolicyAttachments
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
       tags:
-        - Policy Adherence
+        - Policy Attachments Adherence
       responses:
         "200":
-          description: Ok. Successful response with adherence details for all policies.
+          description: Ok. Successful response with adherence details for all policy attachments.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PolicyAdherenceList'
+                $ref: '#/components/schemas/PolicyAttachmentAdherenceList'
         "400":
           description: Bad request
           content:
@@ -823,20 +823,20 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_result_read
-  /policy-adherence/summary:
+  /policy-attachment-adherence/summary:
     get:
-      summary: Retrieves the summary of adherence for all policies
-      description: Retrieves the summary of adherence for all governance policies within the organization.
-      operationId: getPolicyAdherenceSummary
+      summary: Retrieves the summary of adherence for all policy attachments
+      description: Retrieves the summary of adherence for all governance policy attachments within the organization.
+      operationId: getPolicyAttachmentAdherenceSummary
       tags:
-        - Policy Adherence
+        - Policy Attachments Adherence
       responses:
         "200":
           description: OK. Successful response with adherence summary.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PolicyAdherenceSummary'
+                $ref: '#/components/schemas/PolicyAttachmentAdherenceSummary'
         "400":
           description: Bad request
           content:
@@ -864,22 +864,22 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_result_read
-  /policy-adherence/{policyId}:
+  /policy-attachment-adherence/{policyAttachmentId}:
     get:
-      summary: Retrieve adherence details for a specific policy
-      description: Retrieve adherence details associated with a specific governance policy within the organization using its unique ID.
-      operationId: getPolicyAdherenceByPolicyId
+      summary: Retrieve adherence details for a specific policy attachment
+      description: Retrieve adherence details associated with a specific governance policy attachment within the organization using its unique ID.
+      operationId: getPolicyAttachmentAdherenceByPolicyAttachmentId
       tags:
-        - Policy Adherence
+        - Policy Attachment Adherence
       parameters:
-        - $ref: '#/components/parameters/policyId'
+        - $ref: '#/components/parameters/policyAttachmentId'
       responses:
         "200":
-          description: Ok. Successful response with adherence details for the specified policy.
+          description: Ok. Successful response with adherence details for the specified policy attachment.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PolicyAdherenceDetails'
+                $ref: '#/components/schemas/PolicyAttachmentAdherenceDetails'
         "400":
           description: Bad request
           content:
@@ -949,36 +949,36 @@ components:
           type: string
           description: |
             A detail description about the error message.
-    RulesetList:
+    PolicyList:
       type: object
-      description: A list of rulesets.
+      description: A list of policies.
       properties:
         count:
           type: integer
-          description: Number of rulesets returned.
+          description: Number of policies returned.
           example: 2
         list:
           type: array
-          description: List of rulesets.
+          description: List of policies.
           items:
-            $ref: '#/components/schemas/RulesetInfo'
+            $ref: '#/components/schemas/PolicyInfo'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    RulesetInput:
+    PolicyInput:
       type: object
-      description: Detailed information about a ruleset.
+      description: Detailed information about a policy.
       properties:
         name:
           type: string
-          description: Name of the ruleset.
-          example: "API Security Ruleset"
+          description: Name of the policy.
+          example: "API Security Policy"
         description:
           type: string
-          description: A brief description of the ruleset.
-          example: "A ruleset designed to enforce security standards for APIs."
-        rulesetContent:
+          description: A brief description of the policy.
+          example: "A policy designed to enforce security standards for APIs."
+        policyContent:
           type: string
-          description: The content of the ruleset file (YAML or JSON).
+          description: The content of the policy file (YAML or JSON).
           format: binary
           example: |
             rules:
@@ -998,14 +998,14 @@ components:
                   - oas2
         ruleCategory:
           type: string
-          description: Category the rules included in ruleset.
+          description: Category the rules included in policy.
           enum:
             - SPECTRAL
           example: SPECTRAL
           default: SPECTRAL
         ruleType:
           type: string
-          description: Context or area to which the ruleset applies.
+          description: Context or area to which the policy applies.
           enum:
             - API_METADATA
             - API_DEFINITION
@@ -1017,50 +1017,50 @@ components:
             - API_DOCUMENTATION
         artifactType:
           type: string
-          description: The type of artifact that the ruleset validates.
+          description: The type of artifact that the policy validates.
           enum:
             - REST_API
             - ASYNC_API
           example: REST_API
         documentationLink:
           type: string
-          description: URL to the documentation related to the ruleset.
-          example: "https://example.com/docs/api-security-ruleset"
+          description: URL to the documentation related to the policy.
+          example: "https://example.com/docs/api-security-policy"
         provider:
           type: string
-          description: Entity or individual providing the ruleset.
+          description: Entity or individual providing the policy.
           example: "TechWave"
       required:
         - name
-        - rulesetContent
+        - policyContent
         - ruleType
         - artifactType
-    RulesetInfo:
+    PolicyInfo:
       type: object
-      description: Detailed information about a ruleset.
+      description: Detailed information about a policy.
       properties:
         id:
           type: string
-          description: UUID of the ruleset.
+          description: UUID of the policy.
           readOnly: true
           example: "123e4567-e89b-12d3-a456-426614174000"
         name:
           type: string
-          description: Name of the ruleset.
-          example: "API Security Ruleset"
+          description: Name of the policy.
+          example: "API Security Policy"
         description:
           type: string
-          description: A brief description of the ruleset.
-          example: "A ruleset designed to enforce security standards for APIs."
+          description: A brief description of the policy.
+          example: "A policy designed to enforce security standards for APIs."
         ruleCategory:
           type: string
-          description: Category the rules included in ruleset.
+          description: Category the rules included in policy.
           enum:
             - SPECTRAL
           example: SPECTRAL
         ruleType:
           type: string
-          description: Context or area to which the ruleset applies.
+          description: Context or area to which the policy applies.
           enum:
             - API_METADATA
             - API_DEFINITION
@@ -1072,37 +1072,37 @@ components:
             - API_DOCUMENTATION
         artifactType:
           type: string
-          description: The type of artifact that the ruleset validates.
+          description: The type of artifact that the policy validates.
           enum:
             - REST_API
             - ASYNC_API
           example: REST_API
         documentationLink:
           type: string
-          description: URL to the documentation related to the ruleset.
-          example: "https://example.com/docs/api-security-ruleset"
+          description: URL to the documentation related to the policy.
+          example: "https://example.com/docs/api-security-policy"
         provider:
           type: string
-          description: Entity or individual providing the ruleset.
+          description: Entity or individual providing the policy.
           example: "TechWave"
         createdBy:
           type: string
-          description: Identifier of the user who created the ruleset.
+          description: Identifier of the user who created the policy.
           readOnly: true
           example: "admin@gmail.com"
         createdTime:
           type: string
-          description: Timestamp when the ruleset was created.
+          description: Timestamp when the policy was created.
           readOnly: true
           example: "2024-08-01T12:00:00Z"
         updatedBy:
           type: string
-          description: Identifier of the user who last updated the ruleset.
+          description: Identifier of the user who last updated the policy.
           readOnly: true
           example: "admin@gmail.com"
         updatedTime:
           type: string
-          description: Timestamp when the ruleset was last updated.
+          description: Timestamp when the policy was last updated.
           readOnly: true
           example: "2024-08-02T12:00:00Z"
       required:
@@ -1110,29 +1110,29 @@ components:
         - ruleType
         - artifactType
         - provider
-    APIMGovernancePolicy:
+    APIMGovernancePolicyAttachment:
       type: object
-      description: Detailed information about a governance policy.
+      description: Detailed information about a governance policy attachment.
       properties:
         id:
           type: string
-          description: UUID of the governance policy.
+          description: UUID of the governance policy attachment.
           readOnly: true
           example: "987e6543-d21b-34d5-b678-912345678900"
         name:
           type: string
-          description: Name of the governance policy.
-          example: "API Security Policy"
+          description: Name of the governance policy attachment.
+          example: "API Security Policy Attachment"
         description:
           type: string
-          description: A brief description of the governance policy.
-          example: "Policy for enforcing security standards across all APIs."
+          description: A brief description of the governance policy attachment.
+          example: "Policy Attachment for enforcing security standards across all APIs."
         governableStates:
           type: array
-          description: List of states at which the governance policy should be enforced.
+          description: List of states at which the governance policy attachment should be enforced.
           items:
             type: string
-            description: The state at which an governance policy should be enforced.
+            description: The state at which an governance policy attachment should be enforced.
             enum:
               - API_CREATE
               - API_UPDATE
@@ -1146,51 +1146,51 @@ components:
               - API_PUBLISH
         actions:
           type: array
-          description: List of actions taken when the governance policy is violated. An action is defined by the state and rule severity. If an action is not specified to each state and rule severity, the default action is `NOTIFY`.
+          description: List of actions taken when the governance policy attachment is violated. An action is defined by the state and rule severity. If an action is not specified to each state and rule severity, the default action is `NOTIFY`.
           items:
             $ref: '#/components/schemas/Action'
-        rulesets:
+        policies:
           type: array
-          description: List of rulesets associated with the governance policy.
+          description: List of policies associated with the governance policy attachment.
           items:
             type: string
             example: "94566543-d21b-34d5-b678-912345678900"
         labels:
           type: array
-          description: List of labels IDs associated with the governance policy.
+          description: List of labels IDs associated with the governance policy attachment.
           items:
             type: string
           example:
             - "54d5833a-ca86-44bb-bcda-5b9fcdacd79d"
         createdBy:
           type: string
-          description: Identifier of the user who created the governance policy.
+          description: Identifier of the user who created the governance policy attachment.
           readOnly: true
           example: "admin@wso2.com"
         createdTime:
           type: string
-          description: Timestamp when the governance policy was created.
+          description: Timestamp when the governance policy attachment was created.
           readOnly: true
           example: "2024-08-01T12:00:00Z"
         updatedBy:
           type: string
-          description: Identifier of the user who last updated the governance policy.
+          description: Identifier of the user who last updated the governance policy attachment.
           readOnly: true
           example: "admin@wso2.com"
         updatedTime:
           type: string
-          description: Timestamp when the governance policy was last updated.
+          description: Timestamp when the governance policy attachment was last updated.
           readOnly: true
           example: "2024-08-02T12:00:00Z"
       required:
         - name
-        - rulesets
+        - policies
         - labels
         - governableStates
         - actions
     Action:
       type: object
-      description: Action to be taken when a governance policy is violated.
+      description: Action to be taken when a governance policy attachment is violated.
       properties:
         state:
           type: string
@@ -1216,24 +1216,24 @@ components:
           example: "ERROR"
         type:
           type: string
-          description: The type of action to be taken when a governance policy is violated in the given state withe given rule severity.
+          description: The type of action to be taken when a governance policy attachment is violated in the given state withe given rule severity.
           enum:
             - BLOCK
             - NOTIFY
           example: "BLOCK"
-    APIMGovernancePolicyList:
+    APIMGovernancePolicyAttachmentList:
       type: object
-      description: A list of governance policies.
+      description: A list of governance policy attachments.
       properties:
         count:
           type: integer
-          description: Number of governance policies returned.
+          description: Number of governance policy attachments returned.
           example: 10
         list:
           type: array
-          description: List of governance policies.
+          description: List of governance policy attachments.
           items:
-            $ref: '#/components/schemas/APIMGovernancePolicy'
+            $ref: '#/components/schemas/APIMGovernancePolicyAttachment'
         pagination:
           $ref: '#/components/schemas/Pagination'
     ArtifactComplianceSummary:
@@ -1260,25 +1260,25 @@ components:
           type: integer
           description: Number of artifacts not applicable for compliance yet.
           example: 0
-    PolicyAdherenceSummary:
+    PolicyAttachmentAdherenceSummary:
       type: object
-      description: Summary of governance policy adherence in the organization.
+      description: Summary of governance policy attachment adherence in the organization.
       properties:
         total:
           type: integer
-          description: Total number of policies.
+          description: Total number of policy attachments.
           example: 10
         followed:
           type: integer
-          description: Number of policies followed to.
+          description: Number of policy attachments followed to.
           example: 6
         violated:
           type: integer
-          description: Number of policies violated.
+          description: Number of policy attachments violated.
           example: 4
         unApplied:
           type: integer
-          description: Number of policies unApplied.
+          description: Number of policy attachments unApplied.
           example: 0
     ArtifactComplianceList:
       type: object
@@ -1294,18 +1294,18 @@ components:
             $ref: '#/components/schemas/ArtifactComplianceStatus'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    PolicyAdherenceList:
+    PolicyAttachmentAdherenceList:
       type: object
-      description: Policy adherence status of a list of policies.
+      description: Policy Attachment adherence status of a list of policy attachments.
       properties:
         count:
           type: integer
-          description: Number of policies returned.
+          description: Number of policy attachments returned.
           example: 10
         list:
           type: array
           items:
-            $ref: '#/components/schemas/PolicyAdherenceStatus'
+            $ref: '#/components/schemas/PolicyAttachmentAdherenceStatus'
         pagination:
           $ref: '#/components/schemas/Pagination'
     ArtifactComplianceStatus:
@@ -1327,28 +1327,28 @@ components:
           example: "COMPLIANT"
         info:
           $ref: '#/components/schemas/ArtifactInfo'
-        policyAdherenceSummary:
-          $ref: '#/components/schemas/PolicyAdherenceSummary'
+        policyAttachmentAdherenceSummary:
+          $ref: '#/components/schemas/PolicyAttachmentAdherenceSummary'
         severityBasedRuleViolationSummary:
           type: array
           description: Summary of severity based rule violations.
           items:
             $ref: '#/components/schemas/SeverityBasedRuleViolationCount'
-    PolicyAdherenceStatus:
+    PolicyAttachmentAdherenceStatus:
       type: object
-      description: Provides adherence status of a policy.
+      description: Provides adherence status of a policy attachment.
       properties:
         id:
           type: string
-          description: UUID of the policy.
+          description: UUID of the policy attachment.
           example: "123e4567-e89b-12d3-a456-426614174000"
         name:
           type: string
-          description: Name of the policy.
+          description: Name of the policy attachment.
           example: "Policy1"
         status:
           type: string
-          description: Status of the policy's governance compliance.
+          description: Status of the policy attachment's governance compliance.
           enum:
             - FOLLOWED
             - VIOLATED
@@ -1358,7 +1358,7 @@ components:
           $ref: '#/components/schemas/ArtifactComplianceSummaryForPolicy'
     ArtifactComplianceSummaryForPolicy:
       type: object
-      description: Summary of compliance of artifacts evaluated against a specific policy.
+      description: Summary of compliance of artifacts evaluated against a specific policy attachment.
       properties:
         compliant:
           type: integer
@@ -1387,26 +1387,26 @@ components:
           example: "COMPLIANT"
         info:
           $ref: '#/components/schemas/ArtifactInfo'
-        governedPolicies:
+        governedPolicyAttachments:
           type: array
-          description: List of policies under which the artifact was governed.
+          description: List of policy attachments under which the artifact was governed.
           items:
-            $ref: '#/components/schemas/PolicyAdherenceWithRulesets'
-    PolicyAdherenceDetails:
+            $ref: '#/components/schemas/PolicyAttachmentAdherenceWithPolicies'
+    PolicyAttachmentAdherenceDetails:
       type: object
-      description: Provides adherence details of a policy.
+      description: Provides adherence details of a policy attachment.
       properties:
         id:
           type: string
-          description: UUID of the policy.
+          description: UUID of the policy attachment.
           example: "123e4567-e89b-12d3-a456-426614174000"
         name:
           type: string
-          description: Name of the policy.
-          example: "Policy1"
+          description: Name of the policy attachment.
+          example: "PolicyAttachment1"
         status:
           type: string
-          description: Status of the policy's governance compliance.
+          description: Status of the policy attachment's governance compliance.
           enum:
             - FOLLOWED
             - VIOLATED
@@ -1414,12 +1414,55 @@ components:
           example: "FOLLOWED"
         evaluatedArtifacts:
           type: array
-          description: Compliance status of the artifacts evaluated against the policy.
+          description: Compliance status of the artifacts evaluated against the policy attachment.
           items:
             $ref: '#/components/schemas/ArtifactComplianceForPolicy'
-    PolicyAdherenceWithRulesets:
+    PolicyAttachmentAdherenceWithPolicies:
       type: object
-      description: Adherence status of a policy with ruleset details.
+      description: Adherence status of a policy attachment with policy details.
+      properties:
+        id:
+          type: string
+          description: UUID of the policy attachment.
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          description: Name of the policy attachment.
+          example: "Policy1"
+        status:
+          type: string
+          description: Status of the policy attachment's governance compliance.
+          enum:
+            - FOLLOWED
+            - VIOLATED
+            - UNAPPLIED
+          example: "FOLLOWED"
+        policyValidationResults:
+          type: array
+          description: List of policy validation information.
+          items:
+            $ref: '#/components/schemas/PolicyValidationResultWithoutRules'
+    ArtifactComplianceForPolicy:
+      type: object
+      description: Compliance status of an artifact for a specific policy attachment.
+      properties:
+        id:
+          type: string
+          description: UUID of the artifact.
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        status:
+          type: string
+          description: Status of the artifact's compliance to the policy attachment.
+          enum:
+            - COMPLIANT
+            - NON-COMPLIANT
+            - NOT-APPLICABLE
+          example: "COMPLIANT"
+        info:
+          $ref: '#/components/schemas/ArtifactInfo'
+    PolicyValidationResult:
+      type: object
+      description: Result of the policy validation.
       properties:
         id:
           type: string
@@ -1428,53 +1471,10 @@ components:
         name:
           type: string
           description: Name of the policy.
-          example: "Policy1"
+          example: "API Security Policy"
         status:
           type: string
-          description: Status of the policy's governance compliance.
-          enum:
-            - FOLLOWED
-            - VIOLATED
-            - UNAPPLIED
-          example: "FOLLOWED"
-        rulesetValidationResults:
-          type: array
-          description: List of ruleset validation information.
-          items:
-            $ref: '#/components/schemas/RulesetValidationResultWithoutRules'
-    ArtifactComplianceForPolicy:
-      type: object
-      description: Compliance status of an artifact for a specific policy.
-      properties:
-        id:
-          type: string
-          description: UUID of the artifact.
-          example: "123e4567-e89b-12d3-a456-426614174000"
-        status:
-          type: string
-          description: Status of the artifact's compliance to the policy.
-          enum:
-            - COMPLIANT
-            - NON-COMPLIANT
-            - NOT-APPLICABLE
-          example: "COMPLIANT"
-        info:
-          $ref: '#/components/schemas/ArtifactInfo'
-    RulesetValidationResult:
-      type: object
-      description: Result of the ruleset validation.
-      properties:
-        id:
-          type: string
-          description: UUID of the ruleset.
-          example: "123e4567-e89b-12d3-a456-426614174000"
-        name:
-          type: string
-          description: Name of the ruleset.
-          example: "API Security Ruleset"
-        status:
-          type: string
-          description: Status of the ruleset validation.
+          description: Status of the policy validation.
           enum:
             - PASSED
             - FAILED
@@ -1490,21 +1490,21 @@ components:
           description: List of followed rules.
           items:
             $ref: '#/components/schemas/RuleValidationResult'
-    RulesetValidationResultWithoutRules:
+    PolicyValidationResultWithoutRules:
       type: object
-      description: Result of the ruleset validation.
+      description: Result of the policy validation.
       properties:
         id:
           type: string
-          description: UUID of the ruleset.
+          description: UUID of the policy.
           example: "123e4567-e89b-12d3-a456-426614174000"
         name:
           type: string
-          description: Name of the ruleset.
-          example: "API Security Ruleset"
+          description: Name of the policy.
+          example: "API Security Policy"
         ruleType:
           type: string
-          description: Context or area to which the ruleset applies.
+          description: Context or area to which the policy applies.
           enum:
             - API_METADATA
             - API_DEFINITION
@@ -1516,7 +1516,7 @@ components:
             - API_DOCUMENTATION
         status:
           type: string
-          description: Status of the ruleset validation.
+          description: Status of the policy validation.
           enum:
             - PASSED
             - FAILED
@@ -1611,10 +1611,10 @@ components:
           tokenUrl: https://localhost:9443/oauth2/token
           scopes:
             openid: Authorize access to user details
-            apim:gov_rule_read: Read governance rulesets
-            apim:gov_rule_manage: Manage governance rulesets
-            apim:gov_policy_read: Read governance policies
-            apim:gov_policy_manage: Manage governance policies
+            apim:gov_rule_read: Read governance policies
+            apim:gov_rule_manage: Manage governance policies
+            apim:gov_policy_read: Read governance policy attachments
+            apim:gov_policy_manage: Manage governance policy attachments
             apim:gov_result_read: Read governance results
   parameters:
     artifactId:
@@ -1644,19 +1644,19 @@ components:
           - API
         default: API
         example: API
-    rulesetId:
-      name: rulesetId
-      in: path
-      description: |
-        **UUID** of the Ruleset.
-      required: true
-      schema:
-        type: string
     policyId:
       name: policyId
       in: path
       description: |
         **UUID** of the Policy.
+      required: true
+      schema:
+        type: string
+    policyAttachmentId:
+      name: policyAttachmentId
+      in: path
+      description: |
+        **UUID** of the Policy Attachment.
       required: true
       schema:
         type: string

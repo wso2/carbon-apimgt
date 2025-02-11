@@ -21,16 +21,16 @@ package org.wso2.carbon.apimgt.governance.api.model;
 /**
  * This class represents a governance rule category
  */
-public enum RuleCategory {
+public enum PolicyCategory {
     SPECTRAL,
     AI;
 
-    public static RuleCategory fromString(String text) {
+    public static PolicyCategory fromString(String text) {
         if ("spectral".equalsIgnoreCase(text)) {
-            return RuleCategory.SPECTRAL;
+            return PolicyCategory.SPECTRAL;
         } else if ("ai".equalsIgnoreCase(text)) {
-            return RuleCategory.AI;
+            return PolicyCategory.AI;
         }
-        return RuleCategory.SPECTRAL;
+        return PolicyCategory.SPECTRAL;
     }
 }
