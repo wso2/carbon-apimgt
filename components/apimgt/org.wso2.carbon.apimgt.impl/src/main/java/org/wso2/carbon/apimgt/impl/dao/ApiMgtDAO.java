@@ -17866,6 +17866,8 @@ public class ApiMgtDAO {
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 tenantThemeContent = resultSet.getBinaryStream("ARTIFACT");
+            } else {
+                log.warn("Theme ID does not match any of the themes");
             }
         } catch (SQLException e) {
             handleException("Failed to get organization theme for tenant " + organization, e);
@@ -17890,6 +17892,8 @@ public class ApiMgtDAO {
                 if (resultSet.next()) {
                     themeMap.put("drafted", resultSet.getString("DRAFTED_ARTIFACT"));
                     themeMap.put("published", resultSet.getString("PUBLISHED_ARTIFACT"));
+                } else {
+                    log.warn("Organization does not have any themes published or drafted from APIM");
                 }
             }
         } catch (SQLException e) {
@@ -18225,6 +18229,8 @@ public class ApiMgtDAO {
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 tenantThemeContent = resultSet.getBinaryStream("ARTIFACT");
+            } else {
+                log.warn("Theme ID does not match any of the themes");
             }
         } catch (SQLException e) {
             handleException("Failed to get API theme for API ID: " + apiId + " and Organization: " + organization, e);
@@ -18251,6 +18257,8 @@ public class ApiMgtDAO {
                 if (resultSet.next()) {
                     themeMap.put("drafted", resultSet.getString("DRAFTED_ARTIFACT"));
                     themeMap.put("published", resultSet.getString("PUBLISHED_ARTIFACT"));
+                } else {
+                    log.warn("API does not have any themes published or drafted from APIM");
                 }
             }
         } catch (SQLException e) {
