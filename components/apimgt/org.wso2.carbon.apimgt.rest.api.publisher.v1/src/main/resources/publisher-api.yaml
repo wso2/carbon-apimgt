@@ -10181,7 +10181,7 @@ components:
     ContentPublishStatus:
       type: object
       properties:
-        ACTION:
+        action:
           type: string
           enum:
             - PUBLISH

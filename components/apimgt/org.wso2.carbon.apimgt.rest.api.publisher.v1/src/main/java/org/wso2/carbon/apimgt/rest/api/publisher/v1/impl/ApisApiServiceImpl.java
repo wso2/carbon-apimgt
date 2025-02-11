@@ -5127,7 +5127,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response updateApiThemeStatus(String apiId, String id, ContentPublishStatusDTO contentPublishStatusDTO, MessageContext messageContext) throws APIManagementException {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        String action = contentPublishStatusDTO.getACTION().value();
+        String action = contentPublishStatusDTO.getAction().value();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         apiProvider.updateApiThemeStatusAsPublishedOrUnpublished(tenantDomain, action, apiId);
         return Response.status(Response.Status.OK).entity("Status updated successfully").build();

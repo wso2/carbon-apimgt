@@ -100,7 +100,7 @@ public class OrgThemesApiServiceImpl implements OrgThemesApiService {
     public Response updateOrgThemeStatus(String id, ContentPublishStatusDTO contentPublishStatusDTO, MessageContext messageContext)
         throws APIManagementException {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            String action = contentPublishStatusDTO.getACTION().value();
+            String action = contentPublishStatusDTO.getAction().value();
             APIAdminImpl apiAdmin = new APIAdminImpl();
             apiAdmin.updateOrgThemeStatusAsPublishedOrUnpublished(tenantDomain, action);
             return Response.status(Response.Status.OK).entity("Status updated successfully").build();

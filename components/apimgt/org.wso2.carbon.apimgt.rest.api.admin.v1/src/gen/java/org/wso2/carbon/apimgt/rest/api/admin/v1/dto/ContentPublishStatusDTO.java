@@ -21,14 +21,14 @@ import javax.validation.Valid;
 public class ContentPublishStatusDTO   {
   
 
-    @XmlType(name="ACTIONEnum")
+    @XmlType(name="ActionEnum")
     @XmlEnum(String.class)
-    public enum ACTIONEnum {
+    public enum ActionEnum {
         PUBLISH("PUBLISH"),
         UNPUBLISH("UNPUBLISH");
         private String value;
 
-        ACTIONEnum (String v) {
+        ActionEnum (String v) {
             value = v;
         }
 
@@ -42,8 +42,8 @@ public class ContentPublishStatusDTO   {
         }
 
         @JsonCreator
-        public static ACTIONEnum fromValue(String v) {
-            for (ACTIONEnum b : ACTIONEnum.values()) {
+        public static ActionEnum fromValue(String v) {
+            for (ActionEnum b : ActionEnum.values()) {
                 if (String.valueOf(b.value).equals(v)) {
                     return b;
                 }
@@ -51,23 +51,23 @@ public class ContentPublishStatusDTO   {
 return null;
         }
     }
-    private ACTIONEnum ACTION = null;
+    private ActionEnum action = null;
 
   /**
    **/
-  public ContentPublishStatusDTO ACTION(ACTIONEnum ACTION) {
-    this.ACTION = ACTION;
+  public ContentPublishStatusDTO action(ActionEnum action) {
+    this.action = action;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
-  @JsonProperty("ACTION")
-  public ACTIONEnum getACTION() {
-    return ACTION;
+  @JsonProperty("action")
+  public ActionEnum getAction() {
+    return action;
   }
-  public void setACTION(ACTIONEnum ACTION) {
-    this.ACTION = ACTION;
+  public void setAction(ActionEnum action) {
+    this.action = action;
   }
 
 
@@ -80,12 +80,12 @@ return null;
       return false;
     }
     ContentPublishStatusDTO contentPublishStatus = (ContentPublishStatusDTO) o;
-    return Objects.equals(ACTION, contentPublishStatus.ACTION);
+    return Objects.equals(action, contentPublishStatus.action);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(ACTION);
+    return Objects.hash(action);
   }
 
   @Override
@@ -93,7 +93,7 @@ return null;
     StringBuilder sb = new StringBuilder();
     sb.append("class ContentPublishStatusDTO {\n");
     
-    sb.append("    ACTION: ").append(toIndentedString(ACTION)).append("\n");
+    sb.append("    action: ").append(toIndentedString(action)).append("\n");
     sb.append("}");
     return sb.toString();
   }
