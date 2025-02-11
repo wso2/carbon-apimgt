@@ -48,9 +48,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.wso2.carbon.apimgt.impl.APIConstants.API_SUBTYPE_AI_API;
-import static org.wso2.carbon.apimgt.impl.APIConstants.API_SUBTYPE_DEFAULT;
-
 /**
  * Constructs API and resource configurations for the ESB/Synapse using a Apache velocity
  * templates.
@@ -274,10 +271,10 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             ConfigContext configcontext = new APIConfigContext(this.api);
             configcontext = new TemplateUtilContext(configcontext);
 
-            if (API_SUBTYPE_DEFAULT.equals(api.getSubtype())) {
+            if (APIConstants.API_SUBTYPE_DEFAULT.equals(api.getSubtype())) {
                 configcontext = new SecurityConfigContext(configcontext, api);
                 configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api);
-            } else if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+            } else if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
                 configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api, endpointConfig);
             }
 

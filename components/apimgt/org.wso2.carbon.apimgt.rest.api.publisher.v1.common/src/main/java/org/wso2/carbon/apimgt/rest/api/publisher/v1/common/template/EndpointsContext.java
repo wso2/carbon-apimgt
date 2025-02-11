@@ -119,11 +119,11 @@ public class EndpointsContext extends ConfigContextDecorator {
         } else if (api.getEndpointConfig() != null) {
             EndpointConfigDTO endpointConfigDTO = new Gson().fromJson(api.getEndpointConfig(), EndpointConfigDTO.class);
             if (endpointConfigDTO.getProductionEndpoints() != null) {
-                addDefaultEndpoint(context, APIConstants.PRODUCTION, api);
+                addDefaultEndpointFromEndpointConfig(context, APIConstants.PRODUCTION, api);
             }
 
             if (endpointConfigDTO.getSandboxEndpoints() != null) {
-                addDefaultEndpoint(context, APIConstants.SANDBOX, api);
+                addDefaultEndpointFromEndpointConfig(context, APIConstants.SANDBOX, api);
             }
         }
 
@@ -137,7 +137,7 @@ public class EndpointsContext extends ConfigContextDecorator {
      * @param environment The environment type (Production/Sandbox).
      * @param api         The API object containing endpoint configurations.
      */
-    private static void addDefaultEndpoint(VelocityContext context, String environment, API api) {
+    private static void addDefaultEndpointFromEndpointConfig(VelocityContext context, String environment, API api) {
 
         EndpointDTO defaultEndpoint = new EndpointDTO();
         defaultEndpoint.setEnvironment(environment);
