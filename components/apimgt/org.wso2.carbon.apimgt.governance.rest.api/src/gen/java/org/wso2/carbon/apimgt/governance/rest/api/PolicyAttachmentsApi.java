@@ -43,7 +43,7 @@ PolicyAttachmentsApiService delegate = new PolicyAttachmentsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Creates a new governance policy attachment.", notes = "Creates a new governance policy attachment for the user's organization.", response = APIMGovernancePolicyAttachmentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policy attachments")
+            @AuthorizationScope(scope = "apim:gov_policy_attachment_manage", description = "Manage governance policy attachments")
         })
     }, tags={ "Governance Policy Attachments",  })
     @ApiResponses(value = { 
@@ -62,7 +62,7 @@ PolicyAttachmentsApiService delegate = new PolicyAttachmentsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete a specific governance policy attachment", notes = "Deletes an existing governance policy attachment identified by the policyAttachmentId.", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policy attachments")
+            @AuthorizationScope(scope = "apim:gov_policy_attachment_manage", description = "Manage governance policy attachments")
         })
     }, tags={ "Governance Policy Attachments",  })
     @ApiResponses(value = { 
@@ -81,7 +81,7 @@ PolicyAttachmentsApiService delegate = new PolicyAttachmentsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Get a specific governance policy attachment", notes = "Retrieves details of a specific governance policy attachment identified by the policyAttachmentId.", response = APIMGovernancePolicyAttachmentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policy attachments")
+            @AuthorizationScope(scope = "apim:gov_policy_attachment_read", description = "Read governance policy attachments")
         })
     }, tags={ "Governance Policy Attachments",  })
     @ApiResponses(value = { 
@@ -100,7 +100,7 @@ PolicyAttachmentsApiService delegate = new PolicyAttachmentsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieves a list of all governance policy-attachments.", notes = "Retrieves a list of governance policy-attachments for the user's organization.", response = APIMGovernancePolicyAttachmentListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policy attachments")
+            @AuthorizationScope(scope = "apim:gov_policy_attachment_read", description = "Read governance policy attachments")
         })
     }, tags={ "Governance Policy Attachments",  })
     @ApiResponses(value = { 
@@ -119,7 +119,7 @@ PolicyAttachmentsApiService delegate = new PolicyAttachmentsApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update a specific governance policy attachment", notes = "Updates the details of an existing governance policy attachment identified by the policyAttachmentId.", response = APIMGovernancePolicyAttachmentDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policy attachments")
+            @AuthorizationScope(scope = "apim:gov_policy_attachment_manage", description = "Manage governance policy attachments")
         })
     }, tags={ "Governance Policy Attachments" })
     @ApiResponses(value = { 

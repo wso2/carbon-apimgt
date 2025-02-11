@@ -106,7 +106,8 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
                 throw e;
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_CREATING_POLICY, e, organization);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_CREATING_POLICY_ATTACHMENT, e,
+                    organization);
         }
         return getGovernancePolicyAttachmentByID(governancePolicyAttachment.getId(), organization);
     }
@@ -503,7 +504,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
                     policy.setName(rs.getString("NAME"));
                     policy.setPolicyCategory(PolicyCategory.fromString(
                             rs.getString("RULE_CATEGORY")));
-                    policy.setPolicyType(PolicyType.fromString(rs.getString("RULE_TYPE")));
+                    policy.setPolicyType(PolicyType.fromString(rs.getString("POLICY_TYPE")));
                     policy.setArtifactType(ExtendedArtifactType.fromString(
                             rs.getString("ARTIFACT_TYPE")));
 
@@ -518,7 +519,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             return policyList;
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.
-                    ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY, e, policyAttachmentId);
+                    ERROR_WHILE_RETRIEVING_POLICIES_ASSOCIATED_WITH_POLICY_ATTACHMENT, e, policyAttachmentId);
         }
     }
 
@@ -554,7 +555,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             return policyList;
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes
-                    .ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY, e, policyAttachmentId);
+                    .ERROR_WHILE_RETRIEVING_POLICIES_ASSOCIATED_WITH_POLICY_ATTACHMENT, e, policyAttachmentId);
         }
     }
 
@@ -571,7 +572,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             throws APIMGovernanceException {
         Map<String, String> policyIds = new HashMap();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICIES_BY_LABEL)) {
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICY_ATTACHMENTS_BY_LABEL)) {
             prepStmt.setString(1, label);
             prepStmt.setString(2, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
@@ -601,7 +602,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
                                                             String organization) throws APIMGovernanceException {
         List<String> policyIds = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICIES_BY_LABEL_AND_STATE)) {
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICY_ATTACHMENTS_BY_LABEL_AND_STATE)) {
             prepStmt.setString(1, label);
             prepStmt.setString(2, String.valueOf(state));
             prepStmt.setString(3, organization);
@@ -627,7 +628,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             throws APIMGovernanceException {
         Map<String, String> policyIds = new HashMap<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_GLOBAL_POLICIES)) {
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_GLOBAL_POLICY_ATTACHMENTS)) {
             prepStmt.setString(1, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
@@ -655,7 +656,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
         List<String> policyIds = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
-                     .GET_GLOBAL_POLICIES_BY_STATE)) {
+                     .GET_GLOBAL_POLICY_ATTACHMENT_BY_STATE)) {
             prepStmt.setString(1, APIMGovernanceConstants.GLOBAL_LABEL);
             prepStmt.setString(1, String.valueOf(state));
             prepStmt.setString(2, organization);
@@ -684,8 +685,8 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             return getActionsByPolicyAttachmentId(connection, policyAttachmentId);
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_ACTIONS_BY_POLICY_ID,
-                    e, policyAttachmentId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes
+                    .ERROR_WHILE_RETRIEVING_ACTIONS_BY_POLICY_ATTACHMENT_ID, e, policyAttachmentId);
         }
     }
 
@@ -707,9 +708,9 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.SEARCH_POLICY_ATTACHMENT)) {
             prepStmt.setString(1, organization);
             prepStmt.setString(2, searchCriteria.getOrDefault(
-                    APIMGovernanceConstants.PolicySearchAttributes.NAME, ""));
+                    APIMGovernanceConstants.PolicyAttachmentSearchAttributes.NAME, ""));
             prepStmt.setString(3, searchCriteria.getOrDefault(
-                    APIMGovernanceConstants.PolicySearchAttributes.STATE, ""));
+                    APIMGovernanceConstants.PolicyAttachmentSearchAttributes.STATE, ""));
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     APIMGovernancePolicyAttachment policy = new APIMGovernancePolicyAttachment();
@@ -990,7 +991,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             prepStmt.executeUpdate();
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes
-                    .ERROR_WHILE_DELETING_LABEL_POLICY_MAPPINGS, e, label);
+                    .ERROR_WHILE_DELETING_LABEL_POLICY_ATTACHMENT_MAPPINGS, e, label);
         }
     }
 }

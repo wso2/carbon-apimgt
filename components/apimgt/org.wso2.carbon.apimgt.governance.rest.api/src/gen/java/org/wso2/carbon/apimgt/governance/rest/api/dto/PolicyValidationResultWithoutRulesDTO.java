@@ -26,15 +26,15 @@ public class PolicyValidationResultWithoutRulesDTO   {
     private String id = null;
     private String name = null;
 
-          @XmlType(name="RuleTypeEnum")
+          @XmlType(name="PolicyTypeEnum")
     @XmlEnum(String.class)
-    public enum RuleTypeEnum {
+    public enum PolicyTypeEnum {
         API_METADATA("API_METADATA"),
         API_DEFINITION("API_DEFINITION"),
         API_DOCUMENTATION("API_DOCUMENTATION");
         private String value;
 
-        RuleTypeEnum (String v) {
+        PolicyTypeEnum (String v) {
             value = v;
         }
 
@@ -48,8 +48,8 @@ public class PolicyValidationResultWithoutRulesDTO   {
         }
 
         @JsonCreator
-        public static RuleTypeEnum fromValue(String v) {
-            for (RuleTypeEnum b : RuleTypeEnum.values()) {
+        public static PolicyTypeEnum fromValue(String v) {
+            for (PolicyTypeEnum b : PolicyTypeEnum.values()) {
                 if (String.valueOf(b.value).equals(v)) {
                     return b;
                 }
@@ -57,7 +57,7 @@ public class PolicyValidationResultWithoutRulesDTO   {
 return null;
         }
     } 
-    private RuleTypeEnum ruleType = null;
+    private PolicyTypeEnum policyType = null;
 
           @XmlType(name="StatusEnum")
     @XmlEnum(String.class)
@@ -131,19 +131,19 @@ return null;
   /**
    * Context or area to which the policy applies.
    **/
-  public PolicyValidationResultWithoutRulesDTO ruleType(RuleTypeEnum ruleType) {
-    this.ruleType = ruleType;
+  public PolicyValidationResultWithoutRulesDTO policyType(PolicyTypeEnum policyType) {
+    this.policyType = policyType;
     return this;
   }
 
   
   @ApiModelProperty(example = "API_DEFINITION", value = "Context or area to which the policy applies.")
-  @JsonProperty("ruleType")
-  public RuleTypeEnum getRuleType() {
-    return ruleType;
+  @JsonProperty("policyType")
+  public PolicyTypeEnum getPolicyType() {
+    return policyType;
   }
-  public void setRuleType(RuleTypeEnum ruleType) {
-    this.ruleType = ruleType;
+  public void setPolicyType(PolicyTypeEnum policyType) {
+    this.policyType = policyType;
   }
 
   /**
@@ -176,13 +176,13 @@ return null;
     PolicyValidationResultWithoutRulesDTO policyValidationResultWithoutRules = (PolicyValidationResultWithoutRulesDTO) o;
     return Objects.equals(id, policyValidationResultWithoutRules.id) &&
         Objects.equals(name, policyValidationResultWithoutRules.name) &&
-        Objects.equals(ruleType, policyValidationResultWithoutRules.ruleType) &&
+        Objects.equals(policyType, policyValidationResultWithoutRules.policyType) &&
         Objects.equals(status, policyValidationResultWithoutRules.status);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, ruleType, status);
+    return Objects.hash(id, name, policyType, status);
   }
 
   @Override
@@ -192,7 +192,7 @@ return null;
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    ruleType: ").append(toIndentedString(ruleType)).append("\n");
+    sb.append("    policyType: ").append(toIndentedString(policyType)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("}");
     return sb.toString();

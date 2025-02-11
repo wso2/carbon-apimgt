@@ -79,7 +79,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
      * @param rules        List of rules
      * @param organization Organization
      * @return RulesetInfo Created object
-     * @throws APIMGovernanceException If an error occurs while creating the ruleset
+     * @throws APIMGovernanceException If an error occurs while creating the policy
      */
     @Override
     public PolicyInfo createPolicy(Policy policy, List<Rule> rules,
@@ -111,7 +111,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
                 throw e;
             }
         } catch (SQLException | IOException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_CREATION_FAILED, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_CREATION_FAILED, e,
                     policy.getName(), organization
             );
         }
@@ -126,7 +126,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
      * @param rules        List of rules
      * @param organization Organization
      * @return RulesetInfo Created object
-     * @throws APIMGovernanceException If an error occurs while updating the ruleset
+     * @throws APIMGovernanceException If an error occurs while updating the policy
      */
     @Override
     public PolicyInfo updatePolicy(String rulesetId, Policy policy, List<Rule> rules,
@@ -151,7 +151,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
                 }
                 updateRuleContent(connection, policy.getId(), policy.getPolicyContent());
 
-                // Delete existing rules and rule evaluation results related to this ruleset
+                // Delete existing rules and rule evaluation results related to this policy
                 deleteRuleViolationsForRuleset(connection, rulesetId);
                 deleteRulesetResultsForRuleset(connection, rulesetId);
                 deleteRules(connection, rulesetId);
@@ -165,13 +165,13 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
                 throw e;
             }
         } catch (SQLException | IOException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_RULESET, e, rulesetId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY, e, rulesetId);
         }
-        return getPolicyById(rulesetId, organization); // to return all info of the updated ruleset
+        return getPolicyById(rulesetId, organization); // to return all info of the updated policy
     }
 
     /**
-     * Add rules in a ruleset to DB
+     * Add rules in a policy to DB
      *
      * @param rulesetId  Ruleset ID
      * @param rules      List of rules
@@ -203,8 +203,8 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
      * @param connection     Database connection
      * @param rulesetId      Ruleset ID
      * @param policyContent Ruleset content
-     * @throws SQLException If an error occurs while adding the ruleset content
-     * @throws IOException  If an error occurs while adding the ruleset content
+     * @throws SQLException If an error occurs while adding the policy content
+     * @throws IOException  If an error occurs while adding the policy content
      */
     private void addRuleContent(Connection connection, String rulesetId, PolicyContent policyContent)
             throws SQLException, IOException {
@@ -225,8 +225,8 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
      * @param connection     Database connection
      * @param rulesetId      Ruleset ID
      * @param policyContent Ruleset content
-     * @throws SQLException If an error occurs while updating the ruleset content
-     * @throws IOException  If an error occurs while updating the ruleset content
+     * @throws SQLException If an error occurs while updating the policy content
+     * @throws IOException  If an error occurs while updating the policy content
      */
     private void updateRuleContent(Connection connection, String rulesetId, PolicyContent policyContent)
             throws SQLException, IOException {
@@ -246,7 +246,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
      *
      * @param rulesetId    Ruleset ID
      * @param organization Organization
-     * @throws APIMGovernanceException If an error occurs while deleting the ruleset
+     * @throws APIMGovernanceException If an error occurs while deleting the policy
      */
     @Override
     public void deletePolicy(String rulesetId, String organization) throws APIMGovernanceException {
@@ -272,7 +272,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_DELETING_RULESET,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_DELETING_POLICY,
                     e, rulesetId);
         }
     }
@@ -282,7 +282,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
      *
      * @param connection Database connection
      * @param rulesetId  Ruleset ID
-     * @throws SQLException If an error occurs while deleting the ruleset content
+     * @throws SQLException If an error occurs while deleting the policy content
      */
     private void deleteRulesetContent(Connection connection, String rulesetId) throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.DELETE_POLICY_CONTENT)) {
@@ -292,7 +292,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
     }
 
     /**
-     * Delete rules related to a ruleset
+     * Delete rules related to a policy
      *
      * @param connection Database connection
      * @param rulesetId  Ruleset ID
@@ -306,7 +306,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
     }
 
     /**
-     * Delete rule violations related to a ruleset
+     * Delete rule violations related to a policy
      *
      * @param connection Database connection
      * @param rulesetId  Ruleset ID
@@ -322,7 +322,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
     }
 
     /**
-     * Delete rulseset results related to a ruleset
+     * Delete policy results related to a policy
      *
      * @param connection Database connection
      * @param rulesetId  Ruleset ID
@@ -358,7 +358,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESETS,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES,
                     e, organization);
         }
         policyList.setCount(policyInfoList.size());
@@ -367,12 +367,12 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
     }
 
     /**
-     * Retrieves a ruleset by name.
+     * Retrieves a policy by name.
      *
-     * @param name         Name of the ruleset
-     * @param organization Organization whose ruleset is to be retrieved
-     * @return the ruleset with the given name
-     * @throws APIMGovernanceException if there is an error retrieving the ruleset
+     * @param name         Name of the policy
+     * @param organization Organization whose policy is to be retrieved
+     * @return the policy with the given name
+     * @throws APIMGovernanceException if there is an error retrieving the policy
      */
     @Override
     public PolicyInfo getPolicyByName(String name, String organization) throws APIMGovernanceException {
@@ -387,19 +387,19 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_NAME,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_BY_NAME,
                     e, organization);
         }
         return null;
     }
 
     /**
-     * Retrieves a ruleset by ID.
+     * Retrieves a policy by ID.
      *
-     * @param rulesetId    Ruleset ID of the ruleset
-     * @param organization Organization whose ruleset is to be retrieved
-     * @return the ruleset with the given ID
-     * @throws APIMGovernanceException if there is an error retrieving the ruleset
+     * @param rulesetId    Ruleset ID of the policy
+     * @param organization Organization whose policy is to be retrieved
+     * @return the policy with the given ID
+     * @throws APIMGovernanceException if there is an error retrieving the policy
      */
     @Override
     public PolicyInfo getPolicyById(String rulesetId, String organization) throws APIMGovernanceException {
@@ -414,7 +414,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_BY_ID,
                     e);
         }
         return null;
@@ -439,18 +439,18 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, organization);
             prepStmt.setString(2, searchCriteria
-                    .getOrDefault(APIMGovernanceConstants.RulesetSearchAttributes.NAME, ""));
+                    .getOrDefault(APIMGovernanceConstants.PolicySearchAttributes.NAME, ""));
             prepStmt.setString(3, searchCriteria
-                    .getOrDefault(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE, ""));
+                    .getOrDefault(APIMGovernanceConstants.PolicySearchAttributes.POLICY_TYPE, ""));
             prepStmt.setString(4, searchCriteria
-                    .getOrDefault(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, ""));
+                    .getOrDefault(APIMGovernanceConstants.PolicySearchAttributes.ARTIFACT_TYPE, ""));
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
                     policyInfoList.add(getRulesetInfoFromResultSet(rs));
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_SEARCHING_RULESETS,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_SEARCHING_POLICIES,
                     e, organization);
         }
         policyList.setCount(policyInfoList.size());
@@ -463,11 +463,11 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
      *
      * @param rs ResultSet
      * @return RulesetInfo object
-     * @throws SQLException If an error occurs while retrieving the ruleset
+     * @throws SQLException If an error occurs while retrieving the policy
      */
     private PolicyInfo getRulesetInfoFromResultSet(ResultSet rs) throws SQLException {
         PolicyInfo policyInfo = new PolicyInfo();
-        policyInfo.setId(rs.getString("RULESET_ID"));
+        policyInfo.setId(rs.getString("POLICY_ID"));
         policyInfo.setName(rs.getString("NAME"));
         policyInfo.setDescription(rs.getString("DESCRIPTION"));
         policyInfo.setPolicyCategory(PolicyCategory.fromString(
@@ -489,8 +489,8 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
      *
      * @param rulesetId    Ruleset ID
      * @param organization Organization
-     * @return String Content of the ruleset
-     * @throws APIMGovernanceException If an error occurs while getting the ruleset content
+     * @return String Content of the policy
+     * @throws APIMGovernanceException If an error occurs while getting the policy content
      */
     @Override
     public PolicyContent getPolicyContent(String rulesetId, String organization) throws APIMGovernanceException {
@@ -509,7 +509,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
                 return null;
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_BY_ID,
                     e);
         }
     }
@@ -525,7 +525,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
     public List<String> getAssociatedPolicyAttachmentForPolicy(String rulesetId, String organization)
             throws APIMGovernanceException {
         List<String> policyIds = new ArrayList<>();
-        String sqlQuery = SQLConstants.GET_POLICIES_FOR_POLICY;
+        String sqlQuery = SQLConstants.GET_POLICY_ATTACHMENT_FOR_POLICY;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, rulesetId);
@@ -536,8 +536,8 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICIES,
-                    e, rulesetId);
+            throw new APIMGovernanceException(
+                    APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICY_ATTACHMENTS, e, rulesetId);
         }
         return policyIds;
     }
@@ -560,7 +560,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
                     Rule rule = new Rule();
-                    rule.setId(rs.getString("RULESET_RULE_ID"));
+                    rule.setId(rs.getString("POLICY_RULE_ID"));
                     rule.setName(rs.getString("RULE_NAME"));
                     rule.setDescription(rs.getString("RULE_DESCRIPTION"));
                     rule.setSeverity(RuleSeverity.fromString(rs.getString("SEVERITY")));
@@ -569,7 +569,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
             }
             return rules;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULES_BY_RULESET_ID
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULES_BY_POLICY_ID
                     , e, rulesetId);
         }
     }

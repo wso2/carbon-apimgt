@@ -38,8 +38,8 @@ public class PolicyAttachmentAdherenceApiServiceImpl implements PolicyAttachment
      * Get the policy attachment adherence summary
      *
      * @param messageContext The message context
-     * @return The policy adherence summary
-     * @throws APIMGovernanceException If an error occurs while getting the policy adherence summary
+     * @return The policy attachment adherence summary
+     * @throws APIMGovernanceException If an error occurs while getting the policy attachment adherence summary
      */
     public Response getPolicyAttachmentAdherenceSummary(MessageContext messageContext) throws APIMGovernanceException {
 
@@ -53,7 +53,7 @@ public class PolicyAttachmentAdherenceApiServiceImpl implements PolicyAttachment
                 .collect(Collectors.toList());
 
         Map<PolicyAttachmentAdherenceSate, List<String>> adherenceMap =
-                complianceManager.getAdherenceStateofEvaluatedPolicies(organization);
+                complianceManager.getAdherenceStateOfEvaluatedPolicyAttachments(organization);
 
         int followedCount = adherenceMap.get(PolicyAttachmentAdherenceSate.FOLLOWED).size();
         int violatedCount = adherenceMap.get(PolicyAttachmentAdherenceSate.VIOLATED).size();
@@ -71,11 +71,11 @@ public class PolicyAttachmentAdherenceApiServiceImpl implements PolicyAttachment
     /**
      * Get the policy attachment adherence for a given policy attachment ID
      *
-     * @param policyAttachmentId The policy Attachment ID
-     * @param messageContext     The message context
-     * @return The policy attachment adherence for the given policy ID
+     * @param policyAttachmentId       The policy attachment ID
+     * @param messageContext The message context
+     * @return The policy attachment adherence for the given policy attachment ID
      * @throws APIMGovernanceException If an error occurs while getting the policy attachment adherence for the given
-     *                                 policy attachment id
+     * policy attachment ID
      */
     public Response getPolicyAttachmentAdherenceByPolicyAttachmentId(String policyAttachmentId,
                                                                      MessageContext messageContext)
@@ -167,7 +167,7 @@ public class PolicyAttachmentAdherenceApiServiceImpl implements PolicyAttachment
         List<APIMGovernancePolicyAttachment> attachments = allPolicies.subList(offset, Math.min(offset + limit,
                 allPolicies.size()));
 
-        List<PolicyAttachmentAdherenceStatusDTO> adherenceStatusDTOS = new ArrayList<>();
+        List<PolicyAttachmentAdherenceStatusDTO> policyAttachmentAdherenceStatusDTOs = new ArrayList<>();
 
         for (APIMGovernancePolicyAttachment attachment : attachments) {
             Map<ArtifactComplianceState, List<ArtifactInfo>> evaluatedArtifactsByPolicy =
@@ -180,12 +180,12 @@ public class PolicyAttachmentAdherenceApiServiceImpl implements PolicyAttachment
             PolicyAttachmentAdherenceStatusDTO policyAttachmentAdherenceStatusDTO =
                     getPolicyAttachmentAdherenceStatusDTO(attachment, compliantCount, nonCompliantCount);
 
-            adherenceStatusDTOS.add(policyAttachmentAdherenceStatusDTO);
+            policyAttachmentAdherenceStatusDTOs.add(policyAttachmentAdherenceStatusDTO);
         }
 
         PolicyAttachmentAdherenceListDTO listDTO = new PolicyAttachmentAdherenceListDTO();
         listDTO.setCount(attachments.size());
-        listDTO.setList(adherenceStatusDTOS);
+        listDTO.setList(policyAttachmentAdherenceStatusDTOs);
 
         // Set pagination details for the artifact compliance list
         setPaginationDetailsForPolicyAttachmentAdherence(listDTO, limit, offset, allPolicies.size());

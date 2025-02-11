@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This interface represents the Governance Ruleset DAO
+ * This interface represents the Governance Policy DAO
  */
 public interface PolicyMgtDAO {
 
@@ -39,8 +39,8 @@ public interface PolicyMgtDAO {
      * @param policy      Ruleset object
      * @param rules        List of rules
      * @param organization Organization
-     * @return RulesetInfo Created object
-     * @throws APIMGovernanceException If an error occurs while creating the ruleset
+     * @return PolicyInfo Created object
+     * @throws APIMGovernanceException If an error occurs while creating the policy
      */
     PolicyInfo createPolicy(Policy policy, List<Rule> rules, String organization) throws APIMGovernanceException;
 
@@ -50,8 +50,8 @@ public interface PolicyMgtDAO {
      * @param policyId Ruleset ID
      * @param policy   Ruleset object
      * @param rules     List of rules
-     * @return RulesetInfo Updated object
-     * @throws APIMGovernanceException If an error occurs while updating the ruleset
+     * @return PolicyInfo Updated object
+     * @throws APIMGovernanceException If an error occurs while updating the policy
      */
     PolicyInfo updatePolicy(String policyId, Policy policy, List<Rule> rules, String organization)
             throws APIMGovernanceException;
@@ -61,7 +61,7 @@ public interface PolicyMgtDAO {
      *
      * @param policyId    Ruleset ID
      * @param organization Organization
-     * @throws APIMGovernanceException If an error occurs while deleting the ruleset
+     * @throws APIMGovernanceException If an error occurs while deleting the policy
      */
     void deletePolicy(String policyId, String organization) throws APIMGovernanceException;
 
@@ -69,7 +69,7 @@ public interface PolicyMgtDAO {
      * Get all the Governance Rulesets of the organization
      *
      * @param organization Organization
-     * @return RulesetList object
+     * @return PolicyList object
      * @throws APIMGovernanceException If an error occurs while getting the policies
      */
     PolicyList getPolicies(String organization) throws APIMGovernanceException;
@@ -79,8 +79,8 @@ public interface PolicyMgtDAO {
      *
      * @param name         Ruleset name
      * @param organization Organization
-     * @return RulesetInfo object
-     * @throws APIMGovernanceException If an error occurs while getting the ruleset
+     * @return PolicyInfo object
+     * @throws APIMGovernanceException If an error occurs while getting the policy
      */
     PolicyInfo getPolicyByName(String name, String organization) throws APIMGovernanceException;
 
@@ -89,8 +89,8 @@ public interface PolicyMgtDAO {
      *
      * @param policyId    Ruleset ID
      * @param organization Organization
-     * @return RulesetInfo object
-     * @throws APIMGovernanceException If an error occurs while getting the ruleset
+     * @return PolicyInfo object
+     * @throws APIMGovernanceException If an error occurs while getting the policy
      */
     PolicyInfo getPolicyById(String policyId, String organization) throws APIMGovernanceException;
 
@@ -110,8 +110,8 @@ public interface PolicyMgtDAO {
      *
      * @param policyId    Ruleset ID
      * @param organization Organization
-     * @return Content of the ruleset
-     * @throws APIMGovernanceException If an error occurs while getting the ruleset content
+     * @return Content of the policy
+     * @throws APIMGovernanceException If an error occurs while getting the policy content
      */
     PolicyContent getPolicyContent(String policyId, String organization) throws APIMGovernanceException;
 

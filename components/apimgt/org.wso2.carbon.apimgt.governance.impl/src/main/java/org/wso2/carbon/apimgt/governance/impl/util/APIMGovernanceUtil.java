@@ -86,7 +86,7 @@ public class APIMGovernanceUtil {
         try {
             rulesetMap = yamlReader.readValue(content, Map.class);
         } catch (JsonProcessingException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONTENT, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_FAILED_TO_PARSE_POLICY_CONTENT, e);
         }
         return rulesetMap;
     }
@@ -128,7 +128,7 @@ public class APIMGovernanceUtil {
     }
 
     /**
-     * Load default rulesets from the default ruleset directory
+     * Load default rulesets from the default policy directory
      *
      * @param organization Organization
      */
@@ -144,36 +144,36 @@ public class APIMGovernanceUtil {
 
             // Define the path to default rulesets
             String pathToRulesets = CarbonUtils.getCarbonHome() + File.separator
-                    + APIMGovernanceConstants.DEFAULT_RULESET_LOCATION;
+                    + APIMGovernanceConstants.DEFAULT_POLICY_LOCATION;
             Path pathToDefaultRulesets = Paths.get(pathToRulesets);
 
-            // Iterate through default ruleset files
+            // Iterate through default policy files
             Files.list(pathToDefaultRulesets).forEach(path -> {
                 File file = path.toFile();
                 if (file.isFile() && (file.getName().endsWith(".yaml") || file.getName().endsWith(".yml"))) {
                     try {
                         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-                        DefaultPolicy defaultRuleset = mapper.readValue(file, DefaultPolicy.class);
+                        DefaultPolicy defaultPolicy = mapper.readValue(file, DefaultPolicy.class);
 
-                        // Add ruleset if it doesn't already exist
-                        if (!existingRuleNames.contains(defaultRuleset.getName())) {
-                            log.info("Adding default ruleset: " + defaultRuleset.getName());
+                        // Add policy if it doesn't already exist
+                        if (!existingRuleNames.contains(defaultPolicy.getName())) {
+                            log.info("Adding default policy: " + defaultPolicy.getName());
                             policyManager.createNewPolicy(
-                                    getRulesetFromDefaultRuleset(defaultRuleset,
+                                    getRulesetFromDefaultRuleset(defaultPolicy,
                                             file.getName().replaceAll("/", "_")), organization);
                         } else {
-                            log.info("Ruleset " + defaultRuleset.getName() + " already exists in organization: "
+                            log.info("Ruleset " + defaultPolicy.getName() + " already exists in organization: "
                                     + organization + "; skipping.");
                         }
                     } catch (IOException e) {
-                        log.error("Error while loading default ruleset from file: " + file.getName(), e);
+                        log.error("Error while loading default policy from file: " + file.getName(), e);
                     } catch (APIMGovernanceException e) {
-                        log.error("Error while adding default ruleset: " + file.getName(), e);
+                        log.error("Error while adding default policy: " + file.getName(), e);
                     }
                 }
             });
         } catch (IOException e) {
-            log.error("Error while accessing default ruleset directory", e);
+            log.error("Error while accessing default policy directory", e);
         } catch (APIMGovernanceException e) {
             log.error("Error while retrieving existing rulesets for organization: " + organization, e);
         }
@@ -185,7 +185,7 @@ public class APIMGovernanceUtil {
      * @param defaultRuleset DefaultPolicy
      * @param fileName       File name
      * @return Ruleset
-     * @throws APIMGovernanceException if an error occurs while loading default ruleset content
+     * @throws APIMGovernanceException if an error occurs while loading default policy content
      */
     public static Policy getRulesetFromDefaultRuleset(DefaultPolicy defaultRuleset,
                                                       String fileName) throws APIMGovernanceException {

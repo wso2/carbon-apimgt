@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 /**
  * This class represents the default policy model.
  */
+
 public class DefaultPolicy {
     private String name;
     private String description;

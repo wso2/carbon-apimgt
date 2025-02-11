@@ -12,7 +12,7 @@ description: >-
 ruleCategory: SPECTRAL
 ruleType: API_DEFINITION
 artifactType: REST_API
-documentationLink: "https://wso2.com/choreo/docs/api-management/api-governance/default-rulesets/wso2_api_design_guidelines_doc/"
+documentationLink: "https://wso2.com/choreo/docs/api-management/api-governance/default-policies/wso2_api_design_guidelines_doc/"
 provider: WSO2
 rulesetContent:
   rules:

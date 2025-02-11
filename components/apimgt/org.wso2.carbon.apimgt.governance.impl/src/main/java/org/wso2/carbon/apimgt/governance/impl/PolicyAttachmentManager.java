@@ -62,7 +62,7 @@ public class PolicyAttachmentManager {
 
         if (policyAttachmentMgtDAO.getGovernancePolicyAttachmentByName(governancePolicyAttachment.getName(),
                 organization) != null) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_ALREADY_EXISTS,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_ATTACHMENT_ALREADY_EXISTS,
                     governancePolicyAttachment.getName(), organization);
         }
 
@@ -74,12 +74,12 @@ public class PolicyAttachmentManager {
     }
 
     /**
-     * Update a Governance Policy
+     * Update a Governance Policy Attachment
      *
-     * @param policyAttachmentId         Policy ID
-     * @param governancePolicyAttachment Governance Policy
+     * @param policyAttachmentId         Policy Attachment ID
+     * @param governancePolicyAttachment Governance Policy Attachment
      * @param organization     Organization
-     * @return APIMGovernancePolicy Updated object
+     * @return APIMGovernancePolicyAttachment Updated object
      * @throws APIMGovernanceException If an error occurs while updating the policy
      */
 
@@ -90,14 +90,14 @@ public class PolicyAttachmentManager {
             throws APIMGovernanceException {
 
         if (policyAttachmentMgtDAO.getGovernancePolicyAttachmentByID(policyAttachmentId, organization) == null) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, policyAttachmentId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_ATTACHMENT_NOT_FOUND, policyAttachmentId);
         }
 
         String newName = governancePolicyAttachment.getName();
         APIMGovernancePolicyAttachment policyWithNewName = policyAttachmentMgtDAO
                 .getGovernancePolicyAttachmentByName(newName, organization);
         if (policyWithNewName != null && !policyWithNewName.getId().equals(policyAttachmentId)) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_ALREADY_EXISTS, newName, organization);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_ATTACHMENT_ALREADY_EXISTS, newName, organization);
         }
 
         checkForInvalidActions(governancePolicyAttachment);
@@ -112,7 +112,7 @@ public class PolicyAttachmentManager {
      * - Actions assigned to invalid governable states
      * - BLOCK actions are present for API_CREATE and API_UPDATE states
      *
-     * @param policyAttachment Governance Policy
+     * @param policyAttachment Governance Policy Attachment
      * @throws APIMGovernanceException If an error occurs while checking the actions
      */
     private void checkForInvalidActions(APIMGovernancePolicyAttachment policyAttachment)
@@ -122,13 +122,13 @@ public class PolicyAttachmentManager {
         List<APIMGovernanceAction> actions = policyAttachment.getActions();
         for (APIMGovernanceAction action : actions) {
             if (!apimGovernableStates.contains(action.getGovernableState())) {
-                throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY,
+                throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY_ATTACHMENT,
                         "Invalid governable state found in the policyAttachment. Please update the policyAttachment");
             }
             if (APIMGovernanceActionType.BLOCK.equals(action.getType()) &&
                     (APIMGovernableState.API_CREATE.equals(action.getGovernableState()) ||
                             APIMGovernableState.API_UPDATE.equals(action.getGovernableState()))) {
-                throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY,
+                throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY_ATTACHMENT,
                         "Creating policies with blocking actions for API" +
                                 " create/update is not allowed. Please update the policyAttachment");
             }
@@ -139,7 +139,7 @@ public class PolicyAttachmentManager {
     /**
      * This method adds missing notify actions for each governable state
      *
-     * @param policyAttachment Governance Policy
+     * @param policyAttachment Governance Policy Attachment
      */
     private void addMissingNotifyActions(APIMGovernancePolicyAttachment policyAttachment) {
 
@@ -169,27 +169,27 @@ public class PolicyAttachmentManager {
     }
 
     /**
-     * Delete a Governance Policy
+     * Delete a Governance Policy Attachment
      *
-     * @param policyAttachmentId     Policy ID
+     * @param policyAttachmentId     Policy Attachment ID
      * @param organization Organization
      * @throws APIMGovernanceException If an error occurs while deleting the policy
      */
 
     public void deletePolicyAttachment(String policyAttachmentId, String organization) throws APIMGovernanceException {
         if (policyAttachmentMgtDAO.getGovernancePolicyAttachmentByID(policyAttachmentId, organization) == null) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, policyAttachmentId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_ATTACHMENT_NOT_FOUND, policyAttachmentId);
         }
 
         policyAttachmentMgtDAO.deletePolicyAttachments(policyAttachmentId, organization);
     }
 
     /**
-     * Get Governance Policy by Name
+     * Get Governance Policy Attachment by Name
      *
-     * @param policyAttachmentId     Policy ID
+     * @param policyAttachmentId     Policy Attachment ID
      * @param organization Organization
-     * @return APIMGovernancePolicy
+     * @return APIMGovernancePolicyAttachment
      * @throws APIMGovernanceException If an error occurs while retrieving the policy
      */
 
@@ -199,7 +199,7 @@ public class PolicyAttachmentManager {
         APIMGovernancePolicyAttachment policyAttachmentInfo = policyAttachmentMgtDAO
                 .getGovernancePolicyAttachmentByID(policyAttachmentId, organization);
         if (policyAttachmentInfo == null) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, policyAttachmentId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_ATTACHMENT_NOT_FOUND, policyAttachmentId);
         }
         return policyAttachmentInfo;
     }
@@ -208,7 +208,7 @@ public class PolicyAttachmentManager {
      * Get Governance Policies
      *
      * @param organization Organization
-     * @return APIMGovernancePolicyList
+     * @return APIMGovernancePolicyAttachmentList
      * @throws APIMGovernanceException If an error occurs while retrieving the policies
      */
 
@@ -220,7 +220,7 @@ public class PolicyAttachmentManager {
     /**
      * Get the list of policies for a given policy attachment
      *
-     * @param policyAttachmentId     Policy ID
+     * @param policyAttachmentId     Policy Attachment ID
      * @param organization Organization
      * @return List of policies
      * @throws APIMGovernanceException If an error occurs while getting the policies
@@ -229,18 +229,18 @@ public class PolicyAttachmentManager {
     public List<PolicyInfo> getPoliciesByPolicyAttachmentId(String policyAttachmentId,
                                                             String organization) throws APIMGovernanceException {
         if (policyAttachmentMgtDAO.getGovernancePolicyAttachmentByID(policyAttachmentId, organization) == null) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, policyAttachmentId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_ATTACHMENT_NOT_FOUND, policyAttachmentId);
         }
         return policyAttachmentMgtDAO.getPoliciesByPolicyAttachmentId(policyAttachmentId, organization);
     }
 
     /**
-     * Get the list of policies by label
+     * Get the list of Policy Attachments by label
      *
      * @param label        label
      * @param organization organization
-     * @return Map of Policy IDs, Policy Names
-     * @throws APIMGovernanceException If an error occurs while getting the policies
+     * @return Map of Policy Attachment IDs, Policy Attachment Names
+     * @throws APIMGovernanceException If an error occurs while getting the Policy Attachments
      */
 
     public Map<String, String> getPoliciesByLabel(String label, String organization)
@@ -249,11 +249,11 @@ public class PolicyAttachmentManager {
     }
 
     /**
-     * Get the list of organization wide policies
+     * Get the list of organization wide policy attachment
      *
      * @param organization organization
-     * @return Map of Policy IDs, Policy Names
-     * @throws APIMGovernanceException If an error occurs while getting the policies
+     * @return Map of Policy Attachment IDs, Policy Attachment Names
+     * @throws APIMGovernanceException If an error occurs while getting the policy attachment
      */
 
     public Map<String, String> getOrganizationWidePolicyAttachments(String organization)
@@ -262,13 +262,13 @@ public class PolicyAttachmentManager {
     }
 
     /**
-     * Get the list of policies by label and state
+     * Get the list of policy attachment by label and state
      *
      * @param label        Label
-     * @param state        Governable State for the policy
+     * @param state        Governable State for the policy attachment
      * @param organization Organization
-     * @return List of policy IDs
-     * @throws APIMGovernanceException If an error occurs while getting the policies
+     * @return List of policy attachment IDs
+     * @throws APIMGovernanceException If an error occurs while getting the policy attachment
      */
 
     public List<String> getPolicyAttachmentByLabelAndState(String label, APIMGovernableState state, String organization)
@@ -277,12 +277,12 @@ public class PolicyAttachmentManager {
     }
 
     /**
-     * Get the list of organization wide policies by state
+     * Get the list of organization wide policy attachment by state
      *
-     * @param state        Governable State for the policy
+     * @param state        Governable State for the policy attachment
      * @param organization organization
-     * @return List of policy IDs
-     * @throws APIMGovernanceException If an error occurs while getting the policies
+     * @return List of policy attachment IDs
+     * @throws APIMGovernanceException If an error occurs while getting the policy attachment
      */
 
     public List<String> getOrganizationWidePolicyAttachmentByState(APIMGovernableState state, String organization)
@@ -293,7 +293,7 @@ public class PolicyAttachmentManager {
     /**
      * This method checks whether a blocking action is present for a given governable state of a policy
      *
-     * @param policyAttachmentId     Policy ID
+     * @param policyAttachmentId     Policy Attachment ID
      * @param state        Governable State
      * @param organization Organization
      * @return true if a blocking action is present, false otherwise
@@ -304,7 +304,7 @@ public class PolicyAttachmentManager {
                                                    String organization)
             throws APIMGovernanceException {
         if (policyAttachmentMgtDAO.getGovernancePolicyAttachmentByID(policyAttachmentId, organization) == null) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, policyAttachmentId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_ATTACHMENT_NOT_FOUND, policyAttachmentId);
         }
         boolean isBlockingActionPresent = false;
         List<APIMGovernanceAction> actions = policyAttachmentMgtDAO.getActionsByPolicyAttachmentId(policyAttachmentId);
@@ -320,11 +320,11 @@ public class PolicyAttachmentManager {
     }
 
     /**
-     * This method searches for governance policies
+     * This method searches for governance policy attachments
      *
      * @param query        query
      * @param organization organization
-     * @return APIMGovernancePolicyList
+     * @return APIMGovernancePolicyAttachmentList
      * @throws APIMGovernanceException If an error occurs while searching for policies
      */
 
@@ -354,10 +354,10 @@ public class PolicyAttachmentManager {
                 String searchValue = parts[1];
 
                 // Add valid prefixes to criteriaMap
-                if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.PolicySearchAttributes.STATE)) {
-                    criteriaMap.put(APIMGovernanceConstants.PolicySearchAttributes.STATE, searchValue);
-                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.PolicySearchAttributes.NAME)) {
-                    criteriaMap.put(APIMGovernanceConstants.PolicySearchAttributes.NAME, searchValue);
+                if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.PolicyAttachmentSearchAttributes.STATE)) {
+                    criteriaMap.put(APIMGovernanceConstants.PolicyAttachmentSearchAttributes.STATE, searchValue);
+                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.PolicyAttachmentSearchAttributes.NAME)) {
+                    criteriaMap.put(APIMGovernanceConstants.PolicyAttachmentSearchAttributes.NAME, searchValue);
                 }
             }
         }
@@ -366,7 +366,7 @@ public class PolicyAttachmentManager {
     }
 
     /**
-     * Delete the label policy mappings
+     * Delete the label policy attachment mappings
      *
      * @param label        Label ID
      * @param organization Organization

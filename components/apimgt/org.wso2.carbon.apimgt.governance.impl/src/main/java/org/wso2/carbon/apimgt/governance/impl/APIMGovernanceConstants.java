@@ -33,24 +33,24 @@ public class APIMGovernanceConstants {
     public static final String DOC_META_DATA_FILE_NAME = "document.yaml";
     public static final String API_FILE_NAME = "api.yaml";
 
-    public static final String DEFAULT_RULESET_LOCATION = "repository" + File.separator
-            + "resources" + File.separator + "governance" + File.separator + "default-rulesets";
+    public static final String DEFAULT_POLICY_LOCATION = "repository" + File.separator
+            + "resources" + File.separator + "governance" + File.separator + "default-policies";
     public static final String GLOBAL_LABEL = "GLOBAL";
 
-
-    /**
-     * Represents search attributes for rulesets.
-     */
-    public static class RulesetSearchAttributes {
-        public static final String NAME = "name";
-        public static final String RULE_TYPE = "ruleType";
-        public static final String ARTIFACT_TYPE = "artifactType";
-    }
 
     /**
      * Represents search attributes for policies.
      */
     public static class PolicySearchAttributes {
+        public static final String NAME = "name";
+        public static final String POLICY_TYPE = "policyType";
+        public static final String ARTIFACT_TYPE = "artifactType";
+    }
+
+    /**
+     * Represents search attributes for policy attachment.
+     */
+    public static class PolicyAttachmentSearchAttributes {
         public static final String NAME = "name";
         public static final String STATE = "state";
     }
