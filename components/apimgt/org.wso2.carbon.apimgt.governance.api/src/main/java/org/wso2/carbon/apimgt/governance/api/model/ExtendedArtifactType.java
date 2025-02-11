@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Enum class to represent the artifact types of a ruleset
+ * Enum class to represent the artifact types of a governance policy
  */
 public enum ExtendedArtifactType {
     REST_API("rest_api"),

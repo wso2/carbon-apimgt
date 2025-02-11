@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.governance.api.model;
 
 /**
- * This class represents a governance Ruleset Information excluding the ruleset content
+ * This class represents a governance policy information excluding the policy content
  */
 public class PolicyInfo {
     private String id;

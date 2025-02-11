@@ -3034,7 +3034,7 @@ public class PublisherCommonUtils {
         Map<String, String> responseMap = new HashMap<>(2);
 
         try {
-            if (apimGovernanceService.isPoliciesWithBlockingActionExist(artifactID, type, state, organization)) {
+            if (apimGovernanceService.isPolicyAttachmentsWithBlockingActionExist(artifactID, type, state, organization)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Blocking policies exist for the API. Evaluating compliance synchronously.");
                 }

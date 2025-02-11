@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.governance.api.model;
 
 /**
- * This class represents a governance Ruleset
+ * This class represents a governance policy
  */
 public class Policy extends PolicyInfo {
     private PolicyContent policyContent;

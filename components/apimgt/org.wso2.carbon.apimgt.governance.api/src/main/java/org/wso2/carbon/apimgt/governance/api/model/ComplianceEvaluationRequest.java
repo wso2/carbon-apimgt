@@ -32,7 +32,7 @@ public class ComplianceEvaluationRequest {
 
     private ArtifactType artifactType;
 
-    private List<String> policyIds;
+    private List<String> policyAttachmentIds;
 
     private String organization;
 
@@ -62,12 +62,12 @@ public class ComplianceEvaluationRequest {
         this.artifactType = artifactType;
     }
 
-    public List<String> getPolicyIds() {
-        return new ArrayList<>(policyIds);
+    public List<String> getPolicyAttachmentIds() {
+        return new ArrayList<>(policyAttachmentIds);
     }
 
-    public void setPolicyIds(List<String> policyIds) {
-        this.policyIds = new ArrayList<>(policyIds);
+    public void setPolicyAttachmentIds(List<String> policyAttachmentIds) {
+        this.policyAttachmentIds = new ArrayList<>(policyAttachmentIds);
     }
 
     public String getOrganization() {

@@ -21,11 +21,11 @@ package org.wso2.carbon.apimgt.governance.impl;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
-import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.Policy;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyContent;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyInfo;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyList;
+import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.impl.dao.PolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.PolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
@@ -65,8 +65,8 @@ public class PolicyManager {
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();
 
-        validationEngine.validateRulesetContent(policy);
-        List<Rule> rules = validationEngine.extractRulesFromRuleset(policy);
+        validationEngine.validatePolicyContent(policy);
+        List<Rule> rules = validationEngine.extractRulesFromPolicy(policy);
 
         if (rules.isEmpty()) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT,
@@ -135,8 +135,8 @@ public class PolicyManager {
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
                 getValidationEngineService().getValidationEngine();
 
-        validationEngine.validateRulesetContent(policy);
-        List<Rule> rules = validationEngine.extractRulesFromRuleset(policy);
+        validationEngine.validatePolicyContent(policy);
+        List<Rule> rules = validationEngine.extractRulesFromPolicy(policy);
 
         if (rules.isEmpty()) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT,

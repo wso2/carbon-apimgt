@@ -29,96 +29,96 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
     ORGANIZATION_NOT_FOUND(100001, "Organization Not Found",
             400, "Organization is not found in the request"),
 
-    // Ruleset related codes
-    RULESET_ALREADY_EXIST(200001, "Ruleset already exists",
-            409, "Ruleset with name: '%s' in the organization: '%s' already exists."),
-    RULESET_CREATION_FAILED(200002, "Ruleset creation failed",
-            500, "Ruleset creation failed with name: '%s' in the " +
+    // Policy related codes
+    POLICY_ALREADY_EXIST(200001, "Policy already exists",
+            409, "Policy with name: '%s' in the organization: '%s' already exists."),
+    POLICY_CREATION_FAILED(200002, "Policy creation failed",
+            500, "Policy creation failed with name: '%s' in the " +
             "organization: '%s'.", true),
-    ERROR_WHILE_RETRIEVING_RULESETS(200003, "Retrieving rulesets failed",
-            500, "Error while retrieving rulesets for " +
+    ERROR_WHILE_RETRIEVING_POLICIES(200003, "Retrieving policies failed",
+            500, "Error while retrieving policies for " +
             "the organization: %s", true),
-    ERROR_WHILE_RETRIEVING_RULESET_BY_ID(200004, "Retrieving ruleset by id failed",
-            500, "Error while retrieving ruleset with the provided ID", true),
-    ERROR_WHILE_UPDATING_RULESET(200005, "Updating ruleset failed",
-            500, "Error while updating ruleset: %s", true),
-    ERROR_WHILE_DELETING_RULESET(200006, "Deleting ruleset failed",
-            500, "Error while deleting ruleset with ID: %s ", true),
-    RULESET_NOT_FOUND(200008, "Ruleset not found",
-            404, "Ruleset with ID: %s not found"),
-    ERROR_WHILE_RETRIEVING_RULESET_CONTENT(200009, "Retrieving ruleset content failed",
+    ERROR_WHILE_RETRIEVING_POLICY_BY_ID(200004, "Retrieving policy by id failed",
+            500, "Error while retrieving policy with the provided ID", true),
+    ERROR_WHILE_UPDATING_POLICY(200005, "Updating policy failed",
+            500, "Error while updating policy: %s", true),
+    ERROR_WHILE_DELETING_POLICY(200006, "Deleting policy failed",
+            500, "Error while deleting policy with ID: %s ", true),
+    POLICY_NOT_FOUND(200008, "Policy not found",
+            404, "Policy with ID: %s not found"),
+    ERROR_WHILE_RETRIEVING_POLICY_CONTENT(200009, "Retrieving policy content failed",
             500, "Error while retrieving " +
-            "the content of the ruleset with id: %s", true),
-    ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY(200010,
-            "Error while retrieving rulesets associated with " +
-                    "policy", 500, "Error while retrieving " +
-            "rulesets associated with policy with id: %s", true),
+            "the content of the policy with id: %s", true),
+    ERROR_WHILE_RETRIEVING_POLICIES_ASSOCIATED_WITH_POLICY_ATTACHMENT(200010,
+            "Error while retrieving policies associated with " +
+                    "policy attachment", 500, "Error while retrieving " +
+            "policies associated with policy attachment with id: %s", true),
     ERROR_WHILE_INSERTING_RULES(200011, "Rule insertion failed",
-            500, "Rule insertion failed for the ruleset with id:" +
+            500, "Rule insertion failed for the policy with id:" +
             " '%s'", true),
-    INVALID_RULESET_CONTENT(200012, "Ruleset content is invalid",
-            400, "Content of ruleset '%s' is invalid"),
-    ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT(200013, "Error while loading default ruleset content",
+    INVALID_POLICY_CONTENT(200012, "Policy content is invalid",
+            400, "Content of policy '%s' is invalid"),
+    ERROR_WHILE_LOADING_DEFAULT_POLICY_CONTENT(200013, "Error while loading default policy content",
             500, "Error while loading " +
-            "default ruleset provided by WSO2.", true),
-    ERROR_WHILE_RETRIEVING_RULESET_BY_NAME(200014, "Retrieving ruleset by name failed",
+            "default policy provided by WSO2.", true),
+    ERROR_WHILE_RETRIEVING_POLICY_BY_NAME(200014, "Retrieving policy by name failed",
             500, "Error while retrieving " +
-            "ruleset for the organization: %s", true),
-    ERROR_FAILED_TO_PARSE_RULESET_CONTENT(200015, "Failed to parse ruleset content",
-            500, "Failed to parse ruleset " +
-            "content for the ruleset.", true),
-    ERROR_RULESET_ASSOCIATED_WITH_POLICIES(200016, "Ruleset is currently " +
-            "in use by some governance policies", 409,
-            "The ruleset with ID: %s cannot be deleted because it " +
-                    "is associated with some governance policies. " +
-                    "Please update the associated governance policies before " +
-                    "attempting to delete the ruleset."),
-    ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICIES(200017, "Error while retrieving " +
-            "associated policies for the ruleset.", 500,
-            "Error while retrieving associated policies for the ruleset with ID: %s", true),
+            "policy for the organization: %s", true),
+    ERROR_FAILED_TO_PARSE_POLICY_CONTENT(200015, "Failed to parse policy content",
+            500, "Failed to parse policy " +
+            "content for the policy.", true),
+    ERROR_POLICY_ASSOCIATED_WITH_POLICY_ATTACHMENTIES(200016, "Policy is currently " +
+            "in use by some governance policy attachments", 409,
+            "The policy with ID: %s cannot be deleted because it " +
+                    "is associated with some governance policy attachments. " +
+                    "Please update the associated governance policy attachments before " +
+                    "attempting to delete the policy."),
+    ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICY_ATTACHMENTIES(200017, "Error while retrieving " +
+            "associated policy attachments for the policy.", 500,
+            "Error while retrieving associated policy attachments for the policy with ID: %s", true),
     ERROR_WHILE_EXTRACTING_RULE_CONTENT(200018, "Error while extracting rule content",
             500, "Error while extracting " +
-            "rule content from the ruleset", true),
-    ERROR_WHILE_RETRIEVING_RULES_BY_RULESET_ID(200019, "Error while retrieving rules by ruleset id",
+            "rule content from the policy", true),
+    ERROR_WHILE_RETRIEVING_RULES_BY_POLICY_ID(200019, "Error while retrieving rules by policy id",
             500, "Error while " +
-            "retrieving rules by ruleset id: %s", true),
-    ERROR_WHILE_SEARCHING_RULESETS(200020, "Error while searching rulesets",
-            500, "Error while searching rulesets for the organization: %s", true),
-
-    INVALID_RULESET_CONTENT_DETAILED(200021, "Ruleset content is invalid",
-            400, "Content of ruleset %s is invalid: %s"),
-
-    // Policy related codes
-    ERROR_WHILE_CREATING_POLICY(300001, "Policy creation failed.",
-            500, "Error while creating governance policy " +
-            "in the organization %s", true),
-    POLICY_NOT_FOUND(300002, "Policy not found",
-            404, "Policy with ID: %s not found"),
-    ERROR_WHILE_RETRIEVING_POLICIES(300003, "Retrieving policies failed",
-            500, "Error while retrieving policies for the organization: %s", true),
-    ERROR_WHILE_RETRIEVING_POLICY_BY_ID(300004, "Retrieving policy by id failed",
-            500, "Error while retrieving policy" +
-            " with id: %s ", true),
-    ERROR_WHILE_UPDATING_POLICY(300005, "Updating policy failed",
-            500, ("Error while updating policy with id: %s "), true),
-    ERROR_WHILE_DELETING_POLICY(300006, "Deleting policy failed",
-            500, "Error while deleting policy with ID: %s", true),
-    POLICY_ALREADY_EXISTS(300007, "Policy already exists.",
-            409, "Policy with name: '%s' in the organization: '%s' already exists."),
-    ERROR_WHILE_RETRIEVING_POLICY_BY_NAME(300008, "Retrieving policy by name failed",
-            500, "Error while retrieving " +
-            "policy with name: %s for the organization: %s", true),
-    ERROR_WHILE_RETRIEVING_ACTIONS_BY_POLICY_ID(300010, "Retrieving actions by policy id failed",
-            500, "Error while " +
-            "retrieving actions by policy id: %s", true),
-    ERROR_WHILE_RETRIEVING_LABELS_BY_POLICY_ID(300011, "Retrieving labels by policy id failed",
-            500, "Error while retrieving labels by policy id: %s", true),
-    ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY(300012, "Error while assigning action to policy",
-            400, "Invalid action provided for the policy: %s"),
-    ERROR_WHILE_SEARCHING_POLICIES(300013, "Error while searching policies",
+            "retrieving rules by policy id: %s", true),
+    ERROR_WHILE_SEARCHING_POLICIES(200020, "Error while searching policies",
             500, "Error while searching policies for the organization: %s", true),
-    ERROR_WHILE_DELETING_LABEL_POLICY_MAPPINGS(300014, "Error while deleting label policy mappings",
-            500, "Error while deleting label policy mappings for " +
+
+    INVALID_POLICY_CONTENT_DETAILED(200021, "Policy content is invalid",
+            400, "Content of policy %s is invalid: %s"),
+
+    // policy attachment related codes
+    ERROR_WHILE_CREATING_POLICY_ATTACHMENT(300001, "policy attachment creation failed.",
+            500, "Error while creating governance policy attachment " +
+            "in the organization %s", true),
+    POLICY_ATTACHMENT_NOT_FOUND(300002, "policy attachment not found",
+            404, "policy attachment with ID: %s not found"),
+    ERROR_WHILE_RETRIEVING_POLICY_ATTACHMENTIES(300003, "Retrieving policy attachments failed",
+            500, "Error while retrieving policy attachments for the organization: %s", true),
+    ERROR_WHILE_RETRIEVING_POLICY_ATTACHMENT_BY_ID(300004, "Retrieving policy attachment by id failed",
+            500, "Error while retrieving policy attachment" +
+            " with id: %s ", true),
+    ERROR_WHILE_UPDATING_POLICY_ATTACHMENT(300005, "Updating policy attachment failed",
+            500, ("Error while updating policy attachment with id: %s "), true),
+    ERROR_WHILE_DELETING_POLICY_ATTACHMENT(300006, "Deleting policy attachment failed",
+            500, "Error while deleting policy attachment with ID: %s", true),
+    POLICY_ATTACHMENT_ALREADY_EXISTS(300007, "policy attachment already exists.",
+            409, "policy attachment with name: '%s' in the organization: '%s' already exists."),
+    ERROR_WHILE_RETRIEVING_POLICY_ATTACHMENT_BY_NAME(300008, "Retrieving policy attachment by name failed",
+            500, "Error while retrieving " +
+            "policy attachment with name: %s for the organization: %s", true),
+    ERROR_WHILE_RETRIEVING_ACTIONS_BY_POLICY_ATTACHMENT_ID(300010, "Retrieving actions by policy attachment id failed",
+            500, "Error while " +
+            "retrieving actions by policy attachment id: %s", true),
+    ERROR_WHILE_RETRIEVING_LABELS_BY_POLICY_ATTACHMENT_ID(300011, "Retrieving labels by policy attachment id failed",
+            500, "Error while retrieving labels by policy attachment id: %s", true),
+    ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY_ATTACHMENT(300012, "Error while assigning action to policy attachment",
+            400, "Invalid action provided for the policy attachment: %s"),
+    ERROR_WHILE_SEARCHING_POLICY_ATTACHMENTIES(300013, "Error while searching policy attachments",
+            500, "Error while searching policy attachments for the organization: %s", true),
+    ERROR_WHILE_DELETING_LABEL_POLICY_ATTACHMENT_MAPPINGS(300014, "Error while deleting label policy attachment mappings",
+            500, "Error while deleting label policy attachment mappings for " +
             "label with ID: %s", true),
 
     // Request related codes
@@ -157,17 +157,17 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
     ERROR_WHILE_DELETING_RULE_VIOLATIONS_BY_RESULT_ID(500008, "Error while deleting rule " +
             "violations by result ID.",
             500, "Error while deleting rule violations by result ID: %s", true),
-    ERROR_WHILE_DELETING_EVALUATION_RESULTS_FOR_RULESET(500009, "Error while deleting evaluation " +
-            "results for ruleset.",
-            500, "Error while deleting evaluation results for ruleset with ID: %s",
+    ERROR_WHILE_DELETING_EVALUATION_RESULTS_FOR_POLICY(500009, "Error while deleting evaluation " +
+            "results for policy.",
+            500, "Error while deleting evaluation results for policy with ID: %s",
             true),
-    ERROR_WHILE_DELETING_COMPLIANCE_EVALUATION_RESULTS_FOR_POLICY(500010, "Error while deleting compliance " +
-            "evaluation results for policy.",
-            500, "Error while deleting compliance evaluation results for policy with ID: %s",
+    ERROR_WHILE_DELETING_COMPLIANCE_EVALUATION_RESULTS_FOR_POLICY_ATTACHMENT(500010, "Error while deleting compliance " +
+            "evaluation results for policy attachment.",
+            500, "Error while deleting compliance evaluation results for policy attachment with ID: %s",
             true),
-    ERROR_WHILE_DELETING_RULE_VIOLATIONS_FOR_POLICY(500011, "Error while deleting rule " +
-            "violations for policy.",
-            500, "Error while deleting rule violations for policy with ID: %s", true),
+    ERROR_WHILE_DELETING_RULE_VIOLATIONS_FOR_POLICY_ATTACHMENT(500011, "Error while deleting rule " +
+            "violations for policy attachment.",
+            500, "Error while deleting rule violations for policy attachment with ID: %s", true),
 
     // Artifact related codes
     ERROR_WHILE_SAVING_ARTIFACT_INFO(600001, "Error while saving artifact info.",

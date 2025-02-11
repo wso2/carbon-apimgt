@@ -32,12 +32,12 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.PolicyAttachmentAdherenceSate;
-import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
-import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
-import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Policy;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyAttachmentAdherenceSate;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyInfo;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
+import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
+import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyAttachmentMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.PolicyMgtDAO;
@@ -638,7 +638,7 @@ public class ComplianceManager {
                     List<RuleViolation> ruleViolations = validationEngine.validate(
                             contentToValidate, ruleset);
 
-                    artifactComplianceDryRunInfo.addRuleViolationsForRuleset(policy, policyInfo, ruleViolations);
+                    artifactComplianceDryRunInfo.addRuleViolationsForPolicy(policy, policyInfo, ruleViolations);
 
                 } else {
                     if (log.isDebugEnabled()) {
