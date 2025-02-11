@@ -4644,7 +4644,7 @@ public class SQLConstants {
                         "   AMAE.ENDPOINT_UUID," +
                         "   AMAE.REVISION_UUID," +
                         "   AMAE.ENDPOINT_NAME," +
-                        "   AMAE.ENVIRONMENT," +
+                        "   AMAE.KEY_TYPE," +
                         "   AMAE.ENDPOINT_CONFIG," +
                         "   AMAE.ORGANIZATION" +
                         " FROM " +
@@ -4657,7 +4657,7 @@ public class SQLConstants {
                         "   AMAE.ENDPOINT_UUID," +
                         "   AMAE.REVISION_UUID," +
                         "   AMAE.ENDPOINT_NAME," +
-                        "   AMAE.ENVIRONMENT," +
+                        "   AMAE.KEY_TYPE," +
                         "   AMAE.ENDPOINT_CONFIG," +
                         "   AMAE.ORGANIZATION" +
                         " FROM " +
@@ -4670,7 +4670,7 @@ public class SQLConstants {
                         "   AMAE.ENDPOINT_UUID," +
                         "   AMAE.REVISION_UUID," +
                         "   AMAE.ENDPOINT_NAME," +
-                        "   AMAE.ENVIRONMENT," +
+                        "   AMAE.KEY_TYPE," +
                         "   AMAE.ENDPOINT_CONFIG," +
                         "   AMAE.ORGANIZATION" +
                         " FROM " +
@@ -4696,7 +4696,7 @@ public class SQLConstants {
                         "ENDPOINT_UUID, " +
                         "REVISION_UUID, " +
                         "ENDPOINT_NAME, " +
-                        "ENVIRONMENT, " +
+                        "KEY_TYPE, " +
                         "ENDPOINT_CONFIG, ORGANIZATION) " +
                         "VALUES(?,?,?,?,?,?,?)";
 
@@ -4719,7 +4719,7 @@ public class SQLConstants {
                         "WHERE " +
                         "AME.API_UUID = ? " +
                         "AND AME.REVISION_UUID = 'Current API' " +
-                        "AND AME.ENVIRONMENT = ?";
+                        "AND AME.KEY_TYPE = ?";
 
         public static final String GET_API_PRIMARY_ENDPOINT_UUID_BY_API_UUID_AND_ENV_REVISION =
                 "SELECT AME.ENDPOINT_UUID " +
@@ -4728,7 +4728,7 @@ public class SQLConstants {
                         "WHERE " +
                         "AME.API_UUID = ? " +
                         "AND AME.REVISION_UUID = ? " +
-                        "AND AME.ENVIRONMENT = ?";
+                        "AND AME.KEY_TYPE = ?";
 
         public static final String DELETE_API_ENDPOINTS_BY_API_UUID_AND_REVISION_UUID =
                 "DELETE FROM AM_API_ENDPOINTS WHERE API_UUID = ? AND REVISION_UUID = ? ";

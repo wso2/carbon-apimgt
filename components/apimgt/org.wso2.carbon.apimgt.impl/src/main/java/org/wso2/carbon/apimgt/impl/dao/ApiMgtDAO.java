@@ -21912,7 +21912,7 @@ public class ApiMgtDAO {
         policySpecification.setDisplayName(rs.getString("DISPLAY_NAME"));
         policySpecification.setDescription(rs.getString("POLICY_DESCRIPTION"));
         policySpecification.setApplicableFlows(getListFromString(rs.getString("APPLICABLE_FLOWS")));
-        policySpecification.setSupportedApiTypes(getListFromString(rs.getString("API_TYPES")));
+        policySpecification.setSupportedApiTypes(getObjectListFromString(rs.getString("API_TYPES")));
         policySpecification.setSupportedGateways(getListFromString(rs.getString("GATEWAY_TYPES")));
         policySpecification.setCategory(OperationPolicySpecification.PolicyCategory
                 .valueOf(rs.getString("POLICY_CATEGORY")));
@@ -21946,6 +21946,18 @@ public class ApiMgtDAO {
                     stringElement.substring(1, stringElement.length() - 1).replaceAll("\\s", "").split(","));
         }
         return list;
+    }
+
+    /**
+     *
+     * @param stringElement
+     * @return
+     */
+    private List<Object> getObjectListFromString(String stringElement) {
+        stringElement = stringElement.replace("=", ":");
+        Gson gson = new Gson();
+        Type listType = new TypeToken<List<Object>>() {}.getType();
+        return gson.fromJson(stringElement, listType);
     }
 
     /**
@@ -23428,7 +23440,7 @@ public class ApiMgtDAO {
                         APIEndpointInfo apiEndpoint = new APIEndpointInfo();
                         apiEndpoint.setEndpointUuid(rs.getString("ENDPOINT_UUID"));
                         apiEndpoint.setEndpointName(rs.getString("ENDPOINT_NAME"));
-                        apiEndpoint.setEnvironment(rs.getString("ENVIRONMENT"));
+                        apiEndpoint.setEnvironment(rs.getString("KEY_TYPE"));
                         apiEndpoint.setEndpointConfig(fromBAtoEndpointConfigMap(
                                 rs.getBinaryStream("ENDPOINT_CONFIG")));
                         apiEndpoint.setOrganization(rs.getString("ORGANIZATION"));
@@ -23455,7 +23467,7 @@ public class ApiMgtDAO {
                     apiEndpoint = new APIEndpointInfo();
                     apiEndpoint.setEndpointUuid(rs.getString("ENDPOINT_UUID"));
                     apiEndpoint.setEndpointName(rs.getString("ENDPOINT_NAME"));
-                    apiEndpoint.setEnvironment(rs.getString("ENVIRONMENT"));
+                    apiEndpoint.setEnvironment(rs.getString("KEY_TYPE"));
                     apiEndpoint.setEndpointConfig(fromBAtoEndpointConfigMap(
                             rs.getBinaryStream("ENDPOINT_CONFIG")));
                     apiEndpoint.setOrganization(rs.getString("ORGANIZATION"));

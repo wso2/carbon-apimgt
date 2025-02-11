@@ -14277,11 +14277,13 @@ components:
         supportedApiTypes:
           type: array
           items:
-            type: string
-            example: REST
-#        subType:
-#          type: string
-#          example: AI
+            type: object
+            properties: {}
+          description: |
+            Supported API types as an array of strings, or an array of maps
+            [HTTP, SOAP] 
+            [{apiType: HTTP, subType: AI}, {apiType: SOAP}]
+          example: [HTTP, SOAP]
         isAPISpecific:
           type: boolean
           example: true
