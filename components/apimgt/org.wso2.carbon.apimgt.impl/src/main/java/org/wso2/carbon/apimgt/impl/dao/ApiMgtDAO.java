@@ -17857,7 +17857,7 @@ public class ApiMgtDAO {
      */
     public InputStream getOrgTheme(String themeId, String organization) throws APIManagementException {
         InputStream tenantThemeContent = null;
-        String query = "SELECT * FROM AM_ARTIFACT WHERE UUID = ? AND TYPE IN (?, ?)";
+        String query = SQLConstants.DevPortalContentConstants.GET_THEME_ARTIFACT;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, themeId);
@@ -17884,7 +17884,7 @@ public class ApiMgtDAO {
      */
     public Map<String, String>  getOrgThemes(String organization) throws APIManagementException {
         Map<String, String> themeMap = new HashMap<>();
-        String checkQuery = "SELECT DRAFTED_ARTIFACT, PUBLISHED_ARTIFACT FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
+        String checkQuery = SQLConstants.DevPortalContentConstants.GET_ORG_THEME_IDS;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(checkQuery)) {
             preparedStatement.setString(1, organization);
@@ -17910,7 +17910,7 @@ public class ApiMgtDAO {
      * @return Boolean of organization availability.
      */
     private boolean isOrganizationExist(Connection connection, String organization) throws SQLException {
-        String query = "SELECT COUNT(*) FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
+        String query = SQLConstants.DevPortalContentConstants.GET_ORG_ROW;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, organization);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -17930,7 +17930,7 @@ public class ApiMgtDAO {
      * @return String of drafted content ID.
      */
     private String getDraftedArtifactForOrg(Connection connection, String organization) throws SQLException {
-        String query = "SELECT DRAFTED_ARTIFACT FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
+        String query = SQLConstants.DevPortalContentConstants.GET_ORG_DRAFTED_ID;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, organization);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -17949,7 +17949,7 @@ public class ApiMgtDAO {
      * @param organization Organization name.
      */
     private void updateDraftedArtifactForOrg(Connection connection, String organization, String artifactUUID) throws SQLException {
-        String query = "UPDATE AM_DEVPORTAL_ORG_CONTENT SET DRAFTED_ARTIFACT = ? WHERE ORGANIZATION = ?";
+        String query = SQLConstants.DevPortalContentConstants.UPDATED_ORG_DRAFTED_ID;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, artifactUUID);
             preparedStatement.setString(2, organization);
@@ -17964,7 +17964,7 @@ public class ApiMgtDAO {
      * @param organization Organization name.
      */
     private void updatePublishedArtifactForOrg(Connection connection, String organization, String artifactUUID) throws SQLException {
-        String query = "UPDATE AM_DEVPORTAL_ORG_CONTENT SET PUBLISHED_ARTIFACT = ? WHERE ORGANIZATION = ?";
+        String query = SQLConstants.DevPortalContentConstants.UPDATED_ORG_PUBLISHED_ID;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, artifactUUID);
             preparedStatement.setString(2, organization);
@@ -17980,7 +17980,7 @@ public class ApiMgtDAO {
      * @return String of published artifact content ID.
      */
     private String getPublishedArtifactForOrg(Connection connection, String organization) throws SQLException {
-        String query = "SELECT PUBLISHED_ARTIFACT FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
+        String query = SQLConstants.DevPortalContentConstants.GET_ORG_PUBLISHED_ID;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, organization);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -18002,7 +18002,7 @@ public class ApiMgtDAO {
      */
     private String addArtifact(Connection connection, InputStream themeContent, String artifactType) throws SQLException {
         String id = UUID.randomUUID().toString();
-        String query = "INSERT INTO AM_ARTIFACT (UUID, ARTIFACT, TYPE) VALUES (?, ?, ?)";
+        String query = SQLConstants.DevPortalContentConstants.ADD_ARTIFACT;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, id);
             preparedStatement.setBinaryStream(2, themeContent);
@@ -18020,7 +18020,7 @@ public class ApiMgtDAO {
      * @return Artifact content.
      */
     private InputStream getArtifactContent(Connection connection, String artifactId) throws SQLException {
-        String query = "SELECT ARTIFACT FROM AM_ARTIFACT WHERE UUID = ?";
+        String query = SQLConstants.DevPortalContentConstants.GET_ARTIFACT;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, artifactId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -18039,7 +18039,7 @@ public class ApiMgtDAO {
      * @param artifactId Artifact's ID.
      */
     private void removeArtifact(Connection connection, String artifactId) throws SQLException {
-        String query = "DELETE FROM AM_ARTIFACT WHERE UUID = ?";
+        String query = SQLConstants.DevPortalContentConstants.DELETE_ARTIFACT;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, artifactId);
             preparedStatement.executeUpdate();
@@ -18054,7 +18054,7 @@ public class ApiMgtDAO {
      * @param artifactUUID Artifact's ID.
      */
     private void insertNewOrgWithDraftedArtifact(Connection connection, String organization, String artifactUUID) throws SQLException {
-        String query = "INSERT INTO AM_DEVPORTAL_ORG_CONTENT (ORGANIZATION, DRAFTED_ARTIFACT) VALUES (?, ?)";
+        String query = SQLConstants.DevPortalContentConstants.ADD_ORG_DRAFTED_ID;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, organization);
             preparedStatement.setString(2, artifactUUID);
@@ -18071,7 +18071,7 @@ public class ApiMgtDAO {
      * @return Boolean of the theme availability.
      */
     private boolean isThemeUsedByOrg(Connection connection, String organization, String themeId) throws SQLException {
-        String query = "SELECT COUNT(*) FROM AM_DEVPORTAL_ORG_CONTENT WHERE (DRAFTED_ARTIFACT = ? OR PUBLISHED_ARTIFACT = ?) AND ORGANIZATION = ?";
+        String query = SQLConstants.DevPortalContentConstants.CHECK_IF_ORG_THEME_IS_USED;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, themeId);
             preparedStatement.setString(2, themeId);
@@ -18092,7 +18092,7 @@ public class ApiMgtDAO {
      * @param organization Organization name.
      */
     private void removeOrgIfNoData(Connection connection, String organization) throws SQLException {
-        String checkQuery = "SELECT DRAFTED_ARTIFACT, PUBLISHED_ARTIFACT FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
+        String checkQuery = SQLConstants.DevPortalContentConstants.GET_BOTH_IDS_FOR_ORG;
         try (PreparedStatement preparedStatement = connection.prepareStatement(checkQuery)) {
             preparedStatement.setString(1, organization);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
@@ -18111,7 +18111,7 @@ public class ApiMgtDAO {
      * @param organization Organization name.
      */
     private void removeOrg(Connection connection, String organization) throws SQLException {
-        String query = "DELETE FROM AM_DEVPORTAL_ORG_CONTENT WHERE ORGANIZATION = ?";
+        String query = SQLConstants.DevPortalContentConstants.DELETE_ORG_ID;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, organization);
             preparedStatement.executeUpdate();
@@ -18220,7 +18220,7 @@ public class ApiMgtDAO {
      */
     public InputStream getApiTheme(String themeId, String organization, String apiId) throws APIManagementException {
         InputStream tenantThemeContent = null;
-        String query = "SELECT * FROM AM_ARTIFACT WHERE UUID = ? AND TYPE IN (?, ?)";
+        String query = SQLConstants.DevPortalContentConstants.GET_THEME_ARTIFACT;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, themeId);
@@ -18248,7 +18248,7 @@ public class ApiMgtDAO {
      */
     public Map<String, String>  getApiThemes(String organization, String apiId) throws APIManagementException {
         Map<String, String> themeMap = new HashMap<>();
-        String checkQuery = "SELECT DRAFTED_ARTIFACT, PUBLISHED_ARTIFACT FROM AM_DEVPORTAL_API_CONTENT WHERE ORGANIZATION = ? AND API_UUID = ?";
+        String checkQuery = SQLConstants.DevPortalContentConstants.GET_API_THEME_IDS;
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(checkQuery)) {
             preparedStatement.setString(1, organization);
@@ -18277,7 +18277,7 @@ public class ApiMgtDAO {
      */
     private boolean isApiAndOrganizationExist(Connection connection, String organization, String apiId)
             throws SQLException {
-        String query = "SELECT COUNT(*) FROM AM_DEVPORTAL_API_CONTENT WHERE ORGANIZATION = ? AND API_UUID = ?";
+        String query = SQLConstants.DevPortalContentConstants.GET_API_ROW;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, organization);
             preparedStatement.setString(2, apiId);
@@ -18300,7 +18300,7 @@ public class ApiMgtDAO {
      */
     private String getDraftedArtifactForApi(Connection connection, String organization, String apiId)
             throws SQLException {
-        String query = "SELECT DRAFTED_ARTIFACT FROM AM_DEVPORTAL_API_CONTENT WHERE ORGANIZATION = ? AND API_UUID = ?";
+        String query = SQLConstants.DevPortalContentConstants.GET_API_DRAFTED_ID;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, organization);
             preparedStatement.setString(2, apiId);
@@ -18323,7 +18323,7 @@ public class ApiMgtDAO {
     private void updateDraftedArtifactForApi(
             Connection connection, String organization, String artifactUUID, String apiId)
             throws SQLException {
-        String query = "UPDATE AM_DEVPORTAL_API_CONTENT SET DRAFTED_ARTIFACT = ? WHERE ORGANIZATION = ? AND API_UUID = ?";
+        String query = SQLConstants.DevPortalContentConstants.UPDATED_API_DRAFTED_ID;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, artifactUUID);
             preparedStatement.setString(2, organization);
@@ -18342,7 +18342,7 @@ public class ApiMgtDAO {
     private void updatePublishedArtifactForApi(
             Connection connection, String organization, String artifactUUID, String apiId)
             throws SQLException {
-        String query = "UPDATE AM_DEVPORTAL_API_CONTENT SET PUBLISHED_ARTIFACT = ? WHERE ORGANIZATION = ? AND API_UUID = ?";
+        String query = SQLConstants.DevPortalContentConstants.UPDATED_API_PUBLISHED_ID;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, artifactUUID);
             preparedStatement.setString(2, organization);
@@ -18361,7 +18361,7 @@ public class ApiMgtDAO {
      */
     private String getPublishedArtifactForApi(Connection connection, String organization, String apiId)
             throws SQLException {
-        String query = "SELECT PUBLISHED_ARTIFACT FROM AM_DEVPORTAL_API_CONTENT WHERE ORGANIZATION = ? AND API_UUID = ?";
+        String query = SQLConstants.DevPortalContentConstants.GET_API_PUBLISHED_ID;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, organization);
             preparedStatement.setString(2, apiId);
@@ -18385,7 +18385,7 @@ public class ApiMgtDAO {
     private void insertNewApiWithDraftedArtifact(
             Connection connection, String organization, String artifactUUID, String apiId)
             throws SQLException {
-        String query = "INSERT INTO AM_DEVPORTAL_API_CONTENT (API_UUID, ORGANIZATION, DRAFTED_ARTIFACT) VALUES (?, ?, ?)";
+        String query = SQLConstants.DevPortalContentConstants.ADD_API_DRAFTED_ID;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, apiId);
             preparedStatement.setString(2, organization);
@@ -18405,7 +18405,7 @@ public class ApiMgtDAO {
      */
     private boolean isThemeUsedByApi(Connection connection, String organization, String themeId, String apiId)
             throws SQLException {
-        String query = "SELECT COUNT(*) FROM AM_DEVPORTAL_API_CONTENT WHERE (DRAFTED_ARTIFACT = ? OR PUBLISHED_ARTIFACT = ?) AND ORGANIZATION = ? AND API_UUID = ?";
+        String query = SQLConstants.DevPortalContentConstants.CHECK_IF_API_THEME_IS_USED;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, themeId);
             preparedStatement.setString(2, themeId);
@@ -18428,7 +18428,7 @@ public class ApiMgtDAO {
      * @param apiId        API Identifier.
      */
     private void removeApiIfNoData(Connection connection, String organization, String apiId) throws SQLException {
-        String checkQuery = "SELECT DRAFTED_ARTIFACT, PUBLISHED_ARTIFACT FROM AM_DEVPORTAL_API_CONTENT WHERE ORGANIZATION = ? AND API_UUID = ?";
+        String checkQuery = SQLConstants.DevPortalContentConstants.GET_BOTH_IDS_FOR_API;
         try (PreparedStatement preparedStatement = connection.prepareStatement(checkQuery)) {
             preparedStatement.setString(1, organization);
             preparedStatement.setString(2, apiId);
