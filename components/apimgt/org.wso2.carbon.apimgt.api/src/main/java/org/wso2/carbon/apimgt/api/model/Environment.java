@@ -59,6 +59,9 @@ public class Environment implements Serializable {
     private String[] visibilityRoles;
     private String visibility;
 
+    public Environment() {
+    }
+
     public Environment(Environment environment) {
         this.type = environment.type;
         this.serverURL = environment.serverURL;
