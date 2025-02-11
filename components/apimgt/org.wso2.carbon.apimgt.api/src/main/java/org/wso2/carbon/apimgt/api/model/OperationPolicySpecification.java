@@ -37,7 +37,7 @@ public class OperationPolicySpecification {
     private String description = null;
     private List<String> applicableFlows = new ArrayList<>();
     private List<String> supportedGateways = new ArrayList<>();
-    private List<String> supportedApiTypes = new ArrayList<>();
+    private List<Object> supportedApiTypes = new ArrayList<>();
     private List<OperationPolicySpecAttribute> policyAttributes = new ArrayList<>();
 
     public String getName() {
@@ -100,13 +100,11 @@ public class OperationPolicySpecification {
         this.supportedGateways = supportedGateways;
     }
 
-    public List<String> getSupportedApiTypes() {
-
+    public List<Object> getSupportedApiTypes() {
         return supportedApiTypes;
     }
 
-    public void setSupportedApiTypes(List<String> supportedApiTypes) {
-
+    public void setSupportedApiTypes(List<Object> supportedApiTypes) {
         this.supportedApiTypes = supportedApiTypes;
     }
 

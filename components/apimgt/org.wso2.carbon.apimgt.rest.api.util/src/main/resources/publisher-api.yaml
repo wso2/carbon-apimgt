@@ -8044,7 +8044,7 @@ paths:
                 type: array
                 items:
                   type: string
-                  example: ["gpt-35-turbo", "gpt-4", "gpt-4o"]
+                  example: "gpt-4"
       security:
         - OAuth2Security:
             - apim:llm_provider_read
@@ -12157,8 +12157,13 @@ components:
         supportedApiTypes:
           type: array
           items:
-            type: string
-            example: REST
+            type: object
+            properties: {}
+          description: |
+            Supported API types as an array of strings, or an array of maps
+            [HTTP, SOAP] 
+            [{apiType: HTTP, subType: AI}, {apiType: SOAP}]
+          example: [HTTP, SOAP]
         isAPISpecific:
           type: boolean
           example: true
