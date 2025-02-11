@@ -51,21 +51,21 @@ import java.util.Map;
 /**
  * Implementation of the GovernancePolicyMgtDAO interface.
  */
-public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgtDAO {
+public class GovernancePolicyAttachmentMgtDAOImpl implements GovernancePolicyAttachmentMgtDAO {
 
-    private static final Log log = LogFactory.getLog(GovernancePolicyMgtDAOImpl.class);
+    private static final Log log = LogFactory.getLog(GovernancePolicyAttachmentMgtDAOImpl.class);
 
-    private GovernancePolicyMgtDAOImpl() {
+    private GovernancePolicyAttachmentMgtDAOImpl() {
     }
 
     private static class SingletonHelper {
-        private static final GovernancePolicyAttachmentMgtDAO INSTANCE = new GovernancePolicyMgtDAOImpl();
+        private static final GovernancePolicyAttachmentMgtDAO INSTANCE = new GovernancePolicyAttachmentMgtDAOImpl();
     }
 
     /**
-     * Get instance of GovernancePolicyMgtDAOImpl
+     * Get instance of GovernancePolicyAttachmentMgtDAOImpl
      *
-     * @return GovernancePolicyMgtDAOImpl instance
+     * @return GovernancePolicyAttachmentMgtDAOImpl instance
      */
     public static GovernancePolicyAttachmentMgtDAO getInstance() {
         return SingletonHelper.INSTANCE;
@@ -115,17 +115,17 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     /**
      * Insert policy attachment-policy mappings into the database.
      *
-     * @param connection                 Connection
-     * @param governancePolicyAttachment Governance Policy
+     * @param connection       Connection
+     * @param policyAttachment Governance Policy Attachment
      * @throws SQLException If an error occurs while inserting the mappings (Captured at higher level)
      */
     private void insertPolicyAttachmentPolicyMapping(Connection connection,
-                                                     APIMGovernancePolicyAttachment governancePolicyAttachment)
+                                                     APIMGovernancePolicyAttachment policyAttachment)
             throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                 .CREATE_POLICY_ATTACHMENT_POLICY_MAPPING)) {
-            for (String policyId : governancePolicyAttachment.getPolicyIds()) {
-                prepStmt.setString(1, governancePolicyAttachment.getId());
+            for (String policyId : policyAttachment.getPolicyIds()) {
+                prepStmt.setString(1, policyAttachment.getId());
                 prepStmt.setString(2, policyId);
                 prepStmt.addBatch();
             }
@@ -134,18 +134,18 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     }
 
     /**
-     * Insert policy-label mappings into the database.
+     * Insert policy attachment-label mappings into the database.
      *
-     * @param connection                 Connection
-     * @param governancePolicyAttachment Governance Policy
+     * @param connection       Connection
+     * @param policyAttachment Governance Policy Attachment
      * @throws SQLException If an error occurs while inserting the mappings (Captured at higher level)
      */
-    private void insertPolicyAttachmentLabels(Connection connection, APIMGovernancePolicyAttachment governancePolicyAttachment)
+    private void insertPolicyAttachmentLabels(Connection connection, APIMGovernancePolicyAttachment policyAttachment)
             throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                 .CREATE_GOVERNANCE_POLICY_ATTACHMENT_LABEL_MAPPING)) {
-            for (String label : governancePolicyAttachment.getLabels()) {
-                prepStmt.setString(1, governancePolicyAttachment.getId());
+            for (String label : policyAttachment.getLabels()) {
+                prepStmt.setString(1, policyAttachment.getId());
                 prepStmt.setString(2, label);
                 prepStmt.addBatch();
             }
@@ -154,19 +154,19 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     }
 
     /**
-     * Insert policy-states and action mappings into the database.
+     * Insert policy attachment-states and action mappings into the database.
      *
      * @param connection                 Connection
-     * @param governancePolicyAttachment Governance Policy
+     * @param policyAttachment Governance Policy Attachment
      * @throws SQLException If an error occurs while inserting the mappings
      */
     private void insertPolicyAttachmentsStatesAndActions(Connection connection,
-                                                         APIMGovernancePolicyAttachment governancePolicyAttachment)
+                                                         APIMGovernancePolicyAttachment policyAttachment)
             throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                 .CREATE_GOVERNANCE_POLICY_ATTACHMENT_STATE_MAPPING)) {
-            for (APIMGovernableState state : governancePolicyAttachment.getGovernableStates()) {
-                prepStmt.setString(1, governancePolicyAttachment.getId());
+            for (APIMGovernableState state : policyAttachment.getGovernableStates()) {
+                prepStmt.setString(1, policyAttachment.getId());
                 prepStmt.setString(2, String.valueOf(state));
                 prepStmt.addBatch();
             }
@@ -175,8 +175,8 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
 
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                 .CREATE_GOVERNANCE_POLICY_ATTACHMENT_ACTION_MAPPING)) {
-            for (APIMGovernanceAction action : governancePolicyAttachment.getActions()) {
-                prepStmt.setString(1, governancePolicyAttachment.getId());
+            for (APIMGovernanceAction action : policyAttachment.getActions()) {
+                prepStmt.setString(1, policyAttachment.getId());
                 prepStmt.setString(2, String.valueOf(action.getGovernableState()));
                 prepStmt.setString(3, String.valueOf(action.getRuleSeverity()));
                 prepStmt.setString(4, String.valueOf(action.getType()));
@@ -187,18 +187,18 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     }
 
     /**
-     * Update a Governance Policy
+     * Update a Governance Policy Attachment
      *
-     * @param policyId         Policy ID
-     * @param governancePolicyAttachment Governance Policy
+     * @param policyAttachmentId         Policy Attachment ID
+     * @param policyAttachment Governance Policy
      * @param organization     Organization
      * @return APIMGovernancePolicy Updated object
-     * @throws APIMGovernanceException If an error occurs while updating the policy
+     * @throws APIMGovernanceException If an error occurs while updating the policy attachment
      */
     @Override
-    public APIMGovernancePolicyAttachment updateGovernancePolicyAttachment(String policyId,
+    public APIMGovernancePolicyAttachment updateGovernancePolicyAttachment(String policyAttachmentId,
                                                                            APIMGovernancePolicyAttachment
-                                                                                   governancePolicyAttachment,
+                                                                                   policyAttachment,
                                                                            String organization)
             throws APIMGovernanceException {
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
@@ -206,18 +206,18 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             try {
                 // Update policy details
                 try (PreparedStatement updateStatement = connection.prepareStatement(SQLConstants.UPDATE_POLICY_ATTACHMENT)) {
-                    updateStatement.setString(1, governancePolicyAttachment.getName());
-                    updateStatement.setString(2, governancePolicyAttachment.getDescription());
-                    updateStatement.setString(3, governancePolicyAttachment.getUpdatedBy());
-                    updateStatement.setInt(4, governancePolicyAttachment.isGlobal() ? 1 : 0);
-                    updateStatement.setString(5, policyId);
+                    updateStatement.setString(1, policyAttachment.getName());
+                    updateStatement.setString(2, policyAttachment.getDescription());
+                    updateStatement.setString(3, policyAttachment.getUpdatedBy());
+                    updateStatement.setInt(4, policyAttachment.isGlobal() ? 1 : 0);
+                    updateStatement.setString(5, policyAttachmentId);
                     updateStatement.setString(6, organization);
                     updateStatement.executeUpdate();
                 }
-                updatePolicyAttachmentPolicyMappings(connection, policyId, governancePolicyAttachment);
-                updatePolicyAttachmentLabels(connection, policyId, governancePolicyAttachment);
-                updateStatesAndPolicyAttachmentActions(connection, policyId, governancePolicyAttachment);
-                deletePolicyAttachmentResultsForPolicyAttachment(connection, policyId);
+                updatePolicyAttachmentPolicyMappings(connection, policyAttachmentId, policyAttachment);
+                updatePolicyAttachmentLabels(connection, policyAttachmentId, policyAttachment);
+                updateStatesAndPolicyAttachmentActions(connection, policyAttachmentId, policyAttachment);
+                deletePolicyAttachmentRunsForPolicyAttachment(connection, policyAttachmentId);
 
                 // return updated APIMGovernancePolicy object
                 connection.commit();
@@ -226,22 +226,22 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
                 throw e;
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY, e,
-                    policyId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY_ATTACHMENT, e,
+                    policyAttachmentId);
         }
-        return getGovernancePolicyAttachmentByID(policyId, organization);
+        return getGovernancePolicyAttachmentByID(policyAttachmentId, organization);
     }
 
     /**
-     * Delete a Governance Policy
+     * Delete a Governance Policy Attachment
      *
      * @param connection       DB Connection
-     * @param policyAttachmentId         Policy ID
-     * @param governancePolicyAttachment Governance Policy
+     * @param policyAttachmentId         Policy Attachment ID
+     * @param policyAttachment Governance Policy Attachment
      * @throws SQLException If an error occurs while deleting the policy (Captured at higher level)
      */
     private void updatePolicyAttachmentPolicyMappings(Connection connection, String policyAttachmentId,
-                                                      APIMGovernancePolicyAttachment governancePolicyAttachment)
+                                                      APIMGovernancePolicyAttachment policyAttachment)
             throws SQLException {
 
         // Delete old mappings and add new mappings
@@ -251,7 +251,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             ps.executeUpdate();
         }
 
-        List<String> policiesToAdd = governancePolicyAttachment.getPolicyIds();
+        List<String> policiesToAdd = policyAttachment.getPolicyIds();
         if (policiesToAdd != null && !policiesToAdd.isEmpty()) {
             try (PreparedStatement ps =
                          connection.prepareStatement(SQLConstants.CREATE_POLICY_ATTACHMENT_POLICY_MAPPING)) {
@@ -269,12 +269,12 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
      * Update labels for a Policy Attachment
      *
      * @param connection       DB Connection
-     * @param policyAttachmentId         Policy ID
-     * @param governancePolicyAttachment Governance Policy
+     * @param policyAttachmentId         Policy Attachment ID
+     * @param policyAttachment Governance Policy Attachment
      * @throws SQLException If an error occurs while updating the labels (Captured at higher level)
      */
     private void updatePolicyAttachmentLabels(Connection connection, String policyAttachmentId,
-                                              APIMGovernancePolicyAttachment governancePolicyAttachment)
+                                              APIMGovernancePolicyAttachment policyAttachment)
             throws SQLException {
         // Delete old mappings and add new mappings
         try (PreparedStatement ps =
@@ -284,7 +284,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             ps.executeUpdate();
         }
 
-        List<String> labelsToAdd = governancePolicyAttachment.getLabels();
+        List<String> labelsToAdd = policyAttachment.getLabels();
         if (labelsToAdd != null && !labelsToAdd.isEmpty()) {
             try (PreparedStatement ps =
                          connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_ATTACHMENT_LABEL_MAPPING)) {
@@ -299,15 +299,15 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     }
 
     /**
-     * Update states, actions for a Policy
+     * Update states, actions for a Policy Attachment
      *
      * @param connection       DB Connection
-     * @param policyAttachmentId         Policy ID
-     * @param governancePolicyAttachment Governance Policy
+     * @param policyAttachmentId         Policy Attachment ID
+     * @param policyAttachment Governance Policy Attachment
      * @throws SQLException If an error occurs while updating the actions (Captured at higher level)
      */
     private void updateStatesAndPolicyAttachmentActions(Connection connection, String policyAttachmentId,
-                                                        APIMGovernancePolicyAttachment governancePolicyAttachment)
+                                                        APIMGovernancePolicyAttachment policyAttachment)
             throws SQLException {
 
         // Delete old mappings and add new mappings
@@ -325,7 +325,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             ps.executeUpdate();
         }
 
-        List<APIMGovernableState> statesToAdd = governancePolicyAttachment.getGovernableStates();
+        List<APIMGovernableState> statesToAdd = policyAttachment.getGovernableStates();
         if (statesToAdd != null && !statesToAdd.isEmpty()) {
             try (PreparedStatement ps =
                          connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_ATTACHMENT_STATE_MAPPING)) {
@@ -338,7 +338,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             }
         }
 
-        List<APIMGovernanceAction> actionsToAdd = governancePolicyAttachment.getActions();
+        List<APIMGovernanceAction> actionsToAdd = policyAttachment.getActions();
         if (actionsToAdd != null && !actionsToAdd.isEmpty()) {
             try (PreparedStatement ps =
                          connection.prepareStatement(SQLConstants.CREATE_GOVERNANCE_POLICY_ATTACHMENT_ACTION_MAPPING)) {
@@ -356,12 +356,12 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     }
 
     /**
-     * Get Governance Policy by Name
+     * Get Governance Policy Attachment by Name
      *
-     * @param policyAttachmentName   Policy Name
+     * @param policyAttachmentName   Policy Attachment Name
      * @param organization Organization
-     * @return APIMGovernancePolicy
-     * @throws APIMGovernanceException If an error occurs while retrieving the policy
+     * @return APIMGovernancePolicyAttachment object
+     * @throws APIMGovernanceException If an error occurs while retrieving the policy attachment
      */
     @Override
     public APIMGovernancePolicyAttachment getGovernancePolicyAttachmentByName(String policyAttachmentName,
@@ -376,7 +376,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 if (resultSet.next()) {
                     policyAttachment = new APIMGovernancePolicyAttachment();
-                    policyAttachment.setId(resultSet.getString("POLICY_ID"));
+                    policyAttachment.setId(resultSet.getString("POLICY_ATTACHMENT_ID"));
                     policyAttachment.setName(resultSet.getString("NAME"));
                     policyAttachment.setDescription(resultSet.getString("DESCRIPTION"));
                     policyAttachment.setCreatedBy(resultSet.getString("CREATED_BY"));
@@ -388,18 +388,18 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             }
             return policyAttachment;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_BY_NAME,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_ATTACHMENT_BY_NAME,
                     e, policyAttachmentName, organization);
         }
     }
 
     /**
-     * Get Governance Policy by ID
+     * Get Governance Policy Attachment by ID
      *
-     * @param policyAttachmentId     Policy ID
+     * @param policyAttachmentId     Policy Attachment ID
      * @param organization Organization
-     * @return APIMGovernancePolicy
-     * @throws APIMGovernanceException If an error occurs while retrieving the policy
+     * @return APIMGovernancePolicyAttachment
+     * @throws APIMGovernanceException If an error occurs while retrieving the policy attachment
      */
     @Override
     public APIMGovernancePolicyAttachment getGovernancePolicyAttachmentByID(String policyAttachmentId,
@@ -413,7 +413,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 if (resultSet.next()) {
                     policyAttachment = new APIMGovernancePolicyAttachment();
-                    policyAttachment.setId(resultSet.getString("POLICY_ID"));
+                    policyAttachment.setId(resultSet.getString("POLICY_ATTACHMENT_ID"));
                     policyAttachment.setName(resultSet.getString("NAME"));
                     policyAttachment.setDescription(resultSet.getString("DESCRIPTION"));
                     policyAttachment.setCreatedBy(resultSet.getString("CREATED_BY"));
@@ -431,17 +431,17 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             }
             return policyAttachment;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_BY_ID,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_ATTACHMENT_BY_ID,
                     e, policyAttachmentId);
         }
     }
 
     /**
-     * Get all the Governance Policies
+     * Get all the Governance Policy Attachments
      *
      * @param organization Organization
-     * @return APIMGovernancePolicyList object
-     * @throws APIMGovernanceException If an error occurs while getting the policies
+     * @return APIMGovernancePolicyAttachmentList object
+     * @throws APIMGovernanceException If an error occurs while getting the policy attachments
      */
     @Override
     public APIMGovernancePolicyAttachmentList getGovernancePolicyAttachments(String organization)
@@ -454,7 +454,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     APIMGovernancePolicyAttachment policyAttachment = new APIMGovernancePolicyAttachment();
-                    policyAttachment.setId(resultSet.getString("POLICY_ID"));
+                    policyAttachment.setId(resultSet.getString("POLICY_ATTACHMENT_ID"));
                     policyAttachment.setName(resultSet.getString("NAME"));
                     policyAttachment.setDescription(resultSet.getString("DESCRIPTION"));
                     policyAttachment.setCreatedBy(resultSet.getString("CREATED_BY"));
@@ -475,13 +475,13 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             policyAttachmentList.setGovernancePolicyAttachmentList(policyAttachmentsList);
             return policyAttachmentList;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_ATTACHMENTS,
                     e, organization);
         }
     }
 
     /**
-     * Get all the Policies associated with Policies
+     * Get all the Policies associated with Policy Attachment
      *
      * @param policyAttachmentId     Policy Attachment ID
      * @param organization Organization
@@ -524,9 +524,9 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     }
 
     /**
-     * Get the list of policies for a given policy
+     * Get the list of policies for a given policy attachment
      *
-     * @param policyAttachmentId     Policy ID
+     * @param policyAttachmentId     Policy Attachment ID
      * @param organization Organization
      * @return List of policies
      * @throws APIMGovernanceException If an error occurs while getting the policies
@@ -560,47 +560,47 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     }
 
     /**
-     * Get the list of policies by label
+     * Get the list of policy attachments by label
      *
      * @param label        label
      * @param organization organization
-     * @return Map of Policy IDs, Policy Names
-     * @throws APIMGovernanceException If an error occurs while getting the policies
+     * @return Map of Policy Attachment IDs, Policy Attachment Names
+     * @throws APIMGovernanceException If an error occurs while getting the policy attachments
      */
     @Override
     public Map<String, String> getPolicyAttachmentsByLabel(String label, String organization)
             throws APIMGovernanceException {
-        Map<String, String> policyIds = new HashMap();
+        Map<String, String> policyAttachmentsMap = new HashMap();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICY_ATTACHMENTS_BY_LABEL)) {
             prepStmt.setString(1, label);
             prepStmt.setString(2, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
-                    policyIds.put(resultSet.getString("POLICY_ID"),
+                    policyAttachmentsMap.put(resultSet.getString("POLICY_ATTACHMENT_ID"),
                             resultSet.getString("NAME"));
                 }
             }
-            return policyIds;
+            return policyAttachmentsMap;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_ATTACHMENTS, e,
                     organization);
         }
 
     }
 
     /**
-     * Get PolicyIds by label
+     * Get Policy Attachment IDs by label
      *
      * @param label        Label
-     * @param state        Governable State for the policy
+     * @param state        Governable State for the policy attachment
      * @param organization Organization
-     * @return List of Policy IDs
+     * @return List of Policy Attachment IDs
      */
     @Override
     public List<String> getPolicyAttachmentsByLabelAndState(String label, APIMGovernableState state,
                                                             String organization) throws APIMGovernanceException {
-        List<String> policyIds = new ArrayList<>();
+        List<String> policyAttachments = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICY_ATTACHMENTS_BY_LABEL_AND_STATE)) {
             prepStmt.setString(1, label);
@@ -608,52 +608,52 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             prepStmt.setString(3, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
-                    policyIds.add(resultSet.getString("POLICY_ID"));
+                    policyAttachments.add(resultSet.getString("POLICY_ATTACHMENT_ID"));
                 }
             }
-            return policyIds;
+            return policyAttachments;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_ATTACHMENTS, e,
                     organization);
         }
     }
 
     /**
-     * Get Global Policies
+     * Get Global Policy Attachments
      *
      * @param organization Organization
-     * @return Map of Policy IDs, Policy Names
+     * @return Map of Policy Attachment IDs, and Names
      */
     public Map<String, String> getGlobalPolicyAttachments(String organization)
             throws APIMGovernanceException {
-        Map<String, String> policyIds = new HashMap<>();
+        Map<String, String> policyAttachments = new HashMap<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_GLOBAL_POLICY_ATTACHMENTS)) {
             prepStmt.setString(1, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
-                    policyIds.put(resultSet.getString("POLICY_ID"),
+                    policyAttachments.put(resultSet.getString("POLICY_ATTACHMENTS_ID"),
                             resultSet.getString("NAME"));
                 }
             }
-            return policyIds;
+            return policyAttachments;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_ATTACHMENTS, e,
                     organization);
         }
     }
 
     /**
-     * Get Global Policies by State
+     * Get Global Policy Attachments by state
      *
-     * @param state        Governable State for the policy
+     * @param state        Governable State for the policy attachment
      * @param organization Organization
-     * @return List of Policy IDs
+     * @return List of Policy Attachment IDs
      */
     @Override
     public List<String> getGlobalPolicyAttachmentsWithState(APIMGovernableState state, String organization)
             throws APIMGovernanceException {
-        List<String> policyIds = new ArrayList<>();
+        List<String> policyAttachmentIds = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                      .GET_GLOBAL_POLICY_ATTACHMENT_BY_STATE)) {
@@ -662,20 +662,20 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             prepStmt.setString(2, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
-                    policyIds.add(resultSet.getString("POLICY_ID"));
+                    policyAttachmentIds.add(resultSet.getString("POLICY_ATTACHMENT_ID"));
                 }
             }
-            return policyIds;
+            return policyAttachmentIds;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_ATTACHMENTS, e,
                     organization);
         }
     }
 
     /**
-     * Get the actions of a policy
+     * Get the actions of a policy attachment
      *
-     * @param policyAttachmentId Policy ID
+     * @param policyAttachmentId Policy Attachment ID
      * @return List of Governance Actions
      * @throws APIMGovernanceException If an error occurs while getting the actions
      */
@@ -691,19 +691,19 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     }
 
     /**
-     * Search for Governance Policies
+     * Search for Governance Policy Attachments
      *
      * @param searchCriteria Search criteria
      * @param organization   Organization
-     * @return APIMGovernancePolicyList object
-     * @throws APIMGovernanceException If an error occurs while searching for policies
+     * @return APIMGovernancePolicyAttachmentList object
+     * @throws APIMGovernanceException If an error occurs while searching for policy attachments
      */
     @Override
     public APIMGovernancePolicyAttachmentList searchPolicyAttachments(Map<String, String> searchCriteria,
                                                                       String organization)
             throws APIMGovernanceException {
-        APIMGovernancePolicyAttachmentList policyListObj = new APIMGovernancePolicyAttachmentList();
-        List<APIMGovernancePolicyAttachment> policyList = new ArrayList<>();
+        APIMGovernancePolicyAttachmentList policyAttachmentListObj = new APIMGovernancePolicyAttachmentList();
+        List<APIMGovernancePolicyAttachment> attachmentList = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.SEARCH_POLICY_ATTACHMENT)) {
             prepStmt.setString(1, organization);
@@ -713,32 +713,36 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
                     APIMGovernanceConstants.PolicyAttachmentSearchAttributes.STATE, ""));
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
-                    APIMGovernancePolicyAttachment policy = new APIMGovernancePolicyAttachment();
-                    policy.setId(resultSet.getString("POLICY_ID"));
-                    policy.setName(resultSet.getString("NAME"));
-                    policy.setDescription(resultSet.getString("DESCRIPTION"));
-                    policy.setCreatedBy(resultSet.getString("CREATED_BY"));
-                    policy.setCreatedTime(resultSet.getString("CREATED_TIME"));
-                    policy.setUpdatedBy(resultSet.getString("UPDATED_BY"));
-                    policy.setUpdatedTime(resultSet.getString("LAST_UPDATED_TIME"));
-                    policy.setPolicyIds(getPoliciesByPolicyAttachmentId(connection, policy.getId()));
-                    policy.setLabels(getLabelsByPolicyAttachmentId(connection, policy.getId()));
-                    policy.setActions(getActionsByPolicyAttachmentId(connection, policy.getId()));
-                    policy.setGovernableStates(getStatesByPolicyAttachmentId(connection, policy.getId()));
-                    policyList.add(policy);
+                    APIMGovernancePolicyAttachment policyAttachment = new APIMGovernancePolicyAttachment();
+                    policyAttachment.setId(resultSet.getString("POLICY_ATTACHMENT_ID"));
+                    policyAttachment.setName(resultSet.getString("NAME"));
+                    policyAttachment.setDescription(resultSet.getString("DESCRIPTION"));
+                    policyAttachment.setCreatedBy(resultSet.getString("CREATED_BY"));
+                    policyAttachment.setCreatedTime(resultSet.getString("CREATED_TIME"));
+                    policyAttachment.setUpdatedBy(resultSet.getString("UPDATED_BY"));
+                    policyAttachment.setUpdatedTime(resultSet.getString("LAST_UPDATED_TIME"));
+                    policyAttachment.setPolicyIds(getPoliciesByPolicyAttachmentId
+                            (connection, policyAttachment.getId()));
+                    policyAttachment.setLabels(getLabelsByPolicyAttachmentId
+                            (connection, policyAttachment.getId()));
+                    policyAttachment.setActions(getActionsByPolicyAttachmentId
+                            (connection, policyAttachment.getId()));
+                    policyAttachment.setGovernableStates(getStatesByPolicyAttachmentId
+                            (connection, policyAttachment.getId()));
+                    attachmentList.add(policyAttachment);
                 }
             }
-            policyListObj.setCount(policyList.size());
-            policyListObj.setGovernancePolicyAttachmentList(policyList);
-            return policyListObj;
+            policyAttachmentListObj.setCount(attachmentList.size());
+            policyAttachmentListObj.setGovernancePolicyAttachmentList(attachmentList);
+            return policyAttachmentListObj;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_SEARCHING_POLICIES,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_SEARCHING_POLICY_ATTACHMENTS,
                     e, organization);
         }
     }
 
     /**
-     * Get all the Policies attached to a Policy Attachment
+     * Get all the policies attached to a Policy Attachment
      *
      * @param connection DB Connection
      * @param policyAttachmentId   Policy Attachment ID
@@ -761,10 +765,10 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     }
 
     /**
-     * Get all the Labels attached to a Policy
+     * Get all the Labels attached to a Policy Attachment
      *
      * @param connection DB Connection
-     * @param policyAttachmentId   Policy ID
+     * @param policyAttachmentId   Policy Attachment ID
      * @return List of Labels
      * @throws SQLException If an error occurs while retrieving the labels (Captured at higher level)
      */
@@ -784,10 +788,10 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     }
 
     /**
-     * Get all the Governable States attached to a Policy
+     * Get all the Governable States attached to a Policy Attachment
      *
      * @param connection DB Connection
-     * @param policyAttachmentId   Policy ID
+     * @param policyAttachmentId   Policy Attachment ID
      * @return List of States
      * @throws SQLException If an error occurs while retrieving the states (Captured at higher level)
      */
@@ -807,10 +811,10 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     }
 
     /**
-     * Get all the Actions attached to a Policy
+     * Get all the Actions attached to a Policy Attachment
      *
      * @param connection DB Connection
-     * @param policyAttachmentId   Policy ID
+     * @param policyAttachmentId   Policy Attachment ID
      * @return List of Actions
      * @throws SQLException If an error occurs while retrieving the actions (Captured at higher level)
      */
@@ -836,11 +840,11 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
 
 
     /**
-     * Delete a Governance Policy
+     * Delete a Governance Policy Attachment
      *
-     * @param policyAttachmentId     Policy ID
+     * @param policyAttachmentId     Policy Attachment ID
      * @param organization Organization
-     * @throws APIMGovernanceException If an error occurs while deleting the policy
+     * @throws APIMGovernanceException If an error occurs while deleting the policy attachment
      */
     @Override
     public void deletePolicyAttachments(String policyAttachmentId, String organization)
@@ -849,12 +853,12 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
             connection.setAutoCommit(false);
             try {
 
-                deletePolicyAttachmentResultsForPolicyAttachment(connection, policyAttachmentId);
+                deletePolicyAttachmentRunsForPolicyAttachment(connection, policyAttachmentId);
                 deleteEvalRequestsForPolicyAttachment(connection, policyAttachmentId);
                 deletePolicyAttachmentPolicyMappingsForPolicyAttachment(connection, policyAttachmentId);
                 deleteActionsMappingsForPolicyAttachment(connection, policyAttachmentId);
                 deleteStatesMappingsForPolicyAttachment(connection, policyAttachmentId);
-                deleteLabelsMappingsForPolicy(connection, policyAttachmentId);
+                deleteLabelsMappingsForPolicyAttachment(connection, policyAttachmentId);
 
                 try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                         .DELETE_GOVERNANCE_POLICY_ATTACHMENT)) {
@@ -869,19 +873,19 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
                 throw e;
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_DELETING_POLICY,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_DELETING_POLICY_ATTACHMENT,
                     e, policyAttachmentId);
         }
     }
 
     /**
-     * Delete Policy Evaluation Results for a Policy
+     * Delete Policy Evaluation Results for a Policy Attachment
      *
      * @param connection DB Connection
-     * @param policyAttachmentId   Policy ID
+     * @param policyAttachmentId   Policy Attachment ID
      * @throws SQLException If an error occurs while deleting the results
      */
-    private void deletePolicyAttachmentResultsForPolicyAttachment(Connection connection, String policyAttachmentId)
+    private void deletePolicyAttachmentRunsForPolicyAttachment(Connection connection, String policyAttachmentId)
             throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                 .DELETE_POLICY_ATTACHMENT_RUN_FOR_POLICY_ATTACHMENT)) {
@@ -892,10 +896,10 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     }
 
     /**
-     * Delete Eval Requests for a Policy
+     * Delete Eval Requests for a Policy Attachment
      *
      * @param connection DB Connection
-     * @param policyAttachmentId   Policy ID
+     * @param policyAttachmentId   Policy Attachment ID
      * @throws SQLException, APIMGovernanceException If an error occurs while deleting the requests
      */
     private void deleteEvalRequestsForPolicyAttachment(Connection connection, String policyAttachmentId)
@@ -912,7 +916,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
      * Delete Policy Attachment Policy Mappings
      *
      * @param connection DB Connection
-     * @param policyAttachmentId   Policy ID
+     * @param policyAttachmentId   Policy Attachment ID
      * @throws SQLException If an error occurs while deleting the mappings
      */
     private void deletePolicyAttachmentPolicyMappingsForPolicyAttachment(Connection connection,
@@ -926,10 +930,10 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     }
 
     /**
-     * Delete Policy Actions Mappings
+     * Delete Policy Attachment Actions Mappings
      *
      * @param connection DB Connection
-     * @param policyAttachmentId   Policy ID
+     * @param policyAttachmentId   Policy Attachment ID
      * @throws SQLException If an error occurs while deleting the mappings
      */
     private void deleteActionsMappingsForPolicyAttachment(Connection connection, String policyAttachmentId)
@@ -942,10 +946,10 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     }
 
     /**
-     * Delete Policy States Mappings
+     * Delete Policy Attachment States Mappings
      *
      * @param connection DB Connection
-     * @param policyAttachmentId   Policy ID
+     * @param policyAttachmentId   Policy Attachment ID
      * @throws SQLException If an error occurs while deleting the mappings
      */
     private void deleteStatesMappingsForPolicyAttachment(Connection connection, String policyAttachmentId)
@@ -958,13 +962,13 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     }
 
     /**
-     * Delete Policy Labels Mappings
+     * Delete Policy Attachment Labels Mappings
      *
      * @param connection DB Connection
-     * @param policyAttachmentId   Policy ID
+     * @param policyAttachmentId   Policy Attachment ID
      * @throws SQLException If an error occurs while deleting the mappings
      */
-    private void deleteLabelsMappingsForPolicy(Connection connection, String policyAttachmentId)
+    private void deleteLabelsMappingsForPolicyAttachment(Connection connection, String policyAttachmentId)
             throws SQLException {
         try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
                 .DELETE_GOVERNANCE_POLICY_ATTACHMENT_LABEL_MAPPING_BY_POLICY_ID)) {
@@ -974,7 +978,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyAttachmentMgt
     }
 
     /**
-     * Delete policy label mappings for a given label
+     * Delete policy attachment label mappings for a given label
      *
      * @param label        label
      * @param organization organization
