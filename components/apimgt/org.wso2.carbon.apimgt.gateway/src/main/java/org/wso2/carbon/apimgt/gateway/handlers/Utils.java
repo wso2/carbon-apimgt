@@ -99,9 +99,6 @@ import java.util.TreeMap;
 import javax.cache.Caching;
 import javax.xml.namespace.QName;
 
-import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE;
-import static org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE_PRODUCTION;
-
 public class Utils {
 
     private static final Log log = LogFactory.getLog(Utils.class);
@@ -886,7 +883,8 @@ public class Utils {
         List<RBEndpointDTO> productionEndpoints = endpoints.getProduction();
         List<RBEndpointDTO> sandboxEndpoints = endpoints.getSandbox();
 
-        List<RBEndpointDTO> selectedEndpoints = API_KEY_TYPE_PRODUCTION.equals(messageContext.getProperty(API_KEY_TYPE))
+        List<RBEndpointDTO> selectedEndpoints =
+                APIConstants.API_KEY_TYPE_PRODUCTION.equals(messageContext.getProperty(APIConstants.API_KEY_TYPE))
                 ? productionEndpoints
                 : sandboxEndpoints;
 

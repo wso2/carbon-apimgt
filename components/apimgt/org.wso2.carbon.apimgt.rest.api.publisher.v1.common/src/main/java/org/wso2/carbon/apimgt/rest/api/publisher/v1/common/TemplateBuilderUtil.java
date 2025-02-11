@@ -87,7 +87,6 @@ import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE;
-import static org.wso2.carbon.apimgt.impl.APIConstants.API_SUBTYPE_AI_API;
 
 /**
  * This class used to utility for Template.
@@ -556,7 +555,7 @@ public class TemplateBuilderUtil {
         List<SoapToRestMediationDto> soapToRestOutMediationDtoList =
                 ImportUtils.retrieveSoapToRestFlowMediations(extractedFolderPath, ImportUtils.OUT);
         List<EndpointDTO> endpointDTOList = null;
-        if (API_SUBTYPE_AI_API.equals(api.getSubtype()) && api.getPrimaryProductionEndpointId() != null
+        if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype()) && api.getPrimaryProductionEndpointId() != null
                 || api.getPrimarySandboxEndpointId() != null) {
             endpointDTOList = ImportUtils.retrieveEndpointConfigs(extractedFolderPath);
         }
