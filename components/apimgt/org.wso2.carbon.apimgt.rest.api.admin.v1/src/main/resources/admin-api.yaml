@@ -1943,6 +1943,41 @@ paths:
   # The "Individual Environment" resource APIs
   ######################################################
   /environments/{environmentId}:
+    get:
+      tags:
+        - Environments
+      summary: Get a Gateway Environment Configuration
+      description: |
+        Retrieve a single Gateway Environment Configuration. We should provide the Id of the Environment as a path parameter.
+      parameters:
+        - $ref: '#/components/parameters/environmentId'
+      responses:
+        200:
+          description: |
+            OK.
+            Gateway Environment Configuration returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:environment_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/environments/8d263942-a6df-4cc2-a804-7a2525501450"'
     put:
       tags:
         - Environments
@@ -5201,9 +5236,6 @@ components:
         host:
           maxLength: 255
           minLength: 1
-          # hostname regex as per RFC 1123 (http://tools.ietf.org/html/rfc1123) and appended *
-          # included {} to allow hostname templates
-          pattern: '^(([a-zA-Z0-9\{\}]|[a-zA-Z0-9\{\}][a-zA-Z0-9\-\{\}]*[a-zA-Z0-9\{\}])\.)*([A-Za-z0-9\{\}]|[A-Za-z0-9\{\}][A-Za-z0-9\-\{\}]*[A-Za-z0-9\{\}])$'
           type: string
           example: mg.wso2.com
         httpContext:
@@ -5433,12 +5465,12 @@ components:
               configurations:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Configuration'
+                  $ref: '#/components/schemas/KeyManagerConfiguration'
               endpointConfigurations:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Configuration'
-        federatedGatewayConfiguration:
+                  $ref: '#/components/schemas/KeyManagerConfiguration'
+        gatewayConfiguration:
           type: array
           items:
             type: object
@@ -5452,7 +5484,7 @@ components:
               configurations:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Configuration'
+                  $ref: '#/components/schemas/GatewayConfiguration'
         analyticsEnabled:
           type: boolean
           description: To determine whether analytics is enabled or not
@@ -5744,8 +5776,42 @@ components:
             - EXCHANGED
             - DIRECT
             - BOTH
-    Configuration:
-      title: Custom Configuration
+    KeyManagerConfiguration:
+      title: Key Manager Configuration
+      type: object
+      properties:
+        name:
+          type: string
+          example: consumer_key
+        label:
+          type: string
+          example: Consumer Key
+        type:
+          type: string
+          example: select
+        required:
+          type: boolean
+          example: true
+        mask:
+          type: boolean
+          example: true
+        multiple:
+          type: boolean
+          example: true
+        tooltip:
+          type: string
+          example: Enter username to connect to key manager
+        default:
+          type: object
+          properties: { }
+          example: admin
+        values:
+          type: array
+          items:
+            type: object
+            properties: { }
+    GatewayConfiguration:
+      title: Gateway Configuration
       type: object
       properties:
         name:

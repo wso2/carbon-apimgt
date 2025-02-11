@@ -20,7 +20,7 @@ import javax.validation.Valid;
 
 
 
-public class ConfigurationDTO   {
+public class KeyManagerConfigurationDTO   {
   
     private String name = null;
     private String label = null;
@@ -34,7 +34,7 @@ public class ConfigurationDTO   {
 
   /**
    **/
-  public ConfigurationDTO name(String name) {
+  public KeyManagerConfigurationDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -51,7 +51,7 @@ public class ConfigurationDTO   {
 
   /**
    **/
-  public ConfigurationDTO label(String label) {
+  public KeyManagerConfigurationDTO label(String label) {
     this.label = label;
     return this;
   }
@@ -68,7 +68,7 @@ public class ConfigurationDTO   {
 
   /**
    **/
-  public ConfigurationDTO type(String type) {
+  public KeyManagerConfigurationDTO type(String type) {
     this.type = type;
     return this;
   }
@@ -85,7 +85,7 @@ public class ConfigurationDTO   {
 
   /**
    **/
-  public ConfigurationDTO required(Boolean required) {
+  public KeyManagerConfigurationDTO required(Boolean required) {
     this.required = required;
     return this;
   }
@@ -102,7 +102,7 @@ public class ConfigurationDTO   {
 
   /**
    **/
-  public ConfigurationDTO mask(Boolean mask) {
+  public KeyManagerConfigurationDTO mask(Boolean mask) {
     this.mask = mask;
     return this;
   }
@@ -119,7 +119,7 @@ public class ConfigurationDTO   {
 
   /**
    **/
-  public ConfigurationDTO multiple(Boolean multiple) {
+  public KeyManagerConfigurationDTO multiple(Boolean multiple) {
     this.multiple = multiple;
     return this;
   }
@@ -136,13 +136,13 @@ public class ConfigurationDTO   {
 
   /**
    **/
-  public ConfigurationDTO tooltip(String tooltip) {
+  public KeyManagerConfigurationDTO tooltip(String tooltip) {
     this.tooltip = tooltip;
     return this;
   }
 
   
-  @ApiModelProperty(example = "Enter username", value = "")
+  @ApiModelProperty(example = "Enter username to connect to key manager", value = "")
   @JsonProperty("tooltip")
   public String getTooltip() {
     return tooltip;
@@ -153,7 +153,7 @@ public class ConfigurationDTO   {
 
   /**
    **/
-  public ConfigurationDTO _default(Object _default) {
+  public KeyManagerConfigurationDTO _default(Object _default) {
     this._default = _default;
     return this;
   }
@@ -171,7 +171,7 @@ public class ConfigurationDTO   {
 
   /**
    **/
-  public ConfigurationDTO values(List<Object> values) {
+  public KeyManagerConfigurationDTO values(List<Object> values) {
     this.values = values;
     return this;
   }
@@ -195,16 +195,16 @@ public class ConfigurationDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ConfigurationDTO _configuration = (ConfigurationDTO) o;
-    return Objects.equals(name, _configuration.name) &&
-        Objects.equals(label, _configuration.label) &&
-        Objects.equals(type, _configuration.type) &&
-        Objects.equals(required, _configuration.required) &&
-        Objects.equals(mask, _configuration.mask) &&
-        Objects.equals(multiple, _configuration.multiple) &&
-        Objects.equals(tooltip, _configuration.tooltip) &&
-        Objects.equals(_default, _configuration._default) &&
-        Objects.equals(values, _configuration.values);
+    KeyManagerConfigurationDTO keyManagerConfiguration = (KeyManagerConfigurationDTO) o;
+    return Objects.equals(name, keyManagerConfiguration.name) &&
+        Objects.equals(label, keyManagerConfiguration.label) &&
+        Objects.equals(type, keyManagerConfiguration.type) &&
+        Objects.equals(required, keyManagerConfiguration.required) &&
+        Objects.equals(mask, keyManagerConfiguration.mask) &&
+        Objects.equals(multiple, keyManagerConfiguration.multiple) &&
+        Objects.equals(tooltip, keyManagerConfiguration.tooltip) &&
+        Objects.equals(_default, keyManagerConfiguration._default) &&
+        Objects.equals(values, keyManagerConfiguration.values);
   }
 
   @Override
@@ -215,7 +215,7 @@ public class ConfigurationDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ConfigurationDTO {\n");
+    sb.append("class KeyManagerConfigurationDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    label: ").append(toIndentedString(label)).append("\n");

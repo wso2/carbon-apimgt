@@ -59,6 +59,19 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         return Response.ok().build();
     }
 
+    @Override
+    public Response environmentsEnvironmentIdGet(String environmentId, MessageContext messageContext) throws APIManagementException {
+        APIAdmin apiAdmin = new APIAdminImpl();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        Environment environment = apiAdmin.getEnvironment(organization, environmentId);
+        if (environment != null) {
+            EnvironmentDTO environmentDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(environment);
+            return Response.ok().entity(environmentDTO).build();
+        }
+        throw new APIManagementException("Requested Gateway Environment not found",
+                ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND);
+    }
+
     /**
      * Update gateway environment
      *

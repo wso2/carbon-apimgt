@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayConfigurationDTO;
 import javax.validation.constraints.*;
 
 
@@ -21,15 +21,15 @@ import javax.validation.Valid;
 
 
 
-public class SettingsFederatedGatewayConfigurationDTO   {
+public class SettingsGatewayConfigurationDTO   {
   
     private String type = null;
     private String displayName = null;
-    private List<ConfigurationDTO> configurations = new ArrayList<ConfigurationDTO>();
+    private List<GatewayConfigurationDTO> configurations = new ArrayList<GatewayConfigurationDTO>();
 
   /**
    **/
-  public SettingsFederatedGatewayConfigurationDTO type(String type) {
+  public SettingsGatewayConfigurationDTO type(String type) {
     this.type = type;
     return this;
   }
@@ -46,7 +46,7 @@ public class SettingsFederatedGatewayConfigurationDTO   {
 
   /**
    **/
-  public SettingsFederatedGatewayConfigurationDTO displayName(String displayName) {
+  public SettingsGatewayConfigurationDTO displayName(String displayName) {
     this.displayName = displayName;
     return this;
   }
@@ -63,7 +63,7 @@ public class SettingsFederatedGatewayConfigurationDTO   {
 
   /**
    **/
-  public SettingsFederatedGatewayConfigurationDTO configurations(List<ConfigurationDTO> configurations) {
+  public SettingsGatewayConfigurationDTO configurations(List<GatewayConfigurationDTO> configurations) {
     this.configurations = configurations;
     return this;
   }
@@ -72,10 +72,10 @@ public class SettingsFederatedGatewayConfigurationDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("configurations")
-  public List<ConfigurationDTO> getConfigurations() {
+  public List<GatewayConfigurationDTO> getConfigurations() {
     return configurations;
   }
-  public void setConfigurations(List<ConfigurationDTO> configurations) {
+  public void setConfigurations(List<GatewayConfigurationDTO> configurations) {
     this.configurations = configurations;
   }
 
@@ -88,10 +88,10 @@ public class SettingsFederatedGatewayConfigurationDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    SettingsFederatedGatewayConfigurationDTO settingsFederatedGatewayConfiguration = (SettingsFederatedGatewayConfigurationDTO) o;
-    return Objects.equals(type, settingsFederatedGatewayConfiguration.type) &&
-        Objects.equals(displayName, settingsFederatedGatewayConfiguration.displayName) &&
-        Objects.equals(configurations, settingsFederatedGatewayConfiguration.configurations);
+    SettingsGatewayConfigurationDTO settingsGatewayConfiguration = (SettingsGatewayConfigurationDTO) o;
+    return Objects.equals(type, settingsGatewayConfiguration.type) &&
+        Objects.equals(displayName, settingsGatewayConfiguration.displayName) &&
+        Objects.equals(configurations, settingsGatewayConfiguration.configurations);
   }
 
   @Override
@@ -102,7 +102,7 @@ public class SettingsFederatedGatewayConfigurationDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class SettingsFederatedGatewayConfigurationDTO {\n");
+    sb.append("class SettingsGatewayConfigurationDTO {\n");
     
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
