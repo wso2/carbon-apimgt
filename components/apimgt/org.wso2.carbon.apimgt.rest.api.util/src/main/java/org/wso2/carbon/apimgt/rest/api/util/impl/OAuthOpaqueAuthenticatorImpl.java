@@ -305,7 +305,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
             UserStoreManager manager = realm.getUserStoreManager();
             organization =
                     manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), orgNameClaim, null);
-            if ("super".equals(organization.toLowerCase())) {
+            if (organization != null && "super".equals(organization.toLowerCase())) {
                 organization = tenantDomain;
             }
             if (realm.getClaimManager().getClaim(orgIdClaim) != null) {
