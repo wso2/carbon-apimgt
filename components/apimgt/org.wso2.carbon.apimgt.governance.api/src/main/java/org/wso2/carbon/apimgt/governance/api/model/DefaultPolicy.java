@@ -25,17 +25,17 @@ import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 
 /**
- * This class represents the default ruleset model.
+ * This class represents the default policy model.
  */
-public class DefaultRuleset {
+public class DefaultPolicy {
     private String name;
     private String description;
-    private String ruleCategory;
-    private String ruleType;
+    private String policyCategory;
+    private String policyType;
     private String artifactType;
     private String documentationLink;
     private String provider;
-    private Object rulesetContent;
+    private Object policyContent;
 
     public String getName() {
         return name;
@@ -69,12 +69,12 @@ public class DefaultRuleset {
         this.provider = provider;
     }
 
-    public Object getRulesetContent() {
-        return rulesetContent;
+    public Object getPolicyContent() {
+        return policyContent;
     }
 
-    public void setRulesetContent(Object rulesetContent) {
-        this.rulesetContent = rulesetContent;
+    public void setPolicyContent(Object policyContent) {
+        this.policyContent = policyContent;
     }
 
     public String getArtifactType() {
@@ -85,30 +85,30 @@ public class DefaultRuleset {
         this.artifactType = artifactType;
     }
 
-    public String getRulesetContentString() throws APIMGovernanceException {
+    public String getPolicyContentString() throws APIMGovernanceException {
         ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
-        String rulesetContentString;
+        String contentString;
         try {
-            rulesetContentString = objectMapper.writeValueAsString(rulesetContent);
+            contentString = objectMapper.writeValueAsString(policyContent);
         } catch (JsonProcessingException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_LOADING_DEFAULT_RULESET_CONTENT, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_LOADING_DEFAULT_POLICY_CONTENT, e);
         }
-        return rulesetContentString;
+        return contentString;
     }
 
-    public String getRuleCategory() {
-        return ruleCategory;
+    public String getPolicyCategory() {
+        return policyCategory;
     }
 
-    public void setRuleCategory(String ruleCategory) {
-        this.ruleCategory = ruleCategory;
+    public void setPolicyCategory(String policyCategory) {
+        this.policyCategory = policyCategory;
     }
 
-    public String getRuleType() {
-        return ruleType;
+    public String getPolicyType() {
+        return policyType;
     }
 
-    public void setRuleType(String ruleType) {
-        this.ruleType = ruleType;
+    public void setPolicyType(String policyType) {
+        this.policyType = policyType;
     }
 }

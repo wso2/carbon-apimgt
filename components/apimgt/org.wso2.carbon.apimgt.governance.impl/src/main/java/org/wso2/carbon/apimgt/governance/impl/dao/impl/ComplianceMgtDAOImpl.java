@@ -359,7 +359,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 request.setArtifactType(ArtifactType.fromString(resultSet
                         .getString("ARTIFACT_TYPE")));
                 request.setOrganization(resultSet.getString("ORGANIZATION"));
-                request.setPolicyIds(getPolicyIdsForRequest(connection, request.getId()));
+                request.setPolicyAttachmentIds(getPolicyIdsForRequest(connection, request.getId()));
                 complianceEvaluationRequests.add(request);
             }
 
@@ -652,7 +652,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             for (RuleViolation ruleViolation : ruleViolations) {
                 prepStmnt.setString(1, APIMGovernanceUtil.generateUUID());
                 prepStmnt.setString(2, rulesetResultId);
-                prepStmnt.setString(3, ruleViolation.getRulesetId());
+                prepStmnt.setString(3, ruleViolation.getPolicyId());
                 prepStmnt.setString(4, ruleViolation.getRuleName());
                 prepStmnt.setString(5, ruleViolation.getViolatedPath());
                 prepStmnt.setString(6, ruleViolation.getRuleMessage());
@@ -689,7 +689,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     RuleViolation ruleViolation = new RuleViolation();
                     ruleViolation.setArtifactRefId(artifactRefId);
                     ruleViolation.setArtifactType(artifactType);
-                    ruleViolation.setRulesetId(rulesetId);
+                    ruleViolation.setPolicyId(rulesetId);
                     ruleViolation.setRuleName(resultSet.getString("RULE_NAME"));
                     ruleViolation.setViolatedPath(resultSet.getString("VIOLATED_PATH"));
                     ruleViolation.setRuleMessage(resultSet.getString("MESSAGE"));
@@ -730,7 +730,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     RuleViolation ruleViolation = new RuleViolation();
                     ruleViolation.setArtifactRefId(artifactRefId);
                     ruleViolation.setArtifactType(artifactType);
-                    ruleViolation.setRulesetId(resultSet.getString("RULESET_ID"));
+                    ruleViolation.setPolicyId(resultSet.getString("RULESET_ID"));
                     ruleViolation.setRuleName(resultSet.getString("RULE_NAME"));
                     ruleViolation.setViolatedPath(resultSet.getString("VIOLATED_PATH"));
                     ruleViolation.setRuleMessage(resultSet.getString("MESSAGE"));

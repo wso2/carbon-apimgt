@@ -19,14 +19,14 @@
 package org.wso2.carbon.apimgt.governance.api.model;
 
 /**
- * This class represents a list of governance Policies.
+ * This enum represents the adherence state of a policy attachment
  */
-public enum PolicyAdherenceSate {
+public enum PolicyAttachmentAdherenceSate {
     FOLLOWED,
     VIOLATED,
     UNAPPPLIED;
 
-    public static PolicyAdherenceSate fromString(String text) {
+    public static PolicyAttachmentAdherenceSate fromString(String text) {
 
         if ("followed".equalsIgnoreCase(text)) {
             return FOLLOWED;

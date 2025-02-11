@@ -7,7 +7,7 @@ import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicyAttachmen
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.PolicyAdherenceSate;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyAttachmentAdherenceSate;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyAttachmentManager;
 import org.wso2.carbon.apimgt.governance.rest.api.PolicyAttachmentAdherenceApiService;
@@ -52,11 +52,11 @@ public class PolicyAttachmentAdherenceApiServiceImpl implements PolicyAttachment
                 .getGovernancePolicyAttachmentList().stream().map(APIMGovernancePolicyAttachment::getId)
                 .collect(Collectors.toList());
 
-        Map<PolicyAdherenceSate, List<String>> adherenceMap =
+        Map<PolicyAttachmentAdherenceSate, List<String>> adherenceMap =
                 complianceManager.getAdherenceStateofEvaluatedPolicies(organization);
 
-        int followedCount = adherenceMap.get(PolicyAdherenceSate.FOLLOWED).size();
-        int violatedCount = adherenceMap.get(PolicyAdherenceSate.VIOLATED).size();
+        int followedCount = adherenceMap.get(PolicyAttachmentAdherenceSate.FOLLOWED).size();
+        int violatedCount = adherenceMap.get(PolicyAttachmentAdherenceSate.VIOLATED).size();
 
         PolicyAttachmentAdherenceSummaryDTO policyAttachmentAdherenceSummaryDTO =
                 new PolicyAttachmentAdherenceSummaryDTO();

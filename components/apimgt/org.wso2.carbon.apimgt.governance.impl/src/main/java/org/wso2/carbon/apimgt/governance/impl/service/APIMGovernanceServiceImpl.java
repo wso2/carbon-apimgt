@@ -73,9 +73,9 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      * @throws APIMGovernanceException If an error occurs while checking for policies with blocking actions
      */
     @Override
-    public boolean isPoliciesWithBlockingActionExist(String artifactRefId,
-                                                     ArtifactType artifactType, APIMGovernableState state,
-                                                     String organization)
+    public boolean isPolicyAttachmentsWithBlockingActionExist(String artifactRefId,
+                                                              ArtifactType artifactType, APIMGovernableState state,
+                                                              String organization)
             throws APIMGovernanceException {
 
         List<String> applicablePolicyIds = APIMGovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactRefId,

@@ -23,10 +23,10 @@ import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyInfo;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
-import org.wso2.carbon.apimgt.governance.api.model.PolicyInfo;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyAttachmentManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
@@ -41,9 +41,9 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAttachmentAdherenceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAttachmentAdherenceWithPoliciesDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyValidationResultDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyValidationResultWithoutRulesDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RuleValidationResultDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RuleValidationResultViolatedPathDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyValidationResultWithoutRulesDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.SeverityBasedRuleViolationCountDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -370,7 +370,7 @@ public class ComplianceAPIUtil {
 
             // Track the IDs of violated policies
             for (RuleViolation ruleViolation : ruleViolations) {
-                violatedRulesets.add(ruleViolation.getRulesetId());
+                violatedRulesets.add(ruleViolation.getPolicyId());
             }
         }
 

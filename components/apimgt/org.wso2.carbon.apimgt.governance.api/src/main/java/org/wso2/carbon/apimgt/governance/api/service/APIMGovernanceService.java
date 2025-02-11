@@ -35,17 +35,17 @@ import java.util.Map;
 public interface APIMGovernanceService {
 
     /**
-     * Check if there are any policies with blocking actions for the artifact
+     * Check if there are any policy attachments with blocking actions for the artifact
      *
      * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)
      * @param artifactType  Artifact type (ArtifactType.API)
      * @param state         State to be governed
      * @param organization  Organization
-     * @return True if there are policies with blocking actions, False otherwise
-     * @throws APIMGovernanceException If an error occurs while checking for policies with blocking actions
+     * @return True if there are policy attachments with blocking actions, False otherwise
+     * @throws APIMGovernanceException If an error occurs while checking for policy attachments with blocking actions
      */
-    boolean isPoliciesWithBlockingActionExist(String artifactRefId, ArtifactType artifactType,
-                                              APIMGovernableState state, String organization)
+    boolean isPolicyAttachmentsWithBlockingActionExist(String artifactRefId, ArtifactType artifactType,
+                                                       APIMGovernableState state, String organization)
             throws APIMGovernanceException;
 
     /**
@@ -86,7 +86,7 @@ public interface APIMGovernanceService {
     /**
      * This method can be called to evaluate the compliance of the artifact without persisting the compliance data (A
      * dry run) using the provided artifact content file path and the artifact type. The artifact will be evaluated
-     * against all the global policies configured in the system.
+     * against all the global policy attachments configured in the system.
      *
      * @param artifactType Artifact type (ExtendedArtifactType.REST_API, etc)
      * @param zipArchive   File path of the artifact content (ZIP path)

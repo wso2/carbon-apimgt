@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.governance.api.model;
 
 /**
- * This class represents a governance rule type
+ * This class represents a governance policy type
  */
 public enum PolicyType {
     API_METADATA,
