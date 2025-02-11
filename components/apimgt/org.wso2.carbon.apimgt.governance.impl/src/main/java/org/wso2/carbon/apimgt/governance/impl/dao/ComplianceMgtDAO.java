@@ -35,10 +35,10 @@ public interface ComplianceMgtDAO {
     /**
      * Add an artifact compliance evaluation request
      *
-     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType  Artifact Type
-     * @param policyAttachmentIds     List of Policy IDs
-     * @param organization  Organization
+     * @param artifactRefId       Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType        Artifact Type
+     * @param policyAttachmentIds List of Policy Attachment IDs
+     * @param organization        Organization
      * @throws APIMGovernanceException If an error occurs while adding the artifact
      *                                 compliance evaluation request event
      */
@@ -134,13 +134,13 @@ public interface ComplianceMgtDAO {
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact Type
-     * @param policyId     Policy ID
+     * @param policyId      Policy ID
      * @param organization  Organization
      * @return List of rule violations
      * @throws APIMGovernanceException If an error occurs while getting the rule violations
      */
-    List<RuleViolation> getPolicyViolations(String artifactRefId, ArtifactType artifactType, String policyId,
-                                            String organization)
+    List<RuleViolation> getPolicyRuleViolations(String artifactRefId, ArtifactType artifactType, String policyId,
+                                                String organization)
             throws APIMGovernanceException;
 
     /**
@@ -152,8 +152,8 @@ public interface ComplianceMgtDAO {
      * @return List of Rule Violations
      * @throws APIMGovernanceException If an error occurs while getting the rule violations
      */
-    List<RuleViolation> getPolicyViolationsForArtifact(String artifactRefId, ArtifactType artifactType,
-                                                       String organization) throws APIMGovernanceException;
+    List<RuleViolation> getPolicyRuleViolationsForArtifact(String artifactRefId, ArtifactType artifactType,
+                                                           String organization) throws APIMGovernanceException;
 
 
     /**
@@ -254,7 +254,7 @@ public interface ComplianceMgtDAO {
     /**
      * Get list of all evaluated artifacts for a policy attachment
      *
-     * @param policyAttachmentId     Policy ID
+     * @param policyAttachmentId     Policy Attachment ID
      * @param organization Organization
      * @return List of all evaluated artifacts for a policy attachment
      * @throws APIMGovernanceException If an error occurs while getting the list of all

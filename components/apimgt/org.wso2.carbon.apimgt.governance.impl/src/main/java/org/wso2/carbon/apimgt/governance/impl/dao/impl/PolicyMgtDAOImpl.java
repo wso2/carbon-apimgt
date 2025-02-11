@@ -102,7 +102,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
                     prepStmt.setString(10, policy.getCreatedBy());
                     prepStmt.execute();
                 }
-                addRuleContent(connection, policy.getId(), policy.getPolicyContent());
+                addPolicyContent(connection, policy.getId(), policy.getPolicyContent());
                 addRules(policy.getId(), rules, connection);
 
                 connection.commit();
@@ -149,7 +149,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
                     prepStmt.setString(10, organization);
                     prepStmt.executeUpdate();
                 }
-                updateRuleContent(connection, policy.getId(), policy.getPolicyContent());
+                updatePolicyContent(connection, policy.getId(), policy.getPolicyContent());
 
                 // Delete existing rules and rule evaluation results related to this policy
                 deleteRuleViolationsForPolicy(connection, policyId);
@@ -206,7 +206,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
      * @throws SQLException If an error occurs while adding the policy content
      * @throws IOException  If an error occurs while adding the policy content
      */
-    private void addRuleContent(Connection connection, String policyId, PolicyContent policyContent)
+    private void addPolicyContent(Connection connection, String policyId, PolicyContent policyContent)
             throws SQLException, IOException {
         String sqlQuery = SQLConstants.ADD_POLICY_CONTENT;
         try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);
@@ -228,7 +228,7 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
      * @throws SQLException If an error occurs while updating the policy content
      * @throws IOException  If an error occurs while updating the policy content
      */
-    private void updateRuleContent(Connection connection, String policyId, PolicyContent policyContent)
+    private void updatePolicyContent(Connection connection, String policyId, PolicyContent policyContent)
             throws SQLException, IOException {
         String sqlQuery = SQLConstants.UPDATE_POLICY_CONTENT;
         try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);
@@ -471,8 +471,8 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
         policyInfo.setName(rs.getString("NAME"));
         policyInfo.setDescription(rs.getString("DESCRIPTION"));
         policyInfo.setPolicyCategory(PolicyCategory.fromString(
-                rs.getString("RULE_CATEGORY")));
-        policyInfo.setPolicyType(PolicyType.fromString(rs.getString("RULE_TYPE")));
+                rs.getString("POLICY_CATEGORY")));
+        policyInfo.setPolicyType(PolicyType.fromString(rs.getString("POLICY_TYPE")));
         policyInfo.setArtifactType(ExtendedArtifactType.fromString(
                 rs.getString("ARTIFACT_TYPE")));
         policyInfo.setDocumentationLink(rs.getString("DOCUMENTATION_LINK"));
@@ -515,16 +515,16 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
     }
 
     /**
-     * Get the associated policies for a Policy
+     * Get the associated policy attachments for a policy
      *
      * @param policyId     Policy ID
      * @param organization Organization
-     * @return List of associated policies
+     * @return List of associated policy attachments
      */
     @Override
     public List<String> getAssociatedPolicyAttachmentForPolicy(String policyId, String organization)
             throws APIMGovernanceException {
-        List<String> policyIds = new ArrayList<>();
+        List<String> policyAttachmentIds = new ArrayList<>();
         String sqlQuery = SQLConstants.GET_POLICY_ATTACHMENT_FOR_POLICY;
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
@@ -532,14 +532,14 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
             prepStmt.setString(2, organization);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
-                    policyIds.add(rs.getString("POLICY_ID"));
+                    policyAttachmentIds.add(rs.getString("POLICY_ATTACHMENT_ID"));
                 }
             }
         } catch (SQLException e) {
             throw new APIMGovernanceException(
                     APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICY_ATTACHMENTS, e, policyId);
         }
-        return policyIds;
+        return policyAttachmentIds;
     }
 
     /**

@@ -94,7 +94,7 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
             "in the organization %s", true),
     POLICY_ATTACHMENT_NOT_FOUND(300002, "policy attachment not found",
             404, "policy attachment with ID: %s not found"),
-    ERROR_WHILE_RETRIEVING_POLICY_ATTACHMENTIES(300003, "Retrieving policy attachments failed",
+    ERROR_WHILE_RETRIEVING_POLICY_ATTACHMENTS(300003, "Retrieving policy attachments failed",
             500, "Error while retrieving policy attachments for the organization: %s", true),
     ERROR_WHILE_RETRIEVING_POLICY_ATTACHMENT_BY_ID(300004, "Retrieving policy attachment by id failed",
             500, "Error while retrieving policy attachment" +
@@ -115,7 +115,7 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
             500, "Error while retrieving labels by policy attachment id: %s", true),
     ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY_ATTACHMENT(300012, "Error while assigning action to policy attachment",
             400, "Invalid action provided for the policy attachment: %s"),
-    ERROR_WHILE_SEARCHING_POLICY_ATTACHMENTIES(300013, "Error while searching policy attachments",
+    ERROR_WHILE_SEARCHING_POLICY_ATTACHMENTS(300013, "Error while searching policy attachments",
             500, "Error while searching policy attachments for the organization: %s", true),
     ERROR_WHILE_DELETING_LABEL_POLICY_ATTACHMENT_MAPPINGS(300014, "Error while deleting label " +
             "policy attachment mappings",

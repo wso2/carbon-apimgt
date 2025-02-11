@@ -276,86 +276,87 @@ public class APIMGovernanceUtil {
     }
 
     /**
-     * Get applicable policies for an artifact
+     * Get applicable policy attachments for an artifact
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact Type
      * @param organization  Organization
-     * @return Map of Policy IDs, Policy Names
+     * @return Map of Policy Attachment IDs and Attachment Names
      */
-    public static Map<String, String> getApplicablePoliciesForArtifact(String artifactRefId, ArtifactType artifactType,
-                                                                       String organization)
+    public static Map<String, String> getApplicablePolicyAttachmentsForArtifact(String artifactRefId, ArtifactType artifactType,
+                                                                                String organization)
             throws APIMGovernanceException {
 
         List<String> labels = APIMGovernanceUtil.getLabelsForArtifact(artifactRefId, artifactType);
         PolicyAttachmentManager policyAttachmentManager = new PolicyAttachmentManager();
 
-        Map<String, String> policies = new HashMap<>();
+        Map<String, String> attachments = new HashMap<>();
         for (String label : labels) {
-            Map<String, String> policiesForLabel = policyAttachmentManager.getPolicyAttachmentsByLabel(label, organization);
-            if (policiesForLabel != null) {
-                policies.putAll(policiesForLabel);
+            Map<String, String> attachmentsForLabel = policyAttachmentManager
+                    .getPolicyAttachmentsByLabel(label, organization);
+            if (attachmentsForLabel != null) {
+                attachments.putAll(attachmentsForLabel);
             }
         }
 
-        policies.putAll(policyAttachmentManager.getOrganizationWidePolicyAttachments(organization));
+        attachments.putAll(policyAttachmentManager.getOrganizationWidePolicyAttachments(organization));
 
-        return policies; // Return a map of policy IDs and policy names
+        return attachments; // Return a map of policy attachment IDs and attachment names
     }
 
     /**
-     * Get all applicable policy IDs for an artifact given a specific state at which
+     * Get all applicable policy attachment IDs for an artifact given a specific state at which
      * the artifact should be governed
      *
      * @param artifactRefId       Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType        Artifact Type
      * @param apimGovernableState Governable state (The state at which the artifact should be governed)
      * @param organization        Organization
-     * @return List of applicable policy IDs
-     * @throws APIMGovernanceException if an error occurs while checking for applicable policies
+     * @return List of applicable policy attachment IDs
+     * @throws APIMGovernanceException if an error occurs while checking for applicable policy attachments
      */
-    public static List<String> getApplicablePoliciesForArtifactWithState(String artifactRefId,
-                                                                         ArtifactType artifactType,
-                                                                         APIMGovernableState apimGovernableState,
-                                                                         String organization)
+    public static List<String> getApplicablePolicyAttachmentsForArtifactWithState(String artifactRefId,
+                                                                                  ArtifactType artifactType,
+                                                                                  APIMGovernableState apimGovernableState,
+                                                                                  String organization)
             throws APIMGovernanceException {
 
         List<String> labels = APIMGovernanceUtil.getLabelsForArtifact(artifactRefId, artifactType);
         PolicyAttachmentManager policyAttachmentManager = new PolicyAttachmentManager();
 
-        // Check for policies using labels and the state
-        Set<String> policies = new HashSet<>();
+        // Check for policy attachments using labels and the state
+        Set<String> policyAttachments = new HashSet<>();
         for (String label : labels) {
-            // Get policies for the label and state
-            List<String> policiesForLabel = policyAttachmentManager
+            // Get policy attachments for the label and state
+            List<String> attachmentsForLabel = policyAttachmentManager
                     .getPolicyAttachmentByLabelAndState(label, apimGovernableState, organization);
-            if (policiesForLabel != null) {
-                policies.addAll(policiesForLabel);
+            if (attachmentsForLabel != null) {
+                policyAttachments.addAll(attachmentsForLabel);
             }
         }
 
-        policies.addAll(policyAttachmentManager.getOrganizationWidePolicyAttachmentByState(apimGovernableState,
-                organization));
+        policyAttachments.addAll(policyAttachmentManager
+                .getOrganizationWidePolicyAttachmentByState(apimGovernableState, organization));
 
-        return new ArrayList<>(policies);
+        return new ArrayList<>(policyAttachments);
     }
 
     /**
-     * Check for blocking actions in policies
+     * Check for blocking actions in policy attachments
      *
-     * @param policyIds           List of policy IDs
-     * @param apimGovernableState Governable state
+     * @param policyAttachmentIds List of policy attachment IDs
+     * @param governableState     Governable state
      * @param organization        Organization
      * @return boolean
      * @throws APIMGovernanceException if an error occurs while checking for blocking actions
      */
-    public static boolean isBlockingActionsPresent(List<String> policyIds, APIMGovernableState apimGovernableState,
+    public static boolean isBlockingActionsPresent(List<String> policyAttachmentIds, APIMGovernableState governableState,
                                                    String organization)
             throws APIMGovernanceException {
         PolicyAttachmentManager policyAttachmentManager = new PolicyAttachmentManager();
         boolean isBlocking = false;
-        for (String policyId : policyIds) {
-            if (policyAttachmentManager.isBlockingActionPresentForState(policyId, apimGovernableState, organization)) {
+        for (String attachmentId : policyAttachmentIds) {
+            if (policyAttachmentManager.isBlockingActionPresentForState(attachmentId, governableState, organization)) {
                 isBlocking = true;
                 break;
             }
@@ -415,25 +416,6 @@ public class APIMGovernanceUtil {
             artifactVersion = APIMUtil.getAPIVersion(artifactRefId);
         }
         return artifactVersion;
-    }
-
-    /**
-     * Get artifact id from artifact name, version, type and organization
-     *
-     * @param artifactName    Artifact name
-     * @param artifactVersion Artifact version
-     * @param artifactType    Artifact type
-     * @param organization    Organization
-     * @return Artifact Reference ID (ID of the artifact on APIM side)
-     * @throws APIMGovernanceException If an error occurs while getting the artifact ID
-     */
-    public static String getArtifactRefId(String artifactName, String artifactVersion, ArtifactType artifactType,
-                                          String organization) throws APIMGovernanceException {
-
-        if (ArtifactType.API.equals(artifactType)) {
-            return APIMUtil.getApiUUID(artifactName, artifactVersion, organization);
-        }
-        return null;
     }
 
     /**
@@ -505,21 +487,4 @@ public class APIMGovernanceUtil {
         }
         return null;
     }
-
-    /**
-     * Read artifact project content from a file path
-     *
-     * @param filePath File path
-     * @return byte[]
-     * @throws APIMGovernanceException If an error occurs while reading the file
-     */
-    public static byte[] readArtifactProjectContent(String filePath) throws APIMGovernanceException {
-        Path path = Paths.get(filePath);
-        try {
-            return Files.readAllBytes(path);
-        } catch (IOException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_FAILED_TO_READ_ARTIFACT_PROJECT, e);
-        }
-    }
-
 }

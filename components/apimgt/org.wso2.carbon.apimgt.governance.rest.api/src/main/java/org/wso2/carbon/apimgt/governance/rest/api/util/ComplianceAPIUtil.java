@@ -93,7 +93,7 @@ public class ComplianceAPIUtil {
         // Get all policy attachments applicable to the artifact within the organization as a map of policy
         // attachment ID and name
         Map<String, String> applicableAttachments = APIMGovernanceUtil
-                .getApplicablePoliciesForArtifact(artifactRefId, artifactType, organization);
+                .getApplicablePolicyAttachmentsForArtifact(artifactRefId, artifactType, organization);
 
         if (applicableAttachments.isEmpty()) {
             artifactComplianceDetailsDTO.setStatus(ArtifactComplianceDetailsDTO.StatusEnum.NOT_APPLICABLE);
@@ -318,7 +318,7 @@ public class ComplianceAPIUtil {
 
         // Retrieve applicable policy attachments for the current artifact
         Map<String, String> applicableAttachments = APIMGovernanceUtil
-                .getApplicablePoliciesForArtifact(artifactRefId, artifactType, organization);
+                .getApplicablePolicyAttachmentsForArtifact(artifactRefId, artifactType, organization);
 
         // If no policy attachments are applicable, set the compliance status to not applicable and return
         if (applicableAttachments.isEmpty()) {

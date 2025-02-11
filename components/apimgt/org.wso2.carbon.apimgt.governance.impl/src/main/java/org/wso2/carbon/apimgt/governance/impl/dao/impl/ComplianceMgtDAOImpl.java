@@ -69,9 +69,9 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     /**
      * Add an artifact compliance evaluation request event
      *
-     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType  Artifact Type
-     * @param policyAttachmentIds     Policy IDs
+     * @param artifactRefId       Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType        Artifact Type
+     * @param policyAttachmentIds Policy Attachment IDs
      * @throws APIMGovernanceException If an error occurs while adding the artifact
      *                                 compliance evaluation request event
      */
@@ -89,7 +89,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 connection.setAutoCommit(false);
 
                 // Check for any pending requests for the artifact, if no pending requests add a new request,
-                // else just add the policy mappings
+                // else just add the policy attachment mappings
                 requestId = getPendingEvalRequest(connection, artifactRefId, artifactType, organization);
                 if (requestId == null) {
                     requestId = APIMGovernanceUtil.generateUUID();
@@ -101,7 +101,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                         prepStmnt.executeUpdate();
                     }
                 }
-                addRequestPolicyMappings(connection, requestId, policyAttachmentIds);
+                addRequestPolicyAttachmentMappings(connection, requestId, policyAttachmentIds);
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -182,30 +182,30 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
 
 
     /**
-     * Add request policy mappings
+     * Add request policy attachment mappings
      *
-     * @param connection Connection
-     * @param requestId  Request ID
-     * @param policyIds  Policy IDs
+     * @param connection          Connection
+     * @param requestId           Request ID
+     * @param policyAttachmentIds Policy Attachemnt IDs
      * @throws SQLException If an error occurs while adding the request
      *                      policy mappings (Captured at a higher level)
      */
-    private void addRequestPolicyMappings(Connection connection,
-                                          String requestId, List<String> policyIds)
+    private void addRequestPolicyAttachmentMappings(Connection connection,
+                                                    String requestId, List<String> policyAttachmentIds)
             throws SQLException {
 
         String sqlQuery = SQLConstants.ADD_REQ_POLICY_ATTACHMENT_MAPPING;
 
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            for (String policyId : policyIds) {
+            for (String attachmentId : policyAttachmentIds) {
                 try {
                     prepStmnt.setString(1, requestId);
-                    prepStmnt.setString(2, policyId);
+                    prepStmnt.setString(2, attachmentId);
                     prepStmnt.execute();
                 } catch (SQLIntegrityConstraintViolationException e) { // to catch and ignore duplicates
                     if (log.isDebugEnabled()) {
-                        log.debug("The policy mapping already exists for the request: " + requestId +
-                                " and policy: " + policyId);
+                        log.debug("The policy attachment mapping already exists for the request: " + requestId +
+                                " and policy attachment: " + attachmentId);
                     }
                 } catch (SQLException e) {
                     throw e;
@@ -359,7 +359,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 request.setArtifactType(ArtifactType.fromString(resultSet
                         .getString("ARTIFACT_TYPE")));
                 request.setOrganization(resultSet.getString("ORGANIZATION"));
-                request.setPolicyAttachmentIds(getPolicyIdsForRequest(connection, request.getId()));
+                request.setPolicyAttachmentIds(getPolicyAttachmentIdsForRequest(connection, request.getId()));
                 complianceEvaluationRequests.add(request);
             }
 
@@ -421,25 +421,25 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Get policy IDs for a request
+     * Get policy attachment IDs for a request
      *
      * @param connection Connection
      * @param requestId  Request ID
-     * @return List of policy IDs
-     * @throws SQLException If an error occurs while getting the policy IDs (Captured at a higher level)
+     * @return List of policy attachemnt IDs
+     * @throws SQLException If an error occurs while getting the policy attachment IDs (Captured at a higher level)
      */
-    private List<String> getPolicyIdsForRequest(Connection connection, String requestId) throws SQLException {
+    private List<String> getPolicyAttachmentIdsForRequest(Connection connection, String requestId) throws SQLException {
 
         String sqlQuery = SQLConstants.GET_REQ_POLICY_ATTACHMENT_MAPPING;
-        List<String> policyIds = new ArrayList<>();
+        List<String> policyAttachmentIds = new ArrayList<>();
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             prepStmnt.setString(1, requestId);
             try (ResultSet resultSet = prepStmnt.executeQuery()) {
                 while (resultSet.next()) {
-                    policyIds.add(resultSet.getString("POLICY_ATTACHMENT_ID"));
+                    policyAttachmentIds.add(resultSet.getString("POLICY_ATTACHMENT_ID"));
                 }
             }
-            return policyIds;
+            return policyAttachmentIds;
         }
     }
 
@@ -473,9 +473,9 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 for (Map.Entry<String, List<RuleViolation>> entry : policyViolationsMap.entrySet()) {
                     String policyId = entry.getKey();
                     List<RuleViolation> ruleViolations = entry.getValue();
-                    String policyResultId = addPolicyRuns(connection, artifactKey, policyId,
+                    String policyRunId = addPolicyRuns(connection, artifactKey, policyId,
                             ruleViolations.isEmpty());
-                    addRuleViolations(connection, policyResultId, ruleViolations);
+                    addRuleViolations(connection, policyRunId, ruleViolations);
                 }
 
                 connection.commit();
@@ -612,7 +612,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Add a policy compliance evaluation result
+     * Add a policy run
      *
      * @param connection           Connection
      * @param artifactKey          Artifact Key
@@ -667,14 +667,15 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact Type
-     * @param policyId     Policy ID
+     * @param policyId      Policy ID
      * @param organization  Organization
      * @return List of rule violations
      * @throws APIMGovernanceException If an error occurs while getting the rule violations
      */
     @Override
-    public List<RuleViolation> getPolicyViolations(String artifactRefId, ArtifactType artifactType,
-                                                   String policyId, String organization) throws APIMGovernanceException {
+    public List<RuleViolation> getPolicyRuleViolations(String artifactRefId, ArtifactType artifactType,
+                                                       String policyId, String organization)
+            throws APIMGovernanceException {
 
         String sqlQuery = SQLConstants.GET_RULE_VIOLATIONS;
         List<RuleViolation> ruleViolations = new ArrayList<>();
@@ -715,8 +716,8 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
      * @throws APIMGovernanceException If an error occurs while getting the rule violations
      */
     @Override
-    public List<RuleViolation> getPolicyViolationsForArtifact(String artifactRefId, ArtifactType artifactType,
-                                                              String organization) throws APIMGovernanceException {
+    public List<RuleViolation> getPolicyRuleViolationsForArtifact(String artifactRefId, ArtifactType artifactType,
+                                                                  String organization) throws APIMGovernanceException {
 
         String sqlQuery = SQLConstants.GET_RULE_VIOLATIONS_FOR_ARTIFACT;
         List<RuleViolation> ruleViolations = new ArrayList<>();
@@ -747,7 +748,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Get evaluated policies for an artifact
+     * Get evaluated policy attchments for an artifact
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact Type
@@ -760,7 +761,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                                                                  String organization) throws APIMGovernanceException {
 
         String sqlQuery = SQLConstants.GET_POLICY_ATTACHMENT_RUNS_FOR_ARTIFACT;
-        List<String> policyIds = new ArrayList<>();
+        List<String> policyAttachmentIds = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             prepStmnt.setString(1, artifactRefId);
@@ -768,10 +769,10 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             prepStmnt.setString(3, organization);
             try (ResultSet resultSet = prepStmnt.executeQuery()) {
                 while (resultSet.next()) {
-                    policyIds.add(resultSet.getString("POLICY_ATTACHMENT_ID"));
+                    policyAttachmentIds.add(resultSet.getString("POLICY_ATTACHMENT_ID"));
                 }
             }
-            return policyIds;
+            return policyAttachmentIds;
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
         }
@@ -894,29 +895,29 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Get list of all compliance evaluated policies
+     * Get list of all compliance evaluated policy attachments
      *
      * @param organization Organization
-     * @return List of all compliance evaluated policies
+     * @return List of all compliance evaluated policy attachments
      * @throws APIMGovernanceException If an error occurs while getting the list of all compliance evaluated policies
      */
     @Override
     public List<String> getAllComplianceEvaluatedPolicyAttachments(String organization) throws APIMGovernanceException {
 
         String sqlQuery = SQLConstants.GET_POLICY_ATTACHMENT_RUNS;
-        Set<String> policyIds = new HashSet<>();
+        Set<String> policyAttachmentIds = new HashSet<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             prepStmnt.setString(1, organization);
             try (ResultSet resultSet = prepStmnt.executeQuery()) {
                 while (resultSet.next()) {
-                    policyIds.add(resultSet.getString("POLICY_ID"));
+                    policyAttachmentIds.add(resultSet.getString("POLICY_ATTACHMENT_ID"));
                 }
             }
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
         }
-        return new ArrayList<>(policyIds);
+        return new ArrayList<>(policyAttachmentIds);
     }
 
     /**
@@ -977,22 +978,23 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Get list of all evaluated artifacts for a policy
+     * Get list of all evaluated artifacts for a policy attachment
      *
-     * @param policyId     Policy ID
-     * @param organization Organization
-     * @return List of all evaluated artifacts for a policy
+     * @param policyAttachmentId Policy Attachment ID
+     * @param organization       Organization
+     * @return List of all evaluated artifacts for a policy attachment
      * @throws APIMGovernanceException If an error occurs while getting the list of all
-     *                                 evaluated artifacts for a policy
+     *                                 evaluated artifacts for a policy attachment
      */
     @Override
-    public List<ArtifactInfo> getEvaluatedArtifactsForPolicyAttachment(String policyId, String organization)
+    public List<ArtifactInfo> getEvaluatedArtifactsForPolicyAttachment(String policyAttachmentId,
+                                                                       String organization)
             throws APIMGovernanceException {
         String sqlQuery = SQLConstants.GET_ARTIFACTS_FOR_POLICY_ATTACHMENT_RUN;
         List<ArtifactInfo> artifactInfos = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            prepStmnt.setString(1, policyId);
+            prepStmnt.setString(1, policyAttachmentId);
             prepStmnt.setString(2, organization);
             try (ResultSet resultSet = prepStmnt.executeQuery()) {
                 while (resultSet.next()) {
