@@ -33,27 +33,27 @@ import java.util.List;
 public interface ValidationEngine {
 
     /**
-     * Check if a ruleset is valid
+     * Check if a gov policy is valid
      *
-     * @param policy Ruleset
-     * @throws APIMGovernanceException If an error occurs while validating the ruleset
+     * @param policy Governance Policy
+     * @throws APIMGovernanceException If an error occurs while validating the governance policy
      */
-    void validateRulesetContent(Policy policy) throws APIMGovernanceException;
+    void validatePolicyContent(Policy policy) throws APIMGovernanceException;
 
     /**
-     * Extract rules from a ruleset
+     * Extract rules from a governance policy
      *
-     * @param policy Ruleset
+     * @param policy Governance Policy
      * @return List of rules
      * @throws APIMGovernanceException If an error occurs while extracting rules
      */
-    List<Rule> extractRulesFromRuleset(Policy policy) throws APIMGovernanceException;
+    List<Rule> extractRulesFromPolicy(Policy policy) throws APIMGovernanceException;
 
     /**
-     * Validate a target against a ruleset
+     * Validate a target against a governance policy
      *
      * @param target Target to be validated
-     * @param policy Ruleset
+     * @param policy Governance Policy
      * @return List of rule violations
      * @throws APIMGovernanceException If an error occurs while validating the target
      */

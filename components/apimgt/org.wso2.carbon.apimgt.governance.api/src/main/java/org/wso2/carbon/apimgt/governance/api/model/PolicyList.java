@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * This class represents a list of governance Rulesets
+ * This class represents a list of governance policies
  */
 public class PolicyList {
     private Integer count;

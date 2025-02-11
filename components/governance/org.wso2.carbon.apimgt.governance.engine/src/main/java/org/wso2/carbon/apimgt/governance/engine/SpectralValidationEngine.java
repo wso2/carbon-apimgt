@@ -28,11 +28,11 @@ import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.Policy;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyContent;
 import org.wso2.carbon.apimgt.governance.api.model.Rule;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
-import org.wso2.carbon.apimgt.governance.api.model.Policy;
-import org.wso2.carbon.apimgt.governance.api.model.PolicyContent;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.rule.validator.InvalidContentTypeException;
 import org.wso2.rule.validator.InvalidRulesetException;
@@ -56,19 +56,19 @@ public class SpectralValidationEngine implements ValidationEngine {
     private static final Log log = LogFactory.getLog(SpectralValidationEngine.class);
 
     /**
-     * Check if a ruleset is valid
+     * Check if a policy is valid
      *
-     * @param policy Ruleset
-     * @throws APIMGovernanceException If an error occurs while validating the ruleset
+     * @param policy Governance Policy
+     * @throws APIMGovernanceException If an error occurs while validating the policy
      */
     @Override
-    public void validateRulesetContent(Policy policy) throws APIMGovernanceException {
+    public void validatePolicyContent(Policy policy) throws APIMGovernanceException {
         PolicyContent content = policy.getPolicyContent();
-        String rulesetContentString = new String(content.getContent(),
+        String contentString = new String(content.getContent(),
                 StandardCharsets.UTF_8);
         String jsonString;
         try {
-            jsonString = Validator.validateRuleset(rulesetContentString);
+            jsonString = Validator.validateRuleset(contentString);
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(jsonString);
             boolean passed = rootNode.path("passed").asBoolean();
@@ -76,25 +76,25 @@ public class SpectralValidationEngine implements ValidationEngine {
                 return;
             }
             String message = rootNode.path("message").asText();
-            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT_DETAILED,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_POLICY_CONTENT_DETAILED,
                     policy.getName(), message);
         } catch (InvalidContentTypeException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT, e, policy.getName());
+            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_POLICY_CONTENT, e, policy.getName());
         } catch (JsonProcessingException e) {
             log.error("Error while parsing rulseset validation result JSON string", e);
-            throw new APIMGovernanceException("Error while parsing ruleset validation result JSON string", e);
+            throw new APIMGovernanceException("Error while parsing policy validation result JSON string", e);
         }
     }
 
     /**
-     * Extract rules from a ruleset
+     * Extract rules from a policy
      *
-     * @param policy Ruleset
+     * @param policy Governance Policy
      * @return List of rules
      * @throws APIMGovernanceException If an error occurs while extracting rules
      */
     @Override
-    public List<Rule> extractRulesFromRuleset(Policy policy) throws APIMGovernanceException {
+    public List<Rule> extractRulesFromPolicy(Policy policy) throws APIMGovernanceException {
         String ruleContentString = new String(policy.getPolicyContent().getContent(),
                 StandardCharsets.UTF_8);
 
@@ -140,10 +140,10 @@ public class SpectralValidationEngine implements ValidationEngine {
     }
 
     /**
-     * Validate a target against a ruleset
+     * Validate a target against a policy
      *
-     * @param target  Target to be validated
-     * @param policy Ruleset
+     * @param target Target to be validated
+     * @param policy Governance Policy
      * @return List of rule violations
      * @throws APIMGovernanceException If an error occurs while validating the target
      */
@@ -152,16 +152,16 @@ public class SpectralValidationEngine implements ValidationEngine {
 
         try {
             PolicyContent policyContent = policy.getPolicyContent();
-            String rulesetContentString = new String(policyContent.getContent(),
+            String policyContentString = new String(policyContent.getContent(),
                     StandardCharsets.UTF_8);
 
-            String resultJson = Validator.validateDocument(target, rulesetContentString);
+            String resultJson = Validator.validateDocument(target, policyContentString);
             if (log.isDebugEnabled()) {
                 log.debug("Validation success for target: " + target);
             }
             return getRuleViolationsFromJsonResponse(resultJson, policy);
         } catch (InvalidRulesetException | InvalidContentTypeException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT, policy.getName());
+            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_POLICY_CONTENT, policy.getName());
         } catch (Throwable e) {
             log.error("Error occurred while verifying governance compliance ", e);
             throw new APIMGovernanceException("Error occurred while verifying governance compliance ", e);
@@ -173,7 +173,7 @@ public class SpectralValidationEngine implements ValidationEngine {
      * Get Rule Violations from a JSON response
      *
      * @param resultJson JSON response
-     * @param policy    Ruleset
+     * @param policy    Governance Policy
      * @return List of Rule Violations
      * @throws APIMGovernanceException If an error occurs while getting the rule violations
      */
@@ -193,7 +193,7 @@ public class SpectralValidationEngine implements ValidationEngine {
                 violation.setViolatedPath(node.get("path").asText());
                 violation.setRuleMessage(node.get("message").asText());
                 violation.setSeverity(RuleSeverity.fromString(node.get("severity").asText()));
-                violation.setRulesetId(policy.getId());
+                violation.setPolicyId(policy.getId());
                 violations.add(violation);
             }
             return violations;

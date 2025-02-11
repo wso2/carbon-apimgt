@@ -32,12 +32,12 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.PolicyAdherenceSate;
-import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
-import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
-import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.model.Policy;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyAttachmentAdherenceSate;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyInfo;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
+import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
+import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyAttachmentMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.PolicyMgtDAO;
@@ -361,7 +361,7 @@ public class ComplianceManager {
      * @throws APIMGovernanceException If an error occurs while getting the policy adherence
      */
 
-    public Map<PolicyAdherenceSate, List<String>> getAdherenceStateofEvaluatedPolicies(String organization)
+    public Map<PolicyAttachmentAdherenceSate, List<String>> getAdherenceStateofEvaluatedPolicies(String organization)
             throws APIMGovernanceException {
         List<String> allComplianceEvaluatedPolicies = complianceMgtDAO
                 .getAllComplianceEvaluatedPolicies(organization);
@@ -387,15 +387,15 @@ public class ComplianceManager {
             }
         }
 
-        Map<PolicyAdherenceSate, List<String>> policyAdherence = new HashMap<>();
-        policyAdherence.put(PolicyAdherenceSate.FOLLOWED, new ArrayList<>());
-        policyAdherence.put(PolicyAdherenceSate.VIOLATED, new ArrayList<>());
+        Map<PolicyAttachmentAdherenceSate, List<String>> policyAdherence = new HashMap<>();
+        policyAdherence.put(PolicyAttachmentAdherenceSate.FOLLOWED, new ArrayList<>());
+        policyAdherence.put(PolicyAttachmentAdherenceSate.VIOLATED, new ArrayList<>());
 
         for (String policy : allComplianceEvaluatedPolicies) {
             if (violatedPolicies.contains(policy)) {
-                policyAdherence.get(PolicyAdherenceSate.VIOLATED).add(policy);
+                policyAdherence.get(PolicyAttachmentAdherenceSate.VIOLATED).add(policy);
             } else {
-                policyAdherence.get(PolicyAdherenceSate.FOLLOWED).add(policy);
+                policyAdherence.get(PolicyAttachmentAdherenceSate.FOLLOWED).add(policy);
             }
         }
 
@@ -638,7 +638,7 @@ public class ComplianceManager {
                     List<RuleViolation> ruleViolations = validationEngine.validate(
                             contentToValidate, ruleset);
 
-                    artifactComplianceDryRunInfo.addRuleViolationsForRuleset(policy, policyInfo, ruleViolations);
+                    artifactComplianceDryRunInfo.addRuleViolationsForPolicy(policy, policyInfo, ruleViolations);
 
                 } else {
                     if (log.isDebugEnabled()) {

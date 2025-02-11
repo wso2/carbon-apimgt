@@ -25,9 +25,9 @@ import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ComplianceEvaluationRequest;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.Policy;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
-import org.wso2.carbon.apimgt.governance.api.model.Policy;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
@@ -235,7 +235,7 @@ public class ComplianceEvaluationScheduler {
             }
 
             // Evaluate the artifact against each policy
-            for (String policyId : request.getPolicyIds()) {
+            for (String policyId : request.getPolicyAttachmentIds()) {
                 evaluteArtifactWithPolicy(artifactRefId, artifactType, policyId, artifactProjectContentMap,
                         organization);
             }

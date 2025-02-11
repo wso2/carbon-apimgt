@@ -35,8 +35,8 @@ public class ArtifactComplianceDryRunInfo {
         return Collections.unmodifiableMap(violations);
     }
 
-    public void addRuleViolationsForRuleset(APIMGovernancePolicyAttachment policy, PolicyInfo ruleset,
-                                            List<RuleViolation> ruleViolations) {
-        violations.computeIfAbsent(policy, k -> new HashMap<>()).put(ruleset, ruleViolations);
+    public void addRuleViolationsForPolicy(APIMGovernancePolicyAttachment attachment, PolicyInfo policy,
+                                           List<RuleViolation> ruleViolations) {
+        violations.computeIfAbsent(attachment, k -> new HashMap<>()).put(policy, ruleViolations);
     }
 }

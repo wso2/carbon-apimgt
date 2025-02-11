@@ -25,7 +25,7 @@ import static org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants.Y
 import static org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants.YML_FILE_TYPE;
 
 /**
- * This class represents the Ruleset Content
+ * This class represents the Policy Content
  */
 public class PolicyContent {
     byte[] content;
@@ -33,7 +33,7 @@ public class PolicyContent {
     String fileName;
 
     /**
-     * Content Type of the Ruleset
+     * Content Type of the governance policy
      */
     public enum ContentType {
         YAML,
