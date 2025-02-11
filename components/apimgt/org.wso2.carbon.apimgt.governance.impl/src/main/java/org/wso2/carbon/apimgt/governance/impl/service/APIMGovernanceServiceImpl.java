@@ -202,7 +202,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         Set<String> allPoliciesForLabel = new HashSet<>();
         for (String label : labels) {
             allPoliciesForLabel.addAll(new ArrayList<>(policyAttachmentManager
-                    .getPoliciesByLabel(label, organization).keySet()));
+                    .getPolicyAttachmentsByLabel(label, organization).keySet()));
         }
 
         List<String> applicablePolicyIds = new ArrayList<>();

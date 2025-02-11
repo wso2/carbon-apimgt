@@ -297,7 +297,7 @@ public class ComplianceEvaluationScheduler {
 
             } else {
                 if (log.isDebugEnabled()) {
-                    log.debug("Ruleset artifact type does not match with the artifact's type. Skipping " +
+                    log.debug("Policy artifact type does not match with the artifact's type. Skipping " +
                             "governance evaluation for policy ID: " + policy.getId());
                 }
             }

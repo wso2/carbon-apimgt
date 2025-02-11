@@ -41,7 +41,7 @@ public class ServerStartupListener implements ServerStartupObserver {
                     ServiceReferenceHolder.getInstance().getGovernanceConfigurationService()
                             .getGovernanceConfig();
             if (governanceConfiguration != null) {
-                APIMGovernanceUtil.loadDefaultRulesets(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+                APIMGovernanceUtil.loadDefaultPolicies(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             }
         }
     }
