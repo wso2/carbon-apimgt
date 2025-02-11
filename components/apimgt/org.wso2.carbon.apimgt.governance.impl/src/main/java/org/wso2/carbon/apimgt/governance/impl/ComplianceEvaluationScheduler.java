@@ -234,7 +234,7 @@ public class ComplianceEvaluationScheduler {
                 return;
             }
 
-            // Evaluate the artifact against each policy
+            // Evaluate the artifact against each policy attachment
             for (String policyId : request.getPolicyAttachmentIds()) {
                 evaluteArtifactWithPolicyAttachment(artifactRefId, artifactType, policyId, artifactProjectContentMap,
                         organization);
@@ -249,11 +249,11 @@ public class ComplianceEvaluationScheduler {
     }
 
     /**
-     * Evaluate an artifact against a policy.
+     * Evaluate an artifact against a policy attachment.
      *
      * @param artifactRefId             ID of the artifact.
      * @param artifactType              Type of the artifact.
-     * @param policyAttachmentId                  ID of the policy.
+     * @param policyAttachmentId        ID of the policy attachment.
      * @param artifactProjectContentMap Content of the artifact project.
      * @param organization              Organization of the artifact.
      * @throws APIMGovernanceException If an error occurs while evaluating the artifact.
@@ -267,7 +267,7 @@ public class ComplianceEvaluationScheduler {
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
 
-        // Validate the artifact against each policy
+        // Validate the artifact against each policy in the policy attachment
         List<Policy> policies = GovernancePolicyMgtDAOImpl.getInstance()
                 .getPoliciesWithContentByPolicyAttachmentId(policyAttachmentId, organization);
 
@@ -308,11 +308,11 @@ public class ComplianceEvaluationScheduler {
     }
 
     /**
-     * Save compliance evaluation results of the policy.
+     * Save compliance evaluation results of the policy attachment.
      *
      * @param artifactRefId        ID of the artifact.
      * @param artifactType         Type of the artifact.
-     * @param policyAttachmentId             ID of the policy.
+     * @param policyAttachmentId             ID of the policy attachment.
      * @param policyViolationsMap Map of rule violations for each policy.
      * @param organization         Organization of the artifact.
      */

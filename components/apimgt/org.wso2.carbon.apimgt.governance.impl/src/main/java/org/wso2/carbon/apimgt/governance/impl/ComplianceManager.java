@@ -592,7 +592,7 @@ public class ComplianceManager {
      * Handle API Compliance Evaluation Request Dry Run
      *
      * @param artifactType           Artifact Type (REST_API, ASYNC_API, etc)
-     * @param govPolicies            List of governance policies to be evaluated
+     * @param govPolicyAttachments   List of governance attachments to be evaluated
      * @param artifactProjectContent Map of artifact content
      * @param organization           Organization
      * @return ArtifactComplianceDryRunInfo object
@@ -600,7 +600,7 @@ public class ComplianceManager {
      */
 
     public ArtifactComplianceDryRunInfo handleComplianceEvalDryRun(ExtendedArtifactType artifactType,
-                                                                   List<String> govPolicies, Map<PolicyType, String>
+                                                                   List<String> govPolicyAttachments, Map<PolicyType, String>
                                                                            artifactProjectContent,
                                                                    String organization) throws
             APIMGovernanceException {
@@ -622,7 +622,7 @@ public class ComplianceManager {
             return null;
         }
 
-        for (String policyAttachmentId : govPolicies) {
+        for (String policyAttachmentId : govPolicyAttachments) {
             APIMGovernancePolicyAttachment policyAttachment = policyAttachmentMgtDAO
                     .getGovernancePolicyAttachmentByID(policyAttachmentId, organization);
             List<Policy> policies = policyAttachmentMgtDAO
@@ -667,12 +667,12 @@ public class ComplianceManager {
     /**
      * Filter Blockable and Non-Blockable Rule Violations Based on Policy Attachment
      *
-     * @param artifactRefId        Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType         Artifact Type
-     * @param policyAttachment     Governance Policy
-     * @param ruleViolations       List of Rule Violations
-     * @param state                State at which artifact should be governed
-     * @param organization         Organization
+     * @param artifactRefId    Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType     Artifact Type
+     * @param policyAttachment Governance Policy Attachment
+     * @param ruleViolations   List of Rule Violations
+     * @param state            State at which artifact should be governed
+     * @param organization     Organization
      * @return Map of blockable and non-blockable rule violations
      */
     private Map<APIMGovernanceActionType, List<RuleViolation>>
@@ -681,7 +681,7 @@ public class ComplianceManager {
                                                  List<RuleViolation> ruleViolations, APIMGovernableState state,
                                                  String organization) {
 
-        // Identify blockable severities from the policy
+        // Identify blockable severities from the policy attachment
         List<RuleSeverity> blockableSeverities = new ArrayList<>();
         for (APIMGovernanceAction governanceAction : policyAttachment.getActions()) {
 
@@ -731,7 +731,7 @@ public class ComplianceManager {
     }
 
     /**
-     * Get the list of policies evaluated for the artifact
+     * Identify violated policy attachments
      *
      * @param evaluatedPolicyAttachments List of evaluated policy attachments
      * @param violatedPolicies  List of violated policies

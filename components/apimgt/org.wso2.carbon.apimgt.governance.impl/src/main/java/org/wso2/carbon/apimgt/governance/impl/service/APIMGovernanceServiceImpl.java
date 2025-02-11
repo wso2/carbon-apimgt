@@ -63,14 +63,14 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
     }
 
     /**
-     * Check if there are any policies with blocking actions for the artifact
+     * Check if there are any policy attachments with blocking actions for the artifact
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact type (ArtifactType.API)
      * @param state         State to be governed
      * @param organization  Organization
-     * @return True if there are policies with blocking actions, False otherwise
-     * @throws APIMGovernanceException If an error occurs while checking for policies with blocking actions
+     * @return True if there are policy attachments with blocking actions, False otherwise
+     * @throws APIMGovernanceException If an error occurs while checking for policy attachments with blocking actions
      */
     @Override
     public boolean isPolicyAttachmentsWithBlockingActionExist(String artifactRefId,
@@ -78,9 +78,9 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                                                               String organization)
             throws APIMGovernanceException {
 
-        List<String> applicablePolicyIds = APIMGovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactRefId,
+        List<String> applicablePolicyAttachmentIds = APIMGovernanceUtil.getApplicablePolicyAttachmentsForArtifactWithState(artifactRefId,
                 artifactType, state, organization);
-        return APIMGovernanceUtil.isBlockingActionsPresent(applicablePolicyIds, state, organization);
+        return APIMGovernanceUtil.isBlockingActionsPresent(applicablePolicyAttachmentIds, state, organization);
     }
 
     /**
@@ -102,11 +102,11 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                 APIMGovernableState.getDependentGovernableStates(state);
 
         for (APIMGovernableState dependentState : dependentAPIMGovernableStates) {
-            List<String> applicablePolicyIds = APIMGovernanceUtil
-                    .getApplicablePoliciesForArtifactWithState(artifactRefId,
+            List<String> applicablePolicyAttachmentIds = APIMGovernanceUtil
+                    .getApplicablePolicyAttachmentsForArtifactWithState(artifactRefId,
                             artifactType, dependentState, organization);
             complianceManager.handleComplianceEvalAsync
-                    (artifactRefId, artifactType, applicablePolicyIds, organization);
+                    (artifactRefId, artifactType, applicablePolicyAttachmentIds, organization);
         }
     }
 
@@ -134,11 +134,11 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                                                          Map<PolicyType, String> artifactProjectContent,
                                                          String organization) throws APIMGovernanceException {
 
-        List<String> applicablePolicyIds = APIMGovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactRefId,
-                artifactType, state, organization);
+        List<String> applicablePolicyAttachmentIds = APIMGovernanceUtil
+                .getApplicablePolicyAttachmentsForArtifactWithState(artifactRefId, artifactType, state, organization);
 
         ArtifactComplianceInfo artifactComplianceInfo = complianceManager.handleComplianceEvalSync
-                (artifactRefId, revisionNo, artifactType, applicablePolicyIds,
+                (artifactRefId, revisionNo, artifactType, applicablePolicyAttachmentIds,
                         artifactProjectContent, state, organization);
 
         // Though compliance is evaluated sync , we need to evaluate the compliance for all dependent states async to
@@ -167,15 +167,16 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
             log.debug("Evaluating compliance for the artifact with the file path ");
         }
 
-        Map<String, String> policies = policyAttachmentManager.getOrganizationWidePolicyAttachments(organization);
+        Map<String, String> policyAttachments = policyAttachmentManager
+                .getOrganizationWidePolicyAttachments(organization);
 
-        List<String> applicablePolicyIds = new ArrayList<>(policies.keySet());
+        List<String> applicablePolicyAttachmentIds = new ArrayList<>(policyAttachments.keySet());
 
         // Only extract content if the artifact type requires it.
         if (ExtendedArtifactType.isArtifactAPI(artifactType)) {
             Map<PolicyType, String> contentMap = APIMGovernanceUtil
                     .extractArtifactProjectContent(zipArchive, ArtifactType.API);
-            return complianceManager.handleComplianceEvalDryRun(artifactType, applicablePolicyIds,
+            return complianceManager.handleComplianceEvalDryRun(artifactType, applicablePolicyAttachmentIds,
                     contentMap, organization);
         } else {
             throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_ARTIFACT_TYPE, artifactType.toString());
@@ -199,30 +200,31 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                                                 String organization) throws APIMGovernanceException {
 
 
-        Set<String> allPoliciesForLabel = new HashSet<>();
+        Set<String> allPolicyAttachmentsForLabel = new HashSet<>();
         for (String label : labels) {
-            allPoliciesForLabel.addAll(new ArrayList<>(policyAttachmentManager
+            allPolicyAttachmentsForLabel.addAll(new ArrayList<>(policyAttachmentManager
                     .getPolicyAttachmentsByLabel(label, organization).keySet()));
         }
 
-        List<String> applicablePolicyIds = new ArrayList<>();
+        List<String> applicablePolicyAttachmentIds = new ArrayList<>();
 
         if (ArtifactType.API.equals(artifactType)) {
-            // Find the state API is in and get the policies that should be evaluated
+            // Find the state API is in and get the policy attachments that should be evaluated
             String apiStatus = APIMUtil.getAPIStatus(artifactRefId);
             boolean isDeployed = APIMUtil.isAPIDeployed(artifactRefId);
 
-            for (String policyId : allPoliciesForLabel) {
-                APIMGovernancePolicyAttachment policy = policyAttachmentManager.getGovernancePolicyAttachmentByID(policyId, organization);
-                boolean isAPIGovernable = APIMUtil.isAPIGovernable(apiStatus, isDeployed, policy.getGovernableStates());
+            for (String attachmentId : allPolicyAttachmentsForLabel) {
+                APIMGovernancePolicyAttachment policyAttachment = policyAttachmentManager
+                        .getGovernancePolicyAttachmentByID(attachmentId, organization);
+                boolean isAPIGovernable = APIMUtil.isAPIGovernable(apiStatus, isDeployed, policyAttachment.getGovernableStates());
                 // If the API should be governed by the policy
                 if (isAPIGovernable) {
-                    applicablePolicyIds.add(policyId);
+                    applicablePolicyAttachmentIds.add(attachmentId);
                 }
             }
         }
 
-        complianceManager.handleComplianceEvalAsync(artifactRefId, artifactType, applicablePolicyIds, organization);
+        complianceManager.handleComplianceEvalAsync(artifactRefId, artifactType, applicablePolicyAttachmentIds, organization);
     }
 
     /**
