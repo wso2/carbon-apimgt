@@ -11,8 +11,8 @@ import org.wso2.carbon.apimgt.governance.api.model.PolicyAttachmentAdherenceSate
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyAttachmentManager;
 import org.wso2.carbon.apimgt.governance.rest.api.PolicyAttachmentAdherenceApiService;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceForPolicyDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryForPolicyDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactCompForPolicyAttachmentDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactCompSummaryForPolicyAttachmentDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactInfoDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAttachmentAdherenceDetailsDTO;
@@ -58,14 +58,14 @@ public class PolicyAttachmentAdherenceApiServiceImpl implements PolicyAttachment
         int followedCount = adherenceMap.get(PolicyAttachmentAdherenceSate.FOLLOWED).size();
         int violatedCount = adherenceMap.get(PolicyAttachmentAdherenceSate.VIOLATED).size();
 
-        PolicyAttachmentAdherenceSummaryDTO policyAttachmentAdherenceSummaryDTO =
+        PolicyAttachmentAdherenceSummaryDTO summaryDTO =
                 new PolicyAttachmentAdherenceSummaryDTO();
-        policyAttachmentAdherenceSummaryDTO.setTotal(policyIds.size());
-        policyAttachmentAdherenceSummaryDTO.setViolated(violatedCount);
-        policyAttachmentAdherenceSummaryDTO.setFollowed(followedCount);
-        policyAttachmentAdherenceSummaryDTO.setUnApplied(policyIds.size() - followedCount - violatedCount);
+        summaryDTO.setTotal(policyIds.size());
+        summaryDTO.setViolated(violatedCount);
+        summaryDTO.setFollowed(followedCount);
+        summaryDTO.setUnApplied(policyIds.size() - followedCount - violatedCount);
 
-        return Response.ok().entity(policyAttachmentAdherenceSummaryDTO).build();
+        return Response.ok().entity(summaryDTO).build();
     }
 
     /**
@@ -82,17 +82,17 @@ public class PolicyAttachmentAdherenceApiServiceImpl implements PolicyAttachment
             throws APIMGovernanceException {
 
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
-        APIMGovernancePolicyAttachment policy = new PolicyAttachmentManager()
+        APIMGovernancePolicyAttachment policyAttachment = new PolicyAttachmentManager()
                 .getGovernancePolicyAttachmentByID(policyAttachmentId, organization);
 
         Map<ArtifactComplianceState, List<ArtifactInfo>> evaluatedArtifacts =
                 new ComplianceManager().getArtifactsComplianceForPolicy(policyAttachmentId, organization,
                         true);
 
-        PolicyAttachmentAdherenceDetailsDTO policyAttachmentAdherenceDetailsDTO = new PolicyAttachmentAdherenceDetailsDTO();
-        policyAttachmentAdherenceDetailsDTO.setName(policy.getName());
-        policyAttachmentAdherenceDetailsDTO.setId(policy.getId());
-        List<ArtifactComplianceForPolicyDTO> artifactComplianceForPolicyDTOList = new ArrayList<>();
+        PolicyAttachmentAdherenceDetailsDTO adherenceDetailsDTO = new PolicyAttachmentAdherenceDetailsDTO();
+        adherenceDetailsDTO.setName(policyAttachment.getName());
+        adherenceDetailsDTO.setId(policyAttachment.getId());
+        List<ArtifactCompForPolicyAttachmentDTO> artifactComplianceForPolicyDTOList = new ArrayList<>();
 
         // Set the status of the policy attachment adherence
         boolean isCompliantArtifactsExist = evaluatedArtifacts.containsKey(ArtifactComplianceState.COMPLIANT) &&
@@ -102,11 +102,11 @@ public class PolicyAttachmentAdherenceApiServiceImpl implements PolicyAttachment
                 !evaluatedArtifacts.get(ArtifactComplianceState.NON_COMPLIANT).isEmpty();
 
         if (!isNonCompliantArtifactsExist && !isCompliantArtifactsExist) {
-            policyAttachmentAdherenceDetailsDTO.setStatus(PolicyAttachmentAdherenceDetailsDTO.StatusEnum.UNAPPLIED);
+            adherenceDetailsDTO.setStatus(PolicyAttachmentAdherenceDetailsDTO.StatusEnum.UNAPPLIED);
         } else if (isNonCompliantArtifactsExist) {
-            policyAttachmentAdherenceDetailsDTO.setStatus(PolicyAttachmentAdherenceDetailsDTO.StatusEnum.VIOLATED);
+            adherenceDetailsDTO.setStatus(PolicyAttachmentAdherenceDetailsDTO.StatusEnum.VIOLATED);
         } else {
-            policyAttachmentAdherenceDetailsDTO.setStatus(PolicyAttachmentAdherenceDetailsDTO.StatusEnum.FOLLOWED);
+            adherenceDetailsDTO.setStatus(PolicyAttachmentAdherenceDetailsDTO.StatusEnum.FOLLOWED);
         }
 
         // Set the compliance status of the artifacts attached to the policy attachment
@@ -115,8 +115,8 @@ public class PolicyAttachmentAdherenceApiServiceImpl implements PolicyAttachment
             List<ArtifactInfo> artifactInfoList = entry.getValue();
 
             for (ArtifactInfo artifactInfo : artifactInfoList) {
-                ArtifactComplianceForPolicyDTO artifactComplianceForPolicyDTO = new ArtifactComplianceForPolicyDTO();
-                artifactComplianceForPolicyDTO.setId(artifactInfo.getArtifactRefId());
+                ArtifactCompForPolicyAttachmentDTO complianceDTO = new ArtifactCompForPolicyAttachmentDTO();
+                complianceDTO.setId(artifactInfo.getArtifactRefId());
 
                 ArtifactType artifactType = artifactInfo.getArtifactType();
                 ArtifactInfoDTO infoDTO = new ArtifactInfoDTO();
@@ -124,17 +124,17 @@ public class PolicyAttachmentAdherenceApiServiceImpl implements PolicyAttachment
                 infoDTO.setVersion(artifactInfo.getVersion());
                 infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
 
-                artifactComplianceForPolicyDTO.setInfo(infoDTO);
+                complianceDTO.setInfo(infoDTO);
 
-                artifactComplianceForPolicyDTO.setStatus(ArtifactComplianceForPolicyDTO
+                complianceDTO.setStatus(ArtifactCompForPolicyAttachmentDTO
                         .StatusEnum.valueOf(String.valueOf(complianceState)));
 
-                artifactComplianceForPolicyDTOList.add(artifactComplianceForPolicyDTO);
+                artifactComplianceForPolicyDTOList.add(complianceDTO);
             }
         }
 
-        policyAttachmentAdherenceDetailsDTO.setEvaluatedArtifacts(artifactComplianceForPolicyDTOList);
-        return Response.ok().entity(policyAttachmentAdherenceDetailsDTO).build();
+        adherenceDetailsDTO.setEvaluatedArtifacts(artifactComplianceForPolicyDTOList);
+        return Response.ok().entity(adherenceDetailsDTO).build();
 
     }
 
@@ -144,7 +144,7 @@ public class PolicyAttachmentAdherenceApiServiceImpl implements PolicyAttachment
      * @param limit          The limit
      * @param offset         The offset
      * @param messageContext The message context
-     * @return The policy attachment adherence for all policies
+     * @return The policy attachment adherence for all policy attachments
      * @throws APIMGovernanceException If an error occurs while getting the policy attachment adherence for
      * all policy attachments
      */
@@ -164,27 +164,27 @@ public class PolicyAttachmentAdherenceApiServiceImpl implements PolicyAttachment
             offset = RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         }
 
-        List<APIMGovernancePolicyAttachment> policyAttachments = allPolicies.subList(offset, Math.min(offset + limit,
+        List<APIMGovernancePolicyAttachment> attachments = allPolicies.subList(offset, Math.min(offset + limit,
                 allPolicies.size()));
 
         List<PolicyAttachmentAdherenceStatusDTO> policyAttachmentAdherenceStatusDTOs = new ArrayList<>();
 
-        for (APIMGovernancePolicyAttachment policyAttachment : policyAttachments) {
+        for (APIMGovernancePolicyAttachment attachment : attachments) {
             Map<ArtifactComplianceState, List<ArtifactInfo>> evaluatedArtifactsByPolicy =
-                    new ComplianceManager().getArtifactsComplianceForPolicy(policyAttachment.getId(), organization,
+                    new ComplianceManager().getArtifactsComplianceForPolicy(attachment.getId(), organization,
                             false);
 
             int compliantCount = evaluatedArtifactsByPolicy.get(ArtifactComplianceState.COMPLIANT).size();
             int nonCompliantCount = evaluatedArtifactsByPolicy.get(ArtifactComplianceState.NON_COMPLIANT).size();
 
             PolicyAttachmentAdherenceStatusDTO policyAttachmentAdherenceStatusDTO =
-                    getPolicyAttachmentAdherenceStatusDTO(policyAttachment, compliantCount, nonCompliantCount);
+                    getPolicyAttachmentAdherenceStatusDTO(attachment, compliantCount, nonCompliantCount);
 
             policyAttachmentAdherenceStatusDTOs.add(policyAttachmentAdherenceStatusDTO);
         }
 
         PolicyAttachmentAdherenceListDTO listDTO = new PolicyAttachmentAdherenceListDTO();
-        listDTO.setCount(policyAttachments.size());
+        listDTO.setCount(attachments.size());
         listDTO.setList(policyAttachmentAdherenceStatusDTOs);
 
         // Set pagination details for the artifact compliance list
@@ -194,25 +194,25 @@ public class PolicyAttachmentAdherenceApiServiceImpl implements PolicyAttachment
     }
 
     /**
-     * Get the policy adherence status
+     * Get the policy attachment adherence status
      *
-     * @param policy                    APIMGovernancePolicy object
+     * @param policyAttachment                APIMGovernancePolicyAttachment object
      * @param compliantArtifactCount    total number of compliant artifacts
      * @param nonCompliantArtifactCount total number of non-compliant artifacts
      * @return PolicyAdherenceStatusDTO object
      */
     private PolicyAttachmentAdherenceStatusDTO getPolicyAttachmentAdherenceStatusDTO(
-            APIMGovernancePolicyAttachment policy,
+            APIMGovernancePolicyAttachment policyAttachment,
             int compliantArtifactCount,
             int nonCompliantArtifactCount) {
 
-        ArtifactComplianceSummaryForPolicyDTO summaryDTO = new ArtifactComplianceSummaryForPolicyDTO();
+        ArtifactCompSummaryForPolicyAttachmentDTO summaryDTO = new ArtifactCompSummaryForPolicyAttachmentDTO();
         summaryDTO.setCompliant(compliantArtifactCount);
         summaryDTO.setNonCompliant(nonCompliantArtifactCount);
 
         PolicyAttachmentAdherenceStatusDTO statusDTO = new PolicyAttachmentAdherenceStatusDTO();
-        statusDTO.setId(policy.getId());
-        statusDTO.setName(policy.getName());
+        statusDTO.setId(policyAttachment.getId());
+        statusDTO.setName(policyAttachment.getName());
         statusDTO.setArtifactComplianceSummary(summaryDTO);
         if (compliantArtifactCount == 0 && nonCompliantArtifactCount == 0) {
             statusDTO.setStatus(PolicyAttachmentAdherenceStatusDTO.StatusEnum.UNAPPLIED);
@@ -225,7 +225,7 @@ public class PolicyAttachmentAdherenceApiServiceImpl implements PolicyAttachment
     }
 
     /**
-     * Set pagination details for the policy adherence list
+     * Set pagination details for the policy attachment adherence list
      *
      * @param listDTO PolicyAttachmentAdherenceListDTO object
      * @param limit   max number of objects returned

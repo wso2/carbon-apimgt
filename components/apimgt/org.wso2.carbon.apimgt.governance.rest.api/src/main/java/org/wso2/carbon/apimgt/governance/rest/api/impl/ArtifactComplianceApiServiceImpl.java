@@ -82,10 +82,10 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
      * Get policy validation results by Artifact Reference Id
      *
      * @param apiId          API ID
-     * @param policyId      policy ID
+     * @param policyId       policy ID
      * @param messageContext message context
      * @return Response
-     * @throws APIMGovernanceException if an error occurs while getting the policy validation results
+     * @throws APIMGovernanceException if an error occurs while getting the governance policy validation results
      */
     public Response getPolicyValidationResultsByAPIId(String apiId, String policyId, MessageContext messageContext)
             throws APIMGovernanceException {

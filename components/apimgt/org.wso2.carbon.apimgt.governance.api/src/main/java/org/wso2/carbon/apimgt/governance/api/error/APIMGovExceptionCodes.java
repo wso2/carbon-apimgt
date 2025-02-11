@@ -117,7 +117,8 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
             400, "Invalid action provided for the policy attachment: %s"),
     ERROR_WHILE_SEARCHING_POLICY_ATTACHMENTIES(300013, "Error while searching policy attachments",
             500, "Error while searching policy attachments for the organization: %s", true),
-    ERROR_WHILE_DELETING_LABEL_POLICY_ATTACHMENT_MAPPINGS(300014, "Error while deleting label policy attachment mappings",
+    ERROR_WHILE_DELETING_LABEL_POLICY_ATTACHMENT_MAPPINGS(300014, "Error while deleting label " +
+            "policy attachment mappings",
             500, "Error while deleting label policy attachment mappings for " +
             "label with ID: %s", true),
 
@@ -161,7 +162,8 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
             "results for policy.",
             500, "Error while deleting evaluation results for policy with ID: %s",
             true),
-    ERROR_WHILE_DELETING_COMPLIANCE_EVALUATION_RESULTS_FOR_POLICY_ATTACHMENT(500010, "Error while deleting compliance " +
+    ERROR_WHILE_DELETING_COMPLIANCE_EVALUATION_RESULTS_FOR_POLICY_ATTACHMENT(500010, "Error while " +
+            "deleting compliance " +
             "evaluation results for policy attachment.",
             500, "Error while deleting compliance evaluation results for policy attachment with ID: %s",
             true),

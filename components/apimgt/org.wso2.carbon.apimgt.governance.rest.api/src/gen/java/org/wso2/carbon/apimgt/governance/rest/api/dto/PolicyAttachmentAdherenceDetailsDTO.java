@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceForPolicyDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactCompForPolicyAttachmentDTO;
 import javax.validation.constraints.*;
 
 /**
@@ -61,7 +61,7 @@ return null;
         }
     } 
     private StatusEnum status = null;
-    private List<ArtifactComplianceForPolicyDTO> evaluatedArtifacts = new ArrayList<ArtifactComplianceForPolicyDTO>();
+    private List<ArtifactCompForPolicyAttachmentDTO> evaluatedArtifacts = new ArrayList<ArtifactCompForPolicyAttachmentDTO>();
 
   /**
    * UUID of the policy attachment.
@@ -120,7 +120,7 @@ return null;
   /**
    * Compliance status of the artifacts evaluated against the policy attachment.
    **/
-  public PolicyAttachmentAdherenceDetailsDTO evaluatedArtifacts(List<ArtifactComplianceForPolicyDTO> evaluatedArtifacts) {
+  public PolicyAttachmentAdherenceDetailsDTO evaluatedArtifacts(List<ArtifactCompForPolicyAttachmentDTO> evaluatedArtifacts) {
     this.evaluatedArtifacts = evaluatedArtifacts;
     return this;
   }
@@ -129,10 +129,10 @@ return null;
   @ApiModelProperty(value = "Compliance status of the artifacts evaluated against the policy attachment.")
       @Valid
   @JsonProperty("evaluatedArtifacts")
-  public List<ArtifactComplianceForPolicyDTO> getEvaluatedArtifacts() {
+  public List<ArtifactCompForPolicyAttachmentDTO> getEvaluatedArtifacts() {
     return evaluatedArtifacts;
   }
-  public void setEvaluatedArtifacts(List<ArtifactComplianceForPolicyDTO> evaluatedArtifacts) {
+  public void setEvaluatedArtifacts(List<ArtifactCompForPolicyAttachmentDTO> evaluatedArtifacts) {
     this.evaluatedArtifacts = evaluatedArtifacts;
   }
 

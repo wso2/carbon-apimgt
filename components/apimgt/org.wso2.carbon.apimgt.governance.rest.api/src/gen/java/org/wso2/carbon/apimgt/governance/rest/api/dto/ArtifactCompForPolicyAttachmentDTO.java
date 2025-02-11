@@ -22,7 +22,7 @@ import javax.validation.Valid;
 
 @ApiModel(description = "Compliance status of an artifact for a specific policy attachment.")
 
-public class ArtifactComplianceForPolicyDTO   {
+public class ArtifactCompForPolicyAttachmentDTO   {
   
     private String id = null;
 
@@ -63,7 +63,7 @@ return null;
   /**
    * UUID of the artifact.
    **/
-  public ArtifactComplianceForPolicyDTO id(String id) {
+  public ArtifactCompForPolicyAttachmentDTO id(String id) {
     this.id = id;
     return this;
   }
@@ -81,7 +81,7 @@ return null;
   /**
    * Status of the artifact&#39;s compliance to the policy attachment.
    **/
-  public ArtifactComplianceForPolicyDTO status(StatusEnum status) {
+  public ArtifactCompForPolicyAttachmentDTO status(StatusEnum status) {
     this.status = status;
     return this;
   }
@@ -98,7 +98,7 @@ return null;
 
   /**
    **/
-  public ArtifactComplianceForPolicyDTO info(ArtifactInfoDTO info) {
+  public ArtifactCompForPolicyAttachmentDTO info(ArtifactInfoDTO info) {
     this.info = info;
     return this;
   }
@@ -123,10 +123,10 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ArtifactComplianceForPolicyDTO artifactComplianceForPolicy = (ArtifactComplianceForPolicyDTO) o;
-    return Objects.equals(id, artifactComplianceForPolicy.id) &&
-        Objects.equals(status, artifactComplianceForPolicy.status) &&
-        Objects.equals(info, artifactComplianceForPolicy.info);
+    ArtifactCompForPolicyAttachmentDTO artifactCompForPolicyAttachment = (ArtifactCompForPolicyAttachmentDTO) o;
+    return Objects.equals(id, artifactCompForPolicyAttachment.id) &&
+        Objects.equals(status, artifactCompForPolicyAttachment.status) &&
+        Objects.equals(info, artifactCompForPolicyAttachment.info);
   }
 
   @Override
@@ -137,7 +137,7 @@ return null;
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ArtifactComplianceForPolicyDTO {\n");
+    sb.append("class ArtifactCompForPolicyAttachmentDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
