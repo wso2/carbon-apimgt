@@ -849,7 +849,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     @Override
     public List<String> getAllComplianceEvaluatedArtifacts(ArtifactType artifactType,
                                                            String organization) throws APIMGovernanceException {
-        String sqlQuery = SQLConstants.GET_ALL_EVALUTED_ARTIFACTS;
+        String sqlQuery = SQLConstants.GET_ALL_EVALUATED_ARTIFACTS;
         Set<String> artifactRefIds = new HashSet<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
