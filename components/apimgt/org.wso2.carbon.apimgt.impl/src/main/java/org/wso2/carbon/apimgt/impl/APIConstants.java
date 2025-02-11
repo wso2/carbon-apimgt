@@ -3215,28 +3215,7 @@ public final class APIConstants {
     public static final String EXTERNAL_GATEWAY_VENDOR = "external";
     public static final String WSO2_APK_GATEWAY = "wso2/apk";
     public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
-    public static final String AWS_GATEWAY = "AWS";
-    public static final String SYNAPSE_GATEWAY_FEATURES = "{\"basic\":[\"defaultVersion\",\"advertised\"]," +
-            "\"runtime\":[\"cors\",\"schemaValidation\",\"queryAnalysis\",\"responseCaching\",\"transportsHTTP\"," +
-            "\"transportsHTTPS\",\"transportsMutualSSL\",\"oauth2\",\"apikey\",\"basicAuth\",\"audienceValidation\"," +
-            "\"backendThroughput\",\"keyManagerConfig\"],\"resources\":[\"apiLevelRateLimiting\"," +
-            "\"operationLevelRateLimiting\",\"operationSecurity\"],\"localScopes\":[\"operationScopes\"]," +
-         "\"policies\":[\"policies\"],\"monetization\":[\"monetization\"],\"subscriptions\":[\"subscriptions\"]," +
-          "\"endpoints\":[\"http\",\"service\",\"address\",\"default\",\"INLINE\",\"dynamic\",\"awslambda\"," +
-            "\"sequence_backend\",\"advancedConfigurations\",\"loadBalanceAndFailoverConfigurations\"," +
-             "\"endpointSecurity\",\"typePRODUCTION\",\"typeSANDBOX\"],\"endpointSecurity\":[\"basicAuth\"," +
-            "\"oauth2\",\"digest\"]}";
-
-    public static final String APK_GATEWAY_FEATURES = "{\"basic\":[\"defaultVersion\"],\"runtime\":[\"cors\"," +
-            "\"transportsHTTP\",\"transportsHTTPS\",\"transportsMutualSSL\",\"oauth2\",\"apikey\",\"audienceValidation\"," +
-      "\"keyManagerConfig\"],\"resources\":[\"apiLevelRateLimiting\",\"operationLevelRateLimiting\"," +
-            "\"operationSecurity\"],\"localScopes\":[\"operationScopes\"],\"policies\":[\"policies\"]," +
-             "\"monetization\":[\"monetization\"],\"subscriptions\":[\"subscriptions\"],\"endpoints\":[\"http\"," +
-            "\"typePRODUCTION\",\"typeSANDBOX\"],\"endpointSecurity\":[\"basicAuth\"]}";
-
-    public static final String API_DATA = "{\"rest\":[\"wso2/synapse\",\"wso2/apk\"],\"soap\":[\"wso2/synapse\"]," +
-            "\"graphql\":[\"wso2/synapse\",\"wso2/apk\"],\"ws\":[\"wso2/synapse\"],\"wh\":[\"wso2/synapse\"]," +
-      "\"sse\":[\"wso2/synapse\"],\"ai\":[\"wso2/synapse\",\"wso2/apk\"]}";
+    public static final List<String> API_TYPES = Arrays.asList("rest", "soap", "graphql", "ws", "wh", "sse", "ai");
 
     public static final String PERMISSION_ALLOW = "ALLOW";
     public static final String PERMISSION_DENY = "DENY";

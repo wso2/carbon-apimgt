@@ -15626,18 +15626,18 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Add API - AWS API mapping
+     * Add API - External API mapping
      *
      * @param apiId API ID
-     * @param aWSApiId AWS API ID
      * @param environmentId Gateway environment ID
+     * @param referenceArtifact Reference Artifact
      * @throws APIManagementException if failed to add the mapping
      */
-    public void addApiAWSApiMapping(String apiId, String aWSApiId, String environmentId)
+    public void addApiExternalApiMapping(String apiId, String environmentId, String referenceArtifact)
             throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
-        String query = SQLConstants.ADD_API_AWS_API_MAPPING_SQL;
+        String query = SQLConstants.ADD_API_EXTERNAL_API_MAPPING_SQL;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -15645,7 +15645,46 @@ public class ApiMgtDAO {
 
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, apiId);
-            prepStmt.setString(2, aWSApiId);
+            prepStmt.setString(2, environmentId);
+            prepStmt.setBinaryStream(3, new ByteArrayInputStream(referenceArtifact.getBytes()));
+            prepStmt.execute();
+
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                log.error("Failed to rollback the add API - External API Mapping for API ID: " + apiId, ex);
+            }
+            handleException("Error while adding API - External API Mapping for API ID: " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
+    /**
+     * Update API - External API mapping
+     *
+     * @param apiId API ID
+     * @param environmentId Gateway environment ID
+     * @param referenceArtifact Reference Artifact
+     * @throws APIManagementException if failed to add the mapping
+     */
+    public void updateApiExternalApiMapping(String apiId, String environmentId, String referenceArtifact)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        String query = SQLConstants.UPDATE_API_EXTERNAL_API_MAPPING_SQL;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setBinaryStream(1, new ByteArrayInputStream(referenceArtifact.getBytes()));
+            prepStmt.setString(2, apiId);
             prepStmt.setString(3, environmentId);
             prepStmt.execute();
 
@@ -15656,53 +15695,60 @@ public class ApiMgtDAO {
                     connection.rollback();
                 }
             } catch (SQLException ex) {
-                log.error("Failed to rollback the add API - AWS API Mapping: API ID: "
-                        + apiId + " AWS API ID: " + aWSApiId, ex);
+                log.error("Failed to rollback the update API - External API Mapping for API ID: " + apiId, ex);
             }
-            handleException("Error while adding mapping between API ID: " + apiId + " and AWS API ID: " + aWSApiId, e);
+            handleException("Error while updating API - External API Mapping for API ID: " + apiId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
     }
 
     /**
-     * Get API - AWS API mapping by API ID
+     * Get Reference Artifact of the API-External API mapping by API ID and Environment ID
      *
      * @param apiId API ID
      * @param environmentId Environment ID
      * @throws APIManagementException if failed to get the mapping
      */
-    public String getApiAWSApiMapping(String apiId, String environmentId)
+    public String getApiExternalApiMappingReference(String apiId, String environmentId)
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement =
-                     connection.prepareStatement(SQLConstants.GET_API_AWS_API_MAPPING_BY_API_ID_SQL)) {
+                     connection.prepareStatement(SQLConstants.GET_REFERENCE_ARTIFACT_BY_API_ID_SQL)) {
             statement.setString(1, apiId);
             statement.setString(2, environmentId);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {
-                    return resultSet.getString("AWS_API_ID");
+                    try (InputStream referenceArtifactStream =
+                                 resultSet.getBinaryStream("REFERENCE_ARTIFACT")) {
+                        if (referenceArtifactStream != null) {
+                            return IOUtils.toString(referenceArtifactStream);
+                        }
+                    } catch (IOException e) {
+                        handleException("Error while retrieving the Reference Artifact of the external API for the " +
+                                "API ID: " + apiId, e);
+                    }
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to fetch API - AWS API mapping for the API ID: " + apiId, e);
+            handleException("Failed to fetch API - External API mapping for the API ID: " + apiId, e);
         }
         return null;
     }
 
     /**
-     * Delete API - AWS API mapping by API ID
+     * Delete API - External API mapping by API ID
      *
      * @param apiId API ID
      * @param environmentId Environment ID
      * @throws APIManagementException if failed to get the mapping
      */
-    public void deleteApiAWSApiMapping(String apiId, String environmentId)
+    public void deleteApiExternalApiMapping(String apiId, String environmentId)
             throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
-        String query = SQLConstants.DELETE_API_AWS_API_MAPPING_SQL;
+        String query = SQLConstants.DELETE_API_EXTERNAL_API_MAPPING_SQL;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -15720,26 +15766,26 @@ public class ApiMgtDAO {
                     connection.rollback();
                 }
             } catch (SQLException ex) {
-                log.error("Failed to rollback the delete API - AWS API Mapping: API ID: "
+                log.error("Failed to rollback the delete API - External API Mapping: API ID: "
                         + apiId, ex);
             }
-            handleException("Error while deleting API - AWS API mapping for API ID: " + apiId, e);
+            handleException("Error while deleting API - External API mapping for API ID: " + apiId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }
     }
 
     /**
-     * Delete all API - AWS API mapping for given API ID
+     * Delete all API - External API mapping for given API ID
      *
      * @param apiId API ID
      * @throws APIManagementException if failed to get the mapping
      */
-    public void deleteApiAWSApiMappings(String apiId)
+    public void deleteApiExternalApiMappings(String apiId)
             throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
-        String query = SQLConstants.DELETE_API_AWS_API_MAPPINGS_SQL;
+        String query = SQLConstants.DELETE_API_EXTERNAL_API_MAPPINGS_SQL;
 
         try {
             connection = APIMgtDBUtil.getConnection();
@@ -15756,10 +15802,10 @@ public class ApiMgtDAO {
                     connection.rollback();
                 }
             } catch (SQLException ex) {
-                log.error("Failed to rollback the delete API - AWS API Mappings: API ID: "
+                log.error("Failed to rollback the delete API - External API Mappings: API ID: "
                         + apiId, ex);
             }
-            handleException("Error while deleting API - AWS API mappings for API ID: " + apiId, e);
+            handleException("Error while deleting API - External API mappings for API ID: " + apiId, e);
         } finally {
             APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
         }

@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayFeatureCatalogDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsCustomPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberContactAttributeDTO;
@@ -29,7 +30,7 @@ public class SettingsDTO   {
     private String devportalUrl = null;
     private List<EnvironmentDTO> environment = new ArrayList<EnvironmentDTO>();
     private List<String> gatewayTypes = new ArrayList<String>();
-    private String gatewayFeatureCatalog = null;
+    private GatewayFeatureCatalogDTO gatewayFeatureCatalog = null;
     private List<String> scopes = new ArrayList<String>();
     private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<MonetizationAttributeDTO>();
     private List<SubscriberContactAttributeDTO> subscriberContactAttributes = new ArrayList<SubscriberContactAttributeDTO>();
@@ -102,18 +103,19 @@ public class SettingsDTO   {
 
   /**
    **/
-  public SettingsDTO gatewayFeatureCatalog(String gatewayFeatureCatalog) {
+  public SettingsDTO gatewayFeatureCatalog(GatewayFeatureCatalogDTO gatewayFeatureCatalog) {
     this.gatewayFeatureCatalog = gatewayFeatureCatalog;
     return this;
   }
 
   
-  @ApiModelProperty(example = "{\"REGULAR\": {\"runtime\": [\"cors\", \"schemaValidation\", \"responseCaching\", \"transportsHTTP\", \"transportsHTTPS\", \"transportsMutualSSL\", \"oauth2\", \"apikey\", \"basicAuth\", \"audienceValidation\"], \"resources\": [\"apiLevelRateLimiting\", \"operationLevelRateLimiting\", \"operationSecurity\"], \"localScopes\": [\"operationScopes\"], \"policies\": [\"operationLevelPolicies\"], \"monetization\": [\"monetization\"], \"subscriptions\": [\"subscriptions\"], \"endpoints\": [\"restEndpoints\", \"serviceEndpoints\", \"soapEndpoints\", \"dynamicEndpoints\", \"mockEndpoints\", \"lambdaEndpoints\", \"sequenceEndpoints\"]}}", value = "")
-  @JsonProperty("gatewayFeatureCatalog")
-  public String getGatewayFeatureCatalog() {
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("GatewayFeatureCatalog")
+  public GatewayFeatureCatalogDTO getGatewayFeatureCatalog() {
     return gatewayFeatureCatalog;
   }
-  public void setGatewayFeatureCatalog(String gatewayFeatureCatalog) {
+  public void setGatewayFeatureCatalog(GatewayFeatureCatalogDTO gatewayFeatureCatalog) {
     this.gatewayFeatureCatalog = gatewayFeatureCatalog;
   }
 

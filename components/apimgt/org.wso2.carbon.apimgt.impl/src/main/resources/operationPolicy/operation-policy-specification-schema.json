@@ -42,7 +42,8 @@
         "type": "string",
         "enum": [
           "Synapse",
-          "ChoreoConnect"
+          "ChoreoConnect",
+          "AWS"
         ]
       },
       "minItems": 1

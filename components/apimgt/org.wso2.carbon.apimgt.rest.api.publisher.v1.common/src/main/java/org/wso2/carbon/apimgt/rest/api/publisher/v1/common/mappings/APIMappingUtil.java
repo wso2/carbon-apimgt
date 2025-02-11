@@ -66,6 +66,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
+import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.lifecycle.CheckListItem;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
@@ -515,6 +517,16 @@ public class APIMappingUtil {
                     AIConfiguration.class));
         } else {
             model.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
+        }
+        ExternalGatewayDeployer deployer =
+                org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
+                        .getExternalGatewayDeployer(model.getGatewayType());
+        if (deployer != null) {
+            try {
+                deployer.applyGatewayStandards(model);
+            } catch (DeployerException e) {
+                throw new APIManagementException("Error while applying gateway standards to the API. ", e);
+            }
         }
         return model;
     }
@@ -1851,7 +1863,7 @@ public class APIMappingUtil {
         Set<URITemplate> uriTemplates = new LinkedHashSet<>();
 
         if (operations == null || operations.isEmpty()) {
-            operations = getDefaultOperationsList(model.getType(), model.getGatewayType());
+            operations = getDefaultOperationsList(model.getType());
         }
 
         for (APIOperationsDTO operation : operations) {
@@ -2451,7 +2463,7 @@ public class APIMappingUtil {
      *
      * @return a default operations list
      */
-    private static List<APIOperationsDTO> getDefaultOperationsList(String apiType, String gatewayType) {
+    private static List<APIOperationsDTO> getDefaultOperationsList(String apiType) {
 
         List<APIOperationsDTO> operationsDTOs = new ArrayList<>();
         String[] supportedMethods;
@@ -2478,12 +2490,7 @@ public class APIMappingUtil {
             if (apiType.equals((APIConstants.API_TYPE_WEBSUB))) {
                 operationsDTO.setTarget(APIConstants.WEBSUB_DEFAULT_TOPIC_NAME);
             } else {
-                // Wildcard resources are handled from "/" in AWS gateway
-                if (APIConstants.AWS_GATEWAY.equalsIgnoreCase(gatewayType)) {
-                    operationsDTO.setTarget("/");
-                } else {
-                    operationsDTO.setTarget("/*");
-                }
+                operationsDTO.setTarget("/*");
             }
             operationsDTO.setVerb(verb);
             operationsDTO.setThrottlingPolicy(defaultThrottlingPolicy);

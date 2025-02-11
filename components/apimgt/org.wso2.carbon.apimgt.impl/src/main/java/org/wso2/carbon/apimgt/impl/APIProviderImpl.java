@@ -121,7 +121,6 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
-import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
@@ -2547,9 +2546,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // Remove API-Label mappings
                 removeAPILabelMappings(apiUuid);
 
-                // Delete mappings for AWS deployed APIs
-                if (api.getGatewayType().equalsIgnoreCase(APIConstants.AWS_GATEWAY)) {
-                    APIUtil.deleteApiAWSApiMappings(api.getUuid());
+                // Delete mappings for External deployed APIs
+                if (!api.getGatewayVendor().equalsIgnoreCase(APIConstants.WSO2_GATEWAY_ENVIRONMENT)) {
+                    APIUtil.deleteApiExternalApiMappings(api.getUuid());
                 }
 
                 // Remove Custom Backend entries of the API

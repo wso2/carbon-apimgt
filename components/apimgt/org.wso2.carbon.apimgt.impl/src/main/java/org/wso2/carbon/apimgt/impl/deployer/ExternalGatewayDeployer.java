@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.impl.deployer;
 
+import com.google.gson.JsonObject;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
@@ -78,9 +79,9 @@ public interface ExternalGatewayDeployer {
     /**
      * This method returns the Gateway Feature Catalog
      *
-     * @return JSON String Gateway Feature Catalog
+     * @return JSON object Gateway Feature Catalog
      */
-    public String getGatewayFeatureCatalog();
+    public JsonObject getGatewayFeatureCatalog() throws DeployerException;
 
     /**
      * This method returns the validation result of a given API with the external gateway
@@ -95,4 +96,11 @@ public interface ExternalGatewayDeployer {
      * @return String api execution url
      */
     public String getAPIExecutionURL(String apiId, String url, Environment environment) throws DeployerException;
+
+    /**
+     * This method returns refined API by manipulating the API object according to the external gateway requirements
+     *
+     * @return API api object
+     */
+    public void applyGatewayStandards(API api) throws DeployerException;
 }

@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.apimgt.solace.deployer;
 
+import com.google.gson.JsonObject;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import org.apache.commons.logging.Log;
@@ -343,11 +344,11 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
     /**
      * This method returns the Gateway Feature Catalog
      *
-     * @return JSON String Gateway Feature Catalog
+     * @return JSON Object Gateway Feature Catalog
      */
     @Override
-    public String getGatewayFeatureCatalog() {
-        return "";
+    public JsonObject getGatewayFeatureCatalog() {
+        return null;
     }
 
     /**
@@ -360,9 +361,23 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
         return new ArrayList<>();
     }
 
+    /**
+     * This method returns the resolved API execution URL by replacing all placeholders appropriately
+     *
+     * @return String api execution url
+     */
     @Override
     public String getAPIExecutionURL(String apiId, String url, Environment environment) throws DeployerException {
         return url;
+    }
+
+    /**
+     * This method returns refined API by manipulating the API object according to the external gateway requirements
+     *
+     */
+    @Override
+    public void applyGatewayStandards(API api) throws DeployerException {
+        // No need to implement
     }
 
 }

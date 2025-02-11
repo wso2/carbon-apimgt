@@ -8545,12 +8545,12 @@ paths:
   /apis/{apiId}/labels:
     get:
       tags:
-          - API Labels
+        - API Labels
       summary: Get Labels of an API
       description: |
-          This operation can be used to get the labels of an API.
+        This operation can be used to get the labels of an API.
       parameters:
-          - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/apiId'
       responses:
         200:
           description: |
@@ -8563,14 +8563,14 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
       security:
-          - OAuth2Security:
-              - apim:api_view
-              - apim:api_create
-              - apim:api_manage
-              - apim:api_publish
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
       x-code-samples:
-          - lang: Curl
-            source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/labels"'
       operationId: getLabelsOfAPI
 
@@ -13430,9 +13430,20 @@ components:
             - AWS
           items:
             type: string
-        gatewayFeatureCatalog:
-          type: string
-          example: "{\"REGULAR\": {\"runtime\": [\"cors\", \"schemaValidation\", \"responseCaching\", \"transportsHTTP\", \"transportsHTTPS\", \"transportsMutualSSL\", \"oauth2\", \"apikey\", \"basicAuth\", \"audienceValidation\"], \"resources\": [\"apiLevelRateLimiting\", \"operationLevelRateLimiting\", \"operationSecurity\"], \"localScopes\": [\"operationScopes\"], \"policies\": [\"operationLevelPolicies\"], \"monetization\": [\"monetization\"], \"subscriptions\": [\"subscriptions\"], \"endpoints\": [\"restEndpoints\", \"serviceEndpoints\", \"soapEndpoints\", \"dynamicEndpoints\", \"mockEndpoints\", \"lambdaEndpoints\", \"sequenceEndpoints\"]}}"
+        GatewayFeatureCatalog:
+          title: Gateway feature Catalog
+          type: object
+          properties:
+            gatewayFeatures:
+              type: object
+              additionalProperties:
+                type: object
+            apiTypes:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
         scopes:
           type: array
           example:

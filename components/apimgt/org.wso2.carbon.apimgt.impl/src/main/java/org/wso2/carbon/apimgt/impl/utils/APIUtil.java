@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -109,6 +110,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayFeatureCatalog;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
@@ -162,6 +164,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.CorrelationConfigDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
+import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
@@ -171,7 +174,6 @@ import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.DataLoadingException;
-import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -248,6 +250,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -3369,48 +3372,106 @@ public final class APIUtil {
         return gatewayTypesList;
     }
 
-    public static String getGatewayFeatureCatalog() {
+    public static GatewayFeatureCatalog getGatewayFeatureCatalog() throws APIManagementException {
+
         Gson gson = new Gson();
+        Type type = new TypeToken<Map<String, Object>>() {}.getType();
+        Map<String, Object> gatewayConfigsMap = new HashMap<>();
+        Map<String, List<String>> apiData = new HashMap<>();
+        JsonObject synapseConfigJSON = null;
+        JsonObject apkConfigJSON = null;
+        try (InputStream synapseInputStream = APIUtil.class.getClassLoader()
+                .getResourceAsStream("gatewayFeatureCatalog/synapse-gateway-feature-catalog.json")) {
+            if (synapseInputStream == null) {
+                throw new APIManagementException("Synapse Gateway Feature Catalog JSON not found");
+            }
+            InputStreamReader reader = new InputStreamReader(synapseInputStream, StandardCharsets.UTF_8);
+            synapseConfigJSON = JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading Synapse Gateway Feature Catalog JSON", e);
+        }
 
-        JsonObject synapseJSON = gson.fromJson(APIConstants.SYNAPSE_GATEWAY_FEATURES, JsonObject.class);
-        JsonObject apkJSON = gson.fromJson(APIConstants.APK_GATEWAY_FEATURES, JsonObject.class);
-        JsonObject apiData = gson.fromJson(APIConstants.API_DATA, JsonObject.class);
+        try (InputStream apkInputStream = APIUtil.class.getClassLoader()
+                .getResourceAsStream("gatewayFeatureCatalog/apk-gateway-feature-catalog.json")) {
+            if (apkInputStream == null) {
+                throw new APIManagementException("APK Gateway Feature Catalog JSON not found");
+            }
+            InputStreamReader reader = new InputStreamReader(apkInputStream, StandardCharsets.UTF_8);
+            apkConfigJSON = JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading APK Gateway Feature Catalog JSON", e);
+        }
 
-        JsonObject gatewayFeatures = new JsonObject();
-        gatewayFeatures.add(APIConstants.WSO2_SYNAPSE_GATEWAY, synapseJSON);
-        gatewayFeatures.add(APIConstants.WSO2_APK_GATEWAY, apkJSON);
+        if (synapseConfigJSON == null || apkConfigJSON == null) {
+            throw new APIManagementException("Error while reading Gateway Feature Catalog JSON");
+        }
+
+        JsonObject synapseConfigsJSONValue = synapseConfigJSON.getAsJsonObject(APIConstants.WSO2_SYNAPSE_GATEWAY);
+        JsonObject apkConfigsJSONValue = apkConfigJSON.getAsJsonObject(APIConstants.WSO2_APK_GATEWAY);
+
+        JsonObject synapseJSON = synapseConfigsJSONValue.getAsJsonObject("gatewayFeatures");
+        JsonObject apkJSON = apkConfigsJSONValue.getAsJsonObject("gatewayFeatures");
+
+        Map<String, Object> synapseMap = gson.fromJson(synapseJSON, type);
+        Map<String, Object> apkMap = gson.fromJson(apkJSON, type);
+
+        gatewayConfigsMap.put(APIConstants.WSO2_SYNAPSE_GATEWAY, synapseMap);
+        gatewayConfigsMap.put(APIConstants.WSO2_APK_GATEWAY, apkMap);
+
+        JsonArray synapseApiTypes = synapseConfigsJSONValue.getAsJsonArray("apiTypes");
+        JsonArray apkApiTypes = apkConfigsJSONValue.getAsJsonArray("apiTypes");
+        for (String key : APIConstants.API_TYPES) {
+            apiData.put(key, new ArrayList<>());
+        }
+
+        for (int i = 0; i < synapseApiTypes.size(); i++) {
+            String apiType = synapseApiTypes.get(i).getAsString();
+            if (apiData.containsKey(apiType)) {
+                apiData.get(apiType).add(APIConstants.WSO2_SYNAPSE_GATEWAY);
+            }
+        }
+
+        for (int i = 0; i < apkApiTypes.size(); i++) {
+            String apiType = apkApiTypes.get(i).getAsString();
+            if (apiData.containsKey(apiType)) {
+                apiData.get(apiType).add(APIConstants.WSO2_APK_GATEWAY);
+            }
+        }
 
         Map<String, ExternalGatewayDeployer> externalGatewayConnectorConfigurationMap =
                 ServiceReferenceHolder.getInstance().getExternalGatewayDeployers();
         externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
-            String externalGatewayFeatures = gatewayConfiguration.getGatewayFeatureCatalog();
+            JsonObject configsJSON = null;
+            try {
+                configsJSON = gatewayConfiguration.getGatewayFeatureCatalog();
+            } catch (DeployerException e) {
+                throw new RuntimeException(e);
+            }
 
-            if (!externalGatewayFeatures.equalsIgnoreCase("")) {
-                JsonObject configsJSON = gson.fromJson(externalGatewayFeatures, JsonObject.class);
+            if (configsJSON != null) {
                 Set<String> keys = configsJSON.keySet();
                 String gatewayType = keys.iterator().next();
 
                 JsonObject configsJSONValue = configsJSON.getAsJsonObject(gatewayType);
-
-                JsonObject features = configsJSONValue.getAsJsonObject("gatewayFeatures");
-                gatewayFeatures.add(gatewayType, features);
+                JsonObject gwFeatures = configsJSONValue.getAsJsonObject("gatewayFeatures");
+                Map<String, Object> configsMap = gson.fromJson(gwFeatures, type);
+                gatewayConfigsMap.put(gatewayType, configsMap);
 
                 JsonArray types = configsJSONValue.getAsJsonArray("apiTypes");
                 for (int i = 0; i < types.size(); i++) {
                     String apiType = types.get(i).getAsString();
-                    if (apiData.has(apiType)) {
-                        JsonArray existingGateways = apiData.getAsJsonArray(apiType);
-                        existingGateways.add(gatewayType);
+                    if (apiData.containsKey(apiType)) {
+                        apiData.get(apiType).add(gatewayType);
                     }
                 }
             }
         });
 
-        JsonObject result = new JsonObject();
-        result.add("gatewayFeatures", gatewayFeatures);
-        result.add("apiTypes", apiData);
+        GatewayFeatureCatalog gatewayFeatureCatalog = new GatewayFeatureCatalog();
+        gatewayFeatureCatalog.setApiTypes(apiData);
+        gatewayFeatureCatalog.setGatewayFeatures(gatewayConfigsMap);
 
-        return result.toString();
+        return gatewayFeatureCatalog;
     }
 
     /**
@@ -8251,27 +8312,34 @@ public final class APIUtil {
         return allEnvironments;
     }
 
-    public static void addApiAWSApiMapping(String apiId, String aWSApiId, String environmentId)
+    // Federated Gateway related API Reference mapping methods
+    public static void addApiExternalApiMapping(String apiId, String environmentId, String referenceArtifact)
             throws APIManagementException {
 
-        ApiMgtDAO.getInstance().addApiAWSApiMapping(apiId, aWSApiId, environmentId);
+        ApiMgtDAO.getInstance().addApiExternalApiMapping(apiId, environmentId, referenceArtifact);
     }
 
-    public static String getApiAWSApiMappingByApiId(String apiId, String environmentId)
+    public static void updateApiExternalApiMapping(String apiId, String environmentId, String referenceArtifact)
             throws APIManagementException {
 
-        return ApiMgtDAO.getInstance().getApiAWSApiMapping(apiId, environmentId);
+        ApiMgtDAO.getInstance().updateApiExternalApiMapping(apiId, environmentId, referenceArtifact);
     }
 
-    public static void deleteApiAWSApiMapping(String apiId, String environmentId)
+    public static String getApiExternalApiMappingReferenceByApiId(String apiId, String environmentId)
             throws APIManagementException {
 
-        ApiMgtDAO.getInstance().deleteApiAWSApiMapping(apiId, environmentId);
+        return ApiMgtDAO.getInstance().getApiExternalApiMappingReference(apiId, environmentId);
     }
 
-    public static void deleteApiAWSApiMappings(String apiId) throws APIManagementException {
+    public static void deleteApiExternalApiMapping(String apiId, String environmentId)
+            throws APIManagementException {
 
-        ApiMgtDAO.getInstance().deleteApiAWSApiMappings(apiId);
+        ApiMgtDAO.getInstance().deleteApiExternalApiMapping(apiId, environmentId);
+    }
+
+    public static void deleteApiExternalApiMappings(String apiId) throws APIManagementException {
+
+        ApiMgtDAO.getInstance().deleteApiExternalApiMappings(apiId);
     }
 
     /**
