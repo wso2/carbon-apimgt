@@ -262,9 +262,9 @@ paths:
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/apis"'
       operationId: createAPI
 
-  ######################################################
+  #######################################################
   # The "API Design Assistant - Chat" resource APIs
-  ######################################################
+  #######################################################
   /design-assistant/chat:
     post:
       tags:
@@ -301,7 +301,7 @@ paths:
             - apim:api_manage
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -X POST -H "Content-Type: application/json" -d "{\"text\": \"create an API for a banking transaction.\", \"session_id\": \"1234567890\"}" "https://127.0.0.1:9443/api/am/publisher/v4/design-assistant/chat"'
+          source: 'curl -k -X POST -H Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d "{\"text\": \"create an API for a banking transaction.\", \"session_id\": \"1234567890\"}" "https://127.0.0.1:9443/api/am/publisher/v4/design-assistant/chat"'
       operationId: designAssistantChat
 
   ######################################################################
@@ -8624,12 +8624,12 @@ paths:
   /apis/{apiId}/labels:
     get:
       tags:
-        - API Labels
+          - API Labels
       summary: Get Labels of an API
       description: |
-        This operation can be used to get the labels of an API.
+          This operation can be used to get the labels of an API.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+          - $ref: '#/components/parameters/apiId'
       responses:
         200:
           description: |
@@ -8642,14 +8642,14 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
       security:
-        - OAuth2Security:
-            - apim:api_view
-            - apim:api_create
-            - apim:api_manage
-            - apim:api_publish
+          - OAuth2Security:
+              - apim:api_view
+              - apim:api_create
+              - apim:api_manage
+              - apim:api_publish
       x-code-samples:
-        - lang: Curl
-          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          - lang: Curl
+            source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/labels"'
       operationId: getLabelsOfAPI
 
