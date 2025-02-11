@@ -33,30 +33,29 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * This class represents the Policy Mapping Utility
+ * This class represents the Policy Attachment Mapping Utility
  */
 public class PolicyAttachmentMappingUtil {
 
     /**
-     * Converts a GovernancePolicyDTO object to
-     * a APIMGovernancePolicy object
+     * Converts a GovernancePolicyAttachmentDTO object to a APIMGovernancePolicyAttachment object
      *
-     * @param dto GovernancePolicyDTO object
-     * @return APIMGovernancePolicy object
+     * @param dto APIMGovernancePolicyAttachmentDTO object
+     * @return APIMGovernancePolicyAttachment object
      */
     public static APIMGovernancePolicyAttachment fromDTOtoGovernancePolicyAttachment
     (APIMGovernancePolicyAttachmentDTO dto) {
-        APIMGovernancePolicyAttachment govPolicy = new APIMGovernancePolicyAttachment();
-        govPolicy.setId(dto.getId());
-        govPolicy.setName(dto.getName());
-        govPolicy.setDescription(dto.getDescription());
-        govPolicy.setCreatedBy(dto.getCreatedBy());
-        govPolicy.setCreatedBy(dto.getCreatedBy());
-        govPolicy.setUpdatedBy(dto.getUpdatedBy());
-        govPolicy.setUpdatedTime(dto.getUpdatedTime());
-        govPolicy.setPolicyIds(dto.getPolicies());
-        govPolicy.setActions(fromActionDTOListtoActionList(dto.getActions()));
-        govPolicy.setGovernableStates(dto.getGovernableStates().stream()
+        APIMGovernancePolicyAttachment attachment = new APIMGovernancePolicyAttachment();
+        attachment.setId(dto.getId());
+        attachment.setName(dto.getName());
+        attachment.setDescription(dto.getDescription());
+        attachment.setCreatedBy(dto.getCreatedBy());
+        attachment.setCreatedBy(dto.getCreatedBy());
+        attachment.setUpdatedBy(dto.getUpdatedBy());
+        attachment.setUpdatedTime(dto.getUpdatedTime());
+        attachment.setPolicyIds(dto.getPolicies());
+        attachment.setActions(fromActionDTOListtoActionList(dto.getActions()));
+        attachment.setGovernableStates(dto.getGovernableStates().stream()
                 .map(Enum::name)
                 .map(APIMGovernableState::fromString)
                 .collect(Collectors.toList()));
@@ -64,46 +63,46 @@ public class PolicyAttachmentMappingUtil {
         List<String> labels = dto.getLabels();
         if (labels != null && labels.stream().anyMatch(label -> label
                 .equalsIgnoreCase(APIMGovernanceConstants.GLOBAL_LABEL))) {
-            govPolicy.setGlobal(true);
-            govPolicy.setLabels(Collections.emptyList());
+            attachment.setGlobal(true);
+            attachment.setLabels(Collections.emptyList());
         } else {
-            govPolicy.setLabels(labels);
+            attachment.setLabels(labels);
         }
 
-        return govPolicy;
+        return attachment;
     }
 
     /**
-     * Converts a APIMGovernancePolicy object to a GovernancePolicyDTO object
+     * Converts a APIMGovernancePolicyAttachment object to a GovernancePolicyAttachmentDTO object
      *
-     * @param governancePolicyAttachment APIMGovernancePolicy object
+     * @param attachment APIMGovernancePolicyAttachment object
      * @return GovernancePolicyDTO object
      */
     public static APIMGovernancePolicyAttachmentDTO fromGovernancePolicyAttachmentToGovernancePolicyAttachmentDTO
-    (APIMGovernancePolicyAttachment governancePolicyAttachment) {
-        APIMGovernancePolicyAttachmentDTO governancePolicyDTO = new APIMGovernancePolicyAttachmentDTO();
-        governancePolicyDTO.setId(governancePolicyAttachment.getId());
-        governancePolicyDTO.setName(governancePolicyAttachment.getName());
-        governancePolicyDTO.setDescription(governancePolicyAttachment.getDescription());
-        governancePolicyDTO.setCreatedBy(governancePolicyAttachment.getCreatedBy());
-        governancePolicyDTO.setCreatedTime(governancePolicyAttachment.getCreatedTime());
-        governancePolicyDTO.setUpdatedBy(governancePolicyAttachment.getUpdatedBy());
-        governancePolicyDTO.setUpdatedTime(governancePolicyAttachment.getUpdatedTime());
-        governancePolicyDTO.setLabels(governancePolicyAttachment.getLabels());
-        governancePolicyDTO.setPolicies(governancePolicyAttachment.getPolicyIds());
-        governancePolicyDTO.setActions(
-                fromActionListtoActionDTOList(governancePolicyAttachment.getActions()));
-        governancePolicyDTO.setGovernableStates(governancePolicyAttachment.getGovernableStates().stream()
+    (APIMGovernancePolicyAttachment attachment) {
+        APIMGovernancePolicyAttachmentDTO attachmentDTO = new APIMGovernancePolicyAttachmentDTO();
+        attachmentDTO.setId(attachment.getId());
+        attachmentDTO.setName(attachment.getName());
+        attachmentDTO.setDescription(attachment.getDescription());
+        attachmentDTO.setCreatedBy(attachment.getCreatedBy());
+        attachmentDTO.setCreatedTime(attachment.getCreatedTime());
+        attachmentDTO.setUpdatedBy(attachment.getUpdatedBy());
+        attachmentDTO.setUpdatedTime(attachment.getUpdatedTime());
+        attachmentDTO.setLabels(attachment.getLabels());
+        attachmentDTO.setPolicies(attachment.getPolicyIds());
+        attachmentDTO.setActions(
+                fromActionListtoActionDTOList(attachment.getActions()));
+        attachmentDTO.setGovernableStates(attachment.getGovernableStates().stream()
                 .map(Enum::name)
                 .map(APIMGovernancePolicyAttachmentDTO.GovernableStatesEnum::valueOf)
                 .collect(Collectors.toList()));
-        if (governancePolicyAttachment.isGlobal()) {
-            governancePolicyDTO.setLabels(new ArrayList<>(Collections
+        if (attachment.isGlobal()) {
+            attachmentDTO.setLabels(new ArrayList<>(Collections
                     .singleton(APIMGovernanceConstants.GLOBAL_LABEL)));
         } else {
-            governancePolicyDTO.setLabels(governancePolicyAttachment.getLabels());
+            attachmentDTO.setLabels(attachment.getLabels());
         }
-        return governancePolicyDTO;
+        return attachmentDTO;
     }
 
     /**

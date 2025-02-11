@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryForPolicyDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactCompSummaryForPolicyAttachmentDTO;
 import javax.validation.constraints.*;
 
 /**
@@ -59,7 +59,7 @@ return null;
         }
     } 
     private StatusEnum status = null;
-    private ArtifactComplianceSummaryForPolicyDTO artifactComplianceSummary = null;
+    private ArtifactCompSummaryForPolicyAttachmentDTO artifactComplianceSummary = null;
 
   /**
    * UUID of the policy attachment.
@@ -117,7 +117,7 @@ return null;
 
   /**
    **/
-  public PolicyAttachmentAdherenceStatusDTO artifactComplianceSummary(ArtifactComplianceSummaryForPolicyDTO artifactComplianceSummary) {
+  public PolicyAttachmentAdherenceStatusDTO artifactComplianceSummary(ArtifactCompSummaryForPolicyAttachmentDTO artifactComplianceSummary) {
     this.artifactComplianceSummary = artifactComplianceSummary;
     return this;
   }
@@ -126,10 +126,10 @@ return null;
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("artifactComplianceSummary")
-  public ArtifactComplianceSummaryForPolicyDTO getArtifactComplianceSummary() {
+  public ArtifactCompSummaryForPolicyAttachmentDTO getArtifactComplianceSummary() {
     return artifactComplianceSummary;
   }
-  public void setArtifactComplianceSummary(ArtifactComplianceSummaryForPolicyDTO artifactComplianceSummary) {
+  public void setArtifactComplianceSummary(ArtifactCompSummaryForPolicyAttachmentDTO artifactComplianceSummary) {
     this.artifactComplianceSummary = artifactComplianceSummary;
   }
 

@@ -26,12 +26,12 @@ import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.PolicyCategory;
-import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
 import org.wso2.carbon.apimgt.governance.api.model.Policy;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyCategory;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyContent;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyInfo;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyList;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
 import org.wso2.carbon.apimgt.governance.rest.api.PoliciesApiService;
@@ -54,7 +54,7 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 
 /**
- * This is the implementation class for the Policys API.
+ * This is the implementation class for the Policies API.
  */
 public class PoliciesApiServiceImpl implements PoliciesApiService {
 
@@ -263,7 +263,7 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
     }
 
     /**
-     * Get all the Governance Policys
+     * Get all the Governance Policies
      *
      * @param limit          Limit
      * @param offset         Offset
@@ -294,17 +294,17 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
     }
 
     /**
-     * Get the paginated list of Governance Policys
+     * Get the paginated list of Governance Policies
      *
      * @param policyList PolicyList object
-     * @param limit       Limit
-     * @param offset      Offset
-     * @param query       Query for filtering
+     * @param limit      Limit
+     * @param offset     Offset
+     * @param query      Query for filtering
      * @return PolicyListDTO object
      */
     private PolicyListDTO getPaginatedPolicies(PolicyList policyList, int limit, int offset, String query) {
         int policyCount = policyList.getCount();
-        List<PolicyInfoDTO> paginatedPolicys = new ArrayList<>();
+        List<PolicyInfoDTO> paginatedPolicies = new ArrayList<>();
         PolicyListDTO paginatedPolicyListDTO = new PolicyListDTO();
         paginatedPolicyListDTO.setCount(Math.min(policyCount, limit));
 
@@ -319,9 +319,9 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
         for (int i = start; i < end; i++) {
             PolicyInfo policyInfo = policyList.getPolicyList().get(i);
             PolicyInfoDTO policyInfoDTO = PolicyMappingUtil.fromPolicyInfoToPolicyInfoDTO(policyInfo);
-            paginatedPolicys.add(policyInfoDTO);
+            paginatedPolicies.add(policyInfoDTO);
         }
-        paginatedPolicyListDTO.setList(paginatedPolicys);
+        paginatedPolicyListDTO.setList(paginatedPolicies);
 
         PaginationDTO paginationDTO = new PaginationDTO();
         paginationDTO.setLimit(limit);
