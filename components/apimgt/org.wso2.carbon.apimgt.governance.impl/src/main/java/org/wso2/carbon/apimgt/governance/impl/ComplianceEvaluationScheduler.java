@@ -30,7 +30,7 @@ import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
-import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
+import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyAttachmentMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
@@ -268,7 +268,7 @@ public class ComplianceEvaluationScheduler {
                 .getValidationEngineService().getValidationEngine();
 
         // Validate the artifact against each policy in the policy attachment
-        List<Policy> policies = GovernancePolicyMgtDAOImpl.getInstance()
+        List<Policy> policies = GovernancePolicyAttachmentMgtDAOImpl.getInstance()
                 .getPoliciesWithContentByPolicyAttachmentId(policyAttachmentId, organization);
 
         Map<String, List<RuleViolation>> policyViolationsMap = new HashMap<>();

@@ -28,7 +28,7 @@ import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicyAttachmen
 import org.wso2.carbon.apimgt.governance.api.model.PolicyInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyAttachmentMgtDAO;
-import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
+import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyAttachmentMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 
 import java.util.HashMap;
@@ -43,7 +43,7 @@ public class PolicyAttachmentManager {
     private final GovernancePolicyAttachmentMgtDAO policyAttachmentMgtDAO;
 
     public PolicyAttachmentManager() {
-        policyAttachmentMgtDAO = GovernancePolicyMgtDAOImpl.getInstance();
+        policyAttachmentMgtDAO = GovernancePolicyAttachmentMgtDAOImpl.getInstance();
     }
 
     /**

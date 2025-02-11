@@ -42,7 +42,7 @@ import org.wso2.carbon.apimgt.governance.impl.dao.ComplianceMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyAttachmentMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.PolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
-import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
+import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyAttachmentMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.PolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
@@ -70,7 +70,7 @@ public class ComplianceManager {
 
     public ComplianceManager() {
         complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
-        policyAttachmentMgtDAO = GovernancePolicyMgtDAOImpl.getInstance();
+        policyAttachmentMgtDAO = GovernancePolicyAttachmentMgtDAOImpl.getInstance();
         policyMgtDAO = PolicyMgtDAOImpl.getInstance();
     }
 
@@ -237,7 +237,7 @@ public class ComplianceManager {
 
     public List<RuleViolation> getRuleViolations(String artifactRefId, ArtifactType artifactType,
                                                  String policyId, String organization) throws APIMGovernanceException {
-        return complianceMgtDAO.getPolicyViolations(artifactRefId, artifactType, policyId, organization);
+        return complianceMgtDAO.getPolicyRuleViolations(artifactRefId, artifactType, policyId, organization);
     }
 
     /**
@@ -255,7 +255,7 @@ public class ComplianceManager {
                                                                                             String organization)
             throws APIMGovernanceException {
         List<RuleViolation> ruleViolations = complianceMgtDAO
-                .getPolicyViolationsForArtifact(artifactRefId, artifactType, organization);
+                .getPolicyRuleViolationsForArtifact(artifactRefId, artifactType, organization);
         Map<RuleSeverity, List<RuleViolation>> severityBasedRuleViolations = new HashMap<>();
         for (RuleViolation ruleViolation : ruleViolations) {
             RuleSeverity severity = ruleViolation.getSeverity();
