@@ -79,22 +79,22 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
     }
 
     /**
-     * Get ruleset validation results by Artifact Reference Id
+     * Get policy validation results by Artifact Reference Id
      *
      * @param apiId          API ID
-     * @param rulesetId      ruleset ID
+     * @param policyId       policy ID
      * @param messageContext message context
      * @return Response
-     * @throws APIMGovernanceException if an error occurs while getting the ruleset validation results
+     * @throws APIMGovernanceException if an error occurs while getting the governance policy validation results
      */
-    public Response getPolicyValidationResultsByAPIId(String apiId, String rulesetId, MessageContext messageContext)
+    public Response getPolicyValidationResultsByAPIId(String apiId, String policyId, MessageContext messageContext)
             throws APIMGovernanceException {
 
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
         ArtifactType artifactType = ArtifactType.API;
 
         PolicyValidationResultDTO policyValidationResultDTO = ComplianceAPIUtil
-                .getPolicyValidationResultDTO(apiId, artifactType, rulesetId, organization);
+                .getPolicyValidationResultDTO(apiId, artifactType, policyId, organization);
 
         return Response.ok().entity(policyValidationResultDTO).build();
     }

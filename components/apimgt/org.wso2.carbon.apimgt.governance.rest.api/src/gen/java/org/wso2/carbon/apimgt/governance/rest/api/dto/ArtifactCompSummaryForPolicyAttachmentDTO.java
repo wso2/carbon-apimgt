@@ -21,7 +21,7 @@ import javax.validation.Valid;
 
 @ApiModel(description = "Summary of compliance of artifacts evaluated against a specific policy attachment.")
 
-public class ArtifactComplianceSummaryForPolicyDTO   {
+public class ArtifactCompSummaryForPolicyAttachmentDTO   {
   
     private Integer compliant = null;
     private Integer nonCompliant = null;
@@ -29,7 +29,7 @@ public class ArtifactComplianceSummaryForPolicyDTO   {
   /**
    * Number of compliant artifacts.
    **/
-  public ArtifactComplianceSummaryForPolicyDTO compliant(Integer compliant) {
+  public ArtifactCompSummaryForPolicyAttachmentDTO compliant(Integer compliant) {
     this.compliant = compliant;
     return this;
   }
@@ -47,7 +47,7 @@ public class ArtifactComplianceSummaryForPolicyDTO   {
   /**
    * Number of non-compliant artifacts.
    **/
-  public ArtifactComplianceSummaryForPolicyDTO nonCompliant(Integer nonCompliant) {
+  public ArtifactCompSummaryForPolicyAttachmentDTO nonCompliant(Integer nonCompliant) {
     this.nonCompliant = nonCompliant;
     return this;
   }
@@ -71,9 +71,9 @@ public class ArtifactComplianceSummaryForPolicyDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ArtifactComplianceSummaryForPolicyDTO artifactComplianceSummaryForPolicy = (ArtifactComplianceSummaryForPolicyDTO) o;
-    return Objects.equals(compliant, artifactComplianceSummaryForPolicy.compliant) &&
-        Objects.equals(nonCompliant, artifactComplianceSummaryForPolicy.nonCompliant);
+    ArtifactCompSummaryForPolicyAttachmentDTO artifactCompSummaryForPolicyAttachment = (ArtifactCompSummaryForPolicyAttachmentDTO) o;
+    return Objects.equals(compliant, artifactCompSummaryForPolicyAttachment.compliant) &&
+        Objects.equals(nonCompliant, artifactCompSummaryForPolicyAttachment.nonCompliant);
   }
 
   @Override
@@ -84,7 +84,7 @@ public class ArtifactComplianceSummaryForPolicyDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ArtifactComplianceSummaryForPolicyDTO {\n");
+    sb.append("class ArtifactCompSummaryForPolicyAttachmentDTO {\n");
     
     sb.append("    compliant: ").append(toIndentedString(compliant)).append("\n");
     sb.append("    nonCompliant: ").append(toIndentedString(nonCompliant)).append("\n");

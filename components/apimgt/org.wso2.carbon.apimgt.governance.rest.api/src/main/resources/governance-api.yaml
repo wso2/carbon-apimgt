@@ -1355,8 +1355,8 @@ components:
             - UNAPPLIED
           example: "FOLLOWED"
         artifactComplianceSummary:
-          $ref: '#/components/schemas/ArtifactComplianceSummaryForPolicy'
-    ArtifactComplianceSummaryForPolicy:
+          $ref: '#/components/schemas/ArtifactCompSummaryForPolicyAttachment'
+    ArtifactCompSummaryForPolicyAttachment:
       type: object
       description: Summary of compliance of artifacts evaluated against a specific policy attachment.
       properties:
@@ -1416,7 +1416,7 @@ components:
           type: array
           description: Compliance status of the artifacts evaluated against the policy attachment.
           items:
-            $ref: '#/components/schemas/ArtifactComplianceForPolicy'
+            $ref: '#/components/schemas/ArtifactCompForPolicyAttachment'
     PolicyAttachmentAdherenceWithPolicies:
       type: object
       description: Adherence status of a policy attachment with policy details.
@@ -1442,7 +1442,7 @@ components:
           description: List of policy validation information.
           items:
             $ref: '#/components/schemas/PolicyValidationResultWithoutRules'
-    ArtifactComplianceForPolicy:
+    ArtifactCompForPolicyAttachment:
       type: object
       description: Compliance status of an artifact for a specific policy attachment.
       properties:

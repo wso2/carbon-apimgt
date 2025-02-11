@@ -22,33 +22,33 @@ import org.wso2.carbon.apimgt.governance.api.model.PolicyInfo;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyInfoDTO;
 
 /**
- * This class represents the Ruleset Mapping Utility
+ * This class represents the Policy Mapping Utility
  */
 public class PolicyMappingUtil {
 
     /**
-     * Converts a RulesetInfo object to a PolicyInfoDTO object
+     * Converts a PolicyInfo object to a PolicyInfoDTO object
      *
-     * @param policyInfo RulesetInfo object
+     * @param policyInfo PolicyInfo object
      * @return PolicyInfoDTO object
      */
     public static PolicyInfoDTO fromPolicyInfoToPolicyInfoDTO(PolicyInfo policyInfo) {
-        PolicyInfoDTO rulesetInfoDTO = new PolicyInfoDTO();
-        rulesetInfoDTO.setId(policyInfo.getId());
-        rulesetInfoDTO.setName(policyInfo.getName());
-        rulesetInfoDTO.setDescription(policyInfo.getDescription());
-        rulesetInfoDTO.setRuleCategory(PolicyInfoDTO.
+        PolicyInfoDTO policyInfoDTO = new PolicyInfoDTO();
+        policyInfoDTO.setId(policyInfo.getId());
+        policyInfoDTO.setName(policyInfo.getName());
+        policyInfoDTO.setDescription(policyInfo.getDescription());
+        policyInfoDTO.setRuleCategory(PolicyInfoDTO.
                 RuleCategoryEnum.fromValue(String.valueOf(policyInfo.getPolicyCategory())));
-        rulesetInfoDTO.setRuleType(PolicyInfoDTO.
+        policyInfoDTO.setRuleType(PolicyInfoDTO.
                 RuleTypeEnum.fromValue(String.valueOf(policyInfo.getPolicyType())));
-        rulesetInfoDTO.setArtifactType(PolicyInfoDTO.
+        policyInfoDTO.setArtifactType(PolicyInfoDTO.
                 ArtifactTypeEnum.fromValue(String.valueOf(policyInfo.getArtifactType())));
-        rulesetInfoDTO.setDocumentationLink(policyInfo.getDocumentationLink());
-        rulesetInfoDTO.setProvider(policyInfo.getProvider());
-        rulesetInfoDTO.setCreatedBy(policyInfo.getCreatedBy());
-        rulesetInfoDTO.setCreatedTime(policyInfo.getCreatedTime());
-        rulesetInfoDTO.setUpdatedBy(policyInfo.getUpdatedBy());
-        rulesetInfoDTO.setUpdatedTime(policyInfo.getUpdatedTime());
-        return rulesetInfoDTO;
+        policyInfoDTO.setDocumentationLink(policyInfo.getDocumentationLink());
+        policyInfoDTO.setProvider(policyInfo.getProvider());
+        policyInfoDTO.setCreatedBy(policyInfo.getCreatedBy());
+        policyInfoDTO.setCreatedTime(policyInfo.getCreatedTime());
+        policyInfoDTO.setUpdatedBy(policyInfo.getUpdatedBy());
+        policyInfoDTO.setUpdatedTime(policyInfo.getUpdatedTime());
+        return policyInfoDTO;
     }
 }
