@@ -31,10 +31,10 @@
     <jaxrs:server id="services" address="/">
         <jaxrs:serviceBeans>
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.gateway.SwaggerYamlApi"/>
-            <bean class="org.wso2.carbon.apimgt.governance.rest.api.RulesetsApi"/>
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.PoliciesApi"/>
+            <bean class="org.wso2.carbon.apimgt.governance.rest.api.PolicyAttachmentsApi"/>
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApi"/>
-            <bean class="org.wso2.carbon.apimgt.governance.rest.api.PolicyAdherenceApi"/>
+            <bean class="org.wso2.carbon.apimgt.governance.rest.api.PolicyAttachmentAdherenceApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
