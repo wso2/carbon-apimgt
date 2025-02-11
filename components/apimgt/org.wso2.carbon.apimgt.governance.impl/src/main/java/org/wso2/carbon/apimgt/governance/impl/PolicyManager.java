@@ -260,12 +260,12 @@ public class PolicyManager {
                 String searchValue = parts[1];
 
                 // Add valid prefixes to criteriaMap
-                if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE)) {
-                    criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, searchValue);
-                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE)) {
-                    criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE, searchValue);
-                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.NAME)) {
-                    criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.NAME, searchValue);
+                if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.PolicySearchAttributes.ARTIFACT_TYPE)) {
+                    criteriaMap.put(APIMGovernanceConstants.PolicySearchAttributes.ARTIFACT_TYPE, searchValue);
+                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.PolicySearchAttributes.POLICY_TYPE)) {
+                    criteriaMap.put(APIMGovernanceConstants.PolicySearchAttributes.POLICY_TYPE, searchValue);
+                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.PolicySearchAttributes.NAME)) {
+                    criteriaMap.put(APIMGovernanceConstants.PolicySearchAttributes.NAME, searchValue);
                 }
             }
         }

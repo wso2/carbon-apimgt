@@ -100,7 +100,7 @@ paths:
                 $ref: "#/components/schemas/Error"
       security:
         - OAuth2Security:
-            - apim:gov_rule_read
+            - apim:gov_policy_read
     post:
       summary: Create a new policy.
       description: Creates a new policy in the user's organization.
@@ -147,7 +147,7 @@ paths:
                 $ref: "#/components/schemas/Error"
       security:
         - OAuth2Security:
-            - apim:gov_rule_manage
+            - apim:gov_policy_manage
   /policies/{policyId}:
     get:
       summary: Retrieves details of a specific policy.
@@ -190,7 +190,7 @@ paths:
                 $ref: "#/components/schemas/Error"
       security:
         - OAuth2Security:
-            - apim:gov_rule_read
+            - apim:gov_policy_read
     put:
       summary: Updates a specific policy.
       description: Updates the details of the policy identified by the `policyId`.
@@ -239,7 +239,7 @@ paths:
                 $ref: "#/components/schemas/Error"
       security:
         - OAuth2Security:
-            - apim:gov_rule_manage
+            - apim:gov_policy_manage
     delete:
       summary: Deletes a specific policy.
       description: Deletes an existing policy identified by the policyId.
@@ -277,7 +277,7 @@ paths:
                 $ref: "#/components/schemas/Error"
       security:
         - OAuth2Security:
-            - apim:gov_rule_manage
+            - apim:gov_policy_manage
   /policies/{policyId}/content:
     get:
       summary: Retrieves the content of a specific policy.
@@ -323,7 +323,7 @@ paths:
                 $ref: "#/components/schemas/Error"
       security:
         - OAuth2Security:
-            - apim:gov_rule_read
+            - apim:gov_policy_read
   /policies/{policyId}/usage:
     get:
       summary: Retrieves the policy attachment usage of a specific policy.
@@ -370,7 +370,7 @@ paths:
                 $ref: "#/components/schemas/Error"
       security:
         - OAuth2Security:
-            - apim:gov_rule_read
+            - apim:gov_policy_read
   /policy-attachments:
     get:
       summary: Retrieves a list of all governance policy-attachments.
@@ -429,7 +429,7 @@ paths:
                 $ref: "#/components/schemas/Error"
       security:
         - OAuth2Security:
-            - apim:gov_policy_read
+            - apim:gov_policy_attachment_read
     post:
       summary: Creates a new governance policy attachment.
       description: Creates a new governance policy attachment for the user's organization.
@@ -476,7 +476,7 @@ paths:
                 $ref: "#/components/schemas/Error"
       security:
         - OAuth2Security:
-            - apim:gov_policy_manage
+            - apim:gov_policy_attachment_manage
   /policy-attachments/{policyAttachmentId}:
     get:
       summary: Get a specific governance policy attachment
@@ -519,7 +519,7 @@ paths:
                 $ref: "#/components/schemas/Error"
       security:
         - OAuth2Security:
-            - apim:gov_policy_read
+            - apim:gov_policy_attachment_read
     put:
       summary: Update a specific governance policy attachment
       description: Updates the details of an existing governance policy attachment identified by the policyAttachmentId.
@@ -568,7 +568,7 @@ paths:
                 $ref: "#/components/schemas/Error"
       security:
         - OAuth2Security:
-            - apim:gov_policy_manage
+            - apim:gov_policy_attachment_manage
     delete:
       summary: Delete a specific governance policy attachment
       description: Deletes an existing governance policy attachment identified by the policyAttachmentId.
@@ -606,7 +606,7 @@ paths:
                 $ref: "#/components/schemas/Error"
       security:
         - OAuth2Security:
-            - apim:gov_policy_manage
+            - apim:gov_policy_attachment_manage
   /artifact-compliance/api:
     get:
       summary: Retrieves compliance of all API artifacts
@@ -1611,10 +1611,10 @@ components:
           tokenUrl: https://localhost:9443/oauth2/token
           scopes:
             openid: Authorize access to user details
-            apim:gov_rule_read: Read governance policies
-            apim:gov_rule_manage: Manage governance policies
-            apim:gov_policy_read: Read governance policy attachments
-            apim:gov_policy_manage: Manage governance policy attachments
+            apim:gov_policy_read: Read governance policies
+            apim:gov_policy_manage: Manage governance policies
+            apim:gov_policy_attachment_read: Read governance policy attachments
+            apim:gov_policy_attachment_manage: Manage governance policy attachments
             apim:gov_result_read: Read governance results
   parameters:
     artifactId:

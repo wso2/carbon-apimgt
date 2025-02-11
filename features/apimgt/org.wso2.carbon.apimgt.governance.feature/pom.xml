@@ -125,11 +125,11 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>src/main/resources/default-rulesets</outputDirectory>
+                            <outputDirectory>src/main/resources/default-policies</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>
-                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.governance.impl/src/main/resources/default-rulesets
+                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.governance.impl/src/main/resources/default-policies
                                     </directory>
                                     <excludes>
                                         <exclude>**/*.mustache</exclude>

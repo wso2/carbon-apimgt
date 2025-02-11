@@ -354,10 +354,10 @@ public class PolicyAttachmentManager {
                 String searchValue = parts[1];
 
                 // Add valid prefixes to criteriaMap
-                if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.PolicySearchAttributes.STATE)) {
-                    criteriaMap.put(APIMGovernanceConstants.PolicySearchAttributes.STATE, searchValue);
-                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.PolicySearchAttributes.NAME)) {
-                    criteriaMap.put(APIMGovernanceConstants.PolicySearchAttributes.NAME, searchValue);
+                if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.PolicyAttachmentSearchAttributes.STATE)) {
+                    criteriaMap.put(APIMGovernanceConstants.PolicyAttachmentSearchAttributes.STATE, searchValue);
+                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.PolicyAttachmentSearchAttributes.NAME)) {
+                    criteriaMap.put(APIMGovernanceConstants.PolicyAttachmentSearchAttributes.NAME, searchValue);
                 }
             }
         }

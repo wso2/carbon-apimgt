@@ -32,7 +32,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.PolicyAdherenceSate;
+import org.wso2.carbon.apimgt.governance.api.model.PolicyAttachmentAdherenceSate;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
@@ -78,13 +78,13 @@ public class ComplianceManager {
     /**
      * Handle Policy Change Event
      *
-     * @param policyId     Policy ID
+     * @param policyAttachmentId     Policy ID
      * @param organization Organization
      */
-    public void handlePolicyAttachmentChangeEvent(String policyId, String organization) throws APIMGovernanceException {
+    public void handlePolicyAttachmentChangeEvent(String policyAttachmentId, String organization) throws APIMGovernanceException {
 
         // Get the policy and its labels and associated governable states
-        APIMGovernancePolicyAttachment policy = policyAttachmentMgtDAO.getGovernancePolicyAttachmentByID(policyId, organization);
+        APIMGovernancePolicyAttachment policy = policyAttachmentMgtDAO.getGovernancePolicyAttachmentByID(policyAttachmentId, organization);
 
         List<String> labels = policy.getLabels();
         List<APIMGovernableState> apimGovernableStates = policy.getGovernableStates();
@@ -103,7 +103,7 @@ public class ComplianceManager {
             String artifactRefId = artifact.getArtifactRefId();
             ArtifactType artifactType = artifact.getArtifactType();
             complianceMgtDAO.addComplianceEvalRequest(artifactRefId, artifactType,
-                    Collections.singletonList(policyId), organization);
+                    Collections.singletonList(policyAttachmentId), organization);
         }
     }
 
@@ -197,8 +197,8 @@ public class ComplianceManager {
     public void handlePolicyChangeEvent(String rulesetId, String organization) throws APIMGovernanceException {
         List<String> policies = policyMgtDAO.getAssociatedPolicyAttachmentForPolicy(rulesetId, organization);
 
-        for (String policyId : policies) {
-            handlePolicyAttachmentChangeEvent(policyId, organization);
+        for (String policyAttachmentId : policies) {
+            handlePolicyAttachmentChangeEvent(policyAttachmentId, organization);
         }
     }
 
@@ -361,17 +361,17 @@ public class ComplianceManager {
      * @throws APIMGovernanceException If an error occurs while getting the policy adherence
      */
 
-    public Map<PolicyAdherenceSate, List<String>> getAdherenceStateofEvaluatedPolicies(String organization)
+    public Map<PolicyAttachmentAdherenceSate, List<String>> getAdherenceStateofEvaluatedPolicies(String organization)
             throws APIMGovernanceException {
         List<String> allComplianceEvaluatedPolicies = complianceMgtDAO
                 .getAllComplianceEvaluatedPolicies(organization);
 
-        // Get a map of policies to their policies
+        // Get a map of policies to their policy attachments
         Map<String, List<String>> policyRulesetsMap = new HashMap<>();
-        for (String policyId : allComplianceEvaluatedPolicies) {
-            List<String> policies = policyAttachmentMgtDAO.getPoliciesByPolicyAttachmentId(policyId, organization)
+        for (String policyAttachmentId : allComplianceEvaluatedPolicies) {
+            List<String> policies = policyAttachmentMgtDAO.getPoliciesByPolicyAttachmentId(policyAttachmentId, organization)
                     .stream().map(PolicyInfo::getId).collect(Collectors.toList());
-            policyRulesetsMap.put(policyId, policies);
+            policyRulesetsMap.put(policyAttachmentId, policies);
         }
 
         // Get the list of violated policies
@@ -380,22 +380,22 @@ public class ComplianceManager {
         // Identify violated policies
         List<String> violatedPolicies = new ArrayList<>();
         for (Map.Entry<String, List<String>> entry : policyRulesetsMap.entrySet()) {
-            String policyId = entry.getKey();
+            String policyAttachmentId = entry.getKey();
             List<String> policies = entry.getValue();
             if (violatedRulesets.stream().anyMatch(policies::contains)) {
-                violatedPolicies.add(policyId);
+                violatedPolicies.add(policyAttachmentId);
             }
         }
 
-        Map<PolicyAdherenceSate, List<String>> policyAdherence = new HashMap<>();
-        policyAdherence.put(PolicyAdherenceSate.FOLLOWED, new ArrayList<>());
-        policyAdherence.put(PolicyAdherenceSate.VIOLATED, new ArrayList<>());
+        Map<PolicyAttachmentAdherenceSate, List<String>> policyAdherence = new HashMap<>();
+        policyAdherence.put(PolicyAttachmentAdherenceSate.FOLLOWED, new ArrayList<>());
+        policyAdherence.put(PolicyAttachmentAdherenceSate.VIOLATED, new ArrayList<>());
 
         for (String policy : allComplianceEvaluatedPolicies) {
             if (violatedPolicies.contains(policy)) {
-                policyAdherence.get(PolicyAdherenceSate.VIOLATED).add(policy);
+                policyAdherence.get(PolicyAttachmentAdherenceSate.VIOLATED).add(policy);
             } else {
-                policyAdherence.get(PolicyAdherenceSate.FOLLOWED).add(policy);
+                policyAdherence.get(PolicyAttachmentAdherenceSate.FOLLOWED).add(policy);
             }
         }
 
@@ -403,9 +403,9 @@ public class ComplianceManager {
     }
 
     /**
-     * Get a map of artifacts evaluated by policy
+     * Get a map of artifacts evaluated by policy attachment
      *
-     * @param policyId                      Policy ID
+     * @param policyAttachmentId                      Policy Attachment ID
      * @param organization                  Organization
      * @param resolveArtifactNameAndVersion Whether the artifact name,version should be resolved
      * @return Map of artifacts evaluated by policy
@@ -413,7 +413,7 @@ public class ComplianceManager {
      */
 
     public Map<ArtifactComplianceState, List<ArtifactInfo>> getArtifactsComplianceForPolicy
-    (String policyId, String organization, boolean resolveArtifactNameAndVersion) throws APIMGovernanceException {
+    (String policyAttachmentId, String organization, boolean resolveArtifactNameAndVersion) throws APIMGovernanceException {
 
 
         Map<ArtifactComplianceState, List<ArtifactInfo>> complianceStateOfEvaluatedArtifacts = new HashMap<>();
@@ -421,8 +421,8 @@ public class ComplianceManager {
         complianceStateOfEvaluatedArtifacts.put(ArtifactComplianceState.COMPLIANT, new ArrayList<>());
         complianceStateOfEvaluatedArtifacts.put(ArtifactComplianceState.NON_COMPLIANT, new ArrayList<>());
 
-        List<ArtifactInfo> evaluatedArtifacts = complianceMgtDAO.getEvaluatedArtifactsForPolicy(policyId, organization);
-        List<String> applicableRulesets = policyAttachmentMgtDAO.getPoliciesByPolicyAttachmentId(policyId, organization).
+        List<ArtifactInfo> evaluatedArtifacts = complianceMgtDAO.getEvaluatedArtifactsForPolicy(policyAttachmentId, organization);
+        List<String> applicableRulesets = policyAttachmentMgtDAO.getPoliciesByPolicyAttachmentId(policyAttachmentId, organization).
                 stream().map(PolicyInfo::getId).collect(Collectors.toList());
 
         for (ArtifactInfo artifactInfo : evaluatedArtifacts) {
@@ -528,9 +528,9 @@ public class ComplianceManager {
             }
         }
 
-        for (String policyId : govPolicies) {
-            APIMGovernancePolicyAttachment policy = policyAttachmentMgtDAO.getGovernancePolicyAttachmentByID(policyId, organization);
-            List<Policy> policies = policyAttachmentMgtDAO.getPoliciesWithContentByPolicyAttachmentId(policyId, organization);
+        for (String policyAttachmentId : govPolicies) {
+            APIMGovernancePolicyAttachment policy = policyAttachmentMgtDAO.getGovernancePolicyAttachmentByID(policyAttachmentId, organization);
+            List<Policy> policies = policyAttachmentMgtDAO.getPoliciesWithContentByPolicyAttachmentId(policyAttachmentId, organization);
 
             // Validate the artifact against each ruleset
             for (Policy ruleset : policies) {
@@ -611,9 +611,9 @@ public class ComplianceManager {
             return null;
         }
 
-        for (String policyId : govPolicies) {
-            APIMGovernancePolicyAttachment policy = policyAttachmentMgtDAO.getGovernancePolicyAttachmentByID(policyId, organization);
-            List<Policy> policies = policyAttachmentMgtDAO.getPoliciesWithContentByPolicyAttachmentId(policyId, organization);
+        for (String policyAttachmentId : govPolicies) {
+            APIMGovernancePolicyAttachment policy = policyAttachmentMgtDAO.getGovernancePolicyAttachmentByID(policyAttachmentId, organization);
+            List<Policy> policies = policyAttachmentMgtDAO.getPoliciesWithContentByPolicyAttachmentId(policyAttachmentId, organization);
 
             // Validate the artifact against each ruleset
             for (Policy ruleset : policies) {

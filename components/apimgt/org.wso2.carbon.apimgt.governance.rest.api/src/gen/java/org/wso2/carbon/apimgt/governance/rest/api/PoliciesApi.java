@@ -44,7 +44,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Create a new policy.", notes = "Creates a new policy in the user's organization.", response = PolicyInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance policies")
+            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
         })
     }, tags={ "Policy",  })
     @ApiResponses(value = { 
@@ -63,7 +63,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Deletes a specific policy.", notes = "Deletes an existing policy identified by the policyId.", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance policies")
+            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
         })
     }, tags={ "Policy",  })
     @ApiResponses(value = { 
@@ -82,7 +82,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieves a list of policies.", notes = "Returns a list of all policies associated with the requested organization.", response = PolicyListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance policies")
+            @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies")
         })
     }, tags={ "Policies",  })
     @ApiResponses(value = { 
@@ -91,7 +91,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getPolicies( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "You can search for policies using the following format:    - \"query=name:{NAME}\" searches policies by name.   - \"query=artifactType:{ARTIFACT_TYPE}\" searches policies by artifact type.   - \"query=ruleType:{RULE_TYPE}\" searches policies by rule type.  You can combine multiple attributes to search for policies:   - \"query=name:{NAME} artifactType:{ARTIFACT_TYPE} ruleType:{RULE_TYPE}\" searches policies by name, artifact type, and rule type.  Remember to use URL encoding if your client does not support it (e.g., curl). ")  @QueryParam("query") String query) throws APIMGovernanceException{
+    public Response getPolicies( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "You can search for policies using the following format:    - \"query=name:{NAME}\" searches policies by name.   - \"query=artifactType:{ARTIFACT_TYPE}\" searches policies by artifact type.   - \"query=ruleType:{POLICY_TYPE}\" searches policies by rule type.  You can combine multiple attributes to search for policies:   - \"query=name:{NAME} artifactType:{ARTIFACT_TYPE} ruleType:{POLICY_TYPE}\" searches policies by name, artifact type, and rule type.  Remember to use URL encoding if your client does not support it (e.g., curl). ")  @QueryParam("query") String query) throws APIMGovernanceException{
         return delegate.getPolicies(limit, offset, query, securityContext);
     }
 
@@ -101,7 +101,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieves details of a specific policy.", notes = "Retrieves details of the policy identified by the policyId.", response = PolicyInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance policies")
+            @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies")
         })
     }, tags={ "Policy",  })
     @ApiResponses(value = { 
@@ -120,7 +120,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Produces({ "application/x-yaml", "application/json" })
     @ApiOperation(value = "Retrieves the content of a specific policy.", notes = "Retrieves the content of the policy identified by the policyId.", response = String.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance policies")
+            @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies")
         })
     }, tags={ "Policy",  })
     @ApiResponses(value = { 
@@ -139,7 +139,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Retrieves the policy attachment usage of a specific policy.", notes = "Retrieves the list of policy attachments using the policy identified by the policyId.", response = String.class, responseContainer = "List", authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_rule_read", description = "Read governance policies")
+            @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies")
         })
     }, tags={ "Policy",  })
     @ApiResponses(value = { 
@@ -158,7 +158,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Updates a specific policy.", notes = "Updates the details of the policy identified by the `policyId`.", response = PolicyInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_rule_manage", description = "Manage governance policies")
+            @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
         })
     }, tags={ "Policy" })
     @ApiResponses(value = { 

@@ -54,7 +54,7 @@ import java.util.Map;
 import javax.ws.rs.core.Response;
 
 /**
- * This is the implementation class for the Policys API.
+ * This is the implementation class for the Policy API.
  */
 public class PoliciesApiServiceImpl implements PoliciesApiService {
 

@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This interface represents the DAO layer for Governance Policy Management
+ * This interface represents the DAO layer for Governance Policy Attachment Management
  */
 public interface GovernancePolicyAttachmentMgtDAO {
 

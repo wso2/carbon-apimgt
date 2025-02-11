@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This interface represents the Governance Ruleset DAO
+ * This interface represents the Governance Policy DAO
  */
 public interface PolicyMgtDAO {
 

@@ -439,11 +439,11 @@ public class PolicyMgtDAOImpl implements PolicyMgtDAO {
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, organization);
             prepStmt.setString(2, searchCriteria
-                    .getOrDefault(APIMGovernanceConstants.RulesetSearchAttributes.NAME, ""));
+                    .getOrDefault(APIMGovernanceConstants.PolicySearchAttributes.NAME, ""));
             prepStmt.setString(3, searchCriteria
-                    .getOrDefault(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE, ""));
+                    .getOrDefault(APIMGovernanceConstants.PolicySearchAttributes.POLICY_TYPE, ""));
             prepStmt.setString(4, searchCriteria
-                    .getOrDefault(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, ""));
+                    .getOrDefault(APIMGovernanceConstants.PolicySearchAttributes.ARTIFACT_TYPE, ""));
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
                     policyInfoList.add(getRulesetInfoFromResultSet(rs));
