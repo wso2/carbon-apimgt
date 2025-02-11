@@ -942,7 +942,7 @@ public class TemplateBuilderUtil {
             gatewayAPIDTO.setApiDefinition(prototypeScriptAPI);
         } else if (APIConstants.IMPLEMENTATION_TYPE_ENDPOINT.equalsIgnoreCase(api.getImplementation())) {
             String apiConfig = null;
-            if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+            if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
                 apiConfig = builder.getConfigStringForAIAPI(environment, endpointDTOList);
             } else {
                 apiConfig = builder.getConfigStringForTemplate(environment);
