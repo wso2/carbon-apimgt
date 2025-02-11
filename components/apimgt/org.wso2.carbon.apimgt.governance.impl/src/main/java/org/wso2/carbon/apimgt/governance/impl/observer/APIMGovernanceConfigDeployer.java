@@ -36,8 +36,8 @@ public class APIMGovernanceConfigDeployer extends AbstractAxis2ConfigurationCont
 
         final String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
 
-        log.info("Starting to load default rulesets.");
-        APIMGovernanceUtil.loadDefaultRulesets(tenantDomain);
+        log.info("Starting to load default governance policies.");
+        APIMGovernanceUtil.loadDefaultPolicies(tenantDomain);
 
     }
 }

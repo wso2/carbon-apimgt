@@ -82,13 +82,13 @@ public class APIMGovernanceUtil {
     public static Map<String, Object> getMapFromYAMLStringContent(String content) throws APIMGovernanceException {
         // Parse YAML content
         ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
-        Map<String, Object> rulesetMap;
+        Map<String, Object> contentMap;
         try {
-            rulesetMap = yamlReader.readValue(content, Map.class);
+            contentMap = yamlReader.readValue(content, Map.class);
         } catch (JsonProcessingException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_FAILED_TO_PARSE_POLICY_CONTENT, e);
         }
-        return rulesetMap;
+        return contentMap;
     }
 
     /**
@@ -128,27 +128,27 @@ public class APIMGovernanceUtil {
     }
 
     /**
-     * Load default rulesets from the default policy directory
+     * Load default governance policies from the default policy directory
      *
      * @param organization Organization
      */
-    public static void loadDefaultRulesets(String organization) {
+    public static void loadDefaultPolicies(String organization) {
         PolicyManager policyManager = new PolicyManager();
         try {
-            // Fetch existing rulesets for the organization
-            PolicyList existingRulesets = policyManager.getPolicies(organization);
-            List<PolicyInfo> policyInfos = existingRulesets.getPolicyList();
-            List<String> existingRuleNames = policyInfos.stream()
+            // Fetch existing policies for the organization
+            PolicyList existingPolicies = policyManager.getPolicies(organization);
+            List<PolicyInfo> policyInfos = existingPolicies.getPolicyList();
+            List<String> existingPolicyNames = policyInfos.stream()
                     .map(PolicyInfo::getName)
                     .collect(Collectors.toList());
 
-            // Define the path to default rulesets
-            String pathToRulesets = CarbonUtils.getCarbonHome() + File.separator
+            // Define the path to default policies
+            String pathToPolicies = CarbonUtils.getCarbonHome() + File.separator
                     + APIMGovernanceConstants.DEFAULT_POLICY_LOCATION;
-            Path pathToDefaultRulesets = Paths.get(pathToRulesets);
+            Path defaultPolicyPath = Paths.get(pathToPolicies);
 
             // Iterate through default policy files
-            Files.list(pathToDefaultRulesets).forEach(path -> {
+            Files.list(defaultPolicyPath).forEach(path -> {
                 File file = path.toFile();
                 if (file.isFile() && (file.getName().endsWith(".yaml") || file.getName().endsWith(".yml"))) {
                     try {
@@ -156,13 +156,12 @@ public class APIMGovernanceUtil {
                         DefaultPolicy defaultPolicy = mapper.readValue(file, DefaultPolicy.class);
 
                         // Add policy if it doesn't already exist
-                        if (!existingRuleNames.contains(defaultPolicy.getName())) {
+                        if (!existingPolicyNames.contains(defaultPolicy.getName())) {
                             log.info("Adding default policy: " + defaultPolicy.getName());
                             policyManager.createNewPolicy(
-                                    getRulesetFromDefaultRuleset(defaultPolicy,
-                                            file.getName().replaceAll("/", "_")), organization);
+                                    getPolicyFromDefaultPolicy(defaultPolicy, file.getName()), organization);
                         } else {
-                            log.info("Ruleset " + defaultPolicy.getName() + " already exists in organization: "
+                            log.info("Policy " + defaultPolicy.getName() + " already exists in organization: "
                                     + organization + "; skipping.");
                         }
                     } catch (IOException e) {
@@ -175,32 +174,32 @@ public class APIMGovernanceUtil {
         } catch (IOException e) {
             log.error("Error while accessing default policy directory", e);
         } catch (APIMGovernanceException e) {
-            log.error("Error while retrieving existing rulesets for organization: " + organization, e);
+            log.error("Error while retrieving existing policies for organization: " + organization, e);
         }
     }
 
     /**
-     * Get Ruleset from DefaultPolicy
+     * Get Policy from DefaultPolicy
      *
-     * @param defaultRuleset DefaultPolicy
-     * @param fileName       File name
-     * @return Ruleset
+     * @param defaultPolicy DefaultPolicy
+     * @param fileName      File name
+     * @return Governance Policy
      * @throws APIMGovernanceException if an error occurs while loading default policy content
      */
-    public static Policy getRulesetFromDefaultRuleset(DefaultPolicy defaultRuleset,
-                                                      String fileName) throws APIMGovernanceException {
+    public static Policy getPolicyFromDefaultPolicy(DefaultPolicy defaultPolicy,
+                                                    String fileName) throws APIMGovernanceException {
         Policy policy = new Policy();
-        policy.setName(defaultRuleset.getName());
-        policy.setDescription(defaultRuleset.getDescription());
-        policy.setPolicyCategory(PolicyCategory.fromString(defaultRuleset.getPolicyCategory()));
-        policy.setPolicyType(PolicyType.fromString(defaultRuleset.getPolicyType()));
-        policy.setArtifactType(ExtendedArtifactType.fromString(defaultRuleset.getArtifactType()));
-        policy.setProvider(defaultRuleset.getProvider());
-        policy.setDocumentationLink(defaultRuleset.getDocumentationLink());
+        policy.setName(defaultPolicy.getName());
+        policy.setDescription(defaultPolicy.getDescription());
+        policy.setPolicyCategory(PolicyCategory.fromString(defaultPolicy.getPolicyCategory()));
+        policy.setPolicyType(PolicyType.fromString(defaultPolicy.getPolicyType()));
+        policy.setArtifactType(ExtendedArtifactType.fromString(defaultPolicy.getArtifactType()));
+        policy.setProvider(defaultPolicy.getProvider());
+        policy.setDocumentationLink(defaultPolicy.getDocumentationLink());
 
         PolicyContent policyContent = new PolicyContent();
         policyContent.setFileName(fileName);
-        policyContent.setContent(defaultRuleset.getPolicyContentString().getBytes(StandardCharsets.UTF_8));
+        policyContent.setContent(defaultPolicy.getPolicyContentString().getBytes(StandardCharsets.UTF_8));
         policy.setPolicyContent(policyContent);
 
         return policy;
@@ -293,7 +292,7 @@ public class APIMGovernanceUtil {
 
         Map<String, String> policies = new HashMap<>();
         for (String label : labels) {
-            Map<String, String> policiesForLabel = policyAttachmentManager.getPoliciesByLabel(label, organization);
+            Map<String, String> policiesForLabel = policyAttachmentManager.getPolicyAttachmentsByLabel(label, organization);
             if (policiesForLabel != null) {
                 policies.putAll(policiesForLabel);
             }

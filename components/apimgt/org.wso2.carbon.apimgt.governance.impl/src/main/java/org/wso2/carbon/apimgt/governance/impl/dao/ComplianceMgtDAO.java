@@ -118,16 +118,16 @@ public interface ComplianceMgtDAO {
     /**
      * Add compliance evaluation results for an artifact and policy attachment
      *
-     * @param artifactRefId        Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType         Artifact Type
-     * @param policyAttachmentId             Policy ID
-     * @param rulesetViolationsMap Map of Rulesets to Rule Violations
-     * @param organization         Organization
+     * @param artifactRefId       Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType        Artifact Type
+     * @param policyAttachmentId  Policy Attachment ID
+     * @param policyViolationsMap Map of policy to Rule Violations
+     * @param organization        Organization
      * @throws APIMGovernanceException If an error occurs while adding the compliance evaluation results
      */
     void addComplianceEvalResults(String artifactRefId, ArtifactType artifactType, String policyAttachmentId,
-                                  Map<String, List<RuleViolation>> rulesetViolationsMap, String organization)
-            throws APIMGovernanceException;
+                                  Map<String, List<RuleViolation>> policyViolationsMap, String organization)
+    throws APIMGovernanceException;
 
     /**
      * Get the rule violations
