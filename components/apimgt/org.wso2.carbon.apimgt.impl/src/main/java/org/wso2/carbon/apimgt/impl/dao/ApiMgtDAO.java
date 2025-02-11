@@ -20412,7 +20412,7 @@ public class ApiMgtDAO {
             throws APIManagementException {
 
 
-        AIConfiguration aiConfiguration = new AIConfiguration();
+        AIConfiguration aiConfiguration = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             String getConfigQuery = (revisionUUID == null)
@@ -20425,8 +20425,8 @@ public class ApiMgtDAO {
                 }
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        String llmProviderId = rs.getString("LLM_PROVIDER_UUID");
-                        aiConfiguration.setLlmProviderId(llmProviderId);
+                        aiConfiguration = new AIConfiguration();
+                        aiConfiguration.setLlmProviderId(rs.getString("LLM_PROVIDER_UUID"));
                         aiConfiguration.setLlmProviderName(rs.getString("NAME"));
                         aiConfiguration.setLlmProviderApiVersion(rs.getString("API_VERSION"));
                     }
