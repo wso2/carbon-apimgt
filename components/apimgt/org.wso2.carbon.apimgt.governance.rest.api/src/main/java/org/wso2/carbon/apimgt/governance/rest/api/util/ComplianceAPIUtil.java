@@ -108,7 +108,7 @@ public class ComplianceAPIUtil {
         }
 
         // Get all policy attachments evaluated for the artifact
-        List<String> evaluatedPolicies = new ComplianceManager().getEvaluatedPoliciesForArtifact(artifactRefId,
+        List<String> evaluatedPolicies = new ComplianceManager().getEvaluatedPolicyAttachmentsForArtifact(artifactRefId,
                 artifactType, organization);
 
         // If the artifact is not evaluated yet, set the compliance status to not applicable/pending and return
@@ -179,7 +179,7 @@ public class ComplianceAPIUtil {
 
         // Retrieve the evaluated policies for the policy
         List<String> evaluatedRulesets =
-                complianceManager.getEvaluatedRulesetsForArtifactAndPolicy(artifactRefId, artifactType,
+                complianceManager.getEvaluatedPoliciesForArtifactAndPolicyAttachment(artifactRefId, artifactType,
                         policyRulesets, organization);
 
         // Store the ruleset validation results
@@ -331,7 +331,7 @@ public class ComplianceAPIUtil {
         }
 
         // Get evaluated policy attachments for the current artifact
-        List<String> evaluatedPolicies = complianceManager.getEvaluatedPoliciesForArtifact(artifactRefId, artifactType,
+        List<String> evaluatedPolicies = complianceManager.getEvaluatedPolicyAttachmentsForArtifact(artifactRefId, artifactType,
                 organization);
 
         // If the artifact is not evaluated yet, set the compliance status to not applicable/pending and return
@@ -376,7 +376,7 @@ public class ComplianceAPIUtil {
 
         // Identify violated policy attachments
         List<String> violatedPolicies = complianceManager
-                .identifyViolatedPolicies(evaluatedPolicies, new ArrayList<>(violatedRulesets), organization);
+                .identifyViolatedPolicyAttachments(evaluatedPolicies, new ArrayList<>(violatedRulesets), organization);
 
         // Set policy adherence summary
         PolicyAttachmentAdherenceSummaryDTO policyAttachmentAdherenceSummaryDTO = new PolicyAttachmentAdherenceSummaryDTO();
@@ -466,7 +466,7 @@ public class ComplianceAPIUtil {
 
         // If the ruleset has not been evaluated, set the ruleset validation status to unapplied
         boolean isRulesetEvaluatedForArtifact = complianceManager
-                .isRulesetEvaluatedForArtifact(artifactRefId, artifactType, rulesetId, organization);
+                .isPolicyEvaluatedForArtifact(artifactRefId, artifactType, rulesetId, organization);
         if (!isRulesetEvaluatedForArtifact) {
             rulesetValidationResultDTO.setStatus(PolicyValidationResultDTO.StatusEnum.UNAPPLIED);
             return rulesetValidationResultDTO;

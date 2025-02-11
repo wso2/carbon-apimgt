@@ -67,13 +67,13 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
     ERROR_FAILED_TO_PARSE_POLICY_CONTENT(200015, "Failed to parse policy content",
             500, "Failed to parse policy " +
             "content for the policy.", true),
-    ERROR_POLICY_ASSOCIATED_WITH_POLICY_ATTACHMENTIES(200016, "Policy is currently " +
+    ERROR_POLICY_ASSOCIATED_WITH_POLICY_ATTACHMENTS(200016, "Policy is currently " +
             "in use by some governance policy attachments", 409,
             "The policy with ID: %s cannot be deleted because it " +
                     "is associated with some governance policy attachments. " +
                     "Please update the associated governance policy attachments before " +
                     "attempting to delete the policy."),
-    ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICY_ATTACHMENTIES(200017, "Error while retrieving " +
+    ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICY_ATTACHMENTS(200017, "Error while retrieving " +
             "associated policy attachments for the policy.", 500,
             "Error while retrieving associated policy attachments for the policy with ID: %s", true),
     ERROR_WHILE_EXTRACTING_RULE_CONTENT(200018, "Error while extracting rule content",

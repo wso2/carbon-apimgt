@@ -265,7 +265,7 @@ public class ComplianceEvaluationScheduler {
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
 
-        // Validate the artifact against each ruleset
+        // Validate the artifact against each policy
         List<Policy> policies = GovernancePolicyMgtDAOImpl.getInstance()
                 .getPoliciesWithContentByPolicyAttachmentId(policyId, organization);
 
@@ -274,7 +274,7 @@ public class ComplianceEvaluationScheduler {
         for (Policy policy : policies) {
             List<RuleViolation> ruleViolations = new ArrayList<>();
 
-            // Check if ruleset's artifact type matches with the artifact's type
+            // Check if policy's artifact type matches with the artifact's type
             ExtendedArtifactType extendedArtifactType = policy.getArtifactType();
             if (ArtifactType.API.equals(artifactType) && extendedArtifactType.equals(
                     APIMUtil.getExtendedArtifactTypeForAPI(APIMUtil.getAPIType(artifactRefId)))) {
@@ -285,18 +285,18 @@ public class ComplianceEvaluationScheduler {
 
                 if (contentToValidate == null) {
                     log.warn(policyType + " content not found in artifact project for artifact ID: " +
-                            artifactRefId + ". Skipping governance evaluation for ruleset ID: " + policy.getId());
+                            artifactRefId + ". Skipping governance evaluation for policy ID: " + policy.getId());
                     continue;
                 }
 
-                // Send target content and ruleset for validation
+                // Send target content and policy for validation
                 List<RuleViolation> violations = validationEngine.validate(contentToValidate, policy);
                 ruleViolations.addAll(violations);
 
             } else {
                 if (log.isDebugEnabled()) {
                     log.debug("Ruleset artifact type does not match with the artifact's type. Skipping " +
-                            "governance evaluation for ruleset ID: " + policy.getId());
+                            "governance evaluation for policy ID: " + policy.getId());
                 }
             }
             rulesetViolationsMap.put(policy.getId(), ruleViolations);
@@ -311,7 +311,7 @@ public class ComplianceEvaluationScheduler {
      * @param artifactRefId        ID of the artifact.
      * @param artifactType         Type of the artifact.
      * @param policyId             ID of the policy.
-     * @param rulesetViolationsMap Map of rule violations for each ruleset.
+     * @param rulesetViolationsMap Map of rule violations for each policy.
      * @param organization         Organization of the artifact.
      */
     private static void savePolicyEvaluationResults(String artifactRefId, ArtifactType artifactType, String policyId,

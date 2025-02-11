@@ -55,16 +55,16 @@ paths:
           in: query
           schema:
             type: string
-            example: "name:WSO2 Security Practices artifactType:REST_API ruleType:API_DEFINITION"
+            example: "name:WSO2 Security Practices artifactType:REST_API policyType:API_DEFINITION"
           description: |
             You can search for policies using the following format:
 
               - "query=name:{NAME}" searches policies by name.
               - "query=artifactType:{ARTIFACT_TYPE}" searches policies by artifact type.
-              - "query=ruleType:{RULE_TYPE}" searches policies by rule type.
+              - "query=policyType:{POLICY_TYPE}" searches policies by rule type.
 
             You can combine multiple attributes to search for policies:
-              - "query=name:{NAME} artifactType:{ARTIFACT_TYPE} ruleType:{RULE_TYPE}" searches policies by name, artifact type, and rule type.
+              - "query=name:{NAME} artifactType:{ARTIFACT_TYPE} policyType:{POLICY_TYPE}" searches policies by name, artifact type, and rule type.
 
             Remember to use URL encoding if your client does not support it (e.g., curl).
       responses:
@@ -1003,7 +1003,7 @@ components:
             - SPECTRAL
           example: SPECTRAL
           default: SPECTRAL
-        ruleType:
+        policyType:
           type: string
           description: Context or area to which the policy applies.
           enum:
@@ -1033,7 +1033,7 @@ components:
       required:
         - name
         - policyContent
-        - ruleType
+        - policyType
         - artifactType
     PolicyInfo:
       type: object
@@ -1058,7 +1058,7 @@ components:
           enum:
             - SPECTRAL
           example: SPECTRAL
-        ruleType:
+        policyType:
           type: string
           description: Context or area to which the policy applies.
           enum:
@@ -1107,7 +1107,7 @@ components:
           example: "2024-08-02T12:00:00Z"
       required:
         - name
-        - ruleType
+        - policyType
         - artifactType
         - provider
     APIMGovernancePolicyAttachment:
@@ -1502,7 +1502,7 @@ components:
           type: string
           description: Name of the policy.
           example: "API Security Policy"
-        ruleType:
+        policyType:
           type: string
           description: Context or area to which the policy applies.
           enum:

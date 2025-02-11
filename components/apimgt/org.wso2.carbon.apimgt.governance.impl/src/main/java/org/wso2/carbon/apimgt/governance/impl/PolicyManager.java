@@ -57,7 +57,7 @@ public class PolicyManager {
     public PolicyInfo createNewPolicy(Policy policy, String organization) throws APIMGovernanceException {
 
         if (policyMgtDAO.getPolicyByName(policy.getName(), organization) != null) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_ALREADY_EXIST, policy.getName(),
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_ALREADY_EXIST, policy.getName(),
                     organization);
         }
         policy.setId(APIMGovernanceUtil.generateUUID());
@@ -69,7 +69,7 @@ public class PolicyManager {
         List<Rule> rules = validationEngine.extractRulesFromPolicy(policy);
 
         if (rules.isEmpty()) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_POLICY_CONTENT,
                     policy.getName());
         }
 
@@ -81,26 +81,26 @@ public class PolicyManager {
      *
      * @param rulesetId    Ruleset ID
      * @param organization Organization
-     * @throws APIMGovernanceException If an error occurs while deleting the ruleset
+     * @throws APIMGovernanceException If an error occurs while deleting the policy
      */
 
     public void deletePolicy(String rulesetId, String organization) throws APIMGovernanceException {
-        PolicyInfo ruleset = policyMgtDAO.getPolicyById(rulesetId, organization);
-        if (ruleset == null) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_NOT_FOUND, rulesetId);
+        PolicyInfo policy = policyMgtDAO.getPolicyById(rulesetId, organization);
+        if (policy == null) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, rulesetId);
         } else if (isRulesetAssociatedWithPolicies(rulesetId, organization)) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_RULESET_ASSOCIATED_WITH_POLICIES,
-                    ruleset.getId());
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_POLICY_ASSOCIATED_WITH_POLICY_ATTACHMENTS,
+                    policy.getId());
         }
         policyMgtDAO.deletePolicy(rulesetId, organization);
     }
 
     /**
-     * Check if a ruleset is associated with any policies
+     * Check if a policy is associated with any policies
      *
      * @param rulesetId    Ruleset ID
      * @param organization Organization
-     * @return boolean True if the ruleset is associated with policies
+     * @return boolean True if the policy is associated with policies
      */
     private boolean isRulesetAssociatedWithPolicies(String rulesetId, String organization)
             throws APIMGovernanceException {
@@ -115,7 +115,7 @@ public class PolicyManager {
      * @param policy      Ruleset object
      * @param organization Organization
      * @return Ruleset Updated object
-     * @throws APIMGovernanceException If an error occurs while updating the ruleset
+     * @throws APIMGovernanceException If an error occurs while updating the policy
      */
 
     public PolicyInfo updatePolicy(String rulesetId, Policy policy, String organization)
@@ -123,13 +123,13 @@ public class PolicyManager {
 
         PolicyInfo existingRuleset = policyMgtDAO.getPolicyById(rulesetId, organization);
         if (existingRuleset == null) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_NOT_FOUND, rulesetId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, rulesetId);
         }
 
         String newName = policy.getName();
         PolicyInfo existingRulesetByName = policyMgtDAO.getPolicyByName(newName, organization);
         if (existingRulesetByName != null && !existingRulesetByName.getId().equals(rulesetId)) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_ALREADY_EXIST, newName, organization);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_ALREADY_EXIST, newName, organization);
         }
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance().
@@ -139,7 +139,7 @@ public class PolicyManager {
         List<Rule> rules = validationEngine.extractRulesFromPolicy(policy);
 
         if (rules.isEmpty()) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_RULESET_CONTENT,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_POLICY_CONTENT,
                     policy.getName());
         }
 
@@ -164,15 +164,15 @@ public class PolicyManager {
      * @param rulesetId    Ruleset ID
      * @param organization Organization
      * @return RulesetInfo object
-     * @throws APIMGovernanceException If an error occurs while getting the ruleset
+     * @throws APIMGovernanceException If an error occurs while getting the policy
      */
 
     public PolicyInfo getPolicyById(String rulesetId, String organization) throws APIMGovernanceException {
-        PolicyInfo ruleset = policyMgtDAO.getPolicyById(rulesetId, organization);
-        if (ruleset == null) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_NOT_FOUND, rulesetId);
+        PolicyInfo policy = policyMgtDAO.getPolicyById(rulesetId, organization);
+        if (policy == null) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, rulesetId);
         }
-        return ruleset;
+        return policy;
     }
 
     /**
@@ -180,14 +180,14 @@ public class PolicyManager {
      *
      * @param rulesetId    Ruleset ID
      * @param organization Organization
-     * @return Content of the ruleset
-     * @throws APIMGovernanceException If an error occurs while getting the ruleset content
+     * @return Content of the policy
+     * @throws APIMGovernanceException If an error occurs while getting the policy content
      */
 
     public PolicyContent getPolicyContent(String rulesetId, String organization) throws APIMGovernanceException {
         PolicyContent content = policyMgtDAO.getPolicyContent(rulesetId, organization);
         if (content == null) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_NOT_FOUND, rulesetId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, rulesetId);
         }
         return content;
 
@@ -198,14 +198,14 @@ public class PolicyManager {
      *
      * @param rulesetId    Ruleset ID
      * @param organization Organization
-     * @return List of policies using the ruleset
-     * @throws APIMGovernanceException If an error occurs while getting the ruleset usage
+     * @return List of policies using the policy
+     * @throws APIMGovernanceException If an error occurs while getting the policy usage
      */
 
     public List<String> getPolicyUsage(String rulesetId, String organization) throws APIMGovernanceException {
-        PolicyInfo ruleset = policyMgtDAO.getPolicyById(rulesetId, organization);
-        if (ruleset == null) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_NOT_FOUND, rulesetId);
+        PolicyInfo policy = policyMgtDAO.getPolicyById(rulesetId, organization);
+        if (policy == null) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, rulesetId);
         }
         return policyMgtDAO.getAssociatedPolicyAttachmentForPolicy(rulesetId, organization);
     }
@@ -215,13 +215,13 @@ public class PolicyManager {
      *
      * @param rulesetId    Ruleset ID
      * @param organization Organization
-     * @return List of rules using the ruleset
-     * @throws APIMGovernanceException If an error occurs while getting the ruleset usage
+     * @return List of rules using the policy
+     * @throws APIMGovernanceException If an error occurs while getting the policy usage
      */
 
     public List<Rule> getRulesByPolicyId(String rulesetId, String organization) throws APIMGovernanceException {
         if (policyMgtDAO.getPolicyById(rulesetId, organization) == null) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_NOT_FOUND, rulesetId);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, rulesetId);
         }
         return policyMgtDAO.getPolicyByPolicyId(rulesetId, organization);
     }
@@ -242,7 +242,7 @@ public class PolicyManager {
     }
 
     /**
-     * Get the search criteria for the ruleset search from a query such as
+     * Get the search criteria for the policy search from a query such as
      * `query=name:{name} ruleType:{type} artifactType:{type}`
      *
      * @param query Search query

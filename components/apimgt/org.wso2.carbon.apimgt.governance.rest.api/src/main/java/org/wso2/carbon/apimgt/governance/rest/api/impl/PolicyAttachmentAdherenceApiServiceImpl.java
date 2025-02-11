@@ -53,7 +53,7 @@ public class PolicyAttachmentAdherenceApiServiceImpl implements PolicyAttachment
                 .collect(Collectors.toList());
 
         Map<PolicyAttachmentAdherenceSate, List<String>> adherenceMap =
-                complianceManager.getAdherenceStateofEvaluatedPolicies(organization);
+                complianceManager.getAdherenceStateOfEvaluatedPolicyAttachments(organization);
 
         int followedCount = adherenceMap.get(PolicyAttachmentAdherenceSate.FOLLOWED).size();
         int violatedCount = adherenceMap.get(PolicyAttachmentAdherenceSate.VIOLATED).size();
