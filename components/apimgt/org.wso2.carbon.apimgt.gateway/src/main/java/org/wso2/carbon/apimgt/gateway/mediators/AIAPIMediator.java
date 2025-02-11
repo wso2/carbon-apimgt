@@ -120,11 +120,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                 String targetModel = targetModelObj instanceof String ? (String) targetModelObj : null;
 
                 if (APIConstants.AIAPIConstants.REJECT_ENDPOINT.equals(targetEndpoint)) {
-                    ((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                            .setProperty(APIMgtGatewayConstants.HTTP_SC, 503);
-                    ((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                            .setProperty(NO_ENTITY_BODY, true);
-                    return false;
+                    return true;
                 }
                 if (targetEndpoint != null && targetModel != null) {
                     LLMProviderMetadata targetModelMetadata = findMetadataByAttributeName(
