@@ -1904,7 +1904,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         //Validate the API type
-        if (!policySpecification.getSupportedApiTypes().contains(apiType)) {
+        boolean isApiTypeValid = isApiTypeValid(policySpecification.getSupportedApiTypes(), apiType);
+        if (!isApiTypeValid) {
             throw new APIManagementException(policySpecification.getName() + " cannot be used for the "
                     + apiType + " API type.",
                     ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
@@ -1948,6 +1949,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         return true;
+    }
+
+    /**
+     * This method used to check whether the API type is valid
+     *
+     * @param supportedApiTypes Supported API types
+     * @param apiType           Type of API
+     * @return true if the API type is valid
+     */
+    private boolean isApiTypeValid(List<Object> supportedApiTypes, String apiType) {
+        boolean isApiTypeValid = false;
+        for (Object supportedApiType : supportedApiTypes) {
+            if (supportedApiType instanceof String) {
+                if (supportedApiType.equals(apiType)) {
+                    isApiTypeValid = true;
+                }
+            } else if (supportedApiType instanceof Map) {
+                // TODO: Need to add subType validation
+                Map<String, String> supportedApiTypeMap = (Map<String, String>) supportedApiType;
+                if (supportedApiTypeMap.get("apiType").equals(apiType)) {
+                    isApiTypeValid = true;
+                }
+            }
+        }
+        return isApiTypeValid;
     }
 
     /**
