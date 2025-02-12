@@ -3032,12 +3032,7 @@ public class PublisherCommonUtils {
             apiEndpointsList.addAll(defaultEndpointsFromEndpointConfig.values());
         }
 
-        if (apiEndpointsList == null) {
-            throw new APIManagementException("Error occurred while getting endpoints of API with UUID " + uuid,
-                    ExceptionCodes.API_ENDPOINT_NOT_FOUND);
-        } else {
-            return APIMappingUtil.fromAPIEndpointListToDTO(apiEndpointsList);
-        }
+        return APIMappingUtil.fromAPIEndpointListToDTO(apiEndpointsList);
 
     }
 
@@ -3057,11 +3052,13 @@ public class PublisherCommonUtils {
                 Type type = new TypeToken<Map<String, Object>>() {
                 }.getType();
                 Map<String, Object> endpointConfigMap = gson.fromJson(endpointConfig, type);
+                String endpointType = endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).toString();
                 Object endpointSecurityObj = endpointConfigMap.get(APIConstants.ENDPOINT_SECURITY);
 
                 // Add primary production endpoint from endpoint config
                 if (endpointConfigMap.containsKey(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
                     Map<String, Object> productionEndpointConfig = new HashMap<>();
+                    productionEndpointConfig.put(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE, endpointType);
                     productionEndpointConfig.put(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS,
                             endpointConfigMap.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS));
                     if (endpointSecurityObj != null) {
@@ -3082,6 +3079,7 @@ public class PublisherCommonUtils {
                 // Add primary sandbox endpoint from endpoint config
                 if (endpointConfigMap.containsKey(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
                     Map<String, Object> sandboxEndpointConfig = new HashMap<>();
+                    sandboxEndpointConfig.put(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE, endpointType);
                     sandboxEndpointConfig.put(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS,
                             endpointConfigMap.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS));
                     if (endpointSecurityObj != null) {
