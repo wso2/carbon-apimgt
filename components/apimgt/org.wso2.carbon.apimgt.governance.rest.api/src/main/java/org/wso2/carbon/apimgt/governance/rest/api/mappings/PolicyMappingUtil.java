@@ -37,8 +37,8 @@ public class PolicyMappingUtil {
         policyInfoDTO.setId(policyInfo.getId());
         policyInfoDTO.setName(policyInfo.getName());
         policyInfoDTO.setDescription(policyInfo.getDescription());
-        policyInfoDTO.setRuleCategory(PolicyInfoDTO.
-                RuleCategoryEnum.fromValue(String.valueOf(policyInfo.getPolicyCategory())));
+        policyInfoDTO.setPolicyCategory(PolicyInfoDTO.
+                PolicyCategoryEnum.fromValue(String.valueOf(policyInfo.getPolicyCategory())));
         policyInfoDTO.setPolicyType(PolicyInfoDTO.
                 PolicyTypeEnum.fromValue(String.valueOf(policyInfo.getPolicyType())));
         policyInfoDTO.setArtifactType(PolicyInfoDTO.

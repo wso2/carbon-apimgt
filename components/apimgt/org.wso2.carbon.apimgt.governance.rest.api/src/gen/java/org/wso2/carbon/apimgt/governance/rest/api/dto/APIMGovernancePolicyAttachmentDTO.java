@@ -174,9 +174,8 @@ return null;
   }
 
   
-  @ApiModelProperty(required = true, value = "List of policies associated with the governance policy attachment.")
+  @ApiModelProperty(value = "List of policies associated with the governance policy attachment.")
   @JsonProperty("policies")
-  @NotNull
   public List<String> getPolicies() {
     return policies;
   }

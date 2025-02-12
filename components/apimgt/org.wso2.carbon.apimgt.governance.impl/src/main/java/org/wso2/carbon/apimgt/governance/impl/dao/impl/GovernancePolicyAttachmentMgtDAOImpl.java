@@ -220,7 +220,7 @@ public class GovernancePolicyAttachmentMgtDAOImpl implements GovernancePolicyAtt
                 updateStatesAndPolicyAttachmentActions(connection, policyAttachmentId, policyAttachment);
                 deletePolicyAttachmentRunsForPolicyAttachment(connection, policyAttachmentId);
 
-                // return updated APIMGovernancePolicy object
+
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -258,7 +258,7 @@ public class GovernancePolicyAttachmentMgtDAOImpl implements GovernancePolicyAtt
             try (PreparedStatement ps =
                          connection.prepareStatement(SQLConstants.CREATE_POLICY_ATTACHMENT_POLICY_MAPPING)) {
                 for (String policyId : policiesToAdd) {
-                    ps.setString(1, policyId);
+                    ps.setString(1, policyAttachmentId);
                     ps.setString(2, policyId);
                     ps.addBatch();
                 }

@@ -27,13 +27,13 @@ public class PolicyInfoDTO   {
     private String name = null;
     private String description = null;
 
-          @XmlType(name="RuleCategoryEnum")
+          @XmlType(name="PolicyCategoryEnum")
     @XmlEnum(String.class)
-    public enum RuleCategoryEnum {
+    public enum PolicyCategoryEnum {
         SPECTRAL("SPECTRAL");
         private String value;
 
-        RuleCategoryEnum (String v) {
+        PolicyCategoryEnum (String v) {
             value = v;
         }
 
@@ -47,8 +47,8 @@ public class PolicyInfoDTO   {
         }
 
         @JsonCreator
-        public static RuleCategoryEnum fromValue(String v) {
-            for (RuleCategoryEnum b : RuleCategoryEnum.values()) {
+        public static PolicyCategoryEnum fromValue(String v) {
+            for (PolicyCategoryEnum b : PolicyCategoryEnum.values()) {
                 if (String.valueOf(b.value).equals(v)) {
                     return b;
                 }
@@ -56,7 +56,7 @@ public class PolicyInfoDTO   {
 return null;
         }
     } 
-    private RuleCategoryEnum ruleCategory = null;
+    private PolicyCategoryEnum policyCategory = null;
 
           @XmlType(name="PolicyTypeEnum")
     @XmlEnum(String.class)
@@ -185,21 +185,21 @@ return null;
   }
 
   /**
-   * Category the rules included in policy.
+   * Category of the policy based on the rules included.
    **/
-  public PolicyInfoDTO ruleCategory(RuleCategoryEnum ruleCategory) {
-    this.ruleCategory = ruleCategory;
+  public PolicyInfoDTO policyCategory(PolicyCategoryEnum policyCategory) {
+    this.policyCategory = policyCategory;
     return this;
   }
 
   
-  @ApiModelProperty(example = "SPECTRAL", value = "Category the rules included in policy.")
-  @JsonProperty("ruleCategory")
-  public RuleCategoryEnum getRuleCategory() {
-    return ruleCategory;
+  @ApiModelProperty(example = "SPECTRAL", value = "Category of the policy based on the rules included.")
+  @JsonProperty("policyCategory")
+  public PolicyCategoryEnum getPolicyCategory() {
+    return policyCategory;
   }
-  public void setRuleCategory(RuleCategoryEnum ruleCategory) {
-    this.ruleCategory = ruleCategory;
+  public void setPolicyCategory(PolicyCategoryEnum policyCategory) {
+    this.policyCategory = policyCategory;
   }
 
   /**
@@ -362,7 +362,7 @@ return null;
     return Objects.equals(id, policyInfo.id) &&
         Objects.equals(name, policyInfo.name) &&
         Objects.equals(description, policyInfo.description) &&
-        Objects.equals(ruleCategory, policyInfo.ruleCategory) &&
+        Objects.equals(policyCategory, policyInfo.policyCategory) &&
         Objects.equals(policyType, policyInfo.policyType) &&
         Objects.equals(artifactType, policyInfo.artifactType) &&
         Objects.equals(documentationLink, policyInfo.documentationLink) &&
@@ -375,7 +375,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, ruleCategory, policyType, artifactType, documentationLink, provider, createdBy, createdTime, updatedBy, updatedTime);
+    return Objects.hash(id, name, description, policyCategory, policyType, artifactType, documentationLink, provider, createdBy, createdTime, updatedBy, updatedTime);
   }
 
   @Override
@@ -386,7 +386,7 @@ return null;
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    ruleCategory: ").append(toIndentedString(ruleCategory)).append("\n");
+    sb.append("    policyCategory: ").append(toIndentedString(policyCategory)).append("\n");
     sb.append("    policyType: ").append(toIndentedString(policyType)).append("\n");
     sb.append("    artifactType: ").append(toIndentedString(artifactType)).append("\n");
     sb.append("    documentationLink: ").append(toIndentedString(documentationLink)).append("\n");

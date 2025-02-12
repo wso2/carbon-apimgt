@@ -30,16 +30,14 @@ info:
 servers:
   - url: https://apis.wso2.com/api/am/governance/v1
 tags:
-  - name: Policy Attachments
-    description: for managing policies.
+  - name: Governance Policies
+    description: for managing governance policies.
   - name: Governance Policy Attachments
     description: for managing governance policy attachments.
   - name: Artifact Compliance
     description: for accessing artifact compliance.
   - name: Policy Attachment Adherence
     description: for accessing policy attachments adherence.
-  - name: Deprecated
-    description: resources that are deprecated.
 paths:
   /policies:
     get:
@@ -47,7 +45,7 @@ paths:
       description: Returns a list of all policies associated with the requested organization.
       operationId: getPolicies
       tags:
-        - Policies
+        - Governance Policies
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
@@ -61,10 +59,10 @@ paths:
 
               - "query=name:{NAME}" searches policies by name.
               - "query=artifactType:{ARTIFACT_TYPE}" searches policies by artifact type.
-              - "query=policyType:{POLICY_TYPE}" searches policies by rule type.
+              - "query=policyType:{POLICY_TYPE}" searches policies by policy type.
 
             You can combine multiple attributes to search for policies:
-              - "query=name:{NAME} artifactType:{ARTIFACT_TYPE} policyType:{POLICY_TYPE}" searches policies by name, artifact type, and rule type.
+              - "query=name:{NAME} artifactType:{ARTIFACT_TYPE} policyType:{POLICY_TYPE}" searches policies by name, artifact type, and policy type.
 
             Remember to use URL encoding if your client does not support it (e.g., curl).
       responses:
@@ -106,7 +104,7 @@ paths:
       description: Creates a new policy in the user's organization.
       operationId: createPolicy
       tags:
-        - Policies
+        - Governance Policies
       requestBody:
         required: true
         description: JSON object containing the details of the new policy.
@@ -154,7 +152,7 @@ paths:
       description: Retrieves details of the policy identified by the policyId.
       operationId: getPolicyById
       tags:
-        - Policies
+        - Governance Policies
       parameters:
         - $ref: '#/components/parameters/policyId'
       responses:
@@ -196,7 +194,7 @@ paths:
       description: Updates the details of the policy identified by the `policyId`.
       operationId: updatePolicyById
       tags:
-        - Policies
+        - Governance Policies
       parameters:
         - $ref: '#/components/parameters/policyId'
       requestBody:
@@ -245,7 +243,7 @@ paths:
       description: Deletes an existing policy identified by the policyId.
       operationId: deletePolicy
       tags:
-        - Policies
+        - Governance Policies
       parameters:
         - $ref: '#/components/parameters/policyId'
       responses:
@@ -284,7 +282,7 @@ paths:
       description: Retrieves the content of the policy identified by the policyId.
       operationId: getPolicyContent
       tags:
-        - Policies
+        - Governance Policies
       parameters:
         - $ref: '#/components/parameters/policyId'
       responses:
@@ -330,7 +328,7 @@ paths:
       description: Retrieves the list of policy attachments using the policy identified by the policyId.
       operationId: getPolicyUsage
       tags:
-        - Policies
+        - Governance Policies
       parameters:
         - $ref: '#/components/parameters/policyId'
       responses:
@@ -996,9 +994,9 @@ components:
                 message: API host schemes must use the HTTPS protocol.
                 formats:
                   - oas2
-        ruleCategory:
+        policyCategory:
           type: string
-          description: Category the rules included in policy.
+          description: Category the of the policy based on the rules included.
           enum:
             - SPECTRAL
           example: SPECTRAL
@@ -1052,9 +1050,9 @@ components:
           type: string
           description: A brief description of the policy.
           example: "A policy designed to enforce security standards for APIs."
-        ruleCategory:
+        policyCategory:
           type: string
-          description: Category the rules included in policy.
+          description: Category of the policy based on the rules included.
           enum:
             - SPECTRAL
           example: SPECTRAL
@@ -1184,7 +1182,7 @@ components:
           example: "2024-08-02T12:00:00Z"
       required:
         - name
-        - policies
+        - Governance Policies
         - labels
         - governableStates
         - actions

@@ -23,11 +23,11 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface PoliciesApiService {
-      public Response createPolicy(String name, InputStream policyContentInputStream, Attachment policyContentDetail, String policyType, String artifactType, String description, String ruleCategory, String documentationLink, String provider, MessageContext messageContext) throws APIMGovernanceException;
+      public Response createPolicy(String name, InputStream policyContentInputStream, Attachment policyContentDetail, String policyType, String artifactType, String description, String policyCategory, String documentationLink, String provider, MessageContext messageContext) throws APIMGovernanceException;
       public Response deletePolicy(String policyId, MessageContext messageContext) throws APIMGovernanceException;
       public Response getPolicies(Integer limit, Integer offset, String query, MessageContext messageContext) throws APIMGovernanceException;
       public Response getPolicyById(String policyId, MessageContext messageContext) throws APIMGovernanceException;
       public Response getPolicyContent(String policyId, MessageContext messageContext) throws APIMGovernanceException;
       public Response getPolicyUsage(String policyId, MessageContext messageContext) throws APIMGovernanceException;
-      public Response updatePolicyById(String policyId, String name, InputStream policyContentInputStream, Attachment policyContentDetail, String policyType, String artifactType, String description, String ruleCategory, String documentationLink, String provider, MessageContext messageContext) throws APIMGovernanceException;
+      public Response updatePolicyById(String policyId, String name, InputStream policyContentInputStream, Attachment policyContentDetail, String policyType, String artifactType, String description, String policyCategory, String documentationLink, String provider, MessageContext messageContext) throws APIMGovernanceException;
 }
