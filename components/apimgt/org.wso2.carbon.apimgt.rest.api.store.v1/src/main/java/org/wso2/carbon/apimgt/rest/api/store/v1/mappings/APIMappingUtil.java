@@ -573,7 +573,7 @@ public class APIMappingUtil {
             //prevent context appending in case the gateway is an external one
             Map<String, ExternalGatewayDeployer> externalGatewayDeployers = ServiceReferenceHolder.getInstance().
                     getExternalGatewayDeployers();
-            ExternalGatewayDeployer gatewayDeployer = externalGatewayDeployers.get(environment.getProvider());
+            ExternalGatewayDeployer gatewayDeployer = externalGatewayDeployers.get(environment.getGatewayType());
             context = gatewayDeployer != null ? "" : context;
             try {
                 String httpUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(

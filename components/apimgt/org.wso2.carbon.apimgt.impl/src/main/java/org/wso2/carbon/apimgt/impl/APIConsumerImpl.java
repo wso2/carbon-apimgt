@@ -3444,7 +3444,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
         Environment environment = APIUtil.getEnvironments().get(environmentName);
         Map<String, ExternalGatewayDeployer> externalGatewayDeployers = ServiceReferenceHolder.getInstance().getExternalGatewayDeployers();
-        ExternalGatewayDeployer gatewayDeployer = externalGatewayDeployers.get(environment.getProvider());
+        ExternalGatewayDeployer gatewayDeployer = externalGatewayDeployers.get(environment.getGatewayType());
         if (gatewayDeployer != null) {
             api.setContext("");
             updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
@@ -3623,7 +3623,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
             VHost vhost = VHostUtils.getVhostFromEnvironment(environment, host);
             Map<String, ExternalGatewayDeployer> externalGatewayDeployers = ServiceReferenceHolder.getInstance().getExternalGatewayDeployers();
-            ExternalGatewayDeployer gatewayDeployer = externalGatewayDeployers.get(environment.getProvider());
+            ExternalGatewayDeployer gatewayDeployer = externalGatewayDeployers.get(environment.getGatewayType());
             try {
                 if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)
                         && vhost.getHttpPort() != -1) {

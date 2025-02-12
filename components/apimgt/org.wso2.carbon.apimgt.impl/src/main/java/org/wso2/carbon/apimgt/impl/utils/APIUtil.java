@@ -10380,7 +10380,7 @@ public final class APIUtil {
         try {
             Map<String, Environment> environments = getEnvironments(tenantDomain);
             for (Environment environment : environments.values()) {
-                if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getProvider())) {
+                if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getGatewayType())) {
                     return true;
                 }
             }
