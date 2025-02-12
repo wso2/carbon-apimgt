@@ -106,7 +106,7 @@ paths:
       description: Creates a new policy in the user's organization.
       operationId: createPolicy
       tags:
-        - Policy
+        - Policies
       requestBody:
         required: true
         description: JSON object containing the details of the new policy.
@@ -154,7 +154,7 @@ paths:
       description: Retrieves details of the policy identified by the policyId.
       operationId: getPolicyById
       tags:
-        - Policy
+        - Policies
       parameters:
         - $ref: '#/components/parameters/policyId'
       responses:
@@ -196,7 +196,7 @@ paths:
       description: Updates the details of the policy identified by the `policyId`.
       operationId: updatePolicyById
       tags:
-        - Policy
+        - Policies
       parameters:
         - $ref: '#/components/parameters/policyId'
       requestBody:
@@ -245,7 +245,7 @@ paths:
       description: Deletes an existing policy identified by the policyId.
       operationId: deletePolicy
       tags:
-        - Policy
+        - Policies
       parameters:
         - $ref: '#/components/parameters/policyId'
       responses:
@@ -284,7 +284,7 @@ paths:
       description: Retrieves the content of the policy identified by the policyId.
       operationId: getPolicyContent
       tags:
-        - Policy
+        - Policies
       parameters:
         - $ref: '#/components/parameters/policyId'
       responses:
@@ -330,7 +330,7 @@ paths:
       description: Retrieves the list of policy attachments using the policy identified by the policyId.
       operationId: getPolicyUsage
       tags:
-        - Policy
+        - Policies
       parameters:
         - $ref: '#/components/parameters/policyId'
       responses:

@@ -10,12 +10,12 @@ description: >-
   A set of guidelines focused on enforcing uniformity in API style, including
   naming conventions, formatting, and documentation to ensure clarity and
   maintainability across all APIs.
-ruleCategory: SPECTRAL
-ruleType: API_DEFINITION
+policyCategory: SPECTRAL
+policyType: API_DEFINITION
 artifactType: REST_API
 documentationLink: "https://wso2.com/choreo/docs/api-management/api-governance/default-policies/wso2_style_guidelines_doc/"
 provider: WSO2
-rulesetContent:
+policyContent:
   aliases:
     API_Document:
       description: "The complete API specification document. This can be used to target
