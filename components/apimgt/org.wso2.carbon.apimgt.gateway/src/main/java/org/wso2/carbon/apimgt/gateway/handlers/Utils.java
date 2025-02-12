@@ -871,38 +871,4 @@ public class Utils {
         return selectedResource;
     }
 
-    /**
-     * Retrieves available endpoints for round robin policies.
-     *
-     * @param endpoints      RBEndpointsPolicyDTO object containing endpoint configurations.
-     * @param messageContext Synapse message context.
-     * @return The selected RBEndpointDTO list, or null if no active endpoints are available.
-     */
-    public static List<RBEndpointDTO> getActiveEndpoints(RBEndpointsPolicyDTO endpoints, MessageContext messageContext) {
-
-        List<RBEndpointDTO> productionEndpoints = endpoints.getProduction();
-        List<RBEndpointDTO> sandboxEndpoints = endpoints.getSandbox();
-
-        List<RBEndpointDTO> selectedEndpoints =
-                APIConstants.API_KEY_TYPE_PRODUCTION.equals(messageContext.getProperty(APIConstants.API_KEY_TYPE))
-                ? productionEndpoints
-                : sandboxEndpoints;
-
-        if (selectedEndpoints == null || selectedEndpoints.isEmpty()) {
-            return null;
-        }
-
-        List<RBEndpointDTO> activeEndpoints = new ArrayList<>();
-        for (RBEndpointDTO endpoint : selectedEndpoints) {
-            if (!DataHolder.getInstance().isEndpointSuspended(endpoint.getEndpointId() + "_" + endpoint.getModel())) {
-                activeEndpoints.add(endpoint);
-            }
-        }
-
-        if (activeEndpoints.isEmpty()) {
-            return null;
-        }
-        return activeEndpoints;
-    }
-
 }
