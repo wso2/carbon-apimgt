@@ -301,7 +301,7 @@ paths:
             - apim:api_manage
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -X POST -H Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d "{\"text\": \"create an API for a banking transaction.\", \"session_id\": \"1234567890\"}" "https://127.0.0.1:9443/api/am/publisher/v4/design-assistant/chat"'
+          source: 'curl -k -X POST -H Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d "{\"text\": \"create an API for a banking transaction.\", \"sessionId\": \"1234567890\"}" "https://127.0.0.1:9443/api/am/publisher/v4/design-assistant/chat"'
       operationId: designAssistantChat
 
   ######################################################################
@@ -338,7 +338,7 @@ paths:
             - apim:api_manage
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d "{\"session_id\": \"1234567890\"}" "https://127.0.0.1:9443/api/am/publisher/v4/design-assistant/generate-api-payload"'
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d "{\"sessionId\": \"1234567890\"}" "https://127.0.0.1:9443/api/am/publisher/v4/design-assistant/generate-api-payload"'
       operationId: designAssistantApiPayloadGen
 
   ######################################################
