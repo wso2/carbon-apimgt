@@ -317,13 +317,13 @@ public class DataHolder {
     /**
      * Checks if an endpoint is currently suspended.
      *
-     * @param endpointId The identifier of the endpoint.
+     * @param endpointKey The identifier of the endpoint.
      * @return {@code true} if the endpoint is suspended and has not expired, otherwise {@code false}.
      */
-    public boolean isEndpointSuspended(String endpointId) {
-        Long expirationTime = suspendedEndpoints.getIfPresent(endpointId);
+    public boolean isEndpointSuspended(String endpointKey) {
+        Long expirationTime = suspendedEndpoints.getIfPresent(endpointKey);
         if (expirationTime == null || System.currentTimeMillis() > expirationTime) {
-            suspendedEndpoints.invalidate(endpointId);
+            suspendedEndpoints.invalidate(endpointKey);
             return false;
         }
         return true;

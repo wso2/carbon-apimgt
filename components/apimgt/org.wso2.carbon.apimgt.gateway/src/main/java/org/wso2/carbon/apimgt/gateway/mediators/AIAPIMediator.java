@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -159,8 +160,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                     if (statusCode < 200 || statusCode >= 300) {
                         Long suspendDuration = (Long)
                                 messageContext.getProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION);
-                        DataHolder.getInstance().suspendEndpoint(targetEndpoint + "_" + targetModel,
-                                suspendDuration * 1000);
+                        suspendEndpoint(messageContext, targetEndpoint, targetModel, suspendDuration * 1000);
                         return true;
                     }
 
@@ -176,8 +176,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                     if (remainingTokenCount <= 0 || remainingRequestCount <= 0) {
                         Long suspendDuration = (Long)
                                 messageContext.getProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION);
-                        DataHolder.getInstance().suspendEndpoint(targetEndpoint + "_" + targetModel,
-                                suspendDuration * 1000);
+                        suspendEndpoint(messageContext, targetEndpoint, targetModel, suspendDuration * 1000);
                     }
                 }
 
@@ -459,6 +458,22 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
 
         return metadataList.stream().filter(metadata ->
                 attributeName.equals(metadata.getAttributeName())).findFirst().orElse(null);
+    }
+
+    /**
+     * Suspend the endpoint using the generated key.
+     *
+     * @param messageContext  The Synapse MessageContext.
+     * @param targetEndpoint  The target endpoint.
+     * @param targetModel     The target model.
+     * @param suspendDuration The duration to suspend the endpoint.
+     */
+    public void suspendEndpoint(org.apache.synapse.MessageContext messageContext, String targetEndpoint,
+                                String targetModel, long suspendDuration) {
+
+        String endpointKey =
+                GatewayUtils.getAPIKeyForEndpoints(messageContext) + "_" + targetEndpoint + "_" + targetModel;
+        DataHolder.getInstance().suspendEndpoint(endpointKey, suspendDuration);
     }
 
 }

@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.gateway.RBEndpointDTO;
 import org.wso2.carbon.apimgt.api.gateway.RBEndpointsPolicyDTO;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,7 +75,7 @@ public class WeightedRoundRobinMediator extends AbstractMediator implements Mana
         }
 
         RBEndpointsPolicyDTO endpoints = new Gson().fromJson(weightedRoundRobinConfigs, RBEndpointsPolicyDTO.class);
-        List<RBEndpointDTO> activeEndpoints = Utils.getActiveEndpoints(endpoints, messageContext);
+        List<RBEndpointDTO> activeEndpoints = GatewayUtils.getActiveEndpoints(endpoints, messageContext);
 
         if (activeEndpoints != null && !activeEndpoints.isEmpty()) {
             RBEndpointDTO nextEndpoint = getWeightedRandomEndpoint(activeEndpoints);
