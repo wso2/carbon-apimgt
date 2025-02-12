@@ -78,8 +78,8 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                                                               String organization)
             throws APIMGovernanceException {
 
-        List<String> applicablePolicyAttachmentIds = APIMGovernanceUtil.getApplicablePolicyAttachmentsForArtifactWithState(artifactRefId,
-                artifactType, state, organization);
+        List<String> applicablePolicyAttachmentIds = APIMGovernanceUtil
+                .getApplicablePolicyAttachmentsForArtifactWithState(artifactRefId, artifactType, state, organization);
         return APIMGovernanceUtil.isBlockingActionsPresent(applicablePolicyAttachmentIds, state, organization);
     }
 
@@ -216,7 +216,8 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
             for (String attachmentId : allPolicyAttachmentsForLabel) {
                 APIMGovernancePolicyAttachment policyAttachment = policyAttachmentManager
                         .getGovernancePolicyAttachmentByID(attachmentId, organization);
-                boolean isAPIGovernable = APIMUtil.isAPIGovernable(apiStatus, isDeployed, policyAttachment.getGovernableStates());
+                boolean isAPIGovernable = APIMUtil.isAPIGovernable(apiStatus, isDeployed,
+                        policyAttachment.getGovernableStates());
                 // If the API should be governed by the policy
                 if (isAPIGovernable) {
                     applicablePolicyAttachmentIds.add(attachmentId);
@@ -224,7 +225,8 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
             }
         }
 
-        complianceManager.handleComplianceEvalAsync(artifactRefId, artifactType, applicablePolicyAttachmentIds, organization);
+        complianceManager.handleComplianceEvalAsync(artifactRefId, artifactType, applicablePolicyAttachmentIds,
+                organization);
     }
 
     /**

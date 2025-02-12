@@ -109,7 +109,8 @@ public interface GovernancePolicyAttachmentMgtDAO {
      * @return List of policies
      * @throws APIMGovernanceException If an error occurs while getting the policies
      */
-    List<PolicyInfo> getPoliciesByPolicyAttachmentId(String policyAttachmentId, String organization) throws APIMGovernanceException;
+    List<PolicyInfo> getPoliciesByPolicyAttachmentId(String policyAttachmentId, String organization)
+            throws APIMGovernanceException;
 
     /**
      * Get the list of policy attachments by label

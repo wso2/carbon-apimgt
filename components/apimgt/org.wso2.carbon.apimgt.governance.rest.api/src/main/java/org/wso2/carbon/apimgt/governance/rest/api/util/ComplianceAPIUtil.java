@@ -109,7 +109,8 @@ public class ComplianceAPIUtil {
         }
 
         // Get all policy attachments evaluated for the artifact
-        List<String> evaluatedAttachment = new ComplianceManager().getEvaluatedPolicyAttachmentsForArtifact(artifactRefId,
+        List<String> evaluatedAttachment = new ComplianceManager()
+                .getEvaluatedPolicyAttachmentsForArtifact(artifactRefId,
                 artifactType, organization);
 
         // If the artifact is not evaluated yet, set the compliance status to not applicable/pending and return
@@ -125,7 +126,8 @@ public class ComplianceAPIUtil {
             String policyId = entry.getKey();
             String policyName = entry.getValue();
             boolean isAttachmentEvaluated = evaluatedAttachment.contains(policyId);
-            PolicyAttachmentAdherenceWithPoliciesDTO policyAttachmentAdherence = getPolicyAttachmentAdherenceResultsDTO(policyId,
+            PolicyAttachmentAdherenceWithPoliciesDTO policyAttachmentAdherence =
+                    getPolicyAttachmentAdherenceResultsDTO(policyId,
                     policyName, artifactRefId, artifactType, organization, isAttachmentEvaluated);
             policyAttachmentAdherenceDetails.add(policyAttachmentAdherence);
 
@@ -160,18 +162,21 @@ public class ComplianceAPIUtil {
         PolicyAttachmentManager policyAttachmentManager = new PolicyAttachmentManager();
         ComplianceManager complianceManager = new ComplianceManager();
 
-        PolicyAttachmentAdherenceWithPoliciesDTO policyAttachmentAdherenceWithPoliciesDTO = new PolicyAttachmentAdherenceWithPoliciesDTO();
+        PolicyAttachmentAdherenceWithPoliciesDTO policyAttachmentAdherenceWithPoliciesDTO =
+                new PolicyAttachmentAdherenceWithPoliciesDTO();
         policyAttachmentAdherenceWithPoliciesDTO.setId(attachmentId);
         policyAttachmentAdherenceWithPoliciesDTO.setName(attachmentName);
 
         // If the policy has not been evaluated, set the policy adherence status to unapplied
         if (!isAttachmentEvaluated) {
-            policyAttachmentAdherenceWithPoliciesDTO.setStatus(PolicyAttachmentAdherenceWithPoliciesDTO.StatusEnum.UNAPPLIED);
+            policyAttachmentAdherenceWithPoliciesDTO.setStatus(PolicyAttachmentAdherenceWithPoliciesDTO
+                    .StatusEnum.UNAPPLIED);
             return policyAttachmentAdherenceWithPoliciesDTO;
         }
 
         // Retrieve policy attachments tied to the policy attachment
-        List<PolicyInfo> policiesInAttachment = policyAttachmentManager.getPoliciesByPolicyAttachmentId(attachmentId, organization);
+        List<PolicyInfo> policiesInAttachment = policyAttachmentManager.getPoliciesByPolicyAttachmentId(attachmentId,
+                organization);
 
         // Retrieve the evaluated policies for the policy
         List<String> evaluatedPolicies =
@@ -194,9 +199,11 @@ public class ComplianceAPIUtil {
         if (policyValidationResults.stream().allMatch(
                 policyValidationResultDTO -> policyValidationResultDTO.getStatus() ==
                         PolicyValidationResultWithoutRulesDTO.StatusEnum.PASSED)) {
-            policyAttachmentAdherenceWithPoliciesDTO.setStatus(PolicyAttachmentAdherenceWithPoliciesDTO.StatusEnum.FOLLOWED);
+            policyAttachmentAdherenceWithPoliciesDTO.setStatus(PolicyAttachmentAdherenceWithPoliciesDTO
+                    .StatusEnum.FOLLOWED);
         } else {
-            policyAttachmentAdherenceWithPoliciesDTO.setStatus(PolicyAttachmentAdherenceWithPoliciesDTO.StatusEnum.VIOLATED);
+            policyAttachmentAdherenceWithPoliciesDTO.setStatus(PolicyAttachmentAdherenceWithPoliciesDTO
+                    .StatusEnum.VIOLATED);
         }
 
         policyAttachmentAdherenceWithPoliciesDTO.setPolicyValidationResults(policyValidationResults);
@@ -372,7 +379,8 @@ public class ComplianceAPIUtil {
 
         // Identify violated policy attachments
         List<String> violatedPolicyAttachments = complianceManager
-                .identifyViolatedPolicyAttachments(evaluatedAttachments, new ArrayList<>(violatedPolicies), organization);
+                .identifyViolatedPolicyAttachments(evaluatedAttachments, new ArrayList<>(violatedPolicies),
+                        organization);
 
         // Set policy adherence summary
         PolicyAttachmentAdherenceSummaryDTO summaryDTO = new PolicyAttachmentAdherenceSummaryDTO();

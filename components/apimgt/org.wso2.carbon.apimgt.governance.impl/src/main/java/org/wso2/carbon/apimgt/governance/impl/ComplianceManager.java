@@ -600,7 +600,8 @@ public class ComplianceManager {
      */
 
     public ArtifactComplianceDryRunInfo handleComplianceEvalDryRun(ExtendedArtifactType artifactType,
-                                                                   List<String> govPolicyAttachments, Map<PolicyType, String>
+                                                                   List<String> govPolicyAttachments,
+                                                                   Map<PolicyType, String>
                                                                            artifactProjectContent,
                                                                    String organization) throws
             APIMGovernanceException {
@@ -651,7 +652,8 @@ public class ComplianceManager {
                     List<RuleViolation> ruleViolations = validationEngine.validate(
                             contentToValidate, policy);
 
-                    artifactComplianceDryRunInfo.addRuleViolationsForPolicy(policyAttachment, policyInfo, ruleViolations);
+                    artifactComplianceDryRunInfo.addRuleViolationsForPolicy(policyAttachment, policyInfo,
+                            ruleViolations);
 
                 } else {
                     if (log.isDebugEnabled()) {

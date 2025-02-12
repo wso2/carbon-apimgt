@@ -788,7 +788,7 @@ paths:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
       tags:
-        - Policy Attachments Adherence
+        - Policy Attachment Adherence
       responses:
         "200":
           description: Ok. Successful response with adherence details for all policy attachments.
@@ -829,7 +829,7 @@ paths:
       description: Retrieves the summary of adherence for all governance policy attachments within the organization.
       operationId: getPolicyAttachmentAdherenceSummary
       tags:
-        - Policy Attachments Adherence
+        - Policy Attachment Adherence
       responses:
         "200":
           description: OK. Successful response with adherence summary.
