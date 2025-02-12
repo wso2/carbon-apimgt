@@ -58,7 +58,6 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     public static final String TEMPLATE_WEBSUB_API = "websub_api_template";
     public static final String TEMPLATE_TYPE_PROTOTYPE = "prototype_template";
     public static final String TEMPLATE_AI_API = "ai_api_template";
-    public static final String TEMPLATE_AI_API_PRODUCT = "ai_api_product_template";
     public static final String TEMPLATE_DEFAULT_API = "default_api_template";
     public static final String TEMPLATE_DEFAULT_WS_API = "default_ws_api_template";
     private static final Log log = LogFactory.getLog(APITemplateBuilderImpl.class);
@@ -107,8 +106,6 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             if (api != null) {
                 configcontext = createAIAPIConfigContext(api, environment, endpointDTOList);
-            } else {
-                configcontext = createAIAPIConfigContext(apiProduct, environment, endpointDTOList);
             }
 
             configcontext.validate();
@@ -125,8 +122,6 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
             if (api != null) {
                 t = velocityengine.getTemplate(getAIAPITemplatePath());
-            } else {
-                t = velocityengine.getTemplate(getAIAPIProductTemplatePath());
             }
             context.put("llmProviderId", api.getAiConfiguration().getLlmProviderId());
             t.merge(context, writer);
@@ -417,28 +412,6 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         return configcontext;
     }
 
-    /**
-     * Creates a configuration context for the AI API using the given API and environment.
-     *
-     * @param apiProduct The API Product instance for which the configuration context is created.
-     * @param environment The deployment environment associated with the API.
-     * @return A fully initialized {@code ConfigContext} for the AI API Product.
-     */
-    public ConfigContext createAIAPIConfigContext(APIProduct apiProduct, Environment environment,
-                                                  List<EndpointDTO> endpointDTOList) {
-
-        ConfigContext configcontext = new APIConfigContext(apiProduct);
-        configcontext = new TransportConfigContext(configcontext, apiProduct);
-        configcontext = new ResourceConfigContext(configcontext, apiProduct);
-        configcontext = new HandlerConfigContex(configcontext, handlers);
-        configcontext = new EnvironmentConfigContext(configcontext, environment);
-        configcontext = new TemplateUtilContext(configcontext);
-        configcontext = new SecurityConfigContext(configcontext, apiProduct, associatedAPIMap);
-        configcontext = new EndpointsContext(configcontext, apiProduct, endpointDTOList);
-
-        return configcontext;
-    }
-
     public void addHandler(String handlerName, Map<String, String> properties) {
 
         addHandlerPriority(handlerName, properties, handlers.size());
@@ -492,12 +465,6 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
         return "repository" + File.separator + "resources" + File.separator + "api_templates" +
                 File.separator + APITemplateBuilderImpl.TEMPLATE_AI_API + ".xml";
-    }
-
-    public String getAIAPIProductTemplatePath() {
-
-        return "repository" + File.separator + "resources" + File.separator + "api_templates" +
-                File.separator + APITemplateBuilderImpl.TEMPLATE_AI_API_PRODUCT + ".xml";
     }
 
     public String getVelocityLogger() {

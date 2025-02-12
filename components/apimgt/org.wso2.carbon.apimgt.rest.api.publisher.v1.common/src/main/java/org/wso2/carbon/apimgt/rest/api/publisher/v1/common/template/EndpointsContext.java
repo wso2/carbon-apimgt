@@ -23,7 +23,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.EndpointConfigDTO;
 import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
@@ -42,7 +41,6 @@ import java.util.stream.Collectors;
 public class EndpointsContext extends ConfigContextDecorator {
 
     private API api;
-    private APIProduct apiProduct;
     private List<EndpointDTO> endpointDTOList;
 
     /**
@@ -56,21 +54,6 @@ public class EndpointsContext extends ConfigContextDecorator {
 
         super(context);
         this.api = api;
-        this.endpointDTOList = endpointDTOList;
-    }
-
-    /**
-     * Constructs an EndpointsContext instance for an API Product.
-     *
-     * @param configContext   The base configuration context
-     * @param apiProduct      The API product associated with the endpoints
-     * @param endpointDTOList The list of endpoint DTOs
-     */
-    public EndpointsContext(ConfigContext configContext, APIProduct apiProduct,
-                            List<EndpointDTO> endpointDTOList) {
-
-        super(configContext);
-        this.apiProduct = apiProduct;
         this.endpointDTOList = endpointDTOList;
     }
 
