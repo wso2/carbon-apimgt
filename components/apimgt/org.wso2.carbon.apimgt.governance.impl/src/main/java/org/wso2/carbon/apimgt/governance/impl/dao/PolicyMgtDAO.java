@@ -122,7 +122,8 @@ public interface PolicyMgtDAO {
      * @param organization Organization
      * @return List of associated policies
      */
-    List<String> getAssociatedPolicyAttachmentForPolicy(String policyId, String organization) throws APIMGovernanceException;
+    List<String> getAssociatedPolicyAttachmentForPolicy(String policyId, String organization)
+            throws APIMGovernanceException;
 
     /**
      * Get the rules of a Policy

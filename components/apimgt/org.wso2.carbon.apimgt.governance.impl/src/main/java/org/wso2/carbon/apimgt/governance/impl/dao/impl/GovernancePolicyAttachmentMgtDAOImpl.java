@@ -205,7 +205,8 @@ public class GovernancePolicyAttachmentMgtDAOImpl implements GovernancePolicyAtt
             connection.setAutoCommit(false);
             try {
                 // Update policy details
-                try (PreparedStatement updateStatement = connection.prepareStatement(SQLConstants.UPDATE_POLICY_ATTACHMENT)) {
+                try (PreparedStatement updateStatement = connection.prepareStatement(SQLConstants
+                        .UPDATE_POLICY_ATTACHMENT)) {
                     updateStatement.setString(1, policyAttachment.getName());
                     updateStatement.setString(2, policyAttachment.getDescription());
                     updateStatement.setString(3, policyAttachment.getUpdatedBy());
@@ -246,7 +247,8 @@ public class GovernancePolicyAttachmentMgtDAOImpl implements GovernancePolicyAtt
 
         // Delete old mappings and add new mappings
         try (PreparedStatement ps =
-                     connection.prepareStatement(SQLConstants.DELETE_POLICY_ATTACHMENT_POLICY_MAPPING_BY_POLICY_ATTACHMENT_ID)) {
+                     connection.prepareStatement(SQLConstants
+                             .DELETE_POLICY_ATTACHMENT_POLICY_MAPPING_BY_POLICY_ATTACHMENT_ID)) {
             ps.setString(1, policyAttachmentId);
             ps.executeUpdate();
         }
@@ -536,7 +538,8 @@ public class GovernancePolicyAttachmentMgtDAOImpl implements GovernancePolicyAtt
             throws APIMGovernanceException {
         List<PolicyInfo> policyList = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICIES_BY_POLICY_ATTACHMENT_ID)) {
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
+                     .GET_POLICIES_BY_POLICY_ATTACHMENT_ID)) {
             prepStmt.setString(1, policyAttachmentId);
             prepStmt.setString(2, organization);
             try (ResultSet rs = prepStmt.executeQuery()) {
@@ -602,7 +605,8 @@ public class GovernancePolicyAttachmentMgtDAOImpl implements GovernancePolicyAtt
                                                             String organization) throws APIMGovernanceException {
         List<String> policyAttachments = new ArrayList<>();
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_POLICY_ATTACHMENTS_BY_LABEL_AND_STATE)) {
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
+                     .GET_POLICY_ATTACHMENTS_BY_LABEL_AND_STATE)) {
             prepStmt.setString(1, label);
             prepStmt.setString(2, String.valueOf(state));
             prepStmt.setString(3, organization);
@@ -632,7 +636,7 @@ public class GovernancePolicyAttachmentMgtDAOImpl implements GovernancePolicyAtt
             prepStmt.setString(1, organization);
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
-                    policyAttachments.put(resultSet.getString("POLICY_ATTACHMENTS_ID"),
+                    policyAttachments.put(resultSet.getString("POLICY_ATTACHMENT_ID"),
                             resultSet.getString("NAME"));
                 }
             }

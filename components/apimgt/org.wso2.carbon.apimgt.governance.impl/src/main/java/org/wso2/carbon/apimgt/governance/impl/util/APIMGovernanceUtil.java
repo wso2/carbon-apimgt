@@ -283,7 +283,8 @@ public class APIMGovernanceUtil {
      * @param organization  Organization
      * @return Map of Policy Attachment IDs and Attachment Names
      */
-    public static Map<String, String> getApplicablePolicyAttachmentsForArtifact(String artifactRefId, ArtifactType artifactType,
+    public static Map<String, String> getApplicablePolicyAttachmentsForArtifact(String artifactRefId,
+                                                                                ArtifactType artifactType,
                                                                                 String organization)
             throws APIMGovernanceException {
 
@@ -317,7 +318,8 @@ public class APIMGovernanceUtil {
      */
     public static List<String> getApplicablePolicyAttachmentsForArtifactWithState(String artifactRefId,
                                                                                   ArtifactType artifactType,
-                                                                                  APIMGovernableState apimGovernableState,
+                                                                                  APIMGovernableState
+                                                                                          apimGovernableState,
                                                                                   String organization)
             throws APIMGovernanceException {
 
@@ -350,7 +352,8 @@ public class APIMGovernanceUtil {
      * @return boolean
      * @throws APIMGovernanceException if an error occurs while checking for blocking actions
      */
-    public static boolean isBlockingActionsPresent(List<String> policyAttachmentIds, APIMGovernableState governableState,
+    public static boolean isBlockingActionsPresent(List<String> policyAttachmentIds,
+                                                   APIMGovernableState governableState,
                                                    String organization)
             throws APIMGovernanceException {
         PolicyAttachmentManager policyAttachmentManager = new PolicyAttachmentManager();

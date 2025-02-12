@@ -152,9 +152,11 @@ public class PolicyAttachmentsApiServiceImpl implements PolicyAttachmentsApiServ
         PolicyAttachmentManager policyAttachmentManager = new PolicyAttachmentManager();
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 
-        APIMGovernancePolicyAttachment policyAttachment = policyAttachmentManager.getGovernancePolicyAttachmentByID(policyAttachmentId, organization);
+        APIMGovernancePolicyAttachment policyAttachment = policyAttachmentManager
+                .getGovernancePolicyAttachmentByID(policyAttachmentId, organization);
         APIMGovernancePolicyAttachmentDTO policyAttachmentDTO
-                = PolicyAttachmentMappingUtil.fromGovernancePolicyAttachmentToGovernancePolicyAttachmentDTO(policyAttachment);
+                = PolicyAttachmentMappingUtil
+                .fromGovernancePolicyAttachmentToGovernancePolicyAttachmentDTO(policyAttachment);
         return Response.status(Response.Status.OK).entity(policyAttachmentDTO).build();
     }
 
@@ -168,7 +170,8 @@ public class PolicyAttachmentsApiServiceImpl implements PolicyAttachmentsApiServ
      * @return Response
      * @throws APIMGovernanceException If an error occurs while retrieving the policy attachments
      */
-    public Response getGovernancePolicyAttachments(Integer limit, Integer offset, String query, MessageContext messageContext)
+    public Response getGovernancePolicyAttachments(Integer limit, Integer offset, String query,
+                                                   MessageContext messageContext)
             throws APIMGovernanceException {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -184,7 +187,8 @@ public class PolicyAttachmentsApiServiceImpl implements PolicyAttachmentsApiServ
             attachmentList = policyAttachmentManager.getGovernancePolicyAttachments(organization);
         }
 
-        APIMGovernancePolicyAttachmentListDTO policyListDTO = getPaginatedPolicyAttachmentList(attachmentList, limit, offset, query);
+        APIMGovernancePolicyAttachmentListDTO policyListDTO = getPaginatedPolicyAttachmentList(attachmentList, limit,
+                offset, query);
 
         return Response.status(Response.Status.OK).entity(policyListDTO).build();
     }
@@ -198,9 +202,9 @@ public class PolicyAttachmentsApiServiceImpl implements PolicyAttachmentsApiServ
      * @param query      Query for filtering
      * @return Paginated Governance Policy Attachment List
      */
-    private APIMGovernancePolicyAttachmentListDTO getPaginatedPolicyAttachmentList(APIMGovernancePolicyAttachmentList attachmentList, int limit,
-                                                                                   int offset,
-                                                                                   String query) {
+    private APIMGovernancePolicyAttachmentListDTO getPaginatedPolicyAttachmentList(
+            APIMGovernancePolicyAttachmentList attachmentList, int limit, int offset, String query) {
+
         int attachmentCount = attachmentList.getCount();
         List<APIMGovernancePolicyAttachmentDTO> policies = new ArrayList<>();
         APIMGovernancePolicyAttachmentListDTO paginatedPolicyListDTO = new APIMGovernancePolicyAttachmentListDTO();
@@ -216,7 +220,8 @@ public class PolicyAttachmentsApiServiceImpl implements PolicyAttachmentsApiServ
         int end = Math.min(attachmentCount, start + limit);
         for (int i = start; i < end; i++) {
             APIMGovernancePolicyAttachment attachment = attachmentList.getGovernancePolicyAttachmentList().get(i);
-            APIMGovernancePolicyAttachmentDTO policyAttachmentDTO = PolicyAttachmentMappingUtil.fromGovernancePolicyAttachmentToGovernancePolicyAttachmentDTO(attachment);
+            APIMGovernancePolicyAttachmentDTO policyAttachmentDTO = PolicyAttachmentMappingUtil
+                    .fromGovernancePolicyAttachmentToGovernancePolicyAttachmentDTO(attachment);
             policies.add(policyAttachmentDTO);
         }
         paginatedPolicyListDTO.setList(policies);

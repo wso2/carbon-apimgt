@@ -65,7 +65,7 @@ PolicyAttachmentAdherenceApiService delegate = new PolicyAttachmentAdherenceApiS
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
         })
-    }, tags={ "Policy Attachments Adherence",  })
+    }, tags={ "Policy Attachment Adherence",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Ok. Successful response with adherence details for all policy attachments.", response = PolicyAttachmentAdherenceListDTO.class),
         @ApiResponse(code = 400, message = "Bad request", response = ErrorDTO.class),
@@ -84,7 +84,7 @@ PolicyAttachmentAdherenceApiService delegate = new PolicyAttachmentAdherenceApiS
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
         })
-    }, tags={ "Policy Attachments Adherence" })
+    }, tags={ "Policy Attachment Adherence" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Successful response with adherence summary.", response = PolicyAttachmentAdherenceSummaryDTO.class),
         @ApiResponse(code = 400, message = "Bad request", response = ErrorDTO.class),

@@ -98,7 +98,8 @@ public class PolicyAttachmentManager {
                 .getGovernancePolicyAttachmentByName(newName, organization);
         if (policyAttachmentWithNewName != null && !policyAttachmentWithNewName
                 .getId().equals(policyAttachmentId)) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_ATTACHMENT_ALREADY_EXISTS, newName, organization);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_ATTACHMENT_ALREADY_EXISTS, newName,
+                    organization);
         }
 
         checkForInvalidActions(policyAttachment);
@@ -123,13 +124,15 @@ public class PolicyAttachmentManager {
         List<APIMGovernanceAction> actions = policyAttachment.getActions();
         for (APIMGovernanceAction action : actions) {
             if (!apimGovernableStates.contains(action.getGovernableState())) {
-                throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY_ATTACHMENT,
+                throw new APIMGovernanceException(APIMGovExceptionCodes
+                        .ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY_ATTACHMENT,
                         "Invalid governable state found in the policy attachment. Please update the policy attachment");
             }
             if (APIMGovernanceActionType.BLOCK.equals(action.getType()) &&
                     (APIMGovernableState.API_CREATE.equals(action.getGovernableState()) ||
                             APIMGovernableState.API_UPDATE.equals(action.getGovernableState()))) {
-                throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY_ATTACHMENT,
+                throw new APIMGovernanceException(APIMGovExceptionCodes
+                        .ERROR_WHILE_ASSIGNING_ACTION_TO_POLICY_ATTACHMENT,
                         "Creating policy attachments with blocking actions for API" +
                                 " create/update is not allowed. Please update the policy attachment");
             }
@@ -357,7 +360,8 @@ public class PolicyAttachmentManager {
                 // Add valid prefixes to criteriaMap
                 if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.PolicyAttachmentSearchAttributes.STATE)) {
                     criteriaMap.put(APIMGovernanceConstants.PolicyAttachmentSearchAttributes.STATE, searchValue);
-                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.PolicyAttachmentSearchAttributes.NAME)) {
+                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants
+                        .PolicyAttachmentSearchAttributes.NAME)) {
                     criteriaMap.put(APIMGovernanceConstants.PolicyAttachmentSearchAttributes.NAME, searchValue);
                 }
             }

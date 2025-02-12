@@ -601,7 +601,8 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
      * @param policyAttachmentId    Policy Attachment ID
      * @throws SQLException If an error occurs while adding the policy compliance evaluation result
      */
-    private void addPolicyAttachmentRun(Connection connection, String artifactKey, String policyAttachmentId) throws SQLException {
+    private void addPolicyAttachmentRun(Connection connection, String artifactKey, String policyAttachmentId)
+            throws SQLException {
 
         String sqlQuery = SQLConstants.ADD_POLICY_ATTACHMENT_RUN;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {

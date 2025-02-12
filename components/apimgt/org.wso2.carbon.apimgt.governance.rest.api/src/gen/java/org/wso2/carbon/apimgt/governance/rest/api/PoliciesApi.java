@@ -46,7 +46,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
         })
-    }, tags={ "Policy",  })
+    }, tags={ "Policies",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "OK. Policy created successfully.", response = PolicyInfoDTO.class),
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
@@ -65,7 +65,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
         })
-    }, tags={ "Policy",  })
+    }, tags={ "Policies",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 204, message = "OK. Policy deleted successfully.", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
@@ -103,7 +103,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies")
         })
-    }, tags={ "Policy",  })
+    }, tags={ "Policies",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Policy details retrieved successfully.", response = PolicyInfoDTO.class),
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
@@ -122,7 +122,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies")
         })
-    }, tags={ "Policy",  })
+    }, tags={ "Policies",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Policy content retrieved successfully.", response = String.class),
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
@@ -141,7 +141,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_policy_read", description = "Read governance policies")
         })
-    }, tags={ "Policy",  })
+    }, tags={ "Policies",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Policy usage retrieved successfully.", response = String.class, responseContainer = "List"),
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
@@ -160,7 +160,7 @@ PoliciesApiService delegate = new PoliciesApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_policy_manage", description = "Manage governance policies")
         })
-    }, tags={ "Policy" })
+    }, tags={ "Policies" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Policy updated successfully.", response = PolicyInfoDTO.class),
         @ApiResponse(code = 400, message = "Bad Request", response = ErrorDTO.class),
