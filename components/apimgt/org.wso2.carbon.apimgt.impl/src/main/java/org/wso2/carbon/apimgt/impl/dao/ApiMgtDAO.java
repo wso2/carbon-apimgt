@@ -118,6 +118,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.ThrottlePolicyConstants;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
+import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants.ThrottleSQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIInfoDTO;
@@ -17771,22 +17772,28 @@ public class ApiMgtDAO {
     public void importDraftedOrgTheme(String organization, InputStream themeContent) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            if (isOrganizationExist(connection, organization)) {
-                String existingDraftedArtifact = getDraftedArtifactForOrg(connection, organization);
-                if (existingDraftedArtifact != null) {
-                    removeArtifact(connection, existingDraftedArtifact);
+            try {
+                if (isOrganizationExist(connection, organization)) {
+                    String existingDraftedArtifact = getDraftedArtifactForOrg(connection, organization);
+                    if (existingDraftedArtifact != null) {
+                        removeArtifact(connection, existingDraftedArtifact);
+                    }
+                    String newUUID = addArtifact(connection, themeContent, DevPortalConstants.DRAFTED_ORG_THEME);
+                    updateDraftedArtifactForOrg(connection, organization, newUUID);
+                } else {
+                    String newUUID = addArtifact(connection, themeContent, DevPortalConstants.DRAFTED_ORG_THEME);
+                    insertNewOrgWithDraftedArtifact(connection, organization, newUUID);
                 }
-                String newUUID = addArtifact(connection, themeContent, "DRAFTED_ORG_THEME");
-                updateDraftedArtifactForOrg(connection, organization, newUUID);
-            } else {
-                String newUUID = addArtifact(connection, themeContent, "DRAFTED_ORG_THEME");
-                insertNewOrgWithDraftedArtifact(connection, organization, newUUID);
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to import drafted organization theme for organization " + organization, e);
             }
-            connection.commit();
         } catch (SQLException e) {
-            handleException("Failed to import drafted organization theme for tenant " + organization, e);
+            handleException("Database connection error while importing drafted organization theme for organization " + organization, e);
         }
     }
+
 
     /**
      * Updates the organization theme status as published or unpublished.
@@ -17798,32 +17805,38 @@ public class ApiMgtDAO {
     public void updateOrgThemeStatusAsPublishedOrUnpublished(String organization, String action) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            if ("PUBLISH".equals(action)) {
-                String draftedArtifact = getDraftedArtifactForOrg(connection, organization);
-                if (draftedArtifact != null) {
-                    InputStream artifactContent = getArtifactContent(connection, draftedArtifact);
-                    String newUUID = addArtifact(connection, artifactContent, "PUBLISHED_ORG_THEME");
-                    updatePublishedArtifactForOrg(connection, organization, newUUID);
-                    removeArtifact(connection, draftedArtifact);
+            try {
+                if (DevPortalConstants.PUBLISH.equals(action)) {
+                    String draftedArtifact = getDraftedArtifactForOrg(connection, organization);
+                    if (draftedArtifact != null) {
+                        InputStream artifactContent = getArtifactContent(connection, draftedArtifact);
+                        String newUUID = addArtifact(connection, artifactContent, DevPortalConstants.PUBLISHED_ORG_THEME);
+                        updatePublishedArtifactForOrg(connection, organization, newUUID);
+                        removeArtifact(connection, draftedArtifact);
+                    } else {
+                        log.warn("ID cannot be found in drafted state. Aborting the request");
+                    }
                 } else {
-                    log.warn("ID cannot be found in drafted state. Aborting the request");
+                    String publishedArtifact = getPublishedArtifactForOrg(connection, organization);
+                    if (publishedArtifact != null) {
+                        InputStream artifactContent = getArtifactContent(connection, publishedArtifact);
+                        String newUUID = addArtifact(connection, artifactContent, DevPortalConstants.DRAFTED_ORG_THEME);
+                        updateDraftedArtifactForOrg(connection, organization, newUUID);
+                        removeArtifact(connection, publishedArtifact);
+                    } else {
+                        log.warn("ID cannot be found in published state. Aborting the request");
+                    }
                 }
-            } else {
-                String publishedArtifact = getPublishedArtifactForOrg(connection, organization);
-                if (publishedArtifact != null) {
-                    InputStream artifactContent = getArtifactContent(connection, publishedArtifact);
-                    String newUUID = addArtifact(connection, artifactContent, "DRAFTED_ORG_THEME");
-                    updateDraftedArtifactForOrg(connection, organization, newUUID);
-                    removeArtifact(connection, publishedArtifact);
-                } else {
-                    log.warn("ID cannot be found in published state. Aborting the request");
-                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to update organization theme status for organization " + organization, e);
             }
-            connection.commit();
         } catch (SQLException e) {
-            handleException("Failed to update organization theme status for tenant " + organization, e);
+            handleException("Database connection error while updating organization theme status for organization " + organization, e);
         }
     }
+
 
     /**
      * Deletes an organization theme.
@@ -17835,17 +17848,23 @@ public class ApiMgtDAO {
     public void deleteOrgTheme(String organization, String themeId) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            if (isThemeUsedByOrg(connection, organization, themeId)) {
-                removeArtifact(connection, themeId); // Due to DB rules, foreign ID will also set to NULL
-                removeOrgIfNoData(connection, organization);
-            } else {
-                log.warn("User's organization does not use the theme. Aborting the request");
+            try {
+                if (isThemeUsedByOrg(connection, organization, themeId)) {
+                    removeArtifact(connection, themeId); // Due to DB rules, foreign ID will also be set to NULL
+                    removeOrgIfNoData(connection, organization);
+                    connection.commit();
+                } else {
+                    log.warn("User's organization does not use the theme. Aborting the request");
+                }
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to delete organization theme for organization " + organization, e);
             }
-            connection.commit();
         } catch (SQLException e) {
-            handleException("Failed to delete organization theme for tenant " + organization, e);
+            handleException("Database connection error while deleting organization theme for organization " + organization, e);
         }
     }
+
 
     /**
      * Gets an organization theme.
@@ -17861,16 +17880,16 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, themeId);
-            statement.setString(2, "DRAFTED_ORG_THEME");
-            statement.setString(3, "PUBLISHED_ORG_THEME");
+            statement.setString(2, DevPortalConstants.DRAFTED_ORG_THEME);
+            statement.setString(3, DevPortalConstants.PUBLISHED_ORG_THEME);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                tenantThemeContent = resultSet.getBinaryStream("ARTIFACT");
+                tenantThemeContent = resultSet.getBinaryStream(DevPortalConstants.ARTIFACT);
             } else {
                 log.warn("Theme ID does not match any of the themes");
             }
         } catch (SQLException e) {
-            handleException("Failed to get organization theme for tenant " + organization, e);
+            handleException("Failed to get organization theme for organization " + organization, e);
         }
         return tenantThemeContent;
     }
@@ -17890,8 +17909,8 @@ public class ApiMgtDAO {
             preparedStatement.setString(1, organization);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    themeMap.put("drafted", resultSet.getString("DRAFTED_ARTIFACT"));
-                    themeMap.put("published", resultSet.getString("PUBLISHED_ARTIFACT"));
+                    themeMap.put(DevPortalConstants.DRAFTED, resultSet.getString(DevPortalConstants.DRAFTED_ARTIFACT));
+                    themeMap.put(DevPortalConstants.PUBLISHED, resultSet.getString(DevPortalConstants.PUBLISHED_ARTIFACT));
                 } else {
                     log.warn("Organization does not have any themes published or drafted from APIM");
                 }
@@ -18096,8 +18115,8 @@ public class ApiMgtDAO {
         try (PreparedStatement preparedStatement = connection.prepareStatement(checkQuery)) {
             preparedStatement.setString(1, organization);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next() && resultSet.getString("DRAFTED_ARTIFACT") == null &&
-                        resultSet.getString("PUBLISHED_ARTIFACT") == null) {
+                if (resultSet.next() && resultSet.getString(DevPortalConstants.DRAFTED_ARTIFACT) == null &&
+                        resultSet.getString(DevPortalConstants.PUBLISHED_ARTIFACT) == null) {
                     removeOrg(connection, organization);
                 }
             }
@@ -18130,20 +18149,25 @@ public class ApiMgtDAO {
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            if (isApiAndOrganizationExist(connection, organization, apiId)) {
-                String existingDraftedArtifact = getDraftedArtifactForApi(connection, organization, apiId);
-                if (existingDraftedArtifact != null) {
-                    removeArtifact(connection, existingDraftedArtifact);
+            try {
+                if (isApiAndOrganizationExist(connection, organization, apiId)) {
+                    String existingDraftedArtifact = getDraftedArtifactForApi(connection, organization, apiId);
+                    if (existingDraftedArtifact != null) {
+                        removeArtifact(connection, existingDraftedArtifact);
+                    }
+                    String newUUID = addArtifact(connection, themeContent, DevPortalConstants.DRAFTED_API_THEME);
+                    updateDraftedArtifactForApi(connection, organization, newUUID, apiId);
+                } else {
+                    String newUUID = addArtifact(connection, themeContent, DevPortalConstants.DRAFTED_API_THEME);
+                    insertNewApiWithDraftedArtifact(connection, organization, newUUID, apiId);
                 }
-                String newUUID = addArtifact(connection, themeContent, "DRAFTED_API_THEME");
-                updateDraftedArtifactForApi(connection, organization, newUUID, apiId);
-            } else {
-                String newUUID = addArtifact(connection, themeContent, "DRAFTED_API_THEME");
-                insertNewApiWithDraftedArtifact(connection, organization, newUUID, apiId);
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to import drafted API theme for organization " + organization, e);
             }
-            connection.commit();
         } catch (SQLException e) {
-            handleException("Failed to import drafted API theme for tenant " + organization, e);
+            handleException("Database connection error while importing drafted API theme for organization " + organization, e);
         }
     }
 
@@ -18159,30 +18183,36 @@ public class ApiMgtDAO {
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            if ("PUBLISH".equals(action)) {
-                String draftedArtifact = getDraftedArtifactForApi(connection, organization, apiId);
-                if (draftedArtifact != null) {
-                    InputStream artifactContent = getArtifactContent(connection, draftedArtifact);
-                    String newUUID = addArtifact(connection, artifactContent, "PUBLISHED_API_THEME");
-                    updatePublishedArtifactForApi(connection, organization, newUUID, apiId);
-                    removeArtifact(connection, draftedArtifact);
+            try {
+                if (DevPortalConstants.PUBLISH.equals(action)) {
+                    String draftedArtifact = getDraftedArtifactForApi(connection, organization, apiId);
+                    if (draftedArtifact != null) {
+                        InputStream artifactContent = getArtifactContent(connection, draftedArtifact);
+                        String newUUID = addArtifact(connection, artifactContent, DevPortalConstants.PUBLISHED_API_THEME);
+                        updatePublishedArtifactForApi(connection, organization, newUUID, apiId);
+                        removeArtifact(connection, draftedArtifact);
+                    } else {
+                        log.warn("ID cannot be found in drafted state. Aborting the request");
+                    }
                 } else {
-                    log.warn("ID cannot be found in drafted state. Aborting the request");
+                    String publishedArtifact = getPublishedArtifactForApi(connection, organization, apiId);
+                    if (publishedArtifact != null) {
+                        InputStream artifactContent = getArtifactContent(connection, publishedArtifact);
+                        String newUUID = addArtifact(connection, artifactContent, DevPortalConstants.DRAFTED_API_THEME);
+                        updateDraftedArtifactForApi(connection, organization, newUUID, apiId);
+                        removeArtifact(connection, publishedArtifact);
+                    } else {
+                        log.warn("ID cannot be found in published state. Aborting the request");
+                    }
                 }
-            } else {
-                String publishedArtifact = getPublishedArtifactForApi(connection, organization, apiId);
-                if (publishedArtifact != null) {
-                    InputStream artifactContent = getArtifactContent(connection, publishedArtifact);
-                    String newUUID = addArtifact(connection, artifactContent, "DRAFTED_API_THEME");
-                    updateDraftedArtifactForApi(connection, organization, newUUID, apiId);
-                    removeArtifact(connection, publishedArtifact);
-                } else {
-                    log.warn("ID cannot be found in published state. Aborting the request");
-                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to update API theme status for organization " + organization, e);
             }
-            connection.commit();
         } catch (SQLException e) {
-            handleException("Failed to update API theme status for tenant " + organization, e);
+            handleException(
+                    "Database connection error while updating API theme status for organization " + organization, e);
         }
     }
 
@@ -18197,15 +18227,20 @@ public class ApiMgtDAO {
     public void deleteApiTheme(String organization, String themeId, String apiId) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
-            if (isThemeUsedByApi(connection, organization, themeId, apiId)) {
-                removeArtifact(connection, themeId); // Due to DB rules, foreign ID will also set to NULL
-                removeApiIfNoData(connection, organization, apiId);
-            } else {
-                log.warn("API does not have a theme. Aborting the request");
+            try {
+                if (isThemeUsedByApi(connection, organization, themeId, apiId)) {
+                    removeArtifact(connection, themeId); // Due to DB rules, foreign ID will also set to NULL
+                    removeApiIfNoData(connection, organization, apiId);
+                } else {
+                    log.warn("API does not have a theme. Aborting the request");
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to delete API theme for organization " + organization, e);
             }
-            connection.commit();
         } catch (SQLException e) {
-            handleException("Failed to delete API theme for tenant " + organization, e);
+            handleException("Database connection error while deleting API theme for organization " + organization, e);
         }
     }
 
@@ -18224,11 +18259,11 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, themeId);
-            statement.setString(2, "DRAFTED_API_THEME");
-            statement.setString(3, "PUBLISHED_API_THEME");
+            statement.setString(2, DevPortalConstants.DRAFTED_API_THEME);
+            statement.setString(3, DevPortalConstants.PUBLISHED_API_THEME);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                tenantThemeContent = resultSet.getBinaryStream("ARTIFACT");
+                tenantThemeContent = resultSet.getBinaryStream(DevPortalConstants.ARTIFACT);
             } else {
                 log.warn("Theme ID does not match any of the themes");
             }
@@ -18255,8 +18290,8 @@ public class ApiMgtDAO {
             preparedStatement.setString(2, apiId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
-                    themeMap.put("drafted", resultSet.getString("DRAFTED_ARTIFACT"));
-                    themeMap.put("published", resultSet.getString("PUBLISHED_ARTIFACT"));
+                    themeMap.put(DevPortalConstants.DRAFTED, resultSet.getString(DevPortalConstants.DRAFTED_ARTIFACT));
+                    themeMap.put(DevPortalConstants.PUBLISHED, resultSet.getString(DevPortalConstants.PUBLISHED_ARTIFACT));
                 } else {
                     log.warn("API does not have any themes published or drafted from APIM");
                 }
@@ -18433,8 +18468,8 @@ public class ApiMgtDAO {
             preparedStatement.setString(1, organization);
             preparedStatement.setString(2, apiId);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next() && resultSet.getString("DRAFTED_ARTIFACT") == null &&
-                        resultSet.getString("PUBLISHED_ARTIFACT") == null) {
+                if (resultSet.next() && resultSet.getString(DevPortalConstants.DRAFTED_ARTIFACT) == null &&
+                        resultSet.getString(DevPortalConstants.PUBLISHED_ARTIFACT) == null) {
                     removeApi(connection, organization, apiId);
                 }
             }
@@ -18449,7 +18484,7 @@ public class ApiMgtDAO {
      * @param apiId        API Identifier.
      */
     private void removeApi(Connection connection, String organization, String apiId) throws SQLException {
-        String query = "DELETE FROM AM_DEVPORTAL_API_CONTENT WHERE ORGANIZATION = ? AND API_UUID = ?";
+        String query = SQLConstants.DevPortalContentConstants.DELETE_API_ID;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, organization);
             preparedStatement.setString(2, apiId);
