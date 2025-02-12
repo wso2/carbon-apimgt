@@ -228,18 +228,26 @@ public class APIUtils {
      */
     public static void updateAvailableTiersByOrganization(API api, String organization) {
 
-        Set<Tier> availableTiers = api.getAvailableTiers();
-        Set<OrganizationTiers> availableTiersForOrganizations = api.getAvailableTiersForOrganizations();
         if (organization != null) {
+            Set<Tier> availableTiers = new HashSet<>();
+            Set<OrganizationTiers> availableTiersForOrganizations = api.getAvailableTiersForOrganizations();
             for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
                 String orgName = organizationTiers.getOrganizationID();
                 if (organization.equals(orgName)) {
                     availableTiers = organizationTiers.getTiers();
-                    api.removeAllTiers();
-                    api.setAvailableTiers(availableTiers);
                     break;
                 }
             }
+            if (availableTiers == null) {
+                for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
+                    if (APIConstants.DEFAULT_VISIBLE_ORG.equals(organizationTiers.getOrganizationID())) {
+                        availableTiers = organizationTiers.getTiers();
+                        break;
+                    }
+                }
+            }
+            api.removeAllTiers();
+            api.setAvailableTiers(availableTiers);
         }
     }
 }
