@@ -30,10 +30,7 @@ import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsFederatedGatewayConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsKeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;
@@ -61,7 +58,7 @@ public class SettingsMappingUtil {
         if (isUserAvailable) {
             settingsDTO.setAnalyticsEnabled(APIUtil.isAnalyticsEnabled());
             settingsDTO.setKeyManagerConfiguration(getSettingsKeyManagerConfigurationDTOList());
-            settingsDTO.setFederatedGatewayConfiguration(getSettingsFederatedGatewayConfigurationDTOList());
+            settingsDTO.setGatewayConfiguration(getSettingsGatewayConfigurationDTOList());
         }
         settingsDTO.setScopes(getScopeList());
         settingsDTO.setGatewayTypes(APIUtil.getGatewayTypes());
@@ -115,26 +112,44 @@ public class SettingsMappingUtil {
         settingsKeyManagerConfigurationDTO.setDefaultConsumerKeyClaim(consumerKeyClaim);
         if (connectionConfigurationDtoList != null) {
             for (ConfigurationDto configurationDto : connectionConfigurationDtoList) {
-                ConfigurationDTO keyManagerConfigurationDTO = fromConfigurationToConfigurationDTO(configurationDto);
+                KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                keyManagerConfigurationDTO.setName(configurationDto.getName());
+                keyManagerConfigurationDTO.setLabel(configurationDto.getLabel());
+                keyManagerConfigurationDTO.setType(configurationDto.getType());
+                keyManagerConfigurationDTO.setRequired(configurationDto.isRequired());
+                keyManagerConfigurationDTO.setMask(configurationDto.isMask());
+                keyManagerConfigurationDTO.setMultiple(configurationDto.isMultiple());
+                keyManagerConfigurationDTO.setTooltip(configurationDto.getTooltip());
+                keyManagerConfigurationDTO.setDefault(configurationDto.getDefaultValue());
+                keyManagerConfigurationDTO.setValues(configurationDto.getValues());
                 settingsKeyManagerConfigurationDTO.getConfigurations().add(keyManagerConfigurationDTO);
             }
         }
         if (endpointConfigurations != null) {
             for (ConfigurationDto configurationDto : endpointConfigurations) {
-                ConfigurationDTO keyManagerConfigurationDTO = fromConfigurationToConfigurationDTO(configurationDto);
+                KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                keyManagerConfigurationDTO.setName(configurationDto.getName());
+                keyManagerConfigurationDTO.setLabel(configurationDto.getLabel());
+                keyManagerConfigurationDTO.setType(configurationDto.getType());
+                keyManagerConfigurationDTO.setRequired(configurationDto.isRequired());
+                keyManagerConfigurationDTO.setMask(configurationDto.isMask());
+                keyManagerConfigurationDTO.setMultiple(configurationDto.isMultiple());
+                keyManagerConfigurationDTO.setTooltip(configurationDto.getTooltip());
+                keyManagerConfigurationDTO.setDefault(configurationDto.getDefaultValue());
+                keyManagerConfigurationDTO.setValues(configurationDto.getValues());
                 settingsKeyManagerConfigurationDTO.getEndpointConfigurations().add(keyManagerConfigurationDTO);
             }
         }
         return settingsKeyManagerConfigurationDTO;
     }
 
-    private static List<SettingsFederatedGatewayConfigurationDTO> getSettingsFederatedGatewayConfigurationDTOList() {
-        List<SettingsFederatedGatewayConfigurationDTO> list = new ArrayList<>();
+    private static List<SettingsGatewayConfigurationDTO> getSettingsGatewayConfigurationDTOList() {
+        List<SettingsGatewayConfigurationDTO> list = new ArrayList<>();
         Map<String, ExternalGatewayDeployer> externalGatewayConnectorConfigurationMap =
                 ServiceReferenceHolder.getInstance().getExternalGatewayDeployers();
         externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
-            SettingsFederatedGatewayConfigurationDTO settingsFederatedGatewayConfigurationDTO =
-                    new SettingsFederatedGatewayConfigurationDTO();
+            SettingsGatewayConfigurationDTO settingsFederatedGatewayConfigurationDTO =
+                    new SettingsGatewayConfigurationDTO();
             settingsFederatedGatewayConfigurationDTO.setType(gatewayConfiguration.getType());
             settingsFederatedGatewayConfigurationDTO.setDisplayName(gatewayConfiguration.getType());
             List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
@@ -150,7 +165,7 @@ public class SettingsMappingUtil {
         //Add APK and Synapse Gateways configured through toml to the list
         List<String> gatewayTypesFromConfig = APIUtil.getGatewayTypes();
         for (String type : gatewayTypesFromConfig) {
-            SettingsFederatedGatewayConfigurationDTO gateway = new SettingsFederatedGatewayConfigurationDTO();
+            SettingsGatewayConfigurationDTO gateway = new SettingsGatewayConfigurationDTO();
             gateway.setType(type);
             gateway.setDisplayName(type);
             if (list.stream().noneMatch(obj -> obj.getType().equals(type))) {
@@ -160,8 +175,8 @@ public class SettingsMappingUtil {
         return list;
     }
 
-    private static ConfigurationDTO fromConfigurationToConfigurationDTO(ConfigurationDto configuration) {
-        ConfigurationDTO dto = new ConfigurationDTO();
+    private static GatewayConfigurationDTO fromConfigurationToConfigurationDTO(ConfigurationDto configuration) {
+        GatewayConfigurationDTO dto = new GatewayConfigurationDTO();
         dto.setName(configuration.getName());
         dto.setLabel(configuration.getLabel());
         dto.setType(configuration.getType());

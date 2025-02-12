@@ -15340,6 +15340,7 @@ public class ApiMgtDAO {
                     String displayName = rs.getString("DISPLAY_NAME");
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
+                    String gatewayType = rs.getString("GATEWAY_TYPE");
                     Map<String, String> additionalProperties = new HashMap();
                     try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
                         if (configuration != null) {
@@ -15357,6 +15358,7 @@ public class ApiMgtDAO {
                     env.setDisplayName(displayName);
                     env.setDescription(description);
                     env.setProvider(provider);
+                    env.setGatewayType(gatewayType);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                     env.setPermissions(getGatewayVisibilityPermissions(uuid));
                     env.setAdditionalProperties(additionalProperties);

@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerConfigurationDTO;
 import javax.validation.constraints.*;
 
 
@@ -27,8 +27,8 @@ public class SettingsKeyManagerConfigurationDTO   {
     private String displayName = null;
     private String defaultConsumerKeyClaim = null;
     private String defaultScopesClaim = null;
-    private List<ConfigurationDTO> configurations = new ArrayList<ConfigurationDTO>();
-    private List<ConfigurationDTO> endpointConfigurations = new ArrayList<ConfigurationDTO>();
+    private List<KeyManagerConfigurationDTO> configurations = new ArrayList<KeyManagerConfigurationDTO>();
+    private List<KeyManagerConfigurationDTO> endpointConfigurations = new ArrayList<KeyManagerConfigurationDTO>();
 
   /**
    **/
@@ -100,7 +100,7 @@ public class SettingsKeyManagerConfigurationDTO   {
 
   /**
    **/
-  public SettingsKeyManagerConfigurationDTO configurations(List<ConfigurationDTO> configurations) {
+  public SettingsKeyManagerConfigurationDTO configurations(List<KeyManagerConfigurationDTO> configurations) {
     this.configurations = configurations;
     return this;
   }
@@ -109,16 +109,16 @@ public class SettingsKeyManagerConfigurationDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("configurations")
-  public List<ConfigurationDTO> getConfigurations() {
+  public List<KeyManagerConfigurationDTO> getConfigurations() {
     return configurations;
   }
-  public void setConfigurations(List<ConfigurationDTO> configurations) {
+  public void setConfigurations(List<KeyManagerConfigurationDTO> configurations) {
     this.configurations = configurations;
   }
 
   /**
    **/
-  public SettingsKeyManagerConfigurationDTO endpointConfigurations(List<ConfigurationDTO> endpointConfigurations) {
+  public SettingsKeyManagerConfigurationDTO endpointConfigurations(List<KeyManagerConfigurationDTO> endpointConfigurations) {
     this.endpointConfigurations = endpointConfigurations;
     return this;
   }
@@ -127,10 +127,10 @@ public class SettingsKeyManagerConfigurationDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("endpointConfigurations")
-  public List<ConfigurationDTO> getEndpointConfigurations() {
+  public List<KeyManagerConfigurationDTO> getEndpointConfigurations() {
     return endpointConfigurations;
   }
-  public void setEndpointConfigurations(List<ConfigurationDTO> endpointConfigurations) {
+  public void setEndpointConfigurations(List<KeyManagerConfigurationDTO> endpointConfigurations) {
     this.endpointConfigurations = endpointConfigurations;
   }
 
