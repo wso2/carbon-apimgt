@@ -691,6 +691,9 @@ public final class APIConstants {
 
     public static final String GOVERNANCE_COMPLIANCE_KEY = "isCompliant";
     public static final String GOVERNANCE_COMPLIANCE_ERROR_MESSAGE = "message";
+    public static final String GOVERNANCE_COMPLIANCE_RULE_CODE = "ruleCode";
+    public static final String GOVERNANCE_COMPLIANCE_RULE_VIOLATED_PATH = "violatedPath";
+    public static final String GOVERNANCE_COMPLIANCE_RULE_VIOLATED_SEVERITY = "severity";
 
     public static class TokenStatus {
 

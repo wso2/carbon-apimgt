@@ -9,12 +9,12 @@ name: WSO2 API Design Guidelines
 description: >-
   A guide detailing best practices for creating robust, scalable, and secure
   APIs, ensuring alignment with industry standards for optimal design.
-ruleCategory: SPECTRAL
-ruleType: API_DEFINITION
+policyCategory: SPECTRAL
+policyType: API_DEFINITION
 artifactType: REST_API
 documentationLink: "https://wso2.com/choreo/docs/api-management/api-governance/default-policies/wso2_api_design_guidelines_doc/"
 provider: WSO2
-rulesetContent:
+policyContent:
   rules:
     required-id:
       description: "API must have an id."

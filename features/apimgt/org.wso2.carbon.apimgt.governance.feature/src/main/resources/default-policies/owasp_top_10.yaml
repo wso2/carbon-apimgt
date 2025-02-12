@@ -9,12 +9,12 @@ name: OWASP Top 10
 description: >-
   A set of rules enforcing OWASP security guidelines to prevent common
   vulnerabilities and ensure secure coding practices.
-ruleCategory: SPECTRAL
-ruleType: API_DEFINITION
+policyCategory: SPECTRAL
+policyType: API_DEFINITION
 artifactType: REST_API
 documentationLink: "https://wso2.com/choreo/docs/api-management/api-governance/default-policies/owasp_top_10_doc/"
 provider: WSO2
-rulesetContent:
+policyContent:
   aliases:
     ArrayProperties:
       description: ""

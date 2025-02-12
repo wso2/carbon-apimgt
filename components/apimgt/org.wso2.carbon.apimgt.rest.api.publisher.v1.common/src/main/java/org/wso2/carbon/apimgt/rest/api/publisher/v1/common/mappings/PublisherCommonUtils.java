@@ -152,6 +152,9 @@ import java.util.regex.Pattern;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.GOVERNANCE_COMPLIANCE_KEY;
+import static org.wso2.carbon.apimgt.impl.APIConstants.GOVERNANCE_COMPLIANCE_RULE_CODE;
+import static org.wso2.carbon.apimgt.impl.APIConstants.GOVERNANCE_COMPLIANCE_RULE_VIOLATED_PATH;
+import static org.wso2.carbon.apimgt.impl.APIConstants.GOVERNANCE_COMPLIANCE_RULE_VIOLATED_SEVERITY;
 import static org.wso2.carbon.apimgt.impl.APIConstants.PUBLISH;
 import static org.wso2.carbon.apimgt.impl.APIConstants.REPUBLISH;
 
@@ -3034,7 +3037,8 @@ public class PublisherCommonUtils {
         Map<String, String> responseMap = new HashMap<>(2);
 
         try {
-            if (apimGovernanceService.isPolicyAttachmentsWithBlockingActionExist(artifactID, type, state, organization)) {
+            if (apimGovernanceService.isPolicyAttachmentsWithBlockingActionExist(artifactID, type, state,
+                    organization)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Blocking policies exist for the API. Evaluating compliance synchronously.");
                 }
@@ -3097,17 +3101,17 @@ public class PublisherCommonUtils {
 
         for (RuleViolation violation : blockingViolations) {
             Map<String, String> violationDetails = new HashMap<>();
-            violationDetails.put("ruleCode", violation.getRuleName());
-            violationDetails.put("violatedPath", violation.getViolatedPath());
-            violationDetails.put("severity", violation.getSeverity().name());
+            violationDetails.put(GOVERNANCE_COMPLIANCE_RULE_CODE, violation.getRuleName());
+            violationDetails.put(GOVERNANCE_COMPLIANCE_RULE_VIOLATED_PATH, violation.getViolatedPath());
+            violationDetails.put(GOVERNANCE_COMPLIANCE_RULE_VIOLATED_SEVERITY, violation.getSeverity().name());
             violations.add(violationDetails);
         }
 
         for (RuleViolation violation : nonBlockingViolations) {
             Map<String, String> violationDetails = new HashMap<>();
-            violationDetails.put("ruleCode", violation.getRuleName());
-            violationDetails.put("violatedPath", violation.getViolatedPath());
-            violationDetails.put("severity", violation.getSeverity().name());
+            violationDetails.put(GOVERNANCE_COMPLIANCE_RULE_CODE, violation.getRuleName());
+            violationDetails.put(GOVERNANCE_COMPLIANCE_RULE_VIOLATED_PATH, violation.getViolatedPath());
+            violationDetails.put(GOVERNANCE_COMPLIANCE_RULE_VIOLATED_SEVERITY, violation.getSeverity().name());
             violations.add(violationDetails);
         }
 
