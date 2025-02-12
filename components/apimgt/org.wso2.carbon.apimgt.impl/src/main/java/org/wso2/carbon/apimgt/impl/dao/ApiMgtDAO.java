@@ -20563,7 +20563,7 @@ public class ApiMgtDAO {
                 connection.commit();
                 return policyID;
             } catch (SQLException e) {
-                connection.rollback();
+                connection.rollback(); ///////
                 handleException("Failed to add API specific operation policy " + policySpecification.getName()
                         + " for API " + apiUUID, e);
             }
@@ -20627,7 +20627,10 @@ public class ApiMgtDAO {
             statement.setString(5, policySpecification.getDescription());
             statement.setString(6, policySpecification.getApplicableFlows().toString());
             statement.setString(7, policySpecification.getSupportedGateways().toString());
-            statement.setString(8, policySpecification.getSupportedApiTypes().toString());
+
+            String supportedApiTypes = new Gson().toJson(policySpecification.getSupportedApiTypes());
+            statement.setString(8, supportedApiTypes);
+
             statement.setBinaryStream(9,
                     new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
             statement.setString(10, policyData.getOrganization());
@@ -20685,7 +20688,10 @@ public class ApiMgtDAO {
             statement.setString(4, policySpecification.getDescription());
             statement.setString(5, policySpecification.getApplicableFlows().toString());
             statement.setString(6, policySpecification.getSupportedGateways().toString());
-            statement.setString(7, policySpecification.getSupportedApiTypes().toString());
+
+            String supportedApiTypes = new Gson().toJson(policySpecification.getSupportedApiTypes());
+            statement.setString(7, supportedApiTypes);
+
             statement.setBinaryStream(8,
                     new ByteArrayInputStream(APIUtil.getPolicyAttributesAsString(policySpecification).getBytes()));
             statement.setString(9, policyData.getOrganization());
@@ -21954,7 +21960,6 @@ public class ApiMgtDAO {
      * @return
      */
     private List<Object> getObjectListFromString(String stringElement) {
-        stringElement = stringElement.replace("=", ":");
         Gson gson = new Gson();
         Type listType = new TypeToken<List<Object>>() {}.getType();
         return gson.fromJson(stringElement, listType);

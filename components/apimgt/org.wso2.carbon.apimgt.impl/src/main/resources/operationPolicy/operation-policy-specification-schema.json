@@ -75,7 +75,7 @@
               "subType": {
                 "type": "string",
                 "enum": [
-                  "AI"
+                  "AIAPI"
                 ]
               }
             }
