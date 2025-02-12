@@ -549,6 +549,16 @@ public final class APIConstants {
         public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE = "ApiCountResource";
         public static final String AI_CONFIGURATION = "AiConfiguration";
 
+        public static final String DESIGN_ASSISTANT = "DesignAssistant";
+        public static final String DESIGN_ASSISTANT_ENABLED = "Enabled";
+        public static final String DESIGN_ASSISTANT_AUTH_TOKEN = "AuthToken";
+        public static final String DESIGN_ASSISTANT_KEY = "Key";
+        public static final String DESIGN_ASSISTANT_ENDPOINT = "Endpoint";
+        public static final String DESIGN_ASSISTANT_TOKEN_ENDPOINT = "TokenEndpoint";
+        public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
+        public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
+        public static final String DESIGN_ASSISTANT_CONFIGURATION = "AiConfiguration";
+
         private AI() {
 
         }
@@ -1771,6 +1781,8 @@ public final class APIConstants {
     public static final String API_SPEC_NAME = "api_name";
     public static final String TENANT_DOMAIN = "tenant_domain";
     public static final String QUERY = "query";
+    public static final String TEXT = "text";
+    public static final String SESSIONID = "sessionId";
     public static final String HISTORY = "history";
     public static final String VERSION = "version";
     public static final String VISIBILITYROLES = "visibility_roles";

@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
@@ -125,6 +126,7 @@ public class APIManagerConfiguration {
     private ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
     private static MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDTO();
     private static ApiChatConfigurationDTO apiChatConfigurationDto = new ApiChatConfigurationDTO();
+    private static DesignAssistantConfigurationDTO designAssistantConfigurationDto = new DesignAssistantConfigurationDTO();
 
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
@@ -192,6 +194,11 @@ public class APIManagerConfiguration {
     public ApiChatConfigurationDTO getApiChatConfigurationDto() {
 
         return apiChatConfigurationDto;
+    }
+
+    public DesignAssistantConfigurationDTO getDesignAssistantConfigurationDto() {
+
+        return designAssistantConfigurationDto;
     }
 
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
@@ -675,6 +682,8 @@ public class APIManagerConfiguration {
                 setMarketplaceAssistantConfiguration(element);
             } else if (APIConstants.AI.API_CHAT.equals(localName)) {
                 setApiChatConfiguration(element);
+            } else if (APIConstants.AI.DESIGN_ASSISTANT.equals(localName)) {
+                setDesignAssistantConfiguration(element);
             } else if (APIConstants.AI.AI_CONFIGURATION.equals(localName)){
                 setAiConfiguration(element);
             } else if (APIConstants.TokenValidationConstants.TOKEN_VALIDATION_CONFIG.equals(localName)) {
@@ -2672,6 +2681,58 @@ public class APIManagerConfiguration {
             return Boolean.parseBoolean(jwtClaimCacheExpiryEnabledString);
         }
         return false;
+    }
+
+    public void setDesignAssistantConfiguration(OMElement omElement){
+        OMElement designAssistantEnableElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_ENABLED));
+        if (designAssistantEnableElement != null) {
+            designAssistantConfigurationDto.setEnabled(Boolean.parseBoolean(designAssistantEnableElement.getText()));
+        }
+        if (designAssistantConfigurationDto.isEnabled()) {
+            OMElement designAssistantEndpoint =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_ENDPOINT));
+            if (designAssistantEndpoint != null) {
+                designAssistantConfigurationDto.setEndpoint(designAssistantEndpoint.getText());
+            }
+            OMElement designAssistantTokenEndpoint =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_TOKEN_ENDPOINT));
+            if (designAssistantTokenEndpoint != null) {
+                designAssistantConfigurationDto.setTokenEndpoint(designAssistantTokenEndpoint.getText());
+            }
+            OMElement designAssistantKey =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_KEY));
+
+            if (designAssistantKey != null) {
+                String Key = MiscellaneousUtil.resolve(designAssistantKey, secretResolver);
+                designAssistantConfigurationDto.setKey(Key);
+                if (!Key.isEmpty()){
+                    designAssistantConfigurationDto.setKeyProvided(true);
+                }
+            }
+            OMElement designAssistantToken =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_AUTH_TOKEN));
+            if (designAssistantToken != null) {
+                String AccessToken = MiscellaneousUtil.resolve(designAssistantToken, secretResolver);
+                designAssistantConfigurationDto.setAccessToken(AccessToken);
+                if (!AccessToken.isEmpty()){
+                    designAssistantConfigurationDto.setAuthTokenProvided(true);
+                }
+            }
+            OMElement resources =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.RESOURCES));
+
+            OMElement designAssistantChatResource =
+                    resources.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_CHAT_RESOURCE));
+            if (designAssistantChatResource != null) {
+                designAssistantConfigurationDto.setChatResource(designAssistantChatResource.getText());
+            }
+            OMElement designAssistantGenApiPayloadResource =
+                    resources.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE));
+            if (designAssistantGenApiPayloadResource != null) {
+                designAssistantConfigurationDto.setGenApiPayloadResource(designAssistantGenApiPayloadResource.getText());
+            }
+        }
     }
 
     public TokenValidationDto getTokenValidationDto() {

@@ -1,5 +1,35 @@
+/*
+ *  Copyright (c) 2025, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 LLC. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.DesignAssistantApiService;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
@@ -8,6 +38,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DesignAssistantChatQuery
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DesignAssistantChatResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DesignAssistantGenAPIPayloadDTO;
 
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -15,91 +47,122 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-import java.io.InputStream;
-
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DesignAssistantApiServiceImpl implements DesignAssistantApiService {
-    public Response designAssistantApiPayloadGen(DesignAssistantGenAPIPayloadDTO designAssistantGenAPIPayloadDTO, MessageContext messageContext) {
-        String sessionId = designAssistantGenAPIPayloadDTO.getSessionId();
+
+    private static final Log log = LogFactory.getLog(DesignAssistantApiServiceImpl.class);
+
+    private static DesignAssistantConfigurationDTO configDto;
+
+    @Override
+    public Response designAssistantApiPayloadGen(DesignAssistantGenAPIPayloadDTO designAssistantGenAPIPayloadDTO,
+                                                 MessageContext messageContext) throws APIManagementException {
+        APIManagerConfiguration configuration = ServiceReferenceHolder.
+                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+        if (configuration == null) {
+            log.error("API Manager configuration is not initialized.");
+        } else {
+            configDto = configuration.getDesignAssistantConfigurationDto();
+        }
         try {
-            String generatedPayload = sendSessionIdToPythonBackend(sessionId);
-            DesignAssistantAPIPayloadResponseDTO responseDTO = new DesignAssistantAPIPayloadResponseDTO();
-            responseDTO.setGeneratedPayload(generatedPayload);
+            if (configDto.isKeyProvided() || configDto.isAuthTokenProvided()) {
+                String sessionId = designAssistantGenAPIPayloadDTO.getSessionId();
+                boolean isChatQueryEmpty = StringUtils.isEmpty(sessionId);
+                if (isChatQueryEmpty) {
+                    String errorMessage = "Payload is badly formatted. Expected to have 'sessionId'";
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                    return null;
+                }
 
-            return Response.ok(responseDTO).build();
-        } catch (Exception e) {
-            System.err.println("Failed to send Session Id to Python backend: " + e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error processing request: " + e.getMessage())
-                    .build();
+                JSONObject payload = new JSONObject();
+
+                payload.put(APIConstants.SESSIONID, sessionId);
+
+                String response;
+                if (configDto.isKeyProvided()) {
+                    response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
+                            configDto.getKey(), configDto.getGenApiPayloadResource(), payload.toString(), null);
+                } else {
+                    response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
+                            configDto.getAccessToken(), configDto.getGenApiPayloadResource(), payload.toString(), null);
+                }
+
+                ObjectMapper objectMapper = new ObjectMapper();
+                DesignAssistantAPIPayloadResponseDTO responseDTO = new DesignAssistantAPIPayloadResponseDTO();
+                responseDTO.setGeneratedPayload(response);
+
+                return Response.ok(responseDTO).build();
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAIServiceNotAccessible(e)) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity(e.getMessage()).build();
+            } else if (RestApiUtil.isDueToAIServiceThrottled(e)) {
+                return Response.status(Response.Status.TOO_MANY_REQUESTS).entity(e.getMessage()).build();
+            } else {
+                String errorMessage = "Error encountered while executing the execute statement of API Design " +
+                        "Assistant service";
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         }
+        return null;
     }
 
-    public String sendSessionIdToPythonBackend (String sessionId) throws URISyntaxException, IOException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonPayload = objectMapper.writeValueAsString(new GeneratePayloadRequest(sessionId));
+    @Override
+    public Response designAssistantChat(DesignAssistantChatQueryDTO designAssistantChatQueryDTO,
+                                                 MessageContext messageContext) throws APIManagementException {
+        APIManagerConfiguration configuration = ServiceReferenceHolder.
+                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
 
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8000/generate-api-payload"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        return response.body();
-    }
-
-    public Response designAssistantChat(DesignAssistantChatQueryDTO designAssistantChatQueryDTO, MessageContext messageContext) {
-        String text = designAssistantChatQueryDTO.getText();
-        String sessionId = designAssistantChatQueryDTO.getSessionId();
+        if (configuration == null) {
+            log.error("API Manager configuration is not initialized.");
+        } else {
+            configDto = configuration.getDesignAssistantConfigurationDto();
+        }
         try {
-            String chatResponseJson = sendTextSessionIdToPythonBackend(text, sessionId);
-            ObjectMapper objectMapper = new ObjectMapper();
-            DesignAssistantChatResponseDTO responseDTO = objectMapper.readValue(chatResponseJson, DesignAssistantChatResponseDTO.class);
+            if (configDto.isKeyProvided() || configDto.isAuthTokenProvided()) {
 
-            return Response.ok(responseDTO).build();
-        } catch (Exception e) {
-            System.err.println("Failed to send Session Id to Python backend: " + e.getMessage());
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error processing request: " + e.getMessage())
-                    .build();
+                boolean isChatQueryEmpty = StringUtils.isEmpty(designAssistantChatQueryDTO.getSessionId());
+                if (isChatQueryEmpty) {
+                    String errorMessage = "Payload is badly formatted. Expected to have 'sessionId'";
+                    RestApiUtil.handleBadRequest(errorMessage, log);
+                    return null;
+                }
+
+                JSONObject payload = new JSONObject();
+                String text = new Gson().toJson(designAssistantChatQueryDTO.getText());
+                String sessionId = new Gson().toJson(designAssistantChatQueryDTO.getSessionId());
+
+                payload.put(APIConstants.QUERY, designAssistantChatQueryDTO.getSessionId());
+                payload.put(APIConstants.SESSIONID, designAssistantChatQueryDTO.getSessionId());
+
+                String response;
+                if (configDto.isKeyProvided()) {
+                    response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
+                            configDto.getKey(), configDto.getChatResource(), payload.toString(), null);
+                } else {
+                    response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
+                            configDto.getAccessToken(), configDto.getChatResource(), payload.toString(), null);
+                }
+              
+                ObjectMapper objectMapper = new ObjectMapper();
+                DesignAssistantChatResponseDTO responseDTO = objectMapper.readValue(response, DesignAssistantChatResponseDTO.class);
+
+                return Response.ok(responseDTO).build();
+                
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAIServiceNotAccessible(e)) {
+                return Response.status(Response.Status.UNAUTHORIZED).entity(e.getMessage()).build();
+            } else if (RestApiUtil.isDueToAIServiceThrottled(e)) {
+                return Response.status(Response.Status.TOO_MANY_REQUESTS).entity(e.getMessage()).build();
+            } else {
+                String errorMessage = "Error encountered while executing the execute statement of API Design " +
+                        "Assistant service";
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         }
-    }
-
-    public String sendTextSessionIdToPythonBackend (String text, String sessionId) throws URISyntaxException, IOException, InterruptedException {
-        HttpClient client = HttpClient.newHttpClient();
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonPayload = objectMapper.writeValueAsString(new ChatRequest(text, sessionId));
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(new URI("http://localhost:8000/chat"))
-                .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(jsonPayload))
-                .build();
-
-        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        return response.body();
-    }
-
-    private static class GeneratePayloadRequest {
-        public String sessionId;
-
-        public GeneratePayloadRequest(String sessionId) {
-            this.sessionId = sessionId;
-        }
-    }
-
-    private static class ChatRequest {
-        public String text;
-        public String sessionId;
-
-        public ChatRequest(String text, String sessionId) {
-            this.text = text;
-            this.sessionId = sessionId;
-        }
+        return null;
     }
 }
