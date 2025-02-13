@@ -56,7 +56,8 @@
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.WorkflowsApi,
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.LlmProvidersApi,
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.LabelsApi,
-                org.wso2.carbon.apimgt.rest.api.publisher.v1.OrganizationsApi
+                org.wso2.carbon.apimgt.rest.api.publisher.v1.OrganizationsApi,
+                org.wso2.carbon.apimgt.rest.api.publisher.v1.DesignAssistantApi
             </param-value>
         </init-param>
         <init-param>
