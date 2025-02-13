@@ -10536,7 +10536,7 @@ components:
         name:
           type: string
           example: "Endpoint1"
-        environment: #TODO: Change naming of environment
+        deploymentStage:
           type: string
           example: "PRODUCTION or SANDBOX"
         endpointConfig:

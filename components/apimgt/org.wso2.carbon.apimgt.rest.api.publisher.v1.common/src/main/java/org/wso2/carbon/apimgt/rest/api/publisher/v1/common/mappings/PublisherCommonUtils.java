@@ -3117,7 +3117,7 @@ public class PublisherCommonUtils {
             endpointName = APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT;
         }
         apiEndpointInfo.setEndpointName(endpointName);
-        apiEndpointInfo.setEnvironment(environment);
+        apiEndpointInfo.setDeploymentStage(environment);
         apiEndpointInfo.setEndpointConfig(endpointConfig);
         return apiEndpointInfo;
     }

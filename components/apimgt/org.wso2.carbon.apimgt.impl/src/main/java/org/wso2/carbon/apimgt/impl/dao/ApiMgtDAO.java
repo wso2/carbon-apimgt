@@ -18003,7 +18003,7 @@ public class ApiMgtDAO {
                     insertAPIEndpointStatement.setString(2, apiEndpointInfo.getEndpointUuid());
                     insertAPIEndpointStatement.setString(3, apiRevision.getRevisionUUID());
                     insertAPIEndpointStatement.setString(4, apiEndpointInfo.getEndpointName());
-                    insertAPIEndpointStatement.setString(5, apiEndpointInfo.getEnvironment());
+                    insertAPIEndpointStatement.setString(5, apiEndpointInfo.getDeploymentStage());
                     insertAPIEndpointStatement.setBinaryStream(6,
                             fromEndpointConfigMapToBA(apiEndpointInfo.getEndpointConfig()));
                     insertAPIEndpointStatement.setString(7, organization);
@@ -18983,7 +18983,7 @@ public class ApiMgtDAO {
                     insertAPIEndpointStatement.setString(2, apiEndpointInfo.getEndpointUuid());
                     insertAPIEndpointStatement.setString(3, "Current API");
                     insertAPIEndpointStatement.setString(4, apiEndpointInfo.getEndpointName());
-                    insertAPIEndpointStatement.setString(5, apiEndpointInfo.getEnvironment());
+                    insertAPIEndpointStatement.setString(5, apiEndpointInfo.getDeploymentStage());
                     insertAPIEndpointStatement.setBinaryStream(6,
                             fromEndpointConfigMapToBA(apiEndpointInfo.getEndpointConfig()));
                     insertAPIEndpointStatement.setString(7, organization);
@@ -23448,7 +23448,7 @@ public class ApiMgtDAO {
                         APIEndpointInfo apiEndpoint = new APIEndpointInfo();
                         apiEndpoint.setEndpointUuid(rs.getString("ENDPOINT_UUID"));
                         apiEndpoint.setEndpointName(rs.getString("ENDPOINT_NAME"));
-                        apiEndpoint.setEnvironment(rs.getString("KEY_TYPE"));
+                        apiEndpoint.setDeploymentStage(rs.getString("KEY_TYPE"));
                         apiEndpoint.setEndpointConfig(fromBAtoEndpointConfigMap(rs.getBinaryStream("ENDPOINT_CONFIG")));
                         apiEndpoints.add(apiEndpoint);
                     }
@@ -23484,7 +23484,7 @@ public class ApiMgtDAO {
                     apiEndpoint = new APIEndpointInfo();
                     apiEndpoint.setEndpointUuid(rs.getString("ENDPOINT_UUID"));
                     apiEndpoint.setEndpointName(rs.getString("ENDPOINT_NAME"));
-                    apiEndpoint.setEnvironment(rs.getString("KEY_TYPE"));
+                    apiEndpoint.setDeploymentStage(rs.getString("KEY_TYPE"));
                     apiEndpoint.setEndpointConfig(fromBAtoEndpointConfigMap(rs.getBinaryStream("ENDPOINT_CONFIG")));
                     return apiEndpoint;
                 }
@@ -23614,7 +23614,7 @@ public class ApiMgtDAO {
             statement.setString(2, apiEndpoint.getEndpointUuid());
             statement.setString(3, "Current API");
             statement.setString(4, apiEndpoint.getEndpointName());
-            statement.setString(5, apiEndpoint.getEnvironment());
+            statement.setString(5, apiEndpoint.getDeploymentStage());
             statement.setBinaryStream(6, fromEndpointConfigMapToBA(apiEndpoint.getEndpointConfig()));
             statement.setString(7, organization);
             if (statement.executeUpdate() > 0) {
