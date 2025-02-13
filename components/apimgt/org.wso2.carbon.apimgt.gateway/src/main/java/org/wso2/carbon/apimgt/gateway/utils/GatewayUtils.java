@@ -1795,9 +1795,9 @@ public class GatewayUtils {
      */
     public static String getAPIKeyForEndpoints(org.apache.synapse.MessageContext messageContext) {
 
+        String tenantDomain = GatewayUtils.getTenantDomain();
         String apiName = (String) messageContext.getProperty(APIMgtGatewayConstants.API);
         String apiVersion = (String) messageContext.getProperty(APIMgtGatewayConstants.VERSION);
-        String tenantDomain = GatewayUtils.getTenantDomain();
 
         return tenantDomain + "_" + apiName + "_" + apiVersion;
     }

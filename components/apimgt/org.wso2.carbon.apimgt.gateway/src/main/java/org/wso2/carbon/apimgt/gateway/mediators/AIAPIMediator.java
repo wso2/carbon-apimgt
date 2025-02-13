@@ -164,24 +164,6 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                                 suspendDuration * 1000);
                         return true;
                     }
-
-                    Map<String, Object> transportHeaders = (Map<String, Object>) ((Axis2MessageContext) messageContext)
-                            .getAxis2MessageContext().getProperty(
-                                    org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
-                    long remainingTokenCount = Long.parseLong((String) transportHeaders
-                            .get(APIConstants.AIAPIConstants.REMAINING_TOKEN_COUNT_HEADER));
-                    long remainingRequestCount = Long.parseLong((String) transportHeaders
-                            .get(APIConstants.AIAPIConstants.REMAINING_REQUEST_COUNT_HEADER));
-
-                    if (remainingTokenCount <= 0 || remainingRequestCount <= 0) {
-
-                        Long suspendDuration = (Long)
-                                messageContext.getProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION);
-                        DataHolder.getInstance().suspendEndpoint(GatewayUtils.getAPIKeyForEndpoints(messageContext),
-                                getEndpointId(targetEndpoint, targetModel),
-                                suspendDuration * 1000);
-                    }
                 }
 
                 String payload = extractPayloadFromContext(messageContext, providerConfiguration);

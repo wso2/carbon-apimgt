@@ -626,6 +626,6 @@ public class InMemoryAPIDeployer {
      */
     private String generateAPIKeyForEndpoints(GatewayAPIDTO gatewayEvent) {
 
-        return gatewayEvent.getProvider() + "_" + gatewayEvent.getName() + "_" + gatewayEvent.getVersion();
+        return gatewayEvent.getTenantDomain() + "_" + gatewayEvent.getName() + "_" + gatewayEvent.getVersion();
     }
 }
