@@ -250,17 +250,31 @@ public class PublisherCommonUtils {
             OrganizationInfo orginfo)
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
         API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
+       
         if (orginfo != null && orginfo.getOrganizationId() != null) {
             String visibleOrgs = apiToUpdate.getVisibleOrganizations();
-            if (!StringUtils.isEmpty(visibleOrgs)
-                    && !APIConstants.DEFAULT_VISIBLE_ORG.equals(apiToUpdate.getVisibleOrganizations())) {
-                // set the current user organizatin as visible organization.
+            if (!StringUtils.isEmpty(visibleOrgs) && APIConstants.VISIBLE_ORG_ALL.equals(visibleOrgs)) {
+                // IF visibility is all
+                apiToUpdate.setVisibleOrganizations(APIConstants.VISIBLE_ORG_ALL);
+            } else if (StringUtils.isEmpty(visibleOrgs) || APIConstants.VISIBLE_ORG_NONE.equals(visibleOrgs)) {
+                // IF visibility is none 
+                apiToUpdate.setVisibleOrganizations(orginfo.getOrganizationId()); // set to current org
+            } else {
+                // add current id to existing visibility list
                 visibleOrgs = visibleOrgs + "," + orginfo.getOrganizationId();
                 apiToUpdate.setVisibleOrganizations(visibleOrgs);
             }
         }
+        
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
+        
+        if (apiUpdated.getVisibleOrganizations() != null) {
+            List<String> orgList = new ArrayList<>(Arrays.asList(apiUpdated.getVisibleOrganizations().split(",")));
+            orgList.remove(orginfo.getOrganizationId());  // remove current user org
+            String visibleOrgs = StringUtils.join(orgList, ',');
+            apiUpdated.setVisibleOrganizations(visibleOrgs);
+        }
         if (apiUpdated != null && !StringUtils.isEmpty(apiUpdated.getEndpointConfig())) {
             JsonObject endpointConfig = JsonParser.parseString(apiUpdated.getEndpointConfig()).getAsJsonObject();
             if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
@@ -1336,9 +1350,14 @@ public class PublisherCommonUtils {
         }
         if (orgInfo != null && orgInfo.getOrganizationId() != null) {
             String visibleOrgs = apiToAdd.getVisibleOrganizations();
-            if (!StringUtils.isEmpty(visibleOrgs)
-                    && !APIConstants.DEFAULT_VISIBLE_ORG.equals(apiToAdd.getVisibleOrganizations())) {
-                // set the current user organizatin as visible organization.
+            if (!StringUtils.isEmpty(visibleOrgs) && APIConstants.VISIBLE_ORG_ALL.equals(visibleOrgs)) {
+                // IF visibility is all
+                apiToAdd.setVisibleOrganizations(APIConstants.VISIBLE_ORG_ALL);
+            } else if (StringUtils.isEmpty(visibleOrgs) && APIConstants.VISIBLE_ORG_NONE.equals(visibleOrgs)) {
+                // IF visibility is none 
+                apiToAdd.setVisibleOrganizations(orgInfo.getOrganizationId()); // set to current org
+            } else {
+                // add current id to existing visibility list
                 visibleOrgs = visibleOrgs + "," + orgInfo.getOrganizationId();
                 apiToAdd.setVisibleOrganizations(visibleOrgs);
             }

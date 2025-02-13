@@ -1412,13 +1412,12 @@ public class APIMappingUtil {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
         }
 
-        if (model.getVisibleOrganizations() != null
-                || !APIConstants.DEFAULT_VISIBLE_ORG.equals(model.getVisibleOrganizations())) {
+        if (model.getVisibleOrganizations() != null && !model.getVisibleOrganizations().isEmpty()) {
             dto.setVisibleOrganizations(Arrays.asList(model.getVisibleOrganizations().split(",")));
         } else {
-            dto.setVisibleOrganizations(Collections.EMPTY_LIST);
+            dto.setVisibleOrganizations(new ArrayList<>(List.of(APIConstants.VISIBLE_ORG_NONE)));
         }
-
+        
         if (model.getAdditionalProperties() != null) {
             JSONObject additionalProperties = model.getAdditionalProperties();
             List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();

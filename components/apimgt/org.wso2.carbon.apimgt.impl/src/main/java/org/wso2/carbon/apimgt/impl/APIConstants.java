@@ -2029,6 +2029,8 @@ public final class APIConstants {
 
     public static final String BILLING_PLAN_FREE = "FREE";
     public static final String DEFAULT_VISIBLE_ORG = "all";
+    public static final String VISIBLE_ORG_NONE = "none";
+    public static final String VISIBLE_ORG_ALL = "all";
     public static final String POLICY_RESET = "reset";
 
     public static final String BLOCKING_EVENT_TYPE = "wso2event";

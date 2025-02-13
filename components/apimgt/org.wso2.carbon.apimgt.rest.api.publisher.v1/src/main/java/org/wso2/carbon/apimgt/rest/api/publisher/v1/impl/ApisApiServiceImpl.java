@@ -263,6 +263,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             List<String> orglist = apiToReturn.getVisibleOrganizations();
             ArrayList<String> newOrgList = new ArrayList<String>(orglist);
             newOrgList.remove(organizationInfo.getOrganizationId());
+            if (newOrgList.isEmpty()) {
+                newOrgList.add(APIConstants.VISIBLE_ORG_NONE);
+            }
             apiToReturn.setVisibleOrganizations(newOrgList);
         }
 
