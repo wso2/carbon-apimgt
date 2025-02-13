@@ -26,7 +26,7 @@ public class EndpointDTO {
     private String endpointUuid;
     private String endpointName;
     private String organization;
-    private String environment;
+    private String deploymentStage;
     private EndpointConfigDTO endpointConfig;
 
     /**
@@ -89,14 +89,14 @@ public class EndpointDTO {
         this.endpointName = endpointName;
     }
 
-    public String getEnvironment() {
+    public String getDeploymentStage() {
 
-        return environment;
+        return deploymentStage;
     }
 
-    public void setEnvironment(String environment) {
+    public void setDeploymentStage(String deploymentStage) {
 
-        this.environment = environment;
+        this.deploymentStage = deploymentStage;
     }
 
     public EndpointConfigDTO getEndpointConfig() {
