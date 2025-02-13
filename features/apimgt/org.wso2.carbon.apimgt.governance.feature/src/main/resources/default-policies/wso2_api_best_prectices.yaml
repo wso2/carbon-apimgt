@@ -3,6 +3,7 @@ description: This policy enforces a set of best practices recommended by WSO2 fo
 labels:
   - GLOBAL
 governableStates:
+  - API_CREATE
   - API_UPDATE
 rulesetNames:
   - WSO2 API Design Guidelines
