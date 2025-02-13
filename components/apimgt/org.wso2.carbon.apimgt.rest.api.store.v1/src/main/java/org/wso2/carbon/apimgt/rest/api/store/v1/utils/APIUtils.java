@@ -237,7 +237,7 @@ public class APIUtils {
                     break;
                 }
             }
-            if (availableTiers == null) {
+            if (availableTiers.isEmpty()) {
                 for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
                     if (APIConstants.DEFAULT_VISIBLE_ORG.equals(organizationTiers.getOrganizationID())) {
                         availableTiers = organizationTiers.getTiers();
