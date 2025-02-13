@@ -44,6 +44,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +101,11 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     prepStmt.setString(8, ruleset.getProvider());
                     prepStmt.setString(9, organization);
                     prepStmt.setString(10, ruleset.getCreatedBy());
+
+                    Timestamp createdTime = new Timestamp(System.currentTimeMillis());
+                    prepStmt.setTimestamp(11, createdTime);
+                    ruleset.setCreatedTime(createdTime.toString());
+
                     prepStmt.execute();
                 }
                 addRuleContent(connection, ruleset.getId(), ruleset.getRulesetContent());
@@ -115,7 +121,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     ruleset.getName(), organization
             );
         }
-        return getRulesetById(ruleset.getId(), organization); // to return RulesetInfo object
+        return getRulesetInfoFromRuleset(ruleset);
     }
 
     /**
@@ -145,8 +151,13 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                     prepStmt.setString(6, ruleset.getDocumentationLink());
                     prepStmt.setString(7, ruleset.getProvider());
                     prepStmt.setString(8, ruleset.getUpdatedBy());
-                    prepStmt.setString(9, rulesetId);
-                    prepStmt.setString(10, organization);
+
+                    Timestamp updatedTime = new Timestamp(System.currentTimeMillis());
+                    prepStmt.setTimestamp(9, updatedTime);
+                    ruleset.setUpdatedTime(updatedTime.toString());
+
+                    prepStmt.setString(10, rulesetId);
+                    prepStmt.setString(11, organization);
                     prepStmt.executeUpdate();
                 }
                 updateRuleContent(connection, ruleset.getId(), ruleset.getRulesetContent());
@@ -167,7 +178,30 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
         } catch (SQLException | IOException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_RULESET, e, rulesetId);
         }
-        return getRulesetById(rulesetId, organization); // to return all info of the updated ruleset
+        return getRulesetInfoFromRuleset(ruleset);
+    }
+
+    /**
+     * Get the RulesetInfo object from a Ruleset object
+     *
+     * @param ruleset Ruleset object
+     * @return RulesetInfo object
+     */
+    private RulesetInfo getRulesetInfoFromRuleset(Ruleset ruleset) {
+        RulesetInfo rulesetInfo = new RulesetInfo();
+        rulesetInfo.setId(ruleset.getId());
+        rulesetInfo.setName(ruleset.getName());
+        rulesetInfo.setDescription(ruleset.getDescription());
+        rulesetInfo.setRuleCategory(ruleset.getRuleCategory());
+        rulesetInfo.setRuleType(ruleset.getRuleType());
+        rulesetInfo.setArtifactType(ruleset.getArtifactType());
+        rulesetInfo.setDocumentationLink(ruleset.getDocumentationLink());
+        rulesetInfo.setProvider(ruleset.getProvider());
+        rulesetInfo.setCreatedBy(ruleset.getCreatedBy());
+        rulesetInfo.setCreatedTime(ruleset.getCreatedTime());
+        rulesetInfo.setUpdatedBy(ruleset.getUpdatedBy());
+        rulesetInfo.setUpdatedTime(ruleset.getUpdatedTime());
+        return rulesetInfo;
     }
 
     /**
