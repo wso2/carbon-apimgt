@@ -22,7 +22,7 @@ public class APIEndpointDTO   {
   
     private String id = null;
     private String name = null;
-    private String environment = null;
+    private String deploymentStage = null;
     private Object endpointConfig = null;
 
   /**
@@ -62,19 +62,19 @@ public class APIEndpointDTO   {
 
   /**
    **/
-  public APIEndpointDTO environment(String environment) {
-    this.environment = environment;
+  public APIEndpointDTO deploymentStage(String deploymentStage) {
+    this.deploymentStage = deploymentStage;
     return this;
   }
 
   
   @ApiModelProperty(example = "PRODUCTION or SANDBOX", value = "")
-  @JsonProperty("environment")
-  public String getEnvironment() {
-    return environment;
+  @JsonProperty("deploymentStage")
+  public String getDeploymentStage() {
+    return deploymentStage;
   }
-  public void setEnvironment(String environment) {
-    this.environment = environment;
+  public void setDeploymentStage(String deploymentStage) {
+    this.deploymentStage = deploymentStage;
   }
 
   /**
@@ -108,13 +108,13 @@ public class APIEndpointDTO   {
     APIEndpointDTO apIEndpoint = (APIEndpointDTO) o;
     return Objects.equals(id, apIEndpoint.id) &&
         Objects.equals(name, apIEndpoint.name) &&
-        Objects.equals(environment, apIEndpoint.environment) &&
+        Objects.equals(deploymentStage, apIEndpoint.deploymentStage) &&
         Objects.equals(endpointConfig, apIEndpoint.endpointConfig);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, environment, endpointConfig);
+    return Objects.hash(id, name, deploymentStage, endpointConfig);
   }
 
   @Override
@@ -124,7 +124,7 @@ public class APIEndpointDTO   {
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
+    sb.append("    deploymentStage: ").append(toIndentedString(deploymentStage)).append("\n");
     sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
     sb.append("}");
     return sb.toString();

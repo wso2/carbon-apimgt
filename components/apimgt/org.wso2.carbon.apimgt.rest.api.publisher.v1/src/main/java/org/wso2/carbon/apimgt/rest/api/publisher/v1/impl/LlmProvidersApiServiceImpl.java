@@ -98,10 +98,11 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
     @Override
     public Response getLLMProviderModels(String llmProviderId, MessageContext messageContext)
             throws APIManagementException {
-        APIAdmin adpAdmin = new APIAdminImpl();
+
+        APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
-            LLMProvider provider = adpAdmin.getLLMProvider(organization, llmProviderId);
+            LLMProvider provider = apiAdmin.getLLMProvider(organization, llmProviderId);
             List<String> modelList = provider.getModelList();
             return Response.ok().entity(modelList).build();
         } catch (APIManagementException e) {

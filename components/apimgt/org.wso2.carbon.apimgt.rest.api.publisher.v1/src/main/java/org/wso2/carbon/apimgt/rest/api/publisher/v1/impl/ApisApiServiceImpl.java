@@ -280,7 +280,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String createdAPIEndpointId = PublisherCommonUtils.addAPIEndpoint
                     (apiId, apiEndpointDTO, organization, apiProvider);
-            APIEndpointInfo createdAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, createdAPIEndpointId);
+            APIEndpointInfo createdAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, createdAPIEndpointId,
+                    organization);
             APIEndpointDTO createdAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(createdAPIEndpoint);
             removeAPIEndpointSecrets(createdAPIEndpointDTO);
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId
@@ -313,11 +314,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     public Response deleteApiEndpoint(String apiId, String endpointUuid, MessageContext messageContext)
             throws APIManagementException {
         try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
             //validate API Endpoint
-            APIEndpointInfo existingApiEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointUuid);
+            APIEndpointInfo existingApiEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointUuid, organization);
             if (existingApiEndpoint != null) {
                 apiProvider.deleteAPIEndpointById(endpointUuid);
                 if (log.isDebugEnabled()) {
@@ -356,7 +358,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
             PublisherCommonUtils.updateAPIEndpoint(apiId, endpointId, apIEndpointDTO, organization, apiProvider);
-            APIEndpointInfo updatedAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointId);
+            APIEndpointInfo updatedAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointId, organization);
             APIEndpointDTO updatedAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(updatedAPIEndpoint);
             removeAPIEndpointSecrets(updatedAPIEndpointDTO);
             return Response.ok().entity(updatedAPIEndpointDTO).build();
@@ -407,12 +409,15 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response getApiEndpoints(String apiId, Integer limit, Integer offset, MessageContext messageContext)
             throws APIManagementException {
+
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
             //get API endpoints
-            APIEndpointListDTO apiEndpointListDTO = PublisherCommonUtils.getApiEndpoints(apiId, apiProvider);
+            APIEndpointListDTO apiEndpointListDTO = PublisherCommonUtils.getApiEndpoints(apiId, apiProvider,
+                    organization);
             for (APIEndpointDTO apiEndpointDTO : apiEndpointListDTO.getList()) {
                 removeAPIEndpointSecrets(apiEndpointDTO);
             }

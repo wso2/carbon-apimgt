@@ -219,7 +219,7 @@ public class ExportUtils {
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         addOperationPoliciesToArchive(archivePath, tenantDomain, exportFormat, apiProvider,
                 api, currentApiUuid);
-        addAPIEndpointsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider);
+        addAPIEndpointsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider, organization);
 
         if (api != null && !StringUtils.isEmpty(api.getEndpointConfig())) {
             JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
@@ -814,12 +814,13 @@ public class ExportUtils {
      * @param apiID        Unique Identifier of API
      * @param exportFormat Format of export
      * @param apiProvider  API provider
+     * @param organization Organization identifier
      * @throws APIManagementException
      */
     public static void addAPIEndpointsToArchive(String archivePath, String apiID, ExportFormat exportFormat,
-            APIProvider apiProvider) throws APIManagementException {
+            APIProvider apiProvider, String organization) throws APIManagementException {
         try {
-            List<APIEndpointInfo> apiEndpointList = apiProvider.getAllAPIEndpointsByUUID(apiID);
+            List<APIEndpointInfo> apiEndpointList = apiProvider.getAllAPIEndpointsByUUID(apiID, organization);
 
             if (!apiEndpointList.isEmpty()) {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();

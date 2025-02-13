@@ -2800,7 +2800,9 @@ public class SQLConstants {
             "INSERT INTO AM_LLM_PROVIDER_MODEL (MODEL_NAME, LLM_PROVIDER_UUID) VALUES (?, ?)";
 
     public static final String GET_LLM_PROVIDER_MODELS_SQL =
-            "SELECT MODEL_NAME FROM AM_LLM_PROVIDER_MODEL WHERE LLM_PROVIDER_UUID = ?";
+            "SELECT M.MODEL_NAME FROM AM_LLM_PROVIDER_MODEL M " +
+                    "JOIN AM_LLM_PROVIDER P ON M.LLM_PROVIDER_UUID = P.UUID " +
+                    "WHERE M.LLM_PROVIDER_UUID = ? AND P.ORGANIZATION = ?";
 
     public static final String DELETE_LLM_PROVIDER_MODELS_SQL =
             "DELETE FROM AM_LLM_PROVIDER_MODEL WHERE LLM_PROVIDER_UUID = ?";
@@ -4642,42 +4644,36 @@ public class SQLConstants {
         public static final String GET_ALL_API_ENDPOINTS_BY_API_UUID =
                 "SELECT " +
                         "   AMAE.ENDPOINT_UUID," +
-                        "   AMAE.REVISION_UUID," +
                         "   AMAE.ENDPOINT_NAME," +
                         "   AMAE.KEY_TYPE," +
                         "   AMAE.ENDPOINT_CONFIG," +
-                        "   AMAE.ORGANIZATION" +
                         " FROM " +
                         "   AM_API_ENDPOINTS  AMAE" +
                         " WHERE " +
-                        "   AMAE.API_UUID = ? AND REVISION_UUID = 'Current API'";
+                        "   AMAE.API_UUID = ? AND AMAE.ORGANIZATION = ? AND AMAE.REVISION_UUID = 'Current API'";
 
         public static final String GET_ALL_API_ENDPOINTS_BY_API_UUID_REVISION_SQL =
                 "SELECT " +
                         "   AMAE.ENDPOINT_UUID," +
-                        "   AMAE.REVISION_UUID," +
                         "   AMAE.ENDPOINT_NAME," +
                         "   AMAE.KEY_TYPE," +
                         "   AMAE.ENDPOINT_CONFIG," +
-                        "   AMAE.ORGANIZATION" +
                         " FROM " +
                         "   AM_API_ENDPOINTS  AMAE" +
                         " WHERE " +
-                        "   AMAE.API_UUID = ? AND AMAE.REVISION_UUID = ?";
+                        "   AMAE.API_UUID = ? AND AMAE.ORGANIZATION = ? AND AMAE.REVISION_UUID = ?";
 
         public static final String GET_API_ENDPOINT_BY_API_UUID_AND_ENDPOINT_UUID =
                 "SELECT " +
                         "   AMAE.ENDPOINT_UUID," +
-                        "   AMAE.REVISION_UUID," +
                         "   AMAE.ENDPOINT_NAME," +
                         "   AMAE.KEY_TYPE," +
                         "   AMAE.ENDPOINT_CONFIG," +
-                        "   AMAE.ORGANIZATION" +
                         " FROM " +
                         "   AM_API_ENDPOINTS  AMAE" +
                         " WHERE " +
                         "   AMAE.API_UUID = ? AND" +
-                        "   AMAE.ENDPOINT_UUID = ? AND REVISION_UUID = 'Current API'";
+                        "   AMAE.ENDPOINT_UUID = ? AND AMAE.ORGANIZATION = ? AND AMAE.REVISION_UUID = 'Current API'";
 
         public static final String DELETE_API_ENDPOINT_BY_UUID =
                 "DELETE FROM AM_API_ENDPOINTS WHERE ENDPOINT_UUID = ? AND REVISION_UUID = 'Current API'";
@@ -4687,8 +4683,8 @@ public class SQLConstants {
 
         public static final String UPDATE_API_ENDPOINT_BY_UUID =
                 "UPDATE AM_API_ENDPOINTS " +
-                        " SET ENDPOINT_NAME = ?, ENDPOINT_CONFIG = ?, ORGANIZATION = ? " +
-                        " WHERE ENDPOINT_UUID = ? AND REVISION_UUID = 'Current API'";
+                        " SET ENDPOINT_NAME = ?, ENDPOINT_CONFIG = ? " +
+                        " WHERE ENDPOINT_UUID = ? AND ORGANIZATION = ? AND REVISION_UUID = 'Current API'";
 
         public static final String ADD_NEW_API_ENDPOINT =
                 "INSERT INTO AM_API_ENDPOINTS " +
@@ -4700,14 +4696,8 @@ public class SQLConstants {
                         "ENDPOINT_CONFIG, ORGANIZATION) " +
                         "VALUES(?,?,?,?,?,?,?)";
 
-        public static final String GET_MAPPED_API_ENDPOINTS_UUIDS =
-                "SELECT AMAE.ENDPOINT_UUID " +
-                        "FROM AM_API_ENDPOINTS AMAE INNER JOIN AM_API_PRIMARY_EP_MAPPING AMPM " +
-                        "ON AMPM.ENDPOINT_UUID = AMAE.ENDPOINT_UUID " +
-                        "WHERE AMAE.API_UUID = ? AND AMAE.REVISION_UUID = 'Current API'";
-
         public static final String DELETE_PRIMARY_ENDPOINT_MAPPING =
-                "DELETE FROM AM_API_PRIMARY_EP_MAPPING WHERE ENDPOINT_UUID = ?";
+                "DELETE FROM AM_API_PRIMARY_EP_MAPPING WHERE API_UUID = ?";
 
         public static final String ADD_PRIMARY_ENDPOINT_MAPPING =
                 "INSERT INTO AM_API_PRIMARY_EP_MAPPING (API_UUID, ENDPOINT_UUID) VALUES(?,?)";
@@ -4718,6 +4708,7 @@ public class SQLConstants {
                         "ON AMPM.ENDPOINT_UUID = AME.ENDPOINT_UUID " +
                         "WHERE " +
                         "AME.API_UUID = ? " +
+                        "AME.ORGANIZATION = ? " +
                         "AND AME.REVISION_UUID = 'Current API' " +
                         "AND AME.KEY_TYPE = ?";
 
@@ -4727,6 +4718,7 @@ public class SQLConstants {
                         "ON AMPM.ENDPOINT_UUID = AME.ENDPOINT_UUID " +
                         "WHERE " +
                         "AME.API_UUID = ? " +
+                        "AME.ORGANIZATION = ? " +
                         "AND AME.REVISION_UUID = ? " +
                         "AND AME.KEY_TYPE = ?";
 
