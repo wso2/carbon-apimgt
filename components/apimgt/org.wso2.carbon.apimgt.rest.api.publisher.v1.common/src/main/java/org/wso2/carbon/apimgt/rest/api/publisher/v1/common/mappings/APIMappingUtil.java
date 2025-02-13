@@ -3535,7 +3535,7 @@ public class APIMappingUtil {
             throw new APIManagementException("Endpoint Config is missing of API Endpoint.",
                     ExceptionCodes.ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API);
         }
-        apiEndpoint.setOrganization(organization);
+//        apiEndpoint.setOrganization(organization);
         return apiEndpoint;
     }
 

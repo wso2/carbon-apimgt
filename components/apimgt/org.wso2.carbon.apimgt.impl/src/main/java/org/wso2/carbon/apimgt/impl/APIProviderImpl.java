@@ -6152,7 +6152,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiRevision.setRevisionUUID(revisionUUID);
 
         try {
-            apiMgtDAO.addAPIRevision(apiRevision);
+            apiMgtDAO.addAPIRevision(apiRevision, organization);
             AIConfiguration aiConfiguration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), null);
             if (aiConfiguration != null) {
                 addAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), aiConfiguration,
@@ -6758,7 +6758,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
                     ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
         }
-        apiMgtDAO.restoreAPIRevision(apiRevision);
+        apiMgtDAO.restoreAPIRevision(apiRevision, organization);
     }
 
     /**
@@ -7013,7 +7013,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
                     ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
         }
-        apiMgtDAO.restoreAPIProductRevision(apiRevision);
+        apiMgtDAO.restoreAPIProductRevision(apiRevision, organization);
     }
 
     @Override
@@ -8095,21 +8095,23 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint) throws APIManagementException {
+    public String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint, String organization)
+            throws APIManagementException {
         String endpointUUID = UUID.randomUUID().toString();
         apiEndpoint.setEndpointUuid(endpointUUID);
-        return apiMgtDAO.addAPIEndpoint(apiUUID, apiEndpoint);
+        return apiMgtDAO.addAPIEndpoint(apiUUID, apiEndpoint, organization);
     }
 
     @Override
-    public APIEndpointInfo getAPIEndpointByUUID(String apiUUID, String endpointUUID) throws APIManagementException {
-        return apiMgtDAO.getAPIEndpoint(apiUUID, endpointUUID);
-    }
-
-    @Override
-    public APIEndpointInfo updateAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint)
+    public APIEndpointInfo getAPIEndpointByUUID(String apiUUID, String endpointUUID, String organization)
             throws APIManagementException {
-        return apiMgtDAO.updateAPIEndpoint(apiUUID, apiEndpoint);
+        return apiMgtDAO.getAPIEndpoint(apiUUID, endpointUUID, organization);
+    }
+
+    @Override
+    public APIEndpointInfo updateAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint, String organization)
+            throws APIManagementException {
+        return apiMgtDAO.updateAPIEndpoint(apiUUID, apiEndpoint, organization);
     }
 
     @Override
@@ -8118,8 +8120,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public List<APIEndpointInfo> getAllAPIEndpointsByUUID(String uuid) throws APIManagementException {
-        return apiMgtDAO.getAPIEndpoints(uuid);
+    public List<APIEndpointInfo> getAllAPIEndpointsByUUID(String uuid, String organization) throws APIManagementException {
+        return apiMgtDAO.getAPIEndpoints(uuid, organization);
     }
 
     /**
@@ -8130,6 +8132,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     private void populateAPIPrimaryEndpointsMapping(API api, String uuid) throws APIManagementException {
+        String organization = api.getOrganization();
         String currentApiUuid;
         String revisionUuid = null;
         APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
@@ -8141,11 +8144,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         // Get primary production Endpoint mapping
         String productionEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
-                APIConstants.APIEndpoint.PRODUCTION, revisionUuid);
+                APIConstants.APIEndpoint.PRODUCTION, revisionUuid, organization);
         api.setPrimaryProductionEndpointId(productionEndpointId);
         // Get primary sandbox endpoint endpoint
         String sandboxEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
-                APIConstants.APIEndpoint.SANDBOX, revisionUuid);
+                APIConstants.APIEndpoint.SANDBOX, revisionUuid, organization);
         api.setPrimarySandboxEndpointId(sandboxEndpointId);
     }
 

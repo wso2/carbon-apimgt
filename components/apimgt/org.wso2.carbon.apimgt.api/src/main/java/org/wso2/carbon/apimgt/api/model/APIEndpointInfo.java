@@ -27,7 +27,6 @@ public class APIEndpointInfo {
     private String endpointUuid;
     private String endpointName;
     private Map<String, Object> endpointConfig;
-    private String organization;
     private String environment;
 
     public String getEndpointName() { return endpointName; }
@@ -42,14 +41,6 @@ public class APIEndpointInfo {
 
     public void setEndpointConfig(Map endpointConfig) {
         this.endpointConfig = endpointConfig;
-    }
-
-    public String getOrganization() {
-        return organization;
-    }
-
-    public void setOrganization(String organization) {
-        this.organization = organization;
     }
 
     public String getEndpointUuid() {

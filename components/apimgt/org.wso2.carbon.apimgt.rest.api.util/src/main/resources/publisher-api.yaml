@@ -8044,7 +8044,6 @@ paths:
                 type: array
                 items:
                   type: string
-                  example: "gpt-4"
       security:
         - OAuth2Security:
             - apim:llm_provider_read

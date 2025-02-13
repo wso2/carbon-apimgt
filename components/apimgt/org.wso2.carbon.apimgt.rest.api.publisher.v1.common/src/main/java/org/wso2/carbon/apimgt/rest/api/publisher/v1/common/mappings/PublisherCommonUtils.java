@@ -3003,14 +3003,15 @@ public class PublisherCommonUtils {
     /**
      * Get All endpoints of an API.
      *
-     * @param uuid        Unique identifier of API
-     * @param apiProvider
+     * @param uuid         Unique identifier of API
+     * @param apiProvider  API Provider
+     * @param organization Organization of logged-in user
      * @return APIEndpointListDTO object
      * @throws APIManagementException if there is en error while getting the API Endpoints' information
      */
-    public static APIEndpointListDTO getApiEndpoints(String uuid, APIProvider apiProvider)
+    public static APIEndpointListDTO getApiEndpoints(String uuid, APIProvider apiProvider, String organization)
             throws APIManagementException {
-        List<APIEndpointInfo> apiEndpointsList = apiProvider.getAllAPIEndpointsByUUID(uuid);
+        List<APIEndpointInfo> apiEndpointsList = apiProvider.getAllAPIEndpointsByUUID(uuid, organization);
 
         // Check if default production and/or sandbox endpoints are inclusive in the apiEndpointsList. If not, add them.
         Map<String, APIEndpointInfo> defaultEndpointsFromEndpointConfig = getAPIEndpointsFromEndpointConfig(uuid,
@@ -3117,7 +3118,6 @@ public class PublisherCommonUtils {
         }
         apiEndpointInfo.setEndpointName(endpointName);
         apiEndpointInfo.setEnvironment(environment);
-        apiEndpointInfo.setOrganization(organization);
         apiEndpointInfo.setEndpointConfig(endpointConfig);
         return apiEndpointInfo;
     }
@@ -3135,7 +3135,7 @@ public class PublisherCommonUtils {
             throws APIManagementException, JsonProcessingException {
         String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
         API api = apiProvider.getAPIbyUUID(apiUUID, organization);
-        APIEndpointInfo apiEndpoint = apiProvider.getAPIEndpointByUUID(apiUUID, endpointUUID);
+        APIEndpointInfo apiEndpoint = apiProvider.getAPIEndpointByUUID(apiUUID, endpointUUID, organization);
         if (apiEndpoint == null) {
             String endpointConfig = api.getEndpointConfig();
             Gson gson = new Gson();
@@ -3215,7 +3215,7 @@ public class PublisherCommonUtils {
         if (apiEndpoint.getEndpointUuid() == null) {
             apiEndpoint.setEndpointUuid(endpointId);
         }
-        APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiId, apiEndpoint);
+        APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiId, apiEndpoint, organization);
         if (apiEndpointUpdated == null) {
             throw new APIManagementException("Error occurred while updating operation Endpoint of API " + apiId +
                     "endpoint UUID" + endpointId, ExceptionCodes.ERROR_UPDATING_API_ENDPOINT_API);
@@ -3252,7 +3252,7 @@ public class PublisherCommonUtils {
             }
         }
         APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
-        String apiEndpointId = apiProvider.addAPIEndpoint(apiId, apiEndpoint);
+        String apiEndpointId = apiProvider.addAPIEndpoint(apiId, apiEndpoint, organization);
         if (apiEndpointId == null) {
             throw new APIManagementException("Error occurred while getting Endpoint of API " + apiId,
                     ExceptionCodes.ERROR_INSERTING_API_ENDPOINT_API);

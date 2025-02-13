@@ -8977,7 +8977,6 @@ paths:
                 type: array
                 items:
                   type: string
-                  example: ["gpt-35-turbo", "gpt-4", "gpt-4o"]
       security:
         - OAuth2Security:
             - apim:llm_provider_read

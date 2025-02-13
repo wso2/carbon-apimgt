@@ -736,13 +736,14 @@ public class ImportUtils {
                         try {
                             // Check if endpoint already exists. If not, add it.
                             APIEndpointInfo retrievedAPIEndpoint = provider.getAPIEndpointByUUID(api.getUuid(),
-                                    endpointUUID);
+                                    endpointUUID, organization);
                             if (retrievedAPIEndpoint != null) {
                                 if (log.isDebugEnabled()) {
                                     log.debug("API Endpoint with ID: " + endpointUUID + " already exists in the API");
                                 }
                             } else {
-                                String createdEndpointUUID = provider.addAPIEndpoint(api.getUuid(), apiEndpointInfo);
+                                String createdEndpointUUID = provider.addAPIEndpoint(api.getUuid(), apiEndpointInfo,
+                                        organization);
                                 if (log.isDebugEnabled()) {
                                     log.debug("API Endpoint with ID: " + createdEndpointUUID +
                                             " has been added to the API");
