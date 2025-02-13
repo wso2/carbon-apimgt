@@ -190,7 +190,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 prepStmt.setString(3, rule.getName());
                 prepStmt.setString(4, rule.getDescription());
                 prepStmt.setString(5, String.valueOf(rule.getSeverity()));
-                prepStmt.setBlob(6, new ByteArrayInputStream(rule.getContent()
+                prepStmt.setBinaryStream(6, new ByteArrayInputStream(rule.getContent()
                         .getBytes(Charset.defaultCharset())));
                 prepStmt.addBatch();
             }
@@ -214,7 +214,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
         try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);
              InputStream rulesetContentStream = new ByteArrayInputStream(rulesetContent.getContent())) {
             prepStmt.setString(1, rulesetId);
-            prepStmt.setBlob(2, rulesetContentStream);
+            prepStmt.setBinaryStream(2, rulesetContentStream);
             prepStmt.setString(3, rulesetContent.getContentType().toString());
             prepStmt.setString(4, rulesetContent.getFileName());
             prepStmt.execute();
