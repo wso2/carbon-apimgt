@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
@@ -52,7 +54,6 @@ import javax.ws.rs.core.Response;
 public class DesignAssistantApiServiceImpl implements DesignAssistantApiService {
 
     private static final Log log = LogFactory.getLog(DesignAssistantApiServiceImpl.class);
-
     private static DesignAssistantConfigurationDTO configDto;
 
     @Override
@@ -84,12 +85,13 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
                 if (configDto.isKeyProvided()) {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
                             configDto.getKey(), configDto.getGenApiPayloadResource(), payload.toString(), null);
+ 
                 } else {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
                             configDto.getAccessToken(), configDto.getGenApiPayloadResource(), payload.toString(), null);
+
                 }
 
-                ObjectMapper objectMapper = new ObjectMapper();
                 DesignAssistantAPIPayloadResponseDTO responseDTO = new DesignAssistantAPIPayloadResponseDTO();
                 responseDTO.setGeneratedPayload(response);
 
@@ -122,8 +124,8 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
         }
         try {
             if (configDto.isKeyProvided() || configDto.isAuthTokenProvided()) {
-
-                boolean isChatQueryEmpty = StringUtils.isEmpty(designAssistantChatQueryDTO.getSessionId());
+                String sessionId = designAssistantChatQueryDTO.getSessionId();
+                boolean isChatQueryEmpty = StringUtils.isEmpty(sessionId);
                 if (isChatQueryEmpty) {
                     String errorMessage = "Payload is badly formatted. Expected to have 'sessionId'";
                     RestApiUtil.handleBadRequest(errorMessage, log);
@@ -131,26 +133,25 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
                 }
 
                 JSONObject payload = new JSONObject();
-                String text = new Gson().toJson(designAssistantChatQueryDTO.getText());
-                String sessionId = new Gson().toJson(designAssistantChatQueryDTO.getSessionId());
 
-                payload.put(APIConstants.QUERY, designAssistantChatQueryDTO.getSessionId());
-                payload.put(APIConstants.SESSIONID, designAssistantChatQueryDTO.getSessionId());
+                payload.put(APIConstants.TEXT, designAssistantChatQueryDTO.getText());
+                payload.put(APIConstants.SESSIONID, sessionId);
 
                 String response;
                 if (configDto.isKeyProvided()) {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
                             configDto.getKey(), configDto.getChatResource(), payload.toString(), null);
+    
                 } else {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
                             configDto.getAccessToken(), configDto.getChatResource(), payload.toString(), null);
+
                 }
-              
+
                 ObjectMapper objectMapper = new ObjectMapper();
                 DesignAssistantChatResponseDTO responseDTO = objectMapper.readValue(response, DesignAssistantChatResponseDTO.class);
 
                 return Response.ok(responseDTO).build();
-                
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAIServiceNotAccessible(e)) {
@@ -162,6 +163,8 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
                         "Assistant service";
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
         return null;
     }
