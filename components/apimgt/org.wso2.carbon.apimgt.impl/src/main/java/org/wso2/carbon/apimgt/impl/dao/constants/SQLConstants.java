@@ -4646,7 +4646,7 @@ public class SQLConstants {
                         "   AMAE.ENDPOINT_UUID," +
                         "   AMAE.ENDPOINT_NAME," +
                         "   AMAE.KEY_TYPE," +
-                        "   AMAE.ENDPOINT_CONFIG," +
+                        "   AMAE.ENDPOINT_CONFIG" +
                         " FROM " +
                         "   AM_API_ENDPOINTS  AMAE" +
                         " WHERE " +
@@ -4657,7 +4657,7 @@ public class SQLConstants {
                         "   AMAE.ENDPOINT_UUID," +
                         "   AMAE.ENDPOINT_NAME," +
                         "   AMAE.KEY_TYPE," +
-                        "   AMAE.ENDPOINT_CONFIG," +
+                        "   AMAE.ENDPOINT_CONFIG" +
                         " FROM " +
                         "   AM_API_ENDPOINTS  AMAE" +
                         " WHERE " +
@@ -4668,7 +4668,7 @@ public class SQLConstants {
                         "   AMAE.ENDPOINT_UUID," +
                         "   AMAE.ENDPOINT_NAME," +
                         "   AMAE.KEY_TYPE," +
-                        "   AMAE.ENDPOINT_CONFIG," +
+                        "   AMAE.ENDPOINT_CONFIG" +
                         " FROM " +
                         "   AM_API_ENDPOINTS  AMAE" +
                         " WHERE " +
@@ -4708,7 +4708,7 @@ public class SQLConstants {
                         "ON AMPM.ENDPOINT_UUID = AME.ENDPOINT_UUID " +
                         "WHERE " +
                         "AME.API_UUID = ? " +
-                        "AME.ORGANIZATION = ? " +
+                        "AND AME.ORGANIZATION = ? " +
                         "AND AME.REVISION_UUID = 'Current API' " +
                         "AND AME.KEY_TYPE = ?";
 
@@ -4718,7 +4718,7 @@ public class SQLConstants {
                         "ON AMPM.ENDPOINT_UUID = AME.ENDPOINT_UUID " +
                         "WHERE " +
                         "AME.API_UUID = ? " +
-                        "AME.ORGANIZATION = ? " +
+                        "AND AME.ORGANIZATION = ? " +
                         "AND AME.REVISION_UUID = ? " +
                         "AND AME.KEY_TYPE = ?";
 
