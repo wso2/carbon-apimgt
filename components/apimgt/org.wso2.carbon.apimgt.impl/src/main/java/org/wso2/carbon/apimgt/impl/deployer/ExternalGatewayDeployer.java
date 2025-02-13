@@ -103,4 +103,11 @@ public interface ExternalGatewayDeployer {
      * @return API api object
      */
     public void applyGatewayStandards(API api) throws DeployerException;
+
+    /**
+     * This method returns the default hostname template of the external gateway
+     *
+     * @return String default hostname template
+     */
+    public String getDefaultHostnameTemplate();
 }

@@ -152,6 +152,7 @@ public class SettingsMappingUtil {
                     new SettingsGatewayConfigurationDTO();
             settingsFederatedGatewayConfigurationDTO.setType(gatewayConfiguration.getType());
             settingsFederatedGatewayConfigurationDTO.setDisplayName(gatewayConfiguration.getType());
+            settingsFederatedGatewayConfigurationDTO.setDefaultHostnameTemplate(gatewayConfiguration.getDefaultHostnameTemplate());
             List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
             if (connectionConfigurations != null) {
                 for (ConfigurationDto dto : connectionConfigurations) {

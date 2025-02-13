@@ -5485,6 +5485,9 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/GatewayConfiguration'
+              defaultHostnameTemplate:
+                type: string
+                example: '{apiId}.execute-api.{region}.amazonaws.com'
         analyticsEnabled:
           type: boolean
           description: To determine whether analytics is enabled or not

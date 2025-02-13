@@ -380,4 +380,8 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
         // No need to implement
     }
 
+    @Override
+    public String getDefaultHostnameTemplate() {
+        return "";
+    }
 }

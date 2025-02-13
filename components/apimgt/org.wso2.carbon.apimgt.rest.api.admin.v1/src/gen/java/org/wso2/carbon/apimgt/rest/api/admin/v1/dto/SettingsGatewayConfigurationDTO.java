@@ -26,6 +26,7 @@ public class SettingsGatewayConfigurationDTO   {
     private String type = null;
     private String displayName = null;
     private List<GatewayConfigurationDTO> configurations = new ArrayList<GatewayConfigurationDTO>();
+    private String defaultHostnameTemplate = null;
 
   /**
    **/
@@ -79,6 +80,23 @@ public class SettingsGatewayConfigurationDTO   {
     this.configurations = configurations;
   }
 
+  /**
+   **/
+  public SettingsGatewayConfigurationDTO defaultHostnameTemplate(String defaultHostnameTemplate) {
+    this.defaultHostnameTemplate = defaultHostnameTemplate;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "{apiId}.execute-api.{region}.amazonaws.com", value = "")
+  @JsonProperty("defaultHostnameTemplate")
+  public String getDefaultHostnameTemplate() {
+    return defaultHostnameTemplate;
+  }
+  public void setDefaultHostnameTemplate(String defaultHostnameTemplate) {
+    this.defaultHostnameTemplate = defaultHostnameTemplate;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -91,12 +109,13 @@ public class SettingsGatewayConfigurationDTO   {
     SettingsGatewayConfigurationDTO settingsGatewayConfiguration = (SettingsGatewayConfigurationDTO) o;
     return Objects.equals(type, settingsGatewayConfiguration.type) &&
         Objects.equals(displayName, settingsGatewayConfiguration.displayName) &&
-        Objects.equals(configurations, settingsGatewayConfiguration.configurations);
+        Objects.equals(configurations, settingsGatewayConfiguration.configurations) &&
+        Objects.equals(defaultHostnameTemplate, settingsGatewayConfiguration.defaultHostnameTemplate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, displayName, configurations);
+    return Objects.hash(type, displayName, configurations, defaultHostnameTemplate);
   }
 
   @Override
@@ -107,6 +126,7 @@ public class SettingsGatewayConfigurationDTO   {
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    configurations: ").append(toIndentedString(configurations)).append("\n");
+    sb.append("    defaultHostnameTemplate: ").append(toIndentedString(defaultHostnameTemplate)).append("\n");
     sb.append("}");
     return sb.toString();
   }
