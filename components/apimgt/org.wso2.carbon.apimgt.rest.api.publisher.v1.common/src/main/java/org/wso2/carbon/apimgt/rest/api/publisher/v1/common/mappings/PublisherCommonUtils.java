@@ -3089,26 +3089,20 @@ public class PublisherCommonUtils {
      * @return JSON response with the compliance violations
      */
 
-    public static String buildBadRequestResponse(ArtifactComplianceInfo artifactComplianceInfo) {
+    public static String buildBadRequestResponse(ArtifactComplianceInfo artifactComplianceInfo) throws
+            APIManagementException {
         List<RuleViolation> blockingViolations = artifactComplianceInfo.getBlockingRuleViolations();
         List<RuleViolation> nonBlockingViolations = artifactComplianceInfo.getNonBlockingViolations();
 
-        List<Map<String, String>> violations = new ArrayList<>();
+        Map<String, List<Map<String, String>>> violations = new HashMap<>();
+        violations.put("blockingViolations", new ArrayList<>());
+        violations.put("nonBlockingViolations", new ArrayList<>());
 
         for (RuleViolation violation : blockingViolations) {
-            Map<String, String> violationDetails = new HashMap<>();
-            violationDetails.put("ruleCode", violation.getRuleName());
-            violationDetails.put("violatedPath", violation.getViolatedPath());
-            violationDetails.put("severity", violation.getSeverity().name());
-            violations.add(violationDetails);
+            violations.get("blockingViolations").add(getViolationMapFromViolation(violation));
         }
-
         for (RuleViolation violation : nonBlockingViolations) {
-            Map<String, String> violationDetails = new HashMap<>();
-            violationDetails.put("ruleCode", violation.getRuleName());
-            violationDetails.put("violatedPath", violation.getViolatedPath());
-            violationDetails.put("severity", violation.getSeverity().name());
-            violations.add(violationDetails);
+            violations.get("nonBlockingViolations").add(getViolationMapFromViolation(violation));
         }
 
         // Convert violations list to JSON object
@@ -3117,12 +3111,28 @@ public class PublisherCommonUtils {
         try {
             jsonViolations = objectMapper.writeValueAsString(violations);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error generating JSON response for governance compliance ", e);
+            throw new APIManagementException("Error generating JSON response for governance compliance ", e);
         }
         return jsonViolations;
     }
 
-    public static void executeGovernanceOnLabelAttach(List<Label> labels, String artifactType,  String artifactId,
+    /**
+     * Get a map of violation details from a RuleViolation object.
+     *
+     * @param violation RuleViolation object
+     * @return Map of violation details
+     */
+    private static Map<String, String> getViolationMapFromViolation(RuleViolation violation) {
+        Map<String, String> violationDetails = new HashMap<>();
+        violationDetails.put("ruleName", violation.getRuleName());
+        violationDetails.put("ruleType", violation.getRuleType().name());
+        violationDetails.put("violatedPath", violation.getViolatedPath());
+        violationDetails.put("severity", violation.getSeverity().name());
+        violationDetails.put("message", violation.getRuleMessage());
+        return violationDetails;
+    }
+
+    public static void executeGovernanceOnLabelAttach(List<Label> labels, String artifactType, String artifactId,
                                                       String organization) {
         List<String> labelsIdList = new ArrayList<>();
         for (Label label : labels) {

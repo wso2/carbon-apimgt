@@ -26,8 +26,8 @@ public class SQLConstants {
     public static final String CREATE_RULESET =
             "INSERT INTO GOV_RULESET (RULESET_ID, NAME, DESCRIPTION, " +
                     "RULE_CATEGORY, RULE_TYPE, ARTIFACT_TYPE, " +
-                    "DOCUMENTATION_LINK, PROVIDER, ORGANIZATION, CREATED_BY) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    "DOCUMENTATION_LINK, PROVIDER, ORGANIZATION, CREATED_BY, CREATED_TIME) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     public static final String ADD_RULESET_CONTENT =
             "INSERT INTO GOV_RULESET_CONTENT(RULESET_ID, CONTENT, CONTENT_TYPE, FILE_NAME) " +
@@ -65,7 +65,7 @@ public class SQLConstants {
             "UPDATE GOV_RULESET SET NAME = ?, DESCRIPTION = ?, " +
                     "RULE_CATEGORY = ?, RULE_TYPE = ?, ARTIFACT_TYPE = " +
                     "?, DOCUMENTATION_LINK = ?, PROVIDER = ?, UPDATED_BY = ?, " +
-                    "LAST_UPDATED_TIME = CURRENT_TIMESTAMP " +
+                    "LAST_UPDATED_TIME = ? " +
                     "WHERE RULESET_ID = ? AND ORGANIZATION = ?";
 
     public static final String UPDATE_RULESET_CONTENT =
@@ -97,8 +97,8 @@ public class SQLConstants {
 
     public static final String CREATE_POLICY =
             "INSERT INTO GOV_POLICY (POLICY_ID, NAME, DESCRIPTION, " +
-                    "ORGANIZATION, CREATED_BY, IS_GLOBAL) " +
-                    "VALUES (?, ?, ?, ?, ?, ?)";
+                    "ORGANIZATION, CREATED_BY, IS_GLOBAL, CREATED_TIME) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     public static final String CREATE_POLICY_RULESET_MAPPING =
             "INSERT INTO GOV_POLICY_RULESET (POLICY_ID, RULESET_ID) VALUES (?, ?)";
@@ -154,7 +154,7 @@ public class SQLConstants {
 
     public static final String UPDATE_POLICY =
             "UPDATE GOV_POLICY SET NAME = ?, DESCRIPTION = ?, UPDATED_BY = ?, IS_GLOBAL = ?, " +
-                    "LAST_UPDATED_TIME = CURRENT_TIMESTAMP " +
+                    "LAST_UPDATED_TIME = ? " +
                     "WHERE POLICY_ID = ? AND ORGANIZATION = ?";
 
     public static final String GET_RULESET_IDS_BY_POLICY_ID =
@@ -241,7 +241,7 @@ public class SQLConstants {
             "JOIN GOV_REQUEST GR ON GA.ARTIFACT_KEY = GR.ARTIFACT_KEY " +
             "WHERE GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ? AND GR.STATUS = 'PENDING'";
     public static final String ADD_GOV_EVAL_REQ = "INSERT INTO GOV_REQUEST " +
-            "(REQ_ID, ARTIFACT_KEY) VALUES (?, ?)";
+            "(REQ_ID, ARTIFACT_KEY, REQ_TIMESTAMP) VALUES (?, ?, ?)";
 
     public static final String ADD_REQ_POLICY_MAPPING = "INSERT INTO GOV_REQUEST_POLICY " +
             "(REQ_ID, POLICY_ID) VALUES (?, ?)";
@@ -255,7 +255,7 @@ public class SQLConstants {
             "WHERE REQ_ID = ?";
 
     public static final String UPDATE_GOV_REQ_STATUS_TO_PROCESSING = "UPDATE GOV_REQUEST " +
-            "SET STATUS = 'PROCESSING', PROCESSING_TIMESTAMP = CURRENT_TIMESTAMP WHERE REQ_ID = ?" +
+            "SET STATUS = 'PROCESSING', PROCESSING_TIMESTAMP = ? WHERE REQ_ID = ?" +
             "AND STATUS = 'PENDING'";
 
     public static final String UPDATE_GOV_REQ_STATUS_FROM_PROCESSING_TO_PENDING = "UPDATE GOV_REQUEST " +
@@ -291,11 +291,11 @@ public class SQLConstants {
     public static final String DELETE_REQ_POLICY_MAPPING_FOR_POLICY = "DELETE FROM " +
             "GOV_REQUEST_POLICY WHERE POLICY_ID = ?";
 
-    public static final String ADD_POLICY_RUN = "INSERT INTO GOV_POLICY_RUN (ARTIFACT_KEY, POLICY_ID) " +
-            "VALUES (?, ?)";
+    public static final String ADD_POLICY_RUN = "INSERT INTO GOV_POLICY_RUN (ARTIFACT_KEY, POLICY_ID, RUN_TIMESTAMP) " +
+            "VALUES (?, ?, ?)";
 
     public static final String ADD_RULESET_RUN = "INSERT INTO GOV_RULESET_RUN (RULESET_RUN_ID, " +
-            "ARTIFACT_KEY, RULESET_ID, RESULT) VALUES (?, ?, ?, ?)";
+            "ARTIFACT_KEY, RULESET_ID, RESULT, RUN_TIMESTAMP) VALUES (?, ?, ?, ?, ?)";
 
     public static final String ADD_RULE_VIOLATION = "INSERT INTO GOV_RULE_VIOLATION (ID, RULESET_RUN_ID, " +
             "RULESET_ID, RULE_NAME, VIOLATED_PATH, MESSAGE) VALUES (?, ?, ?, ?, ?, ?)";

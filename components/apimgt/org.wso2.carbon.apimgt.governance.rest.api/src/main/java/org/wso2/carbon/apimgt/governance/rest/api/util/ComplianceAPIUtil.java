@@ -195,8 +195,10 @@ public class ComplianceAPIUtil {
 
         // If all rulesets are passed, set the policy adherence status to passed
         if (rulesetValidationResults.stream().allMatch(
-                rulesetValidationResultDTO -> rulesetValidationResultDTO.getStatus() ==
-                        RulesetValidationResultWithoutRulesDTO.StatusEnum.PASSED)) {
+                rulesetValidationResultDTO -> (rulesetValidationResultDTO.getStatus() ==
+                        RulesetValidationResultWithoutRulesDTO.StatusEnum.PASSED) ||
+                        (rulesetValidationResultDTO.getStatus() ==
+                                RulesetValidationResultWithoutRulesDTO.StatusEnum.UNAPPLIED))) {
             policyAdherenceWithRulesetsDTO.setStatus(PolicyAdherenceWithRulesetsDTO.StatusEnum.FOLLOWED);
         } else {
             policyAdherenceWithRulesetsDTO.setStatus(PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED);
@@ -232,14 +234,14 @@ public class ComplianceAPIUtil {
         List<RuleViolation> ruleViolations = complianceManager.getRuleViolations(artifactRefId, artifactType,
                 ruleset.getId(), organization);
 
+        rulesetDTO.setRuleType(RulesetValidationResultWithoutRulesDTO
+                .RuleTypeEnum.fromValue(ruleset.getRuleType().name()));
+
         // If the ruleset has not been evaluated, set the ruleset validation status to unapplied
         if (!isRulesetEvaluated) {
             rulesetDTO.setStatus(RulesetValidationResultWithoutRulesDTO.StatusEnum.UNAPPLIED);
             return rulesetDTO;
         }
-
-        rulesetDTO.setRuleType(RulesetValidationResultWithoutRulesDTO
-                .RuleTypeEnum.fromValue(ruleset.getRuleType().name()));
 
         rulesetDTO.setStatus(ruleViolations.isEmpty() ?
                 RulesetValidationResultWithoutRulesDTO.StatusEnum.PASSED :

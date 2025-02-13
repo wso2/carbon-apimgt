@@ -43,6 +43,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -91,6 +92,11 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     prepStmt.setString(4, organization);
                     prepStmt.setString(5, governancePolicy.getCreatedBy());
                     prepStmt.setInt(6, governancePolicy.isGlobal() ? 1 : 0);
+
+                    Timestamp createdTime = new Timestamp(System.currentTimeMillis());
+                    prepStmt.setTimestamp(7, createdTime);
+                    governancePolicy.setCreatedTime(createdTime.toString());
+
                     prepStmt.execute();
                 }
 
@@ -106,7 +112,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_CREATING_POLICY, e, organization);
         }
-        return getGovernancePolicyByID(governancePolicy.getId(), organization);
+        return governancePolicy;
     }
 
     /**
@@ -203,8 +209,13 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                     updateStatement.setString(2, governancePolicy.getDescription());
                     updateStatement.setString(3, governancePolicy.getUpdatedBy());
                     updateStatement.setInt(4, governancePolicy.isGlobal() ? 1 : 0);
-                    updateStatement.setString(5, policyId);
-                    updateStatement.setString(6, organization);
+
+                    Timestamp updatedTime = new Timestamp(System.currentTimeMillis());
+                    updateStatement.setTimestamp(5, updatedTime);
+                    governancePolicy.setUpdatedTime(updatedTime.toString());
+
+                    updateStatement.setString(6, policyId);
+                    updateStatement.setString(7, organization);
                     updateStatement.executeUpdate();
                 }
                 updatePolicyRulesetMappings(connection, policyId, governancePolicy);
@@ -212,7 +223,6 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                 updateStatesAndPolicyActions(connection, policyId, governancePolicy);
                 deletePolicyResultsForPolicy(connection, policyId);
 
-                // return updated APIMGovernancePolicy object
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -222,7 +232,8 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_UPDATING_POLICY, e,
                     policyId);
         }
-        return getGovernancePolicyByID(policyId, organization);
+        governancePolicy.setId(policyId);
+        return governancePolicy;
     }
 
     /**
