@@ -18,9 +18,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,19 +40,15 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DesignAssistantGenAPIPay
 
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 
 public class DesignAssistantApiServiceImpl implements DesignAssistantApiService {
 
     private static final Log log = LogFactory.getLog(DesignAssistantApiServiceImpl.class);
     private static DesignAssistantConfigurationDTO configDto;
+    public static final String TEXT = "text";
+    public static final String SESSIONID = "sessionId";
 
     @Override
     public Response designAssistantApiPayloadGen(DesignAssistantGenAPIPayloadDTO designAssistantGenAPIPayloadDTO,
@@ -78,8 +72,7 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
                 }
 
                 JSONObject payload = new JSONObject();
-
-                payload.put(APIConstants.SESSIONID, sessionId);
+                payload.put(SESSIONID, sessionId);
 
                 String response;
                 if (configDto.isKeyProvided()) {
@@ -134,8 +127,8 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
 
                 JSONObject payload = new JSONObject();
 
-                payload.put(APIConstants.TEXT, designAssistantChatQueryDTO.getText());
-                payload.put(APIConstants.SESSIONID, sessionId);
+                payload.put(TEXT, designAssistantChatQueryDTO.getText());
+                payload.put(SESSIONID, sessionId);
 
                 String response;
                 if (configDto.isKeyProvided()) {
@@ -147,13 +140,11 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
                             configDto.getAccessToken(), configDto.getChatResource(), payload.toString(), null);
 
                 }
-
                 ObjectMapper objectMapper = new ObjectMapper();
                 DesignAssistantChatResponseDTO responseDTO = objectMapper.readValue(response, DesignAssistantChatResponseDTO.class);
-
                 return Response.ok(responseDTO).build();
             }
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | IOException e) {
             if (RestApiUtil.isDueToAIServiceNotAccessible(e)) {
                 return Response.status(Response.Status.UNAUTHORIZED).entity(e.getMessage()).build();
             } else if (RestApiUtil.isDueToAIServiceThrottled(e)) {
@@ -163,8 +154,6 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
                         "Assistant service";
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
         }
         return null;
     }

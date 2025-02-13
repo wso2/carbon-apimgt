@@ -1,7 +1,7 @@
 /*
- *  Copyright (c) 2025, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2021, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- *  WSO2 LLC. licenses this file to you under the Apache License,
+ *  WSO2 Inc. licenses this file to you under the Apache License,
  *  Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License.
  *  You may obtain a copy of the License at
@@ -1780,8 +1780,6 @@ public final class APIConstants {
     public static final String API_SPEC_NAME = "api_name";
     public static final String TENANT_DOMAIN = "tenant_domain";
     public static final String QUERY = "query";
-    public static final String TEXT = "text";
-    public static final String SESSIONID = "sessionId";
     public static final String HISTORY = "history";
     public static final String VERSION = "version";
     public static final String VISIBILITYROLES = "visibility_roles";
