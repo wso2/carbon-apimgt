@@ -109,9 +109,9 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
         if (keyManagerConfigurationDTO != null) {
             KeyManagerDTO keyManagerDTO = KeyManagerMappingUtil.toKeyManagerDTO(keyManagerConfigurationDTO);
             List<String> allowedOrgs = keyManagerDTO.getAllowedOrganizations();
-            String userOrganizationId = RestApiUtil.getOrganizationInfo(messageContext).getOrganizationId();
-            if (userOrganizationId != null) {
-                if (allowedOrgs != null && allowedOrgs.size() == 1 && allowedOrgs.contains(userOrganizationId)) {
+            OrganizationInfo userOrganizationInfo = RestApiUtil.getOrganizationInfo(messageContext);
+            if (userOrganizationInfo != null) {
+                if (allowedOrgs != null && allowedOrgs.size() == 1 && allowedOrgs.contains(userOrganizationInfo.getOrganizationId())) {
                     allowedOrgs.clear();
                     allowedOrgs.add("NONE");
                     keyManagerDTO.setAllowedOrganizations(allowedOrgs);
@@ -130,10 +130,10 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
         List<String> allowedOrgs = body.getAllowedOrganizations();
         if (allowedOrgs != null && allowedOrgs.contains("NONE")) {
-            String userOrganizationId = RestApiUtil.getOrganizationInfo(messageContext).getOrganizationId();
-            if (userOrganizationId != null) {
+            OrganizationInfo userOrganizationInfo = RestApiUtil.getOrganizationInfo(messageContext);
+            if (userOrganizationInfo != null) {
                 allowedOrgs.clear();
-                allowedOrgs.add(userOrganizationId);
+                allowedOrgs.add(userOrganizationInfo.getOrganizationId());
                 body.setAllowedOrganizations(allowedOrgs);
             }
         }
