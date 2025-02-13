@@ -824,7 +824,7 @@ public class APIMgtDAOTest {
         api.setContextTemplate("/getAPIGatewayVendorByApiUUID/{version}");
         String apiUUID = UUID.randomUUID().toString();
         api.setUUID(apiUUID);
-        api.setGatewayVendor("testGatewayVendor");
+        api.setGatewayType("testGatewayVendor");
         apiMgtDAO.addAPI(api, -1234, "testOrg");
         String gatewayVendor = apiMgtDAO
                 .getGatewayVendorByAPIUUID(apiUUID);
@@ -843,11 +843,11 @@ public class APIMgtDAOTest {
         String apiUUID = UUID.randomUUID().toString();
         api.setUUID(apiUUID);
         api.setGatewayVendor("wso2");
-        api.setGatewayType("wso2/choreo-connect");
+        api.setGatewayType("APK");
         apiMgtDAO.addAPI(api, -1234, "testOrg");
         String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(apiUUID);
         assertNotNull(gatewayVendor);
-        assertTrue(gatewayVendor.equals("wso2"));
+        assertTrue(gatewayVendor.equals("APK"));
         apiMgtDAO.deleteAPI(api.getUuid());
     }
 
