@@ -25,7 +25,7 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.gateway.RBEndpointDTO;
 import org.wso2.carbon.apimgt.api.gateway.RBEndpointsPolicyDTO;
-import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 
 import java.util.ArrayList;
@@ -54,14 +54,6 @@ public class WeightedRoundRobinMediator extends AbstractMediator implements Mana
     }
 
     /**
-     * Destroys the mediator.
-     */
-    @Override
-    public void destroy() {
-
-    }
-
-    /**
      * Processes the message and selects an appropriate endpoint for load balancing.
      *
      * @param messageContext Synapse message context.
@@ -73,6 +65,8 @@ public class WeightedRoundRobinMediator extends AbstractMediator implements Mana
         if (log.isDebugEnabled()) {
             log.debug("AIAPIRoundRobinMediator mediation started.");
         }
+
+        DataHolder.getInstance().initCache(GatewayUtils.getAPIKeyForEndpoints(messageContext));
 
         RBEndpointsPolicyDTO endpoints = new Gson().fromJson(weightedRoundRobinConfigs, RBEndpointsPolicyDTO.class);
         List<RBEndpointDTO> activeEndpoints = GatewayUtils.getActiveEndpoints(endpoints, messageContext);
@@ -102,7 +96,7 @@ public class WeightedRoundRobinMediator extends AbstractMediator implements Mana
 
         for (RBEndpointDTO endpoint : endpoints) {
             double weight = Math.max(endpoint.getWeight(), 0.1f);
-            totalWeight += weight;
+            totalWeight += (float) weight;
             cumulativeWeights.add(totalWeight);
         }
 
@@ -135,5 +129,13 @@ public class WeightedRoundRobinMediator extends AbstractMediator implements Mana
     public void setWeightedRoundRobinConfigs(String weightedRoundRobinConfigs) {
 
         this.weightedRoundRobinConfigs = weightedRoundRobinConfigs;
+    }
+
+    /**
+     * Destroys the mediator.
+     */
+    @Override
+    public void destroy() {
+
     }
 }

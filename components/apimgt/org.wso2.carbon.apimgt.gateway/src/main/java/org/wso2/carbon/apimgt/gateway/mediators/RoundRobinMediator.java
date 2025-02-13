@@ -25,7 +25,8 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.gateway.RBEndpointDTO;
 import org.wso2.carbon.apimgt.api.gateway.RBEndpointsPolicyDTO;
-import org.wso2.carbon.apimgt.gateway.handlers.Utils;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 
 import java.util.List;
@@ -54,14 +55,6 @@ public class RoundRobinMediator extends AbstractMediator implements ManagedLifec
     }
 
     /**
-     * Destroys the mediator.
-     */
-    @Override
-    public void destroy() {
-
-    }
-
-    /**
      * Processes the message and selects an appropriate endpoint for load balancing.
      *
      * @param messageContext Synapse message context.
@@ -73,6 +66,8 @@ public class RoundRobinMediator extends AbstractMediator implements ManagedLifec
         if (log.isDebugEnabled()) {
             log.debug("RoundRobinMediator mediation started.");
         }
+
+        DataHolder.getInstance().initCache(GatewayUtils.getAPIKeyForEndpoints(messageContext));
 
         RBEndpointsPolicyDTO endpoints = new Gson().fromJson(roundRobinConfigs, RBEndpointsPolicyDTO.class);
         List<RBEndpointDTO> activeEndpoints = GatewayUtils.getActiveEndpoints(endpoints, messageContext);
@@ -120,5 +115,12 @@ public class RoundRobinMediator extends AbstractMediator implements ManagedLifec
 
         this.roundRobinConfigs = roundRobinConfigs;
     }
-}
 
+    /**
+     * Destroys the mediator.
+     */
+    @Override
+    public void destroy() {
+
+    }
+}
