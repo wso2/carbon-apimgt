@@ -46,8 +46,6 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import javax.xml.stream.XMLStreamException;
 
-import static org.wso2.carbon.apimgt.impl.APIConstants.NO_ENTITY_BODY;
-
 /**
  * AIAPIMediator is responsible for extracting payload metadata from AI API requests/response
  * and setting it in the message context for further processing.
@@ -158,25 +156,13 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                             .getProperty(APIMgtGatewayConstants.HTTP_SC);
 
                     if (statusCode < 200 || statusCode >= 300) {
+
                         Long suspendDuration = (Long)
                                 messageContext.getProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION);
-                        suspendEndpoint(messageContext, targetEndpoint, targetModel, suspendDuration * 1000);
+                        DataHolder.getInstance().suspendEndpoint(GatewayUtils.getAPIKeyForEndpoints(messageContext),
+                                getEndpointId(targetEndpoint, targetModel),
+                                suspendDuration * 1000);
                         return true;
-                    }
-
-                    Map<String, Object> transportHeaders = (Map<String, Object>) ((Axis2MessageContext) messageContext)
-                            .getAxis2MessageContext().getProperty(
-                                    org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
-                    long remainingTokenCount = Long.parseLong((String) transportHeaders
-                            .get(APIConstants.AIAPIConstants.REMAINING_TOKEN_COUNT_HEADER));
-                    long remainingRequestCount = Long.parseLong((String) transportHeaders
-                            .get(APIConstants.AIAPIConstants.REMAINING_REQUEST_COUNT_HEADER));
-
-                    if (remainingTokenCount <= 0 || remainingRequestCount <= 0) {
-                        Long suspendDuration = (Long)
-                                messageContext.getProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION);
-                        suspendEndpoint(messageContext, targetEndpoint, targetModel, suspendDuration * 1000);
                     }
                 }
 
@@ -461,19 +447,15 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
     }
 
     /**
-     * Suspend the endpoint using the generated key.
+     * Generates an endpoint ID by combining the target endpoint and target mode.
      *
-     * @param messageContext  The Synapse MessageContext.
-     * @param targetEndpoint  The target endpoint.
-     * @param targetModel     The target model.
-     * @param suspendDuration The duration to suspend the endpoint.
+     * @param targetEndpoint The target endpoint.
+     * @param targetMode     The target mode.
+     * @return The generated endpoint ID in the format "targetEndpoint_targetMode".
      */
-    public void suspendEndpoint(org.apache.synapse.MessageContext messageContext, String targetEndpoint,
-                                String targetModel, long suspendDuration) {
+    public String getEndpointId(String targetEndpoint, String targetMode) {
 
-        String endpointKey =
-                GatewayUtils.getAPIKeyForEndpoints(messageContext) + "_" + targetEndpoint + "_" + targetModel;
-        DataHolder.getInstance().suspendEndpoint(endpointKey, suspendDuration);
+        return targetEndpoint + "_" + targetMode;
     }
 
 }

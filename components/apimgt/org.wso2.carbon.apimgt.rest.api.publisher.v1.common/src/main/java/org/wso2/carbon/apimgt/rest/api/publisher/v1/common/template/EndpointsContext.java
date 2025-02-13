@@ -70,7 +70,7 @@ public class EndpointsContext extends ConfigContextDecorator {
     }
 
     /**
-     * Populates the Velocity context with endpoint details categorized by environment.
+     * Populates the Velocity context with endpoint details categorized by deploymentStage.
      *
      * @return VelocityContext containing endpoint configurations
      */
@@ -81,7 +81,7 @@ public class EndpointsContext extends ConfigContextDecorator {
 
         if (this.endpointDTOList != null) {
             Map<String, List<SimplifiedEndpointDTO>> groupedEndpoints = simplifyEndpoints(this.endpointDTOList).stream()
-                    .collect(Collectors.groupingBy(SimplifiedEndpointDTO::getEnvironment));
+                    .collect(Collectors.groupingBy(SimplifiedEndpointDTO::getDeploymentStage));
 
             List<SimplifiedEndpointDTO> productionEndpoints =
                     new ArrayList<>(groupedEndpoints.getOrDefault(APIConstants.PRODUCTION, Collections.emptyList()));
@@ -114,19 +114,19 @@ public class EndpointsContext extends ConfigContextDecorator {
     }
 
     /**
-     * Adds a default endpoint to the context based on the provided environment.
+     * Adds a default endpoint to the context based on the provided deploymentStage.
      *
      * @param context     The context map to store the default endpoint.
-     * @param environment The environment type (Production/Sandbox).
+     * @param deploymentStage The deploymentStage type (Production/Sandbox).
      * @param api         The API object containing endpoint configurations.
      */
-    private static void addDefaultEndpointFromEndpointConfig(VelocityContext context, String environment, API api) {
+    private static void addDefaultEndpointFromEndpointConfig(VelocityContext context, String deploymentStage, API api) {
 
         EndpointDTO defaultEndpoint = new EndpointDTO();
-        defaultEndpoint.setEnvironment(environment);
+        defaultEndpoint.setDeploymentStage(deploymentStage);
         defaultEndpoint.setEndpointConfig(new Gson().fromJson(api.getEndpointConfig(), EndpointConfigDTO.class));
 
-        String contextKey = environment.equals(APIConstants.PRODUCTION) ? "defaultProductionEndpoint" :
+        String contextKey = deploymentStage.equals(APIConstants.PRODUCTION) ? "defaultProductionEndpoint" :
                 "defaultSandboxEndpoint";
         context.put(contextKey, new SimplifiedEndpointDTO(defaultEndpoint));
     }
@@ -174,7 +174,7 @@ public class EndpointsContext extends ConfigContextDecorator {
         private String apiKeyIdentifier;
         private String apiKeyValue;
         private String apiKeyIdentifierType;
-        private String environment;
+        private String deploymentStage;
         private static final Log log = LogFactory.getLog(SimplifiedEndpointDTO.class);
 
         /**
@@ -190,7 +190,7 @@ public class EndpointsContext extends ConfigContextDecorator {
 
             this.endpointUuid = endpointDTO.getEndpointUuid();
             this.endpointName = endpointDTO.getEndpointName();
-            this.environment = endpointDTO.getEnvironment();
+            this.deploymentStage = endpointDTO.getDeploymentStage();
 
             if (endpointDTO.getEndpointConfig() != null) {
                 EndpointConfigDTO.EndpointSecurityConfig securityConfig =
@@ -198,9 +198,9 @@ public class EndpointsContext extends ConfigContextDecorator {
                 if (securityConfig != null) {
                     this.endpointSecurityEnabled = true;
                     EndpointSecurity endpointSecurity = null;
-                    if (APIConstants.PRODUCTION.equals(environment)) {
+                    if (APIConstants.PRODUCTION.equals(deploymentStage)) {
                         endpointSecurity = securityConfig.getProduction();
-                    } else if (APIConstants.SANDBOX.equals(environment)) {
+                    } else if (APIConstants.SANDBOX.equals(deploymentStage)) {
                         endpointSecurity = securityConfig.getSandbox();
                     }
                     if (endpointSecurity != null && endpointSecurity.isEnabled()) {
@@ -214,9 +214,9 @@ public class EndpointsContext extends ConfigContextDecorator {
             }
         }
 
-        public String getEnvironment() {
+        public String getDeploymentStage() {
 
-            return environment;
+            return deploymentStage;
         }
 
         public String getEndpointUuid() {
@@ -264,7 +264,7 @@ public class EndpointsContext extends ConfigContextDecorator {
                     ", apiKeyIdentifier='" + apiKeyIdentifier + '\'' +
                     ", apiKeyValue='" + apiKeyValue + '\'' +
                     ", apiKeyIdentifierType='" + apiKeyIdentifierType + '\'' +
-                    ", environment='" + environment + '\'' +
+                    ", deploymentStage='" + deploymentStage + '\'' +
                     '}';
         }
     }

@@ -1168,7 +1168,7 @@ public class TemplateBuilderUtil {
 
         if (endpointDTOList != null && !endpointDTOList.isEmpty()) {
             for (EndpointDTO endpointDTO : endpointDTOList) {
-                String endpointType = (APIConstants.PRODUCTION.equals(endpointDTO.getEnvironment())) ?
+                String endpointType = (APIConstants.PRODUCTION.equals(endpointDTO.getDeploymentStage())) ?
                         APIConstants.API_DATA_PRODUCTION_ENDPOINTS : APIConstants.API_DATA_SANDBOX_ENDPOINTS;
                 String endpointConfigContext = builder
                         .getConfigStringForEndpointTemplate(endpointType,

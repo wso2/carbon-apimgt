@@ -1772,8 +1772,10 @@ public class GatewayUtils {
         }
 
         List<RBEndpointDTO> activeEndpoints = new ArrayList<>();
+
         for (RBEndpointDTO endpoint : selectedEndpoints) {
-            if (!DataHolder.getInstance().isEndpointSuspended(getEndpointKey(messageContext, endpoint))) {
+            if (!DataHolder.getInstance().isEndpointSuspended(getAPIKeyForEndpoints(messageContext),
+                    getEndpointKey(endpoint))) {
                 activeEndpoints.add(endpoint);
             }
         }
@@ -1785,28 +1787,19 @@ public class GatewayUtils {
     }
 
     /**
-     * Generates a unique key based on the API key, endpoint key, and model.
+     * Generates an API key based on the tenant domain and API name and API version.
      *
      * @param messageContext The Synapse MessageContext containing the API request details.
-     * @param endpoint       The RBEndpointDTO object containing the endpoint details.
-     * @return A unique key in the format "{apiKey}_{endpointId}_{model}".
-     */
-    public static String getEndpointKey(org.apache.synapse.MessageContext messageContext, RBEndpointDTO endpoint) {
-
-        return getAPIKeyForEndpoints(messageContext) + "_" + getEndpointKey(endpoint);
-    }
-
-    /**
-     * Generates an API key based on the tenant domain and API context.
-     *
-     * @param messageContext The Synapse MessageContext containing the API request details.
-     * @return A string representing the API key, which is a combination of the tenant domain and API context.
+     * @return A string representing the API key, which is a combination of the tenant domain and API name and API
+     * version.
      */
     public static String getAPIKeyForEndpoints(org.apache.synapse.MessageContext messageContext) {
 
         String tenantDomain = GatewayUtils.getTenantDomain();
-        String apiContext = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
-        return tenantDomain + "_" + apiContext;
+        String apiName = (String) messageContext.getProperty(APIMgtGatewayConstants.API);
+        String apiVersion = (String) messageContext.getProperty(APIMgtGatewayConstants.VERSION);
+
+        return tenantDomain + "_" + apiName + "_" + apiVersion;
     }
 
     /**
@@ -1819,4 +1812,5 @@ public class GatewayUtils {
 
         return endpoint.getEndpointId() + "_" + endpoint.getModel();
     }
+
 }
