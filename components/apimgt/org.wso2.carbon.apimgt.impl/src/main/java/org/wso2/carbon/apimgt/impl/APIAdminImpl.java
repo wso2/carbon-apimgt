@@ -180,7 +180,9 @@ public class APIAdminImpl implements APIAdmin {
                 );
             }
         }
-        maskValues(env);
+        if (env.getProvider().equalsIgnoreCase(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+            maskValues(env);
+        }
         return env;
     }
 
