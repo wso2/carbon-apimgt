@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.governance.api.error;
 /**
  * This enum class contains the error codes and error messages for the governance component.
  */
-public enum GovernanceExceptionCodes implements ErrorHandler {
+public enum APIMGovExceptionCodes implements ErrorHandler {
 
     // General exceptions
     INTERNAL_SERVER_ERROR(100000, "Internal server error.",
@@ -136,6 +136,8 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
             500, "Error while deleting governance evaluation requests."),
     ERROR_WHILE_CHANGING_PROCESSING_REQ_TO_PENDING(400007, "Error while changing processing requests to pending.",
             500, "Error while changing processing requests to pending", true),
+    ERROR_WHILE_GETTING_COMPLIANCE_PENDING_ARTIFACTS(400008, "Error while getting compliance pending artifacts.",
+            500, "Error while getting compliance pending artifacts", true),
 
     // Result related codes
     ERROR_WHILE_SAVING_GOVERNANCE_RESULT(500001, "Error while saving governance result.",
@@ -219,6 +221,12 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
 
     ERROR_WHILE_GETTING_API_TYPE(700012, "Error while getting API type.",
             500, "Error while getting API type for API with ID: %s", true),
+
+    ERROR_WHILE_EXTRACTING_DOC_DATA(700013, "Error while extracting API documentation data.",
+            500, "Error while extracting API documentation data from zip", true),
+
+    API_DOCUMENT_DATA_NOT_FOUND(700014, "API document data not found.",
+            404, "API document data not found in API project"),
     ;
 
     private final long errorCode;
@@ -234,8 +242,8 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
      *                         a http status code keep it blank.
      * @param errorDescription The error description.
      */
-    GovernanceExceptionCodes(long errorCode, String msg, int httpErrorCode, String errorDescription,
-                             boolean stackTrace) {
+    APIMGovExceptionCodes(long errorCode, String msg, int httpErrorCode, String errorDescription,
+                          boolean stackTrace) {
 
         this.errorCode = errorCode;
         this.errorMessage = msg;
@@ -251,7 +259,7 @@ public enum GovernanceExceptionCodes implements ErrorHandler {
      *                         a http status code keep it blank.
      * @param errorDescription The error description.
      */
-    GovernanceExceptionCodes(long errorCode, String msg, int httpErrorCode, String errorDescription) {
+    APIMGovExceptionCodes(long errorCode, String msg, int httpErrorCode, String errorDescription) {
 
         this.errorCode = errorCode;
         this.errorMessage = msg;

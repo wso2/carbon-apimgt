@@ -129,9 +129,23 @@
                                     <directory>
                                         ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.governance.impl/src/main/resources/default-rulesets
                                     </directory>
-                                    <excludes>
-                                        <exclude>**/*.mustache</exclude>
-                                    </excludes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-default-policy-resources</id>
+                        <phase>site</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>src/main/resources/default-policies</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>
+                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.governance.impl/src/main/resources/default-policies
+                                    </directory>
                                 </resource>
                             </resources>
                         </configuration>

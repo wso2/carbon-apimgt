@@ -1,12 +1,12 @@
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyAdherenceSate;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
@@ -19,7 +19,7 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceDetailsDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceStatusDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceSummaryDTO;
-import org.wso2.carbon.apimgt.governance.rest.api.util.GovernanceAPIUtil;
+import org.wso2.carbon.apimgt.governance.rest.api.util.APIMGovernanceAPIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
@@ -39,17 +39,17 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
      *
      * @param messageContext The message context
      * @return The policy adherence summary
-     * @throws GovernanceException If an error occurs while getting the policy adherence summary
+     * @throws APIMGovernanceException If an error occurs while getting the policy adherence summary
      */
-    public Response getPolicyAdherenceSummary(MessageContext messageContext) throws GovernanceException {
+    public Response getPolicyAdherenceSummary(MessageContext messageContext) throws APIMGovernanceException {
 
 
         PolicyManager policyManager = new PolicyManager();
         ComplianceManager complianceManager = new ComplianceManager();
 
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
         List<String> policyIds = policyManager.getGovernancePolicies(organization)
-                .getGovernancePolicyList().stream().map(GovernancePolicy::getId).collect(Collectors.toList());
+                .getGovernancePolicyList().stream().map(APIMGovernancePolicy::getId).collect(Collectors.toList());
 
         Map<PolicyAdherenceSate, List<String>> adherenceMap =
                 complianceManager.getAdherenceStateofEvaluatedPolicies(organization);
@@ -72,13 +72,13 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
      * @param policyId       The policy ID
      * @param messageContext The message context
      * @return The policy adherence for the given policy ID
-     * @throws GovernanceException If an error occurs while getting the policy adherence for the given policy ID
+     * @throws APIMGovernanceException If an error occurs while getting the policy adherence for the given policy ID
      */
     public Response getPolicyAdherenceByPolicyId(String policyId, MessageContext messageContext)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
-        GovernancePolicy policy = new PolicyManager().getGovernancePolicyByID(policyId);
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+        APIMGovernancePolicy policy = new PolicyManager().getGovernancePolicyByID(policyId, organization);
 
         Map<ArtifactComplianceState, List<ArtifactInfo>> evaluatedArtifacts =
                 new ComplianceManager().getArtifactsComplianceForPolicy(policyId, organization,
@@ -140,15 +140,15 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
      * @param offset         The offset
      * @param messageContext The message context
      * @return The policy adherence for all policies
-     * @throws GovernanceException If an error occurs while getting the policy adherence for all policies
+     * @throws APIMGovernanceException If an error occurs while getting the policy adherence for all policies
      */
     public Response getPolicyAdherenceForAllPolicies(Integer limit, Integer offset, MessageContext messageContext)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
-        String organization = GovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
 
         // Get the list of policies
-        List<GovernancePolicy> allPolicies = new PolicyManager().getGovernancePolicies(organization)
+        List<APIMGovernancePolicy> allPolicies = new PolicyManager().getGovernancePolicies(organization)
                 .getGovernancePolicyList();
 
         // If the offset is greater than the total number of policies, set the offset to the default value
@@ -156,11 +156,11 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
             offset = RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         }
 
-        List<GovernancePolicy> policies = allPolicies.subList(offset, Math.min(offset + limit, allPolicies.size()));
+        List<APIMGovernancePolicy> policies = allPolicies.subList(offset, Math.min(offset + limit, allPolicies.size()));
 
         List<PolicyAdherenceStatusDTO> policyAdherenceStatusDTOs = new ArrayList<>();
 
-        for (GovernancePolicy policy : policies) {
+        for (APIMGovernancePolicy policy : policies) {
             Map<ArtifactComplianceState, List<ArtifactInfo>> evaluatedArtifactsByPolicy =
                     new ComplianceManager().getArtifactsComplianceForPolicy(policy.getId(), organization,
                             false);
@@ -187,12 +187,12 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
     /**
      * Get the policy adherence status
      *
-     * @param policy                    GovernancePolicy object
+     * @param policy                    APIMGovernancePolicy object
      * @param compliantArtifactCount    total number of compliant artifacts
      * @param nonCompliantArtifactCount total number of non-compliant artifacts
      * @return PolicyAdherenceStatusDTO object
      */
-    private PolicyAdherenceStatusDTO getPolicyAdherenceStatusDTO(GovernancePolicy policy,
+    private PolicyAdherenceStatusDTO getPolicyAdherenceStatusDTO(APIMGovernancePolicy policy,
                                                                  int compliantArtifactCount,
                                                                  int nonCompliantArtifactCount) {
 
@@ -236,13 +236,13 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
         String paginatedNext = "";
 
         if (paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET) != null) {
-            paginatedPrevious = GovernanceAPIUtil.getPaginatedURL(
-                    GovernanceAPIConstants.POLICY_ADHERENCE_GET_URL,
+            paginatedPrevious = APIMGovernanceAPIUtil.getPaginatedURL(
+                    APIMGovernanceAPIConstants.POLICY_ADHERENCE_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_OFFSET),
                     paginatedParams.get(RestApiConstants.PAGINATION_PREVIOUS_LIMIT));
         }
         if (paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET) != null) {
-            paginatedNext = GovernanceAPIUtil.getPaginatedURL(GovernanceAPIConstants.POLICY_ADHERENCE_GET_URL,
+            paginatedNext = APIMGovernanceAPIUtil.getPaginatedURL(APIMGovernanceAPIConstants.POLICY_ADHERENCE_GET_URL,
                     paginatedParams.get(RestApiConstants.PAGINATION_NEXT_OFFSET),
                     paginatedParams.get(RestApiConstants.PAGINATION_NEXT_LIMIT));
         }

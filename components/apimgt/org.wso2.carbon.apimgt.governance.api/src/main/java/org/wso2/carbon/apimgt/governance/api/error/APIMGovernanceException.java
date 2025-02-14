@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.governance.api.error;
 /**
  * This is the custom exception class for Governance.
  */
-public class GovernanceException extends Exception {
+public class APIMGovernanceException extends Exception {
 
     private ErrorHandler errorHandler;
 
@@ -35,19 +35,19 @@ public class GovernanceException extends Exception {
         return errorHandler;
     }
 
-    public GovernanceException(String msg) {
+    public APIMGovernanceException(String msg) {
         super(msg);
-        this.errorHandler = GovernanceExceptionCodes.INTERNAL_SERVER_ERROR;
+        this.errorHandler = APIMGovExceptionCodes.INTERNAL_SERVER_ERROR;
     }
 
-    public GovernanceException(String msg, Throwable e) {
+    public APIMGovernanceException(String msg, Throwable e) {
         super(msg, e);
-        this.errorHandler = GovernanceExceptionCodes.INTERNAL_SERVER_ERROR;
+        this.errorHandler = APIMGovExceptionCodes.INTERNAL_SERVER_ERROR;
     }
 
-    public GovernanceException(Throwable throwable) {
+    public APIMGovernanceException(Throwable throwable) {
         super(throwable);
-        this.errorHandler = GovernanceExceptionCodes.INTERNAL_SERVER_ERROR;
+        this.errorHandler = APIMGovExceptionCodes.INTERNAL_SERVER_ERROR;
     }
 
     /**
@@ -56,7 +56,7 @@ public class GovernanceException extends Exception {
      * @param message Error message
      * @param code    Exception code that need to pass to the error DTO
      */
-    public GovernanceException(String message, ErrorHandler code) {
+    public APIMGovernanceException(String message, ErrorHandler code) {
         super(message);
         this.errorHandler = code;
     }
@@ -66,7 +66,7 @@ public class GovernanceException extends Exception {
      *
      * @param code Exception code that need to pass to the error DTO
      */
-    public GovernanceException(ErrorHandler code) {
+    public APIMGovernanceException(ErrorHandler code) {
         super(code.getErrorCode() + ":" + code.getErrorMessage() + "::" + code.getErrorDescription());
         this.errorHandler = code;
     }
@@ -78,7 +78,7 @@ public class GovernanceException extends Exception {
      * @param cause   throwable object.
      * @param code    Exception code that need to pass to the error DTO
      */
-    public GovernanceException(String message, Throwable cause, ErrorHandler code) {
+    public APIMGovernanceException(String message, Throwable cause, ErrorHandler code) {
         super(message, cause);
         this.errorHandler = code;
     }
@@ -89,7 +89,7 @@ public class GovernanceException extends Exception {
      * @param code  Exception code that need to pass to the error DTO
      * @param cause throwable object.
      */
-    public GovernanceException(ErrorHandler code, Throwable cause, Object... args) {
+    public APIMGovernanceException(ErrorHandler code, Throwable cause, Object... args) {
         super(code.getErrorCode() + ":" + code.getErrorMessage() + "::"
                 + String.format(code.getErrorDescription(), args), cause);
         this.errorHandler = new ErrorItem(code.getErrorMessage(),
@@ -103,7 +103,7 @@ public class GovernanceException extends Exception {
      * @param code Exception code that need to pass to the error DTO
      * @param args arguments
      */
-    public GovernanceException(ErrorHandler code, Object... args) {
+    public APIMGovernanceException(ErrorHandler code, Object... args) {
 
         super(code.getErrorCode() + ":" + code.getErrorMessage() + "::"
                 + String.format(code.getErrorDescription(), args));

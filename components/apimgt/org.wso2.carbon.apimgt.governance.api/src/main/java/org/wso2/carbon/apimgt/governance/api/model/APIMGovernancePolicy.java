@@ -25,14 +25,14 @@ import java.util.List;
 /**
  * This class represents a governance Policy
  */
-public class GovernancePolicy {
+public class APIMGovernancePolicy {
     private String id;
     private String name;
     private String description;
     private List<String> rulesetIds;
     private List<String> labels;
     private List<APIMGovernableState> apimGovernableStates;
-    private List<GovernanceAction> actions;
+    private List<APIMGovernanceAction> actions;
     private String createdBy;
     private String createdTime;
     private String updatedBy;
@@ -93,12 +93,12 @@ public class GovernancePolicy {
         this.apimGovernableStates = Collections.unmodifiableList(new ArrayList<>(apimGovernableStates));
     }
 
-    public List<GovernanceAction> getActions() {
+    public List<APIMGovernanceAction> getActions() {
 
         return new ArrayList<>(actions);
     }
 
-    public void setActions(List<GovernanceAction> actions) {
+    public void setActions(List<APIMGovernanceAction> actions) {
 
         this.actions = Collections.unmodifiableList(new ArrayList<>(actions));
     }

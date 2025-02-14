@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.api.service;
 
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
@@ -42,11 +42,11 @@ public interface APIMGovernanceService {
      * @param state         State to be governed
      * @param organization  Organization
      * @return True if there are policies with blocking actions, False otherwise
-     * @throws GovernanceException If an error occurs while checking for policies with blocking actions
+     * @throws APIMGovernanceException If an error occurs while checking for policies with blocking actions
      */
     boolean isPoliciesWithBlockingActionExist(String artifactRefId, ArtifactType artifactType,
                                               APIMGovernableState state, String organization)
-            throws GovernanceException;
+            throws APIMGovernanceException;
 
     /**
      * Evaluate compliance of the artifact asynchronously
@@ -55,11 +55,11 @@ public interface APIMGovernanceService {
      * @param artifactType  Artifact type (ArtifactType.API)
      * @param state         State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
      * @param organization  Organization
-     * @throws GovernanceException If an error occurs while evaluating compliance
+     * @throws APIMGovernanceException If an error occurs while evaluating compliance
      */
     void evaluateComplianceAsync(String artifactRefId, ArtifactType artifactType,
                                  APIMGovernableState state,
-                                 String organization) throws GovernanceException;
+                                 String organization) throws APIMGovernanceException;
 
     /**
      * Evaluate compliance of the artifact synchronously
@@ -76,12 +76,12 @@ public interface APIMGovernanceService {
      *                               If no content is specified content fetched from DB
      * @param organization           Organization
      * @return ArtifactComplianceInfo object
-     * @throws GovernanceException If an error occurs while evaluating compliance
+     * @throws APIMGovernanceException If an error occurs while evaluating compliance
      */
     ArtifactComplianceInfo evaluateComplianceSync(String artifactRefId, String revisionNo, ArtifactType artifactType,
                                                   APIMGovernableState state,
                                                   Map<RuleType, String> artifactProjectContent,
-                                                  String organization) throws GovernanceException;
+                                                  String organization) throws APIMGovernanceException;
 
     /**
      * This method can be called to evaluate the compliance of the artifact without persisting the compliance data (A
@@ -92,10 +92,10 @@ public interface APIMGovernanceService {
      * @param zipArchive   File path of the artifact content (ZIP path)
      * @param organization Organization
      * @return ArtifactComplianceDryRunInfo object
-     * @throws GovernanceException If an error occurs while evaluating compliance
+     * @throws APIMGovernanceException If an error occurs while evaluating compliance
      */
     ArtifactComplianceDryRunInfo evaluateComplianceDryRunSync(ExtendedArtifactType artifactType, byte[] zipArchive,
-                                                              String organization) throws GovernanceException;
+                                                              String organization) throws APIMGovernanceException;
 
     /**
      * Handle artifact label attach
@@ -104,27 +104,27 @@ public interface APIMGovernanceService {
      * @param artifactType  Artifact type (ArtifactType.API)
      * @param labels        ID of the labels to be attached
      * @param organization  Organization
-     * @throws GovernanceException If an error occurs while attaching the label
+     * @throws APIMGovernanceException If an error occurs while attaching the label
      */
     void evaluateComplianceOnLabelAttach(String artifactRefId, ArtifactType artifactType, List<String> labels,
                                          String organization)
-            throws GovernanceException;
+            throws APIMGovernanceException;
 
     /**
      * Delete governance related data for the given label
      *
      * @param label        Label id to delete governance data
      * @param organization Organization
-     * @throws GovernanceException If an error occurs while deleting governance data
+     * @throws APIMGovernanceException If an error occurs while deleting governance data
      */
-    void deleteGovernanceDataForLabel(String label, String organization) throws GovernanceException;
+    void deleteGovernanceDataForLabel(String label, String organization) throws APIMGovernanceException;
 
     /**
      * Delete all governance data related to the artifact
      *
      * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)
-     * @throws GovernanceException If an error occurs while clearing the compliance information
+     * @throws APIMGovernanceException If an error occurs while clearing the compliance information
      */
     void clearArtifactComplianceInfo(String artifactRefId, ArtifactType artifactType, String organization)
-            throws GovernanceException;
+            throws APIMGovernanceException;
 }

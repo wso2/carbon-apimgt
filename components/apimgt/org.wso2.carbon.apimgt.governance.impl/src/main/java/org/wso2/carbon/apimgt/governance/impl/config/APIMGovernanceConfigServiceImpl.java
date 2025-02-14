@@ -21,19 +21,19 @@ package org.wso2.carbon.apimgt.governance.impl.config;
 /**
  * This class represents the Governance Configuration Service Implementation
  */
-public class GovernanceConfigurationServiceImpl implements GovernanceConfigurationService {
+public class APIMGovernanceConfigServiceImpl implements APIMGovernanceConfigService {
 
-    private final GovernanceConfiguration configuration;
+    private final APIMGovernanceConfig configuration;
 
-    public GovernanceConfigurationServiceImpl(GovernanceConfiguration configuration) {
+    public APIMGovernanceConfigServiceImpl(APIMGovernanceConfig configuration) {
 
-        this.configuration = new GovernanceConfiguration(configuration);
-        
+        this.configuration = new APIMGovernanceConfig(configuration);
+
     }
 
     @Override
-    public GovernanceConfiguration getGovernanceConfiguration() {
+    public APIMGovernanceConfig getGovernanceConfig() {
 
-        return new GovernanceConfiguration(configuration);
+        return new APIMGovernanceConfig(configuration);
     }
 }

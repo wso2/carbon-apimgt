@@ -88,7 +88,7 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
@@ -3396,7 +3396,7 @@ public class PublisherCommonUtils {
                     return responseMap;
                 }
             }
-        } catch (GovernanceException e) {
+        } catch (APIMGovernanceException e) {
             log.error("Error occurred while executing governance for API " + artifactID, e);
         }
         return responseMap;
@@ -3407,7 +3407,7 @@ public class PublisherCommonUtils {
         CompletableFuture.runAsync(() -> {
             try {
                 apimGovernanceService.evaluateComplianceAsync(artifactID, type, state, organization);
-            } catch (GovernanceException e) {
+            } catch (APIMGovernanceException e) {
                 log.error("Error occurred while scheduling governance validation for " + artifactID, e);
             }
         });
@@ -3422,9 +3422,9 @@ public class PublisherCommonUtils {
             byte[] fileBytes = IOUtils.toByteArray(fileInputStream);
 
             ArtifactComplianceDryRunInfo artifactComplianceDryRunInfo = apimGovernanceService
-                       .evaluateComplianceDryRunSync(ExtendedArtifactType.REST_API, fileBytes, organization);
-               return responseMap;
-        } catch (GovernanceException e) {
+                    .evaluateComplianceDryRunSync(ExtendedArtifactType.REST_API, fileBytes, organization);
+            return responseMap;
+        } catch (APIMGovernanceException e) {
             log.error("Error occurred while executing governance ", e);
         } finally {
             return responseMap;
@@ -3438,26 +3438,20 @@ public class PublisherCommonUtils {
      * @return JSON response with the compliance violations
      */
 
-    public static String buildBadRequestResponse(ArtifactComplianceInfo artifactComplianceInfo) {
+    public static String buildBadRequestResponse(ArtifactComplianceInfo artifactComplianceInfo) throws
+            APIManagementException {
         List<RuleViolation> blockingViolations = artifactComplianceInfo.getBlockingRuleViolations();
         List<RuleViolation> nonBlockingViolations = artifactComplianceInfo.getNonBlockingViolations();
 
-        List<Map<String, String>> violations = new ArrayList<>();
+        Map<String, List<Map<String, String>>> violations = new HashMap<>();
+        violations.put("blockingViolations", new ArrayList<>());
+        violations.put("nonBlockingViolations", new ArrayList<>());
 
         for (RuleViolation violation : blockingViolations) {
-            Map<String, String> violationDetails = new HashMap<>();
-            violationDetails.put("ruleCode", violation.getRuleName());
-            violationDetails.put("violatedPath", violation.getViolatedPath());
-            violationDetails.put("severity", violation.getSeverity().name());
-            violations.add(violationDetails);
+            violations.get("blockingViolations").add(getViolationMapFromViolation(violation));
         }
-
         for (RuleViolation violation : nonBlockingViolations) {
-            Map<String, String> violationDetails = new HashMap<>();
-            violationDetails.put("ruleCode", violation.getRuleName());
-            violationDetails.put("violatedPath", violation.getViolatedPath());
-            violationDetails.put("severity", violation.getSeverity().name());
-            violations.add(violationDetails);
+            violations.get("nonBlockingViolations").add(getViolationMapFromViolation(violation));
         }
 
         // Convert violations list to JSON object
@@ -3466,12 +3460,28 @@ public class PublisherCommonUtils {
         try {
             jsonViolations = objectMapper.writeValueAsString(violations);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error generating JSON response for governance compliance ", e);
+            throw new APIManagementException("Error generating JSON response for governance compliance ", e);
         }
         return jsonViolations;
     }
 
-    public static void executeGovernanceOnLabelAttach(List<Label> labels, String artifactType,  String artifactId,
+    /**
+     * Get a map of violation details from a RuleViolation object.
+     *
+     * @param violation RuleViolation object
+     * @return Map of violation details
+     */
+    private static Map<String, String> getViolationMapFromViolation(RuleViolation violation) {
+        Map<String, String> violationDetails = new HashMap<>();
+        violationDetails.put("ruleName", violation.getRuleName());
+        violationDetails.put("ruleType", violation.getRuleType().name());
+        violationDetails.put("violatedPath", violation.getViolatedPath());
+        violationDetails.put("severity", violation.getSeverity().name());
+        violationDetails.put("message", violation.getRuleMessage());
+        return violationDetails;
+    }
+
+    public static void executeGovernanceOnLabelAttach(List<Label> labels, String artifactType, String artifactId,
                                                       String organization) {
         List<String> labelsIdList = new ArrayList<>();
         for (Label label : labels) {
@@ -3480,7 +3490,7 @@ public class PublisherCommonUtils {
         try {
             apimGovernanceService.evaluateComplianceOnLabelAttach(artifactId, ArtifactType.fromString(artifactType),
                     labelsIdList, organization);
-        } catch (GovernanceException e) {
+        } catch (APIMGovernanceException e) {
             log.info("Error occurred while executing governance on attached labels for API " + artifactId, e);
         }
     }
@@ -3490,7 +3500,7 @@ public class PublisherCommonUtils {
             for (Label labelId : label) {
                 apimGovernanceService.deleteGovernanceDataForLabel(labelId.getLabelId(), organization);
             }
-        } catch (GovernanceException e) {
+        } catch (APIMGovernanceException e) {
             log.info("Error occurred while deleting governance data on deletion of label " + label, e);
         }
     }
@@ -3499,7 +3509,7 @@ public class PublisherCommonUtils {
         try {
             apimGovernanceService.clearArtifactComplianceInfo(artifactId, ArtifactType.fromString(artifactType),
                     organization);
-        } catch (GovernanceException e) {
+        } catch (APIMGovernanceException e) {
             log.info("Error occurred while deleting governance data on deletion of  " + ArtifactType.API +
                     " " + artifactId, e);
         }
