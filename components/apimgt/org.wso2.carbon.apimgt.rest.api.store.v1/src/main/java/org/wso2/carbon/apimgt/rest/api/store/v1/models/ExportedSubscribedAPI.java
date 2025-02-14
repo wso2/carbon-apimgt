@@ -25,11 +25,13 @@ public class ExportedSubscribedAPI {
         private APIIdentifier apiId;
         private Subscriber subscriber;
         private String throttlingPolicy;
+        private String subscriptionStatus;
 
-    public ExportedSubscribedAPI(APIIdentifier apiId, Subscriber subscriber, String throttlingPolicy) {
+    public ExportedSubscribedAPI(APIIdentifier apiId, Subscriber subscriber, String throttlingPolicy, String subscriptionStatus) {
         this.apiId = apiId;
         this.subscriber = subscriber;
         this.throttlingPolicy = throttlingPolicy;
+        this.subscriptionStatus = subscriptionStatus;
     }
 
     public APIIdentifier getApiId() {
@@ -54,5 +56,13 @@ public class ExportedSubscribedAPI {
 
     public void setThrottlingPolicy(String throttlingPolicy) {
         this.throttlingPolicy = throttlingPolicy;
+    }
+
+    public String getSubscriptionStatus() {
+        return subscriptionStatus;
+    }
+
+    public void setSubscriptionStatus(String subscriptionStatus) {
+        this.subscriptionStatus = subscriptionStatus;
     }
 }

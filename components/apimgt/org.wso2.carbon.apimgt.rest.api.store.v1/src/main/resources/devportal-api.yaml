@@ -2548,6 +2548,12 @@ paths:
             Update if application exists
           schema:
             type: boolean
+        - name: ignoreTier
+          in: query
+          description: |
+            Ignore tier and proceed with subscribed APIs
+          schema:
+            type: boolean
       requestBody:
         content:
           multipart/form-data:
