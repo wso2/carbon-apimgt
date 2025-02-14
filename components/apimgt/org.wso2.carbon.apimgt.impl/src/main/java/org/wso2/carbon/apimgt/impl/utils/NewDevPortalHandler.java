@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.methods.*;
@@ -34,6 +35,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalProcessingConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -55,6 +57,8 @@ import java.util.HashMap;
 import java.util.Arrays;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.base.ServerConfiguration;
 
 public class NewDevPortalHandler {
 
@@ -77,9 +81,13 @@ public class NewDevPortalHandler {
     }
 
     private static final Log log = LogFactory.getLog(NewDevPortalHandler.class);
-    private static final String baseUrl = APIUtil.getNewPortalURL();
+    private static final String baseUrl = getNewPortalURL();
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Map<String, String> orgIdCache = new HashMap<>();
+
+    public static boolean isNewPortalEnabled() {
+        return Boolean.parseBoolean(getConfigProperty(APIConstants.API_STORE_NEW_PORTAL_ENABLED, "false"));
+    }
 
     public static void publish(String tenantName, ApiTypeWrapper apiTypeWrapper) {
         try {
@@ -462,32 +470,44 @@ public class NewDevPortalHandler {
     }
 
     private static SSLConnectionSocketFactory generateSSLSF() throws APIManagementException {
-        Map<String, String> serverSecurityStores = APIUtil.getServerSecurityStores();
-        char[] keyStorePassword = serverSecurityStores.get("keyStorePassword").toCharArray();
-        char[] keyPassword = serverSecurityStores.get("keyPassword").toCharArray();
-        char[] trustStorePassword = serverSecurityStores.get("trustStorePassword").toCharArray();
+        ServerConfiguration serverConfig = ServerConfiguration.getInstance();
+        char[] keyStorePassword = serverConfig.getFirstProperty("Security.KeyStore.Password").toCharArray();
+        char[] keyPassword = serverConfig.getFirstProperty("Security.KeyStore.KeyPassword").toCharArray();
+        char[] trustStorePassword = serverConfig.getFirstProperty("Security.TrustStore.Password").toCharArray();
         try {
+            // Key Store
             KeyStore keyStore;
-            String keyStoreType = serverSecurityStores.get("keyStoreType");
+            String keyStoreType = serverConfig.getFirstProperty("Security.KeyStore.Type");
             if (keyStoreType != null) {
                 keyStore = KeyStore.getInstance(keyStoreType);
             } else {
                 keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
             }
-            try (FileInputStream keyStoreStream = new FileInputStream(serverSecurityStores.get("keyStoreLocation"))) {
+            try (FileInputStream keyStoreStream = new FileInputStream(
+                    serverConfig.getFirstProperty("Security.KeyStore.Location"))) {
                 keyStore.load(keyStoreStream, keyStorePassword);
             }
+
+            // Trust Store
+            KeyStore trustStore;
+            String trustStoreType = serverConfig.getFirstProperty("Security.TrustStore.Type");
+            if (trustStoreType != null) {
+                trustStore = KeyStore.getInstance(trustStoreType);
+            } else {
+                trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            }
+            try (FileInputStream trustStoreStream = new FileInputStream(
+                    serverConfig.getFirstProperty("Security.TrustStore.Location"))) {
+                trustStore.load(trustStoreStream, trustStorePassword);
+            }
+
             return new SSLConnectionSocketFactory(
                     SSLContexts.custom()
                             .loadKeyMaterial(
                                     keyStore,
                                     keyPassword,
-                                    (aliases, socket) -> serverSecurityStores.get("keyAlias"))
-                            .loadTrustMaterial(
-                                    new File(serverSecurityStores.get("trustStoreLocation")),
-                                    trustStorePassword)
-                            .build()
-            );
+                                    (aliases, socket) -> serverConfig.getFirstProperty("Security.KeyStore.KeyAlias"))
+                            .loadTrustMaterial(trustStore, null).build());
         } catch (GeneralSecurityException | IOException e) {
             throw new APIManagementException("Error while certification processing: " + e.getMessage(), e);
         } finally {
@@ -496,5 +516,16 @@ public class NewDevPortalHandler {
             Arrays.fill(keyPassword, ' ');
             Arrays.fill(trustStorePassword, ' ');
         }
+    }
+
+    private static String getNewPortalURL() {
+        return getConfigProperty(APIConstants.API_STORE_NEW_PORTAL_URL, "");
+    }
+
+    private static String getConfigProperty(String key, String defaultValue) {
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String propertyValue = apiManagerConfiguration.getFirstProperty(key);
+        return StringUtils.isNotEmpty(propertyValue) ? propertyValue : defaultValue;
     }
 }

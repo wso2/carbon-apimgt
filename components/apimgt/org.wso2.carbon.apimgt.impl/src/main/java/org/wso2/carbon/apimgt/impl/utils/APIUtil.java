@@ -10128,38 +10128,6 @@ public final class APIUtil {
         return null;
     }
 
-    public static boolean isNewPortalEnabled() {
-        return Boolean.parseBoolean(getConfigProperty(APIConstants.API_STORE_NEW_PORTAL_ENABLED, "false"));
-    }
-
-    public static String getNewPortalURL() {
-        return getConfigProperty(APIConstants.API_STORE_NEW_PORTAL_URL, "");
-    }
-
-    public static Map<String, String> getServerSecurityStores() {
-        ServerConfiguration serverConfig = ServerConfiguration.getInstance();
-
-        Map<String, String> stores = new HashMap<>();
-        stores.put("trustStoreLocation", serverConfig.getFirstProperty("Security.TrustStore.Location"));
-        stores.put("trustStorePassword", serverConfig.getFirstProperty("Security.TrustStore.Password"));
-        stores.put("trustStoreType", serverConfig.getFirstProperty("Security.TrustStore.Type"));
-
-        stores.put("keyStoreLocation", serverConfig.getFirstProperty("Security.KeyStore.Location"));
-        stores.put("keyStorePassword", serverConfig.getFirstProperty("Security.KeyStore.Password"));
-        stores.put("keyStoreType", serverConfig.getFirstProperty("Security.KeyStore.Type"));
-        stores.put("keyPassword", serverConfig.getFirstProperty("Security.KeyStore.KeyPassword"));
-        stores.put("keyAlias", serverConfig.getFirstProperty("Security.KeyStore.KeyAlias"));
-
-        return stores;
-    }
-
-    private static String getConfigProperty(String key, String defaultValue) {
-        APIManagerConfiguration apiManagerConfiguration =
-                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        String propertyValue = apiManagerConfiguration.getFirstProperty(key);
-        return StringUtils.isNotEmpty(propertyValue) ? propertyValue : defaultValue;
-    }
-
     public static boolean isDefaultApplicationCreationEnabled() {
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();

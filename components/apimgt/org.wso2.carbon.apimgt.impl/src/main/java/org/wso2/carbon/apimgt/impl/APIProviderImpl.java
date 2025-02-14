@@ -1059,7 +1059,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         // Update API in new Dev Portal
-        if (APIUtil.isNewPortalEnabled() && APIConstants.PUBLISHED.equals(api.getStatus())) {
+        if (NewDevPortalHandler.isNewPortalEnabled() && APIConstants.PUBLISHED.equals(api.getStatus())) {
             NewDevPortalHandler.update(organization, new ApiTypeWrapper(api));
         }
 
@@ -2667,7 +2667,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
 
                 // Delete from new Developer Portal
-                if (APIUtil.isNewPortalEnabled()) {
+                if (NewDevPortalHandler.isNewPortalEnabled()) {
                     NewDevPortalHandler.unpublish(organization, api);
                 }
             } catch (APIManagementException e) {
