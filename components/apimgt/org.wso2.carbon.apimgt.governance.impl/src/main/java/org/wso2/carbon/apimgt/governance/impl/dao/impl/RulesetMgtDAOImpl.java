@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.impl.dao.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
@@ -222,7 +223,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 prepStmt.setString(3, rule.getName());
                 prepStmt.setString(4, rule.getDescription());
                 prepStmt.setString(5, String.valueOf(rule.getSeverity()));
-                prepStmt.setBlob(6, new ByteArrayInputStream(rule.getContent()
+                prepStmt.setBinaryStream(6, new ByteArrayInputStream(rule.getContent()
                         .getBytes(Charset.defaultCharset())));
                 prepStmt.addBatch();
             }
@@ -246,7 +247,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
         try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);
              InputStream rulesetContentStream = new ByteArrayInputStream(rulesetContent.getContent())) {
             prepStmt.setString(1, rulesetId);
-            prepStmt.setBlob(2, rulesetContentStream);
+            prepStmt.setBinaryStream(2, rulesetContentStream);
             prepStmt.setString(3, rulesetContent.getContentType().toString());
             prepStmt.setString(4, rulesetContent.getFileName());
             prepStmt.execute();
@@ -267,7 +268,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
         String sqlQuery = SQLConstants.UPDATE_RULESET_CONTENT;
         try (PreparedStatement prepStmt = connection.prepareStatement(sqlQuery);
              InputStream rulesetContentStream = new ByteArrayInputStream(rulesetContent.getContent())) {
-            prepStmt.setBlob(1, rulesetContentStream);
+            prepStmt.setBinaryStream(1, rulesetContentStream);
             prepStmt.setString(2, rulesetContent.getContentType().toString());
             prepStmt.setString(3, rulesetContent.getFileName());
             prepStmt.setString(4, rulesetId);
@@ -537,7 +538,13 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 if (rs.next()) {
                     RulesetContent rulesetContentObj = new RulesetContent();
                     rulesetContentObj.setFileName(rs.getString("FILE_NAME"));
-                    rulesetContentObj.setContent(rs.getBytes("CONTENT"));
+                    try (InputStream contentStream = rs.getBinaryStream("CONTENT")) {
+                        byte[] content = IOUtils.toByteArray(contentStream);
+                        rulesetContentObj.setContent(content);
+                    } catch (IOException e) {
+                        throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_CONTENT,
+                                e, rulesetId);
+                    }
                     return rulesetContentObj;
                 }
                 return null;

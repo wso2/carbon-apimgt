@@ -85,6 +85,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         Ruleset ruleset = new Ruleset();
         try {
             ruleset.setName(name);
+            ruleCategory = ruleCategory != null ? ruleCategory : RuleCategory.SPECTRAL.toString();
             ruleset.setRuleCategory(RuleCategory.fromString(ruleCategory));
             ruleset.setRuleType(RuleType.fromString(ruleType));
             ruleset.setArtifactType(ExtendedArtifactType.fromString(artifactType));
@@ -148,6 +149,7 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         try {
             Ruleset ruleset = new Ruleset();
             ruleset.setName(name);
+            ruleCategory = ruleCategory != null ? ruleCategory : RuleCategory.SPECTRAL.toString();
             ruleset.setRuleCategory(RuleCategory.fromString(ruleCategory));
             ruleset.setRuleType(RuleType.fromString(ruleType));
             ruleset.setArtifactType(ExtendedArtifactType.fromString(artifactType));
