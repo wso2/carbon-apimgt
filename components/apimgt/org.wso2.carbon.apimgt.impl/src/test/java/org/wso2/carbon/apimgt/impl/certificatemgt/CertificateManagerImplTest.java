@@ -112,7 +112,7 @@ public class CertificateManagerImplTest {
                 String.class))
                 .toReturn(ResponseCode.SUCCESS);
         ResponseCode result =
-                certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS, END_POINT, TENANT_ID);
+                certificateManager.addCertificate(BASE64_ENCODED_CERT, ALIAS, END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.SUCCESS, result);
     }
 
@@ -125,7 +125,7 @@ public class CertificateManagerImplTest {
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore", String.class,
                 String.class))
                 .toReturn(ResponseCode.INTERNAL_SERVER_ERROR);
-        ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
+        ResponseCode responseCode = certificateManager.addCertificate(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }
@@ -140,7 +140,7 @@ public class CertificateManagerImplTest {
         PowerMockito.stub(PowerMockito.method(CertificateMgtUtils.class, "addCertificateToTrustStore",String.class,
                 String.class))
                 .toReturn(ResponseCode.CERTIFICATE_EXPIRED);
-        ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
+        ResponseCode responseCode = certificateManager.addCertificate(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.CERTIFICATE_EXPIRED, responseCode);
     }
@@ -153,7 +153,7 @@ public class CertificateManagerImplTest {
         PowerMockito.stub(PowerMockito
                 .method(CertificateMgtUtils.class, "addCertificateToTrustStore", String.class, String.class))
                 .toReturn(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE);
-        ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
+        ResponseCode responseCode = certificateManager.addCertificate(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE, responseCode);
     }
@@ -162,7 +162,7 @@ public class CertificateManagerImplTest {
     public void testAddToPublisherWhenDBError() {
 
         PowerMockito.stub(PowerMockito.method(CertificateMgtDAO.class, "addCertificate")).toReturn(false);
-        ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
+        ResponseCode responseCode = certificateManager.addCertificate(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }
@@ -173,7 +173,7 @@ public class CertificateManagerImplTest {
 
         Mockito.when(certificateMgtDAO.addCertificate(BASE64_ENCODED_CERT, ALIAS, END_POINT, TENANT_ID))
                 .thenThrow(CertificateAliasExistsException.class);
-        ResponseCode responseCode = certificateManager.addCertificateToParentNode(BASE64_ENCODED_CERT, ALIAS,
+        ResponseCode responseCode = certificateManager.addCertificate(BASE64_ENCODED_CERT, ALIAS,
                 END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE, responseCode);
     }
@@ -190,7 +190,7 @@ public class CertificateManagerImplTest {
         certificateMetadataDTO.setEndpoint(END_POINT);
         certificateMetadataDTOList.add(certificateMetadataDTO);
         Mockito.when(certificateMgtDAO.getCertificates(ALIAS, null, TENANT_ID)).thenReturn(certificateMetadataDTOList);
-        ResponseCode responseCode = certificateManager.deleteCertificateFromParentNode(ALIAS, END_POINT, TENANT_ID);
+        ResponseCode responseCode = certificateManager.deleteCertificate(ALIAS, END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.SUCCESS, responseCode);
     }
 
@@ -206,7 +206,7 @@ public class CertificateManagerImplTest {
         certificateMetadataDTO.setEndpoint(END_POINT);
         certificateMetadataDTOList.add(certificateMetadataDTO);
         Mockito.when(certificateMgtDAO.getCertificates(ALIAS, null, TENANT_ID)).thenReturn(certificateMetadataDTOList);
-        ResponseCode responseCode = certificateManager.deleteCertificateFromParentNode(ALIAS, END_POINT, TENANT_ID);
+        ResponseCode responseCode = certificateManager.deleteCertificate(ALIAS, END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }
 
@@ -221,7 +221,7 @@ public class CertificateManagerImplTest {
         } catch (CertificateManagementException | CertificateAliasExistsException e) {
             e.printStackTrace();
         }
-        ResponseCode responseCode = certificateManager.deleteCertificateFromParentNode(ALIAS, END_POINT, TENANT_ID);
+        ResponseCode responseCode = certificateManager.deleteCertificate(ALIAS, END_POINT, TENANT_ID);
         Assert.assertEquals(ResponseCode.CERTIFICATE_NOT_FOUND, responseCode);
     }
 
@@ -250,7 +250,7 @@ public class CertificateManagerImplTest {
             e.printStackTrace();
         }
         ResponseCode responseCode = certificateManager
-                .deleteCertificateFromParentNode("testRemoveFromPublisherCertificateManagementException",
+                .deleteCertificate("testRemoveFromPublisherCertificateManagementException",
                         "testRemoveFromPublisherCertificateManagementException", TENANT_ID);
         Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }
@@ -278,7 +278,7 @@ public class CertificateManagerImplTest {
             e.printStackTrace();
         }
         ResponseCode responseCode = certificateManager
-                .deleteCertificateFromParentNode("testRemoveFromPublisherWithInternalServerErrorWhenDeleting",
+                .deleteCertificate("testRemoveFromPublisherWithInternalServerErrorWhenDeleting",
                         "testRemoveFromPublisherWithInternalServerErrorWhenDeleting", TENANT_ID);
         Assert.assertEquals(ResponseCode.INTERNAL_SERVER_ERROR, responseCode);
     }

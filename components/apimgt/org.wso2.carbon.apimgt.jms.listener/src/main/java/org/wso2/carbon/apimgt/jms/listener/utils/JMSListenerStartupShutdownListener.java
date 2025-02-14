@@ -81,6 +81,9 @@ public class JMSListenerStartupShutdownListener implements ServerStartupObserver
             log.info("Running on migration enabled mode: Stopped at JMSListenerStartupShutdownListener completed");
         }
 
+        jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_NOTIFICATION,
+                new CertificateManagerJMSMessageListener());
+
     }
 
     @Override
