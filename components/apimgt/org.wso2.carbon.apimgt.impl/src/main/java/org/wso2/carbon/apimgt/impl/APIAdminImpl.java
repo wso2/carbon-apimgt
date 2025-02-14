@@ -69,6 +69,7 @@ import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
@@ -157,6 +158,10 @@ public class APIAdminImpl implements APIAdmin {
         // add read only environments first and dynamic environments later
         APIUtil.getReadOnlyEnvironments().values().stream().filter(env -> !dynamicEnvNames.contains(env.getName())).forEach(allEnvs::add);
         allEnvs.addAll(dynamicEnvs);
+
+        for (Environment env : allEnvs) {
+            decryptGatewayConfigurationValues(env);
+        }
         return allEnvs;
     }
 
@@ -175,6 +180,7 @@ public class APIAdminImpl implements APIAdmin {
                 );
             }
         }
+        maskValues(env);
         return env;
     }
 
@@ -189,6 +195,8 @@ public class APIAdminImpl implements APIAdmin {
                             String.format("name '%s'", environment.getName())));
         }
         validateForUniqueVhostNames(environment);
+        Environment environmentToStore =  new Environment(environment);
+        encryptGatewayConfigurationValues(null, environmentToStore);
         return apiMgtDAO.addEnvironment(tenantDomain, environment);
     }
 
@@ -797,6 +805,31 @@ public class APIAdminImpl implements APIAdmin {
         }
     }
 
+    private void encryptGatewayConfigurationValues(Environment retrievedGatewayConfigurationDTO,
+                                                   Environment updatedGatewayConfigurationDto)
+            throws APIManagementException {
+
+        ExternalGatewayDeployer gatewayDeployer = ServiceReferenceHolder.getInstance()
+                .getExternalGatewayDeployer(updatedGatewayConfigurationDto.getGatewayType());
+        if (gatewayDeployer != null) {
+            Map<String, String> additionalProperties = updatedGatewayConfigurationDto.getAdditionalProperties();
+            for (ConfigurationDto configurationDto : gatewayDeployer.getConnectionConfigurations()) {
+                if (configurationDto.isMask()) {
+                    String value = additionalProperties.get(configurationDto.getName());
+                    if (APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD.equals(value)) {
+                        if (retrievedGatewayConfigurationDTO != null) {
+                            String unModifiedValue = retrievedGatewayConfigurationDTO.getAdditionalProperties()
+                                    .get(configurationDto.getName());
+                            additionalProperties.replace(configurationDto.getName(), unModifiedValue);
+                        }
+                    } else if (StringUtils.isNotEmpty(value)) {
+                        additionalProperties.replace(configurationDto.getName(), String.valueOf(encryptValues(value)));
+                    }
+                }
+            }
+        }
+    }
+
     private KeyManagerConfigurationDTO decryptKeyManagerConfigurationValues(
             KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
@@ -810,6 +843,20 @@ public class APIAdminImpl implements APIAdmin {
             }
         }
         return keyManagerConfigurationDTO;
+    }
+
+    private Environment decryptGatewayConfigurationValues(Environment environment)
+            throws APIManagementException {
+
+        Map<String, String> additionalProperties = environment.getAdditionalProperties();
+        for (Map.Entry<String, String> entry : additionalProperties.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if (value != null) {
+                additionalProperties.replace(key, String.valueOf(decryptValue(value)));
+            }
+        }
+        return environment;
     }
 
     private Object decryptValue(Object value) throws APIManagementException {
@@ -1461,6 +1508,20 @@ public class APIAdminImpl implements APIAdmin {
         Map<String, Object> additionalProperties = keyManagerConfigurationDTO.getAdditionalProperties();
         List<ConfigurationDto> connectionConfigurations =
                 keyManagerConnectorConfiguration.getConnectionConfigurations();
+        for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
+            if (connectionConfiguration.isMask()) {
+                additionalProperties.replace(connectionConfiguration.getName(),
+                        APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+            }
+        }
+    }
+
+    private void maskValues(Environment environment) {
+        ExternalGatewayDeployer gatewayDeployer = ServiceReferenceHolder.getInstance()
+                .getExternalGatewayDeployer(environment.getGatewayType());
+
+        Map<String, String> additionalProperties = environment.getAdditionalProperties();
+        List<ConfigurationDto> connectionConfigurations = gatewayDeployer.getConnectionConfigurations();
         for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
             if (connectionConfiguration.isMask()) {
                 additionalProperties.replace(connectionConfiguration.getName(),

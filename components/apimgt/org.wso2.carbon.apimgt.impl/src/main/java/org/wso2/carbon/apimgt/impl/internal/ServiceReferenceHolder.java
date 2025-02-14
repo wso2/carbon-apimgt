@@ -339,6 +339,11 @@ public class ServiceReferenceHolder {
         return externalGatewayDeployers.get(type);
     }
 
+    public Map<String, ExternalGatewayDeployer> getExternalGatewayDeployers() {
+
+            return externalGatewayDeployers;
+    }
+
     public void addExternalEnvironment(String type, ExternalEnvironment externalEnvironment) {
 
         externalEnvironmentsMap.put(type, externalEnvironment);
@@ -400,5 +405,4 @@ public class ServiceReferenceHolder {
 
         return this.llmProviderServiceMap;
     }
-
 }

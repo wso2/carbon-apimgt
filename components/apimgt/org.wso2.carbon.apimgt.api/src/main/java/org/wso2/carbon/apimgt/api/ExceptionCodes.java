@@ -171,6 +171,8 @@ public enum ExceptionCodes implements ErrorHandler {
             400, "Gateway Environment VHOST name not provided"),
     INVALID_VHOST(900512, "Invalid virtual host name provided",
             400, "Virtual host with provided vhost name does not exist"),
+    FEDERATED_GATEWAY_VALIDATION_FAILED(900513, "API Validation Failed with Federated Gateway",
+            400, "API Validation Failed with %s Gateway. %s", false),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,

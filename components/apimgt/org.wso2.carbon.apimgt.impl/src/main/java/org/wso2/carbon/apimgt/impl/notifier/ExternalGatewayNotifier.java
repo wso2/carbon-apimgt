@@ -43,7 +43,7 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
 
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
-        if (APIUtil.isAnyExternalGateWayProviderExists()) {
+        if (APIUtil.isAnyExternalGateWayProviderExists(event.getTenantDomain())) {
             apiMgtDAO = ApiMgtDAO.getInstance();
             process(event);
         }
@@ -88,16 +88,27 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
             for (String deploymentEnv : gateways) {
                 if (environments.containsKey(deploymentEnv)) {
                     ExternalGatewayDeployer deployer = ServiceReferenceHolder.getInstance().getExternalGatewayDeployer
-                            (environments.get(deploymentEnv).getProvider());
+                            (environments.get(deploymentEnv).getGatewayType());
                     if (deployer != null) {
                         try {
-                            deployed = deployer.deploy(api, environments.get(deploymentEnv));
-                            if (!deployed) {
-                                throw new APIManagementException("Error while deploying API product to Solace broker");
+                            String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(),
+                                    environments.get(deploymentEnv).getUuid());
+                            String updatedReferenceArtifact = deployer.deploy(api, environments.get(deploymentEnv),
+                                    referenceArtifact);
+                            if (updatedReferenceArtifact == null) {
+                                throw new APIManagementException("Error while deploying API to the external gateway");
+                            }
+                            if (referenceArtifact == null) {
+                                APIUtil.addApiExternalApiMapping(api.getUuid(), environments.get(deploymentEnv).getUuid(),
+                                        updatedReferenceArtifact);
+                            } else {
+                                APIUtil.updateApiExternalApiMapping(api.getUuid(), environments.get(deploymentEnv).getUuid(),
+                                        updatedReferenceArtifact);
                             }
                         } catch (DeployerException e) {
                             throw new APIManagementException(e.getMessage());
                         }
+
                     }
                 }
             }
@@ -126,11 +137,17 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
             for (String deploymentEnv : gateways) {
                 if (environments.containsKey(deploymentEnv)) {
                     ExternalGatewayDeployer deployer = ServiceReferenceHolder.getInstance().getExternalGatewayDeployer
-                            (environments.get(deploymentEnv).getProvider());
+                            (environments.get(deploymentEnv).getGatewayType());
                     if (deployer != null) {
                         try {
-                            deleted = deployer.undeploy(api.getId().getName(), api.getId().getVersion(),
-                                    api.getContext(), environments.get(deploymentEnv));
+                            String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
+                                    environments.get(deploymentEnv).getUuid());
+                            if (referenceArtifact == null) {
+                                throw new DeployerException("API ID is not mapped with AWS API ID");
+                            }
+                            deleted = deployer.undeploy(api.getId().getUUID(), api.getId().getName(),
+                                    api.getId().getVersion(),
+                                    api.getContext(), environments.get(deploymentEnv), referenceArtifact);
                             if (!deleted) {
                                 throw new NotifierException("Error while deleting API product from Solace broker");
                             }
@@ -153,7 +170,7 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
             Map<String, Environment> environments = APIUtil.getEnvironments(deployAPIInGatewayEvent.getTenantDomain());
             for (String label : gatewayLabels) {
                 Environment environment = environments.get(label);
-                if (environment != null && !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getProvider())) {
+                if (environment != null && !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getGatewayType())) {
                     return true;
                 }
             }

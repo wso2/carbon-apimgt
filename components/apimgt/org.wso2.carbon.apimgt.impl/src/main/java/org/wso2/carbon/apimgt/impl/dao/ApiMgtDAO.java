@@ -15370,6 +15370,15 @@ public class ApiMgtDAO {
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
                     String gatewayType = rs.getString("GATEWAY_TYPE");
+                    Map<String, String> additionalProperties = new HashMap();
+                    try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
+                        if (configuration != null) {
+                            String configurationContent = IOUtils.toString(configuration);
+                            additionalProperties = new Gson().fromJson(configurationContent, Map.class);
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while converting configurations in " + uuid, e);
+                    }
 
                     Environment env = new Environment();
                     env.setId(id);
@@ -15382,6 +15391,7 @@ public class ApiMgtDAO {
                     env.setGatewayType(gatewayType);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                     env.setPermissions(getGatewayVisibilityPermissions(uuid));
+                    env.setAdditionalProperties(additionalProperties);
                     envList.add(env);
                 }
             }
@@ -15413,6 +15423,16 @@ public class ApiMgtDAO {
                     String displayName = rs.getString("DISPLAY_NAME");
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
+                    String gatewayType = rs.getString("GATEWAY_TYPE");
+                    Map<String, String> additionalProperties = new HashMap();
+                    try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
+                        if (configuration != null) {
+                            String configurationContent = IOUtils.toString(configuration);
+                            additionalProperties = new Gson().fromJson(configurationContent, Map.class);
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while converting configurations in " + uuid, e);
+                    }
 
                     env = new Environment();
                     env.setId(id);
@@ -15421,8 +15441,10 @@ public class ApiMgtDAO {
                     env.setDisplayName(displayName);
                     env.setDescription(description);
                     env.setProvider(provider);
+                    env.setGatewayType(gatewayType);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                     env.setPermissions(getGatewayVisibilityPermissions(uuid));
+                    env.setAdditionalProperties(additionalProperties);
                 }
             }
         } catch (SQLException e) {
@@ -15456,7 +15478,9 @@ public class ApiMgtDAO {
                 prepStmt.setString(5, environment.getDescription());
                 prepStmt.setString(6, environment.getProvider());
                 prepStmt.setString(7, environment.getGatewayType());
-                prepStmt.setString(8, tenantDomain);
+                String configurationJson = new Gson().toJson(environment.getAdditionalProperties());
+                prepStmt.setBinaryStream(8, new ByteArrayInputStream(configurationJson.getBytes()));
+                prepStmt.setString(9, tenantDomain);
                 prepStmt.executeUpdate();
 
                 GatewayVisibilityPermissionConfigurationDTO permissionDTO = environment.getPermissions();
@@ -15507,8 +15531,8 @@ public class ApiMgtDAO {
                 prepStmt.setInt(1, id);
                 prepStmt.setString(2, vhost.getHost());
                 prepStmt.setString(3, vhost.getHttpContext());
-                prepStmt.setString(4, vhost.getHttpPort().toString());
-                prepStmt.setString(5, vhost.getHttpsPort().toString());
+                prepStmt.setString(4, (vhost.getHttpPort() != null) ? vhost.getHttpPort().toString() : "N/A");
+                prepStmt.setString(5, (vhost.getHttpsPort() != null) ? vhost.getHttpsPort().toString() : "N/A");
                 prepStmt.setString(6, (vhost.getWsPort() != null) ? vhost.getWsPort().toString() : "N/A");
                 prepStmt.setString(7, (vhost.getWssPort() != null) ? vhost.getWssPort().toString() : "N/A");
                 prepStmt.addBatch();
@@ -15553,8 +15577,24 @@ public class ApiMgtDAO {
                 while (rs.next()) {
                     String host = rs.getString("HOST");
                     String httpContext = rs.getString("HTTP_CONTEXT");
-                    Integer httpPort = rs.getInt("HTTP_PORT");
-                    Integer httpsPort = rs.getInt("HTTPS_PORT");
+                    Integer httpPort;
+                    String httpPortValue = rs.getString("HTTP_PORT");
+                    if ("N/A".equals(httpPortValue)) {
+                        // Handle the "N/A" case
+                        httpPort = null;
+                    } else {
+                        // Parse the integer value
+                        httpPort = Integer.parseInt(httpPortValue);
+                    }
+                    Integer httpsPort;
+                    String httpsPortValue = rs.getString("HTTPS_PORT");
+                    if ("N/A".equals(httpsPortValue)) {
+                        // Handle the "N/A" case
+                        httpsPort = null;
+                    } else {
+                        // Parse the integer value
+                        httpsPort = Integer.parseInt(httpsPortValue);
+                    }
                     Integer wsPort;
                     String wsPortValue = rs.getString("WS_PORT");
                     if ("N/A".equals(wsPortValue)) {
@@ -15634,7 +15674,9 @@ public class ApiMgtDAO {
             try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.UPDATE_ENVIRONMENT_SQL)) {
                 prepStmt.setString(1, environment.getDisplayName());
                 prepStmt.setString(2, environment.getDescription());
-                prepStmt.setString(3, environment.getUuid());
+                String configurationJson = new Gson().toJson(environment.getAdditionalProperties());
+                prepStmt.setBinaryStream(3, new ByteArrayInputStream(configurationJson.getBytes()));
+                prepStmt.setString(4, environment.getUuid());
                 prepStmt.executeUpdate();
                 deleteGatewayVhosts(connection, environment.getId());
                 addGatewayVhosts(connection, environment.getId(), environment.getVhosts());
@@ -15666,6 +15708,192 @@ public class ApiMgtDAO {
             handleException("Failed to update Environment", e);
         }
         return environment;
+    }
+
+    /**
+     * Add API - External API mapping
+     *
+     * @param apiId API ID
+     * @param environmentId Gateway environment ID
+     * @param referenceArtifact Reference Artifact
+     * @throws APIManagementException if failed to add the mapping
+     */
+    public void addApiExternalApiMapping(String apiId, String environmentId, String referenceArtifact)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        String query = SQLConstants.ADD_API_EXTERNAL_API_MAPPING_SQL;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, apiId);
+            prepStmt.setString(2, environmentId);
+            prepStmt.setBinaryStream(3, new ByteArrayInputStream(referenceArtifact.getBytes()));
+            prepStmt.execute();
+
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                log.error("Failed to rollback the add API - External API Mapping for API ID: " + apiId, ex);
+            }
+            handleException("Error while adding API - External API Mapping for API ID: " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
+    /**
+     * Update API - External API mapping
+     *
+     * @param apiId API ID
+     * @param environmentId Gateway environment ID
+     * @param referenceArtifact Reference Artifact
+     * @throws APIManagementException if failed to add the mapping
+     */
+    public void updateApiExternalApiMapping(String apiId, String environmentId, String referenceArtifact)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        String query = SQLConstants.UPDATE_API_EXTERNAL_API_MAPPING_SQL;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setBinaryStream(1, new ByteArrayInputStream(referenceArtifact.getBytes()));
+            prepStmt.setString(2, apiId);
+            prepStmt.setString(3, environmentId);
+            prepStmt.execute();
+
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                log.error("Failed to rollback the update API - External API Mapping for API ID: " + apiId, ex);
+            }
+            handleException("Error while updating API - External API Mapping for API ID: " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
+    /**
+     * Get Reference Artifact of the API-External API mapping by API ID and Environment ID
+     *
+     * @param apiId API ID
+     * @param environmentId Environment ID
+     * @throws APIManagementException if failed to get the mapping
+     */
+    public String getApiExternalApiMappingReference(String apiId, String environmentId)
+            throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement =
+                     connection.prepareStatement(SQLConstants.GET_REFERENCE_ARTIFACT_BY_API_ID_SQL)) {
+            statement.setString(1, apiId);
+            statement.setString(2, environmentId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    try (InputStream referenceArtifactStream =
+                                 resultSet.getBinaryStream("REFERENCE_ARTIFACT")) {
+                        if (referenceArtifactStream != null) {
+                            return IOUtils.toString(referenceArtifactStream);
+                        }
+                    } catch (IOException e) {
+                        handleException("Error while retrieving the Reference Artifact of the external API for the " +
+                                "API ID: " + apiId, e);
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to fetch API - External API mapping for the API ID: " + apiId, e);
+        }
+        return null;
+    }
+
+    /**
+     * Delete API - External API mapping by API ID
+     *
+     * @param apiId API ID
+     * @param environmentId Environment ID
+     * @throws APIManagementException if failed to get the mapping
+     */
+    public void deleteApiExternalApiMapping(String apiId, String environmentId)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        String query = SQLConstants.DELETE_API_EXTERNAL_API_MAPPING_SQL;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, apiId);
+            prepStmt.setString(2, environmentId);
+            prepStmt.execute();
+
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                log.error("Failed to rollback the delete API - External API Mapping: API ID: "
+                        + apiId, ex);
+            }
+            handleException("Error while deleting API - External API mapping for API ID: " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
+    /**
+     * Delete all API - External API mapping for given API ID
+     *
+     * @param apiId API ID
+     * @throws APIManagementException if failed to get the mapping
+     */
+    public void deleteApiExternalApiMappings(String apiId)
+            throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        String query = SQLConstants.DELETE_API_EXTERNAL_API_MAPPINGS_SQL;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, apiId);
+            prepStmt.execute();
+
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                }
+            } catch (SQLException ex) {
+                log.error("Failed to rollback the delete API - External API Mappings: API ID: "
+                        + apiId, ex);
+            }
+            handleException("Error while deleting API - External API mappings for API ID: " + apiId, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
     }
 
     private boolean isEmptyValuesInApplicationAttributesEnabled() {

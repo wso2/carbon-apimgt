@@ -23,6 +23,7 @@ import javax.ws.rs.core.SecurityContext;
 
 public interface EnvironmentsApiService {
       public Response environmentsEnvironmentIdDelete(String environmentId, MessageContext messageContext) throws APIManagementException;
+      public Response environmentsEnvironmentIdGet(String environmentId, MessageContext messageContext) throws APIManagementException;
       public Response environmentsEnvironmentIdPut(String environmentId, EnvironmentDTO environmentDTO, MessageContext messageContext) throws APIManagementException;
       public Response environmentsGet(MessageContext messageContext) throws APIManagementException;
       public Response environmentsPost(EnvironmentDTO environmentDTO, MessageContext messageContext) throws APIManagementException;

@@ -27,10 +27,10 @@ import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsKeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;
@@ -58,6 +58,7 @@ public class SettingsMappingUtil {
         if (isUserAvailable) {
             settingsDTO.setAnalyticsEnabled(APIUtil.isAnalyticsEnabled());
             settingsDTO.setKeyManagerConfiguration(getSettingsKeyManagerConfigurationDTOList());
+            settingsDTO.setGatewayConfiguration(getSettingsGatewayConfigurationDTOList());
         }
         settingsDTO.setScopes(getScopeList());
         settingsDTO.setGatewayTypes(APIUtil.getGatewayTypes());
@@ -140,6 +141,53 @@ public class SettingsMappingUtil {
             }
         }
         return settingsKeyManagerConfigurationDTO;
+    }
+
+    private static List<SettingsGatewayConfigurationDTO> getSettingsGatewayConfigurationDTOList() {
+        List<SettingsGatewayConfigurationDTO> list = new ArrayList<>();
+        Map<String, ExternalGatewayDeployer> externalGatewayConnectorConfigurationMap =
+                ServiceReferenceHolder.getInstance().getExternalGatewayDeployers();
+        externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
+            SettingsGatewayConfigurationDTO settingsFederatedGatewayConfigurationDTO =
+                    new SettingsGatewayConfigurationDTO();
+            settingsFederatedGatewayConfigurationDTO.setType(gatewayConfiguration.getType());
+            settingsFederatedGatewayConfigurationDTO.setDisplayName(gatewayConfiguration.getType());
+            settingsFederatedGatewayConfigurationDTO.setDefaultHostnameTemplate(gatewayConfiguration.getDefaultHostnameTemplate());
+            List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
+            if (connectionConfigurations != null) {
+                for (ConfigurationDto dto : connectionConfigurations) {
+                    settingsFederatedGatewayConfigurationDTO.getConfigurations().add(fromConfigurationToConfigurationDTO(dto));
+                }
+            }
+            list.add(settingsFederatedGatewayConfigurationDTO);
+
+        });
+
+        //Add APK and Synapse Gateways configured through toml to the list
+        List<String> gatewayTypesFromConfig = APIUtil.getGatewayTypes();
+        for (String type : gatewayTypesFromConfig) {
+            SettingsGatewayConfigurationDTO gateway = new SettingsGatewayConfigurationDTO();
+            gateway.setType(type);
+            gateway.setDisplayName(type);
+            if (list.stream().noneMatch(obj -> obj.getType().equals(type))) {
+                list.add(gateway);
+            }
+        }
+        return list;
+    }
+
+    private static GatewayConfigurationDTO fromConfigurationToConfigurationDTO(ConfigurationDto configuration) {
+        GatewayConfigurationDTO dto = new GatewayConfigurationDTO();
+        dto.setName(configuration.getName());
+        dto.setLabel(configuration.getLabel());
+        dto.setType(configuration.getType());
+        dto.setRequired(configuration.isRequired());
+        dto.setMask(configuration.isMask());
+        dto.setMultiple(configuration.isMultiple());
+        dto.setTooltip(configuration.getTooltip());
+        dto.setDefault(configuration.getDefaultValue());
+        dto.setValues(configuration.getValues());
+        return dto;
     }
 
     public List<String> GetRoleScopeList(String[] userRoles, Map<String, String> scopeRoleMapping) {

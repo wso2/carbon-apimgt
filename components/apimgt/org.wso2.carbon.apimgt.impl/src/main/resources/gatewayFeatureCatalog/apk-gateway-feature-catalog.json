@@ -1,0 +1,52 @@
+{
+  "wso2/apk": {
+    "apiTypes": [
+      "rest",
+      "graphql",
+      "ai"
+    ],
+    "gatewayFeatures": {
+      "basic": [
+        "defaultVersion"
+      ],
+      "runtime": [
+        "cors",
+        "transportsHTTP",
+        "transportsHTTPS",
+        "transportsMutualSSL",
+        "oauth2",
+        "apikey",
+        "audienceValidation",
+        "keyManagerConfig"
+      ],
+      "resources": [
+        "apiLevelRateLimiting",
+        "operationLevelRateLimiting",
+        "operationSecurity"
+      ],
+      "localScopes": [
+        "operationScopes"
+      ],
+      "policies": [
+        "policies"
+      ],
+      "monetization": [
+        "monetization"
+      ],
+      "subscriptions": [
+        "subscriptions"
+      ],
+      "endpoints": [
+        "http",
+        "typePRODUCTION",
+        "typeSANDBOX"
+      ],
+      "endpointSecurity": [
+        "basicAuth"
+      ],
+      "tryout": [
+        "tryout"
+      ]
+    }
+  }
+}
