@@ -95,6 +95,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     private static final Log log = LogFactory.getLog(AMDefaultKeyManagerImpl.class);
     private static final String GRANT_TYPE_VALUE = "client_credentials";
+    public static final String SP_NAME_APPLICATION = "sp.name.application";
 
     private DCRClient dcrClient;
     private IntrospectionClient introspectionClient;
@@ -121,6 +122,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String applicationName = oAuthApplicationInfo.getClientName();
         String oauthClientName = oauthAppRequest.getOAuthApplicationInfo().getApplicationUUID();
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
+
+        // Added to use the application name as part of sp name instead of application UUID when specified
+        String applicationSpNameProp = System.getProperty(SP_NAME_APPLICATION);
+        boolean applicationSpName = Boolean.parseBoolean(applicationSpNameProp);
+        if (applicationSpName) {
+            oauthClientName = oAuthApplicationInfo.getClientName();
+        }
 
         if (StringUtils.isNotEmpty(applicationName) && StringUtils.isNotEmpty(keyType)) {
             String domain = UserCoreUtil.extractDomainFromName(userId);
@@ -388,6 +396,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String applicationName = oAuthApplicationInfo.getClientName();
         String oauthClientName = oAuthApplicationInfo.getApplicationUUID();
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
+
+        // Added to use the application name as part of sp name instead of application UUID when specified
+        String applicationSpNameProp = System.getProperty(SP_NAME_APPLICATION);
+        boolean applicationSpName = Boolean.parseBoolean(applicationSpNameProp);
+        if (applicationSpName) {
+            oauthClientName = oAuthApplicationInfo.getClientName();
+        }
 
         // First we attempt to get the tenant domain from the userID and if it is not possible, we fetch it
         // from the ThreadLocalCarbonContext
