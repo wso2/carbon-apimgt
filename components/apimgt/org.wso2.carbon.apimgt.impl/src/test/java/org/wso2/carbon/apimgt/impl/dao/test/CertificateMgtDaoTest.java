@@ -62,8 +62,8 @@ public class CertificateMgtDaoTest {
     private static CertificateMgtDAO certificateMgtDAO;
     private static String TEST_ALIAS = "test alias";
     private static String TEST_ALIAS_2 = "test alias 2";
-    private static String TEST_ENDPOINT = "test end point";
-    private static String TEST_ENDPOINT_2 = "test end point 2";
+    private static String TEST_ENDPOINT = "https://test-end-point.com";
+    private static String TEST_ENDPOINT_2 = "https://test-end-point2.com";
     private static int TENANT_ID = MultitenantConstants.SUPER_TENANT_ID;
     private static final int TENANT_2 = 1001;
     private static final String certificate =

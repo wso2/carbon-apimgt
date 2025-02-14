@@ -358,7 +358,7 @@ public class RegistryPersistenceUtil {
         Set<org.wso2.carbon.apimgt.api.model.OrganizationTiers> availableTiersForOrganizations
                 = api.getAvailableTiersForOrganizations();
         if (availableTiersForOrganizations == null || availableTiersForOrganizations.isEmpty()) {
-            return null;
+            return "";
         }
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -432,7 +432,6 @@ public class RegistryPersistenceUtil {
 
         OrganizationTiers organizationTiers = new OrganizationTiers();
         organizationTiers.setOrganizationID(organizationTiersToMap.getOrganizationID());
-        organizationTiers.setOrganizationName(organizationTiersToMap.getOrganizationName());
         Set<Tier> tiersToMap = organizationTiersToMap.getTiers();
         Set<String> tiers = new LinkedHashSet<>();
         for (Tier tierToMap : tiersToMap) {

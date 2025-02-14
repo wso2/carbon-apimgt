@@ -25,7 +25,6 @@ import java.util.Set;
 public class OrganizationTiers {
 
     private String organizationID;
-    private String organizationName;
     private Set<Tier> tiers;
 
     public String getOrganizationID() {
@@ -34,14 +33,6 @@ public class OrganizationTiers {
 
     public void setOrganizationID(String organizationID) {
         this.organizationID = organizationID;
-    }
-
-    public String getOrganizationName() {
-        return organizationName;
-    }
-
-    public void setOrganizationName(String organizationName) {
-        this.organizationName = organizationName;
     }
 
     public Set<Tier> getTiers() {

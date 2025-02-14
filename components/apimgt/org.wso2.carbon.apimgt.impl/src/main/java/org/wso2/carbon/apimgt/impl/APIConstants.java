@@ -2029,6 +2029,8 @@ public final class APIConstants {
 
     public static final String BILLING_PLAN_FREE = "FREE";
     public static final String DEFAULT_VISIBLE_ORG = "all";
+    public static final String VISIBLE_ORG_NONE = "none";
+    public static final String VISIBLE_ORG_ALL = "all";
     public static final String POLICY_RESET = "reset";
 
     public static final String BLOCKING_EVENT_TYPE = "wso2event";
@@ -2347,6 +2349,8 @@ public final class APIConstants {
     public static final String JSON_GRANT_TYPES = "grant_types";
     public static final String JSON_USERNAME = "username";
     public static final String REGEX_ILLEGAL_CHARACTERS_FOR_API_METADATA = "[~!@#;:%^*()+={}|<>\"\',\\[\\]&/$\\\\]";
+    public static final String REGEX_URL_TEMPLATE_PLACEHOLDERS = "\\{.*?}";
+    public static final String URL_SCHEME_SEPARATOR = "://";
     public static final String JSON_CLIENT_ID = "client_id";
     public static final String JSON_ADDITIONAL_PROPERTIES = "additionalProperties";
     public static final String JSON_CLIENT_SECRET = "client_secret";
