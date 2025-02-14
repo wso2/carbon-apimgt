@@ -1329,6 +1329,7 @@ public class APIAdminImpl implements APIAdmin {
                     ExceptionCodes.from(ExceptionCodes.LABEL_CANNOT_DELETE_ASSOCIATED));
         }
         labelsDAO.deleteLabel(labelID);
+
     }
 
     /**
