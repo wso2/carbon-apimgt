@@ -368,7 +368,7 @@ rulesetContent:
       then:
         function: pattern
         functionOptions:
-          notMatch: eval\(
+          notMatch: 'eval\('
       description: |-
         Markdown descriptions should not contain [`eval()` functions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/eval),
         which pose a security risk.
@@ -392,7 +392,7 @@ rulesetContent:
       then:
         function: pattern
         functionOptions:
-          notMatch: "<script"
+          notMatch: '<script'
       description: |-
         Markdown descriptions should not contain `script` tags, which pose a security risk.
 
@@ -605,7 +605,7 @@ rulesetContent:
       then:
         function: pattern
         functionOptions:
-          notMatch: "{}"
+          notMatch: '\{\}'
         field: "@key"
       description: |-
         Path parameter declarations must not be empty.
@@ -626,7 +626,7 @@ rulesetContent:
       then:
         function: pattern
         functionOptions:
-          notMatch: "\\/$"
+          notMatch: '\\/$'
         field: "@key"
       description: |-
         Paths must not end with a trailing slash.
@@ -683,7 +683,7 @@ rulesetContent:
       then:
         function: pattern
         functionOptions:
-          notMatch: ".+\\/$"
+          notMatch: '.+\\/$'
         field: "@key"
       description: |-
         Path keys should not end in forward slashes. This is a best practice for working with web tooling, such as mock servers, code generators, application frameworks, and more.
@@ -713,7 +713,7 @@ rulesetContent:
       then:
         function: pattern
         functionOptions:
-          notMatch: "\\?"
+          notMatch: '\\?'
         field: "@key"
       description: |-
         Paths should not include `query` string items. Instead, add them as parameters with `in: query`.
@@ -820,7 +820,7 @@ rulesetContent:
       then:
         function: pattern
         functionOptions:
-          notMatch: "/$"
+          notMatch: '/$'
       description: |-
         Server URLs should not end in forward slashes. This is a best practice for working with web tooling, such as mock servers, code generators, application frameworks, and more.
 
@@ -855,7 +855,7 @@ rulesetContent:
       then:
         function: pattern
         functionOptions:
-          match: "^[^A-Z]*$"
+          match: '^[^A-Z]*$'
       description: |-
         Server URLs must be lowercase. This standard helps meet industry best practices.
 
@@ -930,7 +930,7 @@ rulesetContent:
       then:
         function: pattern
         functionOptions:
-          notMatch: example.com
+          notMatch: 'example.com'
       description: |
         Server URLs must not direct to example.com. This helps ensure URLs 
         are valid before you distribute your API document.
@@ -1240,7 +1240,7 @@ rulesetContent:
       then:
         function: pattern
         functionOptions:
-          notMatch: "\\?"
+          notMatch: '\\?'
         field: "@key"
       description: |-
         Paths should not have query parameters in them. They should be defined separately in the OpenAPI.
