@@ -523,7 +523,7 @@ public class APIMappingUtil {
                         .getExternalGatewayDeployer(model.getGatewayType());
         if (deployer != null) {
             try {
-                deployer.applyGatewayStandards(model);
+                deployer.transformAPI(model);
             } catch (DeployerException e) {
                 throw new APIManagementException("Error while applying gateway standards to the API. ", e);
             }
