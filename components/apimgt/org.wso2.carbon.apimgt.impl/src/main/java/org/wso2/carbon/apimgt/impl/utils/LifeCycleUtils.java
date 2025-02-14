@@ -9,6 +9,8 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.NewDevPortalHandler;
+import org.wso2.carbon.apimgt.impl.NewDevPortalHandlerImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -74,16 +76,17 @@ public class LifeCycleUtils {
             sendEmailNotification(apiTypeWrapper, orgId);
         }
 
+        NewDevPortalHandler devPortalHandler = NewDevPortalHandlerImpl.getInstance();
         // Next Gen Dev Portal Publication
         if (Arrays.asList(APIConstants.PUBLISH, APIConstants.REPUBLISH).contains(action)
-                && NewDevPortalHandler.isNewPortalEnabled()) {
-            NewDevPortalHandler.publish(orgId, apiTypeWrapper);
+                && devPortalHandler.isNewPortalEnabled()) {
+            devPortalHandler.publish(orgId, apiTypeWrapper);
         }
 
         // Next Gen Dev Portal Un-Publication
         if (Arrays.asList(APIConstants.DEPRECATE, APIConstants.BLOCK, APIConstants.DEMOTE_TO_CREATED).contains(action)
-                && NewDevPortalHandler.isNewPortalEnabled()) {
-            NewDevPortalHandler.unpublish(orgId, apiTypeWrapper.getApi());
+                && devPortalHandler.isNewPortalEnabled()) {
+            devPortalHandler.unpublish(orgId, apiTypeWrapper.getApi());
         }
 
         // Change the lifecycle state in the database

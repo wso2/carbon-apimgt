@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.utils;
+package org.wso2.carbon.apimgt.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.StringUtils;
@@ -32,9 +32,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.api.APIConsumer;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalProcessingConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -60,11 +57,27 @@ import org.wso2.carbon.base.ServerConfiguration;
 /**
  * This class used to handle newly introduced 2025 version of Developer Portal's configuration with APIM.
  */
-public class NewDevPortalHandler {
-    private static final Log log = LogFactory.getLog(NewDevPortalHandler.class);
+public class NewDevPortalHandlerImpl implements NewDevPortalHandler {
+
+    private static final Log log = LogFactory.getLog(NewDevPortalHandlerImpl.class);
     private static final String baseUrl = getNewPortalURL();
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Map<String, String> orgIdCache = new ConcurrentHashMap<>();
+    private static volatile NewDevPortalHandlerImpl instance;
+
+    private NewDevPortalHandlerImpl() {}
+
+    public static NewDevPortalHandlerImpl getInstance() {
+        if (instance == null) {
+            synchronized (NewDevPortalHandlerImpl.class) {
+                if (instance == null) {
+                    instance = new NewDevPortalHandlerImpl();
+                }
+            }
+        }
+        return instance;
+    }
+
 
     private static class HttpResponseData {
         private final int statusCode;
@@ -84,11 +97,13 @@ public class NewDevPortalHandler {
         }
     }
 
-    public static boolean isNewPortalEnabled() {
+    @Override
+    public boolean isNewPortalEnabled() {
         return Boolean.parseBoolean(getConfigProperty(APIConstants.API_STORE_NEW_PORTAL_ENABLED, "false"));
     }
 
-    public static void publish(String tenantName, ApiTypeWrapper apiTypeWrapper) {
+    @Override
+    public void publish(String tenantName, ApiTypeWrapper apiTypeWrapper) {
         try {
             SSLConnectionSocketFactory sslsf = generateSSLSF();
             publishAPI(apiTypeWrapper,  tenantName, sslsf);
@@ -97,7 +112,8 @@ public class NewDevPortalHandler {
         }
     }
 
-    public static void update(String tenantName, ApiTypeWrapper apiTypeWrapper) {
+    @Override
+    public void update(String tenantName, ApiTypeWrapper apiTypeWrapper) {
         try {
             SSLConnectionSocketFactory sslsf = generateSSLSF();
             updateAPI(apiTypeWrapper,  tenantName, sslsf);
@@ -106,7 +122,8 @@ public class NewDevPortalHandler {
         }
     }
 
-    public static void unpublish(String tenantName, API api) {
+    @Override
+    public void unpublish(String tenantName, API api) {
         try {
             SSLConnectionSocketFactory sslsf = generateSSLSF();
             unpublishAPI(api, tenantName, sslsf);
