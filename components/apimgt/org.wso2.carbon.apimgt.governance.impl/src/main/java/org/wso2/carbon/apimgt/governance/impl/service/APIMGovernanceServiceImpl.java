@@ -202,20 +202,26 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         // Clear previous compliance data for the artifact
         complianceManager.deleteArtifact(artifactRefId, artifactType, organization);
 
-        Set<String> allPoliciesForLabel = new HashSet<>();
+        Set<String> allCandidatePolicies = new HashSet<>();
+
+        // Get policies for labels
         for (String label : labels) {
-            allPoliciesForLabel.addAll(new ArrayList<>(policyManager
+            allCandidatePolicies.addAll(new ArrayList<>(policyManager
                     .getPoliciesByLabel(label, organization).keySet()));
         }
 
+        // Need to add organization wide policies as well
+        allCandidatePolicies.addAll(policyManager.getOrganizationWidePolicies(organization).keySet());
+
         List<String> applicablePolicyIds = new ArrayList<>();
 
+        // Filter which policies should be evaluated at current API state
         if (ArtifactType.API.equals(artifactType)) {
             // Find the state API is in and get the policies that should be evaluated
             String apiStatus = APIMUtil.getAPIStatus(artifactRefId);
             boolean isDeployed = APIMUtil.isAPIDeployed(artifactRefId);
 
-            for (String policyId : allPoliciesForLabel) {
+            for (String policyId : allCandidatePolicies) {
                 APIMGovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId, organization);
                 boolean isAPIGovernable = APIMUtil.isAPIGovernable(apiStatus, isDeployed, policy.getGovernableStates());
                 // If the API should be governed by the policy
