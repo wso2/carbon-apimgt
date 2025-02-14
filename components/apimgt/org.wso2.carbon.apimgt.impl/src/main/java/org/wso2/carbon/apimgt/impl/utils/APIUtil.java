@@ -3624,17 +3624,25 @@ public final class APIUtil {
      */
     public static void updateAvailableTiersByOrganization(DevPortalAPIInfo devPortalAPIInfo, String organization) {
 
-        Set<String> availableTiers = devPortalAPIInfo.getAvailableTierNames();
-        Set<OrganizationTiers> availableTiersForOrganizations = devPortalAPIInfo.getAvailableTiersForOrganizations();
         if (organization != null) {
+            Set<OrganizationTiers> availableTiersForOrganizations = devPortalAPIInfo.getAvailableTiersForOrganizations();
+            Set<String> availableTiers = new HashSet<>();
             for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
                 String orgID = organizationTiers.getOrganizationID();
                 if (organization.equals(orgID)) {
                     availableTiers = organizationTiers.getTiers();
-                    devPortalAPIInfo.setAvailableTierNames(availableTiers);
                     break;
                 }
             }
+            if (availableTiers.isEmpty()) {
+                for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
+                    if (APIConstants.DEFAULT_VISIBLE_ORG.equals(organizationTiers.getOrganizationID())) {
+                        availableTiers = organizationTiers.getTiers();
+                        break;
+                    }
+                }
+            }
+            devPortalAPIInfo.setAvailableTierNames(availableTiers);
         }
     }
 
@@ -11205,7 +11213,7 @@ public final class APIUtil {
         Set<org.wso2.carbon.apimgt.api.model.OrganizationTiers> availableTiersForOrganizations
                 = api.getAvailableTiersForOrganizations();
         if (availableTiersForOrganizations == null || availableTiersForOrganizations.isEmpty()) {
-            return null;
+            return "";
         }
         try {
             ObjectMapper objectMapper = new ObjectMapper();

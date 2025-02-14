@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CurrentAndNewPasswordsDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.OrganizationInfoDTO;
 
 import java.util.List;
 
@@ -22,4 +23,5 @@ import javax.ws.rs.core.SecurityContext;
 
 public interface MeApiService {
       public Response changeUserPassword(CurrentAndNewPasswordsDTO currentAndNewPasswordsDTO, MessageContext messageContext) throws APIManagementException;
+      public Response organizationInformation(MessageContext messageContext) throws APIManagementException;
 }

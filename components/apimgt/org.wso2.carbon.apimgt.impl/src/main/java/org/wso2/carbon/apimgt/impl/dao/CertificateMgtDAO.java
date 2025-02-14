@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -42,6 +43,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.wso2.carbon.apimgt.impl.APIConstants;
 
 /**
  * This class handles data base transactions related to the server certificate management.
@@ -341,6 +344,23 @@ public class CertificateMgtDAO {
         List<CertificateMetadataDTO> certificateMetadataList = new ArrayList<>();
 
         if (StringUtils.isNotEmpty(alias) || StringUtils.isNotEmpty(endpoint)) {
+            if (StringUtils.isNotEmpty(endpoint)) {
+                try {
+                    if (log.isDebugEnabled()) {
+                        log.debug("The endpoint is not empty. Generating fqdn from endpoint " + endpoint);
+                    }
+
+                    // Remove any placeholders (curly braces with contents inside)
+                    String sanitizedEndpoint = endpoint.replaceAll(APIConstants.REGEX_URL_TEMPLATE_PLACEHOLDERS, "");
+
+                    // Extract fully qualified domain name form given endpoint
+                    URI uri = new URI(sanitizedEndpoint);
+                    endpoint = uri.getScheme() + APIConstants.URL_SCHEME_SEPARATOR + uri.getHost();
+                } catch (Exception e) {
+                    log.warn("Unable to extract FQDN from the provided endpoint URL", e);
+                }
+            }
+
             if (log.isDebugEnabled()) {
                 log.debug("The alias and endpoint are not empty. Invoking the search query with parameters " +
                         "alias = " + alias + " endpoint = " + endpoint);
@@ -360,7 +380,8 @@ public class CertificateMgtDAO {
 
                 if (StringUtils.isNotEmpty(alias) || StringUtils.isNotEmpty(endpoint)) {
                     preparedStatement.setString(2, alias);
-                    preparedStatement.setString(3, endpoint);
+                    preparedStatement.setString(3,
+                            StringUtils.isNotEmpty(endpoint) ? endpoint + "%" : endpoint);
                 }
                 try (ResultSet resultSet = preparedStatement.executeQuery()) {
                     while (resultSet.next()) {
