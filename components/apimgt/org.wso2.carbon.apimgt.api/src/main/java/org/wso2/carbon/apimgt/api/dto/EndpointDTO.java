@@ -19,40 +19,20 @@
 package org.wso2.carbon.apimgt.api.dto;
 
 /**
- * DTO object to represent endpoints.
+ * Data Transfer Object (DTO) representing an endpoint.
+ * Contains details such as the endpoint's UUID, name, deployment stage, and configuration.
  */
 public class EndpointDTO {
 
     private String endpointUuid;
     private String endpointName;
-    private String organization;
     private String deploymentStage;
     private EndpointConfigDTO endpointConfig;
 
     /**
-     * To get the tier name which the certificate is subscribed to.
+     * Gets the unique identifier (UUID) of the endpoint.
      *
-     * @return tier name.
-     */
-    public String getOrganization() {
-
-        return organization;
-    }
-
-    /**
-     * To set the subscription tier for the current certificate.
-     *
-     * @param organization Name of the tier.
-     */
-    public void setOrganization(String organization) {
-
-        this.organization = organization;
-    }
-
-    /**
-     * To get the alias of the certificate.
-     *
-     * @return alias of the certificate.
+     * @return The UUID of the endpoint.
      */
     public String getEndpointUuid() {
 
@@ -60,9 +40,9 @@ public class EndpointDTO {
     }
 
     /**
-     * To set the alias of the certificate.
+     * Sets the unique identifier (UUID) of the endpoint.
      *
-     * @param endpointUuid Specific alias.
+     * @param endpointUuid The UUID to set.
      */
     public void setEndpointUuid(String endpointUuid) {
 
@@ -70,9 +50,9 @@ public class EndpointDTO {
     }
 
     /**
-     * To get the certificate content.
+     * Gets the name of the endpoint.
      *
-     * @return certificate content.
+     * @return The name of the endpoint.
      */
     public String getEndpointName() {
 
@@ -80,30 +60,50 @@ public class EndpointDTO {
     }
 
     /**
-     * To set the certificate content.
+     * Sets the name of the endpoint.
      *
-     * @param endpointName certificate content.
+     * @param endpointName The name to set for the endpoint.
      */
     public void setEndpointName(String endpointName) {
 
         this.endpointName = endpointName;
     }
 
+    /**
+     * Gets the deployment stage associated with the endpoint.
+     *
+     * @return The deployment stage of the endpoint.
+     */
     public String getDeploymentStage() {
 
         return deploymentStage;
     }
 
+    /**
+     * Sets the deployment stage for the endpoint.
+     *
+     * @param deploymentStage The deployment stage to set.
+     */
     public void setDeploymentStage(String deploymentStage) {
 
         this.deploymentStage = deploymentStage;
     }
 
+    /**
+     * Gets the configuration details of the endpoint.
+     *
+     * @return The configuration of the endpoint.
+     */
     public EndpointConfigDTO getEndpointConfig() {
 
         return endpointConfig;
     }
 
+    /**
+     * Sets the configuration for the endpoint.
+     *
+     * @param endpointConfig The configuration to set for the endpoint.
+     */
     public void setEndpointConfig(EndpointConfigDTO endpointConfig) {
 
         this.endpointConfig = endpointConfig;
