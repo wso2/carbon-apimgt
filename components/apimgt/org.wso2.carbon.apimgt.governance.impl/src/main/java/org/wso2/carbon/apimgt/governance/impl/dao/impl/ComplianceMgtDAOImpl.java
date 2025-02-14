@@ -197,19 +197,16 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                                           String requestId, List<String> policyIds)
             throws SQLException {
 
-        String sqlQuery = SQLConstants.ADD_REQ_POLICY_MAPPING;
+        List<String> existingPolicyIds = getPolicyIdsForRequest(connection, requestId);
+        policyIds.removeAll(existingPolicyIds);
 
+        String sqlQuery = SQLConstants.ADD_REQ_POLICY_MAPPING;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             for (String policyId : policyIds) {
                 try {
                     prepStmnt.setString(1, requestId);
                     prepStmnt.setString(2, policyId);
                     prepStmnt.execute();
-                } catch (SQLIntegrityConstraintViolationException e) { // to catch and ignore duplicates
-                    if (log.isDebugEnabled()) {
-                        log.debug("The policy mapping already exists for the request: " + requestId +
-                                " and policy: " + policyId);
-                    }
                 } catch (SQLException e) {
                     throw e;
                 }

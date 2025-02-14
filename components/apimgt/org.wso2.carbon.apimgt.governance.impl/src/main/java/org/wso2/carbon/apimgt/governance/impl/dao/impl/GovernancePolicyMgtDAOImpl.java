@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.governance.impl.dao.impl;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
@@ -39,6 +40,8 @@ import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -503,7 +506,13 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                             rs.getString("ARTIFACT_TYPE")));
 
                     RulesetContent rulesetContent = new RulesetContent();
-                    rulesetContent.setContent(rs.getBytes("CONTENT"));
+                    try (InputStream contentStream = rs.getBinaryStream("CONTENT")) {
+                        byte[] content = IOUtils.toByteArray(contentStream);
+                        rulesetContent.setContent(content);
+                    } catch (IOException e) {
+                        throw new APIMGovernanceException(APIMGovExceptionCodes
+                                .ERROR_WHILE_RETRIEVING_RULESET_CONTENT, e, ruleset.getId());
+                    }
                     rulesetContent.setFileName(rs.getString("FILE_NAME"));
                     ruleset.setRulesetContent(rulesetContent);
 
