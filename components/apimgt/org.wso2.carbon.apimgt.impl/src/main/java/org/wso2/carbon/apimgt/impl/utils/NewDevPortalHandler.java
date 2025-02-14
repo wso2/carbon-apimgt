@@ -31,8 +31,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -42,8 +40,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.impl.dto.devportal.ApiMetaDataDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -52,15 +50,21 @@ import java.security.GeneralSecurityException;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Objects;
 import java.util.Arrays;
-
+import java.util.concurrent.ConcurrentHashMap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.ServerConfiguration;
 
+/**
+ * This class used to handle newly introduced 2025 version of Developer Portal's configuration with APIM.
+ */
 public class NewDevPortalHandler {
+    private static final Log log = LogFactory.getLog(NewDevPortalHandler.class);
+    private static final String baseUrl = getNewPortalURL();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final Map<String, String> orgIdCache = new ConcurrentHashMap<>();
 
     private static class HttpResponseData {
         private final int statusCode;
@@ -79,11 +83,6 @@ public class NewDevPortalHandler {
             return responseBody;
         }
     }
-
-    private static final Log log = LogFactory.getLog(NewDevPortalHandler.class);
-    private static final String baseUrl = getNewPortalURL();
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final Map<String, String> orgIdCache = new HashMap<>();
 
     public static boolean isNewPortalEnabled() {
         return Boolean.parseBoolean(getConfigProperty(APIConstants.API_STORE_NEW_PORTAL_ENABLED, "false"));
@@ -256,38 +255,40 @@ public class NewDevPortalHandler {
         }
     }
 
-    // Data Structuring Related Methods
-
     private static String getApiMetaData(ApiTypeWrapper apiTypeWrapper) throws APIManagementException {
         API api = apiTypeWrapper.getApi();
+        ApiMetaDataDTO apiMetaDataDTO = new ApiMetaDataDTO();
 
-        JSONObject apiInfo = new JSONObject();
-        apiInfo.put("referenceID", defaultString(apiTypeWrapper.getUuid()));
-        apiInfo.put("provider", "WSO2"); // DEV PORTAL expects WSO2 as Provider when API coming from WSO2 API Manager
-        apiInfo.put("tags", new ArrayList<>(api.getTags()));
-        apiInfo.put("apiName", defaultString(apiTypeWrapper.getName()));
-        apiInfo.put("apiDescription", defaultString(api.getDescription()));
-        if (defaultString(api.getVisibility()).equals("public")){
-            apiInfo.put("visibility", "PUBLIC");
+        ApiMetaDataDTO.ApiInfo apiInfo = new ApiMetaDataDTO.ApiInfo();
+        apiInfo.setReferenceID(Objects.toString(apiTypeWrapper.getUuid(), ""));
+        apiInfo.setProvider("WSO2"); // DEV PORTAL expects WSO2 as Provider when API coming from WSO2 API Manager
+        apiInfo.setApiName(Objects.toString(apiTypeWrapper.getName(), ""));
+        apiInfo.setApiDescription(Objects.toString(api.getDescription(), ""));
+        if (Objects.toString(api.getVisibility(), "").equals("public")) {
+            apiInfo.setVisibility("PUBLIC");
         } else {
-            // If visibility is not PUBLIC, DEV PORTAL expects visibility Groups as well
-            apiInfo.put("visibility", defaultString(api.getVisibility()));
-            apiInfo.put("visibleGroups", generateVisibleGroupsArray(api));
+            apiInfo.setVisibility(Objects.toString(api.getVisibility(), ""));
+            apiInfo.setVisibleGroups(generateVisibleGroupsArray(api));
         }
-        apiInfo.put("owners", generateOwnersObject(api));
-        apiInfo.put("apiVersion", defaultString(api.getId().getVersion()));
-        apiInfo.put("apiType", getType(api.getType())); // IF type is HTTP, DEV PORTAL expects REST As Type
+        apiInfo.setOwners(generateOwnersObject(api));
+        apiInfo.setApiVersion(Objects.toString(api.getId().getVersion(), ""));
+        apiInfo.setApiType(getType(api.getType()));
+        apiMetaDataDTO.setApiInfo(apiInfo);
 
-        JSONObject endPoints = new JSONObject();
-        endPoints.put("sandboxURL", getSandboxEndpoint(api.getEndpointConfig()));
-        endPoints.put("productionURL", getProductionEndpoint(api.getEndpointConfig()));
+        apiMetaDataDTO.setSubscriptionPolicies(convertToSubscriptionPolicies(api.getAvailableTiers().toArray()));
 
-        JSONObject response = new JSONObject();
-        response.put("apiInfo", apiInfo);
-        response.put("subscriptionPolicies", convertToSubscriptionPolicies(api.getAvailableTiers().toArray()));
-        response.put("endPoints", endPoints);
+        ApiMetaDataDTO.EndPoints endPoints = new ApiMetaDataDTO.EndPoints();
+        endPoints.setSandboxURL(getSandboxEndpoint(api.getEndpointConfig()));
+        endPoints.setProductionURL(getProductionEndpoint(api.getEndpointConfig()));
 
-        return response.toJSONString();
+        apiMetaDataDTO.setEndPoints(endPoints);
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(apiMetaDataDTO);
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error while converting ApiMetaDataDTO to JSON: " + e.getMessage(), e);
+        }
     }
 
     private static String getSandboxEndpoint(String jsonString) throws APIManagementException {
@@ -328,41 +329,34 @@ public class NewDevPortalHandler {
         }
     }
 
-    private static List<Map<String, String>> convertToSubscriptionPolicies(Object[] tiers) {
-        List<Map<String, String>> subscriptionPolicies = new ArrayList<>();
+    private static List<String> convertToSubscriptionPolicies(Object[] tiers) {
+        List<String> subscriptionPolicies = new ArrayList<>();
         for (Object tier : tiers) {
             if (tier instanceof Tier) {
                 Tier tierObject = (Tier) tier;
                 String name = tierObject.getName();
                 if (name != null) {
-                    subscriptionPolicies.add(Collections.singletonMap("policyName", name));
+                    subscriptionPolicies.add(name); // Add tier name directly
                 }
             }
         }
         return subscriptionPolicies;
     }
 
-    private static String defaultString(String value) {
-        return value != null ? value : "";
-    }
-
-    private static JSONArray generateVisibleGroupsArray(API api) {
-        JSONArray visibleGroupsArray = new JSONArray();
+    private static List<String> generateVisibleGroupsArray(API api) {
+        List<String> visibleGroupsList = new ArrayList<>();
         if (api.getVisibleRoles() != null) {
-            for (String role : api.getVisibleRoles().split(",")) {
-                visibleGroupsArray.add(role);
-            }
+            visibleGroupsList = Arrays.asList(api.getVisibleRoles().split(","));
         }
-        return visibleGroupsArray;
+        return visibleGroupsList;
     }
 
-    private static JSONObject generateOwnersObject(API api) {
-        JSONObject owners = new JSONObject();
-        // TODO: verify below data
-        owners.put("technicalOwner", defaultString(api.getTechnicalOwner()));
-        owners.put("technicalOwnerEmail", defaultString(api.getTechnicalOwnerEmail()));
-        owners.put("businessOwner", defaultString(api.getBusinessOwner()));
-        owners.put("businessOwnerEmail", defaultString(api.getBusinessOwnerEmail()));
+    private static ApiMetaDataDTO.ApiInfo.Owners generateOwnersObject(API api) {
+        ApiMetaDataDTO.ApiInfo.Owners owners = new ApiMetaDataDTO.ApiInfo.Owners();
+        owners.setTechnicalOwner(Objects.toString(api.getTechnicalOwner(), ""));
+        owners.setTechnicalOwnerEmail(Objects.toString(api.getTechnicalOwnerEmail(), ""));
+        owners.setBusinessOwner(Objects.toString(api.getBusinessOwner(), ""));
+        owners.setBusinessOwnerEmail(Objects.toString(api.getBusinessOwnerEmail(), ""));
         return owners;
     }
 
