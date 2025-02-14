@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+import java.util.Locale;
+
 /**
  * This class represents a governance rule category
  */
@@ -26,11 +28,10 @@ public enum RuleCategory {
     AI;
 
     public static RuleCategory fromString(String text) {
-        if ("spectral".equalsIgnoreCase(text)) {
-            return RuleCategory.SPECTRAL;
-        } else if ("ai".equalsIgnoreCase(text)) {
-            return RuleCategory.AI;
+        try {
+            return RuleCategory.valueOf(text.toUpperCase(Locale.ENGLISH));
+        } catch (IllegalArgumentException e) {
+            return null;
         }
-        return RuleCategory.SPECTRAL;
     }
 }

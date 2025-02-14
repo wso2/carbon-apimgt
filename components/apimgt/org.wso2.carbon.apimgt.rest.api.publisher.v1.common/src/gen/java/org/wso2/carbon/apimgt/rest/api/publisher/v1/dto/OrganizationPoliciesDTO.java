@@ -23,7 +23,6 @@ import javax.validation.Valid;
 public class OrganizationPoliciesDTO   {
   
     private String organizationID = null;
-    private String organizationName = null;
     private List<String> policies = new ArrayList<String>();
 
   /**
@@ -42,23 +41,6 @@ public class OrganizationPoliciesDTO   {
   }
   public void setOrganizationID(String organizationID) {
     this.organizationID = organizationID;
-  }
-
-  /**
-   **/
-  public OrganizationPoliciesDTO organizationName(String organizationName) {
-    this.organizationName = organizationName;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "wso2", value = "")
-  @JsonProperty("organizationName")
-  public String getOrganizationName() {
-    return organizationName;
-  }
-  public void setOrganizationName(String organizationName) {
-    this.organizationName = organizationName;
   }
 
   /**
@@ -89,13 +71,12 @@ public class OrganizationPoliciesDTO   {
     }
     OrganizationPoliciesDTO organizationPolicies = (OrganizationPoliciesDTO) o;
     return Objects.equals(organizationID, organizationPolicies.organizationID) &&
-        Objects.equals(organizationName, organizationPolicies.organizationName) &&
         Objects.equals(policies, organizationPolicies.policies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(organizationID, organizationName, policies);
+    return Objects.hash(organizationID, policies);
   }
 
   @Override
@@ -104,7 +85,6 @@ public class OrganizationPoliciesDTO   {
     sb.append("class OrganizationPoliciesDTO {\n");
     
     sb.append("    organizationID: ").append(toIndentedString(organizationID)).append("\n");
-    sb.append("    organizationName: ").append(toIndentedString(organizationName)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
     sb.append("}");
     return sb.toString();

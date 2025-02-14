@@ -21,14 +21,14 @@ package org.wso2.carbon.apimgt.governance.impl.service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
@@ -70,17 +70,17 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      * @param state         State to be governed
      * @param organization  Organization
      * @return True if there are policies with blocking actions, False otherwise
-     * @throws GovernanceException If an error occurs while checking for policies with blocking actions
+     * @throws APIMGovernanceException If an error occurs while checking for policies with blocking actions
      */
     @Override
     public boolean isPoliciesWithBlockingActionExist(String artifactRefId,
                                                      ArtifactType artifactType, APIMGovernableState state,
                                                      String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         List<String> applicablePolicyIds = APIMGovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactRefId,
                 artifactType, state, organization);
-        return APIMGovernanceUtil.isBlockingActionsPresent(applicablePolicyIds, state);
+        return APIMGovernanceUtil.isBlockingActionsPresent(applicablePolicyIds, state, organization);
     }
 
     /**
@@ -91,12 +91,12 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      *                      , DO NOT USE ArtifactType.API
      * @param state         State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
      * @param organization  Organization
-     * @throws GovernanceException If an error occurs while evaluating compliance
+     * @throws APIMGovernanceException If an error occurs while evaluating compliance
      */
     @Override
     public void evaluateComplianceAsync(String artifactRefId, ArtifactType artifactType,
                                         APIMGovernableState state, String organization) throws
-            GovernanceException {
+            APIMGovernanceException {
 
         List<APIMGovernableState> dependentAPIMGovernableStates =
                 APIMGovernableState.getDependentGovernableStates(state);
@@ -126,13 +126,13 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      *                               If not provided the details will be taken from DB
      * @param organization           Organization
      * @return ArtifactComplianceInfo object
-     * @throws GovernanceException If an error occurs while evaluating compliance
+     * @throws APIMGovernanceException If an error occurs while evaluating compliance
      */
     @Override
     public ArtifactComplianceInfo evaluateComplianceSync(String artifactRefId, String revisionNo,
                                                          ArtifactType artifactType, APIMGovernableState state,
                                                          Map<RuleType, String> artifactProjectContent,
-                                                         String organization) throws GovernanceException {
+                                                         String organization) throws APIMGovernanceException {
 
         List<String> applicablePolicyIds = APIMGovernanceUtil.getApplicablePoliciesForArtifactWithState(artifactRefId,
                 artifactType, state, organization);
@@ -156,12 +156,12 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      *                     project
      * @param organization Organization
      * @return ArtifactComplianceDryRunInfo object
-     * @throws GovernanceException If an error occurs while evaluating compliance
+     * @throws APIMGovernanceException If an error occurs while evaluating compliance
      */
     @Override
     public ArtifactComplianceDryRunInfo evaluateComplianceDryRunSync(ExtendedArtifactType artifactType,
                                                                      byte[] zipArchive, String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         if (log.isDebugEnabled()) {
             log.debug("Evaluating compliance for the artifact with the file path ");
@@ -178,7 +178,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
             return complianceManager.handleComplianceEvalDryRun(artifactType, applicablePolicyIds,
                     contentMap, organization);
         } else {
-            throw new GovernanceException(GovernanceExceptionCodes.INVALID_ARTIFACT_TYPE, artifactType.toString());
+            throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_ARTIFACT_TYPE, artifactType.toString());
         }
 
 
@@ -191,11 +191,12 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      * @param artifactType  Artifact type ArtifactType.API
      * @param labels        List of label IDs
      * @param organization  Organization
-     * @throws GovernanceException If an error occurs while attaching the label
+     * @throws APIMGovernanceException If an error occurs while attaching the label
      */
     @Override
     public void evaluateComplianceOnLabelAttach(String artifactRefId, ArtifactType artifactType,
-                                                List<String> labels, String organization) throws GovernanceException {
+                                                List<String> labels,
+                                                String organization) throws APIMGovernanceException {
 
 
         Set<String> allPoliciesForLabel = new HashSet<>();
@@ -212,7 +213,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
             boolean isDeployed = APIMUtil.isAPIDeployed(artifactRefId);
 
             for (String policyId : allPoliciesForLabel) {
-                GovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId);
+                APIMGovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId, organization);
                 boolean isAPIGovernable = APIMUtil.isAPIGovernable(apiStatus, isDeployed, policy.getGovernableStates());
                 // If the API should be governed by the policy
                 if (isAPIGovernable) {
@@ -228,10 +229,10 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      * Delete governance related data for the given label
      *
      * @param label Label id to delete governance data
-     * @throws GovernanceException If an error occurs while deleting governance data
+     * @throws APIMGovernanceException If an error occurs while deleting governance data
      */
     @Override
-    public void deleteGovernanceDataForLabel(String label, String organization) throws GovernanceException {
+    public void deleteGovernanceDataForLabel(String label, String organization) throws APIMGovernanceException {
         policyManager.deleteLabelPolicyMappings(label, organization);
     }
 
@@ -241,11 +242,11 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact type ArtifactType.API
      * @param organization  Organization
-     * @throws GovernanceException If an error occurs while clearing the compliance information
+     * @throws APIMGovernanceException If an error occurs while clearing the compliance information
      */
     @Override
     public void clearArtifactComplianceInfo(String artifactRefId, ArtifactType artifactType, String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         complianceManager.deleteArtifact(artifactRefId, artifactType, organization);
     }

@@ -19,9 +19,12 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.MeApiServiceImplUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.MeApiService;
+import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import javax.ws.rs.core.Response;
 
@@ -49,5 +52,14 @@ public class MeApiServiceImpl implements MeApiService {
         } else {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
+    }
+
+    @Override
+    public Response organizationInformation(MessageContext messageContext) throws APIManagementException {
+        OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+        OrganizationInfoDTO dto = new OrganizationInfoDTO();
+        dto.setName(orgInfo.getName());
+        dto.setOrganizationId(orgInfo.getOrganizationId());
+        return Response.ok().entity(dto).build();
     }
 }

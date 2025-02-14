@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.api.dto.APIEndpointValidationDTO;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -80,6 +81,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDT
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO.AudienceEnum;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
@@ -330,7 +333,6 @@ public class APIMappingUtil {
                     apiTiersForOrganization.add(new Tier(tier));
                 }
                 organizationTiers.setOrganizationID(organizationPoliciesDTO.getOrganizationID());
-                organizationTiers.setOrganizationName(organizationPoliciesDTO.getOrganizationName());
                 organizationTiers.setTiers(apiTiersForOrganization);
                 organizationAPITiers.add(organizationTiers);
             }
@@ -518,12 +520,17 @@ public class APIMappingUtil {
         } else {
             model.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
         }
+
+        // Set primary endpoint mapping
+        model.setPrimaryProductionEndpointId(dto.getPrimaryProductionEndpointId());
+        model.setPrimarySandboxEndpointId(dto.getPrimarySandboxEndpointId());
+
         ExternalGatewayDeployer deployer =
                 org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
                         .getExternalGatewayDeployer(model.getGatewayType());
         if (deployer != null) {
             try {
-                deployer.applyGatewayStandards(model);
+                deployer.transformAPI(model);
             } catch (DeployerException e) {
                 throw new APIManagementException("Error while applying gateway standards to the API. ", e);
             }
@@ -1425,11 +1432,10 @@ public class APIMappingUtil {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
         }
 
-        if (model.getVisibleOrganizations() != null
-                || !APIConstants.DEFAULT_VISIBLE_ORG.equals(model.getVisibleOrganizations())) {
+        if (model.getVisibleOrganizations() != null && !model.getVisibleOrganizations().isEmpty()) {
             dto.setVisibleOrganizations(Arrays.asList(model.getVisibleOrganizations().split(",")));
         } else {
-            dto.setVisibleOrganizations(Collections.EMPTY_LIST);
+            dto.setVisibleOrganizations(new ArrayList<>(List.of(APIConstants.VISIBLE_ORG_NONE)));
         }
 
         if (model.getAdditionalProperties() != null) {
@@ -1584,6 +1590,11 @@ public class APIMappingUtil {
             dto.setSubtypeConfiguration(subtypeConfigurationDTO);
         }
         dto.setSubtypeConfiguration(subtypeConfigurationDTO);
+
+        // Set primary endpoints
+        dto.setPrimaryProductionEndpointId(model.getPrimaryProductionEndpointId());
+        dto.setPrimarySandboxEndpointId(model.getPrimarySandboxEndpointId());
+
         return dto;
     }
 
@@ -2766,7 +2777,6 @@ public class APIMappingUtil {
         }
         organizationPoliciesDTO.setPolicies(tiersToReturn);
         organizationPoliciesDTO.setOrganizationID(organizationTiers.getOrganizationID());
-        organizationPoliciesDTO.setOrganizationName(organizationTiers.getOrganizationName());
         return organizationPoliciesDTO;
     }
 
@@ -3498,6 +3508,44 @@ public class APIMappingUtil {
             }
         }
         return apiRevisionDeploymentDTO;
+    }
+
+    public static APIEndpointListDTO fromAPIEndpointListToDTO(List<APIEndpointInfo> apiEndpoints)
+            throws APIManagementException {
+        APIEndpointListDTO apiEndpointListDTO = new APIEndpointListDTO();
+        List<APIEndpointDTO> apiEndpointDTOs = new ArrayList<>();
+        for (APIEndpointInfo apiEndpoint : apiEndpoints) {
+            apiEndpointDTOs.add(fromAPIEndpointToDTO(apiEndpoint));
+        }
+        apiEndpointListDTO.setCount(apiEndpointDTOs.size());
+        apiEndpointListDTO.setList(apiEndpointDTOs);
+        return apiEndpointListDTO;
+    }
+
+    public static APIEndpointDTO fromAPIEndpointToDTO(APIEndpointInfo apiEndpoint) throws APIManagementException {
+        APIEndpointDTO apiEndpointDTO = new APIEndpointDTO();
+        apiEndpointDTO.setId(apiEndpoint.getEndpointUuid());
+        apiEndpointDTO.setName(apiEndpoint.getEndpointName());
+        apiEndpointDTO.setDeploymentStage(apiEndpoint.getDeploymentStage());
+        apiEndpointDTO.setEndpointConfig(apiEndpoint.getEndpointConfig());
+        return apiEndpointDTO;
+    }
+
+    public static APIEndpointInfo fromDTOtoAPIEndpoint(APIEndpointDTO apiEndpointDTO, String organization)
+            throws APIManagementException {
+        APIEndpointInfo apiEndpoint = new APIEndpointInfo();
+        apiEndpoint.setEndpointUuid(apiEndpointDTO.getId());
+        apiEndpoint.setEndpointName(apiEndpointDTO.getName());
+        apiEndpoint.setDeploymentStage(apiEndpointDTO.getDeploymentStage());
+        try {
+            HashMap endpointConfigHashMap = (HashMap) apiEndpointDTO.getEndpointConfig();
+            apiEndpoint.setEndpointConfig(endpointConfigHashMap);
+        } catch (ClassCastException e) {
+            throw new APIManagementException("Endpoint Config is missing of API Endpoint.",
+                    ExceptionCodes.ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API);
+        }
+//        apiEndpoint.setOrganization(organization);
+        return apiEndpoint;
     }
 
     public static ApiEndpointValidationResponseDTO fromEndpointValidationToDTO(

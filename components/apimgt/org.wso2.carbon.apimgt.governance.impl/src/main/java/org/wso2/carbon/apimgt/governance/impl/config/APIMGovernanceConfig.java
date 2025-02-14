@@ -25,7 +25,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
@@ -47,25 +47,25 @@ import javax.xml.stream.XMLStreamException;
  * Governance configuration from an XML file and providing access to the configuration
  * properties.
  */
-public class GovernanceConfiguration {
+public class APIMGovernanceConfig {
 
-    private static final Log log = LogFactory.getLog(GovernanceConfiguration.class);
+    private static final Log log = LogFactory.getLog(APIMGovernanceConfig.class);
 
     private Map<String, List<String>> configuration = new ConcurrentHashMap<>();
     private SecretResolver secretResolver;
     private boolean initialized;
 
-    public GovernanceConfiguration() {
+    public APIMGovernanceConfig() {
 
     }
 
     /**
-     * Create a new GovernanceConfiguration instance by copying the configuration from the given
+     * Create a new APIMGovernanceConfig instance by copying the configuration from the given
      * instance.
      *
-     * @param other GovernanceConfiguration instance
+     * @param other APIMGovernanceConfig instance
      */
-    public GovernanceConfiguration(GovernanceConfiguration other) {
+    public APIMGovernanceConfig(APIMGovernanceConfig other) {
 
         this.configuration = new ConcurrentHashMap<>(other.configuration);
         this.secretResolver = other.secretResolver;
@@ -74,13 +74,13 @@ public class GovernanceConfiguration {
 
     /**
      * Populate this configuration by reading an XML file at the given location. This method
-     * can be executed only once on a given GovernanceConfiguration instance. Once invoked and
+     * can be executed only once on a given APIMGovernanceConfig instance. Once invoked and
      * successfully populated, it will ignore all subsequent invocations.
      *
      * @param filePath Path of the XML descriptor file
-     * @throws GovernanceException If an error occurs while reading the XML descriptor
+     * @throws APIMGovernanceException If an error occurs while reading the XML descriptor
      */
-    public void load(String filePath) throws GovernanceException {
+    public void load(String filePath) throws APIMGovernanceException {
         if (initialized) {
             return;
         }
@@ -93,18 +93,18 @@ public class GovernanceConfiguration {
             initialized = true;
         } catch (IOException e) {
             log.error(e);
-            throw new GovernanceException("I/O error while reading the Governance " +
+            throw new APIMGovernanceException("I/O error while reading the Governance " +
                     "configuration: " + filePath, e);
         } catch (XMLStreamException e) {
             log.error(e);
-            throw new GovernanceException("Error while parsing the Governance " +
+            throw new APIMGovernanceException("Error while parsing the Governance " +
                     "configuration: " + filePath, e);
         } catch (OMException e) {
             log.error(e);
-            throw new GovernanceException("Error while parsing Governance configuration: " + filePath, e);
+            throw new APIMGovernanceException("Error while parsing Governance configuration: " + filePath, e);
         } catch (Exception e) {
             log.error(e);
-            throw new GovernanceException("Unexpected error occurred while parsing configuration: " + filePath, e);
+            throw new APIMGovernanceException("Unexpected error occurred while parsing configuration: " + filePath, e);
         } finally {
             IOUtils.closeQuietly(in);
         }
@@ -115,10 +115,10 @@ public class GovernanceConfiguration {
      *
      * @param serverConfig OMElement
      * @param nameStack    Stack<String>
-     * @throws GovernanceException If an error occurs while reading the child elements
+     * @throws APIMGovernanceException If an error occurs while reading the child elements
      */
     private void readChildElements(OMElement serverConfig,
-                                   Stack<String> nameStack) throws GovernanceException {
+                                   Stack<String> nameStack) throws APIMGovernanceException {
 
         for (Iterator childElements = serverConfig.getChildElements(); childElements
                 .hasNext(); ) {

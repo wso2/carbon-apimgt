@@ -19,17 +19,17 @@
 package org.wso2.carbon.apimgt.governance.rest.api.util;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.governance.api.GovernanceAPIConstants;
+import org.wso2.carbon.apimgt.governance.api.APIMGovernanceAPIConstants;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.ErrorHandler;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
 import org.wso2.carbon.context.CarbonContext;
 
 /**
  * This class contains utility methods for Governance API
  */
-public class GovernanceAPIUtil {
+public class APIMGovernanceAPIUtil {
 
     /**
      * Method to extract the validated organization
@@ -37,12 +37,12 @@ public class GovernanceAPIUtil {
      * @param ctx MessageContext
      * @return organization
      */
-    public static String getValidatedOrganization(MessageContext ctx) throws GovernanceException {
+    public static String getValidatedOrganization(MessageContext ctx) throws APIMGovernanceException {
 
-        String organization = (String) ctx.get(GovernanceAPIConstants.ORGANIZATION);
+        String organization = (String) ctx.get(APIMGovernanceAPIConstants.ORGANIZATION);
         if (organization == null) {
-            throw new GovernanceException(
-                    "Organization is not found in the request", GovernanceExceptionCodes
+            throw new APIMGovernanceException(
+                    "Organization is not found in the request", APIMGovExceptionCodes
                     .ORGANIZATION_NOT_FOUND);
         }
         return organization;
@@ -84,8 +84,8 @@ public class GovernanceAPIUtil {
     public static String getPaginatedURL(String templatedURL, Integer offset,
                                          Integer limit) {
 
-        templatedURL = templatedURL.replace(GovernanceAPIConstants.LIMIT_PARAM, String.valueOf(limit));
-        templatedURL = templatedURL.replace(GovernanceAPIConstants.OFFSET_PARAM, String.valueOf(offset));
+        templatedURL = templatedURL.replace(APIMGovernanceAPIConstants.LIMIT_PARAM, String.valueOf(limit));
+        templatedURL = templatedURL.replace(APIMGovernanceAPIConstants.OFFSET_PARAM, String.valueOf(offset));
         return templatedURL;
     }
 
@@ -101,9 +101,9 @@ public class GovernanceAPIUtil {
     public static String getPaginatedURLWithQuery(String templatedURL, Integer offset,
                                                   Integer limit, String query) {
 
-        templatedURL = templatedURL.replace(GovernanceAPIConstants.LIMIT_PARAM, String.valueOf(limit));
-        templatedURL = templatedURL.replace(GovernanceAPIConstants.OFFSET_PARAM, String.valueOf(offset));
-        templatedURL = templatedURL.replace(GovernanceAPIConstants.QUERY_PARAM, query);
+        templatedURL = templatedURL.replace(APIMGovernanceAPIConstants.LIMIT_PARAM, String.valueOf(limit));
+        templatedURL = templatedURL.replace(APIMGovernanceAPIConstants.OFFSET_PARAM, String.valueOf(offset));
+        templatedURL = templatedURL.replace(APIMGovernanceAPIConstants.QUERY_PARAM, query);
         return templatedURL;
     }
 
@@ -119,12 +119,12 @@ public class GovernanceAPIUtil {
     public static String getArtifactCompliancePageURL(String templatedURL, Integer offset, Integer limit,
                                                       String artifactType) {
 
-        templatedURL = templatedURL.replace(GovernanceAPIConstants.LIMIT_PARAM, String.valueOf(limit));
-        templatedURL = templatedURL.replace(GovernanceAPIConstants.OFFSET_PARAM, String.valueOf(offset));
+        templatedURL = templatedURL.replace(APIMGovernanceAPIConstants.LIMIT_PARAM, String.valueOf(limit));
+        templatedURL = templatedURL.replace(APIMGovernanceAPIConstants.OFFSET_PARAM, String.valueOf(offset));
         if (artifactType == null) {
             artifactType = "api";
         }
-        templatedURL = templatedURL.replace(GovernanceAPIConstants.ARTIFACT_TYPE_PARAM, artifactType);
+        templatedURL = templatedURL.replace(APIMGovernanceAPIConstants.ARTIFACT_TYPE_PARAM, artifactType);
         return templatedURL;
     }
 }

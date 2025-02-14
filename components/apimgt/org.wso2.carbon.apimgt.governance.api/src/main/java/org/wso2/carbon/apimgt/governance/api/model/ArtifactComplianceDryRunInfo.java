@@ -28,13 +28,13 @@ import java.util.Map;
  */
 public class ArtifactComplianceDryRunInfo {
 
-    private final Map<GovernancePolicy, Map<RulesetInfo, List<RuleViolation>>> violations = new HashMap<>();
+    private final Map<APIMGovernancePolicy, Map<RulesetInfo, List<RuleViolation>>> violations = new HashMap<>();
 
-    public Map<GovernancePolicy, Map<RulesetInfo, List<RuleViolation>>> getViolations() {
+    public Map<APIMGovernancePolicy, Map<RulesetInfo, List<RuleViolation>>> getViolations() {
         return Collections.unmodifiableMap(violations);
     }
 
-    public void addRuleViolationsForRuleset(GovernancePolicy policy, RulesetInfo ruleset,
+    public void addRuleViolationsForRuleset(APIMGovernancePolicy policy, RulesetInfo ruleset,
                                             List<RuleViolation> ruleViolations) {
         violations.computeIfAbsent(policy, k -> new HashMap<>()).put(ruleset, ruleViolations);
     }

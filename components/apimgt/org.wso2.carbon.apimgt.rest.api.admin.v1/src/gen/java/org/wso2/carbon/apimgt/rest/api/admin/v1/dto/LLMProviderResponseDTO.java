@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.constraints.*;
 
 
@@ -27,6 +29,7 @@ public class LLMProviderResponseDTO   {
     private String description = null;
     private String configurations = null;
     private String apiDefinition = null;
+    private List<String> modelList = new ArrayList<String>();
 
   /**
    **/
@@ -150,6 +153,24 @@ public class LLMProviderResponseDTO   {
     this.apiDefinition = apiDefinition;
   }
 
+  /**
+   * List of models supported by the LLM Provider
+   **/
+  public LLMProviderResponseDTO modelList(List<String> modelList) {
+    this.modelList = modelList;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "List of models supported by the LLM Provider")
+  @JsonProperty("modelList")
+  public List<String> getModelList() {
+    return modelList;
+  }
+  public void setModelList(List<String> modelList) {
+    this.modelList = modelList;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -166,12 +187,13 @@ public class LLMProviderResponseDTO   {
         Objects.equals(builtInSupport, llMProviderResponse.builtInSupport) &&
         Objects.equals(description, llMProviderResponse.description) &&
         Objects.equals(configurations, llMProviderResponse.configurations) &&
-        Objects.equals(apiDefinition, llMProviderResponse.apiDefinition);
+        Objects.equals(apiDefinition, llMProviderResponse.apiDefinition) &&
+        Objects.equals(modelList, llMProviderResponse.modelList);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, apiVersion, builtInSupport, description, configurations, apiDefinition);
+    return Objects.hash(id, name, apiVersion, builtInSupport, description, configurations, apiDefinition, modelList);
   }
 
   @Override
@@ -186,6 +208,7 @@ public class LLMProviderResponseDTO   {
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    configurations: ").append(toIndentedString(configurations)).append("\n");
     sb.append("    apiDefinition: ").append(toIndentedString(apiDefinition)).append("\n");
+    sb.append("    modelList: ").append(toIndentedString(modelList)).append("\n");
     sb.append("}");
     return sb.toString();
   }

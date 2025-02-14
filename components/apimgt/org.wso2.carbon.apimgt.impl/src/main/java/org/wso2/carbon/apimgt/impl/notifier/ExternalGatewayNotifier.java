@@ -91,9 +91,19 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
                             (environments.get(deploymentEnv).getGatewayType());
                     if (deployer != null) {
                         try {
-                            deployed = deployer.deploy(api, environments.get(deploymentEnv));
-                            if (!deployed) {
+                            String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(),
+                                    environments.get(deploymentEnv).getUuid());
+                            String updatedReferenceArtifact = deployer.deploy(api, environments.get(deploymentEnv),
+                                    referenceArtifact);
+                            if (updatedReferenceArtifact == null) {
                                 throw new APIManagementException("Error while deploying API to the external gateway");
+                            }
+                            if (referenceArtifact == null) {
+                                APIUtil.addApiExternalApiMapping(api.getUuid(), environments.get(deploymentEnv).getUuid(),
+                                        updatedReferenceArtifact);
+                            } else {
+                                APIUtil.updateApiExternalApiMapping(api.getUuid(), environments.get(deploymentEnv).getUuid(),
+                                        updatedReferenceArtifact);
                             }
                         } catch (DeployerException e) {
                             throw new APIManagementException(e.getMessage());
@@ -130,9 +140,14 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
                             (environments.get(deploymentEnv).getGatewayType());
                     if (deployer != null) {
                         try {
+                            String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
+                                    environments.get(deploymentEnv).getUuid());
+                            if (referenceArtifact == null) {
+                                throw new DeployerException("API ID is not mapped with AWS API ID");
+                            }
                             deleted = deployer.undeploy(api.getId().getUUID(), api.getId().getName(),
                                     api.getId().getVersion(),
-                                    api.getContext(), environments.get(deploymentEnv));
+                                    api.getContext(), environments.get(deploymentEnv), referenceArtifact);
                             if (!deleted) {
                                 throw new NotifierException("Error while deleting API product from Solace broker");
                             }

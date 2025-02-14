@@ -1,0 +1,10 @@
+name : WSO2 API Best Practices
+description: This policy enforces a set of best practices recommended by WSO2 for APIs on the WSO2 API Manager. This by default includes the WSO2 API Design Guidelines and WSO2 Style Guidelines.
+labels:
+  - GLOBAL
+governableStates:
+  - API_CREATE
+  - API_UPDATE
+rulesetNames:
+  - WSO2 API Design Guidelines
+  - WSO2 Style Guidelines

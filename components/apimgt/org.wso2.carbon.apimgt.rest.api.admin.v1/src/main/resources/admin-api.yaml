@@ -2198,7 +2198,34 @@ paths:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v4/organizations/d7cf8523-9180-4255-84fa-6cb171c1f779"'
-
+ 
+  /me/organization-information:
+    get:
+      tags:
+        - Users
+      summary: Get the Organization information of the user
+      description: |
+        Using this operation, logged-in user can get their organization information.
+      operationId: organizationInformation
+      responses:
+        200:
+          description: |
+            OK.
+            Key Manager list returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationInfo'
+        400:
+          $ref: '#/components/responses/BadRequest'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_settings
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/publisher/v4/me/organization"'
   ######################################################
   # The Bot Detection Data API resources
   ######################################################
@@ -5158,6 +5185,9 @@ components:
           type: string
           description: OpenAPI specification
           format: binary
+        modelList:
+          type: string
+          description: List of models supported by the LLM Provider as a stringified JSON array
     LLMProviderResponse:
       title: LLMProviderResponse
       type: object
@@ -5189,6 +5219,11 @@ components:
         apiDefinition:
           type: string
           description: OpenAPI specification
+        modelList:
+          type: array
+          items:
+            type: string
+          description: List of models supported by the LLM Provider
     LLMProviderSummaryResponse:
       title: LLMProviderSummaryResponse
       type: object
@@ -6204,6 +6239,16 @@ components:
           type: string
           description: The IP of the client
           example: 127.0.0.1
+    OrganizationInfo:
+      title: Organization Info
+      type: object
+      properties:
+        organizationId:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          type: string
+          example: My Organization
     RoleAliasList:
       title: Role alias list
       type: object

@@ -23,9 +23,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
+import org.wso2.carbon.apimgt.governance.api.model.APIMDefaultGovPolicy;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.DefaultRuleset;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
@@ -36,6 +38,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
+import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManager;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -47,6 +50,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -77,16 +81,16 @@ public class APIMGovernanceUtil {
      *
      * @param content String content
      * @return Map
-     * @throws GovernanceException if an error occurs while parsing YAML content
+     * @throws APIMGovernanceException if an error occurs while parsing YAML content
      */
-    public static Map<String, Object> getMapFromYAMLStringContent(String content) throws GovernanceException {
+    public static Map<String, Object> getMapFromYAMLStringContent(String content) throws APIMGovernanceException {
         // Parse YAML content
         ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
         Map<String, Object> rulesetMap;
         try {
             rulesetMap = yamlReader.readValue(content, Map.class);
         } catch (JsonProcessingException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONTENT, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_FAILED_TO_PARSE_RULESET_CONTENT, e);
         }
         return rulesetMap;
     }
@@ -159,23 +163,73 @@ public class APIMGovernanceUtil {
                         if (!existingRuleNames.contains(defaultRuleset.getName())) {
                             log.info("Adding default ruleset: " + defaultRuleset.getName());
                             rulesetManager.createNewRuleset(
-                                    getRulesetFromDefaultRuleset(defaultRuleset,
-                                            file.getName().replaceAll("/", "_")), organization);
+                                    getRulesetFromDefaultRuleset(defaultRuleset, file.getName()), organization);
                         } else {
                             log.info("Ruleset " + defaultRuleset.getName() + " already exists in organization: "
                                     + organization + "; skipping.");
                         }
                     } catch (IOException e) {
                         log.error("Error while loading default ruleset from file: " + file.getName(), e);
-                    } catch (GovernanceException e) {
+                    } catch (APIMGovernanceException e) {
                         log.error("Error while adding default ruleset: " + file.getName(), e);
                     }
                 }
             });
         } catch (IOException e) {
             log.error("Error while accessing default ruleset directory", e);
-        } catch (GovernanceException e) {
+        } catch (APIMGovernanceException e) {
             log.error("Error while retrieving existing rulesets for organization: " + organization, e);
+        }
+    }
+
+    /**
+     * Load default policies from the default policy directory
+     *
+     * @param organization Organization
+     */
+    public static void loadDefaultPolicies(String organization) {
+        PolicyManager policyManager = new PolicyManager();
+        try {
+            // Fetch existing policies for the organization
+            Map<String, String> existingPolicies = policyManager.getOrganizationWidePolicies(organization);
+
+            // Define the path to default policies
+            String pathToPolicies = CarbonUtils.getCarbonHome() + File.separator
+                    + APIMGovernanceConstants.DEFAULT_POLICY_LOCATION;
+            Path pathToDefaultPolicies = Paths.get(pathToPolicies);
+
+            // Iterate through default policy files
+            Files.list(pathToDefaultPolicies).forEach(path -> {
+                File file = path.toFile();
+                if (file.isFile() && (file.getName().endsWith(".yaml") || file.getName().endsWith(".yml"))) {
+                    try {
+                        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+                        APIMDefaultGovPolicy defaultPolicy = mapper.readValue(file, APIMDefaultGovPolicy.class);
+
+                        // Add policy if it doesn't already exist
+                        if (!existingPolicies.containsValue(defaultPolicy.getName())) {
+                            log.info("Adding default policy: " + defaultPolicy.getName());
+                            APIMGovernancePolicy policy = getGovPolicyFromDefaultGovPolicy(defaultPolicy, organization);
+                            APIMGovernancePolicy createdPolicy = policyManager.createGovernancePolicy(organization,
+                                    policy);
+                            if (createdPolicy != null) {
+                                new ComplianceManager().handlePolicyChangeEvent(createdPolicy.getId(), organization);
+                            }
+                        } else {
+                            log.info("Policy " + defaultPolicy.getName() + " already exists in organization: "
+                                    + organization + "; skipping.");
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while loading default policy from file: " + file.getName(), e);
+                    } catch (APIMGovernanceException e) {
+                        log.error("Error while adding default policy: " + file.getName(), e);
+                    }
+                }
+            });
+        } catch (IOException e) {
+            log.error("Error while accessing default policy directory", e);
+        } catch (APIMGovernanceException e) {
+            log.error("Error while retrieving existing policies for organization: " + organization, e);
         }
     }
 
@@ -185,10 +239,10 @@ public class APIMGovernanceUtil {
      * @param defaultRuleset DefaultRuleset
      * @param fileName       File name
      * @return Ruleset
-     * @throws GovernanceException if an error occurs while loading default ruleset content
+     * @throws APIMGovernanceException if an error occurs while loading default ruleset content
      */
     public static Ruleset getRulesetFromDefaultRuleset(DefaultRuleset defaultRuleset,
-                                                       String fileName) throws GovernanceException {
+                                                       String fileName) throws APIMGovernanceException {
         Ruleset ruleset = new Ruleset();
         ruleset.setName(defaultRuleset.getName());
         ruleset.setDescription(defaultRuleset.getDescription());
@@ -207,15 +261,61 @@ public class APIMGovernanceUtil {
     }
 
     /**
+     * Get APIMGovernancePolicy from APIMDefaultGovPolicy
+     *
+     * @param defaultPolicy Default Policy
+     * @param organization  Organization
+     * @return APIMGovernancePolicy object
+     */
+    public static APIMGovernancePolicy getGovPolicyFromDefaultGovPolicy(APIMDefaultGovPolicy defaultPolicy,
+                                                                        String organization) {
+        APIMGovernancePolicy policy = new APIMGovernancePolicy();
+        RulesetManager rulesetManager = new RulesetManager();
+
+        policy.setName(defaultPolicy.getName());
+        policy.setDescription(defaultPolicy.getDescription());
+        List<String> labels = defaultPolicy.getLabels();
+        if (labels != null && labels.stream().anyMatch(label -> label
+                .equalsIgnoreCase(APIMGovernanceConstants.GLOBAL_LABEL))) {
+            policy.setGlobal(true);
+            policy.setLabels(Collections.emptyList());
+        } else {
+            policy.setLabels(labels);
+        }
+        policy.setGovernableStates(defaultPolicy.getGovernableStates().stream()
+                .map(APIMGovernableState::fromString)
+                .collect(Collectors.toList()));
+        List<String> rulesetIds = new ArrayList<>();
+        for (String rulesetName : defaultPolicy.getRulesetNames()) {
+            try {
+                RulesetInfo ruleset = rulesetManager.getRulesetByName(rulesetName, organization);
+                if (ruleset != null) {
+                    rulesetIds.add(ruleset.getId());
+                } else {
+                    log.warn("Provided ruleset name: " + rulesetName + " does not exist in organization: "
+                            + organization + ". Skipping ruleset while creating policy: " + defaultPolicy.getName());
+                }
+            } catch (APIMGovernanceException e) {
+                log.error("Error while getting ruleset ID for ruleset name: " + rulesetName, e);
+            }
+        }
+        policy.setRulesetIds(rulesetIds);
+        // For now actions are empty, notify actions are set by default by the policy manager down the line
+        policy.setActions(Collections.emptyList());
+
+        return policy;
+    }
+
+    /**
      * Get all artifacts for a given artifact type
      *
      * @param artifactType Artifact Type
      * @param organization Organization
      * @return List of artifact IDs
-     * @throws GovernanceException If an error occurs while getting the list of artifacts
+     * @throws APIMGovernanceException If an error occurs while getting the list of artifacts
      */
     public static List<String> getAllArtifacts(ArtifactType artifactType, String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
         if (ArtifactType.API.equals(artifactType)) {
             return APIMUtil.getAllAPIs(organization);
         }
@@ -227,9 +327,9 @@ public class APIMGovernanceUtil {
      *
      * @param organization Organization
      * @return Map of Artifact Type, List of Artifact Reference IDs
-     * @throws GovernanceException If an error occurs while getting the list of artifacts
+     * @throws APIMGovernanceException If an error occurs while getting the list of artifacts
      */
-    public static Map<ArtifactType, List<String>> getAllArtifacts(String organization) throws GovernanceException {
+    public static Map<ArtifactType, List<String>> getAllArtifacts(String organization) throws APIMGovernanceException {
         Map<ArtifactType, List<String>> artifacts = new HashMap<>();
 
         for (ArtifactType artifactType : ArtifactType.values()) {
@@ -249,7 +349,7 @@ public class APIMGovernanceUtil {
      * @param labelId Label ID
      * @return Map of Artifact Type, List of Artifact Reference IDs
      */
-    public static Map<ArtifactType, List<String>> getArtifactsForLabel(String labelId) throws GovernanceException {
+    public static Map<ArtifactType, List<String>> getArtifactsForLabel(String labelId) throws APIMGovernanceException {
         Map<ArtifactType, List<String>> artifacts = new HashMap<>();
         for (ArtifactType artifactType : ArtifactType.values()) {
             if (ArtifactType.API.equals(artifactType)) {
@@ -268,7 +368,7 @@ public class APIMGovernanceUtil {
      * @return List of label IDs
      */
     public static List<String> getLabelsForArtifact(String artifactRefId, ArtifactType artifactType)
-            throws GovernanceException {
+            throws APIMGovernanceException {
         List<String> labels = new ArrayList<>();
         if (ArtifactType.API.equals(artifactType)) {
             labels = APIMUtil.getLabelsForAPI(artifactRefId);
@@ -284,9 +384,9 @@ public class APIMGovernanceUtil {
      * @param organization  Organization
      * @return Map of Policy IDs, Policy Names
      */
-    public static Map<String, String> getApplicablePoliciesForArtifact(String artifactRefId,
-                                                                       ArtifactType artifactType,
-                                                                       String organization) throws GovernanceException {
+    public static Map<String, String> getApplicablePoliciesForArtifact(String artifactRefId, ArtifactType artifactType,
+                                                                       String organization)
+            throws APIMGovernanceException {
 
         List<String> labels = APIMGovernanceUtil.getLabelsForArtifact(artifactRefId, artifactType);
         PolicyManager policyManager = new PolicyManager();
@@ -308,18 +408,18 @@ public class APIMGovernanceUtil {
      * Get all applicable policy IDs for an artifact given a specific state at which
      * the artifact should be governed
      *
-     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType    Artifact Type
+     * @param artifactRefId       Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType        Artifact Type
      * @param apimGovernableState Governable state (The state at which the artifact should be governed)
-     * @param organization    Organization
+     * @param organization        Organization
      * @return List of applicable policy IDs
-     * @throws GovernanceException if an error occurs while checking for applicable policies
+     * @throws APIMGovernanceException if an error occurs while checking for applicable policies
      */
     public static List<String> getApplicablePoliciesForArtifactWithState(String artifactRefId,
                                                                          ArtifactType artifactType,
                                                                          APIMGovernableState apimGovernableState,
                                                                          String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         List<String> labels = APIMGovernanceUtil.getLabelsForArtifact(artifactRefId, artifactType);
         PolicyManager policyManager = new PolicyManager();
@@ -344,17 +444,19 @@ public class APIMGovernanceUtil {
     /**
      * Check for blocking actions in policies
      *
-     * @param policyIds       List of policy IDs
+     * @param policyIds           List of policy IDs
      * @param apimGovernableState Governable state
+     * @param organization        Organization
      * @return boolean
-     * @throws GovernanceException if an error occurs while checking for blocking actions
+     * @throws APIMGovernanceException if an error occurs while checking for blocking actions
      */
-    public static boolean isBlockingActionsPresent(List<String> policyIds, APIMGovernableState apimGovernableState)
-            throws GovernanceException {
+    public static boolean isBlockingActionsPresent(List<String> policyIds, APIMGovernableState apimGovernableState,
+                                                   String organization)
+            throws APIMGovernanceException {
         PolicyManager policyManager = new PolicyManager();
         boolean isBlocking = false;
         for (String policyId : policyIds) {
-            if (policyManager.isBlockingActionPresentForState(policyId, apimGovernableState)) {
+            if (policyManager.isBlockingActionPresentForState(policyId, apimGovernableState, organization)) {
                 isBlocking = true;
                 break;
             }
@@ -386,10 +488,10 @@ public class APIMGovernanceUtil {
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact Type
      * @return String
-     * @throws GovernanceException If an error occurs while getting the artifact name
+     * @throws APIMGovernanceException If an error occurs while getting the artifact name
      */
     public static String getArtifactName(String artifactRefId, ArtifactType artifactType)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         String artifactName = null;
         if (ArtifactType.API.equals(artifactType)) {
@@ -401,19 +503,38 @@ public class APIMGovernanceUtil {
     /**
      * Get artifact version
      *
-     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType Artifact Type
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
      * @return String
-     * @throws GovernanceException If an error occurs while getting the artifact version
+     * @throws APIMGovernanceException If an error occurs while getting the artifact version
      */
     public static String getArtifactVersion(String artifactRefId, ArtifactType artifactType)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         String artifactVersion = null;
         if (ArtifactType.API.equals(artifactType)) {
             artifactVersion = APIMUtil.getAPIVersion(artifactRefId);
         }
         return artifactVersion;
+    }
+
+    /**
+     * Get artifact owner
+     *
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
+     * @return String
+     * @throws APIMGovernanceException If an error occurs while getting the artifact owner
+     */
+    public static String getArtifactOwner(String artifactRefId, ArtifactType artifactType, String organization)
+            throws APIMGovernanceException {
+
+        String artifactOwner = null;
+        if (ArtifactType.API.equals(artifactType)) {
+            artifactOwner = APIMUtil.getAPIOwner(artifactRefId, organization);
+        }
+        return artifactOwner;
     }
 
     /**
@@ -424,10 +545,10 @@ public class APIMGovernanceUtil {
      * @param artifactType    Artifact type
      * @param organization    Organization
      * @return Artifact Reference ID (ID of the artifact on APIM side)
-     * @throws GovernanceException If an error occurs while getting the artifact ID
+     * @throws APIMGovernanceException If an error occurs while getting the artifact ID
      */
     public static String getArtifactRefId(String artifactName, String artifactVersion, ArtifactType artifactType,
-                                          String organization) throws GovernanceException {
+                                          String organization) throws APIMGovernanceException {
 
         if (ArtifactType.API.equals(artifactType)) {
             return APIMUtil.getApiUUID(artifactName, artifactVersion, organization);
@@ -438,14 +559,14 @@ public class APIMGovernanceUtil {
     /**
      * Get extended artifact type for an artifact
      *
-     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType Artifact Type
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
      * @return ExtendedArtifactType
-     * @throws GovernanceException If an error occurs while getting the extended artifact type
+     * @throws APIMGovernanceException If an error occurs while getting the extended artifact type
      */
     public static ExtendedArtifactType getExtendedArtifactTypeForArtifact
     (String artifactRefId, ArtifactType artifactType)
-            throws GovernanceException {
+            throws APIMGovernanceException {
         if (ArtifactType.API.equals(artifactType)) {
             return APIMUtil.getExtendedArtifactTypeForAPI(APIMUtil.getAPIType(artifactRefId));
         }
@@ -455,16 +576,16 @@ public class APIMGovernanceUtil {
     /**
      * Get artifact project
      *
-     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
-     * @param revisionNo   Revision Number
-     * @param artifactType Artifact Type
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param revisionNo    Revision Number
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
      * @return byte[]
-     * @throws GovernanceException If an error occurs while getting the artifact project
+     * @throws APIMGovernanceException If an error occurs while getting the artifact project
      */
     public static byte[] getArtifactProjectWithRevision(String artifactRefId, String revisionNo,
                                                         ArtifactType artifactType,
-                                                        String organization) throws GovernanceException {
+                                                        String organization) throws APIMGovernanceException {
 
         // Get artifact project from APIM
         byte[] artifactProject = null;
@@ -478,14 +599,14 @@ public class APIMGovernanceUtil {
     /**
      * Get artifact project
      *
-     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType Artifact Type
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
      * @return byte[]
-     * @throws GovernanceException If an error occurs while getting the artifact project
+     * @throws APIMGovernanceException If an error occurs while getting the artifact project
      */
     public static byte[] getArtifactProject(String artifactRefId, ArtifactType artifactType,
-                                            String organization) throws GovernanceException {
+                                            String organization) throws APIMGovernanceException {
 
         return getArtifactProjectWithRevision(artifactRefId, null, artifactType, organization);
     }
@@ -498,7 +619,7 @@ public class APIMGovernanceUtil {
      * @return Map of RuleType and String
      */
     public static Map<RuleType, String> extractArtifactProjectContent(byte[] project, ArtifactType artifactType)
-            throws GovernanceException {
+            throws APIMGovernanceException {
         if (ArtifactType.API.equals(artifactType)) {
             return APIMUtil.extractAPIProjectContent(project);
         }
@@ -510,14 +631,14 @@ public class APIMGovernanceUtil {
      *
      * @param filePath File path
      * @return byte[]
-     * @throws GovernanceException If an error occurs while reading the file
+     * @throws APIMGovernanceException If an error occurs while reading the file
      */
-    public static byte[] readArtifactProjectContent(String filePath) throws GovernanceException {
+    public static byte[] readArtifactProjectContent(String filePath) throws APIMGovernanceException {
         Path path = Paths.get(filePath);
         try {
             return Files.readAllBytes(path);
         } catch (IOException e) {
-            throw new GovernanceException(GovernanceExceptionCodes.ERROR_FAILED_TO_READ_ARTIFACT_PROJECT, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_FAILED_TO_READ_ARTIFACT_PROJECT, e);
         }
     }
 

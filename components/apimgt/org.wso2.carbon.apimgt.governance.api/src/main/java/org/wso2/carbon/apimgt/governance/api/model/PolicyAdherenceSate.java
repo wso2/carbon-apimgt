@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+import java.util.Locale;
+
 /**
  * This class represents a list of governance Policies.
  */
@@ -27,14 +29,10 @@ public enum PolicyAdherenceSate {
     UNAPPPLIED;
 
     public static PolicyAdherenceSate fromString(String text) {
-
-        if ("followed".equalsIgnoreCase(text)) {
-            return FOLLOWED;
-        } else if ("violated".equalsIgnoreCase(text)) {
-            return VIOLATED;
-        } else if ("unapplied".equalsIgnoreCase(text)) {
-            return UNAPPPLIED;
+        try {
+            return PolicyAdherenceSate.valueOf(text.toUpperCase(Locale.ENGLISH));
+        } catch (IllegalArgumentException e) {
+            return null;
         }
-        return null;
     }
 }

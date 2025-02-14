@@ -28,9 +28,9 @@ import org.wso2.carbon.utils.AbstractAxis2ConfigurationContextObserver;
 /**
  * This class represents the Governance Config Deployer
  */
-public class GovernanceConfigDeployer extends AbstractAxis2ConfigurationContextObserver {
+public class APIMGovernanceConfigDeployer extends AbstractAxis2ConfigurationContextObserver {
 
-    private static final Log log = LogFactory.getLog(GovernanceConfigDeployer.class);
+    private static final Log log = LogFactory.getLog(APIMGovernanceConfigDeployer.class);
 
     public void createdConfigurationContext(ConfigurationContext configurationContext) {
 
@@ -38,6 +38,8 @@ public class GovernanceConfigDeployer extends AbstractAxis2ConfigurationContextO
 
         log.info("Starting to load default rulesets.");
         APIMGovernanceUtil.loadDefaultRulesets(tenantDomain);
+        log.info("Starting to load default policies.");
+        APIMGovernanceUtil.loadDefaultPolicies(tenantDomain);
 
     }
 }

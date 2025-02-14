@@ -36,9 +36,10 @@ public interface ExternalGatewayDeployer {
      *
      * @param api API to be deployed into in the external gateway
      * @param environment Environment to be deployed
+     * @param referenceArtifact Reference API artifact
      * @throws DeployerException if error occurs when deploying APIs to in the external gateway
      */
-    public boolean deploy(API api, Environment environment) throws DeployerException;
+    public String deploy(API api, Environment environment, String referenceArtifact) throws DeployerException;
 
     /**
      * Undeploy API artifact from provided environment
@@ -48,19 +49,22 @@ public interface ExternalGatewayDeployer {
      * @param apiVersion  Version of the API to be undeployed from Solace broker
      * @param apiContext  Context of the API to be undeployed from Solace broker
      * @param environment Environment needed to be undeployed API from
+     * @param referenceArtifact Reference API artifact
      * @throws DeployerException if error occurs when undeploying APIs from Solace broker
      */
     public boolean undeploy(String apiID, String apiName, String apiVersion, String apiContext,
-                            Environment environment) throws DeployerException;
+                            Environment environment, String referenceArtifact) throws DeployerException;
 
     /**
      * Undeploy API artifact from provided environment in the external gateway when Api is retired
      *
      * @param api API to be undeployed from the external gateway
      * @param environment Environment needed to be undeployed API from the external gateway
+     * @param referenceArtifact Reference API artifact
      * @throws DeployerException if error occurs when undeploying APIs from the external gateway
      */
-    public boolean undeployWhenRetire(API api, Environment environment) throws DeployerException;
+    public boolean undeployWhenRetire(API api, Environment environment, String referenceArtifact)
+            throws DeployerException;
 
     /**
      * Get vendor type of the external gateway
@@ -92,17 +96,23 @@ public interface ExternalGatewayDeployer {
 
     /**
      * This method returns the resolved API execution URL by replacing all placeholders appropriately
+     * @param url Existing Execution URL
+     * @param environment Gateway Environment
+     * @param referenceArtifact Reference API artifact
      *
      * @return String api execution url
      */
-    public String getAPIExecutionURL(String apiId, String url, Environment environment) throws DeployerException;
+    public String getAPIExecutionURL(String url, Environment environment, String referenceArtifact)
+            throws DeployerException;
 
     /**
      * This method returns refined API by manipulating the API object according to the external gateway requirements
      *
+     * @param api API object
+     *
      * @return API api object
      */
-    public void applyGatewayStandards(API api) throws DeployerException;
+    public void transformAPI(API api) throws DeployerException;
 
     /**
      * This method returns the default hostname template of the external gateway

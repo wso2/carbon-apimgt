@@ -20,27 +20,15 @@ package org.wso2.carbon.apimgt.governance.api.model;
 
 import java.util.EnumSet;
 import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Enum class to represent the artifact types of a ruleset
  */
 public enum ExtendedArtifactType {
-    REST_API("rest_api"),
-    SOAP_API("soap_api"),
-    GRAPHQL_API("graphql_api"),
-    ASYNC_API("async_api");
-
-    private static final Map<String, ExtendedArtifactType> STRING_TO_ENUM =
-            EnumSet.allOf(ExtendedArtifactType.class).stream()
-                    .collect(Collectors.toMap(e -> e.identifier, e -> e));
-
-    private final String identifier;
-
-    ExtendedArtifactType(String identifier) {
-        this.identifier = identifier;
-    }
+    REST_API,
+    SOAP_API,
+    GRAPHQL_API,
+    ASYNC_API;
 
     public static ExtendedArtifactType fromString(String text) {
         try {

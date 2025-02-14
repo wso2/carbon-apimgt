@@ -18,19 +18,20 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
+import java.util.Locale;
+
 /**
  * This enum represents a governance action type
  */
-public enum GovernanceActionType {
+public enum APIMGovernanceActionType {
     BLOCK,
     NOTIFY;
 
-    public static GovernanceActionType fromString(String actionTypeString) {
-        if ("block".equalsIgnoreCase(actionTypeString)) {
-            return GovernanceActionType.BLOCK;
-        } else if ("notify".equalsIgnoreCase(actionTypeString)) {
-            return GovernanceActionType.NOTIFY;
+    public static APIMGovernanceActionType fromString(String actionTypeString) {
+        try {
+            return APIMGovernanceActionType.valueOf(actionTypeString.toUpperCase(Locale.ENGLISH));
+        } catch (IllegalArgumentException e) {
+            return null;
         }
-        return null;
     }
 }

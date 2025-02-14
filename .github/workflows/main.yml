@@ -105,17 +105,17 @@ jobs:
           fetch-depth: '10'
           path: product-apim
       - name: Build product-apim with tests
-        run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file product-apim/pom.xml -DskipBenchMarkTest=true -DskipRestartTests=true
+        run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file product-apim/all-in-one-apim/pom.xml -DskipBenchMarkTest=true -DskipRestartTests=true
         env:
           PRODUCT_APIM_TEST_GROUPS: ${{ matrix.segment }}
       - name: Publish Test Report
         if: always()
         uses: malinthaprasan/action-surefire-report@v1
         with:
-          report_paths: 'product-apim/modules/integration/tests-integration/tests-backend/target/surefire-reports/TEST-TestSuite.xml'
+          report_paths: 'product-apim/all-in-one-apim/modules/integration/tests-integration/tests-backend/target/surefire-reports/TEST-TestSuite.xml'
       - name: Prepare upload testng report
         if: always()
-        run: mv product-apim/modules/integration/tests-integration/tests-backend/target/surefire-reports/TEST-TestSuite.xml TEST-TestSuite_${{ matrix.id }}.xml
+        run: mv product-apim/all-in-one-apim/modules/integration/tests-integration/tests-backend/target/surefire-reports/TEST-TestSuite.xml TEST-TestSuite_${{ matrix.id }}.xml
       - name: Archive testng report
         if: always()
         uses: actions/upload-artifact@v4
@@ -170,4 +170,4 @@ jobs:
           fetch-depth: '10'
           path: product-apim
       - name: Build product-apim with tests
-        run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file product-apim/pom.xml -DskipIntegrationTests
+        run: mvn clean install -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file product-apim/all-in-one-apim/pom.xml -DskipIntegrationTests

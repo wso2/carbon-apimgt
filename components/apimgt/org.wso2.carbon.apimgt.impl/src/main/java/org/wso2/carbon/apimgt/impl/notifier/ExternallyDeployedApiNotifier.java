@@ -98,7 +98,13 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                             (gatewayEnvironments.get(deploymentEnv).getGatewayType());
                     if (deployer != null) {
                         try {
-                            deleted = deployer.undeployWhenRetire(api, gatewayEnvironments.get(deploymentEnv));
+                            String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
+                                    gatewayEnvironments.get(deploymentEnv).getUuid());
+                            if (referenceArtifact == null) {
+                                throw new DeployerException("API ID is not mapped with AWS API ID");
+                            }
+                            deleted = deployer.undeployWhenRetire(api, gatewayEnvironments.get(deploymentEnv),
+                                    referenceArtifact);
                             if (!deleted) {
                                 throw new NotifierException("Error while deleting API product from Solace broker");
                             }
@@ -135,9 +141,14 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                             (gatewayEnvironments.get(deploymentEnv).getGatewayType());
                     if (deployer != null) {
                         try {
+                            String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
+                                    gatewayEnvironments.get(deploymentEnv).getUuid());
+                            if (referenceArtifact == null) {
+                                throw new DeployerException("API ID is not mapped with AWS API ID");
+                            }
                             deleted = deployer.undeploy(apiEvent.getUuid(), apiEvent.getApiName(),
                                     apiEvent.getApiVersion(), apiEvent.getApiContext(),
-                                    gatewayEnvironments.get(deploymentEnv));
+                                    gatewayEnvironments.get(deploymentEnv), referenceArtifact);
                             if (!deleted) {
                                 throw new NotifierException("Error while deleting API product from Solace broker");
                             }

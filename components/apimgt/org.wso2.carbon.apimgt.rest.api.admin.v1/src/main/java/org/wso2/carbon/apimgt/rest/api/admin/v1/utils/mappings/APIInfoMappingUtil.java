@@ -116,7 +116,7 @@ public class APIInfoMappingUtil {
         APIIdentifier apiId = api.getId();
         apiResultDTO.setName(apiId.getApiName());
         apiResultDTO.setVersion(apiId.getVersion());
-        apiResultDTO.setProvider(apiId.getProviderName());
+        apiResultDTO.setProvider(APIUtil.replaceEmailDomainBack(apiId.getProviderName()));
         return apiResultDTO;
     }
 }

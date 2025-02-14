@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.GovernancePolicyDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.APIMGovernancePolicyDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PaginationDTO;
 import javax.validation.constraints.*;
 
@@ -25,16 +25,16 @@ import javax.validation.Valid;
 
 @ApiModel(description = "A list of governance policies.")
 
-public class GovernancePolicyListDTO   {
+public class APIMGovernancePolicyListDTO   {
   
     private Integer count = null;
-    private List<GovernancePolicyDTO> list = new ArrayList<GovernancePolicyDTO>();
+    private List<APIMGovernancePolicyDTO> list = new ArrayList<APIMGovernancePolicyDTO>();
     private PaginationDTO pagination = null;
 
   /**
    * Number of governance policies returned.
    **/
-  public GovernancePolicyListDTO count(Integer count) {
+  public APIMGovernancePolicyListDTO count(Integer count) {
     this.count = count;
     return this;
   }
@@ -52,7 +52,7 @@ public class GovernancePolicyListDTO   {
   /**
    * List of governance policies.
    **/
-  public GovernancePolicyListDTO list(List<GovernancePolicyDTO> list) {
+  public APIMGovernancePolicyListDTO list(List<APIMGovernancePolicyDTO> list) {
     this.list = list;
     return this;
   }
@@ -61,16 +61,16 @@ public class GovernancePolicyListDTO   {
   @ApiModelProperty(value = "List of governance policies.")
       @Valid
   @JsonProperty("list")
-  public List<GovernancePolicyDTO> getList() {
+  public List<APIMGovernancePolicyDTO> getList() {
     return list;
   }
-  public void setList(List<GovernancePolicyDTO> list) {
+  public void setList(List<APIMGovernancePolicyDTO> list) {
     this.list = list;
   }
 
   /**
    **/
-  public GovernancePolicyListDTO pagination(PaginationDTO pagination) {
+  public APIMGovernancePolicyListDTO pagination(PaginationDTO pagination) {
     this.pagination = pagination;
     return this;
   }
@@ -95,10 +95,10 @@ public class GovernancePolicyListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    GovernancePolicyListDTO governancePolicyList = (GovernancePolicyListDTO) o;
-    return Objects.equals(count, governancePolicyList.count) &&
-        Objects.equals(list, governancePolicyList.list) &&
-        Objects.equals(pagination, governancePolicyList.pagination);
+    APIMGovernancePolicyListDTO apIMGovernancePolicyList = (APIMGovernancePolicyListDTO) o;
+    return Objects.equals(count, apIMGovernancePolicyList.count) &&
+        Objects.equals(list, apIMGovernancePolicyList.list) &&
+        Objects.equals(pagination, apIMGovernancePolicyList.pagination);
   }
 
   @Override
@@ -109,7 +109,7 @@ public class GovernancePolicyListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class GovernancePolicyListDTO {\n");
+    sb.append("class APIMGovernancePolicyListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");

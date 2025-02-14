@@ -3730,17 +3730,25 @@ public final class APIUtil {
      */
     public static void updateAvailableTiersByOrganization(DevPortalAPIInfo devPortalAPIInfo, String organization) {
 
-        Set<String> availableTiers = devPortalAPIInfo.getAvailableTierNames();
-        Set<OrganizationTiers> availableTiersForOrganizations = devPortalAPIInfo.getAvailableTiersForOrganizations();
         if (organization != null) {
+            Set<OrganizationTiers> availableTiersForOrganizations = devPortalAPIInfo.getAvailableTiersForOrganizations();
+            Set<String> availableTiers = new HashSet<>();
             for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
                 String orgID = organizationTiers.getOrganizationID();
                 if (organization.equals(orgID)) {
                     availableTiers = organizationTiers.getTiers();
-                    devPortalAPIInfo.setAvailableTierNames(availableTiers);
                     break;
                 }
             }
+            if (availableTiers.isEmpty()) {
+                for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
+                    if (APIConstants.DEFAULT_VISIBLE_ORG.equals(organizationTiers.getOrganizationID())) {
+                        availableTiers = organizationTiers.getTiers();
+                        break;
+                    }
+                }
+            }
+            devPortalAPIInfo.setAvailableTierNames(availableTiers);
         }
     }
 
@@ -10722,7 +10730,7 @@ public final class APIUtil {
         gatewayList.add(APIConstants.OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE);
         policySpecification.setSupportedGateways(gatewayList);
 
-        ArrayList<String> supportedAPIList = new ArrayList<>();
+        ArrayList<Object> supportedAPIList = new ArrayList<>();
         supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP);
         supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_SOAP);
         supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_SOAPTOREST);
@@ -11344,7 +11352,7 @@ public final class APIUtil {
         Set<org.wso2.carbon.apimgt.api.model.OrganizationTiers> availableTiersForOrganizations
                 = api.getAvailableTiersForOrganizations();
         if (availableTiersForOrganizations == null || availableTiersForOrganizations.isEmpty()) {
-            return null;
+            return "";
         }
         try {
             ObjectMapper objectMapper = new ObjectMapper();
