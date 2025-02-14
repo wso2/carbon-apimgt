@@ -199,6 +199,9 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                                                 String organization) throws APIMGovernanceException {
 
 
+        // Clear previous compliance data for the artifact
+        complianceManager.deleteArtifact(artifactRefId, artifactType, organization);
+
         Set<String> allPoliciesForLabel = new HashSet<>();
         for (String label : labels) {
             allPoliciesForLabel.addAll(new ArrayList<>(policyManager
