@@ -67,6 +67,7 @@ import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -87,7 +88,7 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
@@ -110,6 +111,8 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsTokenBasedThrottlingConfigurationDTO;
@@ -144,6 +147,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -250,17 +254,31 @@ public class PublisherCommonUtils {
             OrganizationInfo orginfo)
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
         API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
+       
         if (orginfo != null && orginfo.getOrganizationId() != null) {
             String visibleOrgs = apiToUpdate.getVisibleOrganizations();
-            if (!StringUtils.isEmpty(visibleOrgs)
-                    && !APIConstants.DEFAULT_VISIBLE_ORG.equals(apiToUpdate.getVisibleOrganizations())) {
-                // set the current user organizatin as visible organization.
+            if (!StringUtils.isEmpty(visibleOrgs) && APIConstants.VISIBLE_ORG_ALL.equals(visibleOrgs)) {
+                // IF visibility is all
+                apiToUpdate.setVisibleOrganizations(APIConstants.VISIBLE_ORG_ALL);
+            } else if (StringUtils.isEmpty(visibleOrgs) || APIConstants.VISIBLE_ORG_NONE.equals(visibleOrgs)) {
+                // IF visibility is none 
+                apiToUpdate.setVisibleOrganizations(orginfo.getOrganizationId()); // set to current org
+            } else {
+                // add current id to existing visibility list
                 visibleOrgs = visibleOrgs + "," + orginfo.getOrganizationId();
                 apiToUpdate.setVisibleOrganizations(visibleOrgs);
             }
         }
+        
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
+        
+        if (apiUpdated.getVisibleOrganizations() != null) {
+            List<String> orgList = new ArrayList<>(Arrays.asList(apiUpdated.getVisibleOrganizations().split(",")));
+            orgList.remove(orginfo.getOrganizationId());  // remove current user org
+            String visibleOrgs = StringUtils.join(orgList, ',');
+            apiUpdated.setVisibleOrganizations(visibleOrgs);
+        }
         if (apiUpdated != null && !StringUtils.isEmpty(apiUpdated.getEndpointConfig())) {
             JsonObject endpointConfig = JsonParser.parseString(apiUpdated.getEndpointConfig()).getAsJsonObject();
             if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
@@ -909,6 +927,72 @@ public class PublisherCommonUtils {
     }
 
     /**
+     * This method will encrypt the OAuth 2.0 API Key and API Secret.
+     *
+     * @param cryptoUtil             cryptography util
+     * @param oldApiSecret           existing API secret
+     * @param apiEndpointDTO          APIendpointDto
+     * @param endpointConfig          endpointDTO config
+     * @throws CryptoException        if an error occurs while encrypting and base64 encode
+     * @throws APIManagementException if an error occurs due to a problem in the endpointConfig payload
+     */
+    public static void encryptEndpointSecurityOAuthCredentials(APIEndpointDTO apiEndpointDTO, CryptoUtil cryptoUtil,
+            String oldApiSecret, Map endpointConfig)
+            throws CryptoException, APIManagementException {
+        // OAuth 2.0 backend protection: API Key and API Secret encryption
+        String customParametersString;
+        if (endpointConfig != null) {
+            if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
+                Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                String endpointSecurityType = (String) endpointSecurity
+                        .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                // Change default value of customParameters JSONObject to String
+                if (!(endpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String)) {
+                    LinkedHashMap<String, String> customParametersHashMap = (LinkedHashMap<String, String>)
+                            endpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                    customParametersString = JSONObject.toJSONString(customParametersHashMap);
+                } else if (endpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) != null) {
+                    customParametersString = (String) endpointSecurity
+                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+                } else {
+                    customParametersString = "{}";
+                }
+
+                endpointSecurity.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
+                if (APIConstants.OAuthConstants.OAUTH.equals(endpointSecurityType)) {
+                    if (endpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null
+                            && StringUtils.isNotBlank(
+                            endpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString())) {
+                        String apiSecret = endpointSecurity
+                                .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                        String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
+                        endpointSecurity.put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
+                    } else if (StringUtils.isNotBlank(oldApiSecret)) {
+                        endpointSecurity.put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldApiSecret);
+                    } else {
+                        String errorMessage = "Client secret is not provided for production endpoint security";
+                        throw new APIManagementException(
+                                ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
+                    }
+                }
+
+                //encrypt password
+                if (endpointSecurity.containsKey(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PASSWORD)) {
+                    String passWordSecret = endpointSecurity.get(
+                            APIConstants.OAuthConstants.ENDPOINT_SECURITY_PASSWORD).toString();
+                    if (StringUtils.isNotBlank(passWordSecret)) {
+                        endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PASSWORD,
+                                cryptoUtil.encryptAndBase64Encode(passWordSecret.getBytes()));
+                    }
+                }
+                endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                apiEndpointDTO.setEndpointConfig(endpointConfig);
+            }
+        }
+    }
+
+    /**
      * Check whether the token has APIDTO class level Scope annotation.
      *
      * @return true if the token has APIDTO class level Scope annotation
@@ -1336,9 +1420,14 @@ public class PublisherCommonUtils {
         }
         if (orgInfo != null && orgInfo.getOrganizationId() != null) {
             String visibleOrgs = apiToAdd.getVisibleOrganizations();
-            if (!StringUtils.isEmpty(visibleOrgs)
-                    && !APIConstants.DEFAULT_VISIBLE_ORG.equals(apiToAdd.getVisibleOrganizations())) {
-                // set the current user organizatin as visible organization.
+            if (!StringUtils.isEmpty(visibleOrgs) && APIConstants.VISIBLE_ORG_ALL.equals(visibleOrgs)) {
+                // IF visibility is all
+                apiToAdd.setVisibleOrganizations(APIConstants.VISIBLE_ORG_ALL);
+            } else if (StringUtils.isEmpty(visibleOrgs) && APIConstants.VISIBLE_ORG_NONE.equals(visibleOrgs)) {
+                // IF visibility is none 
+                apiToAdd.setVisibleOrganizations(orgInfo.getOrganizationId()); // set to current org
+            } else {
+                // add current id to existing visibility list
                 visibleOrgs = visibleOrgs + "," + orgInfo.getOrganizationId();
                 apiToAdd.setVisibleOrganizations(visibleOrgs);
             }
@@ -2931,6 +3020,266 @@ public class PublisherCommonUtils {
     }
 
     /**
+     * Get All endpoints of an API.
+     *
+     * @param uuid         Unique identifier of API
+     * @param apiProvider  API Provider
+     * @param organization Organization of logged-in user
+     * @return APIEndpointListDTO object
+     * @throws APIManagementException if there is en error while getting the API Endpoints' information
+     */
+    public static APIEndpointListDTO getApiEndpoints(String uuid, APIProvider apiProvider, String organization)
+            throws APIManagementException {
+        List<APIEndpointInfo> apiEndpointsList = apiProvider.getAllAPIEndpointsByUUID(uuid, organization);
+
+        // Check if default production and/or sandbox endpoints are inclusive in the apiEndpointsList. If not, add them.
+        Map<String, APIEndpointInfo> defaultEndpointsFromEndpointConfig = getAPIEndpointsFromEndpointConfig(uuid,
+                apiProvider);
+        APIEndpointInfo defaultProductionEndpoint = defaultEndpointsFromEndpointConfig.get(
+                APIConstants.APIEndpoint.PRODUCTION);
+        APIEndpointInfo defaultSandboxEndpoint = defaultEndpointsFromEndpointConfig.get(
+                APIConstants.APIEndpoint.SANDBOX);
+
+        for (APIEndpointInfo apiEndpointInfo : apiEndpointsList) {
+            if (apiEndpointInfo.getEndpointUuid().equals(defaultProductionEndpoint.getEndpointUuid())) {
+                defaultEndpointsFromEndpointConfig.remove(APIConstants.APIEndpoint.PRODUCTION);
+            }
+            if (apiEndpointInfo.getEndpointUuid().equals(defaultSandboxEndpoint.getEndpointUuid())) {
+                defaultEndpointsFromEndpointConfig.remove(APIConstants.APIEndpoint.SANDBOX);
+            }
+        }
+        if (!defaultEndpointsFromEndpointConfig.isEmpty()) {
+            apiEndpointsList.addAll(defaultEndpointsFromEndpointConfig.values());
+        }
+
+        return APIMappingUtil.fromAPIEndpointListToDTO(apiEndpointsList);
+
+    }
+
+    public static Map<String, APIEndpointInfo> getAPIEndpointsFromEndpointConfig(String apiUUID,
+            APIProvider apiProvider) {
+        Map<String, APIEndpointInfo> defaultAPIEndpoints = new HashMap<>();
+        String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        try {
+            API api = apiProvider.getAPIbyUUID(apiUUID, organization);
+            if (api == null) {
+                throw new APIManagementException("Error occurred while getting API with UUID " + apiUUID,
+                        ExceptionCodes.API_NOT_FOUND);
+            }
+            String endpointConfig = api.getEndpointConfig();
+            if (StringUtils.isNotEmpty(endpointConfig)) {
+                Gson gson = new Gson();
+                Type type = new TypeToken<Map<String, Object>>() {
+                }.getType();
+                Map<String, Object> endpointConfigMap = gson.fromJson(endpointConfig, type);
+                String endpointType = endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).toString();
+                Object endpointSecurityObj = endpointConfigMap.get(APIConstants.ENDPOINT_SECURITY);
+
+                // Add primary production endpoint from endpoint config
+                if (endpointConfigMap.containsKey(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+                    Map<String, Object> productionEndpointConfig = new HashMap<>();
+                    productionEndpointConfig.put(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE, endpointType);
+                    productionEndpointConfig.put(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS,
+                            endpointConfigMap.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS));
+                    if (endpointSecurityObj != null) {
+                        String endpointSecurity = gson.toJson(endpointSecurityObj);
+                        JsonObject endpointSecurityJsonObj = (JsonObject) JsonParser.parseString(endpointSecurity);
+                        // Remove sandbox security (if defined)
+                        if (endpointSecurityJsonObj.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                            endpointSecurityJsonObj.remove(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                        }
+                        productionEndpointConfig.put(APIConstants.ENDPOINT_SECURITY,
+                                gson.fromJson(endpointSecurityJsonObj, Object.class));
+                    }
+                    APIEndpointInfo primaryProductionEndpoint = getAPIEndpointFromEndpointConfig(apiUUID,
+                            productionEndpointConfig, APIConstants.APIEndpoint.PRODUCTION, organization);
+                    defaultAPIEndpoints.put(APIConstants.APIEndpoint.PRODUCTION, primaryProductionEndpoint);
+                }
+
+                // Add primary sandbox endpoint from endpoint config
+                if (endpointConfigMap.containsKey(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+                    Map<String, Object> sandboxEndpointConfig = new HashMap<>();
+                    sandboxEndpointConfig.put(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE, endpointType);
+                    sandboxEndpointConfig.put(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS,
+                            endpointConfigMap.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS));
+                    if (endpointSecurityObj != null) {
+                        String endpointSecurity = gson.toJson(endpointSecurityObj);
+                        JsonObject endpointSecurityJsonObj = (JsonObject) JsonParser.parseString(endpointSecurity);
+                        // Remove production security (if defined)
+                        if (endpointSecurityJsonObj.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                            endpointSecurityJsonObj.remove(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                        }
+                        sandboxEndpointConfig.put(APIConstants.ENDPOINT_SECURITY,
+                                gson.fromJson(endpointSecurityJsonObj, Object.class));
+                    }
+                    APIEndpointInfo primarySandboxEndpoint = getAPIEndpointFromEndpointConfig(apiUUID,
+                            sandboxEndpointConfig, APIConstants.APIEndpoint.SANDBOX, organization);
+                    defaultAPIEndpoints.put(APIConstants.APIEndpoint.SANDBOX, primarySandboxEndpoint);
+                }
+            }
+            return defaultAPIEndpoints;
+        } catch (APIManagementException e) {
+            log.error("Error occurred while getting API with UUID " + apiUUID, e);
+        }
+        return null;
+    }
+
+    public static APIEndpointInfo getAPIEndpointFromEndpointConfig(String apiUUID, Map<String, Object> endpointConfig,
+            String environment, String organization) {
+        APIEndpointInfo apiEndpointInfo = new APIEndpointInfo();
+        apiEndpointInfo.setEndpointUuid(apiUUID + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + environment);
+
+        String endpointName;
+        if (Objects.equals(environment, APIConstants.APIEndpoint.PRODUCTION)) {
+            endpointName = APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT;
+        } else {
+            endpointName = APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT;
+        }
+        apiEndpointInfo.setEndpointName(endpointName);
+        apiEndpointInfo.setDeploymentStage(environment);
+        apiEndpointInfo.setEndpointConfig(endpointConfig);
+        return apiEndpointInfo;
+    }
+
+    /**
+     * Get Endpoint of an API By operation UUID.
+     *
+     * @param apiUUID   Unique identifier of API
+     * @param endpointUUID   Unique identifier of endpoint
+     * @param apiProvider
+     * @return APIEndpointDTO object
+     * @throws APIManagementException if there is en error while getting the API Endpoint information
+     */
+    public static APIEndpointDTO getAPIEndpoint(String apiUUID, String endpointUUID, APIProvider apiProvider)
+            throws APIManagementException, JsonProcessingException {
+        String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        API api = apiProvider.getAPIbyUUID(apiUUID, organization);
+        APIEndpointInfo apiEndpoint = apiProvider.getAPIEndpointByUUID(apiUUID, endpointUUID, organization);
+        if (apiEndpoint == null) {
+            String endpointConfig = api.getEndpointConfig();
+            Gson gson = new Gson();
+            Type type = new TypeToken<Map<String, Object>>() {
+            }.getType();
+            Map<String, Object> endpointConfigMap = gson.fromJson(endpointConfig, type);
+
+            if (endpointUUID.equals(apiUUID + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR
+                    + APIConstants.APIEndpoint.PRODUCTION)) {
+                apiEndpoint = getAPIEndpointFromEndpointConfig(apiUUID, endpointConfigMap,
+                        APIConstants.APIEndpoint.PRODUCTION, organization);
+            } else if (endpointUUID.equals(apiUUID + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR
+                    + APIConstants.APIEndpoint.SANDBOX)) {
+                apiEndpoint = getAPIEndpointFromEndpointConfig(apiUUID, endpointConfigMap,
+                        APIConstants.APIEndpoint.SANDBOX, organization);
+            } else {
+                throw new APIManagementException(
+                        "Error occurred while getting Endpoint of API " + apiUUID + " endpoint UUID " + endpointUUID,
+                        ExceptionCodes.API_ENDPOINT_NOT_FOUND);
+            }
+        }
+        return APIMappingUtil.fromAPIEndpointToDTO(apiEndpoint);
+    }
+
+    /**
+     * Update Endpoint of an API By operation UUID.
+     *
+     * @param apiId   Unique identifier of API
+     * @param endpointId   Unique identifier of API
+     * @param apiEndpointDTO
+     * @param organization
+     * @return APIEndpointDTO object
+     * @throws APIManagementException if there is en error while updating an API endpoint
+     */
+    public static APIEndpointDTO updateAPIEndpoint(String apiId, String endpointId, APIEndpointDTO apiEndpointDTO,
+            String organization, APIProvider apiProvider)
+            throws APIManagementException, CryptoException, JsonProcessingException {
+        String oldApiEndpointSecret = null;
+        APIEndpointDTO oldEndpointDto = getAPIEndpoint(apiId, endpointId, apiProvider);
+        Map oldEndpointConfig = (Map) oldEndpointDto.getEndpointConfig();
+        if (oldEndpointConfig != null) {
+            if ((oldEndpointConfig.containsKey(APIConstants.ENDPOINT_SECURITY))) {
+                Map oldEndpointSecurity = (Map) oldEndpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                if (oldEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_ID) != null
+                        && oldEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null) {
+                    oldApiEndpointSecret = oldEndpointSecurity
+                            .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                }
+            }
+        }
+
+        Map endpointConfig = (Map) apiEndpointDTO.getEndpointConfig();
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+
+        // OAuth 2.0 backend protection: API Key and API Secret encryption
+        encryptEndpointSecurityOAuthCredentials(apiEndpointDTO, cryptoUtil, oldApiEndpointSecret, endpointConfig);
+
+        // AWS Lambda: secret key encryption while updating the API
+        if (apiEndpointDTO.getEndpointConfig() != null) {
+            if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                if (!StringUtils.isEmpty(secretKey)) {
+                    if (!APIConstants.AWS_SECRET_KEY.equals(secretKey)) {
+                        String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                        endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                        apiEndpointDTO.setEndpointConfig(endpointConfig);
+                    } else {
+                        String encryptedSecretKey = (String) oldEndpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                        endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                        apiEndpointDTO.setEndpointConfig(endpointConfig);
+                    }
+                }
+            }
+        }
+
+        APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
+        if (apiEndpoint.getEndpointUuid() == null) {
+            apiEndpoint.setEndpointUuid(endpointId);
+        }
+        APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiId, apiEndpoint, organization);
+        if (apiEndpointUpdated == null) {
+            throw new APIManagementException("Error occurred while updating operation Endpoint of API " + apiId +
+                    "endpoint UUID" + endpointId, ExceptionCodes.ERROR_UPDATING_API_ENDPOINT_API);
+        }
+        return APIMappingUtil.fromAPIEndpointToDTO(apiEndpointUpdated);
+    }
+
+    /**
+     * Insert new endpoint for an API.
+     *
+     * @param apiId Unique identifier of API.
+     * @param apiEndpointDTO payload of Endpoint
+     * @param organization
+     * @param apiProvider
+     * @return
+     * @throws APIManagementException if there is en error while inserting an API Endpoint information
+     * @throws CryptoException if there is en error while Crypto
+     */
+    public static String addAPIEndpoint(String apiId, APIEndpointDTO apiEndpointDTO, String organization,
+            APIProvider apiProvider) throws APIManagementException, CryptoException {
+        Map endpointConfig = (Map) apiEndpointDTO.getEndpointConfig();
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        // OAuth 2.0 backend protection: API Key and API Secret encryption
+        encryptEndpointSecurityOAuthCredentials(apiEndpointDTO, cryptoUtil, StringUtils.EMPTY, endpointConfig);
+        // AWS Lambda: secret key encryption while creating the API
+        if (apiEndpointDTO.getEndpointConfig() != null) {
+            if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+                String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+                if (!StringUtils.isEmpty(secretKey)) {
+                    String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                    endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                    apiEndpointDTO.setEndpointConfig(endpointConfig);
+                }
+            }
+        }
+        APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
+        String apiEndpointId = apiProvider.addAPIEndpoint(apiId, apiEndpoint, organization);
+        if (apiEndpointId == null) {
+            throw new APIManagementException("Error occurred while getting Endpoint of API " + apiId,
+                    ExceptionCodes.ERROR_INSERTING_API_ENDPOINT_API);
+        }
+        return apiEndpointId;
+    }
+
+    /**
      * @param validationResponse Response of a Async API definition validation call
      * @param isServiceAPI       Whether this is a service API
      * @param apiDto             API DTO
@@ -3047,7 +3396,7 @@ public class PublisherCommonUtils {
                     return responseMap;
                 }
             }
-        } catch (GovernanceException e) {
+        } catch (APIMGovernanceException e) {
             log.error("Error occurred while executing governance for API " + artifactID, e);
         }
         return responseMap;
@@ -3058,7 +3407,7 @@ public class PublisherCommonUtils {
         CompletableFuture.runAsync(() -> {
             try {
                 apimGovernanceService.evaluateComplianceAsync(artifactID, type, state, organization);
-            } catch (GovernanceException e) {
+            } catch (APIMGovernanceException e) {
                 log.error("Error occurred while scheduling governance validation for " + artifactID, e);
             }
         });
@@ -3073,9 +3422,9 @@ public class PublisherCommonUtils {
             byte[] fileBytes = IOUtils.toByteArray(fileInputStream);
 
             ArtifactComplianceDryRunInfo artifactComplianceDryRunInfo = apimGovernanceService
-                       .evaluateComplianceDryRunSync(ExtendedArtifactType.REST_API, fileBytes, organization);
-               return responseMap;
-        } catch (GovernanceException e) {
+                    .evaluateComplianceDryRunSync(ExtendedArtifactType.REST_API, fileBytes, organization);
+            return responseMap;
+        } catch (APIMGovernanceException e) {
             log.error("Error occurred while executing governance ", e);
         } finally {
             return responseMap;
@@ -3089,26 +3438,20 @@ public class PublisherCommonUtils {
      * @return JSON response with the compliance violations
      */
 
-    public static String buildBadRequestResponse(ArtifactComplianceInfo artifactComplianceInfo) {
+    public static String buildBadRequestResponse(ArtifactComplianceInfo artifactComplianceInfo) throws
+            APIManagementException {
         List<RuleViolation> blockingViolations = artifactComplianceInfo.getBlockingRuleViolations();
         List<RuleViolation> nonBlockingViolations = artifactComplianceInfo.getNonBlockingViolations();
 
-        List<Map<String, String>> violations = new ArrayList<>();
+        Map<String, List<Map<String, String>>> violations = new HashMap<>();
+        violations.put("blockingViolations", new ArrayList<>());
+        violations.put("nonBlockingViolations", new ArrayList<>());
 
         for (RuleViolation violation : blockingViolations) {
-            Map<String, String> violationDetails = new HashMap<>();
-            violationDetails.put("ruleCode", violation.getRuleName());
-            violationDetails.put("violatedPath", violation.getViolatedPath());
-            violationDetails.put("severity", violation.getSeverity().name());
-            violations.add(violationDetails);
+            violations.get("blockingViolations").add(getViolationMapFromViolation(violation));
         }
-
         for (RuleViolation violation : nonBlockingViolations) {
-            Map<String, String> violationDetails = new HashMap<>();
-            violationDetails.put("ruleCode", violation.getRuleName());
-            violationDetails.put("violatedPath", violation.getViolatedPath());
-            violationDetails.put("severity", violation.getSeverity().name());
-            violations.add(violationDetails);
+            violations.get("nonBlockingViolations").add(getViolationMapFromViolation(violation));
         }
 
         // Convert violations list to JSON object
@@ -3117,12 +3460,28 @@ public class PublisherCommonUtils {
         try {
             jsonViolations = objectMapper.writeValueAsString(violations);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Error generating JSON response for governance compliance ", e);
+            throw new APIManagementException("Error generating JSON response for governance compliance ", e);
         }
         return jsonViolations;
     }
 
-    public static void executeGovernanceOnLabelAttach(List<Label> labels, String artifactType,  String artifactId,
+    /**
+     * Get a map of violation details from a RuleViolation object.
+     *
+     * @param violation RuleViolation object
+     * @return Map of violation details
+     */
+    private static Map<String, String> getViolationMapFromViolation(RuleViolation violation) {
+        Map<String, String> violationDetails = new HashMap<>();
+        violationDetails.put("ruleName", violation.getRuleName());
+        violationDetails.put("ruleType", violation.getRuleType().name());
+        violationDetails.put("violatedPath", violation.getViolatedPath());
+        violationDetails.put("severity", violation.getSeverity().name());
+        violationDetails.put("message", violation.getRuleMessage());
+        return violationDetails;
+    }
+
+    public static void executeGovernanceOnLabelAttach(List<Label> labels, String artifactType, String artifactId,
                                                       String organization) {
         List<String> labelsIdList = new ArrayList<>();
         for (Label label : labels) {
@@ -3131,7 +3490,7 @@ public class PublisherCommonUtils {
         try {
             apimGovernanceService.evaluateComplianceOnLabelAttach(artifactId, ArtifactType.fromString(artifactType),
                     labelsIdList, organization);
-        } catch (GovernanceException e) {
+        } catch (APIMGovernanceException e) {
             log.info("Error occurred while executing governance on attached labels for API " + artifactId, e);
         }
     }
@@ -3141,7 +3500,7 @@ public class PublisherCommonUtils {
             for (Label labelId : label) {
                 apimGovernanceService.deleteGovernanceDataForLabel(labelId.getLabelId(), organization);
             }
-        } catch (GovernanceException e) {
+        } catch (APIMGovernanceException e) {
             log.info("Error occurred while deleting governance data on deletion of label " + label, e);
         }
     }
@@ -3150,7 +3509,7 @@ public class PublisherCommonUtils {
         try {
             apimGovernanceService.clearArtifactComplianceInfo(artifactId, ArtifactType.fromString(artifactType),
                     organization);
-        } catch (GovernanceException e) {
+        } catch (APIMGovernanceException e) {
             log.info("Error occurred while deleting governance data on deletion of  " + ArtifactType.API +
                     " " + artifactId, e);
         }

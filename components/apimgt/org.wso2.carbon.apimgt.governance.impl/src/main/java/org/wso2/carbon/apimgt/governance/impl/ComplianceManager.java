@@ -21,17 +21,17 @@ package org.wso2.carbon.apimgt.governance.impl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceAction;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceActionType;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernanceAction;
-import org.wso2.carbon.apimgt.governance.api.model.GovernanceActionType;
-import org.wso2.carbon.apimgt.governance.api.model.GovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyAdherenceSate;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
@@ -81,10 +81,10 @@ public class ComplianceManager {
      * @param policyId     Policy ID
      * @param organization Organization
      */
-    public void handlePolicyChangeEvent(String policyId, String organization) throws GovernanceException {
+    public void handlePolicyChangeEvent(String policyId, String organization) throws APIMGovernanceException {
 
         // Get the policy and its labels and associated governable states
-        GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId);
+        APIMGovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
 
         List<String> labels = policy.getLabels();
         List<APIMGovernableState> apimGovernableStates = policy.getGovernableStates();
@@ -111,11 +111,11 @@ public class ComplianceManager {
      * Get Artifacts by Governable States
      *
      * @param apimGovernableStates List of governable states
-     * @param organization     Organization
+     * @param organization         Organization
      * @return List of unique artifact information
      */
     private List<ArtifactInfo> getArtifactsByGovernableStates(List<APIMGovernableState> apimGovernableStates,
-                                                              String organization) throws GovernanceException {
+                                                              String organization) throws APIMGovernanceException {
         Map<ArtifactType, List<String>> artifactsMap = APIMGovernanceUtil.getAllArtifacts(organization);
         return filterAndCollectArtifacts(artifactsMap, apimGovernableStates);
     }
@@ -123,13 +123,13 @@ public class ComplianceManager {
     /**
      * Get Artifacts by Labels and Governable State
      *
-     * @param labels           List of labels
+     * @param labels               List of labels
      * @param apimGovernableStates List of governable states
      * @return List of unique artifact information
      */
     private List<ArtifactInfo> getArtifactsByLabelsAndGovernableStates(List<String> labels,
                                                                        List<APIMGovernableState> apimGovernableStates)
-            throws GovernanceException {
+            throws APIMGovernanceException {
         List<ArtifactInfo> artifactInfoList = new ArrayList<>();
         Set<String> artifactRefIds = new HashSet<>(); // Track unique artifact IDs
 
@@ -154,13 +154,13 @@ public class ComplianceManager {
     /**
      * Filter and collect artifacts based on governable states
      *
-     * @param artifactsMap     Map of artifact type to list of artifact IDs
+     * @param artifactsMap         Map of artifact type to list of artifact IDs
      * @param apimGovernableStates List of governable states
      * @return List of unique artifact information
      */
     private List<ArtifactInfo> filterAndCollectArtifacts(Map<ArtifactType, List<String>> artifactsMap,
                                                          List<APIMGovernableState> apimGovernableStates)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         List<ArtifactInfo> artifactInfoList = new ArrayList<>();
 
@@ -194,7 +194,7 @@ public class ComplianceManager {
      * @param organization Organization
      */
 
-    public void handleRulesetChangeEvent(String rulesetId, String organization) throws GovernanceException {
+    public void handleRulesetChangeEvent(String rulesetId, String organization) throws APIMGovernanceException {
         List<String> policies = rulesetMgtDAO.getAssociatedPoliciesForRuleset(rulesetId, organization);
 
         for (String policyId : policies) {
@@ -209,12 +209,12 @@ public class ComplianceManager {
      * @param artifactType  Artifact Type
      * @param govPolicies   List of governance policies to be evaluated
      * @param organization  Organization
-     * @throws GovernanceException If an error occurs while handling the API compliance evaluation
+     * @throws APIMGovernanceException If an error occurs while handling the API compliance evaluation
      */
 
     public void handleComplianceEvalAsync(String artifactRefId, ArtifactType artifactType,
                                           List<String> govPolicies,
-                                          String organization) throws GovernanceException {
+                                          String organization) throws APIMGovernanceException {
 
         if (govPolicies != null && !govPolicies.isEmpty()) {
             complianceMgtDAO.addComplianceEvalRequest(artifactRefId, artifactType, govPolicies, organization);
@@ -230,11 +230,11 @@ public class ComplianceManager {
      * @param rulesetId     Ruleset ID
      * @param organization  Organization
      * @return List of Rule Violations
-     * @throws GovernanceException If an error occurs while getting the rule violations
+     * @throws APIMGovernanceException If an error occurs while getting the rule violations
      */
 
     public List<RuleViolation> getRuleViolations(String artifactRefId, ArtifactType artifactType,
-                                                 String rulesetId, String organization) throws GovernanceException {
+                                                 String rulesetId, String organization) throws APIMGovernanceException {
         return complianceMgtDAO.getRuleViolations(artifactRefId, artifactType, rulesetId, organization);
     }
 
@@ -245,13 +245,13 @@ public class ComplianceManager {
      * @param artifactType  Artifact Type
      * @param organization  Organization
      * @return Map of Rule Violations based on severity
-     * @throws GovernanceException If an error occurs while getting the rule violations
+     * @throws APIMGovernanceException If an error occurs while getting the rule violations
      */
 
     public Map<RuleSeverity, List<RuleViolation>> getSeverityBasedRuleViolationsForArtifact(String artifactRefId,
                                                                                             ArtifactType artifactType,
                                                                                             String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
         List<RuleViolation> ruleViolations = complianceMgtDAO.getRuleViolationsForArtifact(artifactRefId, artifactType,
                 organization);
         Map<RuleSeverity, List<RuleViolation>> severityBasedRuleViolations = new HashMap<>();
@@ -275,12 +275,12 @@ public class ComplianceManager {
      * @param artifactType  Artifact Type
      * @param organization  Organization
      * @return List of evaluated policy IDs
-     * @throws GovernanceException If an error occurs while getting the list of evaluated policies
+     * @throws APIMGovernanceException If an error occurs while getting the list of evaluated policies
      */
 
     public List<String> getEvaluatedPoliciesForArtifact(String artifactRefId, ArtifactType
             artifactType, String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
         return complianceMgtDAO.getEvaluatedPoliciesForArtifact(artifactRefId, artifactType, organization);
     }
 
@@ -292,12 +292,12 @@ public class ComplianceManager {
      * @param policyRulesets List of rulesets for the policy
      * @param organization   Organization
      * @return List of evaluated rulesets IDs
-     * @throws GovernanceException If an error occurs while getting the list of evaluated rulesets
+     * @throws APIMGovernanceException If an error occurs while getting the list of evaluated rulesets
      */
 
     public List<String> getEvaluatedRulesetsForArtifactAndPolicy(String artifactRefId, ArtifactType artifactType,
                                                                  List<RulesetInfo> policyRulesets, String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
         List<String> evaluatedRulesetsForArtifact =
                 complianceMgtDAO.getEvaluatedRulesetsForArtifact(artifactRefId, artifactType, organization);
         List<String> evaluatedRulesetsForPolicy = new ArrayList<>();
@@ -311,16 +311,29 @@ public class ComplianceManager {
     }
 
     /**
+     * Get list of compliance pending artifacts
+     *
+     * @param artifactType Artifact Type
+     * @param organization Organization
+     * @return List of compliance pending artifacts
+     * @throws APIMGovernanceException If an error occurs while getting the compliance pending artifacts
+     */
+    public List<String> getCompliancePendingArtifacts(ArtifactType artifactType, String organization)
+            throws APIMGovernanceException {
+        return complianceMgtDAO.getCompliancePendingArtifacts(artifactType, organization);
+    }
+
+    /**
      * Get a map of compliant and non-compliant artifacts
      *
      * @param artifactType Artifact Type
      * @param organization Organization
      * @return Map of compliant and non-compliant artifacts
-     * @throws GovernanceException If an error occurs while getting the compliant and non-compliant artifacts
+     * @throws APIMGovernanceException If an error occurs while getting the compliant and non-compliant artifacts
      */
 
     public Map<ArtifactComplianceState, List<String>> getComplianceStateOfEvaluatedArtifacts(
-            ArtifactType artifactType, String organization) throws GovernanceException {
+            ArtifactType artifactType, String organization) throws APIMGovernanceException {
         List<String> allComplianceEvaluatedArtifacts =
                 complianceMgtDAO.getAllComplianceEvaluatedArtifacts(artifactType, organization);
         List<String> nonCompliantArtifacts = complianceMgtDAO.getNonCompliantArtifacts(artifactType, organization);
@@ -345,18 +358,19 @@ public class ComplianceManager {
      *
      * @param organization Organization
      * @return Map of policies followed and violated
-     * @throws GovernanceException If an error occurs while getting the policy adherence
+     * @throws APIMGovernanceException If an error occurs while getting the policy adherence
      */
 
     public Map<PolicyAdherenceSate, List<String>> getAdherenceStateofEvaluatedPolicies(String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
         List<String> allComplianceEvaluatedPolicies = complianceMgtDAO
                 .getAllComplianceEvaluatedPolicies(organization);
 
         // Get a map of policies to their rulesets
         Map<String, List<String>> policyRulesetsMap = new HashMap<>();
         for (String policyId : allComplianceEvaluatedPolicies) {
-            List<String> rulesets = policyMgtDAO.getRulesetsIdsByPolicyId(policyId);
+            List<String> rulesets = policyMgtDAO.getRulesetsByPolicyId(policyId, organization)
+                    .stream().map(RulesetInfo::getId).collect(Collectors.toList());
             policyRulesetsMap.put(policyId, rulesets);
         }
 
@@ -395,11 +409,11 @@ public class ComplianceManager {
      * @param organization                  Organization
      * @param resolveArtifactNameAndVersion Whether the artifact name,version should be resolved
      * @return Map of artifacts evaluated by policy
-     * @throws GovernanceException If an error occurs while getting the artifacts evaluated by policy
+     * @throws APIMGovernanceException If an error occurs while getting the artifacts evaluated by policy
      */
 
     public Map<ArtifactComplianceState, List<ArtifactInfo>> getArtifactsComplianceForPolicy
-    (String policyId, String organization, boolean resolveArtifactNameAndVersion) throws GovernanceException {
+    (String policyId, String organization, boolean resolveArtifactNameAndVersion) throws APIMGovernanceException {
 
 
         Map<ArtifactComplianceState, List<ArtifactInfo>> complianceStateOfEvaluatedArtifacts = new HashMap<>();
@@ -407,8 +421,9 @@ public class ComplianceManager {
         complianceStateOfEvaluatedArtifacts.put(ArtifactComplianceState.COMPLIANT, new ArrayList<>());
         complianceStateOfEvaluatedArtifacts.put(ArtifactComplianceState.NON_COMPLIANT, new ArrayList<>());
 
-        List<ArtifactInfo> evaluatedArtifacts = complianceMgtDAO.getEvaluatedArtifactsForPolicy(policyId);
-        List<String> applicableRulesets = policyMgtDAO.getRulesetsIdsByPolicyId(policyId);
+        List<ArtifactInfo> evaluatedArtifacts = complianceMgtDAO.getEvaluatedArtifactsForPolicy(policyId, organization);
+        List<String> applicableRulesets = policyMgtDAO.getRulesetsByPolicyId(policyId, organization).
+                stream().map(RulesetInfo::getId).collect(Collectors.toList());
 
         for (ArtifactInfo artifactInfo : evaluatedArtifacts) {
             String artifactRefId = artifactInfo.getArtifactRefId();
@@ -438,12 +453,13 @@ public class ComplianceManager {
      * @param rulesetId     Ruleset ID
      * @param organization  Organization
      * @return Whether the ruleset is evaluated for the artifact
-     * @throws GovernanceException If an error occurs while checking whether the ruleset is evaluated for the artifact
+     * @throws APIMGovernanceException If an error occurs while checking whether
+     *                                 the ruleset is evaluated for the artifact
      */
 
     public boolean isRulesetEvaluatedForArtifact(String artifactRefId, ArtifactType artifactType,
                                                  String rulesetId, String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
         return complianceMgtDAO.isRulesetEvaluatedForArtifact(artifactRefId, artifactType,
                 rulesetId, organization);
     }
@@ -460,7 +476,7 @@ public class ComplianceManager {
      * @param state                  State at which artifact should be governed
      * @param organization           Organization
      * @return ArtifactComplianceInfo object
-     * @throws GovernanceException If an error occurs while handling the API compliance evaluation
+     * @throws APIMGovernanceException If an error occurs while handling the API compliance evaluation
      */
 
     public ArtifactComplianceInfo handleComplianceEvalSync(String artifactRefId,
@@ -468,7 +484,7 @@ public class ComplianceManager {
                                                            List<String> govPolicies,
                                                            Map<RuleType, String> artifactProjectContent,
                                                            APIMGovernableState state, String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
@@ -513,8 +529,8 @@ public class ComplianceManager {
         }
 
         for (String policyId : govPolicies) {
-            GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId);
-            List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId);
+            APIMGovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
+            List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId, organization);
 
             // Validate the artifact against each ruleset
             for (Ruleset ruleset : rulesets) {
@@ -537,15 +553,15 @@ public class ComplianceManager {
                     List<RuleViolation> ruleViolations = validationEngine.validate(
                             contentToValidate, ruleset);
 
-                    Map<GovernanceActionType, List<RuleViolation>> blockableAndNonBlockableViolations =
+                    Map<APIMGovernanceActionType, List<RuleViolation>> blockableAndNonBlockableViolations =
                             filterBlockableAndNonBlockableRuleViolations(artifactRefId,
                                     artifactType, policy, ruleViolations, state, organization);
 
                     // Add the rule violations to the compliance info
                     artifactComplianceInfo.addBlockingViolations(blockableAndNonBlockableViolations
-                            .get(GovernanceActionType.BLOCK));
+                            .get(APIMGovernanceActionType.BLOCK));
                     artifactComplianceInfo.addNonBlockingViolations(blockableAndNonBlockableViolations
-                            .get(GovernanceActionType.NOTIFY));
+                            .get(APIMGovernanceActionType.NOTIFY));
                 } else {
                     if (log.isDebugEnabled()) {
                         log.debug("Ruleset artifact type does not match with the artifact's type. Skipping " +
@@ -569,14 +585,14 @@ public class ComplianceManager {
      * @param artifactProjectContent Map of artifact content
      * @param organization           Organization
      * @return ArtifactComplianceDryRunInfo object
-     * @throws GovernanceException If an error occurs while handling the API compliance evaluation
+     * @throws APIMGovernanceException If an error occurs while handling the API compliance evaluation
      */
 
     public ArtifactComplianceDryRunInfo handleComplianceEvalDryRun(ExtendedArtifactType artifactType,
                                                                    List<String> govPolicies, Map<RuleType, String>
                                                                            artifactProjectContent,
                                                                    String organization) throws
-            GovernanceException {
+            APIMGovernanceException {
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
@@ -596,8 +612,8 @@ public class ComplianceManager {
         }
 
         for (String policyId : govPolicies) {
-            GovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId);
-            List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId);
+            APIMGovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
+            List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId, organization);
 
             // Validate the artifact against each ruleset
             for (Ruleset ruleset : rulesets) {
@@ -646,34 +662,37 @@ public class ComplianceManager {
      * @param organization   Organization
      * @return Map of blockable and non-blockable rule violations
      */
-    private Map<GovernanceActionType, List<RuleViolation>>
+    private Map<APIMGovernanceActionType, List<RuleViolation>>
     filterBlockableAndNonBlockableRuleViolations(String artifactRefId, ArtifactType artifactType,
-                                                 GovernancePolicy policy,
+                                                 APIMGovernancePolicy policy,
                                                  List<RuleViolation> ruleViolations, APIMGovernableState state,
-                                                 String organization) {
+                                                 String organization) throws APIMGovernanceException {
 
         // Identify blockable severities from the policy
         List<RuleSeverity> blockableSeverities = new ArrayList<>();
-        for (GovernanceAction governanceAction : policy.getActions()) {
+        for (APIMGovernanceAction governanceAction : policy.getActions()) {
 
             // If the state matches and action is block the violation is blockable
             if (state.equals(governanceAction.getGovernableState()) &&
-                    GovernanceActionType.BLOCK.equals(governanceAction.getType())) {
+                    APIMGovernanceActionType.BLOCK.equals(governanceAction.getType())) {
                 blockableSeverities.add(governanceAction.getRuleSeverity());
             }
         }
 
-        Map<GovernanceActionType, List<RuleViolation>> blockableAndNonBlockableViolations = new HashMap<>();
+        Map<APIMGovernanceActionType, List<RuleViolation>> blockableAndNonBlockableViolations = new HashMap<>();
 
         List<RuleViolation> blockableViolations = new ArrayList<>();
         List<RuleViolation> nonBlockingViolations = new ArrayList<>();
 
         // Iterate through the rule violations and categorize them as blockable and non-blockable
-        // based on blockableSeverities
+        // based on blockable severities
         for (RuleViolation ruleViolation : ruleViolations) {
             ruleViolation.setArtifactRefId(artifactRefId);
             ruleViolation.setArtifactType(artifactType);
             ruleViolation.setOrganization(organization);
+            ruleViolation.setRuleType(new RulesetManager()
+                    .getRulesetById(ruleViolation.getRulesetId(), organization)
+                    .getRuleType());
             if (blockableSeverities.contains(ruleViolation.getSeverity())) {
                 blockableViolations.add(ruleViolation);
             } else {
@@ -681,8 +700,8 @@ public class ComplianceManager {
             }
         }
 
-        blockableAndNonBlockableViolations.put(GovernanceActionType.BLOCK, blockableViolations);
-        blockableAndNonBlockableViolations.put(GovernanceActionType.NOTIFY, nonBlockingViolations);
+        blockableAndNonBlockableViolations.put(APIMGovernanceActionType.BLOCK, blockableViolations);
+        blockableAndNonBlockableViolations.put(APIMGovernanceActionType.NOTIFY, nonBlockingViolations);
 
         return blockableAndNonBlockableViolations;
     }
@@ -690,14 +709,14 @@ public class ComplianceManager {
     /**
      * Delete all governance data related to the artifact
      *
-     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType Artifact Type
-     * @param organization Organization
-     * @throws GovernanceException If an error occurs while deleting the governance data
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
+     * @throws APIMGovernanceException If an error occurs while deleting the governance data
      */
 
     public void deleteArtifact(String artifactRefId, ArtifactType artifactType, String organization)
-            throws GovernanceException {
+            throws APIMGovernanceException {
         complianceMgtDAO.deleteArtifact(artifactRefId, artifactType, organization);
     }
 
@@ -706,14 +725,15 @@ public class ComplianceManager {
      *
      * @param evaluatedPolicies List of evaluated policies
      * @param violatedRulesets  List of violated rulesets
+     * @param organization      Organization
      * @return List of violated policies
      */
 
-    public List<String> identifyViolatedPolicies(List<String> evaluatedPolicies, List<String> violatedRulesets)
-            throws GovernanceException {
+    public List<String> identifyViolatedPolicies(List<String> evaluatedPolicies, List<String> violatedRulesets,
+                                                 String organization) throws APIMGovernanceException {
         Set<String> violatedPolicies = new HashSet<>();
         for (String policy : evaluatedPolicies) {
-            List<String> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policy).stream()
+            List<String> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policy, organization).stream()
                     .map(Ruleset::getId).collect(Collectors.toList());
             if (violatedRulesets.stream().anyMatch(rulesets::contains)) {
                 violatedPolicies.add(policy);
@@ -725,16 +745,16 @@ public class ComplianceManager {
     /**
      * Check whether the evaluation is pending for the artifact
      *
-     * @param artifactRefId   Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType Artifact Type
-     * @param organization Organization
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
      * @return Whether the evaluation is pending for the artifact
-     * @throws GovernanceException If an error occurs while checking whether the evaluation
-     *                             is pending for the artifact
+     * @throws APIMGovernanceException If an error occurs while checking whether the evaluation
+     *                                 is pending for the artifact
      */
 
     public boolean isEvaluationPendingForArtifact(String artifactRefId, ArtifactType artifactType,
-                                                  String organization) throws GovernanceException {
+                                                  String organization) throws APIMGovernanceException {
         String reqId = complianceMgtDAO.getPendingEvalRequest(artifactRefId, artifactType, organization);
         return reqId != null;
     }

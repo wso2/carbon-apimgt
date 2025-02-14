@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
 public class OrgAccessControl {
-    private boolean isEnabled;
+    private boolean isEnabled = true; // enabled by default
     private String orgNameLocalClaim;
     private String orgIdLocalClaim;
 

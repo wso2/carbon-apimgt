@@ -18,10 +18,14 @@
 
 package org.wso2.carbon.apimgt.gateway.internal;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.gdata.data.DateTime;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.gateway.RBEndpointDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
@@ -34,6 +38,9 @@ import org.wso2.carbon.apimgt.keymgt.model.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.keymgt.model.impl.SubscriptionDataLoaderImpl;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class DataHolder {
@@ -46,6 +53,8 @@ public class DataHolder {
     private Map<String,Map<String, API>> tenantAPIMap  = new HashMap<>();
     private Map<String, Boolean> tenantDeployStatus = new HashMap<>();
     private Map<String, LLMProviderInfo> llmProviderMap = new HashMap<>();
+    private final Map<String, Cache<String, Long>> apiSuspendedEndpoints = new ConcurrentHashMap<>();
+
     private boolean isAllGatewayPoliciesDeployed = false;
 
     private DataHolder() {
@@ -294,5 +303,86 @@ public class DataHolder {
         } catch (APIManagementException e) {
             log.error("Error while initializing tenant deployment status map", e);
         }
+    }
+
+    /**
+     * Initializes a cache for a specific API key if not already present.
+     *
+     * @param apiKey The key representing the API and tenant domain.
+     */
+    public synchronized void initCache(String apiKey) {
+        apiSuspendedEndpoints.putIfAbsent(apiKey, CacheBuilder.newBuilder()
+                .expireAfterWrite(1, TimeUnit.HOURS)
+                .build());
+    }
+
+    /**
+     * Retrieves the cache for a given endpoint key if it exists.
+     *
+     * @param apiKey The key representing the API and tenant domain.
+     * @return The cache associated with the specified endpoint key, or {@code null} if not initialized.
+     */
+    public Cache<String, Long> getCache(String apiKey) {
+        return apiSuspendedEndpoints.get(apiKey);
+    }
+
+    /**
+     * Suspends an endpoint for a specific API with a given expiry time.
+     *
+     * @param apiKey       The key representing the API and tenant domain.
+     * @param endpointId   The identifier of the endpoint.
+     * @param expiryMillis The suspension duration in milliseconds.
+     */
+    public void suspendEndpoint(String apiKey, String endpointId, long expiryMillis) {
+
+        Cache<String, Long> cache = getCache(apiKey);
+        if (cache != null) {
+            cache.put(endpointId, System.currentTimeMillis() + expiryMillis);
+        }
+    }
+
+    /**
+     * Checks if an endpoint is currently suspended for a given API.
+     *
+     * @param apiKey     The key representing the API and tenant domain.
+     * @param endpointId The identifier of the endpoint.
+     * @return {@code true} if the endpoint is suspended and has not expired, otherwise {@code false}.
+     */
+    public boolean isEndpointSuspended(String apiKey, String endpointId) {
+
+        Cache<String, Long> cache = getCache(apiKey);
+        if (cache == null) {
+            return false;
+        }
+
+        Long expirationTime = cache.getIfPresent(endpointId);
+        if (expirationTime == null || System.currentTimeMillis() > expirationTime) {
+            cache.invalidate(endpointId);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Removes an endpoint from the suspended list for a specific API.
+     *
+     * @param apiKey     The key representing the API and tenant domain.
+     * @param endpointId The identifier of the endpoint.
+     */
+    public void removeSuspendedEndpoint(String apiKey, String endpointId) {
+        Cache<String, Long> cache = getCache(apiKey);
+        if (cache != null) {
+            cache.invalidate(endpointId);
+        }
+    }
+
+    /**
+     * Releases an API's cache and removes it if no active references exist.
+     *
+     * @param apiKey The key representing the API and tenant domain.
+     */
+    public synchronized void releaseCache(String apiKey) {
+
+        apiSuspendedEndpoints.remove(apiKey);
     }
 }

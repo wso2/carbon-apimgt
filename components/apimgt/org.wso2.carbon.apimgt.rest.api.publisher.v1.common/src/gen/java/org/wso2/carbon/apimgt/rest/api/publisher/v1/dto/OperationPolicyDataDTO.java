@@ -31,7 +31,7 @@ public class OperationPolicyDataDTO   {
     private String description = null;
     private List<String> applicableFlows = new ArrayList<String>();
     private List<String> supportedGateways = new ArrayList<String>();
-    private List<String> supportedApiTypes = new ArrayList<String>();
+    private List<Object> supportedApiTypes = new ArrayList<Object>();
     private Boolean isAPISpecific = null;
     private String md5 = null;
     private List<OperationPolicySpecAttributeDTO> policyAttributes = new ArrayList<OperationPolicySpecAttributeDTO>();
@@ -173,19 +173,20 @@ public class OperationPolicyDataDTO   {
   }
 
   /**
+   * Supported API types as an array of strings, or an array of maps [HTTP, SOAP]  [{apiType: HTTP, subType: AI}, {apiType: SOAP}] 
    **/
-  public OperationPolicyDataDTO supportedApiTypes(List<String> supportedApiTypes) {
+  public OperationPolicyDataDTO supportedApiTypes(List<Object> supportedApiTypes) {
     this.supportedApiTypes = supportedApiTypes;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(example = "[\"HTTP\",\"SOAP\"]", value = "Supported API types as an array of strings, or an array of maps [HTTP, SOAP]  [{apiType: HTTP, subType: AI}, {apiType: SOAP}] ")
   @JsonProperty("supportedApiTypes")
-  public List<String> getSupportedApiTypes() {
+  public List<Object> getSupportedApiTypes() {
     return supportedApiTypes;
   }
-  public void setSupportedApiTypes(List<String> supportedApiTypes) {
+  public void setSupportedApiTypes(List<Object> supportedApiTypes) {
     this.supportedApiTypes = supportedApiTypes;
   }
 

@@ -54,6 +54,8 @@ import org.apache.synapse.transport.passthru.Pipe;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.api.gateway.RBEndpointDTO;
+import org.wso2.carbon.apimgt.api.gateway.RBEndpointsPolicyDTO;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
@@ -1746,4 +1748,69 @@ public class GatewayUtils {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
                 .getGatewayArtifactSynchronizerProperties().getFileBasedApiContexts().contains(path);
     }
+
+    /**
+     * Retrieves available endpoints for round robin policies.
+     *
+     * @param endpoints      RBEndpointsPolicyDTO object containing endpoint configurations.
+     * @param messageContext Synapse message context.
+     * @return The selected RBEndpointDTO list, or null if no active endpoints are available.
+     */
+    public static List<RBEndpointDTO> getActiveEndpoints(RBEndpointsPolicyDTO endpoints,
+                                                         org.apache.synapse.MessageContext messageContext) {
+
+        List<RBEndpointDTO> productionEndpoints = endpoints.getProduction();
+        List<RBEndpointDTO> sandboxEndpoints = endpoints.getSandbox();
+
+        List<RBEndpointDTO> selectedEndpoints =
+                APIConstants.API_KEY_TYPE_PRODUCTION.equals(messageContext.getProperty(APIConstants.API_KEY_TYPE))
+                        ? productionEndpoints
+                        : sandboxEndpoints;
+
+        if (selectedEndpoints == null || selectedEndpoints.isEmpty()) {
+            return null;
+        }
+
+        List<RBEndpointDTO> activeEndpoints = new ArrayList<>();
+
+        for (RBEndpointDTO endpoint : selectedEndpoints) {
+            if (!DataHolder.getInstance().isEndpointSuspended(getAPIKeyForEndpoints(messageContext),
+                    getEndpointKey(endpoint))) {
+                activeEndpoints.add(endpoint);
+            }
+        }
+
+        if (activeEndpoints.isEmpty()) {
+            return null;
+        }
+        return activeEndpoints;
+    }
+
+    /**
+     * Generates an API key based on the tenant domain and API name and API version.
+     *
+     * @param messageContext The Synapse MessageContext containing the API request details.
+     * @return A string representing the API key, which is a combination of the tenant domain and API name and API
+     * version.
+     */
+    public static String getAPIKeyForEndpoints(org.apache.synapse.MessageContext messageContext) {
+
+        String tenantDomain = GatewayUtils.getTenantDomain();
+        String apiName = (String) messageContext.getProperty(APIMgtGatewayConstants.API);
+        String apiVersion = (String) messageContext.getProperty(APIMgtGatewayConstants.VERSION);
+
+        return tenantDomain + "_" + apiName + "_" + apiVersion;
+    }
+
+    /**
+     * Generates a unique key for an endpoint based on the endpoint's ID and model.
+     *
+     * @param endpoint The RBEndpointDTO object containing the endpoint details.
+     * @return A unique key in the format "{endpointId}_{model}".
+     */
+    public static String getEndpointKey(RBEndpointDTO endpoint) {
+
+        return endpoint.getEndpointId() + "_" + endpoint.getModel();
+    }
+
 }

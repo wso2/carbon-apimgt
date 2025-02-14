@@ -211,8 +211,7 @@ public class APIUtils {
         String organization = orgInfo.getOrganizationId();
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keymanagerConfigs) {
             List<String> allowedOrgs = keyManagerConfigurationDTO.getAllowedOrganizations();
-            // Add to allowedList if no organizations are restricted or if the organization is allowed
-            if (allowedOrgs == null || allowedOrgs.isEmpty() || allowedOrgs.contains(organization)) {
+            if (allowedOrgs == null || allowedOrgs.isEmpty() || allowedOrgs.contains("ALL") || allowedOrgs.contains(organization)) {
                 allowedList.add(keyManagerConfigurationDTO);
             }
             
@@ -228,18 +227,26 @@ public class APIUtils {
      */
     public static void updateAvailableTiersByOrganization(API api, String organization) {
 
-        Set<Tier> availableTiers = api.getAvailableTiers();
-        Set<OrganizationTiers> availableTiersForOrganizations = api.getAvailableTiersForOrganizations();
         if (organization != null) {
+            Set<Tier> availableTiers = new HashSet<>();
+            Set<OrganizationTiers> availableTiersForOrganizations = api.getAvailableTiersForOrganizations();
             for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
                 String orgName = organizationTiers.getOrganizationID();
                 if (organization.equals(orgName)) {
                     availableTiers = organizationTiers.getTiers();
-                    api.removeAllTiers();
-                    api.setAvailableTiers(availableTiers);
                     break;
                 }
             }
+            if (availableTiers.isEmpty()) {
+                for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
+                    if (APIConstants.DEFAULT_VISIBLE_ORG.equals(organizationTiers.getOrganizationID())) {
+                        availableTiers = organizationTiers.getTiers();
+                        break;
+                    }
+                }
+            }
+            api.removeAllTiers();
+            api.setAvailableTiers(availableTiers);
         }
     }
 }

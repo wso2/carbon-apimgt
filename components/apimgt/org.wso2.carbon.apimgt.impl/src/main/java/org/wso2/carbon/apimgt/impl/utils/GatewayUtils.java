@@ -96,11 +96,15 @@ public class GatewayUtils {
 
         String endpointName = apiName + "--v" + version;
         gatewayAPIDTO.setEndpointEntriesToBeRemove(addStringToList(
-                endpointName + "_API" + APIConstants.API_DATA_SANDBOX_ENDPOINTS.replace("_endpoints", "") + "Endpoint",
+                endpointName + "_API" + APIConstants.API_DATA_SANDBOX_ENDPOINTS
+                        .replace("_endpoints", "") + "Endpoint",
                 gatewayAPIDTO.getEndpointEntriesToBeRemove()));
         gatewayAPIDTO.setEndpointEntriesToBeRemove(addStringToList(
-                endpointName + "_API" + APIConstants.API_DATA_PRODUCTION_ENDPOINTS.replace("_endpoints", "") +
-                        "Endpoint", gatewayAPIDTO.getEndpointEntriesToBeRemove()));
+                endpointName + "_API" + APIConstants.API_DATA_PRODUCTION_ENDPOINTS
+                        .replace("_endpoints", "") + "Endpoint",
+                gatewayAPIDTO.getEndpointEntriesToBeRemove()));
+        gatewayAPIDTO.setEndpointEntriesToBeRemove(addStringToList(
+                endpointName + "_API_LLMEndpoint_*", gatewayAPIDTO.getEndpointEntriesToBeRemove()));
     }
 
     /**

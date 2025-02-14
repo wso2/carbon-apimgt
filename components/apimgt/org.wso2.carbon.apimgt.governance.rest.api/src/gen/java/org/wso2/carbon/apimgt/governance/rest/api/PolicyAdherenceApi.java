@@ -6,7 +6,7 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.PolicyAdherenceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.PolicyAdherenceApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.impl.PolicyAdherenceApiServiceImpl;
-import org.wso2.carbon.apimgt.governance.api.error.GovernanceException;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -53,7 +53,7 @@ PolicyAdherenceApiService delegate = new PolicyAdherenceApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getPolicyAdherenceByPolicyId(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId) throws GovernanceException{
+    public Response getPolicyAdherenceByPolicyId(@ApiParam(value = "**UUID** of the Policy. ",required=true) @PathParam("policyId") String policyId) throws APIMGovernanceException{
         return delegate.getPolicyAdherenceByPolicyId(policyId, securityContext);
     }
 
@@ -72,7 +72,7 @@ PolicyAdherenceApiService delegate = new PolicyAdherenceApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getPolicyAdherenceForAllPolicies( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws GovernanceException{
+    public Response getPolicyAdherenceForAllPolicies( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIMGovernanceException{
         return delegate.getPolicyAdherenceForAllPolicies(limit, offset, securityContext);
     }
 
@@ -91,7 +91,7 @@ PolicyAdherenceApiService delegate = new PolicyAdherenceApiServiceImpl();
         @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getPolicyAdherenceSummary() throws GovernanceException{
+    public Response getPolicyAdherenceSummary() throws APIMGovernanceException{
         return delegate.getPolicyAdherenceSummary(securityContext);
     }
 }

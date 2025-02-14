@@ -370,6 +370,7 @@ public class InMemoryAPIDeployer {
                 apiGatewayAdmin.unDeployAPI(gatewayAPIDTO);
                 DataHolder.getInstance().getApiToCertificatesMap().remove(gatewayEvent.getUuid());
                 DataHolder.getInstance().removeKeyManagerToAPIMapping(gatewayAPIDTO.getApiId());
+                DataHolder.getInstance().releaseCache(generateAPIKeyForEndpoints(gatewayAPIDTO));
             }
     }
 
@@ -615,5 +616,16 @@ public class InMemoryAPIDeployer {
             MessageContext.destroyCurrentMessageContext();
             PrivilegedCarbonContext.endTenantFlow();
         }
+    }
+
+    /**
+     * Generates an API key for endpoints by combining the provider, name, and version from the GatewayAPIDTO.
+     *
+     * @param gatewayEvent The GatewayAPIDTO containing provider, name, and version information of the API.
+     * @return The generated API key in the format "provider_name_version".
+     */
+    private String generateAPIKeyForEndpoints(GatewayAPIDTO gatewayEvent) {
+
+        return gatewayEvent.getTenantDomain() + "_" + gatewayEvent.getName() + "_" + gatewayEvent.getVersion();
     }
 }

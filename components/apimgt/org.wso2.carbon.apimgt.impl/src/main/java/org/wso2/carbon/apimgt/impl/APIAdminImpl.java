@@ -636,6 +636,11 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
+    public List<String> getLLMProviderModels(String organization,String llmProviderId) throws APIManagementException {
+        return apiMgtDAO.getLLMProviderModels(organization, llmProviderId);
+    }
+
+    @Override
     public String deleteLLMProvider(String organization, LLMProvider provider, boolean builtIn)
             throws APIManagementException {
 
