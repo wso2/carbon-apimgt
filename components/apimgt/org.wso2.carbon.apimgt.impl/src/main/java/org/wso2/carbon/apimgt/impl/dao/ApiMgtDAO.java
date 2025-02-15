@@ -17814,7 +17814,8 @@ public class ApiMgtDAO {
                         updatePublishedArtifactForOrg(connection, organization, newUUID);
                         removeArtifact(connection, draftedArtifact);
                     } else {
-                        log.warn("ID cannot be found in drafted state. Aborting the request");
+                        log.warn("ID cannot be found in drafted state");
+                        throw new APIManagementException(ExceptionCodes.ID_CANNOT_BE_FOUND_IN_DRAFTED_STATE);
                     }
                 } else {
                     String publishedArtifact = getPublishedArtifactForOrg(connection, organization);
@@ -17824,7 +17825,8 @@ public class ApiMgtDAO {
                         updateDraftedArtifactForOrg(connection, organization, newUUID);
                         removeArtifact(connection, publishedArtifact);
                     } else {
-                        log.warn("ID cannot be found in published state. Aborting the request");
+                        log.warn("ID cannot be found in published state");
+                        throw new APIManagementException(ExceptionCodes.ID_CANNOT_BE_FOUND_IN_PUBLISHED_STATE);
                     }
                 }
                 connection.commit();
@@ -17854,7 +17856,8 @@ public class ApiMgtDAO {
                     removeOrgIfNoData(connection, organization);
                     connection.commit();
                 } else {
-                    log.warn("User's organization does not use the theme. Aborting the request");
+                    log.warn("User does not have the theme");
+                    throw new APIManagementException(ExceptionCodes.USER_DOES_NOT_HAVE_THE_THEME);
                 }
             } catch (SQLException e) {
                 connection.rollback();
@@ -17886,7 +17889,8 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 tenantThemeContent = resultSet.getBinaryStream(DevPortalConstants.ARTIFACT);
             } else {
-                log.warn("Theme ID does not match any of the themes");
+                log.warn("User does not have the theme");
+                throw new APIManagementException(ExceptionCodes.USER_DOES_NOT_HAVE_THE_THEME);
             }
         } catch (SQLException e) {
             handleException("Failed to get organization theme for organization " + organization, e);
@@ -17912,7 +17916,8 @@ public class ApiMgtDAO {
                     themeMap.put(DevPortalConstants.DRAFTED, resultSet.getString(DevPortalConstants.DRAFTED_ARTIFACT));
                     themeMap.put(DevPortalConstants.PUBLISHED, resultSet.getString(DevPortalConstants.PUBLISHED_ARTIFACT));
                 } else {
-                    log.warn("Organization does not have any themes published or drafted from APIM");
+                    log.warn("User does not have any published or drafted themes");
+                    throw new APIManagementException(ExceptionCodes.USER_DOES_NOT_HAVE_ANY_PUBLISHED_OR_DRAFTED_THEMES);
                 }
             }
         } catch (SQLException e) {
@@ -18192,7 +18197,8 @@ public class ApiMgtDAO {
                         updatePublishedArtifactForApi(connection, organization, newUUID, apiId);
                         removeArtifact(connection, draftedArtifact);
                     } else {
-                        log.warn("ID cannot be found in drafted state. Aborting the request");
+                        log.warn("ID cannot be found in drafted state");
+                        throw new APIManagementException(ExceptionCodes.ID_CANNOT_BE_FOUND_IN_DRAFTED_STATE);
                     }
                 } else {
                     String publishedArtifact = getPublishedArtifactForApi(connection, organization, apiId);
@@ -18202,7 +18208,8 @@ public class ApiMgtDAO {
                         updateDraftedArtifactForApi(connection, organization, newUUID, apiId);
                         removeArtifact(connection, publishedArtifact);
                     } else {
-                        log.warn("ID cannot be found in published state. Aborting the request");
+                        log.warn("ID cannot be found in published state");
+                        throw new APIManagementException(ExceptionCodes.ID_CANNOT_BE_FOUND_IN_PUBLISHED_STATE);
                     }
                 }
                 connection.commit();
@@ -18232,7 +18239,8 @@ public class ApiMgtDAO {
                     removeArtifact(connection, themeId); // Due to DB rules, foreign ID will also set to NULL
                     removeApiIfNoData(connection, organization, apiId);
                 } else {
-                    log.warn("API does not have a theme. Aborting the request");
+                    log.warn("User does not have the theme");
+                    throw new APIManagementException(ExceptionCodes.USER_DOES_NOT_HAVE_THE_THEME);
                 }
                 connection.commit();
             } catch (SQLException e) {
@@ -18265,7 +18273,8 @@ public class ApiMgtDAO {
             if (resultSet.next()) {
                 tenantThemeContent = resultSet.getBinaryStream(DevPortalConstants.ARTIFACT);
             } else {
-                log.warn("Theme ID does not match any of the themes");
+                log.warn("User does not have the theme");
+                throw new APIManagementException(ExceptionCodes.USER_DOES_NOT_HAVE_THE_THEME);
             }
         } catch (SQLException e) {
             handleException("Failed to get API theme for API ID: " + apiId + " and Organization: " + organization, e);
@@ -18293,7 +18302,8 @@ public class ApiMgtDAO {
                     themeMap.put(DevPortalConstants.DRAFTED, resultSet.getString(DevPortalConstants.DRAFTED_ARTIFACT));
                     themeMap.put(DevPortalConstants.PUBLISHED, resultSet.getString(DevPortalConstants.PUBLISHED_ARTIFACT));
                 } else {
-                    log.warn("API does not have any themes published or drafted from APIM");
+                    log.warn("User does not have any themes published or drafted themes");
+                    throw new APIManagementException(ExceptionCodes.USER_DOES_NOT_HAVE_ANY_PUBLISHED_OR_DRAFTED_THEMES);
                 }
             }
         } catch (SQLException e) {
