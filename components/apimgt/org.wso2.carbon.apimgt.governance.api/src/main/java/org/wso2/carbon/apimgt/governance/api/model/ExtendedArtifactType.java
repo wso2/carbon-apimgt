@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.governance.api.model;
 
-import java.util.EnumSet;
 import java.util.Locale;
 
 /**
@@ -26,8 +25,6 @@ import java.util.Locale;
  */
 public enum ExtendedArtifactType {
     REST_API,
-    SOAP_API,
-    GRAPHQL_API,
     ASYNC_API;
 
     public static ExtendedArtifactType fromString(String text) {
@@ -36,16 +33,6 @@ public enum ExtendedArtifactType {
         } catch (IllegalArgumentException e) {
             return null;
         }
-    }
-
-    /**
-     * Check whether the artifact type is an API.
-     *
-     * @param artifactType Artifact type
-     * @return True if the artifact type is an API
-     */
-    public static boolean isArtifactAPI(ExtendedArtifactType artifactType) {
-        return EnumSet.of(REST_API, SOAP_API, GRAPHQL_API, ASYNC_API).contains(artifactType);
     }
 }
 

@@ -33,7 +33,6 @@ import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
-import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.ArrayList;
@@ -201,25 +200,11 @@ public class ComplianceEvaluationScheduler {
             }
 
             // Check if artifact exists
-            if (!APIMGovernanceUtil.isArtifactAvailable(artifactRefId, artifactType)) {
+            if (!APIMGovernanceUtil.isArtifactAvailable(artifactRefId, artifactType, organization)) {
                 log.warn("Artifact not found for artifact ID: " + artifactRefId + " " +
                         ". Skipping governance evaluation");
                 complianceMgtDAO.deleteComplianceEvalReqsForArtifact(artifactRefId, artifactType, organization);
                 return;
-            }
-
-            // Check if artifact is SOAP or GRAPHQL
-            if (ArtifactType.API.equals(artifactType)) {
-                ExtendedArtifactType extendedArtifactType =
-                        APIMUtil.getExtendedArtifactTypeForAPI(APIMUtil.getAPIType(artifactRefId));
-                if (ExtendedArtifactType.SOAP_API.equals(extendedArtifactType) ||
-                        ExtendedArtifactType.GRAPHQL_API.equals(extendedArtifactType)) {
-                    log.warn("Artifact type " + extendedArtifactType + " not supported " +
-                            "for artifact ID: " + artifactRefId + " " +
-                            ". Skipping governance evaluation");
-                    complianceMgtDAO.deleteComplianceEvalReqsForArtifact(artifactRefId, artifactType, organization);
-                    return;
-                }
             }
 
             // Get artifact project
@@ -279,8 +264,8 @@ public class ComplianceEvaluationScheduler {
 
             // Check if ruleset's artifact type matches with the artifact's type
             ExtendedArtifactType extendedArtifactType = ruleset.getArtifactType();
-            if (ArtifactType.API.equals(artifactType) && extendedArtifactType.equals(
-                    APIMUtil.getExtendedArtifactTypeForAPI(APIMUtil.getAPIType(artifactRefId)))) {
+            if (extendedArtifactType.equals(APIMGovernanceUtil
+                    .getExtendedArtifactTypeForArtifact(artifactRefId, artifactType))) {
 
                 // Get target file content from artifact project based on ruleType
                 RuleType ruleType = ruleset.getRuleType();

@@ -31,7 +31,6 @@ import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManager;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
-import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceDetailsDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceStatusDTO;
@@ -75,7 +74,7 @@ public class ComplianceAPIUtil {
             throws APIMGovernanceException {
 
         // Check if the artifact is available
-        if (!APIMGovernanceUtil.isArtifactAvailable(artifactRefId, artifactType)) {
+        if (!APIMGovernanceUtil.isArtifactAvailable(artifactRefId, artifactType, organization)) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ARTIFACT_NOT_FOUND, artifactRefId, organization);
         }
 
@@ -85,8 +84,8 @@ public class ComplianceAPIUtil {
         artifactComplianceDetailsDTO.setId(artifactRefId);
 
         ArtifactInfoDTO infoDTO = new ArtifactInfoDTO();
-        infoDTO.setName(APIMGovernanceUtil.getArtifactName(artifactRefId, artifactType));
-        infoDTO.setVersion(APIMGovernanceUtil.getArtifactVersion(artifactRefId, artifactType));
+        infoDTO.setName(APIMGovernanceUtil.getArtifactName(artifactRefId, artifactType, organization));
+        infoDTO.setVersion(APIMGovernanceUtil.getArtifactVersion(artifactRefId, artifactType, organization));
         infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
         infoDTO.setOwner(APIMGovernanceUtil.getArtifactOwner(artifactRefId, artifactType, organization));
         artifactComplianceDetailsDTO.setInfo(infoDTO);
@@ -291,21 +290,22 @@ public class ComplianceAPIUtil {
                                                                          int offset) throws APIMGovernanceException {
 
         List<ArtifactComplianceStatusDTO> complianceStatusList = new ArrayList<>();
-        int totalArtifactCount = 0;
 
         // Retrieve Artifacts the given organization
-        if (ArtifactType.API.equals(artifactType)) {
-            List<String> allAPIs = APIMUtil.getAllAPIs(organization);
-            if (offset >= allAPIs.size()) {
-                offset = RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-            }
-            totalArtifactCount = allAPIs.size();
-            List<String> paginatedAPIIds = allAPIs.subList(offset, Math.min(offset + limit, allAPIs.size()));
-            for (String apiId : paginatedAPIIds) {
-                ArtifactComplianceStatusDTO complianceStatus = getArtifactComplianceStatus(apiId,
-                        ArtifactType.API, organization);
-                complianceStatusList.add(complianceStatus);
-            }
+        List<String> allArtifacts = APIMGovernanceUtil.getAllArtifacts(artifactType, organization);
+        int totalArtifactCount = allArtifacts.size();
+
+        if (offset >= allArtifacts.size()) {
+            offset = RestApiConstants.PAGINATION_OFFSET_DEFAULT;
+        }
+
+        List<String> paginatedArtifactIds = allArtifacts.subList(offset,
+                Math.min(offset + limit, allArtifacts.size()));
+
+        for (String artifactId : paginatedArtifactIds) {
+            ArtifactComplianceStatusDTO complianceStatus = getArtifactComplianceStatus(artifactId,
+                    artifactType, organization);
+            complianceStatusList.add(complianceStatus);
         }
 
         ArtifactComplianceListDTO complianceListDTO = new ArtifactComplianceListDTO();
@@ -342,8 +342,8 @@ public class ComplianceAPIUtil {
         complianceStatus.setId(artifactRefId);
 
         ArtifactInfoDTO infoDTO = new ArtifactInfoDTO();
-        infoDTO.setName(APIMGovernanceUtil.getArtifactName(artifactRefId, artifactType));
-        infoDTO.setVersion(APIMGovernanceUtil.getArtifactVersion(artifactRefId, artifactType));
+        infoDTO.setName(APIMGovernanceUtil.getArtifactName(artifactRefId, artifactType, organization));
+        infoDTO.setVersion(APIMGovernanceUtil.getArtifactVersion(artifactRefId, artifactType, organization));
         infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
         infoDTO.setOwner(APIMGovernanceUtil.getArtifactOwner(artifactRefId, artifactType, organization));
         complianceStatus.setInfo(infoDTO);

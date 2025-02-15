@@ -23,7 +23,6 @@ import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 
 import java.util.List;
@@ -31,6 +30,7 @@ import java.util.Map;
 
 /**
  * This class represents the Governance Service, which is responsible for managing governance related operations
+ * on API Manager side.
  */
 public interface APIMGovernanceService {
 
@@ -88,13 +88,13 @@ public interface APIMGovernanceService {
      * dry run) using the provided artifact content file path and the artifact type. The artifact will be evaluated
      * against all the global policies configured in the system.
      *
-     * @param artifactType Artifact type (ExtendedArtifactType.REST_API, etc)
+     * @param artifactType Artifact type (ArtifactType.API)
      * @param zipArchive   File path of the artifact content (ZIP path)
      * @param organization Organization
      * @return ArtifactComplianceDryRunInfo object
      * @throws APIMGovernanceException If an error occurs while evaluating compliance
      */
-    ArtifactComplianceDryRunInfo evaluateComplianceDryRunSync(ExtendedArtifactType artifactType, byte[] zipArchive,
+    ArtifactComplianceDryRunInfo evaluateComplianceDryRunSync(ArtifactType artifactType, byte[] zipArchive,
                                                               String organization) throws APIMGovernanceException;
 
     /**

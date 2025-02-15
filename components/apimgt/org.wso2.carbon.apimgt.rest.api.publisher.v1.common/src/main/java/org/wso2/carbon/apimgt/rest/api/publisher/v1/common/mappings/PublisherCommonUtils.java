@@ -3413,7 +3413,13 @@ public class PublisherCommonUtils {
         });
     }
 
-    //mthod to invoke evaluateComplianceDryRunSync
+    /**
+     * Check governance compliance for the API artifact in a dry run mode.
+     *
+     * @param fileInputStream API artifact input stream
+     * @param organization    Organization of the logged-in user
+     * @return Map of compliance violations
+     */
     public static Map<String, String> checkGovernanceComplianceDryRun(InputStream fileInputStream,
                                                                       String organization) {
         Map<String, String> responseMap = new HashMap<>(2);
@@ -3422,7 +3428,7 @@ public class PublisherCommonUtils {
             byte[] fileBytes = IOUtils.toByteArray(fileInputStream);
 
             ArtifactComplianceDryRunInfo artifactComplianceDryRunInfo = apimGovernanceService
-                    .evaluateComplianceDryRunSync(ExtendedArtifactType.REST_API, fileBytes, organization);
+                    .evaluateComplianceDryRunSync(ArtifactType.API, fileBytes, organization);
             return responseMap;
         } catch (APIMGovernanceException e) {
             log.error("Error occurred while executing governance ", e);
