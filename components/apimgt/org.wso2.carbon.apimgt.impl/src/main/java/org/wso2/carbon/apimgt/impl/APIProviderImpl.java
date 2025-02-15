@@ -8101,9 +8101,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void updateApiThemeStatusAsPublishedOrUnpublished(String organization, String action, String apiId)
+    public void updateApiThemeStatus(String organization, String action, String apiId)
             throws APIManagementException {
-        apiMgtDAO.updateApiThemeStatusAsPublishedOrUnpublished(organization, action, apiId);
+        apiMgtDAO.updateApiThemeStatus(organization, action, apiId);
     }
 
     @Override

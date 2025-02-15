@@ -17782,7 +17782,7 @@ public class ApiMgtDAO {
                     updateDraftedArtifactForOrg(connection, organization, newUUID);
                 } else {
                     String newUUID = addArtifact(connection, themeContent, DevPortalConstants.DRAFTED_ORG_THEME);
-                    insertNewOrgWithDraftedArtifact(connection, organization, newUUID);
+                    insertOrgWithDraftedArtifact(connection, organization, newUUID);
                 }
                 connection.commit();
             } catch (SQLException e) {
@@ -18077,7 +18077,7 @@ public class ApiMgtDAO {
      * @param organization Organization name.
      * @param artifactUUID Artifact's ID.
      */
-    private void insertNewOrgWithDraftedArtifact(Connection connection, String organization, String artifactUUID) throws SQLException {
+    private void insertOrgWithDraftedArtifact(Connection connection, String organization, String artifactUUID) throws SQLException {
         String query = SQLConstants.DevPortalContentConstants.ADD_ORG_DRAFTED_ID;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, organization);
@@ -18164,7 +18164,7 @@ public class ApiMgtDAO {
                     updateDraftedArtifactForApi(connection, organization, newUUID, apiId);
                 } else {
                     String newUUID = addArtifact(connection, themeContent, DevPortalConstants.DRAFTED_API_THEME);
-                    insertNewApiWithDraftedArtifact(connection, organization, newUUID, apiId);
+                    insertApiWithDraftedArtifact(connection, organization, newUUID, apiId);
                 }
                 connection.commit();
             } catch (SQLException e) {
@@ -18184,7 +18184,7 @@ public class ApiMgtDAO {
      * @param apiId        API Identifier.
      * @throws APIManagementException If a database error occurs.
      */
-    public void updateApiThemeStatusAsPublishedOrUnpublished(String organization, String action, String apiId)
+    public void updateApiThemeStatus(String organization, String action, String apiId)
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -18427,7 +18427,7 @@ public class ApiMgtDAO {
      * @param apiId        API Identifier.
      * @param artifactUUID Artifact's ID.
      */
-    private void insertNewApiWithDraftedArtifact(
+    private void insertApiWithDraftedArtifact(
             Connection connection, String organization, String artifactUUID, String apiId)
             throws SQLException {
         String query = SQLConstants.DevPortalContentConstants.ADD_API_DRAFTED_ID;

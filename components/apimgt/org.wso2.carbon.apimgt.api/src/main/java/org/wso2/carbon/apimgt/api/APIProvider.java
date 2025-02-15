@@ -2178,7 +2178,7 @@ public interface APIProvider extends APIManager {
      * @param apiId        API Identifier.
      * @throws APIManagementException If a database error occurs.
      */
-    void updateApiThemeStatusAsPublishedOrUnpublished(String organization, String action, String apiId)
+    void updateApiThemeStatus(String organization, String action, String apiId)
             throws APIManagementException;
 
     /**
