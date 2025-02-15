@@ -269,6 +269,12 @@ public class ApisApiServiceImpl implements ApisApiService {
                 newOrgList.add(APIConstants.VISIBLE_ORG_NONE);
             }
             apiToReturn.setVisibleOrganizations(newOrgList);
+            // Remove parent organization policies the OrganizationPoliciesDTO List
+            List<OrganizationPoliciesDTO> organizationPolicies = apiToReturn.getOrganizationPolicies();
+            if (organizationPolicies != null) {
+                organizationPolicies.removeIf(tier -> tier.getOrganizationID().equals(organizationInfo.getOrganizationId()));
+                apiToReturn.setOrganizationPolicies(organizationPolicies);
+            }
         }
 
         return Response.ok().entity(apiToReturn).build();
