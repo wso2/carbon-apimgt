@@ -17802,7 +17802,7 @@ public class ApiMgtDAO {
      * @param action       Action to perform ("PUBLISH" or "UNPUBLISH").
      * @throws APIManagementException If a database error occurs.
      */
-    public void updateOrgThemeStatusAsPublishedOrUnpublished(String organization, String action) throws APIManagementException {
+    public void updateOrgThemeStatus(String organization, String action) throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
@@ -17895,7 +17895,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Gets org theme array.
+     * Retrieves the themes associated with the given organization.
      *
      * @param organization Organization name.
      * @return Hash map of publish unpublish state and theme IDs.
