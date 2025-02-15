@@ -1571,13 +1571,19 @@ CREATE TABLE IDN_CONFIG_TYPE (
 )
 /
 
-INSERT INTO IDN_CONFIG_TYPE (ID, NAME, DESCRIPTION) VALUES
-('9ab0ef95-13e9-4ed5-afaf-d29bed62f7bd', 'IDP_TEMPLATE', 'Template type to uniquely identify IDP templates'),
-('3c4ac3d0-5903-4e3d-aaca-38df65b33bfd', 'APPLICATION_TEMPLATE', 'Template type to uniquely identify Application templates'),
-('8ec6dbf1-218a-49bf-bc34-0d2db52d151c', 'CORS_CONFIGURATION', 'A resource type to keep the tenant CORS configurations'),
-('669b99ca-cdb0-44a6-8cae-babed3b585df', 'Publisher', 'A resource type to keep the event publisher configurations'),
-('73f6d9ca-62f4-4566-bab9-2a930ae51ba8', 'BRANDING_PREFERENCES', 'A resource type to keep the tenant branding preferences'),
+INSERT ALL INTO IDN_CONFIG_TYPE (ID, NAME, DESCRIPTION) VALUES
+('9ab0ef95-13e9-4ed5-afaf-d29bed62f7bd', 'IDP_TEMPLATE', 'Template type to uniquely identify IDP templates')
+INTO IDN_CONFIG_TYPE (ID, NAME, DESCRIPTION) VALUES
+('3c4ac3d0-5903-4e3d-aaca-38df65b33bfd', 'APPLICATION_TEMPLATE', 'Template type to uniquely identify Application templates')
+INTO IDN_CONFIG_TYPE (ID, NAME, DESCRIPTION) VALUES
+('8ec6dbf1-218a-49bf-bc34-0d2db52d151c', 'CORS_CONFIGURATION', 'A resource type to keep the tenant CORS configurations')
+INTO IDN_CONFIG_TYPE (ID, NAME, DESCRIPTION) VALUES
+('669b99ca-cdb0-44a6-8cae-babed3b585df', 'Publisher', 'A resource type to keep the event publisher configurations')
+INTO IDN_CONFIG_TYPE (ID, NAME, DESCRIPTION) VALUES
+('73f6d9ca-62f4-4566-bab9-2a930ae51ba8', 'BRANDING_PREFERENCES', 'A resource type to keep the tenant branding preferences')
+INTO IDN_CONFIG_TYPE (ID, NAME, DESCRIPTION) VALUES
 ('899c69b2-8bf7-46b5-9666-f7f99f90d6cc', 'fido-config', 'A resource type to store FIDO authenticator related preferences')
+SELECT 1 FROM dual
 /
 
 CREATE TABLE IDN_CONFIG_RESOURCE (
@@ -3003,8 +3009,8 @@ CREATE TABLE AM_POLICY_APPLICATION (
             TIME_UNIT VARCHAR2(25) NOT NULL,
             IS_DEPLOYED INTEGER DEFAULT 0 NOT NULL,
 			CUSTOM_ATTRIBUTES BLOB DEFAULT NULL,
-			RATE_LIMIT_COUNT INTEGER NULL DEFAULT 0,
-           RATE_LIMIT_TIME_UNIT VARCHAR(25) DEFAULT NULL NULL,
+			RATE_LIMIT_COUNT INTEGER DEFAULT 0 NULL,
+            RATE_LIMIT_TIME_UNIT VARCHAR(25) DEFAULT NULL NULL,
 			      UUID VARCHAR2(256),
             PRIMARY KEY (POLICY_ID),
             CONSTRAINT AM_POLICY_APP_NAME_TENANT UNIQUE (NAME, TENANT_ID),
@@ -4135,7 +4141,7 @@ CREATE TABLE GOV_RULE_VIOLATION (
 
 CREATE TABLE AM_ARTIFACT (
     UUID VARCHAR2(45),
-    ARTIFACT BLOB NOT NUll,
+    ARTIFACT BLOB NOT NULL,
     TYPE VARCHAR2(25) NOT NULL,
     PRIMARY KEY (UUID)
 )
