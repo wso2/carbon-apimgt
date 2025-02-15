@@ -4398,14 +4398,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
 
     @Override
-    public DocumentationContent getMarkdownOverviewContent(String apiId, String organization)
-            throws APIManagementException {
-
-        checkAPIVisibilityRestriction(apiId, organization);
-        return super.getMarkdownOverviewContent(apiId, organization);
-    }
-
-    @Override
     public String getAsyncAPIDefinitionForLabel(Identifier apiId, String labelName) throws APIManagementException {
         String updatedDefinition = null;
         Map<String, String> hostsWithSchemes;
