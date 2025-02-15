@@ -5054,7 +5054,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         String tenantDomain = RestApiUtil.getValidatedOrganization(messageContext);
         List<Label> updatedLabelList = apiProvider.detachApiLabels(apiId, requestLabelListDTO.getLabels(), tenantDomain);
         LabelListDTO updatedLabelListDTO = LabelMappingUtil.fromLabelListToLabelListDTO(updatedLabelList);
-        PublisherCommonUtils.deleteGovernanceDataOnLabelDelete(updatedLabelList, tenantDomain);
+        PublisherCommonUtils.executeGovernanceOnLabelAttach(updatedLabelList, RestApiConstants.RESOURCE_API,
+                apiId, tenantDomain);
         return Response.ok().entity(updatedLabelListDTO).build();
     }
 

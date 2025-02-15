@@ -262,6 +262,85 @@ paths:
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/apis"'
       operationId: createAPI
 
+  #######################################################
+  # The "API Design Assistant - Chat" resource APIs
+  #######################################################
+  /design-assistant/chat:
+    post:
+      tags:
+        - API Design Assistant
+      summary: Generate API Specifications with API Design Assistant
+      description: |
+        Generates API specifications based on natural language input.
+
+        Key features:
+        - Converts text descriptions into structured API specifications
+        - Provides QoS suggestions and other improvements
+        - Supports session-based API generation
+      requestBody:
+        description: Input for API specification generation
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DesignAssistantChatQuery'
+      responses:
+        200:
+          description: Successful API specification generation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DesignAssistantChatResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d "{\"text\": \"create an API for a banking transaction.\", \"sessionId\": \"1234567890\"}" "https://127.0.0.1:9443/api/am/publisher/v4/design-assistant/chat"'
+      operationId: designAssistantChat
+
+  ######################################################################
+  # The "API Design Assistant - Generate API Payloads" resource APIs
+  ######################################################################
+  /design-assistant/generate-api-payload:
+    post:
+      tags:
+        - API Design Assistant
+      summary: Create API Payload with API Design Assistant
+      description: |
+        Creates an API payload using the stored specification.
+      requestBody:
+        description: Input for API payload creation
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DesignAssistantGenAPIPayload'
+      responses:
+        200:
+          description: API payload successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DesignAssistantAPIPayloadResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d "{\"sessionId\": \"1234567890\"}" "https://127.0.0.1:9443/api/am/publisher/v4/design-assistant/generate-api-payload"'
+      operationId: designAssistantApiPayloadGen
+
   ######################################################
   # The "Individual API" resource APIs
   ######################################################
@@ -8770,12 +8849,12 @@ paths:
   /apis/{apiId}/labels:
     get:
       tags:
-          - API Labels
+        - API Labels
       summary: Get Labels of an API
       description: |
-          This operation can be used to get the labels of an API.
+        This operation can be used to get the labels of an API.
       parameters:
-          - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/apiId'
       responses:
         200:
           description: |
@@ -8788,14 +8867,14 @@ paths:
         404:
           $ref: '#/components/responses/NotFound'
       security:
-          - OAuth2Security:
-              - apim:api_view
-              - apim:api_create
-              - apim:api_manage
-              - apim:api_publish
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
       x-code-samples:
-          - lang: Curl
-            source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/labels"'
       operationId: getLabelsOfAPI
 
@@ -10215,6 +10294,52 @@ components:
         published:
           type: boolean
           description: Publish status of the api-theme
+    DesignAssistantChatQuery:
+      type: object
+      properties:
+        text:
+          type: string
+          example: create an API for a banking transaction
+        session_id:
+          type: string
+          example: 1234567890
+    DesignAssistantChatResponse:
+      type: object
+      properties:
+        backendResponse:
+          type: string
+        isSuggestions:
+          type: boolean
+          example: true
+        typeOfApi:
+          type: string
+          example: REST
+        code:
+          type: string
+        paths:
+          type: array
+          example: []
+          items:
+            type: string
+        apiTypeSuggestion:
+          type: string
+          example: This is suitable for CRUD operations in banking. Do you want to proceed?
+        missingValues:
+          type: string
+        state:
+          type: string
+          example: COMPLETE
+    DesignAssistantGenAPIPayload:
+      type: object
+      properties:
+        session_id:
+          type: string
+          example: 1234567890
+    DesignAssistantAPIPayloadResponse:
+      type: object
+      properties:
+        generated_payload:
+          type: string
     SequenceBackendList:
       title: Sequence Backend List
       type: object
@@ -11158,12 +11283,16 @@ components:
           type: string
           example:
             wso2
+            external
         gatewayType:
           title: Field to identify gateway type.
           type: string
           description: The gateway type selected for the API policies. Accepts one of the
             following. wso2/synapse, wso2/apk.
-          example: wso2/synapse
+          example:
+            wso2/synapse
+            wso2/apk
+            AWS
           default: wso2/synapse
         asyncTransportProtocols:
           type: array
@@ -13941,8 +14070,23 @@ components:
           example:
             - Regular
             - APK
+            - AWS
           items:
             type: string
+        GatewayFeatureCatalog:
+          title: Gateway feature Catalog
+          type: object
+          properties:
+            gatewayFeatures:
+              type: object
+              additionalProperties:
+                type: object
+            apiTypes:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
         scopes:
           type: array
           example:

@@ -1524,7 +1524,6 @@ paths:
         description: |
           LLM provider object that should to be added
         content:
-#          application/json:
           multipart/form-data:
             schema:
               required:
@@ -1572,7 +1571,6 @@ paths:
           LLM Provider object with updated information
         content:
           multipart/form-data:
-#          application/json:
             schema:
               required:
                 - apiDefinition

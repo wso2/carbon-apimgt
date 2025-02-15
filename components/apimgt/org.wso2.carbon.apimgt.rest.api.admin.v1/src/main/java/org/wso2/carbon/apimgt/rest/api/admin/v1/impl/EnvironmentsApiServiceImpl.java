@@ -59,6 +59,19 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         return Response.ok().build();
     }
 
+    @Override
+    public Response environmentsEnvironmentIdGet(String environmentId, MessageContext messageContext) throws APIManagementException {
+        APIAdmin apiAdmin = new APIAdminImpl();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        Environment environment = apiAdmin.getEnvironment(organization, environmentId);
+        if (environment != null) {
+            EnvironmentDTO environmentDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(environment);
+            return Response.ok().entity(environmentDTO).build();
+        }
+        throw new APIManagementException("Requested Gateway Environment not found",
+                ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND);
+    }
+
     /**
      * Update gateway environment
      *
@@ -121,9 +134,12 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         try {
             APIAdmin apiAdmin = new APIAdminImpl();
             String gatewayType = body.getGatewayType();
-            if (!(APIConstants.API_GATEWAY_TYPE_REGULAR.equals(gatewayType) || APIConstants.API_GATEWAY_TYPE_APK.equals(gatewayType))) {
+
+            List<String> gatewayTypes = APIUtil.getGatewayTypes();
+            if (!gatewayTypes.contains(gatewayType)) {
                 throw new APIManagementException("Invalid gateway type: " + gatewayType);
             }
+
             if (APIConstants.API_GATEWAY_TYPE_APK.equals(gatewayType) && hasUnsupportedVhostConfiguration(body.getVhosts())) {
                 throw new APIManagementException("Unsupported Vhost Configuration for gateway type: " + gatewayType);
             }

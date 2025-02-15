@@ -67,6 +67,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
+import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.lifecycle.CheckListItem;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
@@ -280,6 +282,10 @@ public class APIMappingUtil {
 
         Set<Scope> scopes = getScopes(dto);
         model.setScopes(scopes);
+
+        if (dto.getGatewayType() != null) {
+            model.setGatewayType(dto.getGatewayType());
+        }
 
         //URI Templates
         // No default topics for AsyncAPIs. Therefore set URITemplates only for non-AsyncAPIs.
@@ -501,10 +507,6 @@ public class APIMappingUtil {
             model.setGatewayVendor(dto.getGatewayVendor());
         }
 
-        if (dto.getGatewayType() != null) {
-            model.setGatewayType(dto.getGatewayType());
-        }
-
         if (dto.getAsyncTransportProtocols() != null) {
             String asyncTransports = StringUtils.join(dto.getAsyncTransportProtocols(), ',');
             model.setAsyncTransportProtocols(asyncTransports);
@@ -523,6 +525,16 @@ public class APIMappingUtil {
         model.setPrimaryProductionEndpointId(dto.getPrimaryProductionEndpointId());
         model.setPrimarySandboxEndpointId(dto.getPrimarySandboxEndpointId());
 
+        ExternalGatewayDeployer deployer =
+                org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
+                        .getExternalGatewayDeployer(model.getGatewayType());
+        if (deployer != null) {
+            try {
+                deployer.transformAPI(model);
+            } catch (DeployerException e) {
+                throw new APIManagementException("Error while applying gateway standards to the API. ", e);
+            }
+        }
         return model;
     }
 
@@ -1425,7 +1437,7 @@ public class APIMappingUtil {
         } else {
             dto.setVisibleOrganizations(new ArrayList<>(List.of(APIConstants.VISIBLE_ORG_NONE)));
         }
-        
+
         if (model.getAdditionalProperties() != null) {
             JSONObject additionalProperties = model.getAdditionalProperties();
             List<APIInfoAdditionalPropertiesDTO> additionalPropertiesList = new ArrayList<>();
