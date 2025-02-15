@@ -42,6 +42,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.KeyManagersApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.GlobalKeyManagersApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.TenantThemeApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.OrgThemesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.AlertTypesApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.AlertSubscriptionsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.admin.v1.SystemScopesApi"/>

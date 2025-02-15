@@ -1684,6 +1684,31 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
+    public void importDraftedOrgTheme(String organization, InputStream themeContent) throws APIManagementException {
+        apiMgtDAO.importDraftedOrgTheme(organization, themeContent);
+    }
+
+    @Override
+    public void updateOrgThemeStatus(String organization, String action) throws APIManagementException {
+        apiMgtDAO.updateOrgThemeStatus(organization, action);
+    }
+
+    @Override
+    public void deleteOrgTheme(String organization, String themeId) throws APIManagementException {
+        apiMgtDAO.deleteOrgTheme(organization, themeId);
+    }
+
+    @Override
+    public InputStream getOrgTheme(String uuid, String organization) throws APIManagementException {
+        return apiMgtDAO.getOrgTheme(uuid, organization);
+    }
+
+    @Override
+    public Map<String, String> getOrgThemes(String organization) throws APIManagementException {
+        return apiMgtDAO.getOrgThemes(organization);
+    }
+
+    @Override
     public void updateTenantConfig(String organization, String config) throws APIManagementException {
 
         Schema schema = APIUtil.retrieveTenantConfigJsonSchema();

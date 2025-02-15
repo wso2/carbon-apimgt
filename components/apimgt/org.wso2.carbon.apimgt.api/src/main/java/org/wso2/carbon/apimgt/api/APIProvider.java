@@ -2158,4 +2158,57 @@ public interface APIProvider extends APIManager {
      * @return organization list
      */
     List<OrganizationDetailsDTO> getOrganizations(String orgId, String superOrganization) throws APIManagementException;
+
+    /**
+     * Imports a drafted api theme for the given organization and API ID.
+     *
+     * @param organization Organization name.
+     * @param themeContent Theme content as InputStream.
+     * @param apiId        API Identifier.
+     * @throws APIManagementException If a database error occurs.
+     */
+    void importDraftedApiTheme(String organization, InputStream themeContent, String apiId)
+            throws APIManagementException;
+
+    /**
+     * Updates the api theme status as published or unpublished.
+     *
+     * @param organization Organization name.
+     * @param action       Action to perform ("PUBLISH" or "UNPUBLISH").
+     * @param apiId        API Identifier.
+     * @throws APIManagementException If a database error occurs.
+     */
+    void updateApiThemeStatus(String organization, String action, String apiId)
+            throws APIManagementException;
+
+    /**
+     * Deletes an API theme.
+     *
+     * @param organization Organization name.
+     * @param themeId      Theme ID to delete.
+     * @param apiId        API Identifier.
+     * @throws APIManagementException If a database error occurs.
+     */
+    void deleteApiTheme(String organization, String themeId, String apiId) throws APIManagementException;
+
+    /**
+     * Gets an API theme.
+     *
+     * @param uuid      Theme ID to retrieve.
+     * @param organization Organization name.
+     * @param apiId        API Identifier.
+     * @return Input stream of API theme.
+     * @throws APIManagementException If a database error occurs.
+     */
+    InputStream getApiTheme(String uuid, String organization, String apiId) throws APIManagementException;
+
+    /**
+     * Gets API theme array.
+     *
+     * @param organization Organization name.
+     * @param apiId        API Identifier.
+     * @return Hash map of publish unpublish state and theme IDs.
+     * @throws APIManagementException If a database error occurs.
+     */
+    Map<String, String> getApiThemes(String organization, String apiId) throws APIManagementException;
 }

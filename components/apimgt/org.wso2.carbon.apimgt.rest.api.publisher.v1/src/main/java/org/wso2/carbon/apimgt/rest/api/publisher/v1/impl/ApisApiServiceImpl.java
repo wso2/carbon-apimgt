@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.commons.collections.MapUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -5056,6 +5057,81 @@ public class ApisApiServiceImpl implements ApisApiService {
         PublisherCommonUtils.executeGovernanceOnLabelAttach(updatedLabelList, RestApiConstants.RESOURCE_API,
                 apiId, tenantDomain);
         return Response.ok().entity(updatedLabelListDTO).build();
+    }
+
+    @Override
+    public Response deleteApiTheme(String apiId, String id, MessageContext messageContext) throws APIManagementException {
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        apiProvider.deleteApiTheme(tenantDomain, id, apiId);
+        return Response.status(Response.Status.OK).entity("Theme deleted successfully").build();
+    }
+
+    @Override
+    public Response getApiThemeContent(String apiId, String id, MessageContext messageContext) throws APIManagementException {
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        InputStream orgTheme = apiProvider.getApiTheme(id, tenantDomain, apiId);
+        String tempPath =
+                System.getProperty(RestApiConstants.JAVA_IO_TMPDIR) + File.separator + "exported-org-themes";
+        String tempFile = tenantDomain + APIConstants.ZIP_FILE_EXTENSION;
+        File orgThemeArchive = new File(tempPath, tempFile);
+
+        try {
+            FileUtils.copyInputStreamToFile(orgTheme, orgThemeArchive);
+            return Response.ok(orgThemeArchive, MediaType.APPLICATION_OCTET_STREAM)
+                    .header(RestApiConstants.HEADER_CONTENT_DISPOSITION, "attachment; filename=\""
+                            + orgThemeArchive.getName() + "\"").build();
+        } catch (IOException e) {
+            throw new APIManagementException(e.getMessage(), e,
+                    ExceptionCodes.from(ExceptionCodes.ORG_THEME_EXPORT_FAILED, tenantDomain, e.getMessage()));
+        }
+    }
+
+    @Override
+    public Response getApiThemes(String apiId, Boolean publish, MessageContext messageContext) throws APIManagementException {
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        List<ContentPublishStatusResponseDTO> responseList = new ArrayList<>();
+        Map<String, String> themeMap = apiProvider.getApiThemes(tenantDomain, apiId);
+
+        String draftedArtifact = themeMap.get("drafted");
+        String publishedArtifact = themeMap.get("published");
+
+        if (publish == null) {
+            if (draftedArtifact != null) {
+                responseList.add(new ContentPublishStatusResponseDTO().id(draftedArtifact).published(false));
+            }
+            if (publishedArtifact != null) {
+                responseList.add(new ContentPublishStatusResponseDTO().id(publishedArtifact).published(true));
+            }
+        } else if (publish) {
+            if (publishedArtifact != null) {
+                responseList.add(new ContentPublishStatusResponseDTO().id(publishedArtifact).published(true));
+            }
+        } else {
+            if (draftedArtifact != null) {
+                responseList.add(new ContentPublishStatusResponseDTO().id(draftedArtifact).published(false));
+            }
+        }
+        return Response.ok(responseList).build();
+    }
+
+    @Override
+    public Response importApiTheme(String apiId, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException {
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        apiProvider.importDraftedApiTheme(tenantDomain, fileInputStream, apiId);
+        return Response.status(Response.Status.OK).entity("Theme imported successfully").build();
+    }
+
+    @Override
+    public Response updateApiThemeStatus(String apiId, String id, ContentPublishStatusDTO contentPublishStatusDTO, MessageContext messageContext) throws APIManagementException {
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String action = contentPublishStatusDTO.getAction().value();
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        apiProvider.updateApiThemeStatus(tenantDomain, action, apiId);
+        return Response.status(Response.Status.OK).entity("Status updated successfully").build();
     }
 
     private void validateEnvironment(String organization, String envId) throws APIManagementException {

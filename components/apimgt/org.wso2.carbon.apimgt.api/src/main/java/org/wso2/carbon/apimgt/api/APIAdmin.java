@@ -531,6 +531,52 @@ public interface APIAdmin  {
 
     String getTenantConfig(String organization) throws APIManagementException;
 
+    /**
+     * Imports a drafted organization theme for the given organization.
+     *
+     * @param organization Organization name.
+     * @param themeContent Theme content as InputStream.
+     * @throws APIManagementException If a database error occurs.
+     */
+    void importDraftedOrgTheme(String organization, InputStream themeContent) throws APIManagementException;
+
+    /**
+     * Updates the organization theme status as published or unpublished.
+     *
+     * @param organization Organization name.
+     * @param action       Action to perform ("PUBLISH" or "UNPUBLISH").
+     * @throws APIManagementException If a database error occurs.
+     */
+    void updateOrgThemeStatus(String organization, String action) throws APIManagementException;
+
+    /**
+     * Deletes an organization theme.
+     *
+     * @param organization Organization name.
+     * @param themeId      Theme ID to delete.
+     * @throws APIManagementException If a database error occurs.
+     */
+    void deleteOrgTheme(String organization, String themeId) throws APIManagementException;
+
+    /**
+     * Gets an organization theme.
+     *
+     * @param uuid         Theme ID to retrieve.
+     * @param organization Organization name.
+     * @return Input stream of Org theme.
+     * @throws APIManagementException If a database error occurs.
+     */
+    InputStream getOrgTheme(String uuid, String organization) throws APIManagementException;
+
+    /**
+     * Retrieves the themes associated with the given organization.
+     *
+     * @param organization Organization name.
+     * @return Hash map of publish unpublish state and theme IDs.
+     * @throws APIManagementException If a database error occurs.
+     */
+    Map<String, String> getOrgThemes(String organization) throws APIManagementException;
+
     void updateTenantConfig(String organization, String config) throws APIManagementException;
 
     String getTenantConfigSchema(String organization);

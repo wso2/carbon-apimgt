@@ -45,6 +45,7 @@
             org.wso2.carbon.apimgt.rest.api.admin.v1.SwaggerYamlApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.KeyManagersApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.TenantThemeApi,
+            org.wso2.carbon.apimgt.rest.api.admin.v1.OrgThemesApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.AlertTypesApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.AlertSubscriptionsApi,
             org.wso2.carbon.apimgt.rest.api.admin.v1.SystemScopesApi,

@@ -8138,6 +8138,33 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public void importDraftedApiTheme(String organization, InputStream themeContent, String apiId)
+            throws APIManagementException {
+        apiMgtDAO.importDraftedApiTheme(organization, themeContent, apiId);
+    }
+
+    @Override
+    public void updateApiThemeStatus(String organization, String action, String apiId)
+            throws APIManagementException {
+        apiMgtDAO.updateApiThemeStatus(organization, action, apiId);
+    }
+
+    @Override
+    public void deleteApiTheme(String organization, String themeId, String apiId) throws APIManagementException {
+        apiMgtDAO.deleteApiTheme(organization, themeId, apiId);
+    }
+
+    @Override
+    public InputStream getApiTheme(String uuid, String organization, String apiId) throws APIManagementException {
+        return apiMgtDAO.getApiTheme(uuid, organization,apiId);
+    }
+
+    @Override
+    public Map<String, String> getApiThemes(String organization, String apiId) throws APIManagementException {
+        return apiMgtDAO.getApiThemes(organization, apiId);
+    }
+
+    @Override
     public String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint, String organization)
             throws APIManagementException {
         String endpointUUID = UUID.randomUUID().toString();
