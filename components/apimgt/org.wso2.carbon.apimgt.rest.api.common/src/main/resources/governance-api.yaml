@@ -1436,6 +1436,7 @@ components:
             - FOLLOWED
             - VIOLATED
             - UNAPPLIED
+            - PENDING
           example: "FOLLOWED"
         rulesetValidationResults:
           type: array

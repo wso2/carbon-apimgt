@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.governance.impl;
 
 import org.wso2.carbon.apimgt.governance.api.ArtifactGovernanceHandler;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 
@@ -57,7 +58,7 @@ public class ArtifactGovernanceFactory {
         if (ArtifactType.API.equals(artifactType)) {
             return new APIGovernanceHandler();
         }
-        throw new APIMGovernanceException("Unsupported artifact type: " + artifactType);
+        throw new APIMGovernanceException(APIMGovExceptionCodes.INVALID_ARTIFACT_TYPE, artifactType);
     }
 
 }

@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.governance.impl.util;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.impl.config.APIMGovernanceConfig;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
@@ -69,8 +70,8 @@ public class APIMGovernanceDBUtil {
                         Context ctx = new InitialContext();
                         dataSource = (DataSource) ctx.lookup(dataSourceName);
                     } catch (NamingException e) {
-                        throw new APIMGovernanceException("Error while looking up the data " +
-                                "source: " + dataSourceName, e);
+                        throw new APIMGovernanceException(APIMGovExceptionCodes.DATASOURCE_INACCESSIBLE
+                                , e, dataSourceName);
                     }
                 } else {
                     log.error(DATA_SOURCE_NAME + " not defined in api-manager.xml.");

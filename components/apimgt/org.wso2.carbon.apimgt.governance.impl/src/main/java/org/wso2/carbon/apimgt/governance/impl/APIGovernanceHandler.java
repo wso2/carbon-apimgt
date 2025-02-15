@@ -142,7 +142,8 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
                 return true;
             }
         } catch (APIManagementException e) {
-            throw new APIMGovernanceException("Error while checking the existence of the API with ID: " + apiId, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_CHECKING_API_AVAILABILITY, e,
+                    apiId);
         }
         return false;
     }
@@ -214,8 +215,8 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
                 return true;
             }
         } catch (APIManagementException e) {
-            throw new APIMGovernanceException("Error while checking the deployment status of the " +
-                    "API with ID: " + apiId, e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes
+                    .ERROR_WHILE_CHECKING_API_DEPLOYMENT_STATUS, e, apiId);
         }
         return false;
     }
@@ -458,7 +459,7 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
                 return getExtendedArtifactTypeFromAPIType(type);
             }
         } catch (JsonProcessingException e) {
-            throw new APIMGovernanceException("Error while parsing the API metadata", e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_TYPE_FROM_PROJECT, e);
         }
         return null;
     }
