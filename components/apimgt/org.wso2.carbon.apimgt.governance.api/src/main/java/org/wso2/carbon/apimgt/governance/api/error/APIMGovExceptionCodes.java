@@ -124,8 +124,8 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
     // Request related codes
     ERROR_WHILE_ADDING_NEW_GOV_EVAL_REQUEST(400001, "Error while adding new governance evaluation request.",
             500, "Error while adding new governance evaluation request for artifact: %s", true),
-    ERROR_WHILE_GETTING_GOV_EVAL_REQUEST_FOR_ARTIFACT(400002, "Error while getting governance evaluation request.",
-            500, "Error while getting governance evaluation request for artifact: %s", true),
+    ERROR_WHILE_GETTING_EVAL_PENDING_POLICIES_FOR_ARTIFACT(400002, "Error while getting evaluation pending policies.",
+            500, "Error while getting evaluation pending policies for artifact: %s", true),
     ERROR_WHILE_GETTING_GOV_EVAL_REQUESTS(400003, "Error while getting governance evaluation requests.",
             500, "Error while getting governance evaluation requests"),
     ERROR_WHILE_UPDATING_GOV_EVAL_REQUEST(400004, "Error while updating governance evaluation request.",

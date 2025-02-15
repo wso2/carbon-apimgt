@@ -373,27 +373,6 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Add an artifact compliance evaluation request event
-     *
-     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType  Artifact Type
-     * @param organization  Organization
-     * @return Request ID
-     * @throws APIMGovernanceException If an error occurs while adding the artifact compliance evaluation
-     *                                 request
-     */
-    @Override
-    public String getPendingEvalRequest(String artifactRefId, ArtifactType artifactType,
-                                        String organization) throws APIMGovernanceException {
-        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
-            return getPendingEvalRequest(connection, artifactRefId, artifactType, organization);
-        } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes
-                    .ERROR_WHILE_GETTING_GOV_EVAL_REQUEST_FOR_ARTIFACT, e, artifactRefId);
-        }
-    }
-
-    /**
      * Get compliance pending artifacts
      *
      * @param artifactType Artifact Type
@@ -1012,6 +991,39 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             return artifactInfos;
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
+        }
+    }
+
+
+    /**
+     * Get pending policies for an artifact
+     *
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
+     * @return List of pending policies
+     * @throws APIMGovernanceException If an error occurs while getting the pending policies
+     */
+    @Override
+    public List<String> getPendingPoliciesForArtifact(String artifactRefId,
+                                                      ArtifactType artifactType,
+                                                      String organization) throws APIMGovernanceException {
+        String sqlQuery = SQLConstants.GET_PENDING_POLICIES_FOR_ARTIFACT;
+        List<String> policyIds = new ArrayList<>();
+        try (Connection connection = APIMGovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
+            prepStmnt.setString(1, artifactRefId);
+            prepStmnt.setString(2, String.valueOf(artifactType));
+            prepStmnt.setString(3, organization);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    policyIds.add(resultSet.getString("POLICY_ID"));
+                }
+            }
+            return policyIds;
+        } catch (SQLException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes
+                    .ERROR_WHILE_GETTING_EVAL_PENDING_POLICIES_FOR_ARTIFACT, e);
         }
     }
 

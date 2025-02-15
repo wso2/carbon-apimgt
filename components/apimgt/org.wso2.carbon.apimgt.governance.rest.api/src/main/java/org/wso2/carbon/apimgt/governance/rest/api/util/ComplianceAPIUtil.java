@@ -100,20 +100,16 @@ public class ComplianceAPIUtil {
             return artifactComplianceDetailsDTO;
         }
 
-        // If the evaluation is pending, set the compliance status to pending and return
-        boolean isEvaluationPending = new ComplianceManager()
-                .isEvaluationPendingForArtifact(artifactRefId, artifactType, organization);
-        if (isEvaluationPending) {
-            artifactComplianceDetailsDTO.setStatus(ArtifactComplianceDetailsDTO.StatusEnum.PENDING);
-            return artifactComplianceDetailsDTO;
-        }
-
         // Get all policies evaluated for the artifact
         List<String> evaluatedPolicies = new ComplianceManager().getEvaluatedPoliciesForArtifact(artifactRefId,
                 artifactType, organization);
 
-        // If the artifact is not evaluated yet, set the compliance status to not applicable/pending and return
-        if (evaluatedPolicies.isEmpty()) {
+        // Get all pending policies for the artifact
+        List<String> pendingPoliciesForArtifact = new ComplianceManager()
+                .getPendingPoliciesForArtifact(artifactRefId, artifactType, organization);
+
+        // If the artifact is not evaluated and no policies are pending, set the compliance status to not applicable
+        if (evaluatedPolicies.isEmpty() && pendingPoliciesForArtifact.isEmpty()) {
             artifactComplianceDetailsDTO.setStatus(ArtifactComplianceDetailsDTO.StatusEnum.NOT_APPLICABLE);
             return artifactComplianceDetailsDTO;
         }
@@ -125,17 +121,39 @@ public class ComplianceAPIUtil {
             String policyId = entry.getKey();
             String policyName = entry.getValue();
             boolean isPolicyEvaluated = evaluatedPolicies.contains(policyId);
+            boolean isPolicyPending = pendingPoliciesForArtifact.contains(policyId);
             PolicyAdherenceWithRulesetsDTO policyAdherence = getPolicyAdherenceResultsDTO(policyId,
-                    policyName, artifactRefId, artifactType, organization, isPolicyEvaluated);
+                    policyName, artifactRefId, artifactType, organization, isPolicyEvaluated, isPolicyPending);
             policyAdherenceDetails.add(policyAdherence);
-
-            // If the policy is violated, set the artifact compliance status to non-compliant
-            if (policyAdherence.getStatus() == PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED) {
-                artifactComplianceDetailsDTO.setStatus(ArtifactComplianceDetailsDTO
-                        .StatusEnum.NON_COMPLIANT);
-            }
-
         }
+
+        /*
+         *  Set the overall compliance status for the artifact
+         *  If all policies are un-applied, set the status to not applicable.
+         *  If any policy is violated, set the status to non-compliant.
+         *  If any policy is pending, set the status to pending.
+         *  Otherwise, set the status to compliant
+         */
+
+        ArtifactComplianceDetailsDTO.StatusEnum status;
+        if (policyAdherenceDetails.stream().allMatch(dto -> dto.getStatus()
+                == PolicyAdherenceWithRulesetsDTO.StatusEnum.UNAPPLIED)) {
+            status = ArtifactComplianceDetailsDTO.StatusEnum.NOT_APPLICABLE;
+        } else if (policyAdherenceDetails.stream().anyMatch(dto -> dto.getStatus()
+                == PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED)) {
+            status = ArtifactComplianceDetailsDTO.StatusEnum.NON_COMPLIANT;
+        } else if (policyAdherenceDetails.stream().anyMatch(dto -> dto.getStatus()
+                == PolicyAdherenceWithRulesetsDTO.StatusEnum.PENDING)) {
+            status = ArtifactComplianceDetailsDTO.StatusEnum.PENDING;
+        } else if (policyAdherenceDetails.stream().anyMatch(dto -> dto.getStatus()
+                == PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED)) {
+            status = ArtifactComplianceDetailsDTO.StatusEnum.NON_COMPLIANT;
+        } else {
+            status = ArtifactComplianceDetailsDTO.StatusEnum.COMPLIANT;
+        }
+
+        artifactComplianceDetailsDTO.setStatus(status);
+
 
         artifactComplianceDetailsDTO.setGovernedPolicies(policyAdherenceDetails);
         return artifactComplianceDetailsDTO;
@@ -150,6 +168,7 @@ public class ComplianceAPIUtil {
      * @param artifactType      artifact type
      * @param organization      organization
      * @param isPolicyEvaluated whether the policy has been evaluated
+     * @param isPolicyPending   whether the policy evaluation is pending
      * @return PolicyAdherenceWithRulesetsDTO
      * @throws APIMGovernanceException if an error occurs while getting the policy adherence results
      */
@@ -157,7 +176,8 @@ public class ComplianceAPIUtil {
                                                                                String artifactRefId,
                                                                                ArtifactType artifactType,
                                                                                String organization,
-                                                                               boolean isPolicyEvaluated)
+                                                                               boolean isPolicyEvaluated,
+                                                                               boolean isPolicyPending)
             throws APIMGovernanceException {
 
         PolicyManager policyManager = new PolicyManager();
@@ -166,6 +186,12 @@ public class ComplianceAPIUtil {
         PolicyAdherenceWithRulesetsDTO policyAdherenceWithRulesetsDTO = new PolicyAdherenceWithRulesetsDTO();
         policyAdherenceWithRulesetsDTO.setId(policyId);
         policyAdherenceWithRulesetsDTO.setName(policyName);
+
+        // If the policy evaluation is pending, set the policy adherence status to pending
+        if (isPolicyPending) {
+            policyAdherenceWithRulesetsDTO.setStatus(PolicyAdherenceWithRulesetsDTO.StatusEnum.PENDING);
+            return policyAdherenceWithRulesetsDTO;
+        }
 
         // If the policy has not been evaluated, set the policy adherence status to unapplied
         if (!isPolicyEvaluated) {
@@ -229,11 +255,6 @@ public class ComplianceAPIUtil {
         RulesetValidationResultWithoutRulesDTO rulesetDTO = new RulesetValidationResultWithoutRulesDTO();
         rulesetDTO.setId(ruleset.getId());
         rulesetDTO.setName(ruleset.getName());
-
-        // Fetch violations for the current ruleset
-        List<RuleViolation> ruleViolations = complianceManager.getRuleViolations(artifactRefId, artifactType,
-                ruleset.getId(), organization);
-
         rulesetDTO.setRuleType(RulesetValidationResultWithoutRulesDTO
                 .RuleTypeEnum.fromValue(ruleset.getRuleType().name()));
 
@@ -242,6 +263,11 @@ public class ComplianceAPIUtil {
             rulesetDTO.setStatus(RulesetValidationResultWithoutRulesDTO.StatusEnum.UNAPPLIED);
             return rulesetDTO;
         }
+
+        // Fetch violations for the current ruleset
+        List<RuleViolation> ruleViolations = complianceManager.getRuleViolations(artifactRefId, artifactType,
+                ruleset.getId(), organization);
+
 
         rulesetDTO.setStatus(ruleViolations.isEmpty() ?
                 RulesetValidationResultWithoutRulesDTO.StatusEnum.PASSED :
@@ -332,21 +358,22 @@ public class ComplianceAPIUtil {
             return complianceStatus;
         }
 
-        // If the evaluation is pending, set the compliance status to pending and return
-        boolean isEvaluationPending = new ComplianceManager()
-                .isEvaluationPendingForArtifact(artifactRefId, artifactType, organization);
-        if (isEvaluationPending) {
-            complianceStatus.setStatus(ArtifactComplianceStatusDTO.StatusEnum.PENDING);
-            return complianceStatus;
-        }
-
         // Get evaluated policies for the current artifact
-        List<String> evaluatedPolicies = complianceManager.getEvaluatedPoliciesForArtifact(artifactRefId, artifactType,
+        List<String> evaluatedPolicies = complianceManager.getEvaluatedPoliciesForArtifact(artifactRefId,
+                artifactType,
                 organization);
 
-        // If the artifact is not evaluated yet, set the compliance status to not applicable and return
-        if (evaluatedPolicies.isEmpty()) {
+        // Get pending policies for the current artifact
+        List<String> pendingPoliciesForArtifact = complianceManager
+                .getPendingPoliciesForArtifact(artifactRefId, artifactType, organization);
+
+        // If the artifact is not evaluated yet and no policies are pending, set the compliance
+        // status to not applicable
+        if (evaluatedPolicies.isEmpty() && pendingPoliciesForArtifact.isEmpty()) {
             complianceStatus.setStatus(ArtifactComplianceStatusDTO.StatusEnum.NOT_APPLICABLE);
+            return complianceStatus;
+        } else if (!pendingPoliciesForArtifact.isEmpty()) {
+            complianceStatus.setStatus(ArtifactComplianceStatusDTO.StatusEnum.PENDING);
             return complianceStatus;
         }
 

@@ -743,19 +743,16 @@ public class ComplianceManager {
     }
 
     /**
-     * Check whether the evaluation is pending for the artifact
+     * Get the list of pending policies for the artifact
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact Type
      * @param organization  Organization
-     * @return Whether the evaluation is pending for the artifact
-     * @throws APIMGovernanceException If an error occurs while checking whether the evaluation
-     *                                 is pending for the artifact
+     * @return List of pending policies
+     * @throws APIMGovernanceException If an error occurs while getting the list of pending policies
      */
-
-    public boolean isEvaluationPendingForArtifact(String artifactRefId, ArtifactType artifactType,
-                                                  String organization) throws APIMGovernanceException {
-        String reqId = complianceMgtDAO.getPendingEvalRequest(artifactRefId, artifactType, organization);
-        return reqId != null;
+    public List<String> getPendingPoliciesForArtifact(String artifactRefId, ArtifactType artifactType,
+                                                      String organization) throws APIMGovernanceException {
+        return complianceMgtDAO.getPendingPoliciesForArtifact(artifactRefId, artifactType, organization);
     }
 }
