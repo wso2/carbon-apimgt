@@ -3292,6 +3292,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ContentPublishStatusResponse'
+        404:
+          $ref: '#/components/responses/NotFound'
+        400:
+          $ref: '#/components/responses/BadRequest'
         403:
           $ref: '#/components/responses/Forbidden'
         500:
@@ -3327,6 +3331,8 @@ paths:
           description: Successfully imported
         400:
           $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
         403:
           $ref: '#/components/responses/Forbidden'
         413:
@@ -3435,6 +3441,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         403:
           $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
@@ -4382,6 +4390,8 @@ components:
           enum:
             - PUBLISH
             - UNPUBLISH
+      example:
+        action: PUBLISH
     ContentPublishStatusResponse:
       type: object
       properties:

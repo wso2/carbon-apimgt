@@ -90,6 +90,8 @@ OrgThemesApiService delegate = new OrgThemesApiServiceImpl();
     }, tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "List of org themes", response = ContentPublishStatusResponseDTO.class, responseContainer = "List"),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getOrgThemes( @ApiParam(value = "Filter themes based on published status")  @QueryParam("publish") Boolean publish) throws APIManagementException{
@@ -109,6 +111,7 @@ OrgThemesApiService delegate = new OrgThemesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Successfully imported", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
         @ApiResponse(code = 413, message = "Payload Too Large. Request entity is larger than limits defined by server.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
@@ -130,6 +133,7 @@ OrgThemesApiService delegate = new OrgThemesApiServiceImpl();
         @ApiResponse(code = 200, message = "Successfully updated status", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response updateOrgThemeStatus(@ApiParam(value = "",required=true) @PathParam("id") String id, @ApiParam(value = "" ,required=true) ContentPublishStatusDTO contentPublishStatusDTO) throws APIManagementException{
         return delegate.updateOrgThemeStatus(id, contentPublishStatusDTO, securityContext);

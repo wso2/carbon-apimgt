@@ -607,7 +607,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }, tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Successfully deleted", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response deleteApiTheme(@ApiParam(value = "",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "",required=true) @PathParam("id") String id) throws APIManagementException{
         return delegate.deleteApiTheme(apiId, id, securityContext);
@@ -1396,7 +1398,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }, tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Returns the API theme zip file", response = File.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getApiThemeContent(@ApiParam(value = "",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "",required=true) @PathParam("id") String id) throws APIManagementException{
         return delegate.getApiThemeContent(apiId, id, securityContext);
@@ -1414,7 +1418,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }, tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "List of API themes", response = ContentPublishStatusResponseDTO.class, responseContainer = "List"),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getApiThemes(@ApiParam(value = "",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Filter themes based on published status")  @QueryParam("publish") Boolean publish) throws APIManagementException{
         return delegate.getApiThemes(apiId, publish, securityContext);
@@ -1688,6 +1694,7 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "Successfully imported", response = Void.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response importApiTheme(@ApiParam(value = "",required=true) @PathParam("apiId") String apiId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail) throws APIManagementException{
         return delegate.importApiTheme(apiId, fileInputStream, fileDetail, securityContext);
@@ -2114,7 +2121,9 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }, tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Successfully updated status", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response updateApiThemeStatus(@ApiParam(value = "",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "",required=true) @PathParam("id") String id, @ApiParam(value = "" ,required=true) ContentPublishStatusDTO contentPublishStatusDTO) throws APIManagementException{
         return delegate.updateApiThemeStatus(apiId, id, contentPublishStatusDTO, securityContext);

@@ -8910,8 +8910,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ContentPublishStatusResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
         403:
           $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
@@ -8952,6 +8956,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         403:
           $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
@@ -8986,8 +8992,12 @@ paths:
               schema:
                 type: string
                 format: binary
+        400:
+          $ref: '#/components/responses/BadRequest'
         403:
           $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
@@ -9017,8 +9027,12 @@ paths:
       responses:
         200:
           description: Successfully deleted
+        400:
+          $ref: '#/components/responses/BadRequest'
         403:
           $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
@@ -9054,8 +9068,12 @@ paths:
       responses:
         200:
           description: Successfully updated status
+        400:
+          $ref: '#/components/responses/BadRequest'
         403:
           $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
@@ -10186,6 +10204,8 @@ components:
           enum:
             - PUBLISH
             - UNPUBLISH
+      example:
+        action: PUBLISH
     ContentPublishStatusResponse:
       type: object
       properties:
