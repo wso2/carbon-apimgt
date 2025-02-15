@@ -120,7 +120,7 @@ public class OrgThemesApiServiceImpl implements OrgThemesApiService {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String action = contentPublishStatusDTO.getAction().value();
             APIAdminImpl apiAdmin = new APIAdminImpl();
-            apiAdmin.updateOrgThemeStatusAsPublishedOrUnpublished(tenantDomain, action);
+            apiAdmin.updateOrgThemeStatus(tenantDomain, action);
             return Response.status(Response.Status.OK).entity("Status updated successfully").build();
     }
 }
