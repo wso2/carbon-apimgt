@@ -480,6 +480,24 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @GET
+    @Path("/{apiId}/markdown-content")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get the Content of the API Overview Markdown Document ", notes = "This operation can be used to retrieve the overview markdown document content of an API. You need to provide the Id of the API to retrieve it.  The content of the document will be retrieved in `text/plain` content type  `X-WSO2-Tenant` header can be used to retrieve the content of the overview markdown document of an API that belongs to a different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.  **NOTE:** * This operation does not require an Authorization header by default. But in order to see a restricted API's overview markdown document content, you need to provide Authorization header. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "APIs",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Inline content returned. ", response = Void.class),
+        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response getMarkdownContentOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
+        return delegate.getMarkdownContentOfAPI(apiId, xWSO2Tenant, ifNoneMatch, securityContext);
+    }
+
+    @GET
     @Path("/{apiId}/comments/{commentId}/replies")
     
     @Produces({ "application/json" })

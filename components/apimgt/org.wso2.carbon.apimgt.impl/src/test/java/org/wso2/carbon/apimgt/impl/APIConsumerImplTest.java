@@ -37,24 +37,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.APIRating;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.AccessTokenRequest;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
-import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
-import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
-import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -1008,5 +991,22 @@ public class APIConsumerImplTest {
         assertNotNull(apiKeySet);
         assertEquals(apiKeySet.size(), 2);
         assertNotNull(apiKeySet.iterator().next().getAccessToken());
+    }
+
+    @Test
+    public void testGetMarkdownOverviewContent() throws Exception {
+        String apiId = "api123";
+        String organization = "wso2";
+        DocumentationContent mockContent = new DocumentationContent();
+
+        APIConsumerImpl apiConsumer = PowerMockito.spy(new APIConsumerImplWrapper());
+
+        PowerMockito.doNothing().when(apiConsumer).checkAPIVisibilityRestriction(apiId, organization);
+        PowerMockito.doReturn(mockContent).when(apiConsumer, "getMarkdownOverviewContent", apiId, organization);
+
+        DocumentationContent result = apiConsumer.getMarkdownOverviewContent(apiId, organization);
+
+        Assert.assertNotNull(result);
+        Assert.assertEquals(mockContent, result);
     }
 }
