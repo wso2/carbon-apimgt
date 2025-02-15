@@ -81,6 +81,7 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
+import org.wso2.carbon.apimgt.api.model.OrganizationTiers;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -270,6 +271,14 @@ public class PublisherCommonUtils {
                 visibleOrgs = visibleOrgs + "," + orginfo.getOrganizationId();
                 apiToUpdate.setVisibleOrganizations(visibleOrgs);
             }
+            OrganizationTiers parentOrgTiers = new OrganizationTiers(orginfo.getOrganizationId(),
+                    apiToUpdate.getAvailableTiers());
+            Set<OrganizationTiers> currentOrganizationTiers = apiToUpdate.getAvailableTiersForOrganizations();
+            if (currentOrganizationTiers == null) {
+                currentOrganizationTiers = new HashSet<>();
+            }
+            currentOrganizationTiers.add(parentOrgTiers);
+            apiToUpdate.setAvailableTiersForOrganizations(currentOrganizationTiers);
         }
         
         apiProvider.updateAPI(apiToUpdate, originalAPI);
@@ -281,6 +290,13 @@ public class PublisherCommonUtils {
             String visibleOrgs = StringUtils.join(orgList, ',');
             apiUpdated.setVisibleOrganizations(visibleOrgs);
         }
+        // Remove parentOrgTiers from OrganizationTiers list
+        Set<OrganizationTiers> updatedOrganizationTiers = apiUpdated.getAvailableTiersForOrganizations();
+        if (updatedOrganizationTiers != null) {
+            updatedOrganizationTiers.removeIf(tier -> tier.getOrganizationID().equals(orginfo.getOrganizationId()));
+            apiUpdated.setAvailableTiersForOrganizations(updatedOrganizationTiers);
+        }
+
         if (apiUpdated != null && !StringUtils.isEmpty(apiUpdated.getEndpointConfig())) {
             JsonObject endpointConfig = JsonParser.parseString(apiUpdated.getEndpointConfig()).getAsJsonObject();
             if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
@@ -1494,6 +1510,14 @@ public class PublisherCommonUtils {
                 visibleOrgs = visibleOrgs + "," + orgInfo.getOrganizationId();
                 apiToAdd.setVisibleOrganizations(visibleOrgs);
             }
+            OrganizationTiers parentOrgTiers = new OrganizationTiers(orgInfo.getOrganizationId(),
+                    apiToAdd.getAvailableTiers());
+            Set<OrganizationTiers> currentOrganizationTiers = apiToAdd.getAvailableTiersForOrganizations();
+            if (currentOrganizationTiers == null) {
+                currentOrganizationTiers = new HashSet<>();
+            }
+            currentOrganizationTiers.add(parentOrgTiers);
+            apiToAdd.setAvailableTiersForOrganizations(currentOrganizationTiers);
         }
 
         //adding the api
@@ -1506,6 +1530,12 @@ public class PublisherCommonUtils {
         }
         apiProvider.addAPI(apiToAdd);
         checkGovernanceComplianceAsync(apiToAdd.getUuid(), APIMGovernableState.API_CREATE, artifactType, organization);
+        // Remove parentOrgTiers from OrganizationTiers list
+        Set<OrganizationTiers> updatedOrganizationTiers = apiToAdd.getAvailableTiersForOrganizations();
+        if (updatedOrganizationTiers != null) {
+            updatedOrganizationTiers.removeIf(tier -> tier.getOrganizationID().equals(orgInfo.getOrganizationId()));
+            apiToAdd.setAvailableTiersForOrganizations(updatedOrganizationTiers);
+        }
         return apiToAdd;
     }
 
