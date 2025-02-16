@@ -367,7 +367,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
             if (apiRevision != null && apiRevision.getApiUUID() != null) {
                 throw new APIManagementException("Cannot Update API Endpoint in Revision View : " + endpointId,
-                        ExceptionCodes.ERROR_UPDATING_API_ENDPOINT_API);
+                        ExceptionCodes.ERROR_UPDATING_API_ENDPOINT);
             }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);

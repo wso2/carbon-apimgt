@@ -69,6 +69,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.util.SequenceUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
@@ -808,23 +809,27 @@ public class ExportUtils {
     }
 
     /**
-     * Save All API Endpoints To Zip File.
+     * Add endpoint related information to the archive
      *
      * @param archivePath  path to save API Endpoints
      * @param apiID        Unique Identifier of API
      * @param exportFormat Format of export
      * @param apiProvider  API provider
      * @param organization Organization identifier
-     * @throws APIManagementException
+     * @throws APIManagementException If an error occurs while adding API endpoints to the archive
      */
     public static void addAPIEndpointsToArchive(String archivePath, String apiID, ExportFormat exportFormat,
             APIProvider apiProvider, String organization) throws APIManagementException {
         try {
             List<APIEndpointInfo> apiEndpointList = apiProvider.getAllAPIEndpointsByUUID(apiID, organization);
+            List<APIEndpointDTO> apiEndpointDTOList = new ArrayList<>();
+            for (APIEndpointInfo apiEndpointInfo : apiEndpointList) {
+                apiEndpointDTOList.add(APIMappingUtil.fromAPIEndpointToDTO(apiEndpointInfo));
+            }
 
-            if (!apiEndpointList.isEmpty()) {
+            if (!apiEndpointDTOList.isEmpty()) {
                 Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                JsonElement apiEndpointsObj = gson.toJsonTree(apiEndpointList);
+                JsonElement apiEndpointsObj = gson.toJsonTree(apiEndpointDTOList);
                 JsonArray apiEndpointsJson = (JsonArray) apiEndpointsObj;
                 CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_ENDPOINTS_FILE_LOCATION,
                         exportFormat, ImportExportConstants.API_ENDPOINTS_TYPE, apiEndpointsJson);
