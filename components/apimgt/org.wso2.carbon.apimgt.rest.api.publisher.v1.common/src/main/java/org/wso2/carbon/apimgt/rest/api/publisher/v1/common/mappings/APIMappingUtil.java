@@ -3366,11 +3366,16 @@ public class APIMappingUtil {
         if (checkEndpointSecurityPasswordEnabled(tenantDomain) | preserveCredentials) {
             return endpointSecurity;
         }
+        return handleEndpointSecurity(endpointSecurity);
+    }
+
+    private static JSONObject handleEndpointSecurity(JSONObject endpointSecurity) {
+
         JSONObject endpointSecurityElement = new JSONObject();
         endpointSecurityElement.putAll(endpointSecurity);
         if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
-            JSONObject sandboxEndpointSecurity =
-                    (JSONObject) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+            JSONObject sandboxEndpointSecurity = new JSONObject(
+                    (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX));
             if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase((String) sandboxEndpointSecurity
                     .get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
                 sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
@@ -3381,10 +3386,11 @@ public class APIMappingUtil {
             if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
                 sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
             }
+            endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, sandboxEndpointSecurity);
         }
         if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
-            JSONObject productionEndpointSecurity =
-                    (JSONObject) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+            JSONObject productionEndpointSecurity = new JSONObject(
+                    (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION));
             if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase((String) productionEndpointSecurity
                     .get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
                 productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
@@ -3395,6 +3401,7 @@ public class APIMappingUtil {
             if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
                 productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
             }
+            endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
         }
         return endpointSecurityElement;
     }
@@ -3523,11 +3530,21 @@ public class APIMappingUtil {
     }
 
     public static APIEndpointDTO fromAPIEndpointToDTO(APIEndpointInfo apiEndpoint) throws APIManagementException {
+
         APIEndpointDTO apiEndpointDTO = new APIEndpointDTO();
         apiEndpointDTO.setId(apiEndpoint.getEndpointUuid());
         apiEndpointDTO.setName(apiEndpoint.getEndpointName());
         apiEndpointDTO.setDeploymentStage(apiEndpoint.getDeploymentStage());
-        apiEndpointDTO.setEndpointConfig(apiEndpoint.getEndpointConfig());
+
+        Map<String, Object> endpointConfig = apiEndpoint.getEndpointConfig();
+        Map endpointSecurityMap = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+        if (endpointSecurityMap != null && !endpointSecurityMap.isEmpty()) {
+            JSONObject endpointSecurity = new JSONObject(endpointSecurityMap);
+            endpointSecurity = handleEndpointSecurity(endpointSecurity);
+            endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+        }
+        apiEndpointDTO.setEndpointConfig(endpointConfig);
+
         return apiEndpointDTO;
     }
 
@@ -3544,7 +3561,6 @@ public class APIMappingUtil {
             throw new APIManagementException("Endpoint Config is missing of API Endpoint.",
                     ExceptionCodes.ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API);
         }
-//        apiEndpoint.setOrganization(organization);
         return apiEndpoint;
     }
 

@@ -1603,16 +1603,16 @@ public interface APIProvider extends APIManager {
      * @param apiUUID      Unique identifier of API
      * @param apiEndpoint  API endpoint details
      * @param organization Organization name
-     * @return created endpoint UUID
-     * @throws APIManagementException if an error occurs while inserting endpoint detail
+     * @return UUID of the added endpoint
+     * @throws APIManagementException if an error occurs while adding the endpoint
      */
     String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint, String organization)
             throws APIManagementException;
 
     /**
-     * Delete an API endpoint by providing the endpoint UUID.
+     * Delete endpoint by providing the endpoint UUID.
      *
-     * @param endpointUUID Unique identifier of Endpoint
+     * @param endpointUUID Unique identifier of endpoint
      * @throws APIManagementException if an error occurs while deleting the endpoint
      */
     void deleteAPIEndpointById(String endpointUUID) throws APIManagementException;

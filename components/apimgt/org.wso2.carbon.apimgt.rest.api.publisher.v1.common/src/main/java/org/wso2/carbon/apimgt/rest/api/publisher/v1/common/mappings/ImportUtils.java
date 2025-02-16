@@ -716,10 +716,25 @@ public class ImportUtils {
 
     public static void populateAPIWithEndpoints(API api, APIProvider provider, String extractedFolderPath,
             String organization) throws APIManagementException {
-        // Delete previously added endpoints
 
-        // Retrieve endpoints from artifact
+        // Delete existing endpoints
+        List<APIEndpointInfo> existingAPIEndpoints = provider.getAllAPIEndpointsByUUID(api.getUuid(), organization);
+        for (APIEndpointInfo existingAPIEndpoint : existingAPIEndpoints) {
+            try {
+                provider.deleteAPIEndpointById(existingAPIEndpoint.getEndpointUuid());
+                if (log.isDebugEnabled()) {
+                    log.debug("Deleted API Endpoint with UUID : " + existingAPIEndpoint.getEndpointUuid());
+                }
+            } catch (APIManagementException e) {
+                throw new APIManagementException(
+                        "Error while deleting API Endpoint with UUID: " + existingAPIEndpoint.getEndpointUuid(), e,
+                        ExceptionCodes.from(ExceptionCodes.ERROR_DELETING_API_ENDPOINT,
+                                existingAPIEndpoint.getEndpointUuid()));
+            }
+        }
+
         try {
+            // Retrieve endpoints from artifact
             String jsonContent = getFileContentAsJson(
                     extractedFolderPath + ImportExportConstants.API_ENDPOINTS_FILE_LOCATION);
             if (jsonContent != null) {
@@ -727,31 +742,21 @@ public class ImportUtils {
                 JsonElement endpointsJson = new JsonParser().parse(jsonContent).getAsJsonObject()
                         .get(APIConstants.DATA);
                 if (endpointsJson != null) {
-                    // Add API Endpoints if endpoints file is defined
                     JsonArray endpoints = endpointsJson.getAsJsonArray();
                     for (JsonElement endpointElement : endpoints) {
                         JsonObject endpointObj = endpointElement.getAsJsonObject();
                         APIEndpointInfo apiEndpointInfo = new Gson().fromJson(endpointObj, APIEndpointInfo.class);
                         String endpointUUID = apiEndpointInfo.getEndpointUuid();
                         try {
-                            // Check if endpoint already exists. If not, add it.
-                            APIEndpointInfo retrievedAPIEndpoint = provider.getAPIEndpointByUUID(api.getUuid(),
-                                    endpointUUID, organization);
-                            if (retrievedAPIEndpoint != null) {
-                                if (log.isDebugEnabled()) {
-                                    log.debug("API Endpoint with ID: " + endpointUUID + " already exists in the API");
-                                }
-                            } else {
-                                String createdEndpointUUID = provider.addAPIEndpoint(api.getUuid(), apiEndpointInfo,
-                                        organization);
-                                if (log.isDebugEnabled()) {
-                                    log.debug("API Endpoint with ID: " + createdEndpointUUID +
-                                            " has been added to the API");
-                                }
+                            String createdEndpointUUID = provider.addAPIEndpoint(api.getUuid(), apiEndpointInfo,
+                                    organization);
+                            if (log.isDebugEnabled()) {
+                                log.debug("API Endpoint with UUID: " + createdEndpointUUID +
+                                        " has been added to the API");
                             }
                         } catch (APIManagementException e) {
                             throw new APIManagementException("Error while adding API Endpoint with ID: " + endpointUUID,
-                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINTS, endpointUUID));
+                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINT, endpointUUID));
                         }
                     }
                 } else {
@@ -767,20 +772,6 @@ public class ImportUtils {
             throw new APIManagementException("Error while adding API endpoints to the API", e,
                     ExceptionCodes.ERROR_ADDING_API_ENDPOINTS);
         }
-
-        // Add primary endpoints if primaryProductionEndpointId and/or primarySandboxEndpointId is defined
-        //        if (api.getPrimaryProductionEndpointId() != null || api.getPrimarySandboxEndpointId() != null) {
-        //            try {
-        //                provider.addPrimaryEndpoints(api.getUuid(), api.getPrimaryProductionEndpointId(),
-        //                        api.getPrimarySandboxEndpointId());
-        //                if (log.isDebugEnabled()) {
-        //                    log.debug("Primary endpoints have been added to the API");
-        //                }
-        //            } catch (APIManagementException e) {
-        //                throw new APIManagementException("Error while adding primary endpoints to the API", e,
-        //                        ExceptionCodes.ERROR_ADDING_PRIMARY_ENDPOINTS);
-        //            }
-        //        }
     }
 
     /**
