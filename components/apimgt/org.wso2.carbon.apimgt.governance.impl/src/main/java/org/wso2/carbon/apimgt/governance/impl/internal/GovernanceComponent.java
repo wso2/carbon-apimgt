@@ -32,17 +32,12 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceEvaluationScheduler;
-import org.wso2.carbon.apimgt.governance.impl.config.APIMGovernanceConfig;
-import org.wso2.carbon.apimgt.governance.impl.config.APIMGovernanceConfigService;
-import org.wso2.carbon.apimgt.governance.impl.config.APIMGovernanceConfigServiceImpl;
 import org.wso2.carbon.apimgt.governance.impl.observer.APIMGovernanceConfigDeployer;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineService;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineServiceImpl;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.File;
 
 /**
  * This class represents the Governance Component
@@ -53,9 +48,6 @@ import java.io.File;
 public class GovernanceComponent {
 
     private static final Log log = LogFactory.getLog(GovernanceComponent.class);
-    ServiceRegistration registration;
-
-    private APIMGovernanceConfig configuration = new APIMGovernanceConfig();
 
     @Activate
     protected void activate(ComponentContext componentContext) throws Exception {
@@ -66,12 +58,6 @@ public class GovernanceComponent {
 
         BundleContext bundleContext = componentContext.getBundleContext();
 
-        String filePath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "api-manager.xml";
-        configuration.load(filePath);
-
-        APIMGovernanceConfigServiceImpl configurationService =
-                new APIMGovernanceConfigServiceImpl(configuration);
-        ServiceReferenceHolder.getInstance().setGovernanceConfigurationService(configurationService);
         APIMGovernanceDBUtil.initialize();
         ComplianceEvaluationScheduler.initialize();
 
@@ -80,24 +66,27 @@ public class GovernanceComponent {
             APIMGovernanceConfigDeployer configDeployer = new APIMGovernanceConfigDeployer();
             bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), configDeployer, null);
         }
-        registration = componentContext.getBundleContext()
-                .registerService(APIMGovernanceConfigService.class.getName(),
-                        configurationService, null);
     }
 
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
-
         ComplianceEvaluationScheduler.shutdown();
-        if (registration != null) {
-            registration.unregister();
-            if (log.isDebugEnabled()) {
-                log.debug("Deactivating Governance component");
-            }
-        } else {
-            log.warn("Service registration is not initialized, skipping unregister");
-        }
     }
+
+    @Reference(
+            name = "api.manager.config.service",
+            service = org.wso2.carbon.apimgt.impl.APIManagerConfigurationService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIManagerConfigurationService")
+    protected void setAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
+        ServiceReferenceHolder.getInstance().setAPIMConfigurationService(amcService);
+    }
+
+    protected void unsetAPIManagerConfigurationService(APIManagerConfigurationService amcService) {
+        ServiceReferenceHolder.getInstance().setAPIMConfigurationService(null);
+    }
+
 
     @Reference(
             name = "org.wso2.carbon.apimgt.governance.engine.SpectralValidationEngine",
