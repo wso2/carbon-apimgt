@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.governance.api.ArtifactGovernanceHandler;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.APIMDefaultGovPolicy;
@@ -38,6 +39,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetList;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
+import org.wso2.carbon.apimgt.governance.impl.ArtifactGovernanceFactory;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
 import org.wso2.carbon.apimgt.governance.impl.RulesetManager;
@@ -316,10 +318,23 @@ public class APIMGovernanceUtil {
      */
     public static List<String> getAllArtifacts(ArtifactType artifactType, String organization)
             throws APIMGovernanceException {
-        if (ArtifactType.API.equals(artifactType)) {
-            return APIMUtil.getAllAPIs(organization);
-        }
-        return new ArrayList<>();
+        ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
+        return handler.getAllArtifacts(organization);
+    }
+
+    /**
+     * Get all artifacts for a given artifact type visible to a given user
+     *
+     * @param artifactType Artifact Type
+     * @param username     Username
+     * @param organization Organization
+     * @return List of artifact IDs
+     * @throws APIMGovernanceException If an error occurs while getting the list of artifacts
+     */
+    public static List<String> getAllArtifacts(ArtifactType artifactType, String username, String organization)
+            throws APIMGovernanceException {
+        ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
+        return handler.getAllArtifacts(username, organization);
     }
 
     /**
@@ -333,29 +348,26 @@ public class APIMGovernanceUtil {
         Map<ArtifactType, List<String>> artifacts = new HashMap<>();
 
         for (ArtifactType artifactType : ArtifactType.values()) {
-            if (ArtifactType.API.equals(artifactType)) {
-                List<String> artifactRefIds = APIMUtil.getAllAPIs(organization);
-                artifacts.put(artifactType, artifactRefIds);
-            }
+            List<String> artifactRefIds = getAllArtifacts(artifactType, organization);
+            artifacts.put(artifactType, artifactRefIds);
         }
 
         return artifacts;
     }
 
     /**
-     * Get artifacts for a label as a map of Artifact Type,
-     * List of Artifact Reference IDs
+     * Get artifacts for a label as a map of Artifact Type, List of Artifact Reference IDs
      *
-     * @param labelId Label ID
+     * @param label Label ID
      * @return Map of Artifact Type, List of Artifact Reference IDs
      */
-    public static Map<ArtifactType, List<String>> getArtifactsForLabel(String labelId) throws APIMGovernanceException {
+    public static Map<ArtifactType, List<String>> getArtifactsForLabel(String label) throws APIMGovernanceException {
         Map<ArtifactType, List<String>> artifacts = new HashMap<>();
+        ArtifactGovernanceFactory artifactGovernanceFactory = ArtifactGovernanceFactory.getInstance();
         for (ArtifactType artifactType : ArtifactType.values()) {
-            if (ArtifactType.API.equals(artifactType)) {
-                List<String> artifactRefIds = APIMUtil.getAPIsByLabel(labelId);
-                artifacts.put(artifactType, artifactRefIds);
-            }
+            List<String> artifactRefIds = artifactGovernanceFactory.getHandler(artifactType)
+                    .getArtifactsByLabel(label);
+            artifacts.put(artifactType, artifactRefIds);
         }
         return artifacts;
     }
@@ -369,11 +381,8 @@ public class APIMGovernanceUtil {
      */
     public static List<String> getLabelsForArtifact(String artifactRefId, ArtifactType artifactType)
             throws APIMGovernanceException {
-        List<String> labels = new ArrayList<>();
-        if (ArtifactType.API.equals(artifactType)) {
-            labels = APIMUtil.getLabelsForAPI(artifactRefId);
-        }
-        return labels;
+        ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
+        return handler.getLabelsForArtifact(artifactRefId);
     }
 
     /**
@@ -469,17 +478,13 @@ public class APIMGovernanceUtil {
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact Type
+     * @param organization  Organization
      * @return boolean
      */
-    public static boolean isArtifactAvailable(String artifactRefId, ArtifactType artifactType) {
-        artifactType = artifactType != null ? artifactType : ArtifactType.API;
-
-        // Check if artifact exists in APIM
-        boolean artifactExists = false;
-        if (ArtifactType.API.equals(artifactType)) {
-            artifactExists = APIMUtil.isAPIExist(artifactRefId);
-        }
-        return artifactExists;
+    public static boolean isArtifactAvailable(String artifactRefId, ArtifactType artifactType,
+                                              String organization) throws APIMGovernanceException {
+        ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
+        return handler.isArtifactAvailable(artifactRefId, organization);
     }
 
     /**
@@ -487,17 +492,14 @@ public class APIMGovernanceUtil {
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact Type
+     * @param organization  Organization
      * @return String
      * @throws APIMGovernanceException If an error occurs while getting the artifact name
      */
-    public static String getArtifactName(String artifactRefId, ArtifactType artifactType)
+    public static String getArtifactName(String artifactRefId, ArtifactType artifactType, String organization)
             throws APIMGovernanceException {
-
-        String artifactName = null;
-        if (ArtifactType.API.equals(artifactType)) {
-            artifactName = APIMUtil.getAPIName(artifactRefId);
-        }
-        return artifactName;
+        ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
+        return handler.getName(artifactRefId, organization);
     }
 
     /**
@@ -505,17 +507,14 @@ public class APIMGovernanceUtil {
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact Type
+     * @param organization  Organization
      * @return String
      * @throws APIMGovernanceException If an error occurs while getting the artifact version
      */
-    public static String getArtifactVersion(String artifactRefId, ArtifactType artifactType)
+    public static String getArtifactVersion(String artifactRefId, ArtifactType artifactType, String organization)
             throws APIMGovernanceException {
-
-        String artifactVersion = null;
-        if (ArtifactType.API.equals(artifactType)) {
-            artifactVersion = APIMUtil.getAPIVersion(artifactRefId);
-        }
-        return artifactVersion;
+        ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
+        return handler.getVersion(artifactRefId, organization);
     }
 
     /**
@@ -529,31 +528,8 @@ public class APIMGovernanceUtil {
      */
     public static String getArtifactOwner(String artifactRefId, ArtifactType artifactType, String organization)
             throws APIMGovernanceException {
-
-        String artifactOwner = null;
-        if (ArtifactType.API.equals(artifactType)) {
-            artifactOwner = APIMUtil.getAPIOwner(artifactRefId, organization);
-        }
-        return artifactOwner;
-    }
-
-    /**
-     * Get artifact id from artifact name, version, type and organization
-     *
-     * @param artifactName    Artifact name
-     * @param artifactVersion Artifact version
-     * @param artifactType    Artifact type
-     * @param organization    Organization
-     * @return Artifact Reference ID (ID of the artifact on APIM side)
-     * @throws APIMGovernanceException If an error occurs while getting the artifact ID
-     */
-    public static String getArtifactRefId(String artifactName, String artifactVersion, ArtifactType artifactType,
-                                          String organization) throws APIMGovernanceException {
-
-        if (ArtifactType.API.equals(artifactType)) {
-            return APIMUtil.getApiUUID(artifactName, artifactVersion, organization);
-        }
-        return null;
+        ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
+        return handler.getOwner(artifactRefId, organization);
     }
 
     /**
@@ -564,13 +540,11 @@ public class APIMGovernanceUtil {
      * @return ExtendedArtifactType
      * @throws APIMGovernanceException If an error occurs while getting the extended artifact type
      */
-    public static ExtendedArtifactType getExtendedArtifactTypeForArtifact
-    (String artifactRefId, ArtifactType artifactType)
+    public static ExtendedArtifactType getExtendedArtifactTypeForArtifact(String artifactRefId,
+                                                                          ArtifactType artifactType)
             throws APIMGovernanceException {
-        if (ArtifactType.API.equals(artifactType)) {
-            return APIMUtil.getExtendedArtifactTypeForAPI(APIMUtil.getAPIType(artifactRefId));
-        }
-        return null;
+        ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
+        return handler.getExtendedArtifactType(artifactRefId);
     }
 
     /**
@@ -587,13 +561,8 @@ public class APIMGovernanceUtil {
                                                         ArtifactType artifactType,
                                                         String organization) throws APIMGovernanceException {
 
-        // Get artifact project from APIM
-        byte[] artifactProject = null;
-        if (ArtifactType.API.equals(artifactType)) {
-            artifactProject =
-                    APIMUtil.getAPIProject(artifactRefId, revisionNo, organization);
-        }
-        return artifactProject;
+        ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
+        return handler.getArtifactProject(artifactRefId, revisionNo, organization);
     }
 
     /**
@@ -620,26 +589,69 @@ public class APIMGovernanceUtil {
      */
     public static Map<RuleType, String> extractArtifactProjectContent(byte[] project, ArtifactType artifactType)
             throws APIMGovernanceException {
-        if (ArtifactType.API.equals(artifactType)) {
-            return APIMUtil.extractAPIProjectContent(project);
-        }
-        return null;
+        ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
+        return handler.extractArtifactProject(project);
     }
 
     /**
-     * Read artifact project content from a file path
+     * Check if an artifact is governable based on the governable states provided
      *
-     * @param filePath File path
-     * @return byte[]
-     * @throws APIMGovernanceException If an error occurs while reading the file
+     * @param artifactId       Artifact ID
+     * @param artifactType     Artifact Type
+     * @param governableStates List of governable states
+     * @return boolean         True if the artifact is governable, false otherwise
+     * @throws APIMGovernanceException If an error occurs while checking if the artifact is governable
      */
-    public static byte[] readArtifactProjectContent(String filePath) throws APIMGovernanceException {
-        Path path = Paths.get(filePath);
-        try {
-            return Files.readAllBytes(path);
-        } catch (IOException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_FAILED_TO_READ_ARTIFACT_PROJECT, e);
-        }
+    public static boolean isArtifactGovernable(String artifactId,
+                                               ArtifactType artifactType, List<APIMGovernableState> governableStates)
+            throws APIMGovernanceException {
+        ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
+        return handler.isArtifactGovernable(artifactId, governableStates);
     }
+
+    /**
+     * Check if an artifact is governable
+     *
+     * @param artifactId   Artifact ID
+     * @param artifactType Artifact Type
+     * @return boolean True if the artifact is governable, false otherwise
+     * @throws APIMGovernanceException If an error occurs while checking if the artifact is governable
+     */
+    public static boolean isArtifactGovernable(String artifactId, ArtifactType artifactType)
+            throws APIMGovernanceException {
+        ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
+        return handler.isArtifactGovernable(artifactId);
+    }
+
+    /**
+     * Get the extended artifact type from the artifact project
+     *
+     * @param artifactProject Artifact project zip
+     * @return ExtendedArtifactType
+     * @throws APIMGovernanceException If an error occurs while getting the extended artifact type
+     */
+    public static ExtendedArtifactType getExtendedArtifactTypeFromProject(byte[] artifactProject,
+                                                                          ArtifactType artifactType)
+            throws APIMGovernanceException {
+        ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
+        return handler.getExtendedArtifactTypeFromProject(artifactProject);
+    }
+
+    /**
+     * Check if an artifact is visible to a user
+     *
+     * @param artifactRefId Artifact Reference ID
+     * @param artifactType  Artifact Type
+     * @param username      Username
+     * @param organization  Organization
+     * @return boolean
+     * @throws APIMGovernanceException If an error occurs while checking if the artifact is visible to the user
+     */
+    public static boolean isArtifactVisibleToUser(String artifactRefId, ArtifactType artifactType, String username,
+                                                  String organization) throws APIMGovernanceException {
+        ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
+        return handler.isArtifactVisibleToUser(artifactRefId, username, organization);
+    }
+
 
 }
