@@ -323,6 +323,21 @@ public class APIMGovernanceUtil {
     }
 
     /**
+     * Get all artifacts for a given artifact type visible to a given user
+     *
+     * @param artifactType Artifact Type
+     * @param username     Username
+     * @param organization Organization
+     * @return List of artifact IDs
+     * @throws APIMGovernanceException If an error occurs while getting the list of artifacts
+     */
+    public static List<String> getAllArtifacts(ArtifactType artifactType, String username, String organization)
+            throws APIMGovernanceException {
+        ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
+        return handler.getAllArtifacts(username, organization);
+    }
+
+    /**
      * Get all artifacts as a map of Artifact Type, List of Artifact Reference IDs
      *
      * @param organization Organization
@@ -620,6 +635,22 @@ public class APIMGovernanceUtil {
             throws APIMGovernanceException {
         ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
         return handler.getExtendedArtifactTypeFromProject(artifactProject);
+    }
+
+    /**
+     * Check if an artifact is visible to a user
+     *
+     * @param artifactRefId Artifact Reference ID
+     * @param artifactType  Artifact Type
+     * @param username      Username
+     * @param organization  Organization
+     * @return boolean
+     * @throws APIMGovernanceException If an error occurs while checking if the artifact is visible to the user
+     */
+    public static boolean isArtifactVisibleToUser(String artifactRefId, ArtifactType artifactType, String username,
+                                                  String organization) throws APIMGovernanceException {
+        ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
+        return handler.isArtifactVisibleToUser(artifactRefId, username, organization);
     }
 
 

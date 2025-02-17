@@ -214,6 +214,10 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
     INVALID_ARTIFACT_TYPE(990502, "Invalid artifact type.",
             400, "Invalid artifact type: %s"),
 
+    UNAUTHORIZED_TO_VIEW_ARTIFACT(990503, "Unauthorized to view artifact.",
+            403, "User is unauthorized to view governance details related to" +
+            " artifact with ID: %s"),
+
 
     // API related codes
     ERROR_WHILE_GETTING_API_INFO(990600, "Error while retrieving  API name/version with ID.",
@@ -263,6 +267,9 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
 
     ERROR_WHILE_EXTRACTING_DOC_DATA(990615, "Error while extracting API documentation data.",
             500, "Error while extracting API documentation data from zip", true),
+
+    ERROR_WHILE_CHECKING_API_VISIBILITY(990616, "Error while checking API visibility.",
+            500, "Error while checking API visibility for API with ID: %s", true),
 
     ;
 

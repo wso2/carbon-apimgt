@@ -25,6 +25,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
@@ -88,6 +89,29 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
     }
 
     /**
+     * This method is used to get all the artifacts visible to a given user in a given organization
+     *
+     * @param username     username of logged-in user
+     * @param organization organization name
+     * @return List of artifact ids
+     * @throws APIMGovernanceException if an error occurs while getting the artifacts
+     */
+    @Override
+    public List<String> getAllArtifacts(String username, String organization) throws APIMGovernanceException {
+        List<String> apiIds = new ArrayList<>();
+        try {
+            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(username);
+            List<API> apis = apiProvider.getAllAPIs();
+            for (API api : apis) {
+                apiIds.add(api.getUuid());
+            }
+            return apiIds;
+        } catch (APIManagementException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_API_LIST, e, organization);
+        }
+    }
+
+    /**
      * This method is used to get all the apis attached to a given label in a given organization
      *
      * @param label label id
@@ -146,6 +170,36 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
                     apiId);
         }
         return false;
+    }
+
+    /**
+     * This method checks whether an artifact is visible to a given user in the given organization
+     *
+     * @param artifactRefId artifact reference id (uuid on APIM side)
+     * @param username      username of logged-in user
+     * @param organization  organization name
+     * @return true if the artifact is visible, false otherwise
+     * @throws APIMGovernanceException if an error occurs while checking the visibility
+     */
+    @Override
+    public boolean isArtifactVisibleToUser(String artifactRefId, String username,
+                                           String organization) throws APIMGovernanceException {
+
+        APIProvider apiProvider;
+        try {
+            apiProvider = APIManagerFactory.getInstance().getAPIProvider(username);
+            API api = apiProvider.getAPIbyUUID(artifactRefId, organization);
+            return api != null;
+        } catch (APIManagementException e) {
+            // Provider will throw unauthorized error if the user is not authorized to view the API.
+            // Hence, catching the exception and returning false.
+            if (ExceptionCodes.UN_AUTHORIZED_TO_VIEW_MODIFY_API.getErrorCode() ==
+                    (e.getErrorHandler().getErrorCode())) {
+                return false;
+            }
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_CHECKING_API_VISIBILITY, e,
+                    artifactRefId);
+        }
     }
 
     /**

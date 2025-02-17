@@ -60,22 +60,31 @@ import java.util.stream.Collectors;
 public class ComplianceAPIUtil {
 
     /**
-     * Get the artifacts compliance details DTO using the Artifact Reference Id, artifact type, and organization
+     * Get the artifacts compliance details DTO using the Artifact Reference Id, artifact type,
+     * username and organization
      *
      * @param artifactRefId Artifact Reference Id
      * @param artifactType  artifact type
+     * @param username      username of logged in user
      * @param organization  organization
      * @return ArtifactComplianceDetailsDTO
      * @throws APIMGovernanceException if an error occurs while getting the artifact compliance details
      */
     public static ArtifactComplianceDetailsDTO getArtifactComplianceDetailsDTO(String artifactRefId,
                                                                                ArtifactType artifactType,
+                                                                               String username,
                                                                                String organization)
             throws APIMGovernanceException {
 
         // Check if the artifact is available
         if (!APIMGovernanceUtil.isArtifactAvailable(artifactRefId, artifactType, organization)) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ARTIFACT_NOT_FOUND, artifactRefId, organization);
+        }
+
+        // Check if the artifact is visible to the user
+        if (!APIMGovernanceUtil.isArtifactVisibleToUser(artifactRefId, artifactType, username, organization)) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.UNAUTHORIZED_TO_VIEW_ARTIFACT, artifactRefId,
+                    organization);
         }
 
         // Initialize the response DTO
@@ -129,8 +138,8 @@ public class ComplianceAPIUtil {
         /*
          *  Set the overall compliance status for the artifact
          *  If all policies are un-applied, set the status to not applicable.
-         *  If any policy is violated, set the status to non-compliant.
          *  If any policy is pending, set the status to pending.
+         *  If any policy is violated, set the status to non-compliant.
          *  Otherwise, set the status to compliant
          */
 
@@ -139,11 +148,11 @@ public class ComplianceAPIUtil {
                 == PolicyAdherenceWithRulesetsDTO.StatusEnum.UNAPPLIED)) {
             status = ArtifactComplianceDetailsDTO.StatusEnum.NOT_APPLICABLE;
         } else if (policyAdherenceDetails.stream().anyMatch(dto -> dto.getStatus()
-                == PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED)) {
-            status = ArtifactComplianceDetailsDTO.StatusEnum.NON_COMPLIANT;
-        } else if (policyAdherenceDetails.stream().anyMatch(dto -> dto.getStatus()
                 == PolicyAdherenceWithRulesetsDTO.StatusEnum.PENDING)) {
             status = ArtifactComplianceDetailsDTO.StatusEnum.PENDING;
+        } else if (policyAdherenceDetails.stream().anyMatch(dto -> dto.getStatus()
+                == PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED)) {
+            status = ArtifactComplianceDetailsDTO.StatusEnum.NON_COMPLIANT;
         } else if (policyAdherenceDetails.stream().anyMatch(dto -> dto.getStatus()
                 == PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED)) {
             status = ArtifactComplianceDetailsDTO.StatusEnum.NON_COMPLIANT;
@@ -276,23 +285,24 @@ public class ComplianceAPIUtil {
     }
 
     /**
-     * Get the compliance details of all artifacts
+     * Get the compliance details of all artifacts visible to the user of the given organization
      *
      * @param artifactType artifact type
+     * @param username     username of logged in user
      * @param organization organization
      * @param limit        limit
      * @param offset       offset
      * @return ArtifactComplianceListDTO
      * @throws APIMGovernanceException if an error occurs while getting the artifact compliance list
      */
-    public static ArtifactComplianceListDTO getArtifactComplianceListDTO(ArtifactType artifactType,
+    public static ArtifactComplianceListDTO getArtifactComplianceListDTO(ArtifactType artifactType, String username,
                                                                          String organization, int limit,
                                                                          int offset) throws APIMGovernanceException {
 
         List<ArtifactComplianceStatusDTO> complianceStatusList = new ArrayList<>();
 
         // Retrieve Artifacts the given organization
-        List<String> allArtifacts = APIMGovernanceUtil.getAllArtifacts(artifactType, organization);
+        List<String> allArtifacts = APIMGovernanceUtil.getAllArtifacts(artifactType, username, organization);
         int totalArtifactCount = allArtifacts.size();
 
         if (offset >= allArtifacts.size()) {
@@ -468,18 +478,22 @@ public class ComplianceAPIUtil {
     }
 
     /**
-     * Get the ruleset validation result DTO
+     * Get the ruleset validation result DTO using the Artifact Reference Id, artifact type, ruleset ID,
+     * username and organization
      *
-     * @param artifactRefId   Artifact Reference Id
-     * @param artifactType artifact type
-     * @param rulesetId    ruleset ID
-     * @param organization organization
+     * @param artifactRefId Artifact Reference Id
+     * @param artifactType  artifact type
+     * @param rulesetId     ruleset ID
+     * @param username      username of logged in user
+     * @param organization  organization
      * @return RulesetValidationResultDTO object
      * @throws APIMGovernanceException if an error occurs while getting the ruleset validation result
      */
     public static RulesetValidationResultDTO getRulesetValidationResultDTO(String artifactRefId,
                                                                            ArtifactType artifactType,
-                                                                           String rulesetId, String organization)
+                                                                           String rulesetId,
+                                                                           String username,
+                                                                           String organization)
             throws APIMGovernanceException {
 
         ComplianceManager complianceManager = new ComplianceManager();
@@ -490,6 +504,12 @@ public class ComplianceAPIUtil {
         // If the ruleset is not found, throw an exception
         if (rulesetInfo == null) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_NOT_FOUND, rulesetId);
+        }
+
+        // Check if the artifact is visible to the user
+        if (!APIMGovernanceUtil.isArtifactVisibleToUser(artifactRefId, artifactType, username, organization)) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.UNAUTHORIZED_TO_VIEW_ARTIFACT, artifactRefId,
+                    organization);
         }
 
         RulesetValidationResultDTO rulesetValidationResultDTO = new RulesetValidationResultDTO();
@@ -568,20 +588,23 @@ public class ComplianceAPIUtil {
     }
 
     /**
-     * Get the artifact compliance summary
+     * Get the artifact compliance summary of all artifacts visible to the user of the given organization
      *
      * @param artifactType artifact type
+     * @param username     username of logged-in user
      * @param organization organization
      * @return ArtifactComplianceSummaryDTO object
      */
     public static ArtifactComplianceSummaryDTO getArtifactComplianceSummary(ArtifactType artifactType,
+                                                                            String username,
                                                                             String organization)
             throws APIMGovernanceException {
 
         ComplianceManager complianceManager = new ComplianceManager();
 
-        // Get total number of artifacts
-        int totalArtifactsCount = APIMGovernanceUtil.getAllArtifacts(artifactType, organization).size();
+        // Get all artifacts visible to the user
+        List<String> allVisibleArtifacts = APIMGovernanceUtil.getAllArtifacts(artifactType, username, organization);
+        int totalArtifactsCount = allVisibleArtifacts.size();
 
         // Get total number of APIs that are compliant and non-compliant
         Map<ArtifactComplianceState, List<String>> compliancyMap = complianceManager
@@ -589,6 +612,12 @@ public class ComplianceAPIUtil {
 
         // Get pending artifacts
         List<String> pendingArtifacts = complianceManager.getCompliancePendingArtifacts(artifactType, organization);
+
+        // Filter out the pending artifacts from compliant and non-compliant artifacts and keep only ids of the
+        // visible artifacts
+        compliancyMap.get(ArtifactComplianceState.COMPLIANT).retainAll(allVisibleArtifacts);
+        compliancyMap.get(ArtifactComplianceState.NON_COMPLIANT).retainAll(allVisibleArtifacts);
+        pendingArtifacts.retainAll(allVisibleArtifacts);
 
         // Filter out the pending artifacts from compliant and non-compliant artifacts
         compliancyMap.get(ArtifactComplianceState.COMPLIANT).removeAll(pendingArtifacts);

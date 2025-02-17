@@ -42,6 +42,16 @@ public interface ArtifactGovernanceHandler {
     List<String> getAllArtifacts(String organization) throws APIMGovernanceException;
 
     /**
+     * This method is used to get all the artifacts visible to a given user in a given organization
+     *
+     * @param username     username of logged-in user
+     * @param organization organization name
+     * @return List of artifact ids
+     * @throws APIMGovernanceException if an error occurs while getting the artifacts
+     */
+    List<String> getAllArtifacts(String username, String organization) throws APIMGovernanceException;
+
+    /**
      * This method is used to get all the artifacts attached to a given label in a given organization
      *
      * @param label label id
@@ -68,6 +78,18 @@ public interface ArtifactGovernanceHandler {
      * @throws APIMGovernanceException if an error occurs while checking the availability
      */
     boolean isArtifactAvailable(String artifactRefId, String organization) throws APIMGovernanceException;
+
+    /**
+     * This method checks whether an artifact is visible to a given user in the given organization
+     *
+     * @param artifactRefId artifact reference id (uuid on APIM side)
+     * @param username      username of logged-in user
+     * @param organization  organization name
+     * @return true if the artifact is visible, false otherwise
+     * @throws APIMGovernanceException if an error occurs while checking the visibility
+     */
+    boolean isArtifactVisibleToUser(String artifactRefId, String username, String organization)
+            throws APIMGovernanceException;
 
     /**
      * Given a list of governable states, this method checks whether the artifact is governable considering
