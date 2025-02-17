@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.api;
 
-import java.io.File;
-
 /**
  * This class contains common constants for APIs.
  */
@@ -49,7 +47,6 @@ public class APIConstants {
 
     public static class AIAPIConstants {
         public static final String LLM_PROVIDERS = "llmProviders";
-        public static final String LLM_PROVIDER_ID = "llmProviderId";
         public static final String API_KEY_IDENTIFIER_TYPE_HEADER = "HEADER";
         public static final String API_KEY_IDENTIFIER_TYPE_QUERY_PARAMETER = "QUERY_PARAMETER";
         public static final String AI_API_REQUEST_METADATA = "AI_API_REQUEST_METADATA";
@@ -59,11 +56,8 @@ public class APIConstants {
         public static final String ID = "id";
         public static final String NAME = "name";
         public static final String API_VERSION = "apiVersion";
-        public static final String LLM_PROVIDER_CONFIGURATIONS = "configurations";
         public static final String LLM_CONFIGS_ENDPOINT = "/llm-providers";
         public static final String CONFIGURATIONS = "configurations";
-        public static final String AI_API_DEFINITION_FILE_PATH = File.separator + "repository" + File.separator +
-                "resources" + File.separator + "api_definitions" + File.separator;
         public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_NAME = "AzureOpenAI";
         public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_VERSION = "1.0.0";
         public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_CONNECTOR = "azureOpenAi_1.0.0";
@@ -82,6 +76,8 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_KEY = "Authorization";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_API_DEFINITION_FILE_NAME = "mistral_api.yaml";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_DESCRIPTION = "Mistral AI service";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_REQUEST_MODEL = "requestModel";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_RESPONSE_MODEL = "responseModel";
         public static final String LLM_PROVIDER_SERVICE_METADATA_MODEL = "model";
         public static final String LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT = "promptTokenCount";
         public static final String LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT = "completionTokenCount";
@@ -96,5 +92,16 @@ public class APIConstants {
         public static final String NULL = "null";
         public static final String LLM_PROVIDER = "LLM_PROVIDER";
         public static final String LLM_PROVIDER_TENANT_ALL = "ALL";
+
+        public static final String TRAFFIC_FLOW_DIRECTION_IN = "IN";
+        public static final String TRAFFIC_FLOW_DIRECTION_OUT = "OUT";
+        public static final String API_LLM_ENDPOINT = "_API_LLMEndpoint_";
+        public static final String TARGET_MODEL = "targetModel";
+        public static final String TARGET_ENDPOINT = "targetEndpoint";
+        public static final String SUSPEND_DURATION = "suspendDuration";
+        public static final String REJECT_ENDPOINT = "REJECT";
+        public static final String DEFAULT_ENDPOINT = "DEFAULT";
+        public static final String REMAINING_TOKEN_COUNT_HEADER = "x-ratelimit-remaining-tokens";
+        public static final String REMAINING_REQUEST_COUNT_HEADER = "x-ratelimit-remaining-requests";
     }
 }

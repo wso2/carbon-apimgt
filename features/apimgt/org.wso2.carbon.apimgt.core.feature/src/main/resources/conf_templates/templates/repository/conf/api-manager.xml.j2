@@ -440,6 +440,24 @@
         </Resources>
     </MarketplaceAssistant>
 
+    <DesignAssistant>
+        <!-- Enable Design Assistant for API Manager -->
+        <Enabled>{{apim.ai.enable}}</Enabled>
+
+        <AuthToken>{{apim.ai.token}}</AuthToken>
+
+        <Key>{{apim.ai.key}}</Key>
+
+        <Endpoint>{{apim.ai.endpoint}}</Endpoint>
+
+        <TokenEndpoint>{{apim.ai.token_endpoint}}</TokenEndpoint>
+
+        <Resources>
+            <ChatResource>{{apim.ai.design_assistant_chat_resource}}</ChatResource>
+            <GenApiPayloadResource>{{apim.ai.design_assistant_gen_api_payload_resource}}</GenApiPayloadResource>
+        </Resources>
+    </DesignAssistant>
+
     <!--
         API key validator configuration used by API key manager (IS), API Developer Portal and API gateway.
         API gateway uses it to validate and authenticate users against the provided API keys.
@@ -1682,6 +1700,8 @@
             <Sequence>_block_api_handler_.xml</Sequence>
             <Sequence>_backend_failure_handler_.xml</Sequence>
             <Sequence>_opa_policy_failure_handler_.xml</Sequence>
+            <Sequence>_ai_api_request_seq_.xml</Sequence>
+            <Sequence>_ai_api_response_seq_.xml</Sequence>
         {% if apim.sync_runtime_artifacts.gateway.skip_list.sequences is defined %}
             {%- for sequence in apim.sync_runtime_artifacts.gateway.skip_list.sequences -%}
             <Sequence>{{sequence}}</Sequence>

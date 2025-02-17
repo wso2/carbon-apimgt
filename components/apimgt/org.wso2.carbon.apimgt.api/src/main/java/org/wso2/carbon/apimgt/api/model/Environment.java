@@ -59,6 +59,31 @@ public class Environment implements Serializable {
     private String[] visibilityRoles;
     private String visibility;
 
+    public Environment() {
+    }
+
+    public Environment(Environment environment) {
+        this.type = environment.type;
+        this.serverURL = environment.serverURL;
+        this.userName = environment.userName;
+        this.password = environment.password;
+        this.apiGatewayEndpoint = environment.apiGatewayEndpoint;
+        this.websocketGatewayEndpoint = environment.websocketGatewayEndpoint;
+        this.webSubGatewayEndpoint = environment.webSubGatewayEndpoint;
+        this.isDefault = environment.isDefault;
+        this.id = environment.id;
+        this.uuid = environment.uuid;
+        this.name = environment.name;
+        this.displayName = environment.displayName;
+        this.description = environment.description;
+        this.isReadOnly = environment.isReadOnly;
+        this.vhosts = new ArrayList<>(environment.vhosts);
+        this.provider = environment.provider;
+        this.gatewayType = environment.gatewayType;
+        this.additionalProperties = new HashMap<>(environment.additionalProperties);
+        this.visibilityRoles = environment.visibilityRoles;
+        this.visibility = environment.visibility;
+    }
     private GatewayVisibilityPermissionConfigurationDTO permissions = new GatewayVisibilityPermissionConfigurationDTO();
 
     public boolean isDefault() {

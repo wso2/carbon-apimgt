@@ -89,6 +89,8 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
+import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
+import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -3439,8 +3441,17 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         apiTenantDomain = MultitenantUtils.getTenantDomain(
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         hostsWithSchemes = getHostWithSchemeMappingForEnvironment(api, apiTenantDomain, environmentName);
-        api.setContext(getBasePath(apiTenantDomain, api.getContext()));
-        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
+
+        Environment environment = APIUtil.getEnvironments().get(environmentName);
+        Map<String, ExternalGatewayDeployer> externalGatewayDeployers = ServiceReferenceHolder.getInstance().getExternalGatewayDeployers();
+        ExternalGatewayDeployer gatewayDeployer = externalGatewayDeployers.get(environment.getGatewayType());
+        if (gatewayDeployer != null) {
+            api.setContext("");
+            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
+        } else {
+            api.setContext(getBasePath(apiTenantDomain, api.getContext()));
+            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
+        }
         return updatedDefinition;
     }
 
@@ -3611,13 +3622,27 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
 
             VHost vhost = VHostUtils.getVhostFromEnvironment(environment, host);
-            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)
-                    && vhost.getHttpPort() != -1) {
-                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, vhost.getHttpUrl());
-            }
-            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)
-                    && vhost.getHttpsPort() != -1) {
-                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, vhost.getHttpsUrl());
+            Map<String, ExternalGatewayDeployer> externalGatewayDeployers = ServiceReferenceHolder.getInstance().getExternalGatewayDeployers();
+            ExternalGatewayDeployer gatewayDeployer = externalGatewayDeployers.get(environment.getGatewayType());
+            try {
+                if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)
+                        && vhost.getHttpPort() != -1) {
+                    String httpUrl = gatewayDeployer != null ?
+                            gatewayDeployer.getAPIExecutionURL(vhost.getHttpUrl(), environment,
+                                    APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(), environment.getUuid())) :
+                            vhost.getHttpUrl();
+                    hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, httpUrl);
+                }
+                if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)
+                        && vhost.getHttpsPort() != -1) {
+                    String httpsUrl = gatewayDeployer != null ?
+                            gatewayDeployer.getAPIExecutionURL(vhost.getHttpsUrl(), environment,
+                                    APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(), environment.getUuid())) :
+                            vhost.getHttpsUrl();
+                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, httpsUrl);
+                }
+            } catch (DeployerException e) {
+                throw new APIManagementException(e.getMessage());
             }
         }
         return hostsWithSchemes;

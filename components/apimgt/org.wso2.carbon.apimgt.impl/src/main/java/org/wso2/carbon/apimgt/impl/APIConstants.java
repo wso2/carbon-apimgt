@@ -549,6 +549,15 @@ public final class APIConstants {
         public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE = "ApiCountResource";
         public static final String AI_CONFIGURATION = "AiConfiguration";
 
+        public static final String DESIGN_ASSISTANT = "DesignAssistant";
+        public static final String DESIGN_ASSISTANT_ENABLED = "Enabled";
+        public static final String DESIGN_ASSISTANT_AUTH_TOKEN = "AuthToken";
+        public static final String DESIGN_ASSISTANT_KEY = "Key";
+        public static final String DESIGN_ASSISTANT_ENDPOINT = "Endpoint";
+        public static final String DESIGN_ASSISTANT_TOKEN_ENDPOINT = "TokenEndpoint";
+        public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
+        public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
+
         private AI() {
 
         }
@@ -3220,8 +3229,10 @@ public final class APIConstants {
 
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
+    public static final String EXTERNAL_GATEWAY_VENDOR = "external";
     public static final String WSO2_APK_GATEWAY = "wso2/apk";
     public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
+    public static final List<String> API_TYPES = Arrays.asList("rest", "soap", "graphql", "ws", "wh", "sse", "ai");
 
     public static final String PERMISSION_ALLOW = "ALLOW";
     public static final String PERMISSION_DENY = "DENY";
@@ -3275,6 +3286,8 @@ public final class APIConstants {
     //Property for enabling tenant aware sub claims when invoking APIs with API key
     public static final String ENABLE_TENANT_AWARE_SUB_CLAIM= "enable.tenant.aware.subclaim";
 
+    public static final String PRODUCTION = "PRODUCTION";
+    public static final String SANDBOX = "SANDBOX";
     public static class TokenValidationConstants {
         public static final String TOKEN_VALIDATION_CONFIG = "TokenValidation";
         public static final String ENFORCE_JWT_TYPE_HEADER_VALIDATION = "EnforceTypeHeaderValidation";
@@ -3294,4 +3307,12 @@ public final class APIConstants {
 
     //Property for enabling application update capabilities for users in the same organization.
     public static final String ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED = "orgWideAppUpdateEnabled";
+
+    public static class APIEndpoint {
+        public static final String PRODUCTION = "PRODUCTION";
+        public static final String SANDBOX = "SANDBOX";
+        public static final String PRIMARY_ENDPOINT_ID_SEPARATOR = "--";
+        public static final String DEFAULT_PROD_ENDPOINT = "Default Production Endpoint";
+        public static final String DEFAULT_SANDBOX_ENDPOINT = "Default Sandbox Endpoint";
+    }
 }

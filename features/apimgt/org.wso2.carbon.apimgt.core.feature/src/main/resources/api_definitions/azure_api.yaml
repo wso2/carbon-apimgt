@@ -4,7 +4,7 @@ info:
   description: Azure OpenAI APIs for completions and search
   version: '2024-06-01'
 servers:
-  - url: https://{endpoint}/openai
+  - url: https://{endpoint}/openai/deployments/{deployment-id}
     variables:
       endpoint:
         default: your-resource-name.openai.azure.com
@@ -13,18 +13,11 @@ security:
       - api.read
   - apiKey: []
 paths:
-  /deployments/{deployment-id}/completions:
+  /completions:
     post:
       summary: Creates a completion for the provided prompt, parameters and chosen model.
       operationId: Completions_Create
       parameters:
-        - in: path
-          name: deployment-id
-          required: true
-          schema:
-            type: string
-            example: davinci
-            description: Deployment id of the model which was deployed.
         - in: query
           name: api-version
           required: true
@@ -250,18 +243,11 @@ paths:
               description: Request ID for troubleshooting purposes
               schema:
                 type: string
-  /deployments/{deployment-id}/embeddings:
+  /embeddings:
     post:
       summary: Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.
       operationId: embeddings_create
       parameters:
-        - in: path
-          name: deployment-id
-          required: true
-          schema:
-            type: string
-            example: ada-search-index-v1
-          description: The deployment id of the model which was deployed.
         - in: query
           name: api-version
           required: true
@@ -358,17 +344,11 @@ paths:
                   - model
                   - data
                   - usage
-  /deployments/{deployment-id}/chat/completions:
+  /chat/completions:
     post:
       summary: Creates a completion for the chat message
       operationId: ChatCompletions_Create
       parameters:
-        - in: path
-          name: deployment-id
-          required: true
-          schema:
-            type: string
-            description: Deployment id of the model which was deployed.
         - in: query
           name: api-version
           required: true
@@ -405,18 +385,11 @@ paths:
               description: Request ID for troubleshooting purposes
               schema:
                 type: string
-  /deployments/{deployment-id}/audio/transcriptions:
+  /audio/transcriptions:
     post:
       summary: Transcribes audio into the input language.
       operationId: Transcriptions_Create
       parameters:
-        - in: path
-          name: deployment-id
-          required: true
-          schema:
-            type: string
-            example: whisper
-            description: Deployment id of the whisper model.
         - in: query
           name: api-version
           required: true
@@ -443,18 +416,11 @@ paths:
               schema:
                 type: string
                 description: Transcribed text in the output format (when response_format was one of text, vtt or srt).
-  /deployments/{deployment-id}/audio/translations:
+  /audio/translations:
     post:
       summary: Transcribes and translates input audio into English text.
       operationId: Translations_Create
       parameters:
-        - in: path
-          name: deployment-id
-          required: true
-          schema:
-            type: string
-            example: whisper
-            description: Deployment id of the whisper model which was deployed.
         - in: query
           name: api-version
           required: true
@@ -481,7 +447,7 @@ paths:
               schema:
                 type: string
                 description: Transcribed text in the output format (when response_format was one of text, vtt or srt).
-  /deployments/{deployment-id}/images/generations:
+  /images/generations:
     post:
       summary: Generates a batch of images from a text caption on a given DALLE model deployment
       operationId: ImageGenerations_Create
@@ -492,13 +458,6 @@ paths:
             schema:
               $ref: '#/components/schemas/imageGenerationsRequest'
       parameters:
-        - in: path
-          name: deployment-id
-          required: true
-          schema:
-            type: string
-            example: dalle-deployment
-            description: Deployment id of the dalle model which was deployed.
         - in: query
           name: api-version
           required: true

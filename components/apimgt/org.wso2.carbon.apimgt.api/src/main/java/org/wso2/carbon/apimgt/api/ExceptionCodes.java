@@ -120,6 +120,7 @@ public enum ExceptionCodes implements ErrorHandler {
     API_PRODUCT_NOT_FOUND(900360, "API Product Not Found", 404, "Requested API Product with id '%s' not found"),
     SUB_ORGANIZATION_NOT_IDENTIFIED(900361, "User's Organization Not Identified", 403, "User's Organization is not identified"),
     CANNOT_CREATE_API_VERSION(900362, "New API Version cannot be created from a different provider", 409, "Initial provider of an API must be preserved in all versions of that API"),
+    INTERNAL_ERROR_WHILE_UPDATING_API(900363, "Internal Server Error occurred while updating the API", 500, "Internal Server Error. '%s'"),
     ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES(903010, "Error while updating required properties", 400, "Error while updating required properties."),
 
     //Lifecycle related codes
@@ -171,6 +172,8 @@ public enum ExceptionCodes implements ErrorHandler {
             400, "Gateway Environment VHOST name not provided"),
     INVALID_VHOST(900512, "Invalid virtual host name provided",
             400, "Virtual host with provided vhost name does not exist"),
+    FEDERATED_GATEWAY_VALIDATION_FAILED(900513, "API Validation Failed with Federated Gateway",
+            400, "API Validation Failed with %s Gateway. %s", false),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -478,6 +481,22 @@ public enum ExceptionCodes implements ErrorHandler {
     TENANT_THEME_IMPORT_NOT_ALLOWED(901702, "Super Tenant not allowed to import tenant theme", 400,
             "Super Tenant %s is not allowed to import a tenant theme"),
 
+    ORG_THEME_IMPORT_FAILED(901703, "Failed to import organization theme of organization %s", 500,
+            "%s"),
+    ORG_THEME_STATUS_UPDATE_FAILED(901704, "Failed to update status of theme of organization %s", 500,
+            "%s"),
+    ORG_THEME_DELETE_FAILED(901705, "Failed to delete organization theme of organization %s", 500,
+            "%s"),
+    ORG_THEME_EXPORT_FAILED(901706, "Failed to export org theme of organization %s", 500,
+            "%s"),
+    ID_CANNOT_BE_FOUND_IN_DRAFTED_STATE(901707, "ID cannot be found in drafted state", 404,
+            "ID cannot be found in drafted state"),
+    ID_CANNOT_BE_FOUND_IN_PUBLISHED_STATE(901708, "ID cannot be found in published state", 404,
+            "ID cannot be found in published state"),
+    USER_DOES_NOT_HAVE_THE_THEME(901709, "User does not use the theme", 400,
+            "User does not use the theme"),
+    USER_DOES_NOT_HAVE_ANY_PUBLISHED_OR_DRAFTED_THEMES(901710, "User does not have any drafted or published themes", 404,
+            "User does not have any drafted or published themes"),
     INVALID_API_IDENTIFIER(900851, "Provided API identifier (%s) is invalid", 400,
             "Provided API identifier (%s) is invalid"),
     API_NAME_OR_VERSION_NOT_NULL(900852, "name or version couldn't be null", 400, "name or version couldn't be null"),
@@ -764,7 +783,21 @@ public enum ExceptionCodes implements ErrorHandler {
     WORKFLOW_STATUS_NOT_DEFINED(902036, "Workflow status not defined", 400,
             "Workflow status is not defined"),
     RESOURCE_URI_TEMPLATE_NOT_DEFINED(902032, "Resource URI template value not defined", 400,
-            "Resource URI template value (target) not defined", false);
+            "Resource URI template value (target) not defined", false),
+    API_ENDPOINT_NOT_FOUND(902040, "Cannot find the required API Endpoint details.", 404,
+            "Requested API endpoint with id '%s' not found."),
+    ERROR_UPDATING_API_ENDPOINT_API(902041, "Error has occurred. Cannot update an API endpoint.", 500,
+            "Error when updating the API Endpoint."),
+    ERROR_INSERTING_API_ENDPOINT_API(902042, "Error has occurred. Fail to add an API endpoint to API.", 500,
+            "Error has occurred while inserting an API endpoint."),
+    ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API(902043, "Missing mandatory API endpoint's endpoint config", 500,
+            "Required attributes %s for an API endpoint config specification %s are either missing or empty"),
+    ERROR_READING_API_ENDPOINTS_FILE(902044, "Error while reading API Endpoints from the endpoints file",
+            400, "Error while reading API Endpoints from the endpoints file"),
+    ERROR_ADDING_API_ENDPOINT(902045, "Error while adding API Endpoint to the API", 500,
+            "Error while adding API Endpoint with ID: %s to the API"),
+    ERROR_ADDING_API_ENDPOINTS(902046, "Error while adding API Endpoints to the API", 500,
+            "Error while adding API Endpoints to the API");
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

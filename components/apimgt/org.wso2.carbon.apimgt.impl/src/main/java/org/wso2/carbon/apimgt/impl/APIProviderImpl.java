@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIDefinitionContentSearchResult;
+import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -121,10 +122,11 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
-import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
+import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.dto.APIRevisionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
@@ -541,6 +543,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //Validate Transports
         validateAndSetTransports(api);
         validateAndSetAPISecurity(api);
+
+        //Validate API with Federated Gateway
+        validateApiWithFederatedGateway(api);
 
         //Set version timestamp to the API
         String latestTimestamp = calculateVersionTimestamp(provider, apiName,
@@ -987,6 +992,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             migrateMediationPoliciesOfAPI(api, tenantDomain, false);
         }
 
+        //Validate API with Federated Gateway
+        validateApiWithFederatedGateway(api);
+
         //get product resource mappings on API before updating the API. Update uri templates on api will remove all
         //product mappings as well.
         List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
@@ -1132,6 +1140,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
         }
         updateAPIResources(api, tenantId);
+        updateAPIPrimaryEndpointsMapping(api);
+    }
+
+    /**
+     * Update primary endpoints of an API.
+     *
+     * @param api API to update
+     * @throws APIManagementException If fails to update primary endpoints of the API.
+     */
+    private void updateAPIPrimaryEndpointsMapping(API api) throws APIManagementException {
+        apiMgtDAO.updateAPIPrimaryEndpointsMapping(api);
     }
 
     /**
@@ -1892,7 +1911,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         //Validate the API type
-        if (!policySpecification.getSupportedApiTypes().contains(apiType)) {
+        boolean isApiTypeValid = isApiTypeValid(policySpecification.getSupportedApiTypes(), apiType);
+        if (!isApiTypeValid) {
             throw new APIManagementException(policySpecification.getName() + " cannot be used for the "
                     + apiType + " API type.",
                     ExceptionCodes.OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW);
@@ -1936,6 +1956,31 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         return true;
+    }
+
+    /**
+     * This method used to check whether the API type is valid
+     *
+     * @param supportedApiTypes Supported API types
+     * @param apiType           Type of API
+     * @return true if the API type is valid
+     */
+    private boolean isApiTypeValid(List<Object> supportedApiTypes, String apiType) {
+        boolean isApiTypeValid = false;
+        for (Object supportedApiType : supportedApiTypes) {
+            if (supportedApiType instanceof String) {
+                if (supportedApiType.equals(apiType)) {
+                    isApiTypeValid = true;
+                }
+            } else if (supportedApiType instanceof Map) {
+                // TODO: Need to add subType validation
+                Map<String, String> supportedApiTypeMap = (Map<String, String>) supportedApiType;
+                if (supportedApiTypeMap.get("apiType").equals(apiType)) {
+                    isApiTypeValid = true;
+                }
+            }
+        }
+        return isApiTypeValid;
     }
 
     /**
@@ -2036,6 +2081,36 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         api.setApiSecurity(apiSecurity);
+    }
+
+    /**
+     * Validate Api with the federated gateways
+     *
+     * @param api API Object
+     */
+    private static void validateApiWithFederatedGateway(API api) throws APIManagementException {
+
+        ExternalGatewayDeployer deployer =
+                ServiceReferenceHolder.getInstance().getExternalGatewayDeployer(api.getGatewayType());
+        if (deployer != null) {
+            List<String> errorList = null;
+            try {
+                errorList = deployer.validateApi(api);
+                if (!errorList.isEmpty()) {
+                    throw new APIManagementException(
+                            "Error occurred while validating the API with the federated gateway: "
+                            + api.getGatewayType(),
+                            ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
+                                    api.getGatewayType(), errorList.toString()));
+                }
+            } catch (DeployerException e) {
+                throw new APIManagementException(
+                        "Error occurred while validating the API with the federated gateway: "
+                        + api.getGatewayType(), e,
+                        ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
+                        api.getGatewayType()));
+            }
+        }
     }
 
     /**
@@ -2508,6 +2583,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             try {
                 // Remove API-Label mappings
                 removeAPILabelMappings(apiUuid);
+
+                // Delete mappings for External deployed APIs
+                if (!api.getGatewayVendor().equalsIgnoreCase(APIConstants.WSO2_GATEWAY_ENVIRONMENT)) {
+                    APIUtil.deleteApiExternalApiMappings(api.getUuid());
+                }
+
                 // Remove Custom Backend entries of the API
                 deleteCustomBackendByAPIID(apiUuid);
                 deleteAPIRevisions(apiUuid, organization);
@@ -5430,6 +5511,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateSubtypeConfiguration(api);
                 populateDefaultVersion(api);
                 populatePolicyTypeInAPI(api);
+                populateAPIPrimaryEndpointsMapping(api, uuid);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -6113,7 +6195,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiRevision.setRevisionUUID(revisionUUID);
 
         try {
-            apiMgtDAO.addAPIRevision(apiRevision);
+            apiMgtDAO.addAPIRevision(apiRevision, organization);
             AIConfiguration aiConfiguration = apiMgtDAO.getAIConfiguration(apiRevision.getApiUUID(), null);
             if (aiConfiguration != null) {
                 addAIConfiguration(apiRevision.getApiUUID(), apiRevision.getRevisionUUID(), aiConfiguration,
@@ -6205,21 +6287,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return null;
     }
 
-    /**
-     * Validates if the provided LLM provider ID exists in the organization.
-     *
-     * @param llmProviderId LLM provider UUID
-     * @param organization  Organization to which the API belongs
-     * @throws APIManagementException if the LLM provider is not found
-     */
-    private void validateLlmProviderById(String llmProviderId, String organization)
-            throws APIManagementException {
-
-        LLMProvider provider = apiMgtDAO.getLLMProvider(organization, llmProviderId);
-        if (provider == null) {
-            throw new APIManagementException("Incorrect LLM Provider UUID: " + llmProviderId);
-        }
-    }
+//    /**
+//     * Validates if the provided LLM provider ID exists in the organization.
+//     *
+//     * @param llmProviderId LLM provider UUID
+//     * @param organization  Organization to which the API belongs
+//     * @throws APIManagementException if the LLM provider is not found
+//     */
+//    private void validateLlmProviderById(String llmProviderId, String organization)
+//            throws APIManagementException {
+//
+//        LLMProvider provider = apiMgtDAO.getLLMProvider(organization, llmProviderId);
+//        if (provider == null) {
+//            throw new APIManagementException("Incorrect LLM Provider UUID: " + llmProviderId);
+//        }
+//    }
 
     /**
      * Util method to read and return the max revision count per API, using the tenant configs
@@ -6719,7 +6801,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
                     ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
         }
-        apiMgtDAO.restoreAPIRevision(apiRevision);
+        apiMgtDAO.restoreAPIRevision(apiRevision, organization);
     }
 
     /**
@@ -6974,7 +7056,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
                     ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
         }
-        apiMgtDAO.restoreAPIProductRevision(apiRevision);
+        apiMgtDAO.restoreAPIProductRevision(apiRevision, organization);
     }
 
     @Override
@@ -8054,4 +8136,90 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while validating attached labels", e);
         }
     }
+
+    @Override
+    public void importDraftedApiTheme(String organization, InputStream themeContent, String apiId)
+            throws APIManagementException {
+        apiMgtDAO.importDraftedApiTheme(organization, themeContent, apiId);
+    }
+
+    @Override
+    public void updateApiThemeStatus(String organization, String action, String apiId)
+            throws APIManagementException {
+        apiMgtDAO.updateApiThemeStatus(organization, action, apiId);
+    }
+
+    @Override
+    public void deleteApiTheme(String organization, String themeId, String apiId) throws APIManagementException {
+        apiMgtDAO.deleteApiTheme(organization, themeId, apiId);
+    }
+
+    @Override
+    public InputStream getApiTheme(String uuid, String organization, String apiId) throws APIManagementException {
+        return apiMgtDAO.getApiTheme(uuid, organization,apiId);
+    }
+
+    @Override
+    public Map<String, String> getApiThemes(String organization, String apiId) throws APIManagementException {
+        return apiMgtDAO.getApiThemes(organization, apiId);
+    }
+
+    @Override
+    public String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint, String organization)
+            throws APIManagementException {
+        String endpointUUID = UUID.randomUUID().toString();
+        apiEndpoint.setEndpointUuid(endpointUUID);
+        return apiMgtDAO.addAPIEndpoint(apiUUID, apiEndpoint, organization);
+    }
+
+    @Override
+    public APIEndpointInfo getAPIEndpointByUUID(String apiUUID, String endpointUUID, String organization)
+            throws APIManagementException {
+        return apiMgtDAO.getAPIEndpoint(apiUUID, endpointUUID, organization);
+    }
+
+    @Override
+    public APIEndpointInfo updateAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint, String organization)
+            throws APIManagementException {
+        return apiMgtDAO.updateAPIEndpoint(apiUUID, apiEndpoint, organization);
+    }
+
+    @Override
+    public void deleteAPIEndpointById(String endpointUUID) throws APIManagementException {
+        apiMgtDAO.deleteAPIEndpointByEndpointId(endpointUUID);
+    }
+
+    @Override
+    public List<APIEndpointInfo> getAllAPIEndpointsByUUID(String uuid, String organization) throws APIManagementException {
+        return apiMgtDAO.getAPIEndpoints(uuid, organization);
+    }
+
+    /**
+     * It fetches the primary endpoint mappings of an API and populate their UUIDs.
+     *
+     * @param api API model Object
+     * @param uuid unique identifier of an API
+     * @throws APIManagementException
+     */
+    private void populateAPIPrimaryEndpointsMapping(API api, String uuid) throws APIManagementException {
+        String organization = api.getOrganization();
+        String currentApiUuid;
+        String revisionUuid = null;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+            revisionUuid = apiRevision.getRevisionUUID();
+        } else {
+            currentApiUuid = uuid;
+        }
+        // Get primary production Endpoint mapping
+        String productionEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
+                APIConstants.APIEndpoint.PRODUCTION, revisionUuid, organization);
+        api.setPrimaryProductionEndpointId(productionEndpointId);
+        // Get primary sandbox endpoint endpoint
+        String sandboxEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
+                APIConstants.APIEndpoint.SANDBOX, revisionUuid, organization);
+        api.setPrimarySandboxEndpointId(sandboxEndpointId);
+    }
+
 }

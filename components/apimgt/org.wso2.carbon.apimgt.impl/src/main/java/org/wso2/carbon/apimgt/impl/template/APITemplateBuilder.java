@@ -16,15 +16,29 @@
 
 package org.wso2.carbon.apimgt.impl.template;
 
+import org.wso2.carbon.apimgt.api.dto.EndpointConfigDTO;
+import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 import org.wso2.carbon.apimgt.api.model.Environment;
+
+import java.util.List;
 
 public interface APITemplateBuilder {
 
     String getConfigStringForTemplate(Environment environment) throws APITemplateException;
 
+    /**
+     * Generates a configuration string for AI API based on the given environment.
+     *
+     * @param environment     The deployment environment for which the configuration string is generated.
+     * @param endpointDTOList List of Endpoint
+     * @return A string representing the AI API configuration.
+     * @throws APITemplateException If an error occurs while processing the Velocity template.
+     */
+    String getConfigStringForAIAPI(Environment environment, List<EndpointDTO> endpointDTOList) throws APITemplateException;
+
     String getConfigStringForPrototypeScriptAPI(Environment environment) throws APITemplateException;
 
-    String getConfigStringForEndpointTemplate(String endpointType) throws APITemplateException;
+    String getConfigStringForEndpointTemplate(String endpointType, String endpointUuid, EndpointConfigDTO endpointConfig) throws APITemplateException;
 
     String getConfigStringForWebSocketEndpointTemplate(String endpointType, String resourceKey, String endpointUrl) throws APITemplateException;
 

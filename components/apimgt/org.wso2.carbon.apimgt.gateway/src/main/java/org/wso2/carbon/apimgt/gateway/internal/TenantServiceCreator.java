@@ -69,6 +69,8 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
     private String webHookServerHTTP = "WebhookServer";
     private String webHookServerHTTPS = "SecureWebhookServer";
     private String webHookFaultSequenceName = "webhooksFaultSequence";
+    private String aiApiReqSeqName = "_ai_api_request_seq_";
+    private String aiApiResSeqName = "_ai_api_response_seq_";
     private String webSocketOutDispatchSeq = "outDispatchSeq";
     private String webSocketDispatchSeq = "dispatchSeq";
     private String synapseConfigRootPath = CarbonBaseUtils.getCarbonHome() + "/repository/resources/apim-synapse-config/";
@@ -285,6 +287,12 @@ public class TenantServiceCreator extends AbstractAxis2ConfigurationContextObser
                 FileUtils.copyFile(new File(synapseConfigRootPath + webHookFaultSequenceName + ".xml"),
                         new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
                                 + File.separator + webHookFaultSequenceName + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + aiApiReqSeqName + ".xml"),
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                + File.separator + aiApiReqSeqName + ".xml"));
+                FileUtils.copyFile(new File(synapseConfigRootPath + aiApiResSeqName + ".xml"),
+                        new File(synapseConfigDir.getAbsolutePath() + File.separator + "sequences"
+                                + File.separator + aiApiResSeqName + ".xml"));
 
                 copyArtifact(webSocketDispatchSeq, MultiXMLConfigurationBuilder.SEQUENCES_DIR);
                 copyArtifact(webSocketOutDispatchSeq, MultiXMLConfigurationBuilder.SEQUENCES_DIR);

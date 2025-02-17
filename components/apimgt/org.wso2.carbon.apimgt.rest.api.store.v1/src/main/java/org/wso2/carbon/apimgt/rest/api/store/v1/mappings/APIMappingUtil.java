@@ -42,6 +42,9 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIType;
+import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
+import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -567,11 +570,29 @@ public class APIMappingUtil {
         boolean isGQLSubscription = StringUtils.equalsIgnoreCase(APIConstants.GRAPHQL_API, apidto.getType())
                 && isGraphQLSubscriptionsAvailable(apidto);
         if (!isWs) {
-            if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
-                apiurLsDTO.setHttp(vHost.getHttpUrl() + context);
-            }
-            if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
-                apiurLsDTO.setHttps(vHost.getHttpsUrl() + context);
+            //prevent context appending in case the gateway is an external one
+            Map<String, ExternalGatewayDeployer> externalGatewayDeployers = ServiceReferenceHolder.getInstance().
+                    getExternalGatewayDeployers();
+            ExternalGatewayDeployer gatewayDeployer = externalGatewayDeployers.get(environment.getGatewayType());
+            context = gatewayDeployer != null ? "" : context;
+            try {
+                String httpUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(
+                        vHost.getHttpUrl(), environment,
+                        APIUtil.getApiExternalApiMappingReferenceByApiId(apidto.getId(), environment.getUuid()))
+                        : vHost.getHttpUrl();
+                String httpsUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(
+                        vHost.getHttpsUrl(), environment,
+                        APIUtil.getApiExternalApiMappingReferenceByApiId(apidto.getId(), environment.getUuid()))
+                        : vHost.getHttpsUrl();
+
+                if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
+                    apiurLsDTO.setHttp(httpUrl + context);
+                }
+                if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
+                    apiurLsDTO.setHttps(httpsUrl + context);
+                }
+            } catch (DeployerException e) {
+                throw new APIManagementException(e.getMessage());
             }
         }
         if (isWs || isGQLSubscription) {
