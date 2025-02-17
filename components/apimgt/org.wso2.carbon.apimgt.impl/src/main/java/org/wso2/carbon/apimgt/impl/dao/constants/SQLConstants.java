@@ -3937,6 +3937,8 @@ public class SQLConstants {
         
         public static final String GET_ORGANIZATIONS_BY_TENAND_DOMAIN =
                 "SELECT * FROM AM_ORGANIZATION_MAPPING WHERE ROOT_ORGANIZATION=?";
+        
+        public static final String ORGANIZATIONS_EXIST = "SELECT COUNT(*) FROM AM_ORGANIZATION_MAPPING";
     }
 
     /**
