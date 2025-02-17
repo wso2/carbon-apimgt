@@ -36,6 +36,8 @@ import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -69,6 +71,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -570,19 +573,17 @@ public class APIMappingUtil {
         boolean isGQLSubscription = StringUtils.equalsIgnoreCase(APIConstants.GRAPHQL_API, apidto.getType())
                 && isGraphQLSubscriptionsAvailable(apidto);
         if (!isWs) {
-            //prevent context appending in case the gateway is an external one
-            Map<String, ExternalGatewayDeployer> externalGatewayDeployers = ServiceReferenceHolder.getInstance().
-                    getExternalGatewayDeployers();
-            ExternalGatewayDeployer gatewayDeployer = externalGatewayDeployers.get(environment.getGatewayType());
-            context = gatewayDeployer != null ? "" : context;
             try {
-                String httpUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(
-                        vHost.getHttpUrl(), environment,
-                        APIUtil.getApiExternalApiMappingReferenceByApiId(apidto.getId(), environment.getUuid()))
+                //prevent context appending in case the gateway is an external one
+                GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance().
+                        getExternalGatewayConnectorConfiguration(environment.getGatewayType());
+                GatewayDeployer gatewayDeployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation())
+                        .getDeclaredConstructor().newInstance();
+                context = gatewayDeployer != null ? "" : context;
+
+                String httpUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(vHost.getHttpUrl())
                         : vHost.getHttpUrl();
-                String httpsUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(
-                        vHost.getHttpsUrl(), environment,
-                        APIUtil.getApiExternalApiMappingReferenceByApiId(apidto.getId(), environment.getUuid()))
+                String httpsUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(vHost.getHttpsUrl())
                         : vHost.getHttpsUrl();
 
                 if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
@@ -591,7 +592,8 @@ public class APIMappingUtil {
                 if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
                     apiurLsDTO.setHttps(httpsUrl + context);
                 }
-            } catch (DeployerException e) {
+            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException
+                     | InvocationTargetException e) {
                 throw new APIManagementException(e.getMessage());
             }
         }

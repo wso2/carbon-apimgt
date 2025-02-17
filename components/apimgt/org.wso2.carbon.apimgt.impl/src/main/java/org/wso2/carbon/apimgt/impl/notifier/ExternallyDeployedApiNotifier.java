@@ -23,6 +23,8 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -35,6 +37,7 @@ import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -94,8 +97,10 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
             for (APIRevisionDeployment deployment : test) {
                 String deploymentEnv = deployment.getDeployment();
                 if (gatewayEnvironments.containsKey(deploymentEnv)) {
-                    ExternalGatewayDeployer deployer = ServiceReferenceHolder.getInstance().getExternalGatewayDeployer
-                            (gatewayEnvironments.get(deploymentEnv).getGatewayType());
+                    GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance().
+                            getExternalGatewayConnectorConfiguration(gatewayEnvironments.get(deploymentEnv).getGatewayType());
+                    GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation())
+                            .getDeclaredConstructor().newInstance();
                     if (deployer != null) {
                         try {
                             String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
@@ -103,8 +108,7 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                             if (referenceArtifact == null) {
                                 throw new DeployerException("API ID is not mapped with AWS API ID");
                             }
-                            deleted = deployer.undeployWhenRetire(api, gatewayEnvironments.get(deploymentEnv),
-                                    referenceArtifact);
+                            deleted = deployer.undeploy(referenceArtifact);
                             if (!deleted) {
                                 throw new NotifierException("Error while deleting API product from Solace broker");
                             }
@@ -114,7 +118,8 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                     }
                 }
             }
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | ClassNotFoundException | NoSuchMethodException | InstantiationException |
+                 IllegalAccessException | InvocationTargetException e) {
             throw new NotifierException(e.getMessage());
         }
 
@@ -137,28 +142,29 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
             for (APIRevisionDeployment deployment : test) {
                 String deploymentEnv = deployment.getDeployment();
                 if (gatewayEnvironments.containsKey(deploymentEnv)) {
-                    ExternalGatewayDeployer deployer = ServiceReferenceHolder.getInstance().getExternalGatewayDeployer
-                            (gatewayEnvironments.get(deploymentEnv).getGatewayType());
+                    GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance().
+                            getExternalGatewayConnectorConfiguration(gatewayEnvironments.get(deploymentEnv).getGatewayType());
+                    GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation())
+                            .getDeclaredConstructor().newInstance();
                     if (deployer != null) {
                         try {
                             String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
                                     gatewayEnvironments.get(deploymentEnv).getUuid());
                             if (referenceArtifact == null) {
-                                throw new DeployerException("API ID is not mapped with AWS API ID");
+                                throw new APIManagementException("API ID is not mapped with AWS API ID");
                             }
-                            deleted = deployer.undeploy(apiEvent.getUuid(), apiEvent.getApiName(),
-                                    apiEvent.getApiVersion(), apiEvent.getApiContext(),
-                                    gatewayEnvironments.get(deploymentEnv), referenceArtifact);
+                            deleted = deployer.undeploy(referenceArtifact);
                             if (!deleted) {
                                 throw new NotifierException("Error while deleting API product from Solace broker");
                             }
-                        } catch (DeployerException e) {
+                        } catch (APIManagementException e) {
                             throw new NotifierException(e.getMessage());
                         }
                     }
                 }
             }
-        } catch (APIManagementException e) {
+        } catch (APIManagementException | ClassNotFoundException | NoSuchMethodException | InstantiationException |
+                 IllegalAccessException | InvocationTargetException e) {
             throw new NotifierException(e.getMessage());
         }
 

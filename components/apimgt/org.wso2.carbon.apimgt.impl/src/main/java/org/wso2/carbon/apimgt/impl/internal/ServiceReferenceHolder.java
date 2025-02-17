@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl.internal;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
@@ -28,7 +29,6 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigServiceImpl;
-import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.GatewayArtifactGenerator;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
@@ -75,7 +75,7 @@ public class ServiceReferenceHolder {
     private ResourceQuotaLimiter resourceQuotaLimiter;
     private EventPublisherFactory eventPublisherFactory;
     private APIMConfigService apimConfigService;
-    private Map<String, ExternalGatewayDeployer> externalGatewayDeployers = new HashMap<>();
+    private Map<String, GatewayAgentConfiguration> gatewayConnectorConfigurationMap = new HashMap<>();
     private Map<String, ExternalEnvironment> externalEnvironmentsMap = new HashMap<>();
     private Map<String, APIDefinition> apiDefinitionMap = new HashMap<>();
     private WorkflowTaskService workflowTaskService;
@@ -324,24 +324,24 @@ public class ServiceReferenceHolder {
     }
 
 
-    public void addExternalGatewayDeployer(String type, ExternalGatewayDeployer deployer) {
+    public void addExternalGatewayConnectorConfiguration(String type, GatewayAgentConfiguration gatewayConfiguration) {
 
-        externalGatewayDeployers.put(type, deployer);
+        gatewayConnectorConfigurationMap.put(type, gatewayConfiguration);
     }
 
-    public void removeExternalGatewayDeployer(String type) {
+    public void removeExternalGatewayConnectorConfiguration(String type) {
 
-        externalGatewayDeployers.remove(type);
+        gatewayConnectorConfigurationMap.remove(type);
     }
 
-    public ExternalGatewayDeployer getExternalGatewayDeployer(String type) {
+    public GatewayAgentConfiguration getExternalGatewayConnectorConfiguration(String type) {
 
-        return externalGatewayDeployers.get(type);
+        return gatewayConnectorConfigurationMap.get(type);
     }
 
-    public Map<String, ExternalGatewayDeployer> getExternalGatewayDeployers() {
+    public Map<String, GatewayAgentConfiguration> getExternalGatewayConnectorConfigurations() {
 
-            return externalGatewayDeployers;
+            return gatewayConnectorConfigurationMap;
     }
 
     public void addExternalEnvironment(String type, ExternalEnvironment externalEnvironment) {

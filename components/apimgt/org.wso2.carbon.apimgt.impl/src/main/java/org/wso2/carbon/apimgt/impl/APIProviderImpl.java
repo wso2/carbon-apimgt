@@ -73,6 +73,9 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.GatewayAPIValidationResult;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
@@ -221,6 +224,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -2090,26 +2094,29 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private static void validateApiWithFederatedGateway(API api) throws APIManagementException {
 
-        ExternalGatewayDeployer deployer =
-                ServiceReferenceHolder.getInstance().getExternalGatewayDeployer(api.getGatewayType());
-        if (deployer != null) {
-            List<String> errorList = null;
-            try {
+        try {
+            GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance().
+                    getExternalGatewayConnectorConfiguration(api.getGatewayType());
+            GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation())
+                    .getDeclaredConstructor().newInstance();
+            if (deployer != null) {
+                GatewayAPIValidationResult errorList = null;
                 errorList = deployer.validateApi(api);
-                if (!errorList.isEmpty()) {
+                if (!errorList.getErrors().isEmpty()) {
                     throw new APIManagementException(
                             "Error occurred while validating the API with the federated gateway: "
-                            + api.getGatewayType(),
+                                    + api.getGatewayType(),
                             ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
                                     api.getGatewayType(), errorList.toString()));
                 }
-            } catch (DeployerException e) {
-                throw new APIManagementException(
-                        "Error occurred while validating the API with the federated gateway: "
-                        + api.getGatewayType(), e,
-                        ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
-                        api.getGatewayType()));
             }
+        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
+                 IllegalAccessException | InvocationTargetException e) {
+            throw new APIManagementException(
+                    "Error occurred while validating the API with the federated gateway: "
+                            + api.getGatewayType(), e,
+                    ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
+                            api.getGatewayType()));
         }
     }
 

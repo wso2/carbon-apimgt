@@ -28,6 +28,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.internal.LinkedTreeMap;
 import feign.Feign;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
@@ -110,6 +111,8 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayPortalConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayFeatureCatalog;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
@@ -163,8 +166,6 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.CorrelationConfigDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
-import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
-import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
@@ -3438,30 +3439,27 @@ public final class APIUtil {
             }
         }
 
-        Map<String, ExternalGatewayDeployer> externalGatewayConnectorConfigurationMap =
-                ServiceReferenceHolder.getInstance().getExternalGatewayDeployers();
+        Map<String, GatewayAgentConfiguration> externalGatewayConnectorConfigurationMap =
+                ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
         externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
-            JsonObject configsJSON = null;
+            GatewayPortalConfiguration config = null;
             try {
-                configsJSON = gatewayConfiguration.getGatewayFeatureCatalog();
-            } catch (DeployerException e) {
+                config = gatewayConfiguration.getGatewayFeatureCatalog();
+            } catch (APIManagementException e) {
                 throw new RuntimeException(e);
             }
 
-            if (configsJSON != null) {
-                Set<String> keys = configsJSON.keySet();
-                String gatewayType = keys.iterator().next();
+            if (config != null) {
 
-                JsonObject configsJSONValue = configsJSON.getAsJsonObject(gatewayType);
-                JsonObject gwFeatures = configsJSONValue.getAsJsonObject("gatewayFeatures");
-                Map<String, Object> configsMap = gson.fromJson(gwFeatures, type);
-                gatewayConfigsMap.put(gatewayType, configsMap);
+                LinkedTreeMap<String, Object> supportedFeaturesMap = new Gson().fromJson(
+                        (JsonObject)config.getSupportedFeatures(), LinkedTreeMap.class);
+                gatewayConfigsMap.put(config.getGatewayType(), supportedFeaturesMap);
 
-                JsonArray types = configsJSONValue.getAsJsonArray("apiTypes");
+                List<String> types = config.getSupportedAPITypes();
                 for (int i = 0; i < types.size(); i++) {
-                    String apiType = types.get(i).getAsString();
+                    String apiType = types.get(i);
                     if (apiData.containsKey(apiType)) {
-                        apiData.get(apiType).add(gatewayType);
+                        apiData.get(apiType).add(config.getGatewayType());
                     }
                 }
             }

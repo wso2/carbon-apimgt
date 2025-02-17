@@ -68,6 +68,8 @@ import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
@@ -89,7 +91,6 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
-import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -3443,9 +3444,10 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         hostsWithSchemes = getHostWithSchemeMappingForEnvironment(api, apiTenantDomain, environmentName);
 
         Environment environment = APIUtil.getEnvironments().get(environmentName);
-        Map<String, ExternalGatewayDeployer> externalGatewayDeployers = ServiceReferenceHolder.getInstance().getExternalGatewayDeployers();
-        ExternalGatewayDeployer gatewayDeployer = externalGatewayDeployers.get(environment.getGatewayType());
-        if (gatewayDeployer != null) {
+        Map<String, GatewayAgentConfiguration> gatewayConfigurations = ServiceReferenceHolder.getInstance()
+                .getExternalGatewayConnectorConfigurations();
+        GatewayAgentConfiguration gatewayConfiguration = gatewayConfigurations.get(environment.getGatewayType());
+        if (gatewayConfiguration != null) {
             api.setContext("");
             updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
         } else {
@@ -3622,26 +3624,32 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
 
             VHost vhost = VHostUtils.getVhostFromEnvironment(environment, host);
-            Map<String, ExternalGatewayDeployer> externalGatewayDeployers = ServiceReferenceHolder.getInstance().getExternalGatewayDeployers();
-            ExternalGatewayDeployer gatewayDeployer = externalGatewayDeployers.get(environment.getGatewayType());
+            Map<String, GatewayAgentConfiguration> gatewayConfigurations =
+                    ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
+            GatewayAgentConfiguration gatewayConfiguration = gatewayConfigurations.get(environment.getGatewayType());
             try {
+                boolean isExternalGateway = false;
+                GatewayDeployer gatewayDeployer = null;
+                if (gatewayConfiguration != null && StringUtils.isNotEmpty(gatewayConfiguration.getImplementation())) {
+                    gatewayDeployer = (GatewayDeployer) Class.forName(
+                            gatewayConfiguration.getImplementation()).getDeclaredConstructor().newInstance();
+                    isExternalGateway = true;
+                }
+
                 if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)
                         && vhost.getHttpPort() != -1) {
-                    String httpUrl = gatewayDeployer != null ?
-                            gatewayDeployer.getAPIExecutionURL(vhost.getHttpUrl(), environment,
-                                    APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(), environment.getUuid())) :
+                    String httpUrl = isExternalGateway ? gatewayDeployer.getAPIExecutionURL(api.getUuid()) :
                             vhost.getHttpUrl();
                     hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, httpUrl);
                 }
                 if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)
                         && vhost.getHttpsPort() != -1) {
-                    String httpsUrl = gatewayDeployer != null ?
-                            gatewayDeployer.getAPIExecutionURL(vhost.getHttpsUrl(), environment,
-                                    APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(), environment.getUuid())) :
+                    String httpsUrl = isExternalGateway ? gatewayDeployer.getAPIExecutionURL(api.getUuid()) :
                             vhost.getHttpsUrl();
                     hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, httpsUrl);
                 }
-            } catch (DeployerException e) {
+            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException
+                     | InvocationTargetException e) {
                 throw new APIManagementException(e.getMessage());
             }
         }
