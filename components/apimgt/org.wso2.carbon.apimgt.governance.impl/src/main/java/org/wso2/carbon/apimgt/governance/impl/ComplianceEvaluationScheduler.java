@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.governance.impl.dao.impl.ComplianceMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
+import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.util.ArrayList;
@@ -54,9 +55,10 @@ import java.util.concurrent.TimeUnit;
 public class ComplianceEvaluationScheduler {
 
     private static final Log log = LogFactory.getLog(ComplianceEvaluationScheduler.class);
-    private static final int THREAD_POOL_SIZE = 10;
-    private static final int QUEUE_SIZE = 20;
-    private static final int CHECK_INTERVAL_MINUTES = 2;
+    private static int threadPoolSize;
+    private static int queueSize;
+    private static int checkIntervalMinutes;
+    private static int cleanupIntervalMinutes;
     private static ScheduledExecutorService scheduler;
     private static ThreadPoolExecutor processorPool;
     private static final ComplianceMgtDAO complianceMgtDAO = ComplianceMgtDAOImpl.getInstance();
@@ -67,12 +69,20 @@ public class ComplianceEvaluationScheduler {
     public static void initialize() {
         log.info("Initializing Evaluation Request Scheduler...");
 
+        APIMGovernanceConfigDTO apimGovernanceConfigDTO = ServiceReferenceHolder.getInstance()
+                .getAPIMConfigurationService().getAPIManagerConfiguration().getAPIMGovernanceConfigurationDto();
+
+        threadPoolSize = apimGovernanceConfigDTO.getSchedulerThreadPoolSize();
+        queueSize = apimGovernanceConfigDTO.getSchedulerQueueSize();
+        checkIntervalMinutes = apimGovernanceConfigDTO.getSchedulerTaskCheckInterval();
+        cleanupIntervalMinutes = apimGovernanceConfigDTO.getSchedulerTaskCleanupInterval();
+
         scheduler = Executors.newSingleThreadScheduledExecutor();
         processorPool = createProcessorPool();
 
         scheduler.scheduleAtFixedRate(
                 ComplianceEvaluationScheduler::processPendingRequests,
-                0, CHECK_INTERVAL_MINUTES, TimeUnit.MINUTES);
+                0, checkIntervalMinutes, TimeUnit.MINUTES);
     }
 
     /**
@@ -82,9 +92,9 @@ public class ComplianceEvaluationScheduler {
      */
     private static ThreadPoolExecutor createProcessorPool() {
         return new ThreadPoolExecutor(
-                THREAD_POOL_SIZE, THREAD_POOL_SIZE,
+                threadPoolSize, threadPoolSize,
                 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(QUEUE_SIZE),
+                new LinkedBlockingQueue<>(queueSize),
                 Executors.defaultThreadFactory(),
                 new ThreadPoolExecutor.DiscardPolicy()
         );
@@ -98,8 +108,10 @@ public class ComplianceEvaluationScheduler {
             log.debug("Checking for pending evaluation requests...");
         }
 
-        // TODO: Change long lasting processing requests to pending
-        List<ComplianceEvaluationRequest> pendingRequests = fetchPendingRequests(QUEUE_SIZE);
+        // Change long lasting processing requests to pending
+        resetLongLastingProcessingRequests();
+
+        List<ComplianceEvaluationRequest> pendingRequests = fetchPendingRequests(queueSize);
 
         if (pendingRequests == null || pendingRequests.isEmpty()) {
             if (log.isDebugEnabled()) {
@@ -121,8 +133,8 @@ public class ComplianceEvaluationScheduler {
                     PrivilegedCarbonContext carbonContext = PrivilegedCarbonContext.getThreadLocalCarbonContext();
                     carbonContext.setTenantDomain(organization, true);
                     processRequest(request);
-                } catch (Exception e) {
-                    log.error("Unhandled exception during request processing: " + request.getId(), e);
+                } catch (Throwable e) {
+                    log.error("Unhandled exception/error during request processing: " + request.getId(), e);
                 } finally {
                     PrivilegedCarbonContext.endTenantFlow();
                 }
@@ -310,6 +322,17 @@ public class ComplianceEvaluationScheduler {
                     organization);
         } catch (APIMGovernanceException e) {
             log.error("Error saving governance results for artifact ID: " + artifactRefId, e);
+        }
+    }
+
+    /**
+     * Reset long-lasting processing requests.
+     */
+    private static void resetLongLastingProcessingRequests() {
+        try {
+            complianceMgtDAO.updateLongLastingProcessingRequestToPending(cleanupIntervalMinutes);
+        } catch (APIMGovernanceException e) {
+            log.error("Error resetting long lasting processing requests: " + e.getMessage(), e);
         }
     }
 

@@ -23,8 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
-import org.wso2.carbon.apimgt.governance.impl.config.APIMGovernanceConfig;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,9 +61,10 @@ public class APIMGovernanceDBUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("Initializing data source");
                 }
-                APIMGovernanceConfig config = ServiceReferenceHolder.getInstance().
-                        getGovernanceConfigurationService().getGovernanceConfig();
-                String dataSourceName = config.getFirstProperty(DATA_SOURCE_NAME);
+                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                        getAPIMConfigurationService().getAPIManagerConfiguration();
+                String dataSourceName = config.getAPIMGovernanceConfigurationDto()
+                        .getDataSourceName();
 
                 if (dataSourceName != null) {
                     try {
