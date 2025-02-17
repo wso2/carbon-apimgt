@@ -18281,7 +18281,7 @@ public class ApiMgtDAO {
                 }
             }
         }
-        return null;
+        throw new SQLException("No matching artifact found for artifact ID");
     }
 
     /**
@@ -18291,7 +18291,57 @@ public class ApiMgtDAO {
      * @param artifactId Artifact's ID.
      */
     private void removeArtifact(Connection connection, String artifactId) throws SQLException {
-        String query = SQLConstants.DevPortalContentConstants.DELETE_ARTIFACT;
+        String selectQuery = SQLConstants.DevPortalContentConstants.GET_ARTIFACT_TYPE;
+        String deleteQuery = SQLConstants.DevPortalContentConstants.DELETE_ARTIFACT;
+        String artifactType = null;
+
+        try (PreparedStatement selectStatement = connection.prepareStatement(selectQuery)) {
+            selectStatement.setString(1, artifactId);
+            try (ResultSet resultSet = selectStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    artifactType = resultSet.getString("TYPE");
+                }
+            }
+        }
+
+        if (artifactType != null) {
+            try (PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery)) {
+                deleteStatement.setString(1, artifactId);
+                deleteStatement.executeUpdate();
+                removeArtifactId(connection, artifactId, artifactType);
+            }
+        } else {
+            throw new SQLException("No matching artifact type found for artifact ID");
+        }
+    }
+
+
+    /**
+     * Remove the artifact ID from relevant tables if available.
+     * This is because MSSQL does not support advanced constraints with the foreign key 'SET NULL' option.
+     *
+     * @param connection DB connection.
+     * @param artifactId Artifact's ID.
+     * @param type       Artifact's Type.
+     */
+    private void removeArtifactId(Connection connection, String artifactId, String type) throws SQLException {
+        String query;
+        switch (type) {
+            case DevPortalConstants.DRAFTED_API_THEME:
+                query = SQLConstants.DevPortalContentConstants.MAKE_NULL_API_DRAFTED_ID;
+                break;
+            case DevPortalConstants.DRAFTED_ORG_THEME:
+                query = SQLConstants.DevPortalContentConstants.MAKE_NULL_ORG_DRAFTED_ID;
+                break;
+            case DevPortalConstants.PUBLISHED_API_THEME:
+                query = SQLConstants.DevPortalContentConstants.MAKE_NULL_API_PUBLISHED_ID;
+                break;
+            case DevPortalConstants.PUBLISHED_ORG_THEME:
+                query = SQLConstants.DevPortalContentConstants.MAKE_NULL_ORG_PUBLISHED_ID;
+                break;
+            default:
+                throw new SQLException("Artifact type does not match any standard types");
+        }
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, artifactId);
             preparedStatement.executeUpdate();
