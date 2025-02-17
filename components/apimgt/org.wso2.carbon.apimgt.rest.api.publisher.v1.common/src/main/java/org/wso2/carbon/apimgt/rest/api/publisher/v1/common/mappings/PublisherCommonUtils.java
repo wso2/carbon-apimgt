@@ -2865,8 +2865,7 @@ public class PublisherCommonUtils {
             if (!complianceResult.isEmpty()
                     && complianceResult.get(GOVERNANCE_COMPLIANCE_KEY) != null
                     && !Boolean.parseBoolean(complianceResult.get(GOVERNANCE_COMPLIANCE_KEY))) {
-                throw new APIComplianceException(complianceResult
-                        .get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+                throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
             }
             PublisherCommonUtils.checkGovernanceComplianceAsync(apiTypeWrapper.getUuid(),
                     APIMGovernableState.API_PUBLISH, ArtifactType.API, organization);
