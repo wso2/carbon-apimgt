@@ -188,7 +188,7 @@ public class ComplianceEvaluationScheduler {
 
         try {
             // Attempt to process the evaluation request
-            boolean isUpdated = complianceMgtDAO.updatePendingRequestToProcessing(requestId);
+            boolean isUpdated = complianceMgtDAO.updatePendingRequestToProcessing(request);
             if (!isUpdated) {
                 if (log.isDebugEnabled()) {
                     log.debug("Skipping governance evaluation for artifact ID: " + artifactRefId

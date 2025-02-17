@@ -69,11 +69,12 @@ public interface ComplianceMgtDAO {
     /**
      * Update the evaluation status of a pending request to processing
      *
-     * @param requestId Request ID
+     * @param request Evaluation request
      * @return True if the request is updated successfully
      * @throws APIMGovernanceException If an error occurs while updating the evaluation status
      */
-    boolean updatePendingRequestToProcessing(String requestId) throws APIMGovernanceException;
+    boolean updatePendingRequestToProcessing(ComplianceEvaluationRequest requestId)
+            throws APIMGovernanceException;
 
     /**
      * Update the evaluation status of all processing requests to pending

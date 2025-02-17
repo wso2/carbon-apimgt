@@ -200,17 +200,18 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         List<String> existingPolicyIds = getPolicyIdsForRequest(connection, requestId);
         policyIds.removeAll(existingPolicyIds);
 
+        if (policyIds.isEmpty()) {
+            return;
+        }
+
         String sqlQuery = SQLConstants.ADD_REQ_POLICY_MAPPING;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
             for (String policyId : policyIds) {
-                try {
-                    prepStmnt.setString(1, requestId);
-                    prepStmnt.setString(2, policyId);
-                    prepStmnt.execute();
-                } catch (SQLException e) {
-                    throw e;
-                }
+                prepStmnt.setString(1, requestId);
+                prepStmnt.setString(2, policyId);
+                prepStmnt.addBatch();
             }
+            prepStmnt.executeBatch();
         }
     }
 
@@ -218,26 +219,38 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     /**
      * Update the evaluation status of a pending request to processing
      *
-     * @param requestId Request ID
+     * @param request Compliance Evaluation Request
      * @return True if the update is successful, false otherwise
      * @throws APIMGovernanceException If an error occurs while updating the evaluation status
      */
     @Override
-    public boolean updatePendingRequestToProcessing(String requestId) throws APIMGovernanceException {
+    public boolean updatePendingRequestToProcessing(ComplianceEvaluationRequest request)
+            throws APIMGovernanceException {
 
-        String sqlQuery = SQLConstants.UPDATE_GOV_REQ_STATUS_TO_PROCESSING;
-        try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            Timestamp processingTime = new Timestamp(System.currentTimeMillis());
-            prepStmnt.setTimestamp(1, processingTime);
-            prepStmnt.setString(2, requestId);
-            int affectedRows = prepStmnt.executeUpdate();
-            return affectedRows > 0;
-        } catch (SQLIntegrityConstraintViolationException e) {
-            return false;
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
+            String checkQuery = SQLConstants.GET_PROCESSING_REQ_FOR_ARTIFACT;
+            try (PreparedStatement checkStmnt = connection.prepareStatement(checkQuery)) {
+                checkStmnt.setString(1, request.getArtifactRefId());
+                checkStmnt.setString(2, String.valueOf(request.getArtifactType()));
+                checkStmnt.setString(3, request.getOrganization());
+                try (ResultSet resultSet = checkStmnt.executeQuery()) {
+                    if (resultSet.next()) {
+                        return false;
+                    }
+                }
+            }
+
+            String sqlQuery = SQLConstants.UPDATE_GOV_REQ_STATUS_TO_PROCESSING;
+            try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
+                Timestamp processingTime = new Timestamp(System.currentTimeMillis());
+                prepStmnt.setTimestamp(1, processingTime);
+                prepStmnt.setString(2, request.getId());
+                int affectedRows = prepStmnt.executeUpdate();
+                return affectedRows > 0;
+            }
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes
-                    .ERROR_WHILE_UPDATING_GOV_EVAL_REQUEST, e, requestId);
+                    .ERROR_WHILE_UPDATING_GOV_EVAL_REQUEST, e, request.getId());
         }
     }
 

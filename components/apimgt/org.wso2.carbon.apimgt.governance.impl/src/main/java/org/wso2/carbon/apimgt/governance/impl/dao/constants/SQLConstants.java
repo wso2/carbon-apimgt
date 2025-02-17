@@ -251,6 +251,12 @@ public class SQLConstants {
                     "JOIN GOV_ARTIFACT GA ON GR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
                     "WHERE GR.STATUS = 'PENDING'";
 
+    public static final String GET_PROCESSING_REQ_FOR_ARTIFACT = "SELECT REQ_ID FROM GOV_REQUEST GR " +
+            "JOIN GOV_ARTIFACT GA ON GR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
+            "WHERE GA.ARTIFACT_REF_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ? AND GR.STATUS = " +
+            "'PROCESSING'";
+
+
     public static final String GET_PENDING_POLICIES_FOR_ARTIFACT = "SELECT DISTINCT POLICY_ID " +
             "FROM GOV_REQUEST_POLICY GRP " +
             "JOIN GOV_REQUEST GR ON GRP.REQ_ID = GR.REQ_ID " +
