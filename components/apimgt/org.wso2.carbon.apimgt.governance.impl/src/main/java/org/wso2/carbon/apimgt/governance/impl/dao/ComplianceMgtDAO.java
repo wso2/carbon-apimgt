@@ -73,15 +73,16 @@ public interface ComplianceMgtDAO {
      * @return True if the request is updated successfully
      * @throws APIMGovernanceException If an error occurs while updating the evaluation status
      */
-    boolean updatePendingRequestToProcessing(ComplianceEvaluationRequest requestId)
+    boolean updatePendingRequestToProcessing(ComplianceEvaluationRequest request)
             throws APIMGovernanceException;
 
     /**
-     * Update the evaluation status of all processing requests to pending
+     * Update the evaluation status of all of all long-lasting processing requests to pending
      *
+     * @param taskCleanupInterval Task cleanup interval in minutes
      * @throws APIMGovernanceException If an error occurs while updating the evaluation status
      */
-    void updateProcessingRequestToPending() throws APIMGovernanceException;
+    void updateLongLastingProcessingRequestToPending(int taskCleanupInterval) throws APIMGovernanceException;
 
     /**
      * Delete an evaluation request

@@ -36,9 +36,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -255,17 +255,51 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Update the evaluation status of all processing requests to pending
+     * Update the evaluation status of all of all long-lasting processing requests to pending
      *
+     * @param taskCleanupInterval Task Cleanup Interval in minutes
      * @throws APIMGovernanceException If an error occurs while updating the evaluation status
      */
     @Override
-    public void updateProcessingRequestToPending() throws APIMGovernanceException {
+    public void updateLongLastingProcessingRequestToPending(int taskCleanupInterval)
+            throws APIMGovernanceException {
 
-        String sqlQuery = SQLConstants.UPDATE_GOV_REQ_STATUS_FROM_PROCESSING_TO_PENDING;
-        try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            prepStmnt.executeUpdate();
+        Map<String, Timestamp> longLastingProcessing = new HashMap<>();
+        Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
+            String checkQuery = SQLConstants.GET_PROCESSING_REQ;
+            try (PreparedStatement checkStmnt = connection.prepareStatement(checkQuery);
+                 ResultSet resultSet = checkStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    String reqId = resultSet.getString("REQ_ID");
+                    Timestamp processingTimestamp = resultSet.getTimestamp("PROCESSING_TIMESTAMP");
+
+                    long timeDifference = currentTime.getTime() - processingTimestamp.getTime();
+                    if (timeDifference > taskCleanupInterval * 60L * 1000) {
+                        longLastingProcessing.put(reqId, processingTimestamp);
+                    }
+                }
+            }
+
+            if (longLastingProcessing.isEmpty()) {
+                return;
+            }
+
+            connection.setAutoCommit(false);
+            try {
+                String sqlQuery = SQLConstants.UPDATE_GOV_REQ_STATUS_FROM_PROCESSING_TO_PENDING;
+                try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
+                    for (Map.Entry<String, Timestamp> entry : longLastingProcessing.entrySet()) {
+                        prepStmnt.setString(1, entry.getKey());
+                        prepStmnt.addBatch();
+                    }
+                    prepStmnt.executeBatch();
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_CHANGING_PROCESSING_REQ_TO_PENDING, e);
