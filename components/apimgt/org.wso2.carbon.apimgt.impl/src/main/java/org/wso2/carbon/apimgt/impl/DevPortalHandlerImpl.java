@@ -57,21 +57,21 @@ import org.wso2.carbon.base.ServerConfiguration;
 /**
  * This class used to handle newly introduced 2025 version of Developer Portal's configuration with APIM.
  */
-public class NewDevPortalHandlerImpl implements NewDevPortalHandler {
+public class DevPortalHandlerImpl implements DevPortalHandler {
 
-    private static final Log log = LogFactory.getLog(NewDevPortalHandlerImpl.class);
+    private static final Log log = LogFactory.getLog(DevPortalHandlerImpl.class);
     private static final String baseUrl = getNewPortalURL();
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Map<String, String> orgIdCache = new ConcurrentHashMap<>();
-    private static volatile NewDevPortalHandlerImpl instance;
+    private static volatile DevPortalHandlerImpl instance;
 
-    private NewDevPortalHandlerImpl() {}
+    private DevPortalHandlerImpl() {}
 
-    public static NewDevPortalHandlerImpl getInstance() {
+    public static DevPortalHandlerImpl getInstance() {
         if (instance == null) {
-            synchronized (NewDevPortalHandlerImpl.class) {
+            synchronized (DevPortalHandlerImpl.class) {
                 if (instance == null) {
-                    instance = new NewDevPortalHandlerImpl();
+                    instance = new DevPortalHandlerImpl();
                 }
             }
         }
@@ -98,12 +98,12 @@ public class NewDevPortalHandlerImpl implements NewDevPortalHandler {
     }
 
     @Override
-    public boolean isNewPortalEnabled() {
+    public boolean isPortalEnabled() {
         return Boolean.parseBoolean(getConfigProperty(APIConstants.API_STORE_NEW_PORTAL_ENABLED, "false"));
     }
 
     @Override
-    public void publish(String tenantName, ApiTypeWrapper apiTypeWrapper) {
+    public void publishAPIMetadata(String tenantName, ApiTypeWrapper apiTypeWrapper) {
         try {
             SSLConnectionSocketFactory sslsf = generateSSLSF();
             publishAPI(apiTypeWrapper,  tenantName, sslsf);
@@ -113,7 +113,7 @@ public class NewDevPortalHandlerImpl implements NewDevPortalHandler {
     }
 
     @Override
-    public void update(String tenantName, ApiTypeWrapper apiTypeWrapper) {
+    public void updateAPIMetadata(String tenantName, ApiTypeWrapper apiTypeWrapper) {
         try {
             SSLConnectionSocketFactory sslsf = generateSSLSF();
             updateAPI(apiTypeWrapper,  tenantName, sslsf);
@@ -123,7 +123,7 @@ public class NewDevPortalHandlerImpl implements NewDevPortalHandler {
     }
 
     @Override
-    public void unpublish(String tenantName, API api) {
+    public void unpublishAPIMetadata(String tenantName, API api) {
         try {
             SSLConnectionSocketFactory sslsf = generateSSLSF();
             unpublishAPI(api, tenantName, sslsf);

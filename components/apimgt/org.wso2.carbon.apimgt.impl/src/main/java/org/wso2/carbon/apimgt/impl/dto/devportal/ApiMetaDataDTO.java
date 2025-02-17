@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.impl.dto.devportal;
 
 import java.util.List;
 
+/**
+ * This class used for the API Metadata data structure which is expected by Developer Portal V2.
+ */
 public class ApiMetaDataDTO {
 
     private ApiInfo apiInfo;

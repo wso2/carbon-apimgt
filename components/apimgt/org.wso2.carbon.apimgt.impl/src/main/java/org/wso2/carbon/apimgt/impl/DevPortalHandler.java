@@ -25,13 +25,13 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 /**
  * This interface used to handle newly introduced 2025 version of Developer Portal's configuration with APIM.
  */
-public interface NewDevPortalHandler {
+public interface DevPortalHandler {
 
-    boolean isNewPortalEnabled();
+    boolean isPortalEnabled();
 
-    void publish(String tenantName, ApiTypeWrapper apiTypeWrapper) throws APIManagementException;
+    void publishAPIMetadata(String tenantName, ApiTypeWrapper apiTypeWrapper) throws APIManagementException;
 
-    void update(String tenantName, ApiTypeWrapper apiTypeWrapper) throws APIManagementException;
+    void updateAPIMetadata(String tenantName, ApiTypeWrapper apiTypeWrapper) throws APIManagementException;
 
-    void unpublish(String tenantName, API api) throws APIManagementException;
+    void unpublishAPIMetadata(String tenantName, API api) throws APIManagementException;
 }
