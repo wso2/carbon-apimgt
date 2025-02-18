@@ -498,6 +498,23 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
+    @Override
+    public DocumentationContent getMarkdownOverviewContent(String apiId, String organization)
+            throws APIManagementException {
+
+        try {
+            DocumentSearchResult result = apiPersistenceInstance
+                    .searchDocumentation(new Organization(organization), apiId, 0, 0,
+                    "other:_overview", null);
+            if (result == null || result.getDocumentationList() == null || result.getDocumentationList().isEmpty()) {
+                return null;
+            }
+            return getDocumentationContent(apiId, result.getDocumentationList().get(0).getId(), organization);
+        } catch (DocumentationPersistenceException e) {
+            throw new APIManagementException("Error while retrieving document content ", e);
+        }
+    }
+
     public GraphqlComplexityInfo getComplexityDetails(String uuid) throws APIManagementException {
 
         return apiMgtDAO.getComplexityDetails(uuid);
