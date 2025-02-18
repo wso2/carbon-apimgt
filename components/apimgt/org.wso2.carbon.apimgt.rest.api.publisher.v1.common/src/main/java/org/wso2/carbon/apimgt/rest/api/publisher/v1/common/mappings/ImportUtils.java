@@ -410,7 +410,7 @@ public class ImportUtils {
             API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
             Map<String, String> complianceResult = PublisherCommonUtils
                     .checkGovernanceComplianceSync(importedApi.getUuid(), APIMGovernableState.API_CREATE,
-                            ArtifactType.fromString(apiType), importedApi.getOrganization(), null, null);
+                            ArtifactType.API, importedApi.getOrganization(), null, null);
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                     && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
@@ -542,7 +542,7 @@ public class ImportUtils {
                         + "was updated and not deployed in any of the gateway environments.");
             }
             PublisherCommonUtils.checkGovernanceComplianceAsync(importedApi.getUuid(), APIMGovernableState.API_CREATE,
-                    ArtifactType.fromString(apiType), organization);
+                    ArtifactType.API, organization);
             return new ImportedAPIDTO(importedApi, revisionId);
         } catch (CryptoException | IOException e) {
             throw new APIManagementException(

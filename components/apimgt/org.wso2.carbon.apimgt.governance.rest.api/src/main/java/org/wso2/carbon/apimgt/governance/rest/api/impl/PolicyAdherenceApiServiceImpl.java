@@ -10,6 +10,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.PolicyAdherenceSate;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
+import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.PolicyAdherenceApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceForPolicyDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryForPolicyDTO;
@@ -78,6 +79,7 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
             throws APIMGovernanceException {
 
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String username = APIMGovernanceAPIUtil.getLoggedInUsername();
         APIMGovernancePolicy policy = new PolicyManager().getGovernancePolicyByID(policyId, organization);
 
         Map<ArtifactComplianceState, List<ArtifactInfo>> evaluatedArtifacts =
@@ -110,21 +112,25 @@ public class PolicyAdherenceApiServiceImpl implements PolicyAdherenceApiService 
             List<ArtifactInfo> artifactInfoList = entry.getValue();
 
             for (ArtifactInfo artifactInfo : artifactInfoList) {
-                ArtifactComplianceForPolicyDTO artifactComplianceForPolicyDTO = new ArtifactComplianceForPolicyDTO();
-                artifactComplianceForPolicyDTO.setId(artifactInfo.getArtifactRefId());
+                if (APIMGovernanceUtil.isArtifactVisibleToUser(artifactInfo.getArtifactRefId(),
+                        artifactInfo.getArtifactType(), username, organization)) {
+                    ArtifactComplianceForPolicyDTO artifactComplianceForPolicyDTO = new
+                            ArtifactComplianceForPolicyDTO();
+                    artifactComplianceForPolicyDTO.setId(artifactInfo.getArtifactRefId());
 
-                ArtifactType artifactType = artifactInfo.getArtifactType();
-                ArtifactInfoDTO infoDTO = new ArtifactInfoDTO();
-                infoDTO.setName(artifactInfo.getName());
-                infoDTO.setVersion(artifactInfo.getVersion());
-                infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
+                    ArtifactType artifactType = artifactInfo.getArtifactType();
+                    ArtifactInfoDTO infoDTO = new ArtifactInfoDTO();
+                    infoDTO.setName(artifactInfo.getName());
+                    infoDTO.setVersion(artifactInfo.getVersion());
+                    infoDTO.setType(ArtifactInfoDTO.TypeEnum.valueOf(String.valueOf(artifactType)));
 
-                artifactComplianceForPolicyDTO.setInfo(infoDTO);
+                    artifactComplianceForPolicyDTO.setInfo(infoDTO);
 
-                artifactComplianceForPolicyDTO.setStatus(ArtifactComplianceForPolicyDTO
-                        .StatusEnum.valueOf(String.valueOf(complianceState)));
+                    artifactComplianceForPolicyDTO.setStatus(ArtifactComplianceForPolicyDTO
+                            .StatusEnum.valueOf(String.valueOf(complianceState)));
 
-                artifactComplianceForPolicyDTOList.add(artifactComplianceForPolicyDTO);
+                    artifactComplianceForPolicyDTOList.add(artifactComplianceForPolicyDTO);
+                }
             }
         }
 

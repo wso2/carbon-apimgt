@@ -391,7 +391,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return policy;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_BY_NAME,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_POLICY_BY_NAME,
                     e, policyName, organization);
         }
     }
@@ -431,7 +431,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return policy;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICY_BY_ID,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_POLICY_BY_ID,
                     e, policyID);
         }
     }
@@ -472,7 +472,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             policyListObj.setGovernancePolicyList(policyList);
             return policyListObj;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_POLICIES,
                     e, organization);
         }
     }
@@ -511,7 +511,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
                         rulesetContent.setContent(content);
                     } catch (IOException e) {
                         throw new APIMGovernanceException(APIMGovExceptionCodes
-                                .ERROR_WHILE_RETRIEVING_RULESET_CONTENT, e, ruleset.getId());
+                                .ERROR_WHILE_GETTING_RULESET_CONTENT, e, ruleset.getId());
                     }
                     rulesetContent.setFileName(rs.getString("FILE_NAME"));
                     ruleset.setRulesetContent(rulesetContent);
@@ -522,7 +522,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             return rulesetList;
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.
-                    ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY, e, policyId);
+                    ERROR_WHILE_GETTING_RULESETS_ASSOCIATED_WITH_POLICY, e, policyId);
         }
     }
 
@@ -558,7 +558,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             return rulesetList;
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes
-                    .ERROR_WHILE_RETRIEVING_RULESETS_ASSOCIATED_WITH_POLICY, e, policyId);
+                    .ERROR_WHILE_GETTING_RULESETS_ASSOCIATED_WITH_POLICY, e, policyId);
         }
     }
 
@@ -586,7 +586,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return policyIds;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_POLICIES, e,
                     organization);
         }
 
@@ -616,7 +616,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return policyIds;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_POLICIES, e,
                     organization);
         }
     }
@@ -641,7 +641,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return policyIds;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_POLICIES, e,
                     organization);
         }
     }
@@ -670,7 +670,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
             }
             return policyIds;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_POLICIES, e,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_POLICIES, e,
                     organization);
         }
     }
@@ -687,7 +687,7 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             return getActionsByPolicyId(connection, policyId);
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_ACTIONS_BY_POLICY_ID,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_ACTIONS_BY_POLICY_ID,
                     e, policyId);
         }
     }

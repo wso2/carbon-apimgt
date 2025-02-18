@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.impl.internal;
 
-import org.wso2.carbon.apimgt.governance.impl.config.APIMGovernanceConfigService;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineService;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 
 /**
  * This class represents the Governance Service Reference Holder
@@ -27,7 +27,7 @@ import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineService;
 public class ServiceReferenceHolder {
 
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
-    private APIMGovernanceConfigService apimGovernanceConfigService;
+    private APIManagerConfigurationService apiMgtConfigService;
     private ValidationEngineService validationEngineService;
 
     public static ServiceReferenceHolder getInstance() {
@@ -35,14 +35,14 @@ public class ServiceReferenceHolder {
         return instance;
     }
 
-    public APIMGovernanceConfigService getGovernanceConfigurationService() {
+    public APIManagerConfigurationService getAPIMConfigurationService() {
 
-        return apimGovernanceConfigService;
+        return apiMgtConfigService;
     }
 
-    public void setGovernanceConfigurationService(APIMGovernanceConfigService amConfigurationService) {
+    public void setAPIMConfigurationService(APIManagerConfigurationService apiMgtConfigService) {
 
-        this.apimGovernanceConfigService = amConfigurationService;
+        this.apiMgtConfigService = apiMgtConfigService;
     }
 
     public ValidationEngineService getValidationEngineService() {

@@ -115,7 +115,8 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
                     name);
             throw new APIMGovernanceException(error, e, APIMGovExceptionCodes.INTERNAL_SERVER_ERROR);
         } catch (IOException e) {
-            throw new APIMGovernanceException("Error while converting ruleset content stream", e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes
+                    .ERROR_WHILE_COVERTING_RULESET_CONTENT_STREAM_TO_BYTE_ARRAY, e);
         } finally {
             IOUtils.closeQuietly(rulesetContentInputStream);
         }
@@ -176,7 +177,8 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             return Response.status(Response.Status.OK).entity(RulesetMappingUtil.
                     fromRulesetInfoToRulesetInfoDTO(updatedRuleset)).build();
         } catch (IOException e) {
-            throw new APIMGovernanceException("Error while converting ruleset content stream", e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes
+                    .ERROR_WHILE_COVERTING_RULESET_CONTENT_STREAM_TO_BYTE_ARRAY, e);
         } finally {
             IOUtils.closeQuietly(rulesetContentInputStream);
         }

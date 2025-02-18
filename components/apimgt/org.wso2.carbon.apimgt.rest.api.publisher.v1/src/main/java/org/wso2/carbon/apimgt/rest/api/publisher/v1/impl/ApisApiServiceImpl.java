@@ -953,7 +953,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             validateAPIOperationsPerLC(originalAPI.getStatus());
             Map<String, String> complianceResult = PublisherCommonUtils
                     .checkGovernanceComplianceSync(originalAPI.getUuid(), APIMGovernableState.API_UPDATE,
-                            ArtifactType.fromString(originalAPI.getType()), originalAPI.getOrganization(),
+                            ArtifactType.API, originalAPI.getOrganization(),
                             null, null);
             if (!complianceResult.isEmpty()
                     && complianceResult.get(GOVERNANCE_COMPLIANCE_KEY) != null

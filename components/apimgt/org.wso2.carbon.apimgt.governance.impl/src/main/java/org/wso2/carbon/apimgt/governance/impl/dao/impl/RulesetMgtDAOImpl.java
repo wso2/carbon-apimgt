@@ -393,7 +393,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESETS,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_RULESETS,
                     e, organization);
         }
         rulesetList.setCount(rulesetInfoList.size());
@@ -422,7 +422,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_NAME,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_RULESET_BY_NAME,
                     e, organization);
         }
         return null;
@@ -449,7 +449,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_RULESET_BY_ID,
                     e);
         }
         return null;
@@ -542,7 +542,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                         byte[] content = IOUtils.toByteArray(contentStream);
                         rulesetContentObj.setContent(content);
                     } catch (IOException e) {
-                        throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_CONTENT,
+                        throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_RULESET_CONTENT,
                                 e, rulesetId);
                     }
                     return rulesetContentObj;
@@ -550,7 +550,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 return null;
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULESET_BY_ID,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_RULESET_BY_ID,
                     e);
         }
     }
@@ -577,7 +577,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
                 }
             }
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_ASSOCIATED_POLICIES,
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_ASSOCIATED_POLICIES,
                     e, rulesetId);
         }
         return policyIds;
@@ -610,7 +610,7 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
             }
             return rules;
         } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_RETRIEVING_RULES_BY_RULESET_ID
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_RULES_BY_RULESET_ID
                     , e, rulesetId);
         }
     }

@@ -197,8 +197,7 @@ public class SpectralValidationEngine implements ValidationEngine {
             }
             return violations;
         } catch (JsonProcessingException e) {
-            log.error("Error while parsing validation result JSON string", e);
-            throw new APIMGovernanceException("Error while parsing validation result JSON string", e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_READING_SPECTRAL_RESULTS, e);
         }
 
     }

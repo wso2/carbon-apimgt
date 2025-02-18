@@ -21,9 +21,9 @@ package org.wso2.carbon.apimgt.governance.impl.listener;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
-import org.wso2.carbon.apimgt.governance.impl.config.APIMGovernanceConfig;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
@@ -37,10 +37,10 @@ public class ServerStartupListener implements ServerStartupObserver {
     public void completedServerStartup() {
         String migrationEnabled = System.getProperty(APIMGovernanceConstants.MIGRATE);
         if (migrationEnabled == null) {
-            APIMGovernanceConfig governanceConfiguration =
-                    ServiceReferenceHolder.getInstance().getGovernanceConfigurationService()
-                            .getGovernanceConfig();
-            if (governanceConfiguration != null) {
+            APIManagerConfiguration apimConfigService =
+                    ServiceReferenceHolder.getInstance().getAPIMConfigurationService()
+                            .getAPIManagerConfiguration();
+            if (apimConfigService != null) {
                 APIMGovernanceUtil.loadDefaultRulesets(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 APIMGovernanceUtil.loadDefaultPolicies(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             }
