@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.dto.devportal;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class used for the API Metadata data structure which is expected by Developer Portal V2.
@@ -26,7 +27,7 @@ import java.util.List;
 public class ApiMetaDataDTO {
 
     private ApiInfo apiInfo;
-    private List<String> subscriptionPolicies;
+    private List<Map<String, String>> subscriptionPolicies;
     private EndPoints endPoints;
 
     public static class ApiInfo {
@@ -200,11 +201,11 @@ public class ApiMetaDataDTO {
         this.apiInfo = apiInfo;
     }
 
-    public List<String> getSubscriptionPolicies() {
+    public List<Map<String, String>> getSubscriptionPolicies() {
         return subscriptionPolicies;
     }
 
-    public void setSubscriptionPolicies(List<String> subscriptionPolicies) {
+    public void setSubscriptionPolicies(List<Map<String, String>> subscriptionPolicies) {
         this.subscriptionPolicies = subscriptionPolicies;
     }
 

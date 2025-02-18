@@ -49,6 +49,7 @@ import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.security.GeneralSecurityException;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -67,7 +68,7 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
     private static final String baseUrl = getNewPortalURL();
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Map<String, String> orgIdCache = new ConcurrentHashMap<>();
-    private static CloseableHttpClient httpClient;
+    private static SSLConnectionSocketFactory sslsf;
     private static volatile DevPortalHandlerImpl instance;
 
     private DevPortalHandlerImpl() {}
@@ -332,14 +333,16 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         }
     }
 
-    private static List<String> convertToSubscriptionPolicies(Object[] tiers) {
-        List<String> subscriptionPolicies = new ArrayList<>();
+    private static List<Map<String, String>> convertToSubscriptionPolicies(Object[] tiers) {
+        List<Map<String, String>> subscriptionPolicies = new ArrayList<>();
         for (Object tier : tiers) {
             if (tier instanceof Tier) {
                 Tier tierObject = (Tier) tier;
                 String name = tierObject.getName();
                 if (name != null) {
-                    subscriptionPolicies.add(name); // Add tier name directly
+                    Map<String, String> policy = new HashMap<>();
+                    policy.put("policyName", name);
+                    subscriptionPolicies.add(policy);
                 }
             }
         }
@@ -366,11 +369,10 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
     // HTTPS Request Related Methods
 
     private static synchronized CloseableHttpClient getHttpClient() throws APIManagementException {
-        if (httpClient == null) {
-            SSLConnectionSocketFactory sslsf = generateSSLSF();
-            httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+        if (sslsf == null) {
+            sslsf = generateSSLSF();
         }
-        return httpClient;
+        return HttpClients.custom().setSSLSocketFactory(sslsf).build();
     }
 
     private static HttpResponseData orgGetAction(String orgRef)
