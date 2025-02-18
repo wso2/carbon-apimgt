@@ -675,7 +675,7 @@ public interface APIAdmin  {
      * @param organization  The organization name
      * @param llmProviderId The ID of the LLM provider
      * @return list of models registered under the LLM provider
-     * @throws APIManagementException
+     * @throws APIManagementException If an error occurs while retrieving the models
      */
     List<String> getLLMProviderModels(String organization, String llmProviderId) throws APIManagementException;
 

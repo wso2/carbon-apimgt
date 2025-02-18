@@ -24,8 +24,8 @@ package org.wso2.carbon.apimgt.api.dto;
  */
 public class EndpointDTO {
 
-    private String endpointUuid;
-    private String endpointName;
+    private String id;
+    private String name;
     private String deploymentStage;
     private EndpointConfigDTO endpointConfig;
 
@@ -34,19 +34,19 @@ public class EndpointDTO {
      *
      * @return The UUID of the endpoint.
      */
-    public String getEndpointUuid() {
+    public String getId() {
 
-        return endpointUuid;
+        return id;
     }
 
     /**
      * Sets the unique identifier (UUID) of the endpoint.
      *
-     * @param endpointUuid The UUID to set.
+     * @param id The UUID to set.
      */
-    public void setEndpointUuid(String endpointUuid) {
+    public void setId(String id) {
 
-        this.endpointUuid = endpointUuid;
+        this.id = id;
     }
 
     /**
@@ -54,19 +54,19 @@ public class EndpointDTO {
      *
      * @return The name of the endpoint.
      */
-    public String getEndpointName() {
+    public String getName() {
 
-        return endpointName;
+        return name;
     }
 
     /**
      * Sets the name of the endpoint.
      *
-     * @param endpointName The name to set for the endpoint.
+     * @param name The name to set for the endpoint.
      */
-    public void setEndpointName(String endpointName) {
+    public void setName(String name) {
 
-        this.endpointName = endpointName;
+        this.name = name;
     }
 
     /**
