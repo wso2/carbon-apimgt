@@ -9,6 +9,8 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.DevPortalHandler;
+import org.wso2.carbon.apimgt.impl.DevPortalHandlerImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -72,6 +74,24 @@ public class LifeCycleUtils {
         //Sending Notifications to existing subscribers
         if (APIConstants.PUBLISHED.equals(targetStatus)) {
             sendEmailNotification(apiTypeWrapper, orgId);
+        }
+
+        DevPortalHandler devPortalHandler = DevPortalHandlerImpl.getInstance();
+        // Dev Portal V2 Publication
+        if (Arrays.asList(APIConstants.PUBLISH, APIConstants.REPUBLISH).contains(action)
+                && devPortalHandler.isPortalEnabled()) {
+            API api = apiTypeWrapper.getApi();
+            String refId = devPortalHandler.publishAPIMetadata(orgId, api);
+            // TODO: Put refId method
+        }
+
+        // Next Gen Dev Portal Un-Publication
+        if (Arrays.asList(APIConstants.DEPRECATE, APIConstants.BLOCK, APIConstants.DEMOTE_TO_CREATED).contains(action)
+                && devPortalHandler.isPortalEnabled()) {
+            // TODO: Get refId Method
+            String refId = "null";
+            devPortalHandler.unpublishAPIMetadata(orgId, apiTypeWrapper.getApi(), refId);
+            // TODO: Remove refId
         }
 
         // Change the lifecycle state in the database

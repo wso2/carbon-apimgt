@@ -1057,6 +1057,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             recommendationThread.start();
         }
 
+        // Update API in new Dev Portal
+        DevPortalHandler devPortalHandler = DevPortalHandlerImpl.getInstance();
+        if (devPortalHandler.isPortalEnabled() && APIConstants.PUBLISHED.equals(api.getStatus())) {
+            // TODO: Get refId
+            String refId = null;
+            devPortalHandler.updateAPIMetadata(organization, api, refId);
+        }
+
         return api;
     }
 
@@ -2658,6 +2666,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     for (APIStore store : apiStoreSet) {
                         wso2APIPublisher.deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
                     }
+                }
+
+                // Delete from new Developer Portal
+                DevPortalHandler devPortalHandler = DevPortalHandlerImpl.getInstance();
+                if (devPortalHandler.isPortalEnabled()) {
+                    // TODO: Get refId Method
+                    String refId = "null";
+                    devPortalHandler.unpublishAPIMetadata(organization, api, refId);
+                    // TODO: Remove refId
                 }
             } catch (APIManagementException e) {
                 log.error("Error while executing API delete operation on external API stores for API "
