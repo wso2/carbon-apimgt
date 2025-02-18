@@ -100,6 +100,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -270,6 +271,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 newOrgList.add(APIConstants.VISIBLE_ORG_NONE);
             }
             apiToReturn.setVisibleOrganizations(newOrgList);
+        } else {
+            // Default visibility 'none'
+            apiToReturn.setVisibleOrganizations(Collections.singletonList(APIConstants.VISIBLE_ORG_NONE)); 
         }
 
         return Response.ok().entity(apiToReturn).build();
