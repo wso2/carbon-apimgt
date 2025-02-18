@@ -31,8 +31,16 @@ public class LLMProviderMetadata {
     @JsonProperty("attributeIdentifier")
     private String attributeIdentifier;
 
+    @JsonProperty("required")
+    private boolean required = true;
+
     public LLMProviderMetadata() {}
 
+    /**
+     * @deprecated This constructor is deprecated. Use {@link #LLMProviderMetadata(String, String, String, boolean)}
+     *         instead.
+     */
+    @Deprecated
     public LLMProviderMetadata(@JsonProperty("attributeName") String attributeName,
                                @JsonProperty("inputSource") String inputSource,
                                @JsonProperty("attributeIdentifier") String attributeIdentifier) {
@@ -40,6 +48,16 @@ public class LLMProviderMetadata {
         this.attributeName = attributeName;
         this.inputSource = inputSource;
         this.attributeIdentifier = attributeIdentifier;
+    }
+
+    public LLMProviderMetadata(@JsonProperty("attributeName") String attributeName,
+            @JsonProperty("inputSource") String inputSource,
+            @JsonProperty("attributeIdentifier") String attributeIdentifier,
+            @JsonProperty("required") boolean required) {
+        this.attributeName = attributeName;
+        this.inputSource = inputSource;
+        this.attributeIdentifier = attributeIdentifier;
+        this.required = required;
     }
 
     public String getAttributeName() {
@@ -70,5 +88,13 @@ public class LLMProviderMetadata {
     public void setAttributeIdentifier(String attributeIdentifier) {
 
         this.attributeIdentifier = attributeIdentifier;
+    }
+
+    public boolean isRequired() {
+        return required;
+    }
+
+    public void setRequired(boolean required) {
+        this.required = required;
     }
 }
