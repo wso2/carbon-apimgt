@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationUsages;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
@@ -69,7 +70,8 @@ import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
+import org.wso2.carbon.apimgt.impl.deployer.GatewayConfigurationService;
+import org.wso2.carbon.apimgt.impl.deployer.GatewayConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
@@ -117,8 +119,6 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.xml.XMLConstants;
@@ -199,7 +199,14 @@ public class APIAdminImpl implements APIAdmin {
         validateForUniqueVhostNames(environment);
         Environment environmentToStore =  new Environment(environment);
         encryptGatewayConfigurationValues(null, environmentToStore);
-        return apiMgtDAO.addEnvironment(tenantDomain, environment);
+        apiMgtDAO.addEnvironment(tenantDomain, environment);
+
+        if (environment.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+            GatewayConfigurationService gatewayConfigurationService = new GatewayConfigurationServiceImpl();
+            gatewayConfigurationService.addGatewayConfiguration(tenantDomain, environment.getName(),
+                    environment.getGatewayType(), environment);
+        }
+        return environment;
     }
 
     @Override
@@ -213,6 +220,11 @@ public class APIAdminImpl implements APIAdmin {
                     ExceptionCodes.from(ExceptionCodes.READONLY_GATEWAY_ENVIRONMENT, String.format("UUID '%s'", uuid)));
         }
         apiMgtDAO.deleteEnvironment(uuid);
+
+        if (existingEnv.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+            GatewayConfigurationService gatewayConfigurationService = new GatewayConfigurationServiceImpl();
+            gatewayConfigurationService.removeGatewayConfiguration(tenantDomain, existingEnv.getName());
+        }
     }
 
     @Override
@@ -250,6 +262,13 @@ public class APIAdminImpl implements APIAdmin {
         // Perform a separate task of updating gateway label names
         updateGatewayLabelNameForGatewayPolicies(existingEnv.getDisplayName(), updatedEnvironment.getDisplayName(),
                 tenantDomain);
+
+        if (environment.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+            GatewayConfigurationService gatewayConfigurationService = new GatewayConfigurationServiceImpl();
+            gatewayConfigurationService.updateGatewayConfiguration(tenantDomain, environment.getName(),
+                    environment.getType(), environment);
+        }
+
         return updatedEnvironment;
     }
 
@@ -811,11 +830,11 @@ public class APIAdminImpl implements APIAdmin {
                                                    Environment updatedGatewayConfigurationDto)
             throws APIManagementException {
 
-        ExternalGatewayDeployer gatewayDeployer = ServiceReferenceHolder.getInstance()
-                .getExternalGatewayDeployer(updatedGatewayConfigurationDto.getGatewayType());
-        if (gatewayDeployer != null) {
+        GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
+                .getExternalGatewayConnectorConfiguration(updatedGatewayConfigurationDto.getGatewayType());
+        if (gatewayConfiguration != null) {
             Map<String, String> additionalProperties = updatedGatewayConfigurationDto.getAdditionalProperties();
-            for (ConfigurationDto configurationDto : gatewayDeployer.getConnectionConfigurations()) {
+            for (ConfigurationDto configurationDto : gatewayConfiguration.getConnectionConfigurations()) {
                 if (configurationDto.isMask()) {
                     String value = additionalProperties.get(configurationDto.getName());
                     if (APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD.equals(value)) {
@@ -1519,11 +1538,11 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     private void maskValues(Environment environment) {
-        ExternalGatewayDeployer gatewayDeployer = ServiceReferenceHolder.getInstance()
-                .getExternalGatewayDeployer(environment.getGatewayType());
+        GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
+                .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
 
         Map<String, String> additionalProperties = environment.getAdditionalProperties();
-        List<ConfigurationDto> connectionConfigurations = gatewayDeployer.getConnectionConfigurations();
+        List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
         for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
             if (connectionConfiguration.isMask()) {
                 additionalProperties.replace(connectionConfiguration.getName(),

@@ -238,6 +238,7 @@
                             org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;version="${carbon.apimgt.version}",
                             org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;version="${carbon.apimgt.version}"
                         </Export-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

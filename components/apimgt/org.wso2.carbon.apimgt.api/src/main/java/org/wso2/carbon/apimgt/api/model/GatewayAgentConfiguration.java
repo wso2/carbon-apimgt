@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
+
 import java.util.List;
 
 /**
@@ -51,12 +53,12 @@ public interface GatewayAgentConfiguration {
      *
      * @return String Gateway Feature Catalog
      */
-    GatewayFeatureCatalog getGatewayFeatureCatalog();
+    GatewayPortalConfiguration getGatewayFeatureCatalog() throws APIManagementException;
 
     /**
      * This method returns the default hostname template of the external gateway
      *
      * @return String default hostname template
      */
-    public String getDefaultHostnameTemplate();
+    String getDefaultHostnameTemplate();
 }
