@@ -22,7 +22,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.client.methods.*;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
@@ -63,6 +67,7 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
     private static final String baseUrl = getNewPortalURL();
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Map<String, String> orgIdCache = new ConcurrentHashMap<>();
+    private static CloseableHttpClient httpClient;
     private static volatile DevPortalHandlerImpl instance;
 
     private DevPortalHandlerImpl() {}
@@ -105,8 +110,24 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
     @Override
     public void publishAPIMetadata(String tenantName, ApiTypeWrapper apiTypeWrapper) {
         try {
-            SSLConnectionSocketFactory sslsf = generateSSLSF();
-            publishAPI(apiTypeWrapper,  tenantName, sslsf);
+            String orgId = getOrgId(tenantName);
+            if (orgId != null) {
+                API api = apiTypeWrapper.getApi();
+                String apiDefinition = getDefinitionForDevPortal(api, tenantName);
+                String apiMetaData = getApiMetaData(apiTypeWrapper);
+
+                HttpResponseData responseData = apiPostAction(orgId, apiMetaData, apiDefinition);
+
+                if (responseData.getStatusCode() == 201) {
+                    log.info("API " + apiTypeWrapper.getName() + " successfully published to " + baseUrl);
+                } else {
+                    log.error("Failed to publish API " + apiTypeWrapper.getName() + " to " + baseUrl + ". " +
+                            "Status code: " + responseData.getStatusCode());
+                }
+            } else {
+                log.error("Unable to find an organization in " + baseUrl + " that matches the tenant." +
+                        "Hence failed to publish in " + baseUrl);
+            }
         } catch (APIManagementException e) {
             log.error("Error while publishing API to " + baseUrl + ". Error: " + e.getMessage());
         }
@@ -115,8 +136,27 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
     @Override
     public void updateAPIMetadata(String tenantName, ApiTypeWrapper apiTypeWrapper) {
         try {
-            SSLConnectionSocketFactory sslsf = generateSSLSF();
-            updateAPI(apiTypeWrapper,  tenantName, sslsf);
+            API api = apiTypeWrapper.getApi();
+            String apiDefinition = getDefinitionForDevPortal(api, tenantName);
+            String apiMetaData = getApiMetaData(apiTypeWrapper);
+            String orgId = getOrgId(tenantName);
+            if (orgId != null) {
+                String apiId = getApiId(orgId, apiTypeWrapper.getName(), api.getId().getVersion());
+                if (apiId != null) {
+                    HttpResponseData apiPutResponseData = apiPutAction(orgId, apiId, apiDefinition, apiMetaData);
+                    if (apiPutResponseData.getStatusCode() == 200) {
+                        log.info("API " + apiTypeWrapper.getName() + " successfully updated in " + baseUrl);
+                    } else {
+                        log.error("Failed to update API " + apiTypeWrapper.getName() + " in " + baseUrl +
+                                ". Status code: " + apiPutResponseData.getStatusCode());
+                    }
+                } else {
+                    log.error("API is not available in " + baseUrl + ". Hence failed to update in " + baseUrl);
+                }
+            } else {
+                log.error("Unable to find an organization in " + baseUrl + " that matches the tenant." +
+                        "Hence failed to update in " + baseUrl);
+            }
         } catch (APIManagementException e) {
             log.error("Error while updating API to " + baseUrl + ". Error: " + e.getMessage());
         }
@@ -125,81 +165,27 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
     @Override
     public void unpublishAPIMetadata(String tenantName, API api) {
         try {
-            SSLConnectionSocketFactory sslsf = generateSSLSF();
-            unpublishAPI(api, tenantName, sslsf);
+            String orgId = getOrgId(tenantName);
+            if (orgId != null) {
+                String apiId = getApiId(orgId, api.getId().getApiName(), api.getId().getVersion());
+                if (apiId != null) {
+                    HttpResponseData responseData = apiDeleteAction(orgId, apiId);
+                    if (responseData.getStatusCode() == 200) {
+                        log.info("API " + api.getId().getApiName() + " successfully unpublished from " + baseUrl);
+                    } else if (responseData.getStatusCode() == 404) {
+                        log.warn("API " + api.getId().getApiName() + " is not available in "
+                                + baseUrl + " .Hence API cannot get unpublished from " + baseUrl);
+                    } else {
+                        log.error("Failed to delete API " + api.getId().getApiName() + " from " + baseUrl +
+                                ". Status code: " + responseData.getStatusCode());
+                    }
+                }
+            } else {
+                log.error("Unable to find an organization in " + baseUrl + " that matches the tenant." +
+                        "Hence fails to un-publish from " + baseUrl);
+            }
         } catch (APIManagementException e) {
             log.error("Error while un-publishing API from " + baseUrl + ". Error: " + e.getMessage());
-        }
-    }
-
-    private static void publishAPI(ApiTypeWrapper apiTypeWrapper, String tenantName,
-                                   SSLConnectionSocketFactory sslsf)
-            throws APIManagementException {
-        String orgId = getOrgId(tenantName, sslsf);
-        if (orgId != null) {
-            API api = apiTypeWrapper.getApi();
-            String apiDefinition = getDefinitionForDevPortal(api, tenantName);
-            String apiMetaData = getApiMetaData(apiTypeWrapper);
-
-            HttpResponseData responseData = apiPostAction(orgId, apiMetaData, apiDefinition, sslsf);
-
-            if (responseData.getStatusCode() == 201) {
-                log.info("API " + apiTypeWrapper.getName() + " successfully published to " + baseUrl);
-            } else {
-                log.error("Failed to publish API " + apiTypeWrapper.getName() + " to " + baseUrl + ". " +
-                        "Status code: " + responseData.getStatusCode());
-            }
-        } else {
-            log.error("Unable to find an organization in " + baseUrl + " that matches the tenant." +
-                    "Hence failed to publish in " + baseUrl);
-        }
-    }
-
-    private static void updateAPI(ApiTypeWrapper apiTypeWrapper, String tenantName,
-                                  SSLConnectionSocketFactory sslsf) throws APIManagementException {
-        API api = apiTypeWrapper.getApi();
-        String apiDefinition = getDefinitionForDevPortal(api, tenantName);
-        String apiMetaData = getApiMetaData(apiTypeWrapper);
-        String orgId = getOrgId(tenantName, sslsf);
-        if (orgId != null) {
-            String apiId = getApiId(orgId, apiTypeWrapper.getName(), api.getId().getVersion(), sslsf);
-            if (apiId != null) {
-                HttpResponseData apiPutResponseData = apiPutAction(orgId, apiId, apiDefinition, apiMetaData, sslsf);
-                if (apiPutResponseData.getStatusCode() == 200) {
-                    log.info("API " + apiTypeWrapper.getName() + " successfully updated in " + baseUrl);
-                } else {
-                    log.error("Failed to update API " + apiTypeWrapper.getName() + " in " + baseUrl +
-                            ". Status code: " + apiPutResponseData.getStatusCode());
-                }
-            } else {
-                log.error("API is not available in " + baseUrl + ". Hence failed to update in " + baseUrl);
-            }
-        } else {
-            log.error("Unable to find an organization in " + baseUrl + " that matches the tenant." +
-                    "Hence failed to update in " + baseUrl);
-        }
-    }
-
-    private static void unpublishAPI(API api, String tenantName,
-                                   SSLConnectionSocketFactory sslsf) throws APIManagementException {
-        String orgId = getOrgId(tenantName, sslsf);
-        if (orgId != null) {
-            String apiId = getApiId(orgId, api.getId().getApiName(), api.getId().getVersion(), sslsf);
-            if (apiId != null) {
-                HttpResponseData responseData = apiDeleteAction(orgId, apiId, sslsf);
-                if (responseData.getStatusCode() == 200) {
-                    log.info("API " + api.getId().getApiName() + " successfully unpublished from " + baseUrl);
-                } else if (responseData.getStatusCode() == 404) {
-                    log.warn("API " + api.getId().getApiName() + " is not available in "
-                            + baseUrl + " .Hence API cannot get unpublished from " + baseUrl);
-                } else {
-                    log.error("Failed to delete API " + api.getId().getApiName() + " from " + baseUrl +
-                            ". Status code: " + responseData.getStatusCode());
-                }
-            }
-        } else {
-            log.error("Unable to find an organization in " + baseUrl + " that matches the tenant." +
-                    "Hence fails to un-publish from " + baseUrl);
         }
     }
 
@@ -216,13 +202,13 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         }
     }
 
-    private static String getOrgId(String tenantName, SSLConnectionSocketFactory sslsf)
+    private static String getOrgId(String tenantName)
             throws APIManagementException {
         if (orgIdCache.containsKey(tenantName)) {
             // OrgID cache hit
             return orgIdCache.get(tenantName);
         }
-        HttpResponseData responseData = orgGetAction(tenantName, sslsf);
+        HttpResponseData responseData = orgGetAction(tenantName);
         String orgId;
         try {
             if (responseData.getStatusCode() == 200) {
@@ -241,9 +227,9 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         }
     }
 
-    private static String getApiId(String orgId, String apiName, String apiVersion, SSLConnectionSocketFactory sslsf)
+    private static String getApiId(String orgId, String apiName, String apiVersion)
             throws APIManagementException {
-        HttpResponseData responseData = apiGetAction(orgId, apiName, apiVersion, sslsf);
+        HttpResponseData responseData = apiGetAction(orgId, apiName, apiVersion);
 
         if (responseData.getStatusCode() == 200) {
             try {
@@ -379,10 +365,18 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
 
     // HTTPS Request Related Methods
 
-    private static HttpResponseData orgGetAction(String orgRef, SSLConnectionSocketFactory sslsf)
+    private static synchronized CloseableHttpClient getHttpClient() throws APIManagementException {
+        if (httpClient == null) {
+            SSLConnectionSocketFactory sslsf = generateSSLSF();
+            httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+        }
+        return httpClient;
+    }
+
+    private static HttpResponseData orgGetAction(String orgRef)
             throws APIManagementException {
         String apiUrl = baseUrl + DevPortalProcessingConstants.ORG_URI + "/" + orgRef;
-        try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build()) {
+        try (CloseableHttpClient httpClient = getHttpClient()) {
             URIBuilder uriBuilder = new URIBuilder(apiUrl);
             HttpGet httpGet = new HttpGet(uriBuilder.build());
 
@@ -396,11 +390,10 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         }
     }
 
-    private static HttpResponseData apiGetAction(String orgId, String name, String version,
-                                                 SSLConnectionSocketFactory sslsf)
+    private static HttpResponseData apiGetAction(String orgId, String name, String version)
             throws APIManagementException {
         String apiUrl = baseUrl + DevPortalProcessingConstants.API_URI;
-        try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build()) {
+        try (CloseableHttpClient httpClient = getHttpClient()) {
             URIBuilder uriBuilder = new URIBuilder(apiUrl)
                     .addParameter("name", name)
                     .addParameter("version", version);
@@ -417,11 +410,11 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         }
     }
 
-    private static HttpResponseData apiDeleteAction(String orgId, String apiId, SSLConnectionSocketFactory sslsf)
+    private static HttpResponseData apiDeleteAction(String orgId, String apiId)
             throws APIManagementException {
         String apiUrl = baseUrl + DevPortalProcessingConstants.API_URI + "/" + apiId;
 
-        try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build()) {
+        try (CloseableHttpClient httpClient = getHttpClient()) {
             HttpDelete httpDelete = new HttpDelete(apiUrl);
             httpDelete.setHeader("organization", orgId);
 
@@ -436,11 +429,10 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
     }
 
 
-    private static HttpResponseData apiPostAction(String orgId, String apiMetadata, String apiDefinition,
-                                                  SSLConnectionSocketFactory sslsf)
+    private static HttpResponseData apiPostAction(String orgId, String apiMetadata, String apiDefinition)
             throws APIManagementException {
         String apiUrl = baseUrl + DevPortalProcessingConstants.API_URI;
-        try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build()) {
+        try (CloseableHttpClient httpClient = getHttpClient()) {
             HttpPost httpPost = new HttpPost(apiUrl);
             httpPost.setHeader("organization", orgId);
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
@@ -459,10 +451,10 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
     }
 
     private static HttpResponseData apiPutAction(String orgId, String apiId, String apiDefinition,
-                                                 String apiMetadata, SSLConnectionSocketFactory sslsf)
+                                                 String apiMetadata)
             throws APIManagementException {
         String apiUrl = baseUrl + DevPortalProcessingConstants.API_URI + "/" + apiId;
-        try (CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build()) {
+        try (CloseableHttpClient httpClient = getHttpClient()) {
             HttpPut httpPut = new HttpPut(apiUrl);
             httpPut.setHeader("organization", orgId);
             MultipartEntityBuilder builder = MultipartEntityBuilder.create();
