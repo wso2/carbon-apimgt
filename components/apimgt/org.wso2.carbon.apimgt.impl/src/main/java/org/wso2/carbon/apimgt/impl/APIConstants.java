@@ -3080,6 +3080,7 @@ public final class APIConstants {
 
     public static final String USER_CTX_PROPERTY_ISADMIN = "isAdmin";
     public static final String USER_CTX_PROPERTY_SKIP_ROLES = "skipRoles";
+    public static final String USER_CTX_PROPERTY_ORGS_AVAILABLE = "organizationsAvailable";
 
     // Constants related to Service Catalog
     public static final String METADATA_FILE_NAME = "metadata";

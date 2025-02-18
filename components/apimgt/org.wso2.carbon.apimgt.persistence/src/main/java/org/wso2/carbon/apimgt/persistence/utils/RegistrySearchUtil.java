@@ -523,18 +523,21 @@ public class RegistrySearchUtil {
         return criteria;
     }
 
-    private static String getOrganizationVisibilityWrappedQuery(String query, UserContext context) {
+    private static String getOrganizationVisibilityWrappedQuery(String query, UserContext context, String userTenantDomain) {
         if (PersistenceUtil.isAdminUser(context)) {
             log.debug("Admin user. no modifications to the query");
             return query;
         }
+        String criteria;
+        String orgId = context.getOrganization().getId();
 
-        String orgName = context.getOrganization().getName();
-        if (orgName != null && orgName.contains(" ")) {
-            orgName = orgName.replace(" ", "+");
+        if (userTenantDomain.equals(context.getOrganization().getName())) {
+            criteria = VISIBLE_ORGANIZATIONS + "=" + "(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR " + orgId + " OR "
+                    + userTenantDomain + ")";
+        } else {
+            criteria = VISIBLE_ORGANIZATIONS + "=" + "(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR " + orgId + ")";
         }
-
-        String criteria = VISIBLE_ORGANIZATIONS + "=" + "(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR " + orgName + ")";
+        
         if (query != null && !query.trim().isEmpty()) {
             criteria = criteria + "&" + query;
         }
@@ -697,7 +700,7 @@ public class RegistrySearchUtil {
 
     
     public static Map<String, String> getDevPortalSearchAttributes(String searchQuery, UserContext ctx,
-           boolean isCrossTenant, boolean displayMultipleStatus) throws APIPersistenceException {
+           boolean isCrossTenant, boolean displayMultipleStatus, String userTenantDomain) throws APIPersistenceException {
         String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
 
         if (!(StringUtils.containsIgnoreCase(modifiedQuery, APIConstants.API_STATUS))) {
@@ -715,7 +718,9 @@ public class RegistrySearchUtil {
             modifiedQuery = StringUtils.replaceIgnoreCase(modifiedQuery, searchString,
                     APIConstants.LCSTATE_SEARCH_TYPE_KEY);
         }
-        modifiedQuery = RegistrySearchUtil.getOrganizationVisibilityWrappedQuery(modifiedQuery, ctx);
+        if (PersistenceUtil.areOrganizationsRegistered(ctx)) {
+            modifiedQuery = RegistrySearchUtil.getOrganizationVisibilityWrappedQuery(modifiedQuery, ctx, userTenantDomain);
+        }
         modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(modifiedQuery, ctx);
         modifiedQuery = RegistrySearchUtil.getDevPortalVisibilityWrappedQuery(modifiedQuery, isCrossTenant);
         Map<String, String> attributes = RegistrySearchUtil.getSearchAttributes(modifiedQuery);
