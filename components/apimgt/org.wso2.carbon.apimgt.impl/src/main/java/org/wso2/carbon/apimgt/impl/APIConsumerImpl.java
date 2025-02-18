@@ -103,6 +103,7 @@ import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
@@ -3627,30 +3628,27 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             Map<String, GatewayAgentConfiguration> gatewayConfigurations =
                     ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
             GatewayAgentConfiguration gatewayConfiguration = gatewayConfigurations.get(environment.getGatewayType());
-            try {
-                boolean isExternalGateway = false;
-                GatewayDeployer gatewayDeployer = null;
-                if (gatewayConfiguration != null && StringUtils.isNotEmpty(gatewayConfiguration.getImplementation())) {
-                    gatewayDeployer = (GatewayDeployer) Class.forName(
-                            gatewayConfiguration.getImplementation()).getDeclaredConstructor().newInstance();
-                    isExternalGateway = true;
-                }
 
-                if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)
-                        && vhost.getHttpPort() != -1) {
-                    String httpUrl = isExternalGateway ? gatewayDeployer.getAPIExecutionURL(api.getUuid()) :
-                            vhost.getHttpUrl();
-                    hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, httpUrl);
-                }
-                if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)
-                        && vhost.getHttpsPort() != -1) {
-                    String httpsUrl = isExternalGateway ? gatewayDeployer.getAPIExecutionURL(api.getUuid()) :
-                            vhost.getHttpsUrl();
-                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, httpsUrl);
-                }
-            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException
-                     | InvocationTargetException e) {
-                throw new APIManagementException(e.getMessage());
+            boolean isExternalGateway = false;
+            GatewayDeployer gatewayDeployer = null;
+            if (gatewayConfiguration != null && StringUtils.isNotEmpty(gatewayConfiguration.getImplementation())) {
+                gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain, environmentName);
+                isExternalGateway = true;
+            }
+
+            String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(),
+                    environment.getUuid());
+            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)
+                    && vhost.getHttpPort() != -1) {
+                String httpUrl = isExternalGateway ? gatewayDeployer.getAPIExecutionURL(externalReference) :
+                        vhost.getHttpUrl();
+                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, httpUrl);
+            }
+            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)
+                    && vhost.getHttpsPort() != -1) {
+                String httpsUrl = isExternalGateway ? gatewayDeployer.getAPIExecutionURL(externalReference) :
+                        vhost.getHttpsUrl();
+                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, httpsUrl);
             }
         }
         return hostsWithSchemes;

@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
+import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
@@ -91,16 +92,13 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
         try {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
-            API api = apiProvider.getAPIbyUUID(apiId, apiMgtDAO.getOrganizationByAPIUUID(apiId));
+            String organization = apiMgtDAO.getOrganizationByAPIUUID(apiId);
             List<APIRevisionDeployment> test = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
 
             for (APIRevisionDeployment deployment : test) {
                 String deploymentEnv = deployment.getDeployment();
                 if (gatewayEnvironments.containsKey(deploymentEnv)) {
-                    GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance().
-                            getExternalGatewayConnectorConfiguration(gatewayEnvironments.get(deploymentEnv).getGatewayType());
-                    GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation())
-                            .getDeclaredConstructor().newInstance();
+                    GatewayDeployer deployer = GatewayHolder.getTenantGatewayInstance(organization, deploymentEnv);
                     if (deployer != null) {
                         try {
                             String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
@@ -118,8 +116,7 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                     }
                 }
             }
-        } catch (APIManagementException | ClassNotFoundException | NoSuchMethodException | InstantiationException |
-                 IllegalAccessException | InvocationTargetException e) {
+        } catch (APIManagementException e) {
             throw new NotifierException(e.getMessage());
         }
 
@@ -142,10 +139,8 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
             for (APIRevisionDeployment deployment : test) {
                 String deploymentEnv = deployment.getDeployment();
                 if (gatewayEnvironments.containsKey(deploymentEnv)) {
-                    GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance().
-                            getExternalGatewayConnectorConfiguration(gatewayEnvironments.get(deploymentEnv).getGatewayType());
-                    GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation())
-                            .getDeclaredConstructor().newInstance();
+                    GatewayDeployer deployer = GatewayHolder.getTenantGatewayInstance(apiEvent.tenantDomain,
+                            deploymentEnv);
                     if (deployer != null) {
                         try {
                             String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
@@ -163,8 +158,7 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                     }
                 }
             }
-        } catch (APIManagementException | ClassNotFoundException | NoSuchMethodException | InstantiationException |
-                 IllegalAccessException | InvocationTargetException e) {
+        } catch (APIManagementException e) {
             throw new NotifierException(e.getMessage());
         }
 

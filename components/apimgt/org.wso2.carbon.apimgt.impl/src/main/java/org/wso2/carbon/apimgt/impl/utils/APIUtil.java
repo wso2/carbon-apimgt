@@ -112,6 +112,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayPortalConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayFeatureCatalog;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -7966,6 +7967,22 @@ public final class APIUtil {
         keyManagerConfiguration.setEnabled(keyManagerConfigurationDTO.isEnabled());
         keyManagerConfiguration.setType(keyManagerConfigurationDTO.getType());
         return keyManagerConfiguration;
+    }
+
+    public static GatewayConfiguration extractGatewayConfiguration(Environment environment, String organization)
+            throws APIManagementException {
+        GatewayConfiguration gatewayConfiguration = new GatewayConfiguration();
+        if (environment != null) {
+            gatewayConfiguration.setName(environment.getName());
+            gatewayConfiguration.setType(environment.getType());
+            gatewayConfiguration.setTenantDomain(organization);
+            Map<String, Object> configurations = new HashMap<>();
+            if (environment.getAdditionalProperties() != null) {
+                configurations.putAll(environment.getAdditionalProperties());
+            }
+            gatewayConfiguration.setConfiguration(configurations);
+        }
+        return gatewayConfiguration;
     }
 
     /**

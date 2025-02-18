@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
+import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
@@ -94,8 +95,8 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
                             .getExternalGatewayConnectorConfiguration(environments.get(deploymentEnv).getGatewayType());
                     GatewayDeployer deployer = null;
                     if (StringUtils.isNotEmpty(gatewayConfiguration.getImplementation())) {
-                        deployer = (GatewayDeployer)Class.forName(gatewayConfiguration.getImplementation()).
-                                getDeclaredConstructor().newInstance();
+                        deployer = GatewayHolder.getTenantGatewayInstance(deployAPIInGatewayEvent.getTenantDomain(),
+                                deploymentEnv);
                     }
                     if (deployer != null) {
                         String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(),
@@ -114,8 +115,7 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
                     }
                 }
             }
-        } catch (APIManagementException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException
-                 | InstantiationException | IllegalAccessException e) {
+        } catch (APIManagementException e) {
             throw new NotifierException(e.getMessage());
         }
     }
@@ -139,14 +139,9 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
 
             for (String deploymentEnv : gateways) {
                 if (environments.containsKey(deploymentEnv)) {
-                    GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfiguration
-                            (environments.get(deploymentEnv).getGatewayType());
-                    GatewayDeployer deployer = null;
-                    if (StringUtils.isNotEmpty(gatewayConfiguration.getImplementation())) {
-                        deployer = (org.wso2.carbon.apimgt.api.model.GatewayDeployer)Class.
-                                forName(gatewayConfiguration.getImplementation()).getDeclaredConstructor().
-                                newInstance();
-                    }
+                    GatewayDeployer deployer =
+                            GatewayHolder.getTenantGatewayInstance(deployAPIInGatewayEvent.getTenantDomain(),
+                            deploymentEnv);
                     if (deployer != null) {
                         String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
                                 environments.get(deploymentEnv).getUuid());
@@ -160,8 +155,7 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
                     }
                 }
             }
-        } catch (APIManagementException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException
-                 | InstantiationException | IllegalAccessException e) {
+        } catch (APIManagementException e) {
             throw new NotifierException(e.getMessage());
         }
     }

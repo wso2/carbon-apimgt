@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
+import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
@@ -573,28 +574,23 @@ public class APIMappingUtil {
         boolean isGQLSubscription = StringUtils.equalsIgnoreCase(APIConstants.GRAPHQL_API, apidto.getType())
                 && isGraphQLSubscriptionsAvailable(apidto);
         if (!isWs) {
-            try {
-                //prevent context appending in case the gateway is an external one
-                GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance().
-                        getExternalGatewayConnectorConfiguration(environment.getGatewayType());
-                GatewayDeployer gatewayDeployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation())
-                        .getDeclaredConstructor().newInstance();
-                context = gatewayDeployer != null ? "" : context;
+            //prevent context appending in case the gateway is an external one
+            GatewayDeployer gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain,
+                    environment.getName());
+            context = gatewayDeployer != null ? "" : context;
 
-                String httpUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(vHost.getHttpUrl())
-                        : vHost.getHttpUrl();
-                String httpsUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(vHost.getHttpsUrl())
-                        : vHost.getHttpsUrl();
+            String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(apidto.getId(),
+                    environment.getUuid());
+            String httpUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(externalReference)
+                    : vHost.getHttpUrl();
+            String httpsUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(externalReference)
+                    : vHost.getHttpsUrl();
 
-                if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
-                    apiurLsDTO.setHttp(httpUrl + context);
-                }
-                if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
-                    apiurLsDTO.setHttps(httpsUrl + context);
-                }
-            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InstantiationException
-                     | InvocationTargetException e) {
-                throw new APIManagementException(e.getMessage());
+            if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
+                apiurLsDTO.setHttp(httpUrl + context);
+            }
+            if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
+                apiurLsDTO.setHttps(httpsUrl + context);
             }
         }
         if (isWs || isGQLSubscription) {
