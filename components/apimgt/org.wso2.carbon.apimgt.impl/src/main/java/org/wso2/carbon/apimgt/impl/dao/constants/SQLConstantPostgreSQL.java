@@ -40,7 +40,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   GROUP_ID, " +
                     "   UUID, " +
                     "   APP.CREATED_BY AS CREATED_BY, " +
-                    "   APP.TOKEN_TYPE AS TOKEN_TYPE " +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE, " +
+                    "   APP.SHARED_ORGANIZATION AS SHARED_ORGANIZATION " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -73,7 +74,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   GROUP_ID, " +
                     "   UUID, " +
                     "   APP.CREATED_BY AS CREATED_BY, " +
-                    "   APP.TOKEN_TYPE AS TOKEN_TYPE " +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE, " +
+                    "   APP.SHARED_ORGANIZATION AS SHARED_ORGANIZATION " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -105,7 +107,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   GROUP_ID, " +
                     "   UUID, " +
                     "   APP.CREATED_BY AS CREATED_BY, " +
-                    "   APP.TOKEN_TYPE AS TOKEN_TYPE " +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE, " +
+                    "   APP.SHARED_ORGANIZATION AS SHARED_ORGANIZATION " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -143,7 +146,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   GROUP_ID, " +
                     "   UUID, " +
                     "   APP.CREATED_BY AS CREATED_BY, " +
-                    "   APP.TOKEN_TYPE AS TOKEN_TYPE " +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE, " +
+                    "   APP.SHARED_ORGANIZATION AS SHARED_ORGANIZATION " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -182,7 +186,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   GROUP_ID, " +
                     "   UUID, " +
                     "   APP.CREATED_BY AS CREATED_BY, " +
-                    "   APP.TOKEN_TYPE AS TOKEN_TYPE " +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE, " +
+                    "   APP.SHARED_ORGANIZATION AS SHARED_ORGANIZATION " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -214,7 +219,8 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     "   GROUP_ID, " +
                     "   UUID, " +
                     "   APP.CREATED_BY AS CREATED_BY, " +
-                    "   APP.TOKEN_TYPE AS TOKEN_TYPE " +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE, " +
+                    "   APP.SHARED_ORGANIZATION AS SHARED_ORGANIZATION " +
                     " FROM" +
                     "   AM_APPLICATION APP, " +
                     "   AM_SUBSCRIBER SUB  " +
@@ -230,6 +236,71 @@ public class SQLConstantPostgreSQL extends SQLConstants{
                     " offset ? limit  ? "+
                     " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
 
+    public static final String GET_APPLICATIONS_PREFIX_CASESENSITVE_WITH_ORGSHARING =
+            "select distinct x.*,bl.ENABLED from (" +
+                    "SELECT " +
+                    "   APPLICATION_ID, " +
+                    "   NAME," +
+                    "   APPLICATION_TIER," +
+                    "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
+                    "   CALLBACK_URL,  " +
+                    "   DESCRIPTION, " +
+                    "   APPLICATION_STATUS, " +
+                    "   USER_ID, " +
+                    "   GROUP_ID, " +
+                    "   UUID, " +
+                    "   APP.CREATED_BY AS CREATED_BY, " +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE, " +
+                    "   APP.SHARED_ORGANIZATION AS SHARED_ORGANIZATION " +
+                    " FROM" +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIBER SUB  " +
+                    " WHERE " +
+                    "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    " AND " +
+                    "    (SUB.USER_ID = ?  OR APP.SHARED_ORGANIZATION = ?)"+
+                    " AND " +
+                    "   APP.ORGANIZATION = ? " +
+                    " And "+
+                    "    LOWER (NAME) like LOWER (?)"+
+                    " ORDER BY $1 $2 " +
+                    " offset ? limit  ? "+
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
+
+    public static final String GET_APPLICATIONS_PREFIX_NONE_CASESENSITVE_WITH_ORGSHARING =
+            "select distinct x.*,bl.ENABLED from (" +
+                    "SELECT " +
+                    "   APPLICATION_ID, " +
+                    "   NAME," +
+                    "   APPLICATION_TIER," +
+                    "   APP.SUBSCRIBER_ID,  " +
+                    "   APP.CREATED_TIME AS APP_CREATED_TIME, " +
+                    "   APP.UPDATED_TIME AS APP_UPDATED_TIME, " +
+                    "   CALLBACK_URL,  " +
+                    "   DESCRIPTION, " +
+                    "   APPLICATION_STATUS, " +
+                    "   USER_ID, " +
+                    "   GROUP_ID, " +
+                    "   UUID, " +
+                    "   APP.CREATED_BY AS CREATED_BY, " +
+                    "   APP.TOKEN_TYPE AS TOKEN_TYPE, " +
+                    "   APP.SHARED_ORGANIZATION AS SHARED_ORGANIZATION " +
+                    " FROM" +
+                    "   AM_APPLICATION APP, " +
+                    "   AM_SUBSCRIBER SUB  " +
+                    " WHERE " +
+                    "   SUB.SUBSCRIBER_ID = APP.SUBSCRIBER_ID " +
+                    " AND " +
+                    "   (LOWER (SUB.USER_ID) =LOWER (?) OR APP.SHARED_ORGANIZATION = ?)" +
+                    " AND " +
+                    "   APP.ORGANIZATION = ? " +
+                    " And "+
+                    "    LOWER (NAME) like LOWER (?)"+
+                    " ORDER BY $1 $2 " +
+                    " offset ? limit  ? "+
+                    " )x left join AM_BLOCK_CONDITIONS bl on  ( bl.TYPE = 'APPLICATION' AND bl.BLOCK_CONDITION = concat(concat(x.USER_ID,':'),x.name)) ";
 
     public static final String GET_APPLICATIONS_BY_TENANT_ID =
                     "   SELECT " +
