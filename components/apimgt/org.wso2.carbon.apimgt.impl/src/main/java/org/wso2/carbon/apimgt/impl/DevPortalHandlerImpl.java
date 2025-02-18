@@ -109,20 +109,20 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
     }
 
     @Override
-    public void publishAPIMetadata(String tenantName, ApiTypeWrapper apiTypeWrapper) {
+    public String publishAPIMetadata(String organization, API api) {
         try {
-            String orgId = getOrgId(tenantName);
+            String orgId = getOrgId(organization);
             if (orgId != null) {
-                API api = apiTypeWrapper.getApi();
-                String apiDefinition = getDefinitionForDevPortal(api, tenantName);
-                String apiMetaData = getApiMetaData(apiTypeWrapper);
+                String apiDefinition = getDefinitionForDevPortal(api);
+                String apiMetaData = getApiMetaData(api);
 
                 HttpResponseData responseData = apiPostAction(orgId, apiMetaData, apiDefinition);
 
                 if (responseData.getStatusCode() == 201) {
-                    log.info("API " + apiTypeWrapper.getName() + " successfully published to " + baseUrl);
+                    log.info("API " + api.getId().getApiName() + " successfully published to " + baseUrl);
+                    return "refId";
                 } else {
-                    log.error("Failed to publish API " + apiTypeWrapper.getName() + " to " + baseUrl + ". " +
+                    log.error("Failed to publish API " + api.getId().getApiName() + " to " + baseUrl + ". " +
                             "Status code: " + responseData.getStatusCode());
                 }
             } else {
@@ -132,23 +132,23 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         } catch (APIManagementException e) {
             log.error("Error while publishing API to " + baseUrl + ". Error: " + e.getMessage());
         }
+        return null;
     }
 
     @Override
-    public void updateAPIMetadata(String tenantName, ApiTypeWrapper apiTypeWrapper) {
+    public void updateAPIMetadata(String organization, API api, String refId) {
         try {
-            API api = apiTypeWrapper.getApi();
-            String apiDefinition = getDefinitionForDevPortal(api, tenantName);
-            String apiMetaData = getApiMetaData(apiTypeWrapper);
-            String orgId = getOrgId(tenantName);
+            String apiDefinition = getDefinitionForDevPortal(api);
+            String apiMetaData = getApiMetaData(api);
+            String orgId = getOrgId(organization);
             if (orgId != null) {
-                String apiId = getApiId(orgId, apiTypeWrapper.getName(), api.getId().getVersion());
+                String apiId = getApiId(orgId, api.getId().getApiName(), api.getId().getVersion());
                 if (apiId != null) {
                     HttpResponseData apiPutResponseData = apiPutAction(orgId, apiId, apiDefinition, apiMetaData);
                     if (apiPutResponseData.getStatusCode() == 200) {
-                        log.info("API " + apiTypeWrapper.getName() + " successfully updated in " + baseUrl);
+                        log.info("API " + api.getId().getApiName() + " successfully updated in " + baseUrl);
                     } else {
-                        log.error("Failed to update API " + apiTypeWrapper.getName() + " in " + baseUrl +
+                        log.error("Failed to update API " + api.getId().getApiName() + " in " + baseUrl +
                                 ". Status code: " + apiPutResponseData.getStatusCode());
                     }
                 } else {
@@ -164,9 +164,9 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
     }
 
     @Override
-    public void unpublishAPIMetadata(String tenantName, API api) {
+    public void unpublishAPIMetadata(String organization, API api, String refId) {
         try {
-            String orgId = getOrgId(tenantName);
+            String orgId = getOrgId(organization);
             if (orgId != null) {
                 String apiId = getApiId(orgId, api.getId().getApiName(), api.getId().getVersion());
                 if (apiId != null) {
@@ -190,16 +190,19 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         }
     }
 
-    private static String getDefinitionForDevPortal (API api, String tenantName) throws APIManagementException {
-        APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(api.getId().getProviderName());
+    private static String getDefinitionForDevPortal (API api) throws APIManagementException {
         String type = getType(api.getType());
-        if (type.equals("REST")) {
-            return apiConsumer.getOpenAPIDefinitionForEnvironment(api, "Default");
-        } else if (type.equals("AsyncAPI")) {
-            return apiConsumer.getAsyncAPIDefinition(api.getUuid(), tenantName);
-        } else {
-            // TODD: Handle other types of definitions
-            return null;
+        switch (type) {
+            case "REST":
+                return api.getSwaggerDefinition();
+            case "AsyncAPI":
+                return api.getAsyncApiDefinition();
+            case "GraphQL":
+                return api.getGraphQLSchema();
+            case "SOAP":
+                return null;
+            default:
+                return null;
         }
     }
 
@@ -259,14 +262,13 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         }
     }
 
-    private static String getApiMetaData(ApiTypeWrapper apiTypeWrapper) throws APIManagementException {
-        API api = apiTypeWrapper.getApi();
+    private static String getApiMetaData(API api) throws APIManagementException {
         ApiMetaDataDTO apiMetaDataDTO = new ApiMetaDataDTO();
 
         ApiMetaDataDTO.ApiInfo apiInfo = new ApiMetaDataDTO.ApiInfo();
-        apiInfo.setReferenceID(Objects.toString(apiTypeWrapper.getUuid(), ""));
+        apiInfo.setReferenceID(Objects.toString(api.getId(), ""));
         apiInfo.setProvider("WSO2"); // DEV PORTAL expects WSO2 as Provider when API coming from WSO2 API Manager
-        apiInfo.setApiName(Objects.toString(apiTypeWrapper.getName(), ""));
+        apiInfo.setApiName(Objects.toString(api.getId().getApiName(), ""));
         apiInfo.setApiDescription(Objects.toString(api.getDescription(), ""));
         if (Objects.toString(api.getVisibility(), "").equals("public")) {
             apiInfo.setVisibility("PUBLIC");

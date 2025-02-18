@@ -77,16 +77,21 @@ public class LifeCycleUtils {
         }
 
         DevPortalHandler devPortalHandler = DevPortalHandlerImpl.getInstance();
-        // Next Gen Dev Portal Publication
+        // Dev Portal V2 Publication
         if (Arrays.asList(APIConstants.PUBLISH, APIConstants.REPUBLISH).contains(action)
                 && devPortalHandler.isPortalEnabled()) {
-            devPortalHandler.publishAPIMetadata(orgId, apiTypeWrapper);
+            API api = apiTypeWrapper.getApi();
+            String refId = devPortalHandler.publishAPIMetadata(orgId, api);
+            // TODO: Put refId method
         }
 
         // Next Gen Dev Portal Un-Publication
         if (Arrays.asList(APIConstants.DEPRECATE, APIConstants.BLOCK, APIConstants.DEMOTE_TO_CREATED).contains(action)
                 && devPortalHandler.isPortalEnabled()) {
-            devPortalHandler.unpublishAPIMetadata(orgId, apiTypeWrapper.getApi());
+            // TODO: Get refId Method
+            String refId = "null";
+            devPortalHandler.unpublishAPIMetadata(orgId, apiTypeWrapper.getApi(), refId);
+            // TODO: Remove refId
         }
 
         // Change the lifecycle state in the database

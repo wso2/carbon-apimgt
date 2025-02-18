@@ -29,9 +29,9 @@ public interface DevPortalHandler {
 
     boolean isPortalEnabled();
 
-    void publishAPIMetadata(String tenantName, ApiTypeWrapper apiTypeWrapper) throws APIManagementException;
+    String publishAPIMetadata(String organization, API api) throws APIManagementException;
 
-    void updateAPIMetadata(String tenantName, ApiTypeWrapper apiTypeWrapper) throws APIManagementException;
+    void updateAPIMetadata(String organization, API api, String refId) throws APIManagementException;
 
-    void unpublishAPIMetadata(String tenantName, API api) throws APIManagementException;
+    void unpublishAPIMetadata(String organization, API api, String refId) throws APIManagementException;
 }
