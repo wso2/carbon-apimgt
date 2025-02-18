@@ -77,12 +77,12 @@ public interface ComplianceMgtDAO {
             throws APIMGovernanceException;
 
     /**
-     * Update the evaluation status of all of all long-lasting processing requests to pending
+     * Delete long lasting processing requests
      *
      * @param taskCleanupInterval Task cleanup interval in minutes
-     * @throws APIMGovernanceException If an error occurs while updating the evaluation status
+     * @throws APIMGovernanceException If an error occurs while deleting the long-lasting processing requests
      */
-    void updateLongLastingProcessingRequestToPending(int taskCleanupInterval) throws APIMGovernanceException;
+    void deleteLongLastingProcessingReqs(int taskCleanupInterval) throws APIMGovernanceException;
 
     /**
      * Delete an evaluation request

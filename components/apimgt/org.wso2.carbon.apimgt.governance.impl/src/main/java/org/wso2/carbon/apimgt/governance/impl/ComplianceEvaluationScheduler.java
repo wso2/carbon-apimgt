@@ -108,8 +108,7 @@ public class ComplianceEvaluationScheduler {
             log.debug("Checking for pending evaluation requests...");
         }
 
-        // Change long lasting processing requests to pending
-        resetLongLastingProcessingRequests();
+        deleteLongLastingProcessingReqs(); // Clear long-lasting processing requests
 
         List<ComplianceEvaluationRequest> pendingRequests = fetchPendingRequests(queueSize);
 
@@ -326,11 +325,11 @@ public class ComplianceEvaluationScheduler {
     }
 
     /**
-     * Reset long-lasting processing requests.
+     * Delete long-lasting processing requests.
      */
-    private static void resetLongLastingProcessingRequests() {
+    private static void deleteLongLastingProcessingReqs() {
         try {
-            complianceMgtDAO.updateLongLastingProcessingRequestToPending(cleanupIntervalMinutes);
+            complianceMgtDAO.deleteLongLastingProcessingReqs(cleanupIntervalMinutes);
         } catch (APIMGovernanceException e) {
             log.error("Error resetting long lasting processing requests: " + e.getMessage(), e);
         }

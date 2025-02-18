@@ -251,6 +251,9 @@ public class SQLConstants {
                     "JOIN GOV_ARTIFACT GA ON GR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
                     "WHERE GR.STATUS = 'PENDING'";
 
+    public static final String GET_PENDING_ARTIFACTS = "SELECT DISTINCT ARTIFACT_KEY FROM GOV_REQUEST " +
+            "WHERE STATUS = 'PENDING'";
+
     public static final String GET_PROCESSING_REQ =
             "SELECT REQ_ID, ARTIFACT_REF_ID, ARTIFACT_TYPE, ORGANIZATION, PROCESSING_TIMESTAMP " +
                     "FROM GOV_REQUEST GR " +
@@ -275,9 +278,6 @@ public class SQLConstants {
     public static final String UPDATE_GOV_REQ_STATUS_TO_PROCESSING = "UPDATE GOV_REQUEST " +
             "SET STATUS = 'PROCESSING', PROCESSING_TIMESTAMP = ? WHERE REQ_ID = ?" +
             "AND STATUS = 'PENDING'";
-
-    public static final String UPDATE_GOV_REQ_STATUS_FROM_PROCESSING_TO_PENDING = "UPDATE GOV_REQUEST " +
-            "SET STATUS = 'PENDING', PROCESSING_TIMESTAMP = NULL WHERE STATUS = 'PROCESSING' AND REQ_ID = ?";
 
     public static final String DELETE_GOV_REQ = "DELETE FROM GOV_REQUEST" +
             " WHERE REQ_ID = ?";
