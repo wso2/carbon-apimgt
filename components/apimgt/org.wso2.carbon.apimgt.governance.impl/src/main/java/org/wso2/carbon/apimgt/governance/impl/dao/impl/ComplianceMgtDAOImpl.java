@@ -255,21 +255,22 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Update the evaluation status of all of all long-lasting processing requests to pending
+     * Delete long lasting processing requests
      *
      * @param taskCleanupInterval Task Cleanup Interval in minutes
-     * @throws APIMGovernanceException If an error occurs while updating the evaluation status
+     * @throws APIMGovernanceException If an error occurs while deleting the long lasting processing requests
      */
     @Override
-    public void updateLongLastingProcessingRequestToPending(int taskCleanupInterval)
+    public void deleteLongLastingProcessingReqs(int taskCleanupInterval)
             throws APIMGovernanceException {
 
         Map<String, Timestamp> longLastingProcessing = new HashMap<>();
         Timestamp currentTime = new Timestamp(System.currentTimeMillis());
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
-            String checkQuery = SQLConstants.GET_PROCESSING_REQ;
-            try (PreparedStatement checkStmnt = connection.prepareStatement(checkQuery);
-                 ResultSet resultSet = checkStmnt.executeQuery()) {
+
+            String processingReqQuery = SQLConstants.GET_PROCESSING_REQ;
+            try (PreparedStatement reqStmnt = connection.prepareStatement(processingReqQuery);
+                 ResultSet resultSet = reqStmnt.executeQuery()) {
                 while (resultSet.next()) {
                     String reqId = resultSet.getString("REQ_ID");
                     Timestamp processingTimestamp = resultSet.getTimestamp("PROCESSING_TIMESTAMP");
@@ -280,21 +281,30 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                     }
                 }
             }
-
             if (longLastingProcessing.isEmpty()) {
                 return;
             }
 
             connection.setAutoCommit(false);
             try {
-                String sqlQuery = SQLConstants.UPDATE_GOV_REQ_STATUS_FROM_PROCESSING_TO_PENDING;
+                String sqlQuery = SQLConstants.DELETE_REQ_POLICY_MAPPING;
                 try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-                    for (Map.Entry<String, Timestamp> entry : longLastingProcessing.entrySet()) {
-                        prepStmnt.setString(1, entry.getKey());
+                    for (String reqId : longLastingProcessing.keySet()) {
+                        prepStmnt.setString(1, reqId);
                         prepStmnt.addBatch();
                     }
                     prepStmnt.executeBatch();
                 }
+
+                sqlQuery = SQLConstants.DELETE_GOV_REQ;
+                try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
+                    for (String reqId : longLastingProcessing.keySet()) {
+                        prepStmnt.setString(1, reqId);
+                        prepStmnt.addBatch();
+                    }
+                    prepStmnt.executeBatch();
+                }
+
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
