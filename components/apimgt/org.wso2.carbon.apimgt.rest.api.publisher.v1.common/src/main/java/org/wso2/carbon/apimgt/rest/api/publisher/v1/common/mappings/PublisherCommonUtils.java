@@ -592,24 +592,28 @@ public class PublisherCommonUtils {
                         ExceptionCodes.TIER_NAME_INVALID);
             }
         }
+
+        boolean isSubscriptionValidationDisablingEnabled
+                = tiersFromDTO.contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)
+                || tiersFromDTO.contains(APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS);
         // Organization based subscription policies
         if (APIUtil.isOrganizationAccessControlEnabled()) {
             for (OrganizationPoliciesDTO organizationPoliciesDTO : organizationPoliciesDTOs) {
                 List<String> organizationTiersFromDTO = organizationPoliciesDTO.getPolicies();
-
-                // Remove the subscriptionless tier if other tiers are available.
-                if (organizationTiersFromDTO != null && organizationTiersFromDTO.size() > 1) {
-                    String tierToDrop = null;
-                    for (String tier : organizationTiersFromDTO) {
-                        if (tier.contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
-                            tierToDrop = tier;
-                            break;
-                        }
-                    }
-                    if (tierToDrop != null) {
-                        organizationTiersFromDTO.remove(tierToDrop);
-                        organizationPoliciesDTO.setPolicies(tiersFromDTO);
-                    }
+                if (isSubscriptionValidationDisablingEnabled) {
+                    /* If subscription validation is disabled for root organization
+                    it should be disabled for shared organizations */
+                    organizationTiersFromDTO = tiersFromDTO;
+                    organizationPoliciesDTO.setPolicies(organizationTiersFromDTO);
+                } else if (organizationTiersFromDTO.contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)
+                        || organizationTiersFromDTO.contains(APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS)) {
+                    /* If subscription validation is enabled for root organization
+                    it should not be disabled for shared organizations */
+                    organizationTiersFromDTO = tiersFromDTO;
+                    organizationPoliciesDTO.setPolicies(organizationTiersFromDTO);
+                    log.warn("Subscription validation can not be disabled for the organization with ID: "
+                            + organizationPoliciesDTO.getOrganizationID()
+                            + ". Therefore root organization subscription policies will be assigned.");
                 }
                 boolean conditionForOrganization = (
                         (organizationTiersFromDTO == null || organizationTiersFromDTO.isEmpty() && !(
@@ -627,15 +631,9 @@ public class PublisherCommonUtils {
                             throw new APIManagementException("A tier should be defined if the API is not in CREATED "
                                     + "or PROTOTYPED state", ExceptionCodes.TIER_CANNOT_BE_NULL);
                         } else if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
-                            // Internally set the default tier when no tiers are defined in order to support
-                            // subscription validation disabling for OAuth2 secured APIs
+                            // Use the root organization tiers if no tiers are set
                             if (organizationTiersFromDTO != null && organizationTiersFromDTO.isEmpty()) {
-                                if (isAsyncAPI) {
-                                    organizationTiersFromDTO.add(
-                                            APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS);
-                                } else {
-                                    organizationTiersFromDTO.add(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS);
-                                }
+                                organizationTiersFromDTO = tiersFromDTO;
                                 organizationPoliciesDTO.setPolicies(organizationTiersFromDTO);
                             }
                         }
@@ -649,6 +647,7 @@ public class PublisherCommonUtils {
                     }
                 }
             }
+            apiDtoToUpdate.setOrganizationPolicies(organizationPoliciesDTOs);
         }
 
         if (apiDtoToUpdate.getAccessControlRoles() != null) {
