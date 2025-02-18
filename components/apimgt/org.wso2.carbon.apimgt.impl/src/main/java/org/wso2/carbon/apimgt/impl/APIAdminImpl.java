@@ -204,7 +204,7 @@ public class APIAdminImpl implements APIAdmin {
         if (environment.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
             GatewayConfigurationService gatewayConfigurationService = new GatewayConfigurationServiceImpl();
             gatewayConfigurationService.addGatewayConfiguration(tenantDomain, environment.getName(),
-                    environment.getGatewayType(), APIUtil.extractGatewayConfiguration(environment, tenantDomain));
+                    environment.getGatewayType(), environment);
         }
         return environment;
     }
@@ -266,7 +266,7 @@ public class APIAdminImpl implements APIAdmin {
         if (environment.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
             GatewayConfigurationService gatewayConfigurationService = new GatewayConfigurationServiceImpl();
             gatewayConfigurationService.updateGatewayConfiguration(tenantDomain, environment.getName(),
-                    environment.getType(), APIUtil.extractGatewayConfiguration(environment, tenantDomain));
+                    environment.getType(), environment);
         }
 
         return updatedEnvironment;

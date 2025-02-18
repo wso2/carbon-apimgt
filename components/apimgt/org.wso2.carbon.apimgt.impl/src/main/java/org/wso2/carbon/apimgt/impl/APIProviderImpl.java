@@ -550,7 +550,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetAPISecurity(api);
 
         //Validate API with Federated Gateway
-        validateApiWithFederatedGateway(api);
+        APIUtil.validateApiWithFederatedGateway(api);
 
         //Set version timestamp to the API
         String latestTimestamp = calculateVersionTimestamp(provider, apiName,
@@ -996,9 +996,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
             migrateMediationPoliciesOfAPI(api, tenantDomain, false);
         }
-
-        //Validate API with Federated Gateway
-        validateApiWithFederatedGateway(api);
 
         //get product resource mappings on API before updating the API. Update uri templates on api will remove all
         //product mappings as well.
@@ -2086,39 +2083,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         api.setApiSecurity(apiSecurity);
-    }
-
-    /**
-     * Validate Api with the federated gateways
-     *
-     * @param api API Object
-     */
-    private static void validateApiWithFederatedGateway(API api) throws APIManagementException {
-
-        try {
-            GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance().
-                    getExternalGatewayConnectorConfiguration(api.getGatewayType());
-            GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation())
-                    .getDeclaredConstructor().newInstance();
-            if (deployer != null) {
-                GatewayAPIValidationResult errorList = null;
-                errorList = deployer.validateApi(api);
-                if (!errorList.getErrors().isEmpty()) {
-                    throw new APIManagementException(
-                            "Error occurred while validating the API with the federated gateway: "
-                                    + api.getGatewayType(),
-                            ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
-                                    api.getGatewayType(), errorList.toString()));
-                }
-            }
-        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
-                 IllegalAccessException | InvocationTargetException e) {
-            throw new APIManagementException(
-                    "Error occurred while validating the API with the federated gateway: "
-                            + api.getGatewayType(), e,
-                    ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
-                            api.getGatewayType()));
-        }
     }
 
     /**

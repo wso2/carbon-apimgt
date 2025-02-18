@@ -27,7 +27,7 @@ public class GatewayHolder {
     private static final Map<String, OrganizationGatewayDto> organizationWiseMap = new HashMap<>();
 
     public static void addGatewayConfiguration(String organization, String name, String type,
-                   GatewayConfiguration gatewayConfiguration) throws APIManagementException {
+                   Environment environment) throws APIManagementException {
 
         OrganizationGatewayDto organizationGatewayDto = getTenantGatewayDtoFromMap(organization);
         if (organizationGatewayDto == null) {
@@ -46,7 +46,7 @@ public class GatewayHolder {
                 try {
                     deployer = (GatewayDeployer) Class.forName(gatewayAgentConfiguration.getImplementation())
                             .getDeclaredConstructor().newInstance();
-                    deployer.init(gatewayConfiguration);
+                    deployer.init(environment);
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException
                          | NoSuchMethodException | InvocationTargetException e) {
                     throw new APIManagementException("Error while loading gateway configuration", e);
@@ -62,10 +62,10 @@ public class GatewayHolder {
     }
 
     public static void updateGatewayConfiguration(String organization, String name, String type,
-                       GatewayConfiguration gatewayConfiguration) throws APIManagementException {
+                       Environment environment) throws APIManagementException {
 
         removeGatewayConfiguration(organization, name);
-        addGatewayConfiguration(organization, name, type, gatewayConfiguration);
+        addGatewayConfiguration(organization, name, type, environment);
     }
 
     public static void removeGatewayConfiguration(String tenantDomain, String name) {
@@ -105,7 +105,7 @@ public class GatewayHolder {
                                 getExternalGatewayConnectorConfiguration(entry.getValue().getGatewayType());
                         GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayAgentConfiguration.getImplementation())
                                 .getDeclaredConstructor().newInstance();
-                        deployer.init(APIUtil.extractGatewayConfiguration(entry.getValue(), tenantDomain));
+                        deployer.init(entry.getValue());
                         gatewayDto.setGatewayDeployer(deployer);
                         newOrganizationGatewayDto.putGatewayDto(gatewayDto);
                     }
