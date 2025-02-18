@@ -95,8 +95,9 @@ public class CustomAPIIndexer extends RXTIndexer {
                 }
             }
             if (!hasOrganizationProperty) {
+                log.debug("Organization visibilty property missing. adding " + fileData.tenantDomain);
                 List<String> orgProperties = new ArrayList<>();
-                orgProperties.add(VISIBLE_ORGANIZATION_PROPERTY + ",all" );
+                orgProperties.add(VISIBLE_ORGANIZATION_PROPERTY + "," + fileData.tenantDomain );
                 fields.put(IndexingConstants.FIELD_PROPERTY_VALUES, orgProperties);
             }
             indexDocument.setFields(fields);
