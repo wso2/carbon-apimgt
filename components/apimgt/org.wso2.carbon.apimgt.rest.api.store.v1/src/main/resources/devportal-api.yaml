@@ -4053,9 +4053,6 @@ components:
           description: |
             If the provider value is not given user invoking the api will be used as the provider.
           example: admin
-        isMarkdownOverview:
-          type: boolean
-          example: true
         apiDefinition:
           type: string
           description: |
