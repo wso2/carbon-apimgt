@@ -52,6 +52,7 @@ public class APIConstants {
         public static final String AI_API_REQUEST_METADATA = "AI_API_REQUEST_METADATA";
         public static final String AI_API_RESPONSE_METADATA = "AI_API_RESPONSE_METADATA";
         public static final String INPUT_SOURCE_PAYLOAD = "payload";
+        public static final String INPUT_SOURCE_HEADER = "header";
         public static final String CONNECTOR_TYPE = "connectorType";
         public static final String ID = "id";
         public static final String NAME = "name";
@@ -82,12 +83,14 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT = "promptTokenCount";
         public static final String LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT = "completionTokenCount";
         public static final String LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT = "totalTokenCount";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_REMAINING_TOKEN_COUNT = "remainingTokenCount";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_MODEL = "$.model";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_PROMPT_TOKEN_COUNT = "$.usage" +
                 ".prompt_tokens";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_COMPLETION_TOKEN_COUNT = "$.usage" +
                 ".completion_tokens";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_TOTAL_TOKEN_COUNT = "$.usage.total_tokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_REMAINING_TOKEN_COUNT = "x-ratelimit-remaining-tokens";
         public static final String LLM_PROVIDER_SERVICE_DEFAULT = "default";
         public static final String NULL = "null";
         public static final String LLM_PROVIDER = "LLM_PROVIDER";
