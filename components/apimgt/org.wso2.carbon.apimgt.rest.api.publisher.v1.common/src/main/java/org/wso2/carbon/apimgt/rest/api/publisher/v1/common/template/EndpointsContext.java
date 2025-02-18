@@ -188,8 +188,8 @@ public class EndpointsContext extends ConfigContextDecorator {
                 return;
             }
 
-            this.endpointUuid = endpointDTO.getEndpointUuid();
-            this.endpointName = endpointDTO.getEndpointName();
+            this.endpointUuid = endpointDTO.getId();
+            this.endpointName = endpointDTO.getName();
             this.deploymentStage = endpointDTO.getDeploymentStage();
 
             if (endpointDTO.getEndpointConfig() != null) {

@@ -2514,7 +2514,7 @@ public class ImportUtils {
                 // load as a json fallback
                 log.debug("Found endpoint file " + pathToJsonFile);
                 jsonContent = FileUtils.
-                        readFileToString(new File(pathToJsonFile)).replace("{}", "\"{}\"");
+                        readFileToString(new File(pathToJsonFile));
             }
             if (jsonContent == null) {
                 log.debug("No endpoint file found to be added, skipping");
