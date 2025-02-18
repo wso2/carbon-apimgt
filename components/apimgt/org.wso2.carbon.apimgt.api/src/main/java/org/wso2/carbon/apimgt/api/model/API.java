@@ -145,7 +145,7 @@ public class API implements Serializable {
     private String implementation = "ENDPOINT";
 
     private String monetizationCategory;
-
+    
     private List<SOAPToRestSequence> soapToRestSequences;
 
     public List<SOAPToRestSequence> getSoapToRestSequences() {
