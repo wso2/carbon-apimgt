@@ -3960,6 +3960,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
                         devPortalApi.getVisibleRoles(), devPortalApi.getPublisherAccessControl(),
                         devPortalApi.getPublisherAccessControlRoles());
+                List<Documentation> existingDocs = getAllDocumentation(uuid, organization);
+                devPortalApi.setMarkdownOverview(false);
+                for (Documentation doc : existingDocs) {
+                    if (doc.getOtherTypeName() != null && doc.getOtherTypeName().equals("_overview")) {
+                        devPortalApi.setMarkdownOverview(true);
+                        break;
+                    }
+                }
                 if (APIConstants.API_PRODUCT.equalsIgnoreCase(devPortalApi.getType())) {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
                     apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(),
