@@ -2868,7 +2868,8 @@ public final class APIConstants {
         KEY_TEMPLATE,
         CORRELATION_CONFIG,
         GATEWAY_POLICY,
-        LLM_PROVIDER
+        LLM_PROVIDER,
+        LABEL
     }
 
     // Supported Event Types
@@ -2908,7 +2909,10 @@ public final class APIConstants {
         CUSTOM_POLICY_UPDATE,
         UPDATE_CORRELATION_CONFIGS,
         DEPLOY_POLICY_MAPPING_IN_GATEWAY,
-        REMOVE_POLICY_MAPPING_FROM_GATEWAY
+        REMOVE_POLICY_MAPPING_FROM_GATEWAY,
+        LABEL_CREATE,
+        LABEL_UPDATE,
+        LABEL_DELETE
     }
 
     public enum EventAction {
@@ -3310,5 +3314,16 @@ public final class APIConstants {
         public static final String PRIMARY_ENDPOINT_ID_SEPARATOR = "--";
         public static final String DEFAULT_PROD_ENDPOINT = "Default Production Endpoint";
         public static final String DEFAULT_SANDBOX_ENDPOINT = "Default Sandbox Endpoint";
+    }
+
+    // For APIM governance configurations
+    public static class APIMGovernance {
+        public static final String GOVERNANCE_CONFIG = "APIMGovernance";
+        public static final String DATA_SOURCE_NAME = "DataSource";
+        public static final String SCHEDULER_CONFIG = "SchedulerConfigurations";
+        public static final String SCHEDULER_THREAD_POOL_SIZE = "ThreadPoolSize";
+        public static final String SCHEDULER_QUEUE_SIZE = "QueueSize";
+        public static final String SCHEDULER_TASK_CHECK_INTERVAL = "TaskCheckIntervalMinutes";
+        public static final String SCHEDULER_TASK_CLEANUP_INTERVAL = "TaskCleanupIntervalMinutes";
     }
 }

@@ -602,7 +602,7 @@ public enum ExceptionCodes implements ErrorHandler {
     AI_SERVICE_QUOTA_EXCEEDED(903102, "Quota exceeded for AI service", 429, "Quota exceeded for AI service"),
     DOCUMENT_NAME_ILLEGAL_CHARACTERS(902016, "Document name cannot contain illegal characters", 400, "Document name contains one or more illegal characters"),
 
-    COMPLIANCE_VIOLATION_ERROR(903300, "Compliance violation error", 400, "Compliance violation error. %s", false),
+    COMPLIANCE_VIOLATION_ERROR(903300, "Request does not adhere to governance standards", 400, "%s", false),
     // Subscriptions related
     SUBSCRIPTION_ID_NOT_SPECIFIED(902017, "Subscription ID not specified.", 400,
             "Subscription ID not specified."),

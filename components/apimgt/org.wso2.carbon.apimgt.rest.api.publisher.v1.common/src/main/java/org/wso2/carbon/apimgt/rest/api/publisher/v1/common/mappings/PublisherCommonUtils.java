@@ -93,7 +93,6 @@ import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
@@ -2989,8 +2988,7 @@ public class PublisherCommonUtils {
             if (!complianceResult.isEmpty()
                     && complianceResult.get(GOVERNANCE_COMPLIANCE_KEY) != null
                     && !Boolean.parseBoolean(complianceResult.get(GOVERNANCE_COMPLIANCE_KEY))) {
-                throw new APIComplianceException(complianceResult
-                        .get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+                throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
             }
             PublisherCommonUtils.checkGovernanceComplianceAsync(apiTypeWrapper.getUuid(),
                     APIMGovernableState.API_PUBLISH, ArtifactType.API, organization);
@@ -3467,7 +3465,13 @@ public class PublisherCommonUtils {
         });
     }
 
-    //mthod to invoke evaluateComplianceDryRunSync
+    /**
+     * Check governance compliance for the API artifact in a dry run mode.
+     *
+     * @param fileInputStream API artifact input stream
+     * @param organization    Organization of the logged-in user
+     * @return Map of compliance violations
+     */
     public static Map<String, String> checkGovernanceComplianceDryRun(InputStream fileInputStream,
                                                                       String organization) {
         Map<String, String> responseMap = new HashMap<>(2);
@@ -3476,7 +3480,7 @@ public class PublisherCommonUtils {
             byte[] fileBytes = IOUtils.toByteArray(fileInputStream);
 
             ArtifactComplianceDryRunInfo artifactComplianceDryRunInfo = apimGovernanceService
-                    .evaluateComplianceDryRunSync(ExtendedArtifactType.REST_API, fileBytes, organization);
+                    .evaluateComplianceDryRunSync(ArtifactType.API, fileBytes, organization);
             return responseMap;
         } catch (APIMGovernanceException e) {
             log.error("Error occurred while executing governance ", e);

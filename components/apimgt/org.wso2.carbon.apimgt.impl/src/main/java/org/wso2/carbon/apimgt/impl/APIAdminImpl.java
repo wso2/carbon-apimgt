@@ -76,6 +76,7 @@ import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
+import org.wso2.carbon.apimgt.impl.notifier.events.LabelEvent;
 import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -1320,7 +1321,11 @@ public class APIAdminImpl implements APIAdmin {
         }
 
         label.setLabelId(UUID.randomUUID().toString());
-        return labelsDAO.addLabel(label, tenantDomain);
+        Label newLabel = labelsDAO.addLabel(label, tenantDomain);
+        LabelEvent labelEvent = new LabelEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                APIConstants.EventType.LABEL_CREATE.name(), tenantDomain, newLabel.getLabelId(), newLabel.getName());
+        APIUtil.sendNotification(labelEvent, APIConstants.NotifierType.LABEL.name());
+        return newLabel;
     }
 
     /**
@@ -1361,6 +1366,9 @@ public class APIAdminImpl implements APIAdmin {
         }
 
         labelsDAO.updateLabel(updateLabelBody);
+        LabelEvent labelEvent = new LabelEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                APIConstants.EventType.LABEL_UPDATE.name(), tenantDomain, labelID, updateLabelBody.getName());
+        APIUtil.sendNotification(labelEvent, APIConstants.NotifierType.LABEL.name());
         return labelsDAO.getLabelByIdAndTenantDomain(labelID, tenantDomain);
     }
 
@@ -1383,6 +1391,9 @@ public class APIAdminImpl implements APIAdmin {
                     ExceptionCodes.from(ExceptionCodes.LABEL_CANNOT_DELETE_ASSOCIATED));
         }
         labelsDAO.deleteLabel(labelID);
+        LabelEvent labelEvent = new LabelEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                APIConstants.EventType.LABEL_DELETE.name(), tenantDomain, labelID, labelOriginal.getName());
+        APIUtil.sendNotification(labelEvent, APIConstants.NotifierType.LABEL.name());
     }
 
     /**

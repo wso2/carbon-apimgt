@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
@@ -127,6 +128,7 @@ public class APIManagerConfiguration {
     private static MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDTO();
     private static ApiChatConfigurationDTO apiChatConfigurationDto = new ApiChatConfigurationDTO();
     private static DesignAssistantConfigurationDTO designAssistantConfigurationDto = new DesignAssistantConfigurationDTO();
+    private static final APIMGovernanceConfigDTO apimGovConfigurationDto = new APIMGovernanceConfigDTO();
 
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
@@ -697,6 +699,8 @@ public class APIManagerConfiguration {
                 if (counterEnabled != null) {
                     isTransactionCounterEnabled = Boolean.parseBoolean(counterEnabled.getText());
                 }
+            } else if (APIConstants.APIMGovernance.GOVERNANCE_CONFIG.equals(localName)) {
+                setAPIMGovernanceConfigurations(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -2737,5 +2741,58 @@ public class APIManagerConfiguration {
 
     public TokenValidationDto getTokenValidationDto() {
         return tokenValidationDto;
+    }
+
+    /**
+     * Set APIM Governance Configurations
+     *
+     * @param omElement XML Config
+     */
+    public void setAPIMGovernanceConfigurations(OMElement omElement) {
+        OMElement dataSource = omElement
+                .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DATA_SOURCE_NAME));
+        if (dataSource != null) {
+            String dataSourceName = dataSource.getText();
+            apimGovConfigurationDto.setDataSourceName(dataSourceName);
+        }
+
+        OMElement schedulerConfig = omElement
+                .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_CONFIG));
+
+        if (schedulerConfig != null) {
+            OMElement threadPoolSize = schedulerConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_THREAD_POOL_SIZE));
+            if (threadPoolSize != null) {
+                apimGovConfigurationDto.setSchedulerThreadPoolSize(Integer.parseInt(threadPoolSize.getText()));
+            }
+
+            OMElement queueSize = schedulerConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_QUEUE_SIZE));
+            if (queueSize != null) {
+                apimGovConfigurationDto.setSchedulerQueueSize(Integer.parseInt(queueSize.getText()));
+            }
+
+            OMElement checkInterval = schedulerConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_TASK_CHECK_INTERVAL));
+            if (checkInterval != null) {
+                apimGovConfigurationDto.setSchedulerTaskCheckInterval(Integer.parseInt(checkInterval.getText()));
+            }
+
+            OMElement cleanupInterval = schedulerConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_TASK_CLEANUP_INTERVAL));
+            if (cleanupInterval != null) {
+                apimGovConfigurationDto.setSchedulerTaskCleanupInterval(Integer.parseInt(cleanupInterval.getText()));
+            }
+        }
+
+    }
+
+    /**
+     * Get APIM Governance Configuration DTO
+     *
+     * @return APIMGovernanceConfigDTO
+     */
+    public APIMGovernanceConfigDTO getAPIMGovernanceConfigurationDto() {
+        return apimGovConfigurationDto;
     }
 }
