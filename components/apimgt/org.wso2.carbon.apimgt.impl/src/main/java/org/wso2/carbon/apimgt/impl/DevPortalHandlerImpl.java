@@ -65,7 +65,7 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
     private static final Log log = LogFactory.getLog(DevPortalHandlerImpl.class);
     private static final String baseUrl = getNewPortalURL();
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static final Map<String, String> orgIdCache = new ConcurrentHashMap<>();
+    private static final Map<String, String> orgIdMap = new ConcurrentHashMap<>();
     private static SSLConnectionSocketFactory sslsf;
     private static volatile DevPortalHandlerImpl instance;
 
@@ -144,8 +144,7 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         String apiMetaData = getApiMetaData(api);
         String orgId = getOrgId(organization);
         if (orgId != null) {
-            String apiId = getApiId(orgId, api.getId().getApiName(), api.getId().getVersion());
-            HttpResponseData apiPutResponseData = apiPutAction(orgId, apiId, apiDefinition, apiMetaData);
+            HttpResponseData apiPutResponseData = apiPutAction(orgId, refId, apiDefinition, apiMetaData);
             if (apiPutResponseData.getStatusCode() == 200) {
                 log.info("API " + api.getId().getApiName() + " successfully updated in " + baseUrl);
             } else {
@@ -162,18 +161,15 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
     public void unpublishAPIMetadata(String organization, API api, String refId) throws APIManagementException {
         String orgId = getOrgId(organization);
         if (orgId != null) {
-            String apiId = getApiId(orgId, api.getId().getApiName(), api.getId().getVersion());
-            if (apiId != null) {
-                HttpResponseData responseData = apiDeleteAction(orgId, apiId);
-                if (responseData.getStatusCode() == 200) {
-                    log.info("API " + api.getId().getApiName() + " successfully unpublished from " + baseUrl);
-                } else if (responseData.getStatusCode() == 404) {
-                    throw new APIManagementException("API " + api.getId().getApiName() + " is not available in "
-                            + baseUrl + " .Hence API cannot get unpublished from " + baseUrl);
-                } else {
-                    throw new APIManagementException("Failed to delete API " + api.getId().getApiName() + " from "
-                            + baseUrl + ". Status code: " + responseData.getStatusCode());
-                }
+            HttpResponseData responseData = apiDeleteAction(orgId, refId);
+            if (responseData.getStatusCode() == 200) {
+                log.info("API " + api.getId().getApiName() + " successfully unpublished from " + baseUrl);
+            } else if (responseData.getStatusCode() == 404) {
+                throw new APIManagementException("API " + api.getId().getApiName() + " is not available in "
+                        + baseUrl + " .Hence API cannot get unpublished from " + baseUrl);
+            } else {
+                throw new APIManagementException("Failed to delete API " + api.getId().getApiName() + " from "
+                        + baseUrl + ". Status code: " + responseData.getStatusCode());
             }
         } else {
             throw new APIManagementException("Unable to find an organization in " + baseUrl + " that matches the tenant."
@@ -181,7 +177,7 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         }
     }
 
-    private static String getDefinitionForDevPortal (API api) {
+    private static String getDefinitionForDevPortal (API api) throws APIManagementException {
         String type = getType(api.getType());
         switch (type) {
             case "REST":
@@ -191,17 +187,16 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
             case "GraphQL":
                 return api.getGraphQLSchema();
             case "SOAP":
-                return null;
+                return "TODO: SOAP";
             default:
-                return null;
+                throw new APIManagementException("Cannot find a definition for the given type");
         }
     }
 
     private static String getOrgId(String tenantName)
             throws APIManagementException {
-        if (orgIdCache.containsKey(tenantName)) {
-            // OrgID cache hit
-            return orgIdCache.get(tenantName);
+        if (orgIdMap.containsKey(tenantName)) {
+            return orgIdMap.get(tenantName);
         }
         HttpResponseData responseData = orgGetAction(tenantName);
         String orgId;
@@ -215,39 +210,10 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
             } else {
                 return null;
             }
-            orgIdCache.put(tenantName, orgId);
+            orgIdMap.put(tenantName, orgId);
             return orgId;
         } catch (JsonProcessingException e) {
             throw new APIManagementException("Error while processing Json response: " + e.getMessage(), e);
-        }
-    }
-
-    private static String getApiId(String orgId, String apiName, String apiVersion)
-            throws APIManagementException {
-        HttpResponseData responseData = apiGetAction(orgId, apiName, apiVersion);
-
-        if (responseData.getStatusCode() == 200) {
-            try {
-                List<Map<String, Object>> apiList = objectMapper.readValue(responseData.getResponseBody(),
-                        new TypeReference<List<Map<String, Object>>>() {});
-                if (apiList.size() == 1) {
-                    Map<String, Object> apiDetails = apiList.get(0);
-                    return (String) apiDetails.get("apiID");
-                } else if (apiList.size() > 1) {
-                    throw new APIManagementException("There are multiple APIs for the API name: " + apiName
-                            + " & version: " + apiVersion);
-                } else {
-                    throw new APIManagementException("No API found for the API name: " + apiName + " & version: "
-                            + apiVersion);
-                }
-            } catch (JsonProcessingException e) {
-                throw new APIManagementException("Error reading API response: " + e.getMessage(), e);
-            }
-        } else if (responseData.getStatusCode() == 404) {
-            throw new APIManagementException("API is not available in " + baseUrl + " for the name: " + apiName +
-                    " and version: " + apiVersion);
-        } else {
-            throw new APIManagementException("Failed to retrieve API ID. Status code: " + responseData.getStatusCode());
         }
     }
 
@@ -383,29 +349,9 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         }
     }
 
-    private static HttpResponseData apiGetAction(String orgId, String name, String version)
+    private static HttpResponseData apiDeleteAction(String orgId, String refId)
             throws APIManagementException {
-        String apiUrl = baseUrl + DevPortalProcessingConstants.API_URI;
-        try (CloseableHttpClient httpClient = getHttpClient()) {
-            URIBuilder uriBuilder = new URIBuilder(apiUrl)
-                    .addParameter("name", name)
-                    .addParameter("version", version);
-            HttpGet httpGet = new HttpGet(uriBuilder.build());
-            httpGet.setHeader("organization", orgId);
-
-            try (CloseableHttpResponse response = httpClient.execute(httpGet)) {
-                int statusCode = response.getStatusLine().getStatusCode();
-                String responseBody = EntityUtils.toString(response.getEntity());
-                return new HttpResponseData(statusCode, responseBody);
-            }
-        } catch (IOException | URISyntaxException e) {
-            throw new APIManagementException("Error while API search in " + baseUrl + ": " + e.getMessage(), e);
-        }
-    }
-
-    private static HttpResponseData apiDeleteAction(String orgId, String apiId)
-            throws APIManagementException {
-        String apiUrl = baseUrl + DevPortalProcessingConstants.API_URI + "/" + apiId;
+        String apiUrl = baseUrl + DevPortalProcessingConstants.API_URI + "/" + refId;
 
         try (CloseableHttpClient httpClient = getHttpClient()) {
             HttpDelete httpDelete = new HttpDelete(apiUrl);
@@ -443,10 +389,10 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         }
     }
 
-    private static HttpResponseData apiPutAction(String orgId, String apiId, String apiDefinition,
+    private static HttpResponseData apiPutAction(String orgId, String refId, String apiDefinition,
                                                  String apiMetadata)
             throws APIManagementException {
-        String apiUrl = baseUrl + DevPortalProcessingConstants.API_URI + "/" + apiId;
+        String apiUrl = baseUrl + DevPortalProcessingConstants.API_URI + "/" + refId;
         try (CloseableHttpClient httpClient = getHttpClient()) {
             HttpPut httpPut = new HttpPut(apiUrl);
             httpPut.setHeader("organization", orgId);
