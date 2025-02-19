@@ -22,6 +22,8 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
+import java.io.InputStream;
+
 /**
  * This interface used to handle newly introduced 2025 version of Developer Portal's configuration with APIM.
  */
@@ -34,4 +36,12 @@ public interface DevPortalHandler {
     void updateAPIMetadata(String organization, API api, String refId) throws APIManagementException;
 
     void unpublishAPIMetadata(String organization, API api, String refId) throws APIManagementException;
+
+    void publishAPIContent(String organization, String refId, InputStream content) throws APIManagementException;
+
+    void unpublishAPIContent(String organization, String refId) throws APIManagementException;
+
+    void publishOrgContent(String organization, InputStream content) throws APIManagementException;
+
+    void unpublishOrgContent(String organization) throws APIManagementException;
 }

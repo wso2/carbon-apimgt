@@ -23,6 +23,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.DevPortalHandler;
+import org.wso2.carbon.apimgt.impl.DevPortalHandlerImpl;
 import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.OrgThemesApiService;
 
@@ -116,17 +118,26 @@ public class OrgThemesApiServiceImpl implements OrgThemesApiService {
     }
 
     @Override
-    public Response updateOrgThemeStatus(String id, ContentPublishStatusDTO contentPublishStatusDTO, MessageContext messageContext)
-        throws APIManagementException {
+    public Response updateOrgThemeStatus(String id, ContentPublishStatusDTO contentPublishStatusDTO,
+                                         MessageContext messageContext) throws APIManagementException {
+        DevPortalHandler devPortalHandler = DevPortalHandlerImpl.getInstance();
+        if (devPortalHandler.isPortalEnabled()) {
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String action = contentPublishStatusDTO.getAction().value();
             APIAdminImpl apiAdmin = new APIAdminImpl();
-            apiAdmin.updateOrgThemeStatus(tenantDomain, action);
-            if (DevPortalConstants.PUBLISH.equals(action)) {
-                // PUBLISH call
-            } else if (DevPortalConstants.UNPUBLISH.equals(action)) {
-                // UNPUBLISH Call
+            try (InputStream content = apiAdmin.updateOrgThemeStatus(tenantDomain, action)) {
+                if (DevPortalConstants.PUBLISH.equals(action)) {
+                    devPortalHandler.publishOrgContent(tenantDomain, content);
+                } else if (DevPortalConstants.UNPUBLISH.equals(action)) {
+                    devPortalHandler.unpublishOrgContent(tenantDomain);
+                }
+            } catch (IOException e) {
+                throw new APIManagementException("Failed to update API theme status", e);
             }
             return Response.status(Response.Status.OK).entity("Status updated successfully").build();
+        } else {
+            return Response.status(Response.Status.PRECONDITION_FAILED).entity("Please enable Next Gen Devportal " +
+                    "to publish or unpublish").build();
+        }
     }
 }

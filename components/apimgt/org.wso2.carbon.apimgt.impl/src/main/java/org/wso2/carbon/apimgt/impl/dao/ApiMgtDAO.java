@@ -18028,16 +18028,18 @@ public class ApiMgtDAO {
      *
      * @param organization Organization name.
      * @param action       Action to perform ("PUBLISH" or "UNPUBLISH").
+     * @return Published or unpublished input stream.
      * @throws APIManagementException If a database error occurs.
      */
-    public void updateOrgThemeStatus(String organization, String action) throws APIManagementException {
+    public InputStream updateOrgThemeStatus(String organization, String action) throws APIManagementException {
+        InputStream artifactContent = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
                 if (DevPortalConstants.PUBLISH.equals(action)) {
                     String draftedArtifact = getDraftedArtifactForOrg(connection, organization);
                     if (draftedArtifact != null) {
-                        InputStream artifactContent = getArtifactContent(connection, draftedArtifact);
+                        artifactContent = getArtifactContent(connection, draftedArtifact);
                         String newUUID = addArtifact(connection, artifactContent, DevPortalConstants.PUBLISHED_ORG_THEME);
                         updatePublishedArtifactForOrg(connection, organization, newUUID);
                         removeArtifact(connection, draftedArtifact);
@@ -18048,7 +18050,7 @@ public class ApiMgtDAO {
                 } else if (DevPortalConstants.UNPUBLISH.equals(action)) {
                     String publishedArtifact = getPublishedArtifactForOrg(connection, organization);
                     if (publishedArtifact != null) {
-                        InputStream artifactContent = getArtifactContent(connection, publishedArtifact);
+                        artifactContent = getArtifactContent(connection, publishedArtifact);
                         String newUUID = addArtifact(connection, artifactContent, DevPortalConstants.DRAFTED_ORG_THEME);
                         updateDraftedArtifactForOrg(connection, organization, newUUID);
                         removeArtifact(connection, publishedArtifact);
@@ -18065,6 +18067,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Database connection error while updating organization theme status for organization " + organization, e);
         }
+        return artifactContent;
     }
 
 
@@ -18526,17 +18529,19 @@ public class ApiMgtDAO {
      * @param organization Organization name.
      * @param action       Action to perform ("PUBLISH" or "UNPUBLISH").
      * @param apiId        API Identifier.
+     * @return Published or unpublished input stream.
      * @throws APIManagementException If a database error occurs.
      */
-    public void updateApiThemeStatus(String organization, String action, String apiId)
+    public InputStream updateApiThemeStatus(String organization, String action, String apiId)
             throws APIManagementException {
+        InputStream artifactContent = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
                 if (DevPortalConstants.PUBLISH.equals(action)) {
                     String draftedArtifact = getDraftedArtifactForApi(connection, organization, apiId);
                     if (draftedArtifact != null) {
-                        InputStream artifactContent = getArtifactContent(connection, draftedArtifact);
+                        artifactContent = getArtifactContent(connection, draftedArtifact);
                         String newUUID = addArtifact(connection, artifactContent, DevPortalConstants.PUBLISHED_API_THEME);
                         updatePublishedArtifactForApi(connection, organization, newUUID, apiId);
                         removeArtifact(connection, draftedArtifact);
@@ -18547,7 +18552,7 @@ public class ApiMgtDAO {
                 } else if (DevPortalConstants.UNPUBLISH.equals(action)) {
                     String publishedArtifact = getPublishedArtifactForApi(connection, organization, apiId);
                     if (publishedArtifact != null) {
-                        InputStream artifactContent = getArtifactContent(connection, publishedArtifact);
+                        artifactContent = getArtifactContent(connection, publishedArtifact);
                         String newUUID = addArtifact(connection, artifactContent, DevPortalConstants.DRAFTED_API_THEME);
                         updateDraftedArtifactForApi(connection, organization, newUUID, apiId);
                         removeArtifact(connection, publishedArtifact);
@@ -18565,6 +18570,7 @@ public class ApiMgtDAO {
             handleException(
                     "Database connection error while updating API theme status for organization " + organization, e);
         }
+        return artifactContent;
     }
 
     /**

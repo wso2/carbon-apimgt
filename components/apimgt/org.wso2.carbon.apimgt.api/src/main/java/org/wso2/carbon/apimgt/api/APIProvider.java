@@ -2176,10 +2176,10 @@ public interface APIProvider extends APIManager {
      * @param organization Organization name.
      * @param action       Action to perform ("PUBLISH" or "UNPUBLISH").
      * @param apiId        API Identifier.
+     * @return Published or unpublished input stream.
      * @throws APIManagementException If a database error occurs.
      */
-    void updateApiThemeStatus(String organization, String action, String apiId)
-            throws APIManagementException;
+    InputStream updateApiThemeStatus(String organization, String action, String apiId) throws APIManagementException;
 
     /**
      * Deletes an API theme.

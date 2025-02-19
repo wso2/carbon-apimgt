@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.impl.dto.devportal.ApiMetaDataDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.security.GeneralSecurityException;
@@ -177,6 +178,26 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
             throw new APIManagementException("Unable to find an organization in " + baseUrl + " that matches the tenant."
                     + "Hence fails to un-publish from " + baseUrl);
         }
+    }
+
+    @Override
+    public void publishAPIContent(String organization, String refId, InputStream content) throws APIManagementException {
+
+    }
+
+    @Override
+    public void unpublishAPIContent(String organization, String refId) throws APIManagementException {
+
+    }
+
+    @Override
+    public void publishOrgContent(String organization, InputStream content) throws APIManagementException {
+
+    }
+
+    @Override
+    public void unpublishOrgContent(String organization) throws APIManagementException {
+
     }
 
     private static String getDefinitionForDevPortal (API api) throws APIManagementException {
