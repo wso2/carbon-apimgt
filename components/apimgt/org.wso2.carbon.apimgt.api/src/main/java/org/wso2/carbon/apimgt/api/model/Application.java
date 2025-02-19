@@ -59,6 +59,7 @@ public class Application {
     private int subscriptionCount;
     private String keyManager;
     private String sharedOrganization;
+    private String subOrganization; // organization of the application within the super organization.
     
     public String getCreatedTime() {
         return createdTime;
@@ -329,5 +330,13 @@ public class Application {
 
     public void setSharedOrganization(String sharedOrganization) {
         this.sharedOrganization = sharedOrganization;
+    }
+
+    public String getSubOrganization() {
+        return subOrganization;
+    }
+
+    public void setSubOrganization(String subOrganization) {
+        this.subOrganization = subOrganization;
     }
 }
