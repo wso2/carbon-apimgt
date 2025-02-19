@@ -2882,6 +2882,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 updatedSwagger = updateSwagger(apiId, apiDefinition, organization);
             }
+            PublisherCommonUtils.checkGovernanceComplianceAsync(apiId, APIMGovernableState.API_UPDATE,
+                    ArtifactType.API, organization);
             return Response.ok().entity(updatedSwagger).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
