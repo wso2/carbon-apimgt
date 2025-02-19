@@ -80,21 +80,29 @@ public class LifeCycleUtils {
         // Dev Portal V2 Publication
         if (Arrays.asList(APIConstants.PUBLISH, APIConstants.REPUBLISH).contains(action)
                 && devPortalHandler.isPortalEnabled()) {
-            API api = apiTypeWrapper.getApi();
-            String refId = devPortalHandler.publishAPIMetadata(orgId, api);
-            // TODO: Put refId method
+            try {
+                API api = apiTypeWrapper.getApi();
+                String refId = devPortalHandler.publishAPIMetadata(orgId, api);
+                apiMgtDAO.addRefId(api.getUuid(), orgId, refId);
+            } catch (APIManagementException e) {
+                log.error(e.getMessage());
+            }
         }
 
-        // Next Gen Dev Portal Un-Publication
+        // Dev Portal V2 Un-Publication
         if (Arrays.asList(APIConstants.DEPRECATE, APIConstants.BLOCK, APIConstants.DEMOTE_TO_CREATED).contains(action)
                 && devPortalHandler.isPortalEnabled()) {
-            // TODO: Get refId Method
-            String refId = "null";
-            devPortalHandler.unpublishAPIMetadata(orgId, apiTypeWrapper.getApi(), refId);
-            // TODO: Remove refId
+            try {
+                API api = apiTypeWrapper.getApi();
+                String refId = apiMgtDAO.getRefId(api.getUuid(), orgId);
+                devPortalHandler.unpublishAPIMetadata(orgId, api, refId);
+                apiMgtDAO.removeRefId(api.getUuid(), orgId);
+            } catch (APIManagementException e) {
+                log.error(e.getMessage());
+            }
         }
 
-        // Change the lifecycle state in the database
+        // Change the lifecycle state in the databases
         addLCStateChangeInDatabase(user, apiTypeWrapper, currentStatus, targetStatus, uuid);
 
         // Add LC state change event to the event queue

@@ -18421,6 +18421,72 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Store refId to AM_DEVPORTAL_API_REFERENCE.
+     *
+     * @param apiId        API identifier.
+     * @param refId        API reference ID.
+     * @param organization Organization name.
+     * @throws APIManagementException If a database error occurs.
+     */
+    public void addRefId(String apiId, String refId, String organization) throws APIManagementException {
+        String query = SQLConstants.DevPortalContentConstants.ADD_REF_ID;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, apiId);
+            preparedStatement.setString(2, organization);
+            preparedStatement.setString(3, refId);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to add refId where organization = " + organization + " and API ID = " + apiId, e);
+        }
+    }
+
+    /**
+     * Retrieve REFERENCE_APIID from AM_DEVPORTAL_API_REFERENCE.
+     *
+     * @param apiId        API identifier.
+     * @param organization Organization name.
+     * @return Reference API ID if found, otherwise null.
+     * @throws APIManagementException If a database error occurs.
+     */
+    public String getRefId(String apiId, String organization) throws APIManagementException {
+        String query = SQLConstants.DevPortalContentConstants.GET_REF_ID;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            preparedStatement.setString(1, apiId);
+            preparedStatement.setString(2, organization);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("REFERENCE_APIID");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get refId where organization = " + organization + " and API ID = " + apiId, e);
+        }
+        return null;
+    }
+
+    /**
+     * Remove refId from AM_DEVPORTAL_API_REFERENCE.
+     *
+     * @param apiId        API identifier.
+     * @param organization Organization name.
+     * @throws APIManagementException If a database error occurs.
+     */
+    public void removeRefId(String apiId, String organization) throws APIManagementException {
+        String query = SQLConstants.DevPortalContentConstants.REMOVE_REF_ID;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            connection.setAutoCommit(true);
+            preparedStatement.setString(1, apiId);
+            preparedStatement.setString(2, organization);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            handleException("Failed to remove refId where organization = " + organization + " and API ID = " + apiId, e);
+        }
+    }
+
+    /**
      * Imports a drafted api theme for the given organization and API ID.
      *
      * @param organization Organization name.

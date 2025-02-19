@@ -1060,9 +1060,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         // Update API in new Dev Portal
         DevPortalHandler devPortalHandler = DevPortalHandlerImpl.getInstance();
         if (devPortalHandler.isPortalEnabled() && APIConstants.PUBLISHED.equals(api.getStatus())) {
-            // TODO: Get refId
-            String refId = null;
-            devPortalHandler.updateAPIMetadata(organization, api, refId);
+            try {
+                String refId = apiMgtDAO.getRefId(api.getUuid(), organization);
+                devPortalHandler.updateAPIMetadata(organization, api, refId);
+            } catch (APIManagementException e) {
+                log.error(e.getMessage());
+            }
         }
 
         return api;
@@ -2671,10 +2674,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // Delete from new Developer Portal
                 DevPortalHandler devPortalHandler = DevPortalHandlerImpl.getInstance();
                 if (devPortalHandler.isPortalEnabled()) {
-                    // TODO: Get refId Method
-                    String refId = "null";
-                    devPortalHandler.unpublishAPIMetadata(organization, api, refId);
-                    // TODO: Remove refId
+                    try {
+                        String refId = apiMgtDAO.getRefId(api.getUuid(), organization);
+                        devPortalHandler.unpublishAPIMetadata(organization, api, refId);
+                        apiMgtDAO.removeRefId(api.getUuid(), organization);
+                    } catch (APIManagementException e) {
+                        log.error(e.getMessage());
+                    }
                 }
             } catch (APIManagementException e) {
                 log.error("Error while executing API delete operation on external API stores for API "
