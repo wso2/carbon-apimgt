@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,22 +65,25 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
     private static final String baseUrl = getNewPortalURL();
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Map<String, String> orgIdMap = new ConcurrentHashMap<>();
-    private static SSLConnectionSocketFactory sslsf;
-    private static volatile DevPortalHandlerImpl instance;
+
+    private static final SSLConnectionSocketFactory sslsf;
+    static {
+        try {
+            sslsf = generateSSLSF();
+        } catch (APIManagementException e) {
+            throw new RuntimeException("Failed to initialize SSLConnectionSocketFactory", e);
+        }
+    }
 
     private DevPortalHandlerImpl() {}
 
-    public static DevPortalHandlerImpl getInstance() {
-        if (instance == null) {
-            synchronized (DevPortalHandlerImpl.class) {
-                if (instance == null) {
-                    instance = new DevPortalHandlerImpl();
-                }
-            }
-        }
-        return instance;
+    private static class Holder {
+        private static final DevPortalHandlerImpl INSTANCE = new DevPortalHandlerImpl();
     }
 
+    public static DevPortalHandlerImpl getInstance() {
+        return Holder.INSTANCE;
+    }
 
     private static class HttpResponseData {
         private final int statusCode;
@@ -325,10 +327,7 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
 
     // HTTPS Request Related Methods
 
-    private static synchronized CloseableHttpClient getHttpClient() throws APIManagementException {
-        if (sslsf == null) {
-            sslsf = generateSSLSF();
-        }
+    private static synchronized CloseableHttpClient getHttpClient() {
         return HttpClients.custom().setSSLSocketFactory(sslsf).build();
     }
 
