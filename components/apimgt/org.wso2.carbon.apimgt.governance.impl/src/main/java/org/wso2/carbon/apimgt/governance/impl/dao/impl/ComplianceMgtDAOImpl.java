@@ -197,16 +197,17 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                                           String requestId, List<String> policyIds)
             throws SQLException {
 
+        List<String> newPolicyIds = new ArrayList<>(policyIds);
         List<String> existingPolicyIds = getPolicyIdsForRequest(connection, requestId);
-        policyIds.removeAll(existingPolicyIds);
+        newPolicyIds.removeAll(existingPolicyIds);
 
-        if (policyIds.isEmpty()) {
+        if (newPolicyIds.isEmpty()) {
             return;
         }
 
         String sqlQuery = SQLConstants.ADD_REQ_POLICY_MAPPING;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            for (String policyId : policyIds) {
+            for (String policyId : newPolicyIds) {
                 prepStmnt.setString(1, requestId);
                 prepStmnt.setString(2, policyId);
                 prepStmnt.addBatch();
@@ -240,13 +241,18 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 }
             }
 
+            connection.setAutoCommit(false);
             String sqlQuery = SQLConstants.UPDATE_GOV_REQ_STATUS_TO_PROCESSING;
             try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
                 Timestamp processingTime = new Timestamp(System.currentTimeMillis());
                 prepStmnt.setTimestamp(1, processingTime);
                 prepStmnt.setString(2, request.getId());
                 int affectedRows = prepStmnt.executeUpdate();
+                connection.commit();
                 return affectedRows > 0;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
             }
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes

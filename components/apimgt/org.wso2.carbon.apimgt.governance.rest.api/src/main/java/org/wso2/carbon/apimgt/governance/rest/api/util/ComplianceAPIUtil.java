@@ -227,15 +227,20 @@ public class ComplianceAPIUtil {
             rulesetValidationResults.add(resultDTO);
         }
 
-        // If all rulesets are passed, set the policy adherence status to passed
-        if (rulesetValidationResults.stream().allMatch(
-                rulesetValidationResultDTO -> (rulesetValidationResultDTO.getStatus() ==
-                        RulesetValidationResultWithoutRulesDTO.StatusEnum.PASSED) ||
-                        (rulesetValidationResultDTO.getStatus() ==
-                                RulesetValidationResultWithoutRulesDTO.StatusEnum.UNAPPLIED))) {
-            policyAdherenceWithRulesetsDTO.setStatus(PolicyAdherenceWithRulesetsDTO.StatusEnum.FOLLOWED);
-        } else {
+        /* If one of the rulesets is violated, set the policy adherence status to violated
+         * If all rulesets are un applied policy adherence status to unapplied
+         *
+         * Else policy adherence status to followed
+         * passed, set the policy adherence status to followed
+         */
+        if (rulesetValidationResults.stream().anyMatch(dto -> dto.getStatus()
+                == RulesetValidationResultWithoutRulesDTO.StatusEnum.FAILED)) {
             policyAdherenceWithRulesetsDTO.setStatus(PolicyAdherenceWithRulesetsDTO.StatusEnum.VIOLATED);
+        } else if (rulesetValidationResults.stream().allMatch(dto -> dto.getStatus()
+                == RulesetValidationResultWithoutRulesDTO.StatusEnum.UNAPPLIED)) {
+            policyAdherenceWithRulesetsDTO.setStatus(PolicyAdherenceWithRulesetsDTO.StatusEnum.UNAPPLIED);
+        } else {
+            policyAdherenceWithRulesetsDTO.setStatus(PolicyAdherenceWithRulesetsDTO.StatusEnum.FOLLOWED);
         }
 
         policyAdherenceWithRulesetsDTO.setRulesetValidationResults(rulesetValidationResults);
