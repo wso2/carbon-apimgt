@@ -530,10 +530,12 @@ public class APIMappingUtil {
             GatewayAgentConfiguration gatewayConfiguration =
                     org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().
                     getExternalGatewayConnectorConfiguration(model.getGatewayType());
-            GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation()).
-                    getDeclaredConstructor().newInstance();
-            if (deployer != null) {
-                deployer.transformAPI(model);
+            if (gatewayConfiguration != null) {
+                GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation()).
+                        getDeclaredConstructor().newInstance();
+                if (deployer != null) {
+                    deployer.transformAPI(model);
+                }
             }
         } catch (NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException |
                  InvocationTargetException e) {

@@ -3445,9 +3445,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         hostsWithSchemes = getHostWithSchemeMappingForEnvironment(api, apiTenantDomain, environmentName);
 
         Environment environment = APIUtil.getEnvironments().get(environmentName);
-        Map<String, GatewayAgentConfiguration> gatewayConfigurations = ServiceReferenceHolder.getInstance()
-                .getExternalGatewayConnectorConfigurations();
-        GatewayAgentConfiguration gatewayConfiguration = gatewayConfigurations.get(environment.getGatewayType());
+        GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
+                .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
         if (gatewayConfiguration != null) {
             api.setContext("");
             updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
@@ -3625,9 +3624,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
 
             VHost vhost = VHostUtils.getVhostFromEnvironment(environment, host);
-            Map<String, GatewayAgentConfiguration> gatewayConfigurations =
-                    ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
-            GatewayAgentConfiguration gatewayConfiguration = gatewayConfigurations.get(environment.getGatewayType());
+            GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
+                    .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
 
             boolean isExternalGateway = false;
             GatewayDeployer gatewayDeployer = null;

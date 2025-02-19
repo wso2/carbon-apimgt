@@ -94,7 +94,8 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
                     GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
                             .getExternalGatewayConnectorConfiguration(environments.get(deploymentEnv).getGatewayType());
                     GatewayDeployer deployer = null;
-                    if (StringUtils.isNotEmpty(gatewayConfiguration.getImplementation())) {
+                    if (gatewayConfiguration != null &&
+                            StringUtils.isNotEmpty(gatewayConfiguration.getImplementation())) {
                         deployer = GatewayHolder.getTenantGatewayInstance(deployAPIInGatewayEvent.getTenantDomain(),
                                 deploymentEnv);
                     }

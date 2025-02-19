@@ -11453,17 +11453,19 @@ public final class APIUtil {
             GatewayAgentConfiguration gatewayConfiguration = org.wso2.carbon.apimgt.impl.internal.
                     ServiceReferenceHolder.getInstance().
                     getExternalGatewayConnectorConfiguration(api.getGatewayType());
-            GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation())
-                    .getDeclaredConstructor().newInstance();
-            if (deployer != null) {
-                GatewayAPIValidationResult errorList = null;
-                errorList = deployer.validateApi(api);
-                if (!errorList.getErrors().isEmpty()) {
-                    throw new ExternalGatewayAPIValidationException(
-                            "Error occurred while validating the API with the federated gateway: "
-                                    + api.getGatewayType(),
-                            ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
-                                    api.getGatewayType(), errorList.toString()));
+            if (gatewayConfiguration != null) {
+                GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation())
+                        .getDeclaredConstructor().newInstance();
+                if (deployer != null) {
+                    GatewayAPIValidationResult errorList = null;
+                    errorList = deployer.validateApi(api);
+                    if (!errorList.getErrors().isEmpty()) {
+                        throw new ExternalGatewayAPIValidationException(
+                                "Error occurred while validating the API with the federated gateway: "
+                                        + api.getGatewayType(),
+                                ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
+                                        api.getGatewayType(), errorList.toString()));
+                    }
                 }
             }
         } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
