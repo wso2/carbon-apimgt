@@ -35,11 +35,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalProcessingConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.dto.devportal.ApiMetaDataDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -109,88 +107,71 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
     }
 
     @Override
-    public String publishAPIMetadata(String organization, API api) {
-        try {
-            String orgId = getOrgId(organization);
-            if (orgId != null) {
-                String apiDefinition = getDefinitionForDevPortal(api);
-                String apiMetaData = getApiMetaData(api);
-
-                HttpResponseData responseData = apiPostAction(orgId, apiMetaData, apiDefinition);
-
-                if (responseData.getStatusCode() == 201) {
-                    log.info("API " + api.getId().getApiName() + " successfully published to " + baseUrl);
-                    return "refId";
-                } else {
-                    log.error("Failed to publish API " + api.getId().getApiName() + " to " + baseUrl + ". " +
-                            "Status code: " + responseData.getStatusCode());
-                }
-            } else {
-                log.error("Unable to find an organization in " + baseUrl + " that matches the tenant." +
-                        "Hence failed to publish in " + baseUrl);
-            }
-        } catch (APIManagementException e) {
-            log.error("Error while publishing API to " + baseUrl + ". Error: " + e.getMessage());
-        }
-        return null;
-    }
-
-    @Override
-    public void updateAPIMetadata(String organization, API api, String refId) {
-        try {
+    public String publishAPIMetadata(String organization, API api) throws APIManagementException {
+        String orgId = getOrgId(organization);
+        if (orgId != null) {
             String apiDefinition = getDefinitionForDevPortal(api);
             String apiMetaData = getApiMetaData(api);
-            String orgId = getOrgId(organization);
-            if (orgId != null) {
-                String apiId = getApiId(orgId, api.getId().getApiName(), api.getId().getVersion());
-                if (apiId != null) {
-                    HttpResponseData apiPutResponseData = apiPutAction(orgId, apiId, apiDefinition, apiMetaData);
-                    if (apiPutResponseData.getStatusCode() == 200) {
-                        log.info("API " + api.getId().getApiName() + " successfully updated in " + baseUrl);
-                    } else {
-                        log.error("Failed to update API " + api.getId().getApiName() + " in " + baseUrl +
-                                ". Status code: " + apiPutResponseData.getStatusCode());
-                    }
-                } else {
-                    log.error("API is not available in " + baseUrl + ". Hence failed to update in " + baseUrl);
-                }
+
+            HttpResponseData responseData = apiPostAction(orgId, apiMetaData, apiDefinition);
+
+            if (responseData.getStatusCode() == 201) {
+                log.info("API " + api.getId().getApiName() + " successfully published to " + baseUrl);
+                return "refId";
             } else {
-                log.error("Unable to find an organization in " + baseUrl + " that matches the tenant." +
-                        "Hence failed to update in " + baseUrl);
+                throw new APIManagementException("Failed to publish API " + api.getId().getApiName() + " to " + baseUrl
+                        + ". " + "Status code: " + responseData.getStatusCode());
             }
-        } catch (APIManagementException e) {
-            log.error("Error while updating API to " + baseUrl + ". Error: " + e.getMessage());
+        } else {
+            throw new APIManagementException("Unable to find an organization in " + baseUrl + " that matches the tenant."
+                    + "Hence failed to publish in " + baseUrl);
         }
     }
 
     @Override
-    public void unpublishAPIMetadata(String organization, API api, String refId) {
-        try {
-            String orgId = getOrgId(organization);
-            if (orgId != null) {
-                String apiId = getApiId(orgId, api.getId().getApiName(), api.getId().getVersion());
-                if (apiId != null) {
-                    HttpResponseData responseData = apiDeleteAction(orgId, apiId);
-                    if (responseData.getStatusCode() == 200) {
-                        log.info("API " + api.getId().getApiName() + " successfully unpublished from " + baseUrl);
-                    } else if (responseData.getStatusCode() == 404) {
-                        log.warn("API " + api.getId().getApiName() + " is not available in "
-                                + baseUrl + " .Hence API cannot get unpublished from " + baseUrl);
-                    } else {
-                        log.error("Failed to delete API " + api.getId().getApiName() + " from " + baseUrl +
-                                ". Status code: " + responseData.getStatusCode());
-                    }
-                }
+    public void updateAPIMetadata(String organization, API api, String refId) throws APIManagementException {
+        String apiDefinition = getDefinitionForDevPortal(api);
+        String apiMetaData = getApiMetaData(api);
+        String orgId = getOrgId(organization);
+        if (orgId != null) {
+            String apiId = getApiId(orgId, api.getId().getApiName(), api.getId().getVersion());
+            HttpResponseData apiPutResponseData = apiPutAction(orgId, apiId, apiDefinition, apiMetaData);
+            if (apiPutResponseData.getStatusCode() == 200) {
+                log.info("API " + api.getId().getApiName() + " successfully updated in " + baseUrl);
             } else {
-                log.error("Unable to find an organization in " + baseUrl + " that matches the tenant." +
-                        "Hence fails to un-publish from " + baseUrl);
+                throw new APIManagementException("Failed to update API " + api.getId().getApiName() + " in " + baseUrl +
+                        ". Status code: " + apiPutResponseData.getStatusCode());
             }
-        } catch (APIManagementException e) {
-            log.error("Error while un-publishing API from " + baseUrl + ". Error: " + e.getMessage());
+        } else {
+            throw new APIManagementException("Unable to find an organization in " + baseUrl + " that matches the tenant."
+                    + "Hence failed to update in " + baseUrl);
         }
     }
 
-    private static String getDefinitionForDevPortal (API api) throws APIManagementException {
+    @Override
+    public void unpublishAPIMetadata(String organization, API api, String refId) throws APIManagementException {
+        String orgId = getOrgId(organization);
+        if (orgId != null) {
+            String apiId = getApiId(orgId, api.getId().getApiName(), api.getId().getVersion());
+            if (apiId != null) {
+                HttpResponseData responseData = apiDeleteAction(orgId, apiId);
+                if (responseData.getStatusCode() == 200) {
+                    log.info("API " + api.getId().getApiName() + " successfully unpublished from " + baseUrl);
+                } else if (responseData.getStatusCode() == 404) {
+                    throw new APIManagementException("API " + api.getId().getApiName() + " is not available in "
+                            + baseUrl + " .Hence API cannot get unpublished from " + baseUrl);
+                } else {
+                    throw new APIManagementException("Failed to delete API " + api.getId().getApiName() + " from "
+                            + baseUrl + ". Status code: " + responseData.getStatusCode());
+                }
+            }
+        } else {
+            throw new APIManagementException("Unable to find an organization in " + baseUrl + " that matches the tenant."
+                    + "Hence fails to un-publish from " + baseUrl);
+        }
+    }
+
+    private static String getDefinitionForDevPortal (API api) {
         String type = getType(api.getType());
         switch (type) {
             case "REST":
@@ -243,22 +224,20 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
                     Map<String, Object> apiDetails = apiList.get(0);
                     return (String) apiDetails.get("apiID");
                 } else if (apiList.size() > 1) {
-                    log.error("There are multiple APIs for the API name: " + apiName + " & version: " + apiVersion);
-                    return null;
+                    throw new APIManagementException("There are multiple APIs for the API name: " + apiName
+                            + " & version: " + apiVersion);
                 } else {
-                    log.error("No API found for the API name: " + apiName + " & version: " + apiVersion);
-                    return null;
+                    throw new APIManagementException("No API found for the API name: " + apiName + " & version: "
+                            + apiVersion);
                 }
             } catch (JsonProcessingException e) {
                 throw new APIManagementException("Error reading API response: " + e.getMessage(), e);
             }
         } else if (responseData.getStatusCode() == 404) {
-            log.error("API is not available in " + baseUrl + " for the name: " + apiName +
+            throw new APIManagementException("API is not available in " + baseUrl + " for the name: " + apiName +
                     " and version: " + apiVersion);
-            return null;
         } else {
-            log.error("Failed to retrieve API ID. Status code: " + responseData.getStatusCode());
-            return null;
+            throw new APIManagementException("Failed to retrieve API ID. Status code: " + responseData.getStatusCode());
         }
     }
 
