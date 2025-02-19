@@ -1079,7 +1079,7 @@ rulesetContent:
           }
         }
         ```
-      message: Path parameters should be
+      message: Path parameters should be defined on the path level.
 
     paths-no-query-params:
       given:

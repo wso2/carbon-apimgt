@@ -36,8 +36,8 @@ rulesetContent:
           match: "^[a-zA-Z0-9-_\\.]+$"
 
     api-name-length:
-      description: API name should be between 5 and 50 characters.
-      message: "API name must be between 5 and 50 characters."
+      description: API name should be between 1 and 50 characters.
+      message: "API name must be between 1 and 50 characters."
       severity: error
       given: "$.data.name"
       then:
@@ -85,8 +85,8 @@ rulesetContent:
         function: truthy
 
     api-context-no-special-characters:
-      description: API context should not contain whitespaces or special characters except for hyphens, underscores and periods and forward slashes.
-      message: "API context contains spaces or special characters. Use only letters, numbers, hyphens, underscores and periods and forwards slashes."
+      description: API context should not contain whitespaces or special characters except for hyphens, underscores, periods and forward slashes.
+      message: "API context contains spaces or special characters. Use only letters, numbers, hyphens, underscores, periods and forwards slashes."
       severity: error
       given: "$.data.context"
       then:
@@ -95,8 +95,8 @@ rulesetContent:
           match: "^/[/a-zA-Z0-9-_\\.]+$"
 
     api-context-length:
-      description: API context should be between 5 and 200 characters.
-      message: "API context must be between 5 and 200 characters."
+      description: API context should be between 1 and 200 characters.
+      message: "API context must be between 1 and 200 characters."
       severity: error
       given: "$.data.context"
       then:
