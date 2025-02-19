@@ -395,7 +395,12 @@ public class SQLConstants {
                     "JOIN GOV_ARTIFACT GA ON GRR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
                     "JOIN GOV_RULESET_RULE GRULE ON GRR.RULESET_ID = GRULE.RULESET_ID " +
                     "AND GV.RULE_NAME = GRULE.RULE_NAME " +
-                    "WHERE GA.ARTIFACT_REF_ID = ? AND GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ?";
+                    "JOIN GOV_POLICY_RUN GPR ON GA.ARTIFACT_KEY = GPR.ARTIFACT_KEY " +
+                    "JOIN GOV_POLICY_RULESET GPRR ON GPR.POLICY_ID = GPRR.POLICY_ID " +
+                    "AND GRR.RULESET_ID = GPRR.RULESET_ID " +
+                    "WHERE GA.ARTIFACT_REF_ID = ? " +
+                    "AND GA.ARTIFACT_TYPE = ? " +
+                    "AND GA.ORGANIZATION = ?;";
 
     public static final String GET_ALL_EVALUTED_ARTIFACTS = "SELECT DISTINCT GA.ARTIFACT_REF_ID " +
             "FROM GOV_ARTIFACT GA " +
@@ -406,6 +411,7 @@ public class SQLConstants {
             "FROM GOV_ARTIFACT GA " +
             "JOIN GOV_POLICY_RUN GPR ON GA.ARTIFACT_KEY = GPR.ARTIFACT_KEY " +
             "JOIN GOV_RULESET_RUN GRR ON GA.ARTIFACT_KEY = GRR.ARTIFACT_KEY " +
+            "JOIN GOV_POLICY_RULESET GPRR ON GPR.POLICY_ID = GPRR.POLICY_ID " +
             "WHERE GA.ARTIFACT_TYPE = ? AND GA.ORGANIZATION = ? AND GRR.RESULT = 0";
 
     public static final String GET_ARITFCATS_FOR_POLICY_RUN = "SELECT DISTINCT GA.ARTIFACT_REF_ID, GA.ARTIFACT_TYPE " +
