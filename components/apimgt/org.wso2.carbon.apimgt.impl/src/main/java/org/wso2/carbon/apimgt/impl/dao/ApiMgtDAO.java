@@ -18045,7 +18045,7 @@ public class ApiMgtDAO {
                         log.warn("ID cannot be found in drafted state");
                         throw new APIManagementException(ExceptionCodes.ID_CANNOT_BE_FOUND_IN_DRAFTED_STATE);
                     }
-                } else {
+                } else if (DevPortalConstants.UNPUBLISH.equals(action)) {
                     String publishedArtifact = getPublishedArtifactForOrg(connection, organization);
                     if (publishedArtifact != null) {
                         InputStream artifactContent = getArtifactContent(connection, publishedArtifact);
@@ -18079,12 +18079,12 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                if (isThemeUsedByOrg(connection, organization, themeId)) {
+                if (isThemeUsedByOrgAsDrafted(connection, organization, themeId)) {
                     removeArtifact(connection, themeId); // Due to DB rules, foreign ID will also be set to NULL
                     removeOrgIfNoData(connection, organization);
                     connection.commit();
                 } else {
-                    log.warn("User does not have the theme");
+                    log.warn("User does not have the theme as drafted");
                     throw new APIManagementException(ExceptionCodes.USER_DOES_NOT_HAVE_THE_THEME);
                 }
             } catch (SQLException e) {
@@ -18372,8 +18372,8 @@ public class ApiMgtDAO {
      * @param themeId      Theme content's ID.
      * @return Boolean of the theme availability.
      */
-    private boolean isThemeUsedByOrg(Connection connection, String organization, String themeId) throws SQLException {
-        String query = SQLConstants.DevPortalContentConstants.CHECK_IF_ORG_THEME_IS_USED;
+    private boolean isThemeUsedByOrgAsDrafted(Connection connection, String organization, String themeId) throws SQLException {
+        String query = SQLConstants.DevPortalContentConstants.CHECK_IF_DRAFTED_ORG_THEME_IS_USED;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, themeId);
             preparedStatement.setString(2, themeId);
@@ -18544,7 +18544,7 @@ public class ApiMgtDAO {
                         log.warn("ID cannot be found in drafted state");
                         throw new APIManagementException(ExceptionCodes.ID_CANNOT_BE_FOUND_IN_DRAFTED_STATE);
                     }
-                } else {
+                } else if (DevPortalConstants.UNPUBLISH.equals(action)) {
                     String publishedArtifact = getPublishedArtifactForApi(connection, organization, apiId);
                     if (publishedArtifact != null) {
                         InputStream artifactContent = getArtifactContent(connection, publishedArtifact);
@@ -18579,11 +18579,11 @@ public class ApiMgtDAO {
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                if (isThemeUsedByApi(connection, organization, themeId, apiId)) {
+                if (isThemeUsedByApiAsDrafted(connection, organization, themeId, apiId)) {
                     removeArtifact(connection, themeId); // Due to DB rules, foreign ID will also set to NULL
                     removeApiIfNoData(connection, organization, apiId);
                 } else {
-                    log.warn("User does not have the theme");
+                    log.warn("User does not have the theme as drafted");
                     throw new APIManagementException(ExceptionCodes.USER_DOES_NOT_HAVE_THE_THEME);
                 }
                 connection.commit();
@@ -18792,9 +18792,9 @@ public class ApiMgtDAO {
      * @param apiId        API Identifier.
      * @return Boolean of the theme availability.
      */
-    private boolean isThemeUsedByApi(Connection connection, String organization, String themeId, String apiId)
+    private boolean isThemeUsedByApiAsDrafted(Connection connection, String organization, String themeId, String apiId)
             throws SQLException {
-        String query = SQLConstants.DevPortalContentConstants.CHECK_IF_API_THEME_IS_USED;
+        String query = SQLConstants.DevPortalContentConstants.CHECK_IF_DRAFTED_API_THEME_IS_USED;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, themeId);
             preparedStatement.setString(2, themeId);

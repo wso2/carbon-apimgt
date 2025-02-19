@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalConstants;
 import org.wso2.carbon.apimgt.impl.definitions.*;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -5131,6 +5132,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         String action = contentPublishStatusDTO.getAction().value();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         apiProvider.updateApiThemeStatus(tenantDomain, action, apiId);
+        if (DevPortalConstants.PUBLISH.equals(action)) {
+            // PUBLISH call
+        } else if (DevPortalConstants.UNPUBLISH.equals(action)) {
+            // UNPUBLISH Call
+        }
         return Response.status(Response.Status.OK).entity("Status updated successfully").build();
     }
 

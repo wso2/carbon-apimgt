@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalConstants;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.OrgThemesApiService;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -121,6 +122,11 @@ public class OrgThemesApiServiceImpl implements OrgThemesApiService {
             String action = contentPublishStatusDTO.getAction().value();
             APIAdminImpl apiAdmin = new APIAdminImpl();
             apiAdmin.updateOrgThemeStatus(tenantDomain, action);
+            if (DevPortalConstants.PUBLISH.equals(action)) {
+                // PUBLISH call
+            } else if (DevPortalConstants.UNPUBLISH.equals(action)) {
+                // UNPUBLISH Call
+            }
             return Response.status(Response.Status.OK).entity("Status updated successfully").build();
     }
 }
