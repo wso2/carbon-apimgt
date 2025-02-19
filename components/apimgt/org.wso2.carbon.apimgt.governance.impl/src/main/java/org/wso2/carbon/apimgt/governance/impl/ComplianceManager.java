@@ -713,8 +713,8 @@ public class ComplianceManager {
                                                  String organization) throws APIMGovernanceException {
         Set<String> violatedPolicies = new HashSet<>();
         for (String policy : evaluatedPolicies) {
-            List<String> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policy, organization).stream()
-                    .map(Ruleset::getId).collect(Collectors.toList());
+            List<String> rulesets = policyMgtDAO.getRulesetsByPolicyId(policy, organization).stream()
+                    .map(RulesetInfo::getId).collect(Collectors.toList());
             if (violatedRulesets.stream().anyMatch(rulesets::contains)) {
                 violatedPolicies.add(policy);
             }
