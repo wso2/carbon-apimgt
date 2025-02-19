@@ -116,8 +116,18 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
             HttpResponseData responseData = apiPostAction(orgId, apiMetaData, apiDefinition);
 
             if (responseData.getStatusCode() == 201) {
-                log.info("API " + api.getId().getApiName() + " successfully published to " + baseUrl);
-                return "refId";
+                try {
+                    log.info("API " + api.getId().getApiName() + " successfully published to " + baseUrl);
+                    Map<?, ?> jsonMap = objectMapper.readValue(responseData.getResponseBody(), Map.class);
+                    String apiId = (String) jsonMap.get("apiID");
+                    if (apiId == null || apiId.isEmpty()) {
+                        throw new APIManagementException("Reference ID was not found in publication response");
+                    } else {
+                        return apiId;
+                    }
+                } catch (JsonProcessingException e) {
+                    throw new APIManagementException("Error while processing Json response: " + e.getMessage(), e);
+                }
             } else {
                 throw new APIManagementException("Failed to publish API " + api.getId().getApiName() + " to " + baseUrl
                         + ". " + "Status code: " + responseData.getStatusCode());
