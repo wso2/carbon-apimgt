@@ -2868,7 +2868,8 @@ public final class APIConstants {
         KEY_TEMPLATE,
         CORRELATION_CONFIG,
         GATEWAY_POLICY,
-        LLM_PROVIDER
+        LLM_PROVIDER,
+        LABEL
     }
 
     // Supported Event Types
@@ -2908,7 +2909,10 @@ public final class APIConstants {
         CUSTOM_POLICY_UPDATE,
         UPDATE_CORRELATION_CONFIGS,
         DEPLOY_POLICY_MAPPING_IN_GATEWAY,
-        REMOVE_POLICY_MAPPING_FROM_GATEWAY
+        REMOVE_POLICY_MAPPING_FROM_GATEWAY,
+        LABEL_CREATE,
+        LABEL_UPDATE,
+        LABEL_DELETE
     }
 
     public enum EventAction {

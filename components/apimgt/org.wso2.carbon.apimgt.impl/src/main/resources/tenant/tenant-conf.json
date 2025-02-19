@@ -383,11 +383,11 @@
       },
       {
         "Name":"apim:gov_rule_read",
-        "Roles":"admin,Internal/publisher,Internal/creator"
+        "Roles":"admin,Internal/publisher,Internal/creator,Internal/observer"
       },
       {
         "Name": "apim:gov_result_read",
-        "Roles": "admin,Internal/publisher,Internal/creator"
+        "Roles": "admin,Internal/publisher,Internal/creator,Internal/observer"
       },
       {
         "Name": "apim:gov_policy_manage",
@@ -395,7 +395,7 @@
       },
       {
         "Name": "apim:gov_policy_read",
-        "Roles": "admin,Internal/publisher,Internal/creator"
+        "Roles": "admin,Internal/publisher,Internal/creator,Internal/observer"
       }
     ]
   },
