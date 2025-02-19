@@ -241,13 +241,18 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 }
             }
 
+            connection.setAutoCommit(false);
             String sqlQuery = SQLConstants.UPDATE_GOV_REQ_STATUS_TO_PROCESSING;
             try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
                 Timestamp processingTime = new Timestamp(System.currentTimeMillis());
                 prepStmnt.setTimestamp(1, processingTime);
                 prepStmnt.setString(2, request.getId());
                 int affectedRows = prepStmnt.executeUpdate();
+                connection.commit();
                 return affectedRows > 0;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
             }
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes
