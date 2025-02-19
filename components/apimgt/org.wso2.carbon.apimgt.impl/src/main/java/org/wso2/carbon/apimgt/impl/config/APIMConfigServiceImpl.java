@@ -209,7 +209,14 @@ public class APIMConfigServiceImpl implements APIMConfigService {
                 SUBSCRIPTION_APPROVAL_MANAGE_SCOPE,
                 PUBLISHER_ORG_READ,
                 ADMIN_ORG_MANAGE,
-                ADMIN_ORG_READ
+                ADMIN_ORG_READ,
+                "apim:gov_rule_read",
+                "apim:gov_rule_manage",
+                "apim:gov_result_read",
+                "apim:gov_policy_manage",
+                "apim:gov_policy_read",
+                "apim:llm_provider_read",
+                "apim:llm_provider_manage",
             };
         
         ArrayList<String> missingScopesList = new ArrayList<>(Arrays.asList(scopesToCheck));
@@ -242,10 +249,15 @@ public class APIMConfigServiceImpl implements APIMConfigService {
             JsonObject newScope = new JsonObject();
             newScope.addProperty("Name", missingScope);
             if (missingScope.equals(SUBSCRIPTION_APPROVAL_VIEW_SCOPE) ||
-                    missingScope.equals(SUBSCRIPTION_APPROVAL_MANAGE_SCOPE)) {
+                    missingScope.equals(SUBSCRIPTION_APPROVAL_MANAGE_SCOPE) ||
+                    missingScope.equals("apim:llm_provider_read")) {
                 newScope.addProperty("Roles", "admin,Internal/publisher");
             } else if (missingScope.equals(PUBLISHER_ORG_READ)) {
                 newScope.addProperty("Roles", "admin,Internal/creator");
+            } else if (missingScope.equals("gov_result_read") || missingScope.equals("gov_rule_read") ||
+                    missingScope.equals("gov_policy_read")) {
+                newScope.addProperty("Roles",
+                        "admin,Internal/publisher,Internal/creator,Internal/observer");
             } else {
                 newScope.addProperty("Roles", "admin");
             }
@@ -253,8 +265,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         }
               
         // Convert the modified JSON back to a string
-        String modifiedJson = jsonObject.toString();
-        return modifiedJson;
+        return jsonObject.toString();
     }
 
     @Override
