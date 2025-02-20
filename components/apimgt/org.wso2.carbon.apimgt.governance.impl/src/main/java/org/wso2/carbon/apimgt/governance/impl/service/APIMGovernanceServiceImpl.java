@@ -124,7 +124,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      * Evaluate compliance of the artifact synchronously
      *
      * @param artifactRefId          Artifact Reference ID (ID of the artifact on APIM side)
-     * @param revisionNo             Revision number
+     * @param revisionId             Revision number
      * @param artifactType           Artifact type ArtifactType.API
      * @param state                  State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
      * @param artifactProjectContent This is a map of RuleType and String which contains the content of the artifact
@@ -139,7 +139,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      * @throws APIMGovernanceException If an error occurs while evaluating compliance
      */
     @Override
-    public ArtifactComplianceInfo evaluateComplianceSync(String artifactRefId, String revisionNo,
+    public ArtifactComplianceInfo evaluateComplianceSync(String artifactRefId, String revisionId,
                                                          ArtifactType artifactType, APIMGovernableState state,
                                                          Map<RuleType, String> artifactProjectContent,
                                                          String organization) throws APIMGovernanceException {
@@ -161,7 +161,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                 artifactType, state, organization);
 
         ArtifactComplianceInfo artifactComplianceInfo = complianceManager.handleComplianceEvalSync
-                (artifactRefId, revisionNo, artifactType, applicablePolicyIds,
+                (artifactRefId, revisionId, artifactType, applicablePolicyIds,
                         artifactProjectContent, state, organization);
 
         // Though compliance is evaluated sync , we need to evaluate the compliance for all dependent states async to

@@ -156,12 +156,12 @@ public interface ArtifactGovernanceHandler {
      * This method is used to get the artifact project zip
      *
      * @param artifactRefId artifact reference id (uuid on APIM side)
-     * @param revsionNo     revision number of the artifact (can be null)
+     * @param revisionId     revision number of the artifact (can be null)
      * @param organization  organization name
      * @return artifact content
      * @throws APIMGovernanceException if an error occurs while getting the artifact zip
      */
-    byte[] getArtifactProject(String artifactRefId, String revsionNo, String organization)
+    byte[] getArtifactProject(String artifactRefId, String revisionId, String organization)
             throws APIMGovernanceException;
 
 

@@ -468,7 +468,7 @@ public class ComplianceManager {
      * Handle API Compliance Evaluation Request Sync
      *
      * @param artifactRefId          Artifact Reference ID (ID of the artifact on APIM side)
-     * @param revisionNo             Revision number
+     * @param revisionId             Revision number
      * @param artifactType           Artifact Type
      * @param govPolicies            List of governance policies to be evaluated
      * @param artifactProjectContent Map of artifact content
@@ -479,7 +479,7 @@ public class ComplianceManager {
      */
 
     public ArtifactComplianceInfo handleComplianceEvalSync(String artifactRefId,
-                                                           String revisionNo, ArtifactType artifactType,
+                                                           String revisionId, ArtifactType artifactType,
                                                            List<String> govPolicies,
                                                            Map<RuleType, String> artifactProjectContent,
                                                            APIMGovernableState state, String organization)
@@ -496,7 +496,7 @@ public class ComplianceManager {
                         ". Loading content from DB.");
             }
 
-            byte[] project = APIMGovernanceUtil.getArtifactProjectWithRevision(artifactRefId, revisionNo, artifactType,
+            byte[] project = APIMGovernanceUtil.getArtifactProjectWithRevision(artifactRefId, revisionId, artifactType,
                     organization);
 
             if (project == null) {
