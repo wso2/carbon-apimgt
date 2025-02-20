@@ -788,15 +788,17 @@ public enum ExceptionCodes implements ErrorHandler {
             "Requested API endpoint with id '%s' not found."),
     ERROR_UPDATING_API_ENDPOINT(902041, "Error while updating the API endpoint.", 500,
             "Error while updating the API endpoint."),
-    ERROR_ADDING_API_ENDPOINT(902042, "Failed to add endpoint to API.", 500,
+    ENDPOINT_READONLY(902042, "API endpoint is read only", 400,
+            "API endpoint with UUID %s is read only"),
+    ERROR_ADDING_API_ENDPOINT(902043, "Failed to add endpoint to API.", 500,
             "Error while adding API endpoint."),
-    ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API(902043, "Mandatory endpoint config is missing in endpoint",
+    ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API(902044, "Mandatory endpoint config is missing in endpoint",
             500, "Mandatory endpoint config is either missing or empty"),
-    ERROR_READING_API_ENDPOINTS_FILE(902044, "Error while reading API endpoints from the endpoints file",
+    ERROR_READING_API_ENDPOINTS_FILE(902045, "Error while reading API endpoints from the endpoints file",
             400, "Error while reading API endpoints from the endpoints file"),
-    ERROR_ADDING_API_ENDPOINTS(902045, "Error while adding API Endpoints to the API", 500,
+    ERROR_ADDING_API_ENDPOINTS(902046, "Error while adding API Endpoints to the API", 500,
             "Error while adding API Endpoint to the API"),
-    ERROR_DELETING_API_ENDPOINT(902046, "Error while deleting API endpoint", 500,
+    ERROR_DELETING_API_ENDPOINT(902047, "Error while deleting API endpoint", 500,
             "Error while deleting API endpoint with UUID '%s'."),;
     private final long errorCode;
     private final String errorMessage;
