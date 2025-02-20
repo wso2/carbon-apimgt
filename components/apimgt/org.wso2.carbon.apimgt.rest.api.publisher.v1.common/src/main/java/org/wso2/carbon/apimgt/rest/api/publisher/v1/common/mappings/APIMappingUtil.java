@@ -363,7 +363,7 @@ public class APIMappingUtil {
             String visibleOrgs = StringUtils.join(dto.getVisibleOrganizations(), ',');
             model.setVisibleOrganizations(visibleOrgs);
         } else {
-            model.setVisibleOrganizations(APIConstants.DEFAULT_VISIBLE_ORG);
+            model.setVisibleOrganizations(APIConstants.VISIBLE_ORG_NONE);
         }
 
         List<String> accessControlRoles = dto.getAccessControlRoles();
