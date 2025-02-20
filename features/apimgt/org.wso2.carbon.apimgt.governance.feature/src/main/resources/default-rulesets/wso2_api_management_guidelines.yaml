@@ -68,7 +68,7 @@ rulesetContent:
         }
         ```
       message: "API name should not contain the version."
-      severity: error
+      severity: warn
       given: "$.data.name"
       then:
         function: pattern
@@ -92,7 +92,7 @@ rulesetContent:
       then:
         function: pattern
         functionOptions:
-          match: "^/[/a-zA-Z0-9-_\\.]+$"
+          match: '^/[\{\}/a-zA-Z0-9-_\\.]+$'
 
     api-context-length:
       description: API context should be between 1 and 200 characters.
@@ -156,7 +156,7 @@ rulesetContent:
         }
         ```
       message: "API context should not contain the version."
-      severity: error
+      severity: warn
       given: "$.data.context"
       then:
         function: pattern
@@ -171,26 +171,6 @@ rulesetContent:
       then:
         field: "version"
         function: truthy
-
-    api-version-semantic-versioning:
-      description: >
-        API version should follow semantic versioning (x.y.z), where x, y, z are numeric.
-
-        **Correct Examples**:
-        - `"1.0.0"`
-        - `"2.3.11"`
-
-        **Incorrect Examples**:
-        - `"v1.0.0"`
-        - `"1.0"`
-        - `"1.0.0-beta"`
-      message: "API version should follow semantic versioning."
-      severity: error
-      given: "$.data.version"
-      then:
-        function: pattern
-        functionOptions:
-          match: '^[0-9]+\.[0-9]+\.[0-9]+$'
 
     api-no-unlimited-business-plan:
       description: API should not have an unlimited business plan.
@@ -224,7 +204,7 @@ rulesetContent:
     api-tags-count:
       description: API should have at least one tag.
       message: "API should have at least one tag."
-      severity: error
+      severity: warn
       given: "$.data.tags"
       then:
         function: length
@@ -270,7 +250,7 @@ rulesetContent:
     api-business-owner-email-format:
       description: Checks that the business owner’s email is valid.
       message: "Business owner email seems invalid. Please use a proper email format."
-      severity: warn
+      severity: error
       given: "$.data.businessInformation"
       then:
         field: "businessOwnerEmail"
@@ -308,22 +288,13 @@ rulesetContent:
     api-technical-owner-email-format:
       description: Checks that the technical owner’s email is valid.
       message: "Technical owner email seems invalid. Please use a proper email format."
-      severity: warn
+      severity: error
       given: "$.data.businessInformation"
       then:
         field: "technicalOwnerEmail"
         function: pattern
         functionOptions:
           match: '^[^@\s]+@[^@\s]+\.[^@\s]+$'
-
-    api-cors-configuration-enabled:
-      description: Checks that the CORS configuration is enabled.
-      message: "CORS configuration is not enabled."
-      severity: warn
-      given: "$.data.corsConfiguration"
-      then:
-        field: "corsConfigurationEnabled"
-        function: truthy
 
     api-endpointConfig-production-required:
       description: Confirms that a production endpoint is provided.
@@ -353,3 +324,14 @@ rulesetContent:
         function: pattern
         functionOptions:
           notMatch: 'Unlimited'
+
+  api-resources-security-required:
+    description: Checks that security is enabled for all resources.
+    message: "Security is not enabled for all resources."
+    severity: error
+    given: "$.data.operations.*"
+    then:
+      field: "authType"
+      function: pattern
+      functionOptions:
+        notMatch: 'None'
