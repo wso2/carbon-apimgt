@@ -101,8 +101,10 @@ public class ComplianceManager {
         for (ArtifactInfo artifact : artifacts) {
             String artifactRefId = artifact.getArtifactRefId();
             ArtifactType artifactType = artifact.getArtifactType();
-            complianceMgtDAO.addComplianceEvalRequest(artifactRefId, artifactType,
-                    Collections.singletonList(policyId), organization);
+            if (APIMGovernanceUtil.isArtifactGovernable(artifactRefId, artifactType)) {
+                complianceMgtDAO.addComplianceEvalRequest(artifactRefId, artifactType,
+                        Collections.singletonList(policyId), organization);
+            }
         }
     }
 

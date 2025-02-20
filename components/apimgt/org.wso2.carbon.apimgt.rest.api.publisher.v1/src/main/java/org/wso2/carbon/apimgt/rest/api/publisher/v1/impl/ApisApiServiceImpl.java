@@ -3910,10 +3910,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 .get(RestApiConstants.USER_REST_API_SCOPES);
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
 
-        if(dryRun) {
-            Map<String, String> responseMap = PublisherCommonUtils.checkGovernanceComplianceDryRun(fileInputStream,
-                    organization);
-            return Response.ok().entity(responseMap).build();
+        if (dryRun) {
+            String dryRunResults = PublisherCommonUtils
+                    .checkGovernanceComplianceDryRun(fileInputStream, organization);
+            return Response.ok(dryRunResults, MediaType.APPLICATION_JSON).build();
         }
         ImportedAPIDTO importedAPIDTO = importExportAPI.importAPI(fileInputStream, preserveProvider, rotateRevision, overwrite,
                 preservePortalConfigurations, tokenScopes, organization);

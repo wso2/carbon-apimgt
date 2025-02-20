@@ -153,6 +153,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.AI_API_QUOTA_TYPE;
+import static org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.EVENT_COUNT_TYPE;
+
 import static org.wso2.carbon.apimgt.impl.APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.GOVERNANCE_COMPLIANCE_KEY;
 import static org.wso2.carbon.apimgt.impl.APIConstants.PUBLISH;
@@ -364,6 +367,7 @@ public class PublisherCommonUtils {
                 || APIConstants.APITransportType.WEBSUB.toString().equals(originalAPI.getType())
                 || APIConstants.APITransportType.SSE.toString().equals(originalAPI.getType())
                 || APIConstants.APITransportType.ASYNC.toString().equals(originalAPI.getType()));
+        boolean isAIAPI = APIConstants.API_SUBTYPE_AI_API.equals(originalAPI.getSubtype());
 
         Scope[] apiDtoClassAnnotatedScopes = APIDTO.class.getAnnotationsByType(Scope.class);
         boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
@@ -525,9 +529,20 @@ public class PublisherCommonUtils {
         if (!APIUtil.isSubscriptionValidationDisablingAllowed(tenantDomain)) {
             if (apiSecurity != null && (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
                     .contains(APIConstants.API_SECURITY_API_KEY)) && condition) {
-                throw new APIManagementException(
-                        "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
-                        ExceptionCodes.TIER_CANNOT_BE_NULL);
+                Set<Tier> availableThrottlingPolicyList = apiProvider.getTiers();
+                tiersFromDTO = availableThrottlingPolicyList.stream()
+                        .filter(tier -> isApplicableTier(tier, isAsyncAPI, isAIAPI))
+                        .map(Tier::getName)
+                        .findFirst()
+                        .map(Collections::singletonList)
+                        .orElse(Collections.emptyList());
+                apiDtoToUpdate.setPolicies(tiersFromDTO);
+
+                if (tiersFromDTO.isEmpty()) {
+                    throw new APIManagementException(
+                            "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
+                            ExceptionCodes.TIER_CANNOT_BE_NULL);
+                }
             }
         } else {
             if (apiSecurity != null) {
@@ -720,6 +735,54 @@ public class PublisherCommonUtils {
 
         apiToUpdate.setOrganization(originalAPI.getOrganization());
         return apiToUpdate;
+    }
+
+    private static boolean isApplicableTier(Tier tier, boolean isAsyncAPI, boolean isAIAPI) {
+        if (isAsyncAPI) {
+            return isAsyncAPITier(tier);
+        }
+
+        if (isAIAPI) {
+            return isAIAPITier(tier);
+        }
+
+        return isRegularAPITier(tier);
+    }
+
+    /**
+     * Checks if the given tier is an Async API tier.
+     *
+     * @param tier The tier to evaluate.
+     * @return {@code true} if the tier is of type EVENT_COUNT_TYPE, otherwise {@code false}.
+     */
+    private static boolean isAsyncAPITier(Tier tier) {
+        return EVENT_COUNT_TYPE.equals(tier.getQuotaPolicyType());
+    }
+
+    /**
+     * Checks if the given tier is an AI API tier.
+     *
+     * @param tier The tier to evaluate.
+     * @return {@code true} if the tier is of type AI_API_QUOTA_TYPE,
+     *         contains the default subscription-less policy name,
+     *         or has a null quota policy type. Otherwise, returns {@code false}.
+     */
+    private static boolean isAIAPITier(Tier tier) {
+        return AI_API_QUOTA_TYPE.equals(tier.getQuotaPolicyType()) ||
+                tier.getName().contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS) ||
+                tier.getQuotaPolicyType() == null;
+    }
+
+    /**
+     * Checks if the given tier is a regular API tier.
+     *
+     * @param tier The tier to evaluate.
+     * @return {@code true} if the tier is neither an AI API tier nor an Async API tier,
+     *         otherwise {@code false}.
+     */
+    private static boolean isRegularAPITier(Tier tier) {
+        return !AI_API_QUOTA_TYPE.equals(tier.getQuotaPolicyType()) &&
+                !EVENT_COUNT_TYPE.equals(tier.getQuotaPolicyType());
     }
 
     /**
@@ -3472,21 +3535,21 @@ public class PublisherCommonUtils {
      * @param organization    Organization of the logged-in user
      * @return Map of compliance violations
      */
-    public static Map<String, String> checkGovernanceComplianceDryRun(InputStream fileInputStream,
-                                                                      String organization) {
-        Map<String, String> responseMap = new HashMap<>(2);
+    public static String checkGovernanceComplianceDryRun(InputStream fileInputStream,
+                                                         String organization) {
 
         try {
             byte[] fileBytes = IOUtils.toByteArray(fileInputStream);
 
-            ArtifactComplianceDryRunInfo artifactComplianceDryRunInfo = apimGovernanceService
+            ArtifactComplianceDryRunInfo dryRunResults = apimGovernanceService
                     .evaluateComplianceDryRunSync(ArtifactType.API, fileBytes, organization);
-            return responseMap;
+            return ArtifactComplianceDryRunInfo.toJson(dryRunResults);
         } catch (APIMGovernanceException e) {
-            log.error("Error occurred while executing governance ", e);
-        } finally {
-            return responseMap;
+            log.error("Error occurred while executing governance for API in dry run mode", e);
+        } catch (IOException e) {
+            log.error("Error occurred while reading the input stream ", e);
         }
+        return null;
     }
 
     /**
