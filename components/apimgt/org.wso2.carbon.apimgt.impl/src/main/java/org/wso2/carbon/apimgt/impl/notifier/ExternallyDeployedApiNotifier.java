@@ -92,13 +92,12 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
         try {
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
-            String organization = apiMgtDAO.getOrganizationByAPIUUID(apiId);
             List<APIRevisionDeployment> test = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
 
             for (APIRevisionDeployment deployment : test) {
                 String deploymentEnv = deployment.getDeployment();
                 if (gatewayEnvironments.containsKey(deploymentEnv)) {
-                    GatewayDeployer deployer = GatewayHolder.getTenantGatewayInstance(organization, deploymentEnv);
+                    GatewayDeployer deployer = GatewayHolder.getTenantGatewayInstance(apiEvent.tenantDomain, deploymentEnv);
                     if (deployer != null) {
                         try {
                             String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
