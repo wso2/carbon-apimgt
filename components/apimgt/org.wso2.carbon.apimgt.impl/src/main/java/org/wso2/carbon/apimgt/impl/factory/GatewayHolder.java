@@ -99,10 +99,14 @@ public class GatewayHolder {
                 if (environment != null) {
                     GatewayAgentConfiguration gatewayAgentConfiguration = ServiceReferenceHolder.getInstance().
                             getExternalGatewayConnectorConfiguration(environment.getGatewayType());
-                    GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayAgentConfiguration.getImplementation())
-                            .getDeclaredConstructor().newInstance();
-                    deployer.init(environment);
-                    return deployer;
+                    if (gatewayAgentConfiguration != null) {
+                        GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayAgentConfiguration.getImplementation())
+                                .getDeclaredConstructor().newInstance();
+                        deployer.init(environment);
+                        return deployer;
+
+                    }
+                    return null;
                 }
             } catch (APIManagementException | ClassNotFoundException | NoSuchMethodException |
                      InstantiationException | IllegalAccessException | InvocationTargetException e) {

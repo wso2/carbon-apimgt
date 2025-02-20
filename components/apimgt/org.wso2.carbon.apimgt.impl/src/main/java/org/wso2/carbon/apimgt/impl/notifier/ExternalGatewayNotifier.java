@@ -42,13 +42,11 @@ import java.util.Map;
 import java.util.Set;
 
 public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
-    protected ApiMgtDAO apiMgtDAO;
     private static final Log log = LogFactory.getLog(ExternalGatewayNotifier.class);
 
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
         if (APIUtil.isAnyExternalGateWayProviderExists(event.getTenantDomain())) {
-            apiMgtDAO = ApiMgtDAO.getInstance();
             process(event);
         }
         return true;
@@ -78,8 +76,8 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
      * @throws NotifierException if error occurs when deploying APIs to external gateway
      */
     private void deployApi(DeployAPIInGatewayEvent deployAPIInGatewayEvent) throws NotifierException {
-
         boolean deployed;
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         Set<String> gateways = deployAPIInGatewayEvent.getGatewayLabels();
         String apiId = deployAPIInGatewayEvent.getUuid();
 
@@ -130,6 +128,7 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
     private void unDeployApi(DeployAPIInGatewayEvent deployAPIInGatewayEvent) throws NotifierException {
 
         boolean deleted;
+        ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         Set<String> gateways = deployAPIInGatewayEvent.getGatewayLabels();
         String apiId = deployAPIInGatewayEvent.getUuid();
         try {
