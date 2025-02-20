@@ -100,8 +100,8 @@ jobs:
       - name: Checkout Product-APIM
         uses: actions/checkout@v3
         with:
-          repository: wso2/product-apim
-          ref: refs/heads/master
+          repository: hisanhunais/product-apim
+          ref: dependency-upgrade-5
           fetch-depth: '10'
           path: product-apim
       - name: Build product-apim with tests
