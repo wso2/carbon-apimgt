@@ -200,12 +200,6 @@ public class APIAdminImpl implements APIAdmin {
         Environment environmentToStore =  new Environment(environment);
         encryptGatewayConfigurationValues(null, environmentToStore);
         apiMgtDAO.addEnvironment(tenantDomain, environment);
-
-        if (environment.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
-            GatewayConfigurationService gatewayConfigurationService = new GatewayConfigurationServiceImpl();
-            gatewayConfigurationService.addGatewayConfiguration(tenantDomain, environment.getName(),
-                    environment.getGatewayType(), environment);
-        }
         return environment;
     }
 
@@ -220,11 +214,6 @@ public class APIAdminImpl implements APIAdmin {
                     ExceptionCodes.from(ExceptionCodes.READONLY_GATEWAY_ENVIRONMENT, String.format("UUID '%s'", uuid)));
         }
         apiMgtDAO.deleteEnvironment(uuid);
-
-        if (existingEnv.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
-            GatewayConfigurationService gatewayConfigurationService = new GatewayConfigurationServiceImpl();
-            gatewayConfigurationService.removeGatewayConfiguration(tenantDomain, existingEnv.getName());
-        }
     }
 
     @Override
@@ -262,13 +251,6 @@ public class APIAdminImpl implements APIAdmin {
         // Perform a separate task of updating gateway label names
         updateGatewayLabelNameForGatewayPolicies(existingEnv.getDisplayName(), updatedEnvironment.getDisplayName(),
                 tenantDomain);
-
-        if (environment.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
-            GatewayConfigurationService gatewayConfigurationService = new GatewayConfigurationServiceImpl();
-            gatewayConfigurationService.updateGatewayConfiguration(tenantDomain, environment.getName(),
-                    environment.getType(), environment);
-        }
-
         return updatedEnvironment;
     }
 

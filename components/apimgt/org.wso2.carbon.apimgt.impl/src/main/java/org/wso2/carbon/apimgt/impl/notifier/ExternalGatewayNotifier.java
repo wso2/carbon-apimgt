@@ -167,7 +167,7 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
             Map<String, Environment> environments = APIUtil.getEnvironments(deployAPIInGatewayEvent.getTenantDomain());
             for (String label : gatewayLabels) {
                 Environment environment = environments.get(label);
-                if (environment != null && !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getGatewayType())) {
+                if (environment != null && !APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getProvider())) {
                     return true;
                 }
             }
