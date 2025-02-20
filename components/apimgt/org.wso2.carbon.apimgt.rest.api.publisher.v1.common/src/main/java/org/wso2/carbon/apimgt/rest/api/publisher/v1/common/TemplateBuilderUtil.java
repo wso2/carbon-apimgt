@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.axiom.om.OMAttribute;
@@ -32,10 +33,12 @@ import org.json.JSONException;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.TokenBasedThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.EndpointConfigDTO;
 import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
@@ -561,6 +564,7 @@ public class TemplateBuilderUtil {
         if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype()) && api.getPrimaryProductionEndpointId() != null
                 || api.getPrimarySandboxEndpointId() != null) {
             endpointDTOList = ImportUtils.retrieveEndpointConfigs(extractedFolderPath);
+            addEndpointsFromConfig(endpointDTOList, api);
         }
         JSONObject originalProperties = api.getAdditionalProperties();
         JSONObject modifiedProperties = getModifiedProperties(originalProperties);
@@ -630,6 +634,50 @@ public class TemplateBuilderUtil {
             api.setAdditionalProperties(originalProperties);
         }
         return gatewayAPIDto;
+    }
+
+    /**
+     * Adds production and sandbox endpoints from the API's endpoint configuration to the given endpoint list.
+     *
+     * @param endpointDTOList The list to which the generated endpoints will be added.
+     * @param api             The API containing the endpoint configuration.
+     */
+    private static void addEndpointsFromConfig(List<EndpointDTO> endpointDTOList, API api) {
+
+        if (api.getEndpointConfig() == null) {
+            return;
+        }
+        EndpointConfigDTO endpointConfig = new Gson().fromJson(api.getEndpointConfig(), EndpointConfigDTO.class);
+        if (endpointConfig == null) {
+            return;
+        }
+        if (endpointConfig.getProductionEndpoints() != null) {
+            endpointDTOList.add(createEndpointDTO(api, APIConstants.APIEndpoint.PRODUCTION,
+                    AIAPIConstants.DEFAULT_PRODUCTION_ENDPOINT_NAME, endpointConfig));
+        }
+        if (endpointConfig.getSandboxEndpoints() != null) {
+            endpointDTOList.add(createEndpointDTO(api, APIConstants.APIEndpoint.SANDBOX,
+                    AIAPIConstants.DEFAULT_SANDBOX_ENDPOINT_NAME, endpointConfig));
+        }
+    }
+
+    /**
+     * Creates an EndpointDTO object with the specified parameters.
+     *
+     * @param api            The API associated with the endpoint.
+     * @param stage          The deployment stage (production or sandbox).
+     * @param name           The name of the endpoint.
+     * @param endpointConfig The endpoint configuration.
+     * @return An initialized EndpointDTO instance.
+     */
+    private static EndpointDTO createEndpointDTO(API api, String stage, String name, EndpointConfigDTO endpointConfig) {
+
+        EndpointDTO endpoint = new EndpointDTO();
+        endpoint.setEndpointConfig(endpointConfig);
+        endpoint.setId(api.getUuid() + "--" + stage);
+        endpoint.setName(name);
+        endpoint.setDeploymentStage(stage);
+        return endpoint;
     }
 
     public static GatewayAPIDTO retrieveGatewayAPIDto(API api, Environment environment, String tenantDomain,
@@ -950,9 +998,9 @@ public class TemplateBuilderUtil {
                         .collect(Collectors.groupingBy(SimplifiedEndpoint::getDeploymentStage));
 
                 List<SimplifiedEndpoint> productionEndpoints = new ArrayList<>(
-                        groupedEndpoints.getOrDefault(APIConstants.PRODUCTION, Collections.emptyList()));
+                        groupedEndpoints.getOrDefault(APIConstants.APIEndpoint.PRODUCTION, Collections.emptyList()));
                 List<SimplifiedEndpoint> sandboxEndpoints = new ArrayList<>(
-                        groupedEndpoints.getOrDefault(APIConstants.SANDBOX, Collections.emptyList()));
+                        groupedEndpoints.getOrDefault(APIConstants.APIEndpoint.SANDBOX, Collections.emptyList()));
 
                 SimplifiedEndpoint defaultProductionEndpoint = Optional.ofNullable(api.getPrimaryProductionEndpointId())
                         .map(id -> findEndpointByUuid(productionEndpoints, id))
@@ -963,11 +1011,13 @@ public class TemplateBuilderUtil {
                         .orElseGet(() -> sandboxEndpoints.isEmpty() ? null : sandboxEndpoints.get(0));
 
                 if (defaultProductionEndpoint != null) {
-                    addEndpointsSequence(APIConstants.PRODUCTION, productionEndpoints, defaultProductionEndpoint, api,
+                    addEndpointsSequence(APIConstants.APIEndpoint.PRODUCTION, productionEndpoints,
+                            defaultProductionEndpoint, api,
                             gatewayAPIDTO, builder);
                 }
                 if (defaultSandboxEndpoint != null) {
-                    addEndpointsSequence(APIConstants.SANDBOX, sandboxEndpoints, defaultSandboxEndpoint, api,
+                    addEndpointsSequence(APIConstants.APIEndpoint.SANDBOX, sandboxEndpoints,
+                            defaultSandboxEndpoint, api,
                             gatewayAPIDTO, builder);
                 }
                 apiConfig = builder.getConfigStringForAIAPI(environment, defaultProductionEndpoint,
@@ -1000,13 +1050,13 @@ public class TemplateBuilderUtil {
                 new ByteArrayInputStream(endpointsString.getBytes()));
 
         if (endpointsElement != null) {
-            QName nameAttribute = new QName("name");
+            QName nameAttribute = new QName(APIConstants.OM_ELEMENT_NAME);
             if (endpointsElement.getAttribute(nameAttribute) != null) {
                 endpointsElement.getAttribute(nameAttribute).setAttributeValue(
-                        getEndpointKey(api) + "_EndpointsSeq" + type);
+                        getEndpointKey(api) + AIAPIConstants.ENDPOINT_SEQUENCE + type);
             }
             GatewayContentDTO endpointSequence = new GatewayContentDTO();
-            endpointSequence.setName(getEndpointKey(api) + "_EndpointsSeq" + type);
+            endpointSequence.setName(getEndpointKey(api) + AIAPIConstants.ENDPOINT_SEQUENCE + type);
             endpointSequence.setContent(APIUtil.convertOMtoString(endpointsElement));
             gatewayAPIDTO.setSequenceToBeAdd(
                     addGatewayContentToList(endpointSequence, gatewayAPIDTO.getSequenceToBeAdd()));
@@ -1250,7 +1300,7 @@ public class TemplateBuilderUtil {
 
         if (endpointDTOList != null && !endpointDTOList.isEmpty()) {
             for (EndpointDTO endpointDTO : endpointDTOList) {
-                String endpointType = (APIConstants.PRODUCTION.equals(endpointDTO.getDeploymentStage())) ?
+                String endpointType = (APIConstants.APIEndpoint.PRODUCTION.equals(endpointDTO.getDeploymentStage())) ?
                         APIConstants.API_DATA_PRODUCTION_ENDPOINTS : APIConstants.API_DATA_SANDBOX_ENDPOINTS;
                 String endpointConfigContext = builder
                         .getConfigStringEndpointConfigTemplate(endpointType,

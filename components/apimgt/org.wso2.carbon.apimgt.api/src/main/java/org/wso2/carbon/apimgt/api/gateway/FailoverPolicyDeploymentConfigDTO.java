@@ -19,32 +19,54 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
+/**
+ * DTO representing the deployment configuration for failover policies in API Gateway.
+ */
 public class FailoverPolicyDeploymentConfigDTO {
 
     @SerializedName("targetModel")
     private ModelEndpointDTO targetModelEndpoint;
+
     @SerializedName("fallbackModels")
     private List<ModelEndpointDTO> fallbackModelEndpoints;
 
-    // Getters and setters
+    /**
+     * Gets the target model endpoint.
+     *
+     * @return the target model endpoint
+     */
     public ModelEndpointDTO getTargetModelEndpoint() {
 
         return targetModelEndpoint;
     }
 
+    /**
+     * Sets the target model endpoint.
+     *
+     * @param targetModelEndpoint the target model endpoint to set
+     */
     public void setTargetModelEndpoint(ModelEndpointDTO targetModelEndpoint) {
 
         this.targetModelEndpoint = targetModelEndpoint;
     }
 
+    /**
+     * Gets the list of fallback model endpoints.
+     *
+     * @return the fallback model endpoints
+     */
     public List<ModelEndpointDTO> getFallbackModelEndpoints() {
 
         return fallbackModelEndpoints;
     }
 
+    /**
+     * Sets the list of fallback model endpoints.
+     *
+     * @param fallbackModelEndpoints the fallback model endpoints to set
+     */
     public void setFallbackModelEndpoints(List<ModelEndpointDTO> fallbackModelEndpoints) {
 
         this.fallbackModelEndpoints = fallbackModelEndpoints;
     }
-
 }

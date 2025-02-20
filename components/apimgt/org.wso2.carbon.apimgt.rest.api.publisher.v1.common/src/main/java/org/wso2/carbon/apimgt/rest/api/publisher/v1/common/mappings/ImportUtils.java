@@ -2495,6 +2495,14 @@ public class ImportUtils {
         }
     }
 
+    /**
+     * Retrieves endpoint configurations from a given archive path.
+     * The method attempts to load the endpoint configurations from either a YAML or JSON file.
+     *
+     * @param pathToArchive The file path to the archive containing endpoint configuration files.
+     * @return A list of EndpointDTO objects parsed from the retrieved configuration file.
+     * @throws APIManagementException If an error occurs while reading the endpoint file.
+     */
     public static List<EndpointDTO> retrieveEndpointConfigs(String pathToArchive)
             throws APIManagementException {
 
@@ -2505,16 +2513,13 @@ public class ImportUtils {
         String pathToJsonFile = pathToArchive + File.separator + ImportExportConstants.ENDPOINTS_FILE
                 + ImportExportConstants.JSON_EXTENSION;
         try {
-            // try loading file as YAML
             if (CommonUtil.checkFileExistence(pathToYamlFile)) {
                 log.debug("Found endpoint file " + pathToYamlFile);
                 String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
                 jsonContent = CommonUtil.yamlToJson(yamlContent);
             } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
-                // load as a json fallback
                 log.debug("Found endpoint file " + pathToJsonFile);
-                jsonContent = FileUtils.
-                        readFileToString(new File(pathToJsonFile));
+                jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
             }
             if (jsonContent == null) {
                 log.debug("No endpoint file found to be added, skipping");
@@ -2522,9 +2527,7 @@ public class ImportUtils {
             }
             JsonElement endpointsElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
             JsonArray endpointsArray = endpointsElement.getAsJsonArray();
-
-            Gson gson = new Gson();
-            return gson.fromJson(endpointsArray, new TypeToken<ArrayList<EndpointDTO>>() {
+            return new Gson().fromJson(endpointsArray, new TypeToken<ArrayList<EndpointDTO>>() {
             }.getType());
         } catch (IOException e) {
             throw new APIManagementException("Error in reading endpoint file", e);

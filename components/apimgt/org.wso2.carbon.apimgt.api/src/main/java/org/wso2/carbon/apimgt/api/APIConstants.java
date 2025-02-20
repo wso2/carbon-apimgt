@@ -44,6 +44,7 @@ public class APIConstants {
     public static final String ENDPOINT_SECURITY_PRODUCTION = "production";
     public static final String ENDPOINT_SECURITY_SANDBOX = "sandbox";
     public static final String ENDPOINT_CONFIG_SESSION_TIMEOUT = "sessionTimeOut";
+    public static final String OM_ELEMENT_NAME = "name";
 
     public static class AIAPIConstants {
         public static final String LLM_PROVIDERS = "llmProviders";
@@ -107,7 +108,14 @@ public class APIConstants {
         public static final String REJECT_ENDPOINT = "REJECT";
         public static final String DEFAULT_ENDPOINT = "DEFAULT";
         public static final String EXIT_ENDPOINT = "EXIT";
-        public static final String REMAINING_TOKEN_COUNT_HEADER = "x-ratelimit-remaining-tokens";
-        public static final String REMAINING_REQUEST_COUNT_HEADER = "x-ratelimit-remaining-requests";
+        public static final String REQUEST_PAYLOAD = "REQUEST_PAYLOAD";
+        public static final String REQUEST_HEADERS = "REQUEST_HEADERS";
+        public static final String REQUEST_HTTP_METHOD = "REQUEST_HTTP_METHOD";
+        public static final String REQUEST_REST_URL_POSTFIX = "REQUEST_REST_URL_POSTFIX";
+        public static final String CURRENT_ENDPOINT_INDEX = "CURRENT_ENDPOINT_INDEX";
+        public static final String DEFAULT_PRODUCTION_ENDPOINT_NAME = "DEFAULT PRODUCTION ENDPOINT";
+        public static final String DEFAULT_SANDBOX_ENDPOINT_NAME = "DEFAULT SANDBOX ENDPOINT";
+        public static final String ENDPOINT_SEQUENCE = "_EndpointsSeq";
+
     }
 }
