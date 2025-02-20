@@ -83,7 +83,7 @@ public class LifeCycleUtils {
             try {
                 API api = apiTypeWrapper.getApi();
                 String refId = devPortalHandler.publishAPIMetadata(orgId, api);
-                apiMgtDAO.addRefId(api.getUuid(), orgId, refId);
+                apiMgtDAO.addRefId(api.getUuid(), refId, orgId);
             } catch (APIManagementException e) {
                 log.error(e.getMessage());
             }
