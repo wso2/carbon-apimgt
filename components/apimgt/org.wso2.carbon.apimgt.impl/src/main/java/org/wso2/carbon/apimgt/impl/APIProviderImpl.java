@@ -2556,11 +2556,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // Remove API-Label mappings
                 removeAPILabelMappings(apiUuid);
 
-                // Delete mappings for External deployed APIs
-                if (!api.getGatewayVendor().equalsIgnoreCase(APIConstants.WSO2_GATEWAY_ENVIRONMENT)) {
-                    APIUtil.deleteApiExternalApiMappings(api.getUuid());
-                }
-
                 // Remove Custom Backend entries of the API
                 deleteCustomBackendByAPIID(apiUuid);
                 deleteAPIRevisions(apiUuid, organization);

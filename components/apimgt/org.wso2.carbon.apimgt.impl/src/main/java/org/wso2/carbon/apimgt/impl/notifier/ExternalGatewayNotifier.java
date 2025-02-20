@@ -147,11 +147,11 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
                         String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
                                 environments.get(deploymentEnv).getUuid());
                         if (referenceArtifact == null) {
-                            throw new APIManagementException("API ID is not mapped with AWS API ID");
+                            throw new APIManagementException("API is not mapped with an External API");
                         }
                         deleted = deployer.undeploy(referenceArtifact);
                         if (!deleted) {
-                            throw new NotifierException("Error while deleting API product from Solace broker");
+                            throw new NotifierException("Error while deleting externally deployed API");
                         }
                     }
                 }
