@@ -1796,7 +1796,7 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.wso2.orbit.com.amazonaws</groupId>
+                <groupId>org.wso2.orbit.software.amazon.awssdk</groupId>
                 <artifactId>awslambda</artifactId>
                 <version>${org.wso2.orbit.com.amazonaws.version}</version>
             </dependency>
@@ -2281,8 +2281,8 @@
         <import.package.version.commons.io>[2.4.0,3.0.0)</import.package.version.commons.io>
         <import.package.version.commons.codec>[1.14.0,3.0.0)</import.package.version.commons.codec>
 
-        <com.amazonaws.version>1.12.671</com.amazonaws.version>
-        <org.wso2.orbit.com.amazonaws.version>1.12.671.wso2v1</org.wso2.orbit.com.amazonaws.version>
+        <com.amazonaws.version>2.30.22</com.amazonaws.version>
+        <org.wso2.orbit.com.amazonaws.version>2.30.22.wso2v1</org.wso2.orbit.com.amazonaws.version>
 
         <zipkin.version>2.27.1</zipkin.version>
         <okhttp.wso2.version>4.12.0.wso2v1</okhttp.wso2.version>

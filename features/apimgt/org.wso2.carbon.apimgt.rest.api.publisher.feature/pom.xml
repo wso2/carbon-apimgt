@@ -108,7 +108,7 @@
             <artifactId>swagger-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.com.amazonaws</groupId>
+            <groupId>org.wso2.orbit.software.amazon.awssdk</groupId>
             <artifactId>awslambda</artifactId>
         </dependency>
         <dependency>
@@ -284,7 +284,7 @@
                                 <bundleDef>org.wso2.orbit.com.squareup.okio:okio:${okio.wso2.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.squareup.okhttp:okhttp:${okhttp.wso2.version}</bundleDef>
                                 <bundleDef>
-                                    org.wso2.orbit.com.amazonaws:awslambda:${org.wso2.orbit.com.amazonaws.version}
+                                    org.wso2.orbit.software.amazon.awssdk:awslambda:${org.wso2.orbit.com.amazonaws.version}
                                 </bundleDef>
                                 <bundleDef>
                                     com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${fasterxml.jackson.version}

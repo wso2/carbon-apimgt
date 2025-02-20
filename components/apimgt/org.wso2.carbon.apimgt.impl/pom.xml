@@ -406,7 +406,7 @@
             <artifactId>velocity-engine-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.com.amazonaws</groupId>
+            <groupId>org.wso2.orbit.software.amazon.awssdk</groupId>
             <artifactId>awslambda</artifactId>
         </dependency>
         <dependency>
@@ -579,7 +579,7 @@
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
                             org.eclipse.equinox.http.helper,
                             com.google.gson,
-                            com.amazonaws.*; version="${com.amazonaws.version}",
+                            software.amazon.awssdk.*; version="${com.amazonaws.version}",
                             org.apache.axis2.*; version="${imp.pkg.version.axis2}",
                             org.apache.commons.io.*;version="${import.package.version.commons.io}",
                             org.apache.commons.codec.*;version="${import.package.version.commons.codec}",

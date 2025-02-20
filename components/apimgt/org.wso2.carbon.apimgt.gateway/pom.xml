@@ -310,7 +310,7 @@
             <version>${graphql.java.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.com.amazonaws</groupId>
+            <groupId>org.wso2.orbit.software.amazon.awssdk</groupId>
             <artifactId>awslambda</artifactId>
         </dependency>
         <dependency>
