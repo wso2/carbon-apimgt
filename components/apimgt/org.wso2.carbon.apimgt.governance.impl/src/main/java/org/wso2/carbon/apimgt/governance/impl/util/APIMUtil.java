@@ -204,7 +204,7 @@ public class APIMUtil {
                 APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, true, apiProvider);
                 File apiProject = ExportUtils.exportApi(
                         apiProvider, apiIdentifier, apiDtoToReturn, api, userName,
-                        ExportFormat.YAML, true, true, StringUtils.EMPTY, organization
+                        ExportFormat.YAML, true, true, StringUtils.EMPTY, organization, false
                 ); // returns zip file
                 return Files.readAllBytes(apiProject.toPath());
             } catch (APIManagementException | APIImportExportException | IOException e) {

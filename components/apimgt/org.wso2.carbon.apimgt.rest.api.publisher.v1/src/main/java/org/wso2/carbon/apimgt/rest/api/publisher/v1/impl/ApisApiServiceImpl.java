@@ -286,7 +286,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     (apiId, apiEndpointDTO, organization, apiProvider);
             APIEndpointInfo createdAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, createdAPIEndpointId,
                     organization);
-            APIEndpointDTO createdAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(createdAPIEndpoint);
+            APIEndpointDTO createdAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(createdAPIEndpoint,
+                    organization, false);
             removeAPIEndpointSecrets(createdAPIEndpointDTO);
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId
                     + RestApiConstants.RESOURCE_PATH_API_ENDPOINT + "/" + createdAPIEndpointId;
@@ -363,7 +364,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             CommonUtils.validateAPIExistence(apiId);
             PublisherCommonUtils.updateAPIEndpoint(apiId, endpointId, apIEndpointDTO, organization, apiProvider);
             APIEndpointInfo updatedAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointId, organization);
-            APIEndpointDTO updatedAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(updatedAPIEndpoint);
+            APIEndpointDTO updatedAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(updatedAPIEndpoint,
+                    organization, false);
             removeAPIEndpointSecrets(updatedAPIEndpointDTO);
             return Response.ok().entity(updatedAPIEndpointDTO).build();
         } catch (APIManagementException | JsonProcessingException e) {
