@@ -1424,7 +1424,7 @@ public class PublisherCommonUtils {
             if (!StringUtils.isEmpty(visibleOrgs) && APIConstants.VISIBLE_ORG_ALL.equals(visibleOrgs)) {
                 // IF visibility is all
                 apiToAdd.setVisibleOrganizations(APIConstants.VISIBLE_ORG_ALL);
-            } else if (StringUtils.isEmpty(visibleOrgs) && APIConstants.VISIBLE_ORG_NONE.equals(visibleOrgs)) {
+            } else if (StringUtils.isEmpty(visibleOrgs) || APIConstants.VISIBLE_ORG_NONE.equals(visibleOrgs)) {
                 // IF visibility is none 
                 apiToAdd.setVisibleOrganizations(orgInfo.getOrganizationId()); // set to current org
             } else {
