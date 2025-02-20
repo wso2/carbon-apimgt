@@ -330,6 +330,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response deleteApiEndpoint(String apiId, String endpointUuid, MessageContext messageContext)
             throws APIManagementException {
+
+        //validate if api exists
+        CommonUtils.validateAPIExistence(apiId);
+
+        // Handle scenario where original API endpoints appearing under emdpoint config in API object is tried to be
+        // deleted. This is not allowed. One can delete this only by updating the API endpoint config.
         if (endpointUuid.equals(
                 apiId + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.PRODUCTION) ||
                 endpointUuid.equals(apiId +
@@ -339,11 +345,22 @@ public class ApisApiServiceImpl implements ApisApiService {
             throw new APIManagementException(errorMessage,
                     ExceptionCodes.from(ExceptionCodes.ENDPOINT_READONLY, endpointUuid));
         }
+
+        // Validate if endpoint is defined as a primary endpoint in the API object. If so, it cannot be deleted.
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIDTO apiDTO = getAPIByID(apiId, apiProvider, organization);
+        if (apiDTO.getPrimaryProductionEndpointId().equals(endpointUuid) || apiDTO.getPrimarySandboxEndpointId()
+                .equals(endpointUuid)) {
+            String errorMessage = String.format(
+                    "Failed to delete API Endpoint with UUID %s. This Endpoint is defined as a primary endpoint.",
+                    endpointUuid);
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.ERROR_DELETING_PRIMARY_API_ENDPPOINT, endpointUuid));
+
+        }
+
         try {
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            //validate if api exists
-            CommonUtils.validateAPIExistence(apiId);
             //validate API Endpoint
             APIEndpointInfo existingApiEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointUuid, organization);
             if (existingApiEndpoint != null) {

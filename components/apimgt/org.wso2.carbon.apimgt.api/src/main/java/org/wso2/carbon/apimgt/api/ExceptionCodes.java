@@ -794,14 +794,17 @@ public enum ExceptionCodes implements ErrorHandler {
             "API endpoint with UUID %s is read only"),
     ERROR_ADDING_API_ENDPOINT(902043, "Failed to add endpoint to API.", 500,
             "Error while adding API endpoint."),
-    ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API(902044, "Mandatory endpoint config is missing in endpoint",
-            500, "Mandatory endpoint config is either missing or empty"),
+    ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API(902044, "Mandatory endpoint config is missing " +
+            "in endpoint", 500, "Mandatory endpoint config is either missing or empty"),
     ERROR_READING_API_ENDPOINTS_FILE(902045, "Error while reading API endpoints from the endpoints file",
             400, "Error while reading API endpoints from the endpoints file"),
     ERROR_ADDING_API_ENDPOINTS(902046, "Error while adding API Endpoints to the API", 500,
             "Error while adding API Endpoint to the API"),
     ERROR_DELETING_API_ENDPOINT(902047, "Error while deleting API endpoint", 500,
-            "Error while deleting API endpoint with UUID '%s'."),;
+            "Error while deleting API endpoint with UUID '%s'."),
+    ERROR_DELETING_PRIMARY_API_ENDPPOINT(902048, "Failed to delete API endpoint since endpoint is " +
+            "defined as a primary endpoint", 400,
+            "Failed to delete API endpoint with UUID '%s' since it is defined as a primary endpoint.");
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;
