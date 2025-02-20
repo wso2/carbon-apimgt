@@ -32,7 +32,7 @@ public interface GatewayDeployer {
      *
      * @throws APIManagementException if error occurs when initializing the external gateway deployer
      */
-    void init(GatewayConfiguration configuration) throws APIManagementException;
+    void init(Environment environment) throws APIManagementException;
 
     /**
      * This method returns the type of Gateway

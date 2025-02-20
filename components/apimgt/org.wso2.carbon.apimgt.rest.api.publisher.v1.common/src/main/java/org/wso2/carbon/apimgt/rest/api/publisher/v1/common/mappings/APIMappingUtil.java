@@ -52,6 +52,8 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.BackendThrottlingConfiguration;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
@@ -67,8 +69,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
-import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.lifecycle.CheckListItem;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
@@ -143,6 +143,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -525,15 +526,21 @@ public class APIMappingUtil {
         model.setPrimaryProductionEndpointId(dto.getPrimaryProductionEndpointId());
         model.setPrimarySandboxEndpointId(dto.getPrimarySandboxEndpointId());
 
-        ExternalGatewayDeployer deployer =
-                org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
-                        .getExternalGatewayDeployer(model.getGatewayType());
-        if (deployer != null) {
-            try {
-                deployer.transformAPI(model);
-            } catch (DeployerException e) {
-                throw new APIManagementException("Error while applying gateway standards to the API. ", e);
+        try {
+            GatewayAgentConfiguration gatewayConfiguration =
+                    org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().
+                    getExternalGatewayConnectorConfiguration(model.getGatewayType());
+            if (gatewayConfiguration != null) {
+                GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation()).
+                        getDeclaredConstructor().newInstance();
+                if (deployer != null) {
+                    deployer.transformAPI(model);
+                }
             }
+        } catch (NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException |
+                 InvocationTargetException e) {
+            String msg = "Error while fetching gateway deployer instance";
+            handleException(msg, e);
         }
         return model;
     }

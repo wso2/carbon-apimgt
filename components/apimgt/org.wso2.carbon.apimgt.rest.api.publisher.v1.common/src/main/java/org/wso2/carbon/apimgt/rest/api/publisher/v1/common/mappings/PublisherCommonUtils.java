@@ -2280,6 +2280,10 @@ public class PublisherCommonUtils {
 
         SwaggerData swaggerData = new SwaggerData(existingAPI);
         String updatedApiDefinition = oasParser.populateCustomManagementInfo(apiDefinition, swaggerData);
+
+        //Validate API with Federated Gateway before persisting to registry
+        APIUtil.validateApiWithFederatedGateway(existingAPI);
+
         apiProvider.saveSwaggerDefinition(existingAPI, updatedApiDefinition, organization);
         existingAPI.setSwaggerDefinition(updatedApiDefinition);
     }
