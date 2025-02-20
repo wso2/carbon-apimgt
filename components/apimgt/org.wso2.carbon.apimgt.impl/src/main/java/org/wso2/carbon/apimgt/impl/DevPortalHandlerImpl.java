@@ -119,32 +119,27 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
     @Override
     public String publishAPIMetadata(String organization, API api) throws APIManagementException {
         String orgId = getOrgId(organization);
-        if (orgId != null) {
-            String apiDefinition = getDefinitionForDevPortal(api);
-            String apiMetaData = getApiMetaData(api);
+        String apiDefinition = getDefinitionForDevPortal(api);
+        String apiMetaData = getApiMetaData(api);
 
-            HttpResponseData responseData = apiPostAction(orgId, apiMetaData, apiDefinition);
+        HttpResponseData responseData = apiPostAction(orgId, apiMetaData, apiDefinition);
 
-            if (responseData.getStatusCode() == 201) {
-                try {
-                    log.info("API " + api.getId().getApiName() + " successfully published to " + baseUrl);
-                    Map<?, ?> jsonMap = objectMapper.readValue(responseData.getResponseBody(), Map.class);
-                    String apiId = (String) jsonMap.get("apiID");
-                    if (apiId == null || apiId.isEmpty()) {
-                        throw new APIManagementException("Reference ID was not found in publication response");
-                    } else {
-                        return apiId;
-                    }
-                } catch (JsonProcessingException e) {
-                    throw new APIManagementException("Error while processing Json response: " + e.getMessage(), e);
+        if (responseData.getStatusCode() == 201) {
+            try {
+                log.info("API " + api.getId().getApiName() + " successfully published to " + baseUrl);
+                Map<?, ?> jsonMap = objectMapper.readValue(responseData.getResponseBody(), Map.class);
+                String apiId = (String) jsonMap.get("apiID");
+                if (apiId == null || apiId.isEmpty()) {
+                    throw new APIManagementException("Reference ID was not found in publication response");
+                } else {
+                    return apiId;
                 }
-            } else {
-                throw new APIManagementException("Failed to publish API " + api.getId().getApiName() + " to " + baseUrl
-                        + ". " + "Status code: " + responseData.getStatusCode());
+            } catch (JsonProcessingException e) {
+                throw new APIManagementException("Error while processing Json response: " + e.getMessage(), e);
             }
         } else {
-            throw new APIManagementException("Unable to find an organization in " + baseUrl + " that matches the tenant."
-                    + "Hence failed to publish in " + baseUrl);
+            throw new APIManagementException("Failed to publish API " + api.getId().getApiName() + " to " + baseUrl
+                    + ". " + "Status code: " + responseData.getStatusCode());
         }
     }
 
@@ -153,37 +148,26 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         String apiDefinition = getDefinitionForDevPortal(api);
         String apiMetaData = getApiMetaData(api);
         String orgId = getOrgId(organization);
-        if (orgId != null) {
-            HttpResponseData apiPutResponseData = apiPutAction(orgId, refId, apiDefinition, apiMetaData);
-            if (apiPutResponseData.getStatusCode() == 200) {
-                log.info("API " + api.getId().getApiName() + " successfully updated in " + baseUrl);
-            } else {
-                throw new APIManagementException("Failed to update API " + api.getId().getApiName() + " in " + baseUrl +
-                        ". Status code: " + apiPutResponseData.getStatusCode());
-            }
+        HttpResponseData apiPutResponseData = apiPutAction(orgId, refId, apiDefinition, apiMetaData);
+        if (apiPutResponseData.getStatusCode() == 200) {
+            log.info("API " + api.getId().getApiName() + " successfully updated in " + baseUrl);
         } else {
-            throw new APIManagementException("Unable to find an organization in " + baseUrl + " that matches the tenant."
-                    + "Hence failed to update in " + baseUrl);
+            throw new APIManagementException("Failed to update API " + api.getId().getApiName() + " in " + baseUrl +
+                    ". Status code: " + apiPutResponseData.getStatusCode());
         }
     }
 
     @Override
     public void unpublishAPIMetadata(String organization, API api, String refId) throws APIManagementException {
-        String orgId = getOrgId(organization);
-        if (orgId != null) {
-            HttpResponseData responseData = apiDeleteAction(orgId, refId);
-            if (responseData.getStatusCode() == 200) {
-                log.info("API " + api.getId().getApiName() + " successfully unpublished from " + baseUrl);
-            } else if (responseData.getStatusCode() == 404) {
-                throw new APIManagementException("API " + api.getId().getApiName() + " is not available in "
-                        + baseUrl + " .Hence API cannot get unpublished from " + baseUrl);
-            } else {
-                throw new APIManagementException("Failed to delete API " + api.getId().getApiName() + " from "
-                        + baseUrl + ". Status code: " + responseData.getStatusCode());
-            }
+        HttpResponseData responseData = apiDeleteAction(getOrgId(organization), refId);
+        if (responseData.getStatusCode() == 200) {
+            log.info("API " + api.getId().getApiName() + " successfully unpublished from " + baseUrl);
+        } else if (responseData.getStatusCode() == 404) {
+            throw new APIManagementException("API " + api.getId().getApiName() + " is not available in "
+                    + baseUrl + " .Hence API cannot get unpublished from " + baseUrl);
         } else {
-            throw new APIManagementException("Unable to find an organization in " + baseUrl + " that matches the tenant."
-                    + "Hence fails to un-publish from " + baseUrl);
+            throw new APIManagementException("Failed to delete API " + api.getId().getApiName() + " from "
+                    + baseUrl + ". Status code: " + responseData.getStatusCode());
         }
     }
 
@@ -196,7 +180,8 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         try {
             FileUtils.copyInputStreamToFile(content, apiThemeArchive);
             String imageMetadata = imageMetadataGenerator(apiThemeArchive);
-            HttpResponseData responseData = apiContentPutAction(organization, refId, apiThemeArchive, imageMetadata);
+            String orgId = getOrgId(organization);
+            HttpResponseData responseData = apiContentPutAction(orgId, refId, apiThemeArchive, imageMetadata);
             if (responseData.getStatusCode() == 201) {
                 log.info("Successful");
             } else {
@@ -248,7 +233,7 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
 
     @Override
     public void unpublishAPIContent(String organization, String refId) throws APIManagementException {
-        HttpResponseData responseData = apiContentDeleteAction(organization, refId);
+        HttpResponseData responseData = apiContentDeleteAction(getOrgId(organization), refId);
         if (responseData.getStatusCode() == 200) {
             log.info("Successful");
         } else {
@@ -264,7 +249,7 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         File apiThemeArchive = new File(tempPath, tempFile);
         try {
             FileUtils.copyInputStreamToFile(content, apiThemeArchive);
-            HttpResponseData responseData = orgContentPutAction(organization, apiThemeArchive);
+            HttpResponseData responseData = orgContentPutAction(getOrgId(organization), apiThemeArchive);
             if (responseData.getStatusCode() == 201) {
                 log.info("Successful");
             } else {
@@ -277,7 +262,7 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
 
     @Override
     public void unpublishOrgContent(String organization) throws APIManagementException {
-        HttpResponseData responseData = orgContentDeleteAction(organization);
+        HttpResponseData responseData = orgContentDeleteAction(getOrgId(organization));
         if (responseData.getStatusCode() == 200) {
             log.info("Successful");
         } else {
@@ -389,10 +374,10 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
                 Map<?, ?> jsonMap = objectMapper.readValue(responseData.getResponseBody(), Map.class);
                 orgId = (String) jsonMap.get("orgId");
                 if (orgId == null || orgId.isEmpty()) {
-                    return null;
+                    throw new APIManagementException("Org reference ID is not available for organization");
                 }
             } else {
-                return null;
+                throw new APIManagementException("Something went wrong when retrieving Org reference ID");
             }
             orgIdMap.put(tenantName, orgId);
             return orgId;
