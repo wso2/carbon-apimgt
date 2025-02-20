@@ -23,6 +23,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.cache.Cache;
 
@@ -199,27 +201,30 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         if (systemConfig == null) {
             return null;
         }
+
         // List of newly introduced scopes
-        String[] scopesToCheck = {
-                "apim:admin_tier_view",
-                "apim:admin_tier_manage",
-                "apim:keymanagers_manage",
-                "apim:api_category",
-                SUBSCRIPTION_APPROVAL_VIEW_SCOPE,
-                SUBSCRIPTION_APPROVAL_MANAGE_SCOPE,
-                PUBLISHER_ORG_READ,
-                ADMIN_ORG_MANAGE,
-                ADMIN_ORG_READ,
-                "apim:gov_rule_read",
-                "apim:gov_rule_manage",
-                "apim:gov_result_read",
-                "apim:gov_policy_manage",
-                "apim:gov_policy_read",
-                "apim:llm_provider_read",
-                "apim:llm_provider_manage",
-            };
+        Map<String, String> scopesToCheck = new HashMap<>();
+        scopesToCheck.put("apim:admin_tier_view", "admin");
+        scopesToCheck.put("apim:admin_tier_manage", "admin");
+        scopesToCheck.put("apim:keymanagers_manage", "admin");
+        scopesToCheck.put("apim:api_category", "admin");
+        scopesToCheck.put("apim:api_provider_change", "admin");
+        scopesToCheck.put("apim:gateway_policy_manage", "admin");
+        scopesToCheck.put("apim:gateway_policy_view", "admin,Internal/creator,Internal/publisher,Internal/observer");
+        scopesToCheck.put("apim:llm_provider_manage", "admin");
+        scopesToCheck.put("apim:llm_provider_read", "admin,Internal/publisher,Internal/creator");
+        scopesToCheck.put("apim:gov_rule_manage", "admin");
+        scopesToCheck.put("apim:gov_rule_read", "admin,Internal/publisher,Internal/creator,Internal/observer");
+        scopesToCheck.put("apim:gov_result_read", "admin,Internal/publisher,Internal/creator,Internal/observer");
+        scopesToCheck.put("apim:gov_policy_manage", "admin");
+        scopesToCheck.put("apim:gov_policy_read", "admin,Internal/publisher,Internal/creator,Internal/observer");
+        scopesToCheck.put(SUBSCRIPTION_APPROVAL_VIEW_SCOPE, "admin,Internal/publisher");
+        scopesToCheck.put(SUBSCRIPTION_APPROVAL_MANAGE_SCOPE, "admin,Internal/publisher");
+        scopesToCheck.put(PUBLISHER_ORG_READ, "admin,Internal/creator");
+        scopesToCheck.put(ADMIN_ORG_MANAGE, "admin");
+        scopesToCheck.put(ADMIN_ORG_READ, "admin");
         
-        ArrayList<String> missingScopesList = new ArrayList<>(Arrays.asList(scopesToCheck));
+        ArrayList<String> missingScopesList = new ArrayList<>(scopesToCheck.keySet());
         
         JsonParser jsonParser = new JsonParser();
         JsonObject jsonObject = jsonParser.parse(systemConfig).getAsJsonObject();
@@ -248,19 +253,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
         for (String missingScope : missingScopesList) {
             JsonObject newScope = new JsonObject();
             newScope.addProperty("Name", missingScope);
-            if (missingScope.equals(SUBSCRIPTION_APPROVAL_VIEW_SCOPE) ||
-                    missingScope.equals(SUBSCRIPTION_APPROVAL_MANAGE_SCOPE) ||
-                    missingScope.equals("apim:llm_provider_read")) {
-                newScope.addProperty("Roles", "admin,Internal/publisher");
-            } else if (missingScope.equals(PUBLISHER_ORG_READ)) {
-                newScope.addProperty("Roles", "admin,Internal/creator");
-            } else if (missingScope.equals("gov_result_read") || missingScope.equals("gov_rule_read") ||
-                    missingScope.equals("gov_policy_read")) {
-                newScope.addProperty("Roles",
-                        "admin,Internal/publisher,Internal/creator,Internal/observer");
-            } else {
-                newScope.addProperty("Roles", "admin");
-            }
+            newScope.addProperty("Roles", scopesToCheck.get(missingScope));
             scopeArray.add(newScope);
         }
               
