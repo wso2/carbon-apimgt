@@ -407,7 +407,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.software.amazon.awssdk</groupId>
-            <artifactId>awslambda</artifactId>
+            <artifactId>aws-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
