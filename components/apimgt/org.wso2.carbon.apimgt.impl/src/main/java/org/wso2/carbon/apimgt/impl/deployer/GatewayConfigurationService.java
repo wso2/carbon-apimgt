@@ -29,5 +29,5 @@ public interface GatewayConfigurationService {
     void updateGatewayConfiguration(String organization, String name, String type,
                                     Environment environment) throws APIManagementException;
 
-    void removeGatewayConfiguration(String tenantDomain, String name) throws APIManagementException;
+    void removeGatewayConfiguration(String organization, String name) throws APIManagementException;
 }

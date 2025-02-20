@@ -26,14 +26,10 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
-import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.GatewayDto;
-import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.dto.OrganizationGatewayDto;
-import org.wso2.carbon.apimgt.impl.dto.OrganizationKeyManagerDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.loader.KeyManagerConfigurationDataRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.lang.reflect.InvocationTargetException;
@@ -86,60 +82,38 @@ public class GatewayHolder {
         addGatewayConfiguration(organization, name, type, environment);
     }
 
-    public static void removeGatewayConfiguration(String tenantDomain, String name) {
+    public static void removeGatewayConfiguration(String organization, String name) {
 
-        OrganizationGatewayDto organizationGatewayDto = getTenantGatewayDtoFromMap(tenantDomain);
+        OrganizationGatewayDto organizationGatewayDto = getTenantGatewayDtoFromMap(organization);
         if (organizationGatewayDto != null) {
             organizationGatewayDto.removeGatewayDtoByName(name);
         }
     }
 
-    public static GatewayDeployer getTenantGatewayInstance(String tenantDomain, String gatewayName) {
-
-        OrganizationGatewayDto organizationGatewayDto = getTenantGatewayDto(tenantDomain);
-        if (organizationGatewayDto != null) {
-            GatewayDto gatewayDto = organizationGatewayDto.getGatewayByName(gatewayName);
-            if (gatewayDto == null) {
+    public static GatewayDeployer getTenantGatewayInstance(String organization, String gatewayName) {
+        /* At the moment we fetch the environment from DB each time */
+        synchronized (gatewayName.intern()) {
+            try {
+                Map<String, Environment> environmentMap = APIUtil.getEnvironments(organization);
+                Environment environment = environmentMap.get(gatewayName);
+                if (environment != null) {
+                    GatewayAgentConfiguration gatewayAgentConfiguration = ServiceReferenceHolder.getInstance().
+                            getExternalGatewayConnectorConfiguration(environment.getGatewayType());
+                    GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayAgentConfiguration.getImplementation())
+                            .getDeclaredConstructor().newInstance();
+                    deployer.init(environment);
+                    return deployer;
+                }
+            } catch (APIManagementException | ClassNotFoundException | NoSuchMethodException |
+                     InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                log.error("Error while loading environments for tenant " + organization, e);
                 return null;
             }
-            return gatewayDto.getGatewayDeployer();
         }
         return null;
     }
 
-    private static OrganizationGatewayDto getTenantGatewayDto(String tenantDomain) {
-
-        OrganizationGatewayDto organizationGatewayDto = getTenantGatewayDtoFromMap(tenantDomain);
-        if (organizationGatewayDto == null) {
-            try {
-                Map<String, Environment> environmentMap = APIUtil.getEnvironments(tenantDomain);
-                OrganizationGatewayDto newOrganizationGatewayDto = new OrganizationGatewayDto();
-                for (Map.Entry<String, Environment> entry : environmentMap.entrySet()) {
-                    Environment environment = entry.getValue();
-                    if (environment.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
-                        GatewayDto gatewayDto = new GatewayDto();
-                        gatewayDto.setName(entry.getKey());
-                        GatewayAgentConfiguration gatewayAgentConfiguration = ServiceReferenceHolder.getInstance().
-                                getExternalGatewayConnectorConfiguration(entry.getValue().getGatewayType());
-                        GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayAgentConfiguration.getImplementation())
-                                .getDeclaredConstructor().newInstance();
-                        deployer.init(entry.getValue());
-                        gatewayDto.setGatewayDeployer(deployer);
-                        newOrganizationGatewayDto.putGatewayDto(gatewayDto);
-                    }
-                }
-                organizationWiseMap.put(tenantDomain, newOrganizationGatewayDto);
-                return newOrganizationGatewayDto;
-            } catch (APIManagementException | ClassNotFoundException | IllegalAccessException | InstantiationException
-                     | NoSuchMethodException | InvocationTargetException e) {
-                log.error("Error while loading environments for tenant " + tenantDomain, e);
-                return null;
-            }
-        }
-        return organizationGatewayDto;
-    }
-
-    private static OrganizationGatewayDto getTenantGatewayDtoFromMap(String tenantDomain) {
-        return organizationWiseMap.get(tenantDomain);
+    private static OrganizationGatewayDto getTenantGatewayDtoFromMap(String organization) {
+        return organizationWiseMap.get(organization);
     }
 }

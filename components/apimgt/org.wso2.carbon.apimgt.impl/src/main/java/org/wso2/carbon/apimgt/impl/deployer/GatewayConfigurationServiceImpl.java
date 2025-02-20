@@ -42,10 +42,10 @@ public class GatewayConfigurationServiceImpl implements GatewayConfigurationServ
     }
 
     @Override
-    public void removeGatewayConfiguration(String tenantDomain, String name) throws APIManagementException {
-        String internKey = this.getClass().getName().concat(tenantDomain).concat(name);
+    public void removeGatewayConfiguration(String organization, String name) throws APIManagementException {
+        String internKey = this.getClass().getName().concat(organization).concat(name);
         synchronized (internKey.intern()) {
-            GatewayHolder.removeGatewayConfiguration(tenantDomain, name);
+            GatewayHolder.removeGatewayConfiguration(organization, name);
         }
     }
 }
