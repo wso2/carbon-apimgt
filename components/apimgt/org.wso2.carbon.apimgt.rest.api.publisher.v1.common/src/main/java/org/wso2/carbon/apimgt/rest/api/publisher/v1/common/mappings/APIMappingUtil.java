@@ -3376,6 +3376,14 @@ public class APIMappingUtil {
         return handleEndpointSecurity(endpointSecurity);
     }
 
+    private static JSONObject handleEndpointSecurity(JSONObject endpointSecurity, String organization,
+            boolean preserveCredentials) throws APIManagementException {
+        if (checkEndpointSecurityPasswordEnabled(organization) | preserveCredentials) {
+            return endpointSecurity;
+        }
+        return handleEndpointSecurity(endpointSecurity);
+    }
+
     private static JSONObject handleEndpointSecurity(JSONObject endpointSecurity) {
 
         JSONObject endpointSecurityElement = new JSONObject();
@@ -3409,6 +3417,38 @@ public class APIMappingUtil {
                 productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
             }
             endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
+        }
+        return endpointSecurityElement;
+    }
+
+    private static JSONObject handleEndpointSecurityDecrypt(JSONObject endpointSecurity) {
+        JSONObject endpointSecurityElement = new JSONObject();
+        endpointSecurityElement.putAll(endpointSecurity);
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        try {
+            if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                JSONObject sandboxEndpointSecurity = new JSONObject(
+                        (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX));
+                String apiKeyValue = (String) sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
+                if (StringUtils.isNotEmpty(apiKeyValue)) {
+                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
+                            new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
+                }
+                endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, sandboxEndpointSecurity);
+            }
+            if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                JSONObject productionEndpointSecurity = new JSONObject(
+                        (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION));
+                String apiKeyValue = (String) productionEndpointSecurity.get(
+                        APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
+                if (StringUtils.isNotEmpty(apiKeyValue)) {
+                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
+                            new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
+                }
+                endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
+            }
+        } catch (CryptoException e) {
+            log.error("Error while decrypting client credentials", e);
         }
         return endpointSecurityElement;
     }
@@ -3524,19 +3564,20 @@ public class APIMappingUtil {
         return apiRevisionDeploymentDTO;
     }
 
-    public static APIEndpointListDTO fromAPIEndpointListToDTO(List<APIEndpointInfo> apiEndpoints)
-            throws APIManagementException {
+    public static APIEndpointListDTO fromAPIEndpointListToDTO(List<APIEndpointInfo> apiEndpoints, String organization,
+            boolean preserveCredentials) throws APIManagementException {
         APIEndpointListDTO apiEndpointListDTO = new APIEndpointListDTO();
         List<APIEndpointDTO> apiEndpointDTOs = new ArrayList<>();
         for (APIEndpointInfo apiEndpoint : apiEndpoints) {
-            apiEndpointDTOs.add(fromAPIEndpointToDTO(apiEndpoint));
+            apiEndpointDTOs.add(fromAPIEndpointToDTO(apiEndpoint, organization, preserveCredentials));
         }
         apiEndpointListDTO.setCount(apiEndpointDTOs.size());
         apiEndpointListDTO.setList(apiEndpointDTOs);
         return apiEndpointListDTO;
     }
 
-    public static APIEndpointDTO fromAPIEndpointToDTO(APIEndpointInfo apiEndpoint) throws APIManagementException {
+    public static APIEndpointDTO fromAPIEndpointToDTO(APIEndpointInfo apiEndpoint, String organization,
+            boolean preserveCredentials) throws APIManagementException {
 
         APIEndpointDTO apiEndpointDTO = new APIEndpointDTO();
         apiEndpointDTO.setId(apiEndpoint.getEndpointUuid());
@@ -3547,7 +3588,8 @@ public class APIMappingUtil {
         Map endpointSecurityMap = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
         if (endpointSecurityMap != null && !endpointSecurityMap.isEmpty()) {
             JSONObject endpointSecurity = new JSONObject(endpointSecurityMap);
-            endpointSecurity = handleEndpointSecurity(endpointSecurity);
+            endpointSecurity = handleEndpointSecurityDecrypt(endpointSecurity);
+            endpointSecurity = handleEndpointSecurity(endpointSecurity, organization, preserveCredentials);
             endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
         }
         apiEndpointDTO.setEndpointConfig(endpointConfig);

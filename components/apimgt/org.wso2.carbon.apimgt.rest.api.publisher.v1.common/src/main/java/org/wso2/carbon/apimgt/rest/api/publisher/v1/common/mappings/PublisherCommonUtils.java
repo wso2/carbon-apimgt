@@ -3342,7 +3342,7 @@ public class PublisherCommonUtils {
             apiEndpointsList.addAll(defaultEndpointsFromEndpointConfig.values());
         }
 
-        return APIMappingUtil.fromAPIEndpointListToDTO(apiEndpointsList);
+        return APIMappingUtil.fromAPIEndpointListToDTO(apiEndpointsList, organization, false);
 
     }
 
@@ -3481,7 +3481,7 @@ public class PublisherCommonUtils {
                         ExceptionCodes.API_ENDPOINT_NOT_FOUND);
             }
         }
-        return APIMappingUtil.fromAPIEndpointToDTO(apiEndpoint);
+        return APIMappingUtil.fromAPIEndpointToDTO(apiEndpoint, organization, false);
     }
 
     /**
@@ -3546,7 +3546,7 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Error occurred while updating endpoint with UUID " + endpointId +
                     " under API " + apiId, ExceptionCodes.ERROR_UPDATING_API_ENDPOINT);
         }
-        return APIMappingUtil.fromAPIEndpointToDTO(apiEndpointUpdated);
+        return APIMappingUtil.fromAPIEndpointToDTO(apiEndpointUpdated, organization, false);
     }
 
     /**
