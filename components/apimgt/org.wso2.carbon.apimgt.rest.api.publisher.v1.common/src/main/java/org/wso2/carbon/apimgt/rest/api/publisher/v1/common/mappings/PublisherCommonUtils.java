@@ -3322,105 +3322,10 @@ public class PublisherCommonUtils {
      */
     public static APIEndpointListDTO getApiEndpoints(String uuid, APIProvider apiProvider, String organization)
             throws APIManagementException {
+
         List<APIEndpointInfo> apiEndpointsList = apiProvider.getAllAPIEndpointsByUUID(uuid, organization);
-
-        // Check if default production and/or sandbox endpoints are inclusive in the apiEndpointsList. If not, add them.
-        Map<String, APIEndpointInfo> defaultEndpointsFromEndpointConfig = getAPIEndpointsFromEndpointConfig(uuid,
-                apiProvider);
-        APIEndpointInfo defaultProductionEndpoint = defaultEndpointsFromEndpointConfig.get(
-                APIConstants.APIEndpoint.PRODUCTION);
-        APIEndpointInfo defaultSandboxEndpoint = defaultEndpointsFromEndpointConfig.get(
-                APIConstants.APIEndpoint.SANDBOX);
-
-        for (APIEndpointInfo apiEndpointInfo : apiEndpointsList) {
-            if (apiEndpointInfo.getEndpointUuid().equals(defaultProductionEndpoint.getEndpointUuid())) {
-                defaultEndpointsFromEndpointConfig.remove(APIConstants.APIEndpoint.PRODUCTION);
-            }
-            if (apiEndpointInfo.getEndpointUuid().equals(defaultSandboxEndpoint.getEndpointUuid())) {
-                defaultEndpointsFromEndpointConfig.remove(APIConstants.APIEndpoint.SANDBOX);
-            }
-        }
-        if (!defaultEndpointsFromEndpointConfig.isEmpty()) {
-            apiEndpointsList.addAll(defaultEndpointsFromEndpointConfig.values());
-        }
-
         return APIMappingUtil.fromAPIEndpointListToDTO(apiEndpointsList, organization, false);
 
-    }
-
-    /**
-     * Retrieve the default production and sandbox endpoints from the endpoint config of an API.
-     *
-     * @param apiUUID     Unique identifier of API
-     * @param apiProvider API Provider
-     * @return Map consisting of the default production and sandbox endpoints
-     */
-    public static Map<String, APIEndpointInfo> getAPIEndpointsFromEndpointConfig(String apiUUID,
-            APIProvider apiProvider) {
-        Map<String, APIEndpointInfo> defaultAPIEndpoints = new HashMap<>();
-        String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        try {
-            API api = apiProvider.getAPIbyUUID(apiUUID, organization);
-            if (api == null) {
-                throw new APIManagementException("Error occurred while getting API with UUID " + apiUUID,
-                        ExceptionCodes.API_NOT_FOUND);
-            }
-            String endpointConfig = api.getEndpointConfig();
-            if (StringUtils.isNotEmpty(endpointConfig)) {
-                Gson gson = new Gson();
-                Type type = new TypeToken<Map<String, Object>>() {
-                }.getType();
-                Map<String, Object> endpointConfigMap = gson.fromJson(endpointConfig, type);
-                String endpointType = endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).toString();
-                Object endpointSecurityObj = endpointConfigMap.get(APIConstants.ENDPOINT_SECURITY);
-
-                // Add primary production endpoint from endpoint config
-                if (endpointConfigMap.containsKey(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
-                    Map<String, Object> productionEndpointConfig = new HashMap<>();
-                    productionEndpointConfig.put(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE, endpointType);
-                    productionEndpointConfig.put(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS,
-                            endpointConfigMap.get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS));
-                    if (endpointSecurityObj != null) {
-                        String endpointSecurity = gson.toJson(endpointSecurityObj);
-                        JsonObject endpointSecurityJsonObj = (JsonObject) JsonParser.parseString(endpointSecurity);
-                        // Remove sandbox security (if defined)
-                        if (endpointSecurityJsonObj.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
-                            endpointSecurityJsonObj.remove(APIConstants.ENDPOINT_SECURITY_SANDBOX);
-                        }
-                        productionEndpointConfig.put(APIConstants.ENDPOINT_SECURITY,
-                                gson.fromJson(endpointSecurityJsonObj, Object.class));
-                    }
-                    APIEndpointInfo primaryProductionEndpoint = getAPIEndpointFromEndpointConfig(apiUUID,
-                            productionEndpointConfig, APIConstants.APIEndpoint.PRODUCTION);
-                    defaultAPIEndpoints.put(APIConstants.APIEndpoint.PRODUCTION, primaryProductionEndpoint);
-                }
-
-                // Add primary sandbox endpoint from endpoint config
-                if (endpointConfigMap.containsKey(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
-                    Map<String, Object> sandboxEndpointConfig = new HashMap<>();
-                    sandboxEndpointConfig.put(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE, endpointType);
-                    sandboxEndpointConfig.put(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS,
-                            endpointConfigMap.get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS));
-                    if (endpointSecurityObj != null) {
-                        String endpointSecurity = gson.toJson(endpointSecurityObj);
-                        JsonObject endpointSecurityJsonObj = (JsonObject) JsonParser.parseString(endpointSecurity);
-                        // Remove production security (if defined)
-                        if (endpointSecurityJsonObj.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
-                            endpointSecurityJsonObj.remove(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
-                        }
-                        sandboxEndpointConfig.put(APIConstants.ENDPOINT_SECURITY,
-                                gson.fromJson(endpointSecurityJsonObj, Object.class));
-                    }
-                    APIEndpointInfo primarySandboxEndpoint = getAPIEndpointFromEndpointConfig(apiUUID,
-                            sandboxEndpointConfig, APIConstants.APIEndpoint.SANDBOX);
-                    defaultAPIEndpoints.put(APIConstants.APIEndpoint.SANDBOX, primarySandboxEndpoint);
-                }
-            }
-            return defaultAPIEndpoints;
-        } catch (APIManagementException e) {
-            log.error("Error occurred while getting API with UUID " + apiUUID, e);
-        }
-        return null;
     }
 
     /**
@@ -3599,30 +3504,28 @@ public class PublisherCommonUtils {
      */
     public static String addAPIEndpoint(String apiId, APIEndpointDTO apiEndpointDTO, String organization,
             APIProvider apiProvider) throws APIManagementException, CryptoException {
+
+        // API Key and API Secret encryption
         Map endpointConfig = (Map) apiEndpointDTO.getEndpointConfig();
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-        // OAuth 2.0 backend protection: API Key and API Secret encryption
         encryptEndpointSecurityOAuthCredentials(apiEndpointDTO, cryptoUtil, StringUtils.EMPTY, endpointConfig);
         encryptEndpointSecurityApiKeyCredentials(apiEndpointDTO, cryptoUtil, StringUtils.EMPTY, endpointConfig);
 
-        // AWS Lambda: secret key encryption while creating the API
-        if (apiEndpointDTO.getEndpointConfig() != null) {
-            if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
-                String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
-                if (!StringUtils.isEmpty(secretKey)) {
-                    String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
-                    endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
-                    apiEndpointDTO.setEndpointConfig(endpointConfig);
-                }
-            }
-        }
         APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
-        String apiEndpointId = apiProvider.addAPIEndpoint(apiId, apiEndpoint, organization);
-        if (apiEndpointId == null) {
-            throw new APIManagementException("Error occurred while getting Endpoint of API " + apiId,
-                    ExceptionCodes.ERROR_ADDING_API_ENDPOINT);
+
+        if (apiEndpoint.getDeploymentStage()
+                .equals(APIConstants.APIEndpoint.PRODUCTION) || apiEndpoint.getDeploymentStage()
+                .equals(APIConstants.APIEndpoint.SANDBOX)) {
+            String apiEndpointId = apiProvider.addAPIEndpoint(apiId, apiEndpoint, organization);
+            if (apiEndpointId == null) {
+                throw new APIManagementException("Error occurred while getting Endpoint of API " + apiId,
+                        ExceptionCodes.ERROR_ADDING_API_ENDPOINT);
+            }
+            return apiEndpointId;
+        } else {
+            throw new APIManagementException("Invalid deployment stage. Deployment stage should be either " +
+                    "'PRODUCTION' or 'SANDBOX'", ExceptionCodes.ERROR_ADDING_API_ENDPOINT);
         }
-        return apiEndpointId;
     }
 
     /**
