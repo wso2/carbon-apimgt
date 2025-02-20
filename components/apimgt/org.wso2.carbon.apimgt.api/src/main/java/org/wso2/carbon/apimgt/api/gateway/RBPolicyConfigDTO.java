@@ -20,39 +20,73 @@ package org.wso2.carbon.apimgt.api.gateway;
 
 import java.util.List;
 
+/**
+ * DTO representing the configuration for RB (Routing and Balancing) policies in API Gateway.
+ */
 public class RBPolicyConfigDTO {
 
-    List<ModelEndpointDTO> production;
-    List<ModelEndpointDTO> sandbox;
-    Long suspendDuration;
+    private List<ModelEndpointDTO> production;
+    private List<ModelEndpointDTO> sandbox;
+    private Long suspendDuration;
 
+    /**
+     * Gets the production model endpoints.
+     *
+     * @return the list of production model endpoints
+     */
     public List<ModelEndpointDTO> getProduction() {
 
         return production;
     }
 
+    /**
+     * Sets the production model endpoints.
+     *
+     * @param production the list of production model endpoints to set
+     */
     public void setProduction(List<ModelEndpointDTO> production) {
 
         this.production = production;
     }
 
+    /**
+     * Gets the sandbox model endpoints.
+     *
+     * @return the list of sandbox model endpoints
+     */
     public List<ModelEndpointDTO> getSandbox() {
 
         return sandbox;
     }
 
+    /**
+     * Sets the sandbox model endpoints.
+     *
+     * @param sandbox the list of sandbox model endpoints to set
+     */
     public void setSandbox(List<ModelEndpointDTO> sandbox) {
 
         this.sandbox = sandbox;
     }
 
+    /**
+     * Gets the suspend duration for a failed endpoint.
+     *
+     * @return the suspend duration in milliseconds
+     */
     public Long getSuspendDuration() {
 
         return suspendDuration;
     }
 
+    /**
+     * Sets the suspend duration for a failed endpoint.
+     *
+     * @param suspendDuration the suspend duration in milliseconds to set
+     */
     public void setSuspendDuration(Long suspendDuration) {
 
         this.suspendDuration = suspendDuration;
     }
 }
+

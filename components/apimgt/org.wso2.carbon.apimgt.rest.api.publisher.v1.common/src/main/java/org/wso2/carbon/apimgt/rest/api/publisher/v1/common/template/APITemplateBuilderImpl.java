@@ -96,6 +96,15 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         this.apiProduct = apiProduct;
     }
 
+    /**
+     * Generates the AI API configuration as a string using Apache Velocity templating.
+     *
+     * @param environment       The deployment environment for the API.
+     * @param productionEndpoint The production endpoint configuration.
+     * @param sandboxEndpoint    The sandbox endpoint configuration.
+     * @return The AI API configuration string after processing the Velocity template.
+     * @throws APITemplateException If an error occurs during the Velocity template processing.
+     */
     @Override
     public String getConfigStringForAIAPI(Environment environment, SimplifiedEndpoint productionEndpoint,
                                           SimplifiedEndpoint sandboxEndpoint) throws APITemplateException {
@@ -345,6 +354,15 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         return writer.toString();
     }
 
+    /**
+     * Generates an endpoint configuration string using Velocity template.
+     *
+     * @param deploymentStage The stage of deployment (e.g., development, testing, production).
+     * @param endpoints       A list of configured endpoints for the API.
+     * @param defaultEndpoint The default endpoint to be used when no specific endpoint is provided.
+     * @return A string representation of the endpoint configuration after processing the Velocity template.
+     * @throws APITemplateException If an error occurs during the Velocity template processing.
+     */
     @Override
     public String getStringForEndpoints(String deploymentStage, List<SimplifiedEndpoint> endpoints,
                                         SimplifiedEndpoint defaultEndpoint)
@@ -383,6 +401,14 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         return writer.toString();
     }
 
+    /**
+     * Creates and initializes a configuration context for processing AI API endpoints.
+     *
+     * @param api             The API for which the endpoint configuration is being generated.
+     * @param endpoints       A list of endpoints associated with the API.
+     * @param defaultEndpoint The default endpoint to be used if no specific endpoint is provided.
+     * @return A fully initialized {@link ConfigContext} containing endpoint-related configurations.
+     */
     private ConfigContext createContextForEndpoints(API api, List<SimplifiedEndpoint> endpoints,
                                                     SimplifiedEndpoint defaultEndpoint) {
 

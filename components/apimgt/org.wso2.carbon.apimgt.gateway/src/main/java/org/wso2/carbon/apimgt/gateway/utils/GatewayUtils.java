@@ -1752,78 +1752,63 @@ public class GatewayUtils {
     }
 
     /**
-     * Retrieves available endpoints for round robin policies.
+     * Retrieves available endpoints for the given policy configuration.
      *
-     * @param policyConfig      RBEndpointsPolicyDTO object containing endpoint configurations.
-     * @param messageContext Synapse message context.
-     * @return The selected RBEndpointDTO list, or null if no active endpoints are available.
+     * @param selectedEndpoints List of ModelEndpointDTO containing endpoint configurations.
+     * @param messageContext    Synapse message context.
+     * @return The selected ModelEndpointDTO list, or null if no active endpoints are available.
      */
-    public static List<ModelEndpointDTO> getActiveEndpoints(RBPolicyConfigDTO policyConfig,
-                                                            org.apache.synapse.MessageContext messageContext) {
-
-        List<ModelEndpointDTO> productionEndpoints = policyConfig.getProduction();
-        List<ModelEndpointDTO> sandboxEndpoints = policyConfig.getSandbox();
-
-        List<ModelEndpointDTO> selectedEndpoints =
-                APIConstants.API_KEY_TYPE_PRODUCTION.equals(messageContext.getProperty(APIConstants.API_KEY_TYPE))
-                        ? productionEndpoints
-                        : sandboxEndpoints;
+    private static List<ModelEndpointDTO> filterActiveEndpoints(List<ModelEndpointDTO> selectedEndpoints,
+                                                                org.apache.synapse.MessageContext messageContext) {
 
         if (selectedEndpoints == null || selectedEndpoints.isEmpty()) {
             return null;
         }
 
         List<ModelEndpointDTO> activeEndpoints = new ArrayList<>();
-
         for (ModelEndpointDTO endpoint : selectedEndpoints) {
             if (!DataHolder.getInstance().isEndpointSuspended(getAPIKeyForEndpoints(messageContext),
                     getEndpointKey(endpoint))) {
                 activeEndpoints.add(endpoint);
             }
         }
-
-        if (activeEndpoints.isEmpty()) {
-            return null;
-        }
-        return activeEndpoints;
+        return activeEndpoints.isEmpty() ? null : activeEndpoints;
     }
-
 
     /**
      * Retrieves available endpoints for round robin policies.
      *
-     * @param policyConfigDTO      FailoverPolicyConfigDTO object containing endpoint configurations.
+     * @param policyConfig   RBEndpointsPolicyDTO object containing endpoint configurations.
      * @param messageContext Synapse message context.
+     * @return The selected ModelEndpointDTO list, or null if no active endpoints are available.
+     */
+    public static List<ModelEndpointDTO> getActiveEndpoints(RBPolicyConfigDTO policyConfig,
+                                                            org.apache.synapse.MessageContext messageContext) {
+
+        List<ModelEndpointDTO> selectedEndpoints = APIConstants.API_KEY_TYPE_PRODUCTION
+                .equals(messageContext.getProperty(APIConstants.API_KEY_TYPE))
+                ? policyConfig.getProduction()
+                : policyConfig.getSandbox();
+
+        return filterActiveEndpoints(selectedEndpoints, messageContext);
+    }
+
+    /**
+     * Retrieves available endpoints for failover policies.
+     *
+     * @param policyConfigDTO FailoverPolicyConfigDTO object containing endpoint configurations.
+     * @param messageContext  Synapse message context.
      * @return The selected ModelEndpointDTO list, or null if no active endpoints are available.
      */
     public static List<ModelEndpointDTO> getActiveEndpoints(FailoverPolicyConfigDTO policyConfigDTO,
                                                             org.apache.synapse.MessageContext messageContext) {
 
-        List<ModelEndpointDTO> productionEndpoints = policyConfigDTO.getProduction().getFallbackModelEndpoints();
-        List<ModelEndpointDTO> sandboxEndpoints = policyConfigDTO.getSandbox().getFallbackModelEndpoints();
+        List<ModelEndpointDTO> selectedEndpoints = APIConstants.API_KEY_TYPE_PRODUCTION
+                .equals(messageContext.getProperty(APIConstants.API_KEY_TYPE))
+                ? policyConfigDTO.getProduction().getFallbackModelEndpoints()
+                : policyConfigDTO.getSandbox().getFallbackModelEndpoints();
 
-        List<ModelEndpointDTO> selectedEndpoints =
-                APIConstants.API_KEY_TYPE_PRODUCTION.equals(messageContext.getProperty(APIConstants.API_KEY_TYPE))
-                        ? productionEndpoints
-                        : sandboxEndpoints;
-
-        if (selectedEndpoints == null || selectedEndpoints.isEmpty()) {
-            return null;
-        }
-
-        List<ModelEndpointDTO> activeEndpoints = new ArrayList<>();
-
-        for (ModelEndpointDTO endpoint : selectedEndpoints) {
-            if (!DataHolder.getInstance().isEndpointSuspended(getAPIKeyForEndpoints(messageContext),
-                    getEndpointKey(endpoint))) {
-                activeEndpoints.add(endpoint);
-            }
-        }
-
-        if (activeEndpoints.isEmpty()) {
-            return null;
-        }
-        return activeEndpoints;
+        return filterActiveEndpoints(selectedEndpoints, messageContext);
     }
 
     /**
