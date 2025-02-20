@@ -24404,7 +24404,8 @@ public class ApiMgtDAO {
             currentApiUuid = uuid;
         }
 
-        try (Connection conn = APIMgtDBUtil.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        try (Connection conn = APIMgtDBUtil.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, currentApiUuid);
             ps.setString(2, organization);
             if (isRevision) {
