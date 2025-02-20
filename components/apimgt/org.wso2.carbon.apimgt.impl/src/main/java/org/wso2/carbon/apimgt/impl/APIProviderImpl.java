@@ -1057,6 +1057,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             recommendationThread.start();
         }
 
+        // Update API in new Dev Portal
+        DevPortalHandler devPortalHandler = DevPortalHandlerImpl.getInstance();
+        if (devPortalHandler.isPortalEnabled() && APIConstants.PUBLISHED.equals(api.getStatus())) {
+            try {
+                String refId = apiMgtDAO.getRefId(api.getUuid(), organization);
+                devPortalHandler.updateAPIMetadata(organization, api, refId);
+            } catch (APIManagementException e) {
+                log.error(e.getMessage());
+            }
+        }
+
         return api;
     }
 
@@ -2657,6 +2668,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (apiStoreSet != null && !apiStoreSet.isEmpty()) {
                     for (APIStore store : apiStoreSet) {
                         wso2APIPublisher.deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
+                    }
+                }
+
+                // Delete from new Developer Portal
+                DevPortalHandler devPortalHandler = DevPortalHandlerImpl.getInstance();
+                if (devPortalHandler.isPortalEnabled()) {
+                    try {
+                        String refId = apiMgtDAO.getRefId(api.getUuid(), organization);
+                        devPortalHandler.unpublishAPIMetadata(organization, api, refId);
+                        apiMgtDAO.removeRefId(api.getUuid(), organization);
+                    } catch (APIManagementException e) {
+                        log.error(e.getMessage());
                     }
                 }
             } catch (APIManagementException e) {
@@ -8144,9 +8167,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void updateApiThemeStatus(String organization, String action, String apiId)
+    public InputStream updateApiThemeStatus(String organization, String action, String apiId)
             throws APIManagementException {
-        apiMgtDAO.updateApiThemeStatus(organization, action, apiId);
+        return apiMgtDAO.updateApiThemeStatus(organization, action, apiId);
     }
 
     @Override

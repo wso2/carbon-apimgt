@@ -48,12 +48,11 @@ import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityI
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
+import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
-import org.wso2.carbon.apimgt.impl.GZIPUtils;
-import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalConstants;
 import org.wso2.carbon.apimgt.impl.definitions.*;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -5029,7 +5028,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity(labelListDTO).build();
     }
 
-    public Response attachLabelsToAPI(String apiId, RequestLabelListDTO requestLabelListDTO, MessageContext messageContext) throws APIManagementException {
+    public Response attachLabelsToAPI(String apiId, RequestLabelListDTO requestLabelListDTO,
+                                      MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getValidatedOrganization(messageContext);
         List<Label> updatedLabelList = apiProvider.attachApiLabels(apiId, requestLabelListDTO.getLabels(), tenantDomain);
@@ -5039,7 +5039,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         return Response.ok().entity(updatedLabelListDTO).build();
     }
 
-    public Response detachLabelsFromAPI(String apiId, RequestLabelListDTO requestLabelListDTO, MessageContext messageContext) throws APIManagementException {
+    public Response detachLabelsFromAPI(String apiId, RequestLabelListDTO requestLabelListDTO,
+                                        MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String tenantDomain = RestApiUtil.getValidatedOrganization(messageContext);
         List<Label> updatedLabelList = apiProvider.detachApiLabels(apiId, requestLabelListDTO.getLabels(), tenantDomain);
@@ -5050,7 +5051,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response deleteApiTheme(String apiId, String id, MessageContext messageContext) throws APIManagementException {
+    public Response deleteApiTheme(String apiId, String id, MessageContext messageContext)
+            throws APIManagementException {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         apiProvider.deleteApiTheme(tenantDomain, id, apiId);
@@ -5058,7 +5060,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getApiThemeContent(String apiId, String id, MessageContext messageContext) throws APIManagementException {
+    public Response getApiThemeContent(String apiId, String id, MessageContext messageContext)
+            throws APIManagementException {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         InputStream orgTheme = apiProvider.getApiTheme(id, tenantDomain, apiId);
@@ -5079,7 +5082,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getApiThemes(String apiId, Boolean publish, MessageContext messageContext) throws APIManagementException {
+    public Response getApiThemes(String apiId, Boolean publish, MessageContext messageContext)
+            throws APIManagementException {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         List<ContentPublishStatusResponseDTO> responseList = new ArrayList<>();
@@ -5108,7 +5112,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response importApiTheme(String apiId, InputStream fileInputStream, Attachment fileDetail, MessageContext messageContext) throws APIManagementException {
+    public Response importApiTheme(String apiId, InputStream fileInputStream, Attachment fileDetail,
+                                   MessageContext messageContext) throws APIManagementException {
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         apiProvider.importDraftedApiTheme(tenantDomain, fileInputStream, apiId);
@@ -5116,12 +5121,30 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response updateApiThemeStatus(String apiId, String id, ContentPublishStatusDTO contentPublishStatusDTO, MessageContext messageContext) throws APIManagementException {
-        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-        String action = contentPublishStatusDTO.getAction().value();
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        apiProvider.updateApiThemeStatus(tenantDomain, action, apiId);
-        return Response.status(Response.Status.OK).entity("Status updated successfully").build();
+    public Response updateApiThemeStatus(String apiId, String id, ContentPublishStatusDTO contentPublishStatusDTO,
+                                         MessageContext messageContext) throws APIManagementException {
+        DevPortalHandler devPortalHandler = DevPortalHandlerImpl.getInstance();
+        if (devPortalHandler.isPortalEnabled()) {
+            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+            String action = contentPublishStatusDTO.getAction().value();
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+
+            try (InputStream content = apiProvider.updateApiThemeStatus(tenantDomain, action, apiId)) {
+                String refId = ApiMgtDAO.getInstance().getRefId(apiId, tenantDomain);
+                if (DevPortalConstants.PUBLISH.equals(action)) {
+                    API api = apiProvider.getLightweightAPIByUUID(apiId, tenantDomain);
+                    devPortalHandler.publishAPIContent(tenantDomain, refId, content, api.getId().getApiName());
+                } else if (DevPortalConstants.UNPUBLISH.equals(action)) {
+                    devPortalHandler.unpublishAPIContent(tenantDomain, refId);
+                }
+            } catch (IOException e) {
+                throw new APIManagementException("Failed to update API theme status", e);
+            }
+            return Response.status(Response.Status.OK).entity("Status updated successfully").build();
+        } else {
+            return Response.status(Response.Status.PRECONDITION_FAILED).entity("Please enable Next Gen Devportal " +
+                    "to publish or unpublish").build();
+        }
     }
 
     private void validateEnvironment(String organization, String envId) throws APIManagementException {

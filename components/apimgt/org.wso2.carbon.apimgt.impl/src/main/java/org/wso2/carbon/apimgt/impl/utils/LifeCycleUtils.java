@@ -9,6 +9,8 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.DevPortalHandler;
+import org.wso2.carbon.apimgt.impl.DevPortalHandlerImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -74,7 +76,33 @@ public class LifeCycleUtils {
             sendEmailNotification(apiTypeWrapper, orgId);
         }
 
-        // Change the lifecycle state in the database
+        DevPortalHandler devPortalHandler = DevPortalHandlerImpl.getInstance();
+        // Dev Portal V2 Publication
+        if (Arrays.asList(APIConstants.PUBLISH, APIConstants.REPUBLISH).contains(action)
+                && devPortalHandler.isPortalEnabled()) {
+            try {
+                API api = apiTypeWrapper.getApi();
+                String refId = devPortalHandler.publishAPIMetadata(orgId, api);
+                apiMgtDAO.addRefId(api.getUuid(), refId, orgId);
+            } catch (APIManagementException e) {
+                log.error(e.getMessage());
+            }
+        }
+
+        // Dev Portal V2 Un-Publication
+        if (Arrays.asList(APIConstants.DEPRECATE, APIConstants.BLOCK, APIConstants.DEMOTE_TO_CREATED).contains(action)
+                && devPortalHandler.isPortalEnabled()) {
+            try {
+                API api = apiTypeWrapper.getApi();
+                String refId = apiMgtDAO.getRefId(api.getUuid(), orgId);
+                devPortalHandler.unpublishAPIMetadata(orgId, api, refId);
+                apiMgtDAO.removeRefId(api.getUuid(), orgId);
+            } catch (APIManagementException e) {
+                log.error(e.getMessage());
+            }
+        }
+
+        // Change the lifecycle state in the databases
         addLCStateChangeInDatabase(user, apiTypeWrapper, currentStatus, targetStatus, uuid);
 
         // Add LC state change event to the event queue
