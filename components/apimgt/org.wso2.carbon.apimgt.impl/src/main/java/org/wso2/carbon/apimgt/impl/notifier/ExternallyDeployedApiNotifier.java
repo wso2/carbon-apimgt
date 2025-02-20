@@ -104,11 +104,11 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                             String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
                                     gatewayEnvironments.get(deploymentEnv).getUuid());
                             if (referenceArtifact == null) {
-                                throw new DeployerException("API ID is not mapped with AWS API ID");
+                                throw new DeployerException("API is not mapped with an External API");
                             }
                             deleted = deployer.undeploy(referenceArtifact);
                             if (!deleted) {
-                                throw new NotifierException("Error while deleting API product from Solace broker");
+                                throw new NotifierException("Error while deleting externally deployed API");
                             }
                         } catch (DeployerException e) {
                             throw new NotifierException(e.getMessage());
@@ -146,11 +146,11 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                             String referenceArtifact = APIUtil.getApiExternalApiMappingReferenceByApiId(apiId,
                                     gatewayEnvironments.get(deploymentEnv).getUuid());
                             if (referenceArtifact == null) {
-                                throw new APIManagementException("API ID is not mapped with AWS API ID");
+                                throw new APIManagementException("API is not mapped with an External API");
                             }
                             deleted = deployer.undeploy(referenceArtifact);
                             if (!deleted) {
-                                throw new NotifierException("Error while deleting API product from Solace broker");
+                                throw new NotifierException("Error while deleting externally deployed API");
                             }
                         } catch (APIManagementException e) {
                             throw new NotifierException(e.getMessage());
@@ -158,6 +158,8 @@ public class ExternallyDeployedApiNotifier extends ApisNotifier{
                     }
                 }
             }
+            // Remove external API mappings
+            APIUtil.deleteApiExternalApiMappings(apiId);
         } catch (APIManagementException e) {
             throw new NotifierException(e.getMessage());
         }

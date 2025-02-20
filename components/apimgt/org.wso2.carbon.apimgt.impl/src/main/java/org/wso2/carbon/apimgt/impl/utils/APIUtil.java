@@ -11464,7 +11464,7 @@ public final class APIUtil {
                                 "Error occurred while validating the API with the federated gateway: "
                                         + api.getGatewayType(),
                                 ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
-                                        api.getGatewayType(), errorList.toString()));
+                                        api.getGatewayType(), errorList.getErrors().toString()));
                     }
                 }
             }
