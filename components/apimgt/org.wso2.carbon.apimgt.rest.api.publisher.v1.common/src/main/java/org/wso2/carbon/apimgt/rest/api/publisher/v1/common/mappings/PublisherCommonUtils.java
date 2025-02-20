@@ -1494,6 +1494,9 @@ public class PublisherCommonUtils {
                 visibleOrgs = visibleOrgs + "," + orgInfo.getOrganizationId();
                 apiToAdd.setVisibleOrganizations(visibleOrgs);
             }
+        } else {
+            // Set the visibility to tenant domain if user does not belong to an organization.
+            apiToAdd.setVisibleOrganizations(organization);
         }
 
         //adding the api

@@ -3886,7 +3886,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         String[] roles = APIUtil.getListOfRoles(userName);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
         UserContext userCtx = new UserContext(userNameWithoutChange,
-                new Organization(organizationInfo.getOrganizationId()), properties, roles);
+                new Organization(organizationInfo.getName(), organizationInfo.getOrganizationId(), null), properties,
+                roles);
 
         return searchPaginatedAPIs(searchQuery, start, end, org, userCtx, organizationInfo);
     }
@@ -4274,8 +4275,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
         String[] roles = APIUtil.getFilteredUserRoles(userName);
 
-        UserContext ctx = new UserContext(userName, new Organization(organizationInfo.getOrganizationId()),
-                properties, roles);
+        UserContext ctx = new UserContext(userName,
+                new Organization(organizationInfo.getName(), organizationInfo.getOrganizationId(), null), properties,
+                roles);
         return  searchPaginatedContent(org, searchQuery, start, end, ctx);
     }
 

@@ -10470,6 +10470,22 @@ public class ApiMgtDAO {
         return organization;
     }
 
+    public boolean areOrganizationsRegistered() throws APIManagementException {
+        boolean isExist = false;
+        try (Connection connection = APIMgtDBUtil.getConnection();
+                PreparedStatement prepStmt = connection
+                        .prepareStatement(SQLConstants.OrganizationSqlConstants.ORGANIZATIONS_EXIST)) {
+            try (ResultSet resultSet = prepStmt.executeQuery()) {
+                resultSet.next();
+                int count = resultSet.getInt(1); 
+                isExist = count > 0;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check existance of organizations", e);
+        }
+        return isExist;
+    }
+    
     public API getLightWeightAPIInfoByAPIIdentifier(APIIdentifier apiIdentifier, String organization)
             throws APIManagementException {
 
