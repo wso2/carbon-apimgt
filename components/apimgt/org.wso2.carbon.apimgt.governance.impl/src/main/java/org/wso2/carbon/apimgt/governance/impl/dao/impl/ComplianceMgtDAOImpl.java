@@ -510,6 +510,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 clearOldRuleViolations(connection, artifactRefId, artifactType, rulesetIds, organization);
                 clearOldRulesetRuns(connection, artifactRefId, artifactType, rulesetIds, organization);
                 clearOldPolicyRun(connection, artifactRefId, artifactType, policyId, organization);
+                connection.commit();
 
                 String artifactKey = getArtifactKey(connection, artifactRefId, artifactType, organization);
                 addPolicyRun(connection, artifactKey, policyId);
