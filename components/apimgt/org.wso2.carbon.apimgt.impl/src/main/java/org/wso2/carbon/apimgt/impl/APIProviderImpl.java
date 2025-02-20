@@ -625,6 +625,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         addURITemplates(apiId, api, tenantId);
         addAPIPolicies(api, tenantDomain);
         addSubtypeConfiguration(api);
+        addPrimaryEndpoints(api);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -657,6 +658,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
             AIConfiguration aiConfiguration = api.getAiConfiguration();
             addAIConfiguration(api.getUuid(), null, aiConfiguration, api.getOrganization());
+        }
+    }
+
+    /**
+     * Add primary endpoint mappings for the API.
+     *
+     * @param api API object
+     * @throws APIManagementException if an error occurs while adding primary endpoints
+     */
+    private void addPrimaryEndpoints(API api) throws APIManagementException {
+        if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+            apiMgtDAO.addDefaultPrimaryEndpointMappings(api);
         }
     }
 
@@ -8199,7 +8212,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *
      * @param api API model Object
      * @param uuid unique identifier of an API
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs while fetching the primary endpoint mappings
      */
     private void populateAPIPrimaryEndpointsMapping(API api, String uuid) throws APIManagementException {
         String organization = api.getOrganization();
@@ -8212,14 +8225,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             currentApiUuid = uuid;
         }
-        // Get primary production Endpoint mapping
-        String productionEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
-                APIConstants.APIEndpoint.PRODUCTION, revisionUuid, organization);
-        api.setPrimaryProductionEndpointId(productionEndpointId);
-        // Get primary sandbox endpoint endpoint
-        String sandboxEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
-                APIConstants.APIEndpoint.SANDBOX, revisionUuid, organization);
-        api.setPrimarySandboxEndpointId(sandboxEndpointId);
+
+        // Handle scenario where default primary endpoints were set on AI API creation. Hence, these endpoint UUIDs
+        // will not be available under the AM_API_ENDPOINTS table.
+        List<String> endpointIds = apiMgtDAO.getPrimaryEndpointUUIDByAPIId(currentApiUuid);
+        if (endpointIds != null && !endpointIds.isEmpty()) {
+            for (String endpointId : endpointIds) {
+                if (endpointId.equals(
+                        currentApiUuid + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.PRODUCTION)) {
+                    api.setPrimaryProductionEndpointId(endpointId);
+                } else if (endpointId.equals(
+                        currentApiUuid + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.SANDBOX)) {
+                    api.setPrimarySandboxEndpointId(endpointId);
+                }
+            }
+        }
+
+        if (endpointIds != null && !endpointIds.isEmpty() && api.getPrimaryProductionEndpointId() == null) {
+            // Get primary production Endpoint mapping
+            String productionEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
+                    APIConstants.APIEndpoint.PRODUCTION, revisionUuid, organization);
+            api.setPrimaryProductionEndpointId(productionEndpointId);
+        }
+
+        if (endpointIds != null && !endpointIds.isEmpty() && api.getPrimarySandboxEndpointId() == null) {
+            // Get primary sandbox endpoint endpoint
+            String sandboxEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
+                    APIConstants.APIEndpoint.SANDBOX, revisionUuid, organization);
+            api.setPrimarySandboxEndpointId(sandboxEndpointId);
+        }
     }
 
 }
