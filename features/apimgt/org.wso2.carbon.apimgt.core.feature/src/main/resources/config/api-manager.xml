@@ -455,6 +455,10 @@
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
+                <URI>/api/am/store/{version}/apis/{apiId}/markdown-content</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
                 <URI>/api/am/store/{version}/apis/{apiId}/swagger</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
@@ -512,6 +516,10 @@
             </AllowedURI>
             <AllowedURI>
                 <URI>/api/am/store/{version}/api-products/{apiProductId}</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/store/{version}/api-products/{apiProductId}/markdown-content</URI>
                 <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
             <AllowedURI>
