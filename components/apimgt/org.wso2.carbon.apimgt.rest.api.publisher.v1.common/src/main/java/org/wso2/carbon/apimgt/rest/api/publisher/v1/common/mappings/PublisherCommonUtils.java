@@ -1041,7 +1041,9 @@ public class PublisherCommonUtils {
                             endpointSecurityProduction.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
                                     encryptedApiKeyValue);
                         } else if (StringUtils.isNotBlank(oldApiSecret)) {
-                            endpointSecurityProduction.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, oldApiSecret);
+                            String encryptedOldApiKeyValue = cryptoUtil.encryptAndBase64Encode(oldApiSecret.getBytes());
+                            endpointSecurityProduction.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
+                                    encryptedOldApiKeyValue);
                         } else {
                             String errorMessage = "ApiKey value is not provided for production endpoint security";
                             throw new APIManagementException(
@@ -3449,14 +3451,15 @@ public class PublisherCommonUtils {
     /**
      * Get API endpoint information using API UUID and endpoint UUID.
      *
-     * @param apiUUID      Unique identifier of API
-     * @param endpointUUID Unique identifier of endpoint
-     * @param apiProvider  API Provider
+     * @param apiUUID             Unique identifier of API
+     * @param endpointUUID        Unique identifier of endpoint
+     * @param apiProvider         API Provider
+     * @param preserveCredentials Preserve credentials
      * @return APIEndpointDTO object
      * @throws APIManagementException if there is en error while retrieving the API Endpoint information
      */
-    public static APIEndpointDTO getAPIEndpoint(String apiUUID, String endpointUUID, APIProvider apiProvider)
-            throws APIManagementException, JsonProcessingException {
+    public static APIEndpointDTO getAPIEndpoint(String apiUUID, String endpointUUID, APIProvider apiProvider,
+            boolean preserveCredentials) throws APIManagementException, JsonProcessingException {
         String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
         API api = apiProvider.getAPIbyUUID(apiUUID, organization);
         APIEndpointInfo apiEndpoint = apiProvider.getAPIEndpointByUUID(apiUUID, endpointUUID, organization);
@@ -3481,7 +3484,7 @@ public class PublisherCommonUtils {
                         ExceptionCodes.API_ENDPOINT_NOT_FOUND);
             }
         }
-        return APIMappingUtil.fromAPIEndpointToDTO(apiEndpoint, organization, false);
+        return APIMappingUtil.fromAPIEndpointToDTO(apiEndpoint, organization, preserveCredentials);
     }
 
     /**
@@ -3498,15 +3501,49 @@ public class PublisherCommonUtils {
             String organization, APIProvider apiProvider)
             throws APIManagementException, CryptoException, JsonProcessingException {
         String oldApiEndpointSecret = null;
-        APIEndpointDTO oldEndpointDto = getAPIEndpoint(apiId, endpointId, apiProvider);
+        APIEndpointDTO oldEndpointDto = getAPIEndpoint(apiId, endpointId, apiProvider, true);
         Map oldEndpointConfig = (Map) oldEndpointDto.getEndpointConfig();
         if (oldEndpointConfig != null) {
             if ((oldEndpointConfig.containsKey(APIConstants.ENDPOINT_SECURITY))) {
                 Map oldEndpointSecurity = (Map) oldEndpointConfig.get(APIConstants.ENDPOINT_SECURITY);
-                if (oldEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_ID) != null
-                        && oldEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null) {
-                    oldApiEndpointSecret = oldEndpointSecurity
-                            .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                if (apiEndpointDTO.getDeploymentStage().equals(APIConstants.APIEndpoint.PRODUCTION)) {
+                    if (oldEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                        Map oldProductionEndpointSecurity = (Map) oldEndpointSecurity.get(
+                                APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                        if (oldProductionEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CLIENT_ID) != null &&
+                                oldProductionEndpointSecurity.get(
+                                        APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null) {
+                            oldApiEndpointSecret = oldProductionEndpointSecurity.get(
+                                    APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                        } else if (oldProductionEndpointSecurity.get(
+                                APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER) != null
+                                && oldProductionEndpointSecurity.get(
+                                        APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null
+                                && oldProductionEndpointSecurity.get(
+                                        APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE) != null) {
+                            oldApiEndpointSecret = oldProductionEndpointSecurity.get(
+                                    APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
+                        }
+                    }
+                } else if (apiEndpointDTO.getDeploymentStage().equals(APIConstants.APIEndpoint.SANDBOX)) {
+                    if (oldEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                        Map oldSandboxEndpointSecurity = (Map) oldEndpointSecurity.get(
+                                APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                        if (oldSandboxEndpointSecurity.get(
+                                APIConstants.OAuthConstants.OAUTH_CLIENT_ID) != null && oldSandboxEndpointSecurity.get(
+                                APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null) {
+                            oldApiEndpointSecret = oldSandboxEndpointSecurity.get(
+                                    APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
+                        } else if (oldSandboxEndpointSecurity.get(
+                                APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER) != null
+                                && oldSandboxEndpointSecurity.get(
+                                        APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null
+                                && oldSandboxEndpointSecurity.get(
+                                        APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE) != null) {
+                            oldApiEndpointSecret = oldSandboxEndpointSecurity.get(
+                                    APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
+                        }
+                    }
                 }
             }
         }
