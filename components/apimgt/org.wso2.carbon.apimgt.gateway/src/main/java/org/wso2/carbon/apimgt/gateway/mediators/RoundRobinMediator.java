@@ -23,9 +23,8 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.api.APIConstants;
-import org.wso2.carbon.apimgt.api.gateway.RBEndpointDTO;
-import org.wso2.carbon.apimgt.api.gateway.RBEndpointsPolicyDTO;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.api.gateway.ModelEndpointDTO;
+import org.wso2.carbon.apimgt.api.gateway.RBPolicyConfigDTO;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 
@@ -69,14 +68,15 @@ public class RoundRobinMediator extends AbstractMediator implements ManagedLifec
 
         DataHolder.getInstance().initCache(GatewayUtils.getAPIKeyForEndpoints(messageContext));
 
-        RBEndpointsPolicyDTO endpoints = new Gson().fromJson(roundRobinConfigs, RBEndpointsPolicyDTO.class);
-        List<RBEndpointDTO> activeEndpoints = GatewayUtils.getActiveEndpoints(endpoints, messageContext);
+        RBPolicyConfigDTO endpoints = new Gson().fromJson(roundRobinConfigs, RBPolicyConfigDTO.class);
+        List<ModelEndpointDTO> activeEndpoints = GatewayUtils.getActiveEndpoints(endpoints, messageContext);
 
         if (activeEndpoints != null && !activeEndpoints.isEmpty()) {
-            RBEndpointDTO nextEndpoint = getRoundRobinEndpoint(activeEndpoints);
+            ModelEndpointDTO nextEndpoint = getRoundRobinEndpoint(activeEndpoints);
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, nextEndpoint.getEndpointId());
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_MODEL, nextEndpoint.getModel());
-            messageContext.setProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION, endpoints.getSuspendDuration());
+            messageContext.setProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION,
+                    endpoints.getSuspendDuration() * 1000);
         } else {
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
                     APIConstants.AIAPIConstants.REJECT_ENDPOINT);
@@ -90,7 +90,7 @@ public class RoundRobinMediator extends AbstractMediator implements ManagedLifec
      * @param endpoints List of active endpoints.
      * @return The selected RBEndpointDTO based on round-robin order.
      */
-    private RBEndpointDTO getRoundRobinEndpoint(List<RBEndpointDTO> endpoints) {
+    private ModelEndpointDTO getRoundRobinEndpoint(List<ModelEndpointDTO> endpoints) {
 
         int index = counter.getAndIncrement() % endpoints.size();
         return endpoints.get(index);

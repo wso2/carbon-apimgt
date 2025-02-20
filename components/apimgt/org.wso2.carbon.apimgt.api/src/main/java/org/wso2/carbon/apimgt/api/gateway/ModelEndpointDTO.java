@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.api.gateway;
 
-public class RBEndpointDTO {
+public class ModelEndpointDTO {
 
     private String model;
     private String endpointId;

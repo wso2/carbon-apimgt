@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl.template;
 import org.wso2.carbon.apimgt.api.dto.EndpointConfigDTO;
 import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.SimplifiedEndpoint;
 
 import java.util.List;
 
@@ -34,12 +35,15 @@ public interface APITemplateBuilder {
      * @return A string representing the AI API configuration.
      * @throws APITemplateException If an error occurs while processing the Velocity template.
      */
-    String getConfigStringForAIAPI(Environment environment, List<EndpointDTO> endpointDTOList) throws APITemplateException;
+    String getConfigStringForAIAPI(Environment environment, SimplifiedEndpoint productionEndpoint,
+                                   SimplifiedEndpoint sandboxEndpoint) throws APITemplateException;
 
     String getConfigStringForPrototypeScriptAPI(Environment environment) throws APITemplateException;
 
-    String getConfigStringForEndpointTemplate(String endpointType, String endpointUuid, EndpointConfigDTO endpointConfig) throws APITemplateException;
+    String getConfigStringEndpointConfigTemplate(String endpointType, String endpointUuid, EndpointConfigDTO endpointConfig) throws APITemplateException;
 
     String getConfigStringForWebSocketEndpointTemplate(String endpointType, String resourceKey, String endpointUrl) throws APITemplateException;
+
+    String getStringForEndpoints(String deploymentStage, List<SimplifiedEndpoint> endpoints, SimplifiedEndpoint defaultEndpoint) throws APITemplateException;
 
 }
