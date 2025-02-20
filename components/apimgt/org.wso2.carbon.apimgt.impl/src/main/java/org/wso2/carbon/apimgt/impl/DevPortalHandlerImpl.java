@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,19 +31,23 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
+import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalProcessingConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.dto.devportal.ApiMetaDataDTO;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
+import java.io.IOException;
+import java.io.FileInputStream;
 import java.net.URISyntaxException;
 import java.security.KeyStore;
 import java.security.GeneralSecurityException;
@@ -54,6 +59,8 @@ import java.util.Objects;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.ServerConfiguration;
 
@@ -181,23 +188,177 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
     }
 
     @Override
-    public void publishAPIContent(String organization, String refId, InputStream content) throws APIManagementException {
+    public void publishAPIContent(String organization, String refId, InputStream content, String apiName) throws APIManagementException {
+        String tempPath =
+                System.getProperty(DevPortalConstants.JAVA_IO_TMPDIR) + File.separator + "publishing-api-themes";
+        String tempFile = apiName + APIConstants.ZIP_FILE_EXTENSION;
+        File apiThemeArchive = new File(tempPath, tempFile);
+        try {
+            FileUtils.copyInputStreamToFile(content, apiThemeArchive);
+            String imageMetadata = imageMetadataGenerator(apiThemeArchive);
+            HttpResponseData responseData = apiContentPutAction(organization, refId, apiThemeArchive, imageMetadata);
+            if (responseData.getStatusCode() == 201) {
+                log.info("Successful");
+            } else {
+                throw new APIManagementException("Failed");
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("");
+        }
+    }
 
+    private static String imageMetadataGenerator(File zipFile) throws APIManagementException, IOException {
+        File tempDirectory = null;
+        try {
+            tempDirectory = CommonUtil.createTempDirectory(null);
+            String extractedFolderName = CommonUtil.extractArchive(zipFile, tempDirectory.getAbsolutePath());
+            File imagesFolder = new File(tempDirectory, extractedFolderName + "/images");
+            if (!imagesFolder.exists() || !imagesFolder.isDirectory()) {
+                throw new APIManagementException("Images folder not found in ZIP");
+            }
+
+            String apiIconName = null;
+            String apiHeroName = null;
+            for (File file : Objects.requireNonNull(imagesFolder.listFiles())) {
+                String fileName = file.getName().toLowerCase();
+                if (fileName.startsWith("api-icon")) {
+                    apiIconName = file.getName();
+                } else if (fileName.startsWith("api-hero")) {
+                    apiHeroName = file.getName();
+                }
+            }
+
+            JSONObject jsonResponse = new JSONObject();
+            if (apiIconName != null) {
+                jsonResponse.put("api-icon", apiIconName);
+            }
+            if (apiHeroName != null) {
+                jsonResponse.put("api-hero", apiHeroName);
+            }
+
+            return jsonResponse.toString();
+        } catch (APIImportExportException e) {
+            throw new APIManagementException(e);
+        } finally {
+            if (tempDirectory != null) {
+                FileUtils.deleteDirectory(tempDirectory);
+            }
+        }
     }
 
     @Override
     public void unpublishAPIContent(String organization, String refId) throws APIManagementException {
-
+        HttpResponseData responseData = apiContentDeleteAction(organization, refId);
+        if (responseData.getStatusCode() == 200) {
+            log.info("Successful");
+        } else {
+            throw new APIManagementException("Failed");
+        }
     }
 
     @Override
     public void publishOrgContent(String organization, InputStream content) throws APIManagementException {
-
+        String tempPath =
+                System.getProperty(DevPortalConstants.JAVA_IO_TMPDIR) + File.separator + "publishing-org-themes";
+        String tempFile = organization + APIConstants.ZIP_FILE_EXTENSION;
+        File apiThemeArchive = new File(tempPath, tempFile);
+        try {
+            FileUtils.copyInputStreamToFile(content, apiThemeArchive);
+            HttpResponseData responseData = orgContentPutAction(organization, apiThemeArchive);
+            if (responseData.getStatusCode() == 201) {
+                log.info("Successful");
+            } else {
+                throw new APIManagementException("Failed");
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("");
+        }
     }
 
     @Override
     public void unpublishOrgContent(String organization) throws APIManagementException {
+        HttpResponseData responseData = orgContentDeleteAction(organization);
+        if (responseData.getStatusCode() == 200) {
+            log.info("Successful");
+        } else {
+            throw new APIManagementException("Failed");
+        }
+    }
 
+    private static HttpResponseData orgContentPutAction(String orgId, File orgContent)
+            throws APIManagementException {
+        String apiUrl = baseUrl + DevPortalProcessingConstants.LAYOUT_URI;
+        try (CloseableHttpClient httpClient = getHttpClient()) {
+            HttpPut httpPut = new HttpPut(apiUrl);
+            httpPut.setHeader("organization", orgId);
+
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.addPart("file", new FileBody(orgContent, ContentType.create("application/zip"), orgContent.getName()));
+            httpPut.setEntity(builder.build());
+
+            try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
+                int statusCode = response.getStatusLine().getStatusCode();
+                String responseBody = EntityUtils.toString(response.getEntity());
+                return new HttpResponseData(statusCode, responseBody);
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while uploading organization content in " + baseUrl + ": " + e.getMessage(), e);
+        }
+    }
+
+    private static HttpResponseData apiContentPutAction(String orgId, String refId, File apiContent, String imageMetadata)
+            throws APIManagementException {
+        String apiUrl = baseUrl + DevPortalProcessingConstants.API_URI + "/" + refId + DevPortalProcessingConstants.TEMPLATE_URI;
+        try (CloseableHttpClient httpClient = getHttpClient()) {
+            HttpPut httpPut = new HttpPut(apiUrl);
+            httpPut.setHeader("organization", orgId);
+
+            MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+            builder.addPart("apiContent", new FileBody(apiContent, ContentType.create("application/zip"), apiContent.getName()));
+            builder.addTextBody("imageMetadata", imageMetadata, ContentType.APPLICATION_JSON);
+
+            httpPut.setEntity(builder.build());
+
+            try (CloseableHttpResponse response = httpClient.execute(httpPut)) {
+                int statusCode = response.getStatusLine().getStatusCode();
+                String responseBody = EntityUtils.toString(response.getEntity());
+                return new HttpResponseData(statusCode, responseBody);
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while updating API content in " + baseUrl + ": " + e.getMessage(), e);
+        }
+    }
+
+    private static HttpResponseData apiContentDeleteAction(String orgId, String refId) throws APIManagementException {
+        String apiUrl = baseUrl + DevPortalProcessingConstants.API_URI + "/" + refId + DevPortalProcessingConstants.TEMPLATE_URI;
+        try (CloseableHttpClient httpClient = getHttpClient()) {
+            HttpDelete httpDelete = new HttpDelete(apiUrl);
+            httpDelete.setHeader("organization", orgId);
+
+            try (CloseableHttpResponse response = httpClient.execute(httpDelete)) {
+                int statusCode = response.getStatusLine().getStatusCode();
+                String responseBody = EntityUtils.toString(response.getEntity());
+                return new HttpResponseData(statusCode, responseBody);
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while deleting API content in " + baseUrl + ": " + e.getMessage(), e);
+        }
+    }
+
+    private static HttpResponseData orgContentDeleteAction(String orgId) throws APIManagementException {
+        String apiUrl = baseUrl + DevPortalProcessingConstants.LAYOUT_URI;
+        try (CloseableHttpClient httpClient = getHttpClient()) {
+            HttpDelete httpDelete = new HttpDelete(apiUrl);
+            httpDelete.setHeader("organization", orgId);
+
+            try (CloseableHttpResponse response = httpClient.execute(httpDelete)) {
+                int statusCode = response.getStatusLine().getStatusCode();
+                String responseBody = EntityUtils.toString(response.getEntity());
+                return new HttpResponseData(statusCode, responseBody);
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while deleting organization content in " + baseUrl + ": " + e.getMessage(), e);
+        }
     }
 
     private static String getDefinitionForDevPortal (API api) throws APIManagementException {

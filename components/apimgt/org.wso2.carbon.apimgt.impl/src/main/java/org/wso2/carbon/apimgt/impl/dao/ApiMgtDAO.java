@@ -18032,15 +18032,18 @@ public class ApiMgtDAO {
      * @throws APIManagementException If a database error occurs.
      */
     public InputStream updateOrgThemeStatus(String organization, String action) throws APIManagementException {
-        InputStream artifactContent = null;
+        byte[] artifactContentBytes = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
+                InputStream artifactContent;
                 if (DevPortalConstants.PUBLISH.equals(action)) {
                     String draftedArtifact = getDraftedArtifactForOrg(connection, organization);
                     if (draftedArtifact != null) {
                         artifactContent = getArtifactContent(connection, draftedArtifact);
-                        String newUUID = addArtifact(connection, artifactContent, DevPortalConstants.PUBLISHED_ORG_THEME);
+                        artifactContentBytes = artifactContent.readAllBytes();
+                        String newUUID = addArtifact(connection, new ByteArrayInputStream(artifactContentBytes),
+                                DevPortalConstants.PUBLISHED_ORG_THEME);
                         updatePublishedArtifactForOrg(connection, organization, newUUID);
                         removeArtifact(connection, draftedArtifact);
                     } else {
@@ -18060,14 +18063,14 @@ public class ApiMgtDAO {
                     }
                 }
                 connection.commit();
-            } catch (SQLException e) {
+            } catch (SQLException | IOException e) {
                 connection.rollback();
                 handleException("Failed to update organization theme status for organization " + organization, e);
             }
         } catch (SQLException e) {
             handleException("Database connection error while updating organization theme status for organization " + organization, e);
         }
-        return artifactContent;
+        return new ByteArrayInputStream(artifactContentBytes);
     }
 
 
@@ -18534,15 +18537,18 @@ public class ApiMgtDAO {
      */
     public InputStream updateApiThemeStatus(String organization, String action, String apiId)
             throws APIManagementException {
-        InputStream artifactContent = null;
+        byte[] artifactContentBytes = null;
         try (Connection connection = APIMgtDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try {
+                InputStream artifactContent;
                 if (DevPortalConstants.PUBLISH.equals(action)) {
                     String draftedArtifact = getDraftedArtifactForApi(connection, organization, apiId);
                     if (draftedArtifact != null) {
                         artifactContent = getArtifactContent(connection, draftedArtifact);
-                        String newUUID = addArtifact(connection, artifactContent, DevPortalConstants.PUBLISHED_API_THEME);
+                        artifactContentBytes = artifactContent.readAllBytes();
+                        String newUUID = addArtifact(connection, new ByteArrayInputStream(artifactContentBytes),
+                                DevPortalConstants.PUBLISHED_API_THEME);
                         updatePublishedArtifactForApi(connection, organization, newUUID, apiId);
                         removeArtifact(connection, draftedArtifact);
                     } else {
@@ -18562,7 +18568,7 @@ public class ApiMgtDAO {
                     }
                 }
                 connection.commit();
-            } catch (SQLException e) {
+            } catch (SQLException | IOException e) {
                 connection.rollback();
                 handleException("Failed to update API theme status for organization " + organization, e);
             }
@@ -18570,7 +18576,7 @@ public class ApiMgtDAO {
             handleException(
                     "Database connection error while updating API theme status for organization " + organization, e);
         }
-        return artifactContent;
+        return new ByteArrayInputStream(artifactContentBytes);
     }
 
     /**

@@ -37,7 +37,7 @@ public interface DevPortalHandler {
 
     void unpublishAPIMetadata(String organization, API api, String refId) throws APIManagementException;
 
-    void publishAPIContent(String organization, String refId, InputStream content) throws APIManagementException;
+    void publishAPIContent(String organization, String refId, InputStream content, String apiName) throws APIManagementException;
 
     void unpublishAPIContent(String organization, String refId) throws APIManagementException;
 

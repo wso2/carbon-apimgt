@@ -5142,7 +5142,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             try (InputStream content = apiProvider.updateApiThemeStatus(tenantDomain, action, apiId)) {
                 String refId = ApiMgtDAO.getInstance().getRefId(apiId, tenantDomain);
                 if (DevPortalConstants.PUBLISH.equals(action)) {
-                    devPortalHandler.publishAPIContent(tenantDomain, refId, content);
+                    API api = apiProvider.getLightweightAPIByUUID(apiId, tenantDomain);
+                    devPortalHandler.publishAPIContent(tenantDomain, refId, content, api.getId().getApiName());
                 } else if (DevPortalConstants.UNPUBLISH.equals(action)) {
                     devPortalHandler.unpublishAPIContent(tenantDomain, refId);
                 }
