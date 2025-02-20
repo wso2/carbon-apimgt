@@ -18,32 +18,41 @@
 
 package org.wso2.carbon.apimgt.api.gateway;
 
-import java.util.List;
+public class FailoverPolicyConfigDTO {
 
-public class RBEndpointsPolicyDTO {
+    private FailoverPolicyDeploymentConfigDTO production;
+    private FailoverPolicyDeploymentConfigDTO sandbox;
+    private Long requestTimeout;
+    private Long suspendDuration;
 
-    List<RBEndpointDTO> production;
-    List<RBEndpointDTO> sandbox;
-    Long suspendDuration;
-
-    public List<RBEndpointDTO> getProduction() {
+    public FailoverPolicyDeploymentConfigDTO getProduction() {
 
         return production;
     }
 
-    public void setProduction(List<RBEndpointDTO> production) {
+    public void setProduction(FailoverPolicyDeploymentConfigDTO production) {
 
         this.production = production;
     }
 
-    public List<RBEndpointDTO> getSandbox() {
+    public FailoverPolicyDeploymentConfigDTO getSandbox() {
 
         return sandbox;
     }
 
-    public void setSandbox(List<RBEndpointDTO> sandbox) {
+    public void setSandbox(FailoverPolicyDeploymentConfigDTO sandbox) {
 
         this.sandbox = sandbox;
+    }
+
+    public Long getRequestTimeout() {
+
+        return requestTimeout;
+    }
+
+    public void setRequestTimeout(Long requestTimeout) {
+
+        this.requestTimeout = requestTimeout;
     }
 
     public Long getSuspendDuration() {

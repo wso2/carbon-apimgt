@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.LLMProviderConfiguration;
 import org.wso2.carbon.apimgt.api.LLMProviderMetadata;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
+import org.wso2.carbon.apimgt.api.gateway.ModelEndpointDTO;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
@@ -90,6 +91,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         if (log.isDebugEnabled()) {
             log.debug("AIAPIMediator: Mediation started.");
         }
+
         try {
             LLMProviderInfo provider = DataHolder.getInstance().getLLMProviderConfigurations(this.llmProviderId);
             if (provider == null) {
@@ -102,88 +104,177 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                     .getLLMProviderService(providerConfiguration.getConnectorType());
 
             if (llmProviderService == null) {
-                log.error("LLM provider service not found for the provider with ID: " + llmProviderId);
+                log.error("LLM provider service not found for provider ID: " + llmProviderId);
                 return false;
             }
 
             Map<String, String> metadataMap = new HashMap<>();
+            metadataMap.put(APIConstants.AIAPIConstants.NAME, provider.getName());
+            metadataMap.put(APIConstants.AIAPIConstants.API_VERSION, provider.getApiVersion());
+            messageContext.setProperty(APIConstants.AIAPIConstants.AI_API_REQUEST_METADATA, metadataMap);
+
             if (APIConstants.AIAPIConstants.TRAFFIC_FLOW_DIRECTION_IN.equals(direction)) {
-                metadataMap.put(APIConstants.AIAPIConstants.NAME, provider.getName());
-                metadataMap.put(APIConstants.AIAPIConstants.API_VERSION, provider.getApiVersion());
-                messageContext.setProperty(APIConstants.AIAPIConstants.AI_API_REQUEST_METADATA, metadataMap);
-
-                Object targetEndpointObj = messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT);
-                Object targetModelObj = messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_MODEL);
-
-                String targetEndpoint = targetEndpointObj instanceof String ? (String) targetEndpointObj : null;
-                String targetModel = targetModelObj instanceof String ? (String) targetModelObj : null;
-
-                if (APIConstants.AIAPIConstants.REJECT_ENDPOINT.equals(targetEndpoint)) {
-                    return true;
-                }
-                if (targetEndpoint != null && targetModel != null) {
-                    LLMProviderMetadata targetModelMetadata = findMetadataByAttributeName(
-                            providerConfiguration.getMetadata(),
-                            APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_REQUEST_MODEL);
-
-                    if (targetModelMetadata == null) {
-                        targetModelMetadata = findMetadataByAttributeName(
-                                providerConfiguration.getMetadata(),
-                                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_MODEL);
-                    }
-
-                    if (targetModelMetadata != null && APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD
-                            .equalsIgnoreCase(targetModelMetadata.getInputSource())) {
-                        modifyRequestPayload(targetModel, targetModelMetadata,
-                                ((Axis2MessageContext) messageContext).getAxis2MessageContext());
-                    } else {
-                        log.debug("Unsupported input source: " + (targetModelMetadata != null ?
-                                targetModelMetadata.getInputSource() : "null") + " for attribute: " +
-                                (targetModelMetadata != null ? targetModelMetadata.getAttributeName() : "unknown"));
-                    }
-                } else {
-                    messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
-                            APIConstants.AIAPIConstants.DEFAULT_ENDPOINT);
-                }
+                processInboundRequest(messageContext, providerConfiguration);
             } else if (APIConstants.AIAPIConstants.TRAFFIC_FLOW_DIRECTION_OUT.equals(direction)) {
-                String targetModel = (String)
-                        messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_MODEL);
-                String targetEndpoint = (String)
-                        messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT);
-
-                if (targetEndpoint != null && targetModel != null) {
-                    int statusCode = (int) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                            .getProperty(APIMgtGatewayConstants.HTTP_SC);
-
-                    if (statusCode < 200 || statusCode >= 300) {
-
-                        Long suspendDuration = (Long)
-                                messageContext.getProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION);
-                        DataHolder.getInstance().suspendEndpoint(GatewayUtils.getAPIKeyForEndpoints(messageContext),
-                                getEndpointId(targetEndpoint, targetModel),
-                                suspendDuration * 1000);
-                        return true;
-                    }
-                }
-
-                String payload = extractPayloadFromContext(messageContext, providerConfiguration);
-                Map<String, String> queryParams = extractQueryParamsFromContext(messageContext);
-                Map<String, String> headers = extractHeadersFromContext(messageContext);
-
-                llmProviderService.getResponseMetadata(payload, headers, queryParams,
-                        providerConfiguration.getMetadata(), metadataMap);
-                messageContext.setProperty(APIConstants.AIAPIConstants.AI_API_RESPONSE_METADATA, metadataMap);
+                processOutboundResponse(messageContext, providerConfiguration, llmProviderService, metadataMap);
             }
+
         } catch (Exception e) {
-            if (e instanceof APIManagementException) {
-                log.error("Error occurred while extracting metadata.", e);
-            } else if (e instanceof XMLStreamException || e instanceof IOException) {
-                log.error("Error occurred while reading payload.", e);
-            }
+            log.error("Error during mediation.", e);
             return false;
         }
 
         return true;
+    }
+
+    private void processInboundRequest(MessageContext messageContext, LLMProviderConfiguration providerConfiguration)
+            throws XMLStreamException, IOException {
+
+        Axis2MessageContext axis2MessageContext = (Axis2MessageContext) messageContext;
+        RelayUtils.buildMessage(axis2MessageContext.getAxis2MessageContext());
+        messageContext.setProperty("REQUEST_PAYLOAD",
+                JsonUtil.jsonPayloadToString(axis2MessageContext.getAxis2MessageContext()));
+        messageContext.setProperty("REQUEST_HEADERS", axis2MessageContext.getAxis2MessageContext().getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
+        messageContext.setProperty("REQUEST_HTTP_METHOD", ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty("HTTP_METHOD"));
+        messageContext.setProperty("REQUEST_POST_FIX_URL", ((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty("REST_URL_POSTFIX"));
+
+        String targetEndpoint = (String) messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT);
+        String targetModel = (String) messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_MODEL);
+
+        if (APIConstants.AIAPIConstants.REJECT_ENDPOINT.equals(targetEndpoint)) {
+            return;
+        }
+
+        if (targetEndpoint != null && targetModel != null) {
+            LLMProviderMetadata targetModelMetadata = getTargetModelMetadata(providerConfiguration);
+
+            if (targetModelMetadata != null
+                    && APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.
+                    equalsIgnoreCase(targetModelMetadata.getInputSource())) {
+                modifyRequestPayload(targetModel, targetModelMetadata, axis2MessageContext.getAxis2MessageContext());
+            } else {
+                log.debug("Unsupported input source for attribute: " + (targetModelMetadata != null ?
+                        targetModelMetadata.getAttributeName() : "unknown"));
+            }
+        } else {
+            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
+                    APIConstants.AIAPIConstants.DEFAULT_ENDPOINT);
+        }
+    }
+
+    private void processOutboundResponse(MessageContext messageContext, LLMProviderConfiguration providerConfiguration,
+                                         LLMProviderService llmProviderService, Map<String, String> metadataMap)
+            throws APIManagementException, XMLStreamException, IOException {
+
+        String payload = extractPayloadFromContext(messageContext, providerConfiguration);
+        Map<String, String> queryParams = extractQueryParamsFromContext(messageContext);
+        Map<String, String> headers = extractHeadersFromContext(messageContext);
+
+        llmProviderService.getResponseMetadata(payload, headers, queryParams, providerConfiguration.getMetadata(),
+                metadataMap);
+        messageContext.setProperty(APIConstants.AIAPIConstants.AI_API_RESPONSE_METADATA, metadataMap);
+
+        String targetModel = (String) messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_MODEL);
+        String targetEndpoint = (String) messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT);
+        List<ModelEndpointDTO> failoverEndpoints =
+                (List<ModelEndpointDTO>) messageContext.getProperty(APIConstants.AIAPIConstants.FAILOVER_ENDPOINTS);
+
+        if (targetEndpoint == null || targetModel == null) {
+            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
+                    APIConstants.AIAPIConstants.EXIT_ENDPOINT);
+            return;
+        }
+
+        int statusCode =
+                (int) ((Axis2MessageContext) messageContext)
+                        .getAxis2MessageContext().getProperty(APIMgtGatewayConstants.HTTP_SC);
+        if (statusCode >= 200 && statusCode < 300) {
+            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
+                    APIConstants.AIAPIConstants.EXIT_ENDPOINT);
+            return;
+        }
+
+        Long suspendDuration = (Long) messageContext.getProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION);
+        DataHolder.getInstance().suspendEndpoint(GatewayUtils.getAPIKeyForEndpoints(messageContext),
+                getEndpointId(targetEndpoint, targetModel), suspendDuration * 1000);
+
+        handleFailover(messageContext, failoverEndpoints, providerConfiguration);
+    }
+
+    private void handleFailover(MessageContext messageContext, List<ModelEndpointDTO> failoverEndpoints,
+                                LLMProviderConfiguration providerConfiguration) throws XMLStreamException, IOException {
+
+        if (failoverEndpoints == null || failoverEndpoints.isEmpty()) {
+            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
+                    APIConstants.AIAPIConstants.EXIT_ENDPOINT);
+            return;
+        }
+
+        Object nextEndpointObj = messageContext.getProperty("nextEndpoint");
+        int nextEndpointIndex = (nextEndpointObj instanceof Integer) ? (int) nextEndpointObj : 0;
+
+        if (nextEndpointIndex >= failoverEndpoints.size()) {
+            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
+                    APIConstants.AIAPIConstants.REJECT_ENDPOINT);
+            return;
+        }
+
+        ModelEndpointDTO failoverEndpoint = failoverEndpoints.get(nextEndpointIndex);
+        messageContext.setProperty("nextEndpoint", nextEndpointIndex + 1);
+        messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, failoverEndpoint.getEndpointId());
+        messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_MODEL, failoverEndpoint.getModel());
+
+        buildFailoverRequest(messageContext, failoverEndpoint, providerConfiguration);
+    }
+
+    private void buildFailoverRequest(MessageContext messageContext,
+                                      ModelEndpointDTO failoverEndpoint,
+                                      LLMProviderConfiguration providerConfiguration)
+            throws XMLStreamException, IOException {
+
+        String requestPayload = (String) messageContext.getProperty("REQUEST_PAYLOAD");
+        Axis2MessageContext axis2MessageContext = (Axis2MessageContext) messageContext;
+        RelayUtils.buildMessage(axis2MessageContext.getAxis2MessageContext());
+        JsonUtil.getNewJsonPayload(axis2MessageContext.getAxis2MessageContext(), requestPayload, true, true);
+
+        LLMProviderMetadata targetModelMetadata = getTargetModelMetadata(providerConfiguration);
+        if (targetModelMetadata != null &&
+                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD
+                        .equalsIgnoreCase(targetModelMetadata.getInputSource())) {
+            modifyRequestPayload(failoverEndpoint.getModel(), targetModelMetadata,
+                    axis2MessageContext.getAxis2MessageContext());
+        } else {
+            log.debug("Unsupported input source for attribute: " + (targetModelMetadata != null ?
+                    targetModelMetadata.getAttributeName() : "unknown"));
+        }
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty("REST_URL_POSTFIX",
+                messageContext.getProperty("REQUEST_REST_URL_POSTFIX"));
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty("HTTP_METHOD",
+                messageContext.getProperty("REQUEST_HTTP_METHOD"));
+        ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .setProperty(APIMgtGatewayConstants.TRANSPORT_HEADERS, messageContext.getProperty("REQUEST_HEADERS"));
+    }
+
+    private LLMProviderMetadata getTargetModelMetadata(LLMProviderConfiguration providerConfiguration) {
+
+        return findMetadataByAttributeName(providerConfiguration.getMetadata(),
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_REQUEST_MODEL,
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_MODEL);
+    }
+
+    private LLMProviderMetadata findMetadataByAttributeName(List<LLMProviderMetadata> metadataList,
+                                                            String... attributeNames) {
+
+        for (String attributeName : attributeNames) {
+            LLMProviderMetadata metadata = metadataList.stream()
+                    .filter(meta -> attributeName.equals(meta.getAttributeName()))
+                    .findFirst()
+                    .orElse(null);
+            if (metadata != null) {
+                return metadata;
+            }
+        }
+        return null;
     }
 
     /**
@@ -193,34 +284,31 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param targetModel         the new value to set
      * @param targetModelMetadata metadata containing the attribute identifier
      * @param axis2MessageContext the Axis2 message context with the request payload
-     * @return {@code true} if modified, {@code false} if not possible, or {@code null} for XML/undefined content types
      * @throws XMLStreamException if XML processing fails
      * @throws IOException        if an I/O error occurs
      */
 
-    public static Boolean modifyRequestPayload(String targetModel, LLMProviderMetadata targetModelMetadata,
-                                               org.apache.axis2.context.MessageContext axis2MessageContext)
+    public static void modifyRequestPayload(String targetModel, LLMProviderMetadata targetModelMetadata,
+                                            org.apache.axis2.context.MessageContext axis2MessageContext)
             throws XMLStreamException, IOException {
 
         RelayUtils.buildMessage(axis2MessageContext);
         String contentType = (String) axis2MessageContext.getProperty(APIMgtGatewayConstants.REST_CONTENT_TYPE);
 
         if (contentType == null) {
-            return null;
+            return;
         }
         String normalizedContentType = contentType.toLowerCase();
         String attributeIdentifier = targetModelMetadata.getAttributeIdentifier();
 
         if (normalizedContentType.contains(MediaType.APPLICATION_XML)
                 || normalizedContentType.contains(MediaType.TEXT_XML)) {
-            return null;
         } else if (normalizedContentType.contains(MediaType.APPLICATION_JSON)) {
-            return modifyJsonPayload(axis2MessageContext, attributeIdentifier, targetModel);
+            modifyJsonPayload(axis2MessageContext, attributeIdentifier, targetModel);
         } else if (normalizedContentType.contains(MediaType.TEXT_PLAIN)) {
-            return modifyTextPayload(axis2MessageContext, targetModel);
+            modifyTextPayload(axis2MessageContext, targetModel);
         }
 
-        return false;
     }
 
     /**
