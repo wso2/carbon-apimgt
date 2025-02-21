@@ -79,7 +79,20 @@ public class WeightedRoundRobinMediator extends AbstractMediator implements Mana
             return false;
         }
 
-        List<ModelEndpointDTO> activeEndpoints = GatewayUtils.getActiveEndpoints(endpoints, messageContext);
+        String apiKeyType = (String) messageContext.getProperty(org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE);
+
+        List<ModelEndpointDTO> selectedEndpoints = org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE_PRODUCTION
+                .equals(apiKeyType)
+                ? endpoints.getProduction()
+                : endpoints.getSandbox();
+
+        if (selectedEndpoints == null || selectedEndpoints.isEmpty()) {
+            log.debug("RoundRobin policy is not set for " + apiKeyType + ", bypassing mediation.");
+            return true;
+        }
+
+        List<ModelEndpointDTO> activeEndpoints = GatewayUtils.filterActiveEndpoints(selectedEndpoints, messageContext);
+
         if (activeEndpoints != null && !activeEndpoints.isEmpty()) {
             ModelEndpointDTO nextEndpoint = getWeightedRandomEndpoint(activeEndpoints);
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, nextEndpoint.getEndpointId());
