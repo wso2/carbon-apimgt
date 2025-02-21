@@ -3370,7 +3370,7 @@ public class APIMappingUtil {
 
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
                 .getProviderName()));
-        if (checkEndpointSecurityPasswordEnabled(tenantDomain) | preserveCredentials) {
+        if (checkEndpointSecurityPasswordEnabled(tenantDomain) || preserveCredentials) {
             return endpointSecurity;
         }
         return handleEndpointSecurity(endpointSecurity);
@@ -3378,7 +3378,7 @@ public class APIMappingUtil {
 
     private static JSONObject handleEndpointSecurity(JSONObject endpointSecurity, String organization,
             boolean preserveCredentials) throws APIManagementException {
-        if (checkEndpointSecurityPasswordEnabled(organization) | preserveCredentials) {
+        if (checkEndpointSecurityPasswordEnabled(organization) || preserveCredentials) {
             return endpointSecurity;
         }
         return handleEndpointSecurity(endpointSecurity);
