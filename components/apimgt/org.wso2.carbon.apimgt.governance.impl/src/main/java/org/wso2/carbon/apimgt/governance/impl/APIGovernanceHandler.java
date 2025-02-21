@@ -529,7 +529,7 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
      */
     public static String extractAPIDefinition(byte[] apiProjectZip, ExtendedArtifactType extendedArtifactType)
             throws APIMGovernanceException {
-        String rootFolder = APIMGovernanceConstants.DEFINITIONS_FOLDER + File.separator;
+        String rootFolder = APIMGovernanceConstants.DEFINITIONS_FOLDER;
         String swaggerPath = rootFolder + APIMGovernanceConstants.SWAGGER_FILE_NAME;
         String asyncAPIPath = rootFolder + APIMGovernanceConstants.ASYNC_API_FILE_NAME;
         String defContent;
