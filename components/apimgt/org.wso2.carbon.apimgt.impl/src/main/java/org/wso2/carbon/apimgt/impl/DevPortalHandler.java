@@ -27,21 +27,74 @@ import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import java.io.InputStream;
 
 /**
- * This interface used to handle newly introduced 2025 version of Developer Portal's configuration with APIM.
+ * This interface used to handle different types of developer portals' interactions with APIM.
  */
 public interface DevPortalHandler {
 
+    /**
+     * Publishes API metadata to the Developer Portal.
+     *
+     * @param organization The organization to which the API belongs.
+     * @param api          The API object containing metadata details.
+     * @return A reference ID (Devportal side) of API.
+     * @throws APIManagementException If an error occurs while publishing metadata.
+     */
     String publishAPIMetadata(String organization, API api) throws APIManagementException;
 
+    /**
+     * Updates API metadata in the Developer Portal.
+     *
+     * @param organization The organization to which the API belongs.
+     * @param api          The API object containing updated metadata.
+     * @param refId        The reference ID of the API to be updated.
+     * @throws APIManagementException If an error occurs while updating metadata.
+     */
     void updateAPIMetadata(String organization, API api, String refId) throws APIManagementException;
 
+    /**
+     * Un-publishes API metadata from the Developer Portal.
+     *
+     * @param organization The organization to which the API belongs.
+     * @param api          The API object whose metadata is to be removed.
+     * @param refId        The reference ID of the API to be unpublished.
+     * @throws APIManagementException If an error occurs while un-publishing metadata.
+     */
     void unpublishAPIMetadata(String organization, API api, String refId) throws APIManagementException;
 
+    /**
+     * Publishes API content (e.g., documentation, descriptions) to the Developer Portal.
+     *
+     * @param organization The organization to which the API belongs.
+     * @param refId        The reference ID of the API.
+     * @param content      The InputStream containing the content to be published.
+     * @param apiName      The name of the API.
+     * @throws APIManagementException If an error occurs while publishing content.
+     */
     void publishAPIContent(String organization, String refId, InputStream content, String apiName) throws APIManagementException;
 
+    /**
+     * Un-publishes API content from the Developer Portal.
+     *
+     * @param organization The organization to which the API belongs.
+     * @param refId        The reference ID of the API whose content is to be removed.
+     * @throws APIManagementException If an error occurs while un-publishing content.
+     */
     void unpublishAPIContent(String organization, String refId) throws APIManagementException;
 
+    /**
+     * Publishes organization theme to the Developer Portal.
+     *
+     * @param organization The organization for which content is being published.
+     * @param content      The InputStream containing the content to be published.
+     * @throws APIManagementException If an error occurs while publishing organization content.
+     */
     void publishOrgContent(String organization, InputStream content) throws APIManagementException;
 
+    /**
+     * Un-publishes organization-level content from the Developer Portal.
+     *
+     * @param organization The organization whose content is to be removed.
+     * @throws APIManagementException If an error occurs while un-publishing organization content.
+     */
     void unpublishOrgContent(String organization) throws APIManagementException;
 }
