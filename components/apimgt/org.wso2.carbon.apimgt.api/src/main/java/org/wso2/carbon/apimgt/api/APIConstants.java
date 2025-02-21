@@ -100,11 +100,13 @@ public class APIConstants {
         public static final String TRAFFIC_FLOW_DIRECTION_IN = "IN";
         public static final String TRAFFIC_FLOW_DIRECTION_OUT = "OUT";
         public static final String API_LLM_ENDPOINT = "_API_LLMEndpoint_";
-        public static final String TARGET_MODEL = "targetModel";
-        public static final String TARGET_ENDPOINT = "targetEndpoint";
-        public static final String SUSPEND_DURATION = "suspendDuration";
-        public static final String ENDPOINT_TIMEOUT = "endpointTimeout";
-        public static final String FAILOVER_ENDPOINTS = "failoverEndpoints";
+        public static final String TARGET_MODEL = "TARGET_MODEL";
+        public static final String TARGET_ENDPOINT = "TARGET_ENDPOINT";
+        public static final String FAILOVER_TARGET_MODEL = "FAILOVER_TARGET_MODEL";
+        public static final String FAILOVER_TARGET_ENDPOINT = "FAILOVER_TARGET_ENDPOINT";
+        public static final String SUSPEND_DURATION = "SUSPEND_DURATION";
+        public static final String ENDPOINT_TIMEOUT = "ENDPOINT_TIMEOUT";
+        public static final String FAILOVER_ENDPOINTS = "FAILOVER_ENDPOINTS";
         public static final String REJECT_ENDPOINT = "REJECT";
         public static final String DEFAULT_ENDPOINT = "DEFAULT";
         public static final String EXIT_ENDPOINT = "EXIT";
@@ -112,10 +114,10 @@ public class APIConstants {
         public static final String REQUEST_HEADERS = "REQUEST_HEADERS";
         public static final String REQUEST_HTTP_METHOD = "REQUEST_HTTP_METHOD";
         public static final String REQUEST_REST_URL_POSTFIX = "REQUEST_REST_URL_POSTFIX";
+        public static final String REQUEST_MODEL = "REQUEST_MODEL";
         public static final String CURRENT_ENDPOINT_INDEX = "CURRENT_ENDPOINT_INDEX";
         public static final String DEFAULT_PRODUCTION_ENDPOINT_NAME = "DEFAULT PRODUCTION ENDPOINT";
         public static final String DEFAULT_SANDBOX_ENDPOINT_NAME = "DEFAULT SANDBOX ENDPOINT";
         public static final String ENDPOINT_SEQUENCE = "_EndpointsSeq";
-
     }
 }

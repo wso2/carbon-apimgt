@@ -24,6 +24,7 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyConfigDTO;
 import org.wso2.carbon.apimgt.api.gateway.ModelEndpointDTO;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
@@ -54,6 +55,12 @@ public class FailoverMediator extends AbstractMediator implements ManagedLifecyc
     @Override
     public boolean mediate(MessageContext messageContext) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("FailoverMediator mediation started.");
+        }
+
+        DataHolder.getInstance().initCache(GatewayUtils.getAPIKeyForEndpoints(messageContext));
+
         FailoverPolicyConfigDTO policyConfig = new Gson().fromJson(failoverConfigs, FailoverPolicyConfigDTO.class);
         List<ModelEndpointDTO> activeEndpoints = GatewayUtils.getActiveEndpoints(policyConfig, messageContext);
 
@@ -62,8 +69,8 @@ public class FailoverMediator extends AbstractMediator implements ManagedLifecyc
                         ? policyConfig.getProduction().getTargetModelEndpoint()
                         : policyConfig.getSandbox().getTargetModelEndpoint();
 
-        messageContext.setProperty(AIAPIConstants.TARGET_ENDPOINT, targetEndpointModel.getEndpointId());
-        messageContext.setProperty(AIAPIConstants.TARGET_MODEL, targetEndpointModel.getModel());
+        messageContext.setProperty(AIAPIConstants.FAILOVER_TARGET_ENDPOINT, targetEndpointModel.getEndpointId());
+        messageContext.setProperty(AIAPIConstants.FAILOVER_TARGET_MODEL, targetEndpointModel.getModel());
         messageContext.setProperty(AIAPIConstants.FAILOVER_ENDPOINTS, activeEndpoints);
         messageContext.setProperty(AIAPIConstants.SUSPEND_DURATION,
                 policyConfig.getSuspendDuration() * 1000);
