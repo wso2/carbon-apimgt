@@ -350,14 +350,14 @@ public class ApisApiServiceImpl implements ApisApiService {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         APIDTO apiDTO = getAPIByID(apiId, apiProvider, organization);
-        if (apiDTO.getPrimaryProductionEndpointId().equals(endpointUuid) || apiDTO.getPrimarySandboxEndpointId()
-                .equals(endpointUuid)) {
+        String primaryProductionEndpointId = apiDTO.getPrimaryProductionEndpointId();
+        String primarySandboxEndpointId = apiDTO.getPrimarySandboxEndpointId();
+        if (endpointUuid.equals(primaryProductionEndpointId) || endpointUuid.equals(primarySandboxEndpointId)) {
             String errorMessage = String.format(
                     "Failed to delete API Endpoint with UUID %s. This Endpoint is defined as a primary endpoint.",
                     endpointUuid);
             throw new APIManagementException(errorMessage,
                     ExceptionCodes.from(ExceptionCodes.ERROR_DELETING_PRIMARY_API_ENDPOINT, endpointUuid));
-
         }
 
         try {
