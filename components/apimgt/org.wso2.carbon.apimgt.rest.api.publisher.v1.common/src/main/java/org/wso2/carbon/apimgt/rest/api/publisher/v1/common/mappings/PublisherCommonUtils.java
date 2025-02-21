@@ -3513,6 +3513,27 @@ public class PublisherCommonUtils {
 
         APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
 
+        // extract endpoint URL
+        Object endpointURLObj;
+        if (apiEndpoint.getDeploymentStage().equals(APIConstants.APIEndpoint.PRODUCTION)) {
+             endpointURLObj = apiEndpoint.getEndpointConfig()
+                    .get(APIConstants.APIEndpoint.ENDPOINT_CONFIG_PRODUCTION_ENDPOINTS);
+        } else if (apiEndpoint.getDeploymentStage().equals(APIConstants.APIEndpoint.SANDBOX)) {
+            endpointURLObj = apiEndpoint.getEndpointConfig()
+                    .get(APIConstants.APIEndpoint.ENDPOINT_CONFIG_SANDBOX_ENDPOINTS);
+        } else {
+            throw new APIManagementException("Invalid deployment stage. Deployment stage should be either " +
+                    "'PRODUCTION' or 'SANDBOX'", ExceptionCodes.ERROR_ADDING_API_ENDPOINT);
+        }
+
+        String endpointURL = ((LinkedHashMap) endpointURLObj).get("url").toString();
+
+        // validate endpoint URL
+        if (!APIUtil.validateEndpointURL(endpointURL)) {
+            throw new APIManagementException("Invalid/Malformed endpoint URL detected",
+                    ExceptionCodes.API_ENDPOINT_URL_INVALID);
+        }
+
         if (apiEndpoint.getDeploymentStage()
                 .equals(APIConstants.APIEndpoint.PRODUCTION) || apiEndpoint.getDeploymentStage()
                 .equals(APIConstants.APIEndpoint.SANDBOX)) {
