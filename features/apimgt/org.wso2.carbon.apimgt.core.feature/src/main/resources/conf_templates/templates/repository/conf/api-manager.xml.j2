@@ -709,6 +709,7 @@
         <VelocityLogger>{{apim.velocity_log.name}}</VelocityLogger>
     {% endif %}
 
+    {% if apim.governance.datasource.name is defined %}
     <!-- This property is to configure the API Manager Governance capabilities -->
     <APIMGovernance>
         <DataSource>{{apim.governance.datasource.name}}</DataSource>
@@ -719,6 +720,7 @@
             <TaskCleanupIntervalMinutes>{{apim.governance.scheduler.task_cleanup_interval_minutes}}</TaskCleanupIntervalMinutes>
         </SchedulerConfigurations>
     </APIMGovernance>
+    {% endif %}
 
     <RESTAPI>
         <!--Configure allowed URIs of REST API. Accessing allowed URIs does not require credentials (does not require Authorization header). -->
