@@ -356,11 +356,10 @@ public class PolicyManager {
     /**
      * Delete the label policy mappings
      *
-     * @param label        Label ID
-     * @param organization Organization
+     * @param label Label ID
      * @throws APIMGovernanceException If an error occurs while deleting the mappings
      */
-    public void deleteLabelPolicyMappings(String label, String organization) throws APIMGovernanceException {
-        policyMgtDAO.deleteLabelPolicyMappings(label, organization);
+    public void deleteLabelPolicyMappings(String label) throws APIMGovernanceException {
+        policyMgtDAO.deleteLabelPolicyMappings(label);
     }
 }

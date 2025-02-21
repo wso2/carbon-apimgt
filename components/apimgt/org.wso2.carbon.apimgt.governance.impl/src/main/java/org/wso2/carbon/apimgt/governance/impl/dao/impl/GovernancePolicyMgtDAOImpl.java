@@ -970,18 +970,24 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
     /**
      * Delete policy label mappings for a given label
      *
-     * @param label        label
-     * @param organization organization
+     * @param label label
      * @throws APIMGovernanceException If an error occurs while deleting the mappings
      */
     @Override
-    public void deleteLabelPolicyMappings(String label, String organization) throws APIMGovernanceException {
-        try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
-                     .DELETE_GOVERNANCE_POLICIES_BY_LABEL)) {
-            prepStmt.setString(1, label);
-            prepStmt.setString(2, organization);
-            prepStmt.executeUpdate();
+    public void deleteLabelPolicyMappings(String label) throws APIMGovernanceException {
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement prepStmt = connection.prepareStatement(SQLConstants
+                        .DELETE_GOVERNANCE_POLICIES_BY_LABEL)) {
+                    prepStmt.setString(1, label);
+                    prepStmt.executeUpdate();
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_DELETING_LABEL_POLICY_MAPPINGS, e, label);

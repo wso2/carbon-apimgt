@@ -20,27 +20,46 @@
 
 package org.wso2.carbon.apimgt.impl.notifier.events;
 
-import lombok.Getter;
-import lombok.Setter;
+/**
+ * This class represents the event for label related operations
+ */
+public class LabelEvent extends Event {
 
-public class LabelEvent  extends Event {
+    private String labelId;
+    private String name;
+    private String description;
 
-        @Getter
-        @Setter
-        private String labelId;
-        @Getter
-        @Setter
-        private String name;
-        private String description;
+    public LabelEvent(String eventId, long timestamp, String type, String tenantDomain, String labelId,
+                      String name) {
+        this.eventId = eventId;
+        this.timeStamp = timestamp;
+        this.type = type;
+        this.tenantDomain = tenantDomain;
+        this.labelId = labelId;
+        this.name = name;
+    }
 
-        public LabelEvent(String eventId, long timestamp, String type, String tenantDomain, String labelId,
-                          String name) {
-            this.eventId = eventId;
-            this.timeStamp = timestamp;
-            this.type = type;
-            this.tenantDomain = tenantDomain;
-            this.labelId = labelId;
-            this.name = name;
-        }
+    public String getLabelId() {
+        return labelId;
+    }
 
+    public void setLabelId(String labelId) {
+        this.labelId = labelId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

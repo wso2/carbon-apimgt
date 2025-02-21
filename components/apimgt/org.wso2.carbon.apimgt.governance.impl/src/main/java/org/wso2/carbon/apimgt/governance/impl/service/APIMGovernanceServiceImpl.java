@@ -261,17 +261,6 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
     }
 
     /**
-     * Delete governance related data for the given label
-     *
-     * @param label Label id to delete governance data
-     * @throws APIMGovernanceException If an error occurs while deleting governance data
-     */
-    @Override
-    public void deleteGovernanceDataForLabel(String label, String organization) throws APIMGovernanceException {
-        policyManager.deleteLabelPolicyMappings(label, organization);
-    }
-
-    /**
      * Delete all governance data related to the artifact
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)

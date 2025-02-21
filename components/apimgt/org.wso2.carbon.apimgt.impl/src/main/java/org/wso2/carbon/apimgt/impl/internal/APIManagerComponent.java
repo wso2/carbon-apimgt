@@ -85,6 +85,7 @@ import org.wso2.carbon.apimgt.impl.notifier.ExternallyDeployedApiNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.GatewayPolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.GoogleAnalyticsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.LLMProviderNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.LabelNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ScopesNotifier;
@@ -219,6 +220,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new LLMProviderNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new LabelNotifier(), null);
             if (configuration.getMarketplaceAssistantConfigurationDto().isKeyProvided() ||
                     configuration.getMarketplaceAssistantConfigurationDto().isAuthTokenProvided()) {
                 bundleContext.registerService(Notifier.class.getName(), new MarketplaceAssistantApiPublisherNotifier(), null);
