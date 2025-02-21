@@ -16,6 +16,7 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.ManagedLifecycle;
@@ -58,7 +59,7 @@ public class FailoverMediator extends AbstractMediator implements ManagedLifecyc
      */
     @Override
     public void destroy() {
-        
+
     }
 
     /**
@@ -77,7 +78,18 @@ public class FailoverMediator extends AbstractMediator implements ManagedLifecyc
 
         DataHolder.getInstance().initCache(GatewayUtils.getAPIKeyForEndpoints(messageContext));
 
-        FailoverPolicyConfigDTO policyConfig = new Gson().fromJson(failoverConfigs, FailoverPolicyConfigDTO.class);
+        FailoverPolicyConfigDTO policyConfig;
+        try {
+            policyConfig = new Gson().fromJson(failoverConfigs, FailoverPolicyConfigDTO.class);
+            if (policyConfig == null) {
+                log.error("Failed to parse failover configuration: null config");
+                return false;
+            }
+        } catch (JsonSyntaxException e) {
+            log.error("Failed to parse failover configuration", e);
+            return false;
+        }
+
         List<ModelEndpointDTO> activeEndpoints = GatewayUtils.getActiveEndpoints(policyConfig, messageContext);
 
         ModelEndpointDTO targetEndpointModel =
@@ -85,12 +97,18 @@ public class FailoverMediator extends AbstractMediator implements ManagedLifecyc
                         ? policyConfig.getProduction().getTargetModelEndpoint()
                         : policyConfig.getSandbox().getTargetModelEndpoint();
 
-        // Update the message context with failover-related properties
+        if (targetEndpointModel == null) {
+            log.error("Target endpoint model is null");
+            return false;
+        }
+
         messageContext.setProperty(AIAPIConstants.FAILOVER_TARGET_ENDPOINT, targetEndpointModel.getEndpointId());
         messageContext.setProperty(AIAPIConstants.FAILOVER_TARGET_MODEL, targetEndpointModel.getModel());
         messageContext.setProperty(AIAPIConstants.FAILOVER_ENDPOINTS, activeEndpoints);
-        messageContext.setProperty(AIAPIConstants.SUSPEND_DURATION, policyConfig.getSuspendDuration() * 1000);
-        messageContext.setProperty(AIAPIConstants.ENDPOINT_TIMEOUT, policyConfig.getRequestTimeout() * 1000);
+        messageContext.setProperty(AIAPIConstants.SUSPEND_DURATION,
+                policyConfig.getSuspendDuration() * AIAPIConstants.MILLISECONDS_IN_SECOND);
+        messageContext.setProperty(AIAPIConstants.ENDPOINT_TIMEOUT,
+                policyConfig.getRequestTimeout() * AIAPIConstants.MILLISECONDS_IN_SECOND);
 
         return true;
     }
