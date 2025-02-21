@@ -3281,9 +3281,7 @@ public final class APIConstants {
 
     //Property for enabling tenant aware sub claims when invoking APIs with API key
     public static final String ENABLE_TENANT_AWARE_SUB_CLAIM= "enable.tenant.aware.subclaim";
-
-    public static final String PRODUCTION = "PRODUCTION";
-    public static final String SANDBOX = "SANDBOX";
+    public static final String OM_ELEMENT_NAME = "name";
     public static class TokenValidationConstants {
         public static final String TOKEN_VALIDATION_CONFIG = "TokenValidation";
         public static final String ENFORCE_JWT_TYPE_HEADER_VALIDATION = "EnforceTypeHeaderValidation";

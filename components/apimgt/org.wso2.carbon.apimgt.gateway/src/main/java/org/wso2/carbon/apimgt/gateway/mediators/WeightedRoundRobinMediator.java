@@ -23,8 +23,8 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.api.APIConstants;
-import org.wso2.carbon.apimgt.api.gateway.RBEndpointDTO;
-import org.wso2.carbon.apimgt.api.gateway.RBEndpointsPolicyDTO;
+import org.wso2.carbon.apimgt.api.gateway.ModelEndpointDTO;
+import org.wso2.carbon.apimgt.api.gateway.RBPolicyConfigDTO;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 
@@ -63,19 +63,20 @@ public class WeightedRoundRobinMediator extends AbstractMediator implements Mana
     public boolean mediate(MessageContext messageContext) {
 
         if (log.isDebugEnabled()) {
-            log.debug("AIAPIRoundRobinMediator mediation started.");
+            log.debug("WeightedRoundRobinMediator mediation started.");
         }
 
         DataHolder.getInstance().initCache(GatewayUtils.getAPIKeyForEndpoints(messageContext));
 
-        RBEndpointsPolicyDTO endpoints = new Gson().fromJson(weightedRoundRobinConfigs, RBEndpointsPolicyDTO.class);
-        List<RBEndpointDTO> activeEndpoints = GatewayUtils.getActiveEndpoints(endpoints, messageContext);
+        RBPolicyConfigDTO endpoints = new Gson().fromJson(weightedRoundRobinConfigs, RBPolicyConfigDTO.class);
+        List<ModelEndpointDTO> activeEndpoints = GatewayUtils.getActiveEndpoints(endpoints, messageContext);
 
         if (activeEndpoints != null && !activeEndpoints.isEmpty()) {
-            RBEndpointDTO nextEndpoint = getWeightedRandomEndpoint(activeEndpoints);
+            ModelEndpointDTO nextEndpoint = getWeightedRandomEndpoint(activeEndpoints);
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, nextEndpoint.getEndpointId());
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_MODEL, nextEndpoint.getModel());
-            messageContext.setProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION, endpoints.getSuspendDuration());
+            messageContext.setProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION,
+                    endpoints.getSuspendDuration() * 1000);
         } else {
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
                     APIConstants.AIAPIConstants.REJECT_ENDPOINT);
@@ -89,12 +90,12 @@ public class WeightedRoundRobinMediator extends AbstractMediator implements Mana
      * @param endpoints List of active endpoints.
      * @return The selected RBEndpointDTO based on weight.
      */
-    private RBEndpointDTO getWeightedRandomEndpoint(List<RBEndpointDTO> endpoints) {
+    private ModelEndpointDTO getWeightedRandomEndpoint(List<ModelEndpointDTO> endpoints) {
 
         float totalWeight = 0.0f;
         List<Float> cumulativeWeights = new ArrayList<>();
 
-        for (RBEndpointDTO endpoint : endpoints) {
+        for (ModelEndpointDTO endpoint : endpoints) {
             double weight = Math.max(endpoint.getWeight(), 0.1f);
             totalWeight += (float) weight;
             cumulativeWeights.add(totalWeight);

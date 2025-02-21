@@ -50,8 +50,6 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.gateway.RBEndpointDTO;
-import org.wso2.carbon.apimgt.api.gateway.RBEndpointsPolicyDTO;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.throttling.APIThrottleConstants;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
