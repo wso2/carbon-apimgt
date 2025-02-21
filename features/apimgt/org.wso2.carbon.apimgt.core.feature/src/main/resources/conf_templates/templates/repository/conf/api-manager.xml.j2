@@ -1163,6 +1163,7 @@
                 {% else %}
                 <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
                 {% endif %}
+                <SequentialFailoverFromBeginning>{{apim.throttling.sequential_failover_from_beginning}}</SequentialFailoverFromBeginning>
             </JMSConnectionParameters>
         </JMSConnectionDetails>
 
@@ -1619,6 +1620,7 @@
              {% else %}
              <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}?{% if apim.throttling.jms.ssl is defined %}ssl='{{apim.throttling.jms.ssl}}'{% endif %}'</connectionfactory.TopicConnectionFactory>
              {% endif %}
+             <SequentialFailoverFromBeginning>{{apim.throttling.sequential_failover_from_beginning}}</SequentialFailoverFromBeginning>
          </EventReceiverConfiguration>
      </EventHubConfigurations>
 
