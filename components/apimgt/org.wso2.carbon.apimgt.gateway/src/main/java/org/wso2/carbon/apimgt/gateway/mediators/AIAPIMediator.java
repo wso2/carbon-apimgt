@@ -700,8 +700,16 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             return;
         }
         String jsonPayload = JsonUtil.jsonPayloadToString(axis2MessageContext);
-        String updatedJson = JsonPath.parse(jsonPayload).set(jsonPath, newValue).jsonString();
-        JsonUtil.getNewJsonPayload(axis2MessageContext, updatedJson, true, true);
+        try {
+            String updatedJson = JsonPath.parse(jsonPayload).set(jsonPath, newValue).jsonString();
+            JsonUtil.getNewJsonPayload(axis2MessageContext, updatedJson, true, true);
+        } catch (PathNotFoundException e) {
+            log.error("Failed to find JSON path: " + jsonPath, e);
+            throw new AxisFault("Failed to modify JSON payload", e);
+        } catch (Exception e) {
+            log.error("Error modifying JSON payload", e);
+            throw new AxisFault("Failed to modify JSON payload", e);
+        }
     }
 
     /**

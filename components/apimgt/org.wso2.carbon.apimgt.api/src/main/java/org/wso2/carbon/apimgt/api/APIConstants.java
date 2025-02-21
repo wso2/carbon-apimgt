@@ -47,6 +47,7 @@ public class APIConstants {
     public static final String OM_ELEMENT_NAME = "name";
 
     public static class AIAPIConstants {
+        public static final int MILLISECONDS_IN_SECOND = 1000;
         public static final String LLM_PROVIDERS = "llmProviders";
         public static final String API_KEY_IDENTIFIER_TYPE_HEADER = "HEADER";
         public static final String API_KEY_IDENTIFIER_TYPE_QUERY_PARAMETER = "QUERY_PARAMETER";

@@ -23,10 +23,12 @@ package org.wso2.carbon.apimgt.api.gateway;
  */
 public class FailoverPolicyConfigDTO {
 
+    private static final long DEFAULT_REQUEST_TIMEOUT = 30000L;
+    private static final long DEFAULT_SUSPEND_DURATION = 300000L;
     private FailoverPolicyDeploymentConfigDTO production;
     private FailoverPolicyDeploymentConfigDTO sandbox;
-    private Long requestTimeout;
-    private Long suspendDuration;
+    private Long requestTimeout = DEFAULT_REQUEST_TIMEOUT;
+    private Long suspendDuration = DEFAULT_SUSPEND_DURATION;
 
     /**
      * Gets the failover policy configuration for production.
@@ -84,7 +86,7 @@ public class FailoverPolicyConfigDTO {
      * @param requestTimeout the request timeout in milliseconds to set
      */
     public void setRequestTimeout(Long requestTimeout) {
-
+        validateDuration(suspendDuration, "Request timeout");
         this.requestTimeout = requestTimeout;
     }
 
@@ -104,8 +106,22 @@ public class FailoverPolicyConfigDTO {
      * @param suspendDuration the suspend duration in milliseconds to set
      */
     public void setSuspendDuration(Long suspendDuration) {
-
+        validateDuration(suspendDuration, "Suspend duration");
         this.suspendDuration = suspendDuration;
+    }
+
+    /**
+     * Validates that the duration is positive.
+     *
+     * @param duration  the duration to validate
+     * @param fieldName the name of the field being validated
+     * @throws IllegalArgumentException if duration is not positive
+     */
+    private void validateDuration(Long duration, String fieldName) {
+
+        if (duration != null && duration <= 0) {
+            throw new IllegalArgumentException(fieldName + " must be positive");
+        }
     }
 }
 
