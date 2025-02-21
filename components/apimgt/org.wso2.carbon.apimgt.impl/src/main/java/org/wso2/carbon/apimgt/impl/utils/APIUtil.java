@@ -28,6 +28,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.internal.LinkedTreeMap;
 import feign.Feign;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
@@ -110,6 +111,11 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayAPIValidationResult;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
+import org.wso2.carbon.apimgt.api.model.GatewayPortalConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayFeatureCatalog;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
@@ -156,6 +162,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
+import org.wso2.carbon.apimgt.impl.ExternalGatewayAPIValidationException;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
@@ -163,8 +170,6 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.CorrelationConfigDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
-import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
-import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
@@ -250,6 +255,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -3438,30 +3444,27 @@ public final class APIUtil {
             }
         }
 
-        Map<String, ExternalGatewayDeployer> externalGatewayConnectorConfigurationMap =
-                ServiceReferenceHolder.getInstance().getExternalGatewayDeployers();
+        Map<String, GatewayAgentConfiguration> externalGatewayConnectorConfigurationMap =
+                ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
         externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
-            JsonObject configsJSON = null;
+            GatewayPortalConfiguration config = null;
             try {
-                configsJSON = gatewayConfiguration.getGatewayFeatureCatalog();
-            } catch (DeployerException e) {
+                config = gatewayConfiguration.getGatewayFeatureCatalog();
+            } catch (APIManagementException e) {
                 throw new RuntimeException(e);
             }
 
-            if (configsJSON != null) {
-                Set<String> keys = configsJSON.keySet();
-                String gatewayType = keys.iterator().next();
+            if (config != null) {
 
-                JsonObject configsJSONValue = configsJSON.getAsJsonObject(gatewayType);
-                JsonObject gwFeatures = configsJSONValue.getAsJsonObject("gatewayFeatures");
-                Map<String, Object> configsMap = gson.fromJson(gwFeatures, type);
-                gatewayConfigsMap.put(gatewayType, configsMap);
+                LinkedTreeMap<String, Object> supportedFeaturesMap = new Gson().fromJson(
+                        (JsonObject)config.getSupportedFeatures(), LinkedTreeMap.class);
+                gatewayConfigsMap.put(config.getGatewayType(), supportedFeaturesMap);
 
-                JsonArray types = configsJSONValue.getAsJsonArray("apiTypes");
+                List<String> types = config.getSupportedAPITypes();
                 for (int i = 0; i < types.size(); i++) {
-                    String apiType = types.get(i).getAsString();
+                    String apiType = types.get(i);
                     if (apiData.containsKey(apiType)) {
-                        apiData.get(apiType).add(gatewayType);
+                        apiData.get(apiType).add(config.getGatewayType());
                     }
                 }
             }
@@ -7970,6 +7973,22 @@ public final class APIUtil {
         return keyManagerConfiguration;
     }
 
+    public static GatewayConfiguration extractGatewayConfiguration(Environment environment, String organization)
+            throws APIManagementException {
+        GatewayConfiguration gatewayConfiguration = new GatewayConfiguration();
+        if (environment != null) {
+            gatewayConfiguration.setName(environment.getName());
+            gatewayConfiguration.setType(environment.getType());
+            gatewayConfiguration.setTenantDomain(organization);
+            Map<String, Object> configurations = new HashMap<>();
+            if (environment.getAdditionalProperties() != null) {
+                configurations.putAll(environment.getAdditionalProperties());
+            }
+            gatewayConfiguration.setConfiguration(configurations);
+        }
+        return gatewayConfiguration;
+    }
+
     /**
      * Get if there any tenant-specific application configurations from the tenant
      * registry
@@ -10410,7 +10429,7 @@ public final class APIUtil {
         try {
             Map<String, Environment> environments = getEnvironments(tenantDomain);
             for (Environment environment : environments.values()) {
-                if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getGatewayType())) {
+                if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getProvider())) {
                     return true;
                 }
             }
@@ -11443,5 +11462,39 @@ public final class APIUtil {
         // Convert to lowercase and trim hyphens from the beginning/end
         sanatizedName = sanatizedName.toLowerCase(Locale.ENGLISH).replaceAll("^-+|-+$", "");
         return sanatizedName;
+    }
+
+    /**
+     * Validate Api with the federated gateways
+     *
+     * @param api API Object
+     */
+    public static void validateApiWithFederatedGateway(API api) throws APIManagementException {
+
+        try {
+            GatewayAgentConfiguration gatewayConfiguration = org.wso2.carbon.apimgt.impl.internal.
+                    ServiceReferenceHolder.getInstance().
+                    getExternalGatewayConnectorConfiguration(api.getGatewayType());
+            if (gatewayConfiguration != null) {
+                GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation())
+                        .getDeclaredConstructor().newInstance();
+                if (deployer != null) {
+                    GatewayAPIValidationResult errorList = null;
+                    errorList = deployer.validateApi(api);
+                    if (!errorList.getErrors().isEmpty()) {
+                        throw new ExternalGatewayAPIValidationException(
+                                "Error occurred while validating the API with the federated gateway: "
+                                        + api.getGatewayType(),
+                                ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
+                                        api.getGatewayType(), errorList.getErrors().toString()));
+                    }
+                }
+            }
+        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
+                 IllegalAccessException | InvocationTargetException e) {
+            throw new APIManagementException(
+                    "Error occurred while validating the API with the federated gateway: "
+                            + api.getGatewayType(), e);
+        }
     }
 }
