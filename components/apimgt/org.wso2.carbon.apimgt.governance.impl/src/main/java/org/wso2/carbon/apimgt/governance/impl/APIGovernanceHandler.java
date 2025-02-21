@@ -397,21 +397,21 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
      * This method is used to get the api project zip
      *
      * @param apiId        api uuid
-     * @param revisionNo   revision number of the api
+     * @param revisionId   revision number of the api
      * @param organization organization name
      * @return api content
      * @throws APIMGovernanceException if an error occurs while getting the api zip
      */
     @Override
-    public byte[] getArtifactProject(String apiId, String revisionNo, String organization)
+    public byte[] getArtifactProject(String apiId, String revisionId, String organization)
             throws APIMGovernanceException {
         synchronized (apiId.intern()) {
             try {
                 APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
                 String userName = apiIdentifier.getProviderName();
                 APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(userName);
-                if (revisionNo != null) {
-                    apiId = apiProvider.getAPIRevisionUUID(revisionNo, apiId);
+                if (revisionId != null) {
+                    apiId = revisionId;
                 }
 
                 API api = apiProvider.getAPIbyUUID(apiId, organization);
