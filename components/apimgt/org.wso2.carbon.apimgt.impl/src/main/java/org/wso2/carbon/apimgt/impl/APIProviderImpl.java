@@ -2597,6 +2597,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // Remove API-Label mappings
                 removeAPILabelMappings(apiUuid);
 
+                // Remove API endpoints
+                removeAPIEndpoints(apiUuid);
+
                 // Delete mappings for External deployed APIs
                 if (!api.getGatewayVendor().equalsIgnoreCase(APIConstants.WSO2_GATEWAY_ENVIRONMENT)) {
                     APIUtil.deleteApiExternalApiMappings(api.getUuid());
@@ -8132,6 +8135,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             labelsDAO.deleteApiLabelMappings(apiId, labelsDAO.getMappedLabelIDsForApi(apiId));
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while removing label mappings for API " + apiId, e);
+        }
+    }
+
+    /**
+     * This method is used to remove primary endpoint mappings(if any) and API endpoints(if any) for the given API.
+     *
+     * @param apiUUID API identifier
+     * @throws APIManagementException if an error occurs while removing endpoints
+     */
+    private void removeAPIEndpoints(String apiUUID) throws APIManagementException {
+        try {
+            apiMgtDAO.deleteAPIPrimaryEndpointMappings(apiUUID);
+            apiMgtDAO.deleteAPIEndpointsByApiUUID(apiUUID);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while removing endpoints for API " + apiUUID, e);
         }
     }
 
