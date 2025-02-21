@@ -800,9 +800,11 @@ public enum ExceptionCodes implements ErrorHandler {
             "Error while adding API Endpoint to the API"),
     ERROR_DELETING_API_ENDPOINT(902047, "Error while deleting API endpoint", 500,
             "Error while deleting API endpoint with UUID '%s'."),
-    ERROR_DELETING_PRIMARY_API_ENDPPOINT(902048, "Failed to delete API endpoint since endpoint is " +
+    ERROR_DELETING_PRIMARY_API_ENDPOINT(902048, "Failed to delete API endpoint since endpoint is " +
             "defined as a primary endpoint", 400,
-            "Failed to delete API endpoint with UUID '%s' since it is defined as a primary endpoint.");
+            "Failed to delete API endpoint with UUID '%s' since it is defined as a primary endpoint."),
+    API_ENDPOINT_URL_INVALID(902049, "Endpoint URL is invalid", 400,
+            "Endpoint URL is invalid");
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;
