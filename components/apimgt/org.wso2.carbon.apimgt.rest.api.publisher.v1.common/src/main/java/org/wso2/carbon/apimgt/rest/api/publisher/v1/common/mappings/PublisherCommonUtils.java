@@ -81,6 +81,7 @@ import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
+import org.wso2.carbon.apimgt.api.model.OrganizationTiers;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
@@ -93,7 +94,6 @@ import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
-import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
@@ -153,6 +153,9 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.AI_API_QUOTA_TYPE;
+import static org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.EVENT_COUNT_TYPE;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.GOVERNANCE_COMPLIANCE_KEY;
@@ -268,6 +271,14 @@ public class PublisherCommonUtils {
                 visibleOrgs = visibleOrgs + "," + orginfo.getOrganizationId();
                 apiToUpdate.setVisibleOrganizations(visibleOrgs);
             }
+            OrganizationTiers parentOrgTiers = new OrganizationTiers(orginfo.getOrganizationId(),
+                    apiToUpdate.getAvailableTiers());
+            Set<OrganizationTiers> currentOrganizationTiers = apiToUpdate.getAvailableTiersForOrganizations();
+            if (currentOrganizationTiers == null) {
+                currentOrganizationTiers = new HashSet<>();
+            }
+            currentOrganizationTiers.add(parentOrgTiers);
+            apiToUpdate.setAvailableTiersForOrganizations(currentOrganizationTiers);
         }
         
         apiProvider.updateAPI(apiToUpdate, originalAPI);
@@ -279,6 +290,13 @@ public class PublisherCommonUtils {
             String visibleOrgs = StringUtils.join(orgList, ',');
             apiUpdated.setVisibleOrganizations(visibleOrgs);
         }
+        // Remove parentOrgTiers from OrganizationTiers list
+        Set<OrganizationTiers> updatedOrganizationTiers = apiUpdated.getAvailableTiersForOrganizations();
+        if (updatedOrganizationTiers != null) {
+            updatedOrganizationTiers.removeIf(tier -> tier.getOrganizationID().equals(orginfo.getOrganizationId()));
+            apiUpdated.setAvailableTiersForOrganizations(updatedOrganizationTiers);
+        }
+
         if (apiUpdated != null && !StringUtils.isEmpty(apiUpdated.getEndpointConfig())) {
             JsonObject endpointConfig = JsonParser.parseString(apiUpdated.getEndpointConfig()).getAsJsonObject();
             if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
@@ -365,6 +383,7 @@ public class PublisherCommonUtils {
                 || APIConstants.APITransportType.WEBSUB.toString().equals(originalAPI.getType())
                 || APIConstants.APITransportType.SSE.toString().equals(originalAPI.getType())
                 || APIConstants.APITransportType.ASYNC.toString().equals(originalAPI.getType()));
+        boolean isAIAPI = APIConstants.API_SUBTYPE_AI_API.equals(originalAPI.getSubtype());
 
         Scope[] apiDtoClassAnnotatedScopes = APIDTO.class.getAnnotationsByType(Scope.class);
         boolean hasClassLevelScope = checkClassScopeAnnotation(apiDtoClassAnnotatedScopes, tokenScopes);
@@ -526,9 +545,20 @@ public class PublisherCommonUtils {
         if (!APIUtil.isSubscriptionValidationDisablingAllowed(tenantDomain)) {
             if (apiSecurity != null && (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) || apiSecurity
                     .contains(APIConstants.API_SECURITY_API_KEY)) && condition) {
-                throw new APIManagementException(
-                        "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
-                        ExceptionCodes.TIER_CANNOT_BE_NULL);
+                Set<Tier> availableThrottlingPolicyList = apiProvider.getTiers();
+                tiersFromDTO = availableThrottlingPolicyList.stream()
+                        .filter(tier -> isApplicableTier(tier, isAsyncAPI, isAIAPI))
+                        .map(Tier::getName)
+                        .findFirst()
+                        .map(Collections::singletonList)
+                        .orElse(Collections.emptyList());
+                apiDtoToUpdate.setPolicies(tiersFromDTO);
+
+                if (tiersFromDTO.isEmpty()) {
+                    throw new APIManagementException(
+                            "A tier should be defined if the API is not in CREATED or PROTOTYPED state",
+                            ExceptionCodes.TIER_CANNOT_BE_NULL);
+                }
             }
         } else {
             if (apiSecurity != null) {
@@ -562,24 +592,28 @@ public class PublisherCommonUtils {
                         ExceptionCodes.TIER_NAME_INVALID);
             }
         }
+
+        boolean isSubscriptionValidationDisablingEnabled
+                = tiersFromDTO.contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)
+                || tiersFromDTO.contains(APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS);
         // Organization based subscription policies
         if (APIUtil.isOrganizationAccessControlEnabled()) {
             for (OrganizationPoliciesDTO organizationPoliciesDTO : organizationPoliciesDTOs) {
                 List<String> organizationTiersFromDTO = organizationPoliciesDTO.getPolicies();
-
-                // Remove the subscriptionless tier if other tiers are available.
-                if (organizationTiersFromDTO != null && organizationTiersFromDTO.size() > 1) {
-                    String tierToDrop = null;
-                    for (String tier : organizationTiersFromDTO) {
-                        if (tier.contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
-                            tierToDrop = tier;
-                            break;
-                        }
-                    }
-                    if (tierToDrop != null) {
-                        organizationTiersFromDTO.remove(tierToDrop);
-                        organizationPoliciesDTO.setPolicies(tiersFromDTO);
-                    }
+                if (isSubscriptionValidationDisablingEnabled) {
+                    /* If subscription validation is disabled for root organization
+                    it should be disabled for shared organizations */
+                    organizationTiersFromDTO = tiersFromDTO;
+                    organizationPoliciesDTO.setPolicies(organizationTiersFromDTO);
+                } else if (organizationTiersFromDTO.contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)
+                        || organizationTiersFromDTO.contains(APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS)) {
+                    /* If subscription validation is enabled for root organization
+                    it should not be disabled for shared organizations */
+                    organizationTiersFromDTO = tiersFromDTO;
+                    organizationPoliciesDTO.setPolicies(organizationTiersFromDTO);
+                    log.warn("Subscription validation can not be disabled for the organization with ID: "
+                            + organizationPoliciesDTO.getOrganizationID()
+                            + ". Therefore root organization subscription policies will be assigned.");
                 }
                 boolean conditionForOrganization = (
                         (organizationTiersFromDTO == null || organizationTiersFromDTO.isEmpty() && !(
@@ -597,15 +631,9 @@ public class PublisherCommonUtils {
                             throw new APIManagementException("A tier should be defined if the API is not in CREATED "
                                     + "or PROTOTYPED state", ExceptionCodes.TIER_CANNOT_BE_NULL);
                         } else if (apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2)) {
-                            // Internally set the default tier when no tiers are defined in order to support
-                            // subscription validation disabling for OAuth2 secured APIs
+                            // Use the root organization tiers if no tiers are set
                             if (organizationTiersFromDTO != null && organizationTiersFromDTO.isEmpty()) {
-                                if (isAsyncAPI) {
-                                    organizationTiersFromDTO.add(
-                                            APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS);
-                                } else {
-                                    organizationTiersFromDTO.add(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS);
-                                }
+                                organizationTiersFromDTO = tiersFromDTO;
                                 organizationPoliciesDTO.setPolicies(organizationTiersFromDTO);
                             }
                         }
@@ -619,6 +647,7 @@ public class PublisherCommonUtils {
                     }
                 }
             }
+            apiDtoToUpdate.setOrganizationPolicies(organizationPoliciesDTOs);
         }
 
         if (apiDtoToUpdate.getAccessControlRoles() != null) {
@@ -721,6 +750,54 @@ public class PublisherCommonUtils {
 
         apiToUpdate.setOrganization(originalAPI.getOrganization());
         return apiToUpdate;
+    }
+
+    private static boolean isApplicableTier(Tier tier, boolean isAsyncAPI, boolean isAIAPI) {
+        if (isAsyncAPI) {
+            return isAsyncAPITier(tier);
+        }
+
+        if (isAIAPI) {
+            return isAIAPITier(tier);
+        }
+
+        return isRegularAPITier(tier);
+    }
+
+    /**
+     * Checks if the given tier is an Async API tier.
+     *
+     * @param tier The tier to evaluate.
+     * @return {@code true} if the tier is of type EVENT_COUNT_TYPE, otherwise {@code false}.
+     */
+    private static boolean isAsyncAPITier(Tier tier) {
+        return EVENT_COUNT_TYPE.equals(tier.getQuotaPolicyType());
+    }
+
+    /**
+     * Checks if the given tier is an AI API tier.
+     *
+     * @param tier The tier to evaluate.
+     * @return {@code true} if the tier is of type AI_API_QUOTA_TYPE,
+     *         contains the default subscription-less policy name,
+     *         or has a null quota policy type. Otherwise, returns {@code false}.
+     */
+    private static boolean isAIAPITier(Tier tier) {
+        return AI_API_QUOTA_TYPE.equals(tier.getQuotaPolicyType()) ||
+                tier.getName().contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS) ||
+                tier.getQuotaPolicyType() == null;
+    }
+
+    /**
+     * Checks if the given tier is a regular API tier.
+     *
+     * @param tier The tier to evaluate.
+     * @return {@code true} if the tier is neither an AI API tier nor an Async API tier,
+     *         otherwise {@code false}.
+     */
+    private static boolean isRegularAPITier(Tier tier) {
+        return !AI_API_QUOTA_TYPE.equals(tier.getQuotaPolicyType()) &&
+                !EVENT_COUNT_TYPE.equals(tier.getQuotaPolicyType());
     }
 
     /**
@@ -1432,6 +1509,14 @@ public class PublisherCommonUtils {
                 visibleOrgs = visibleOrgs + "," + orgInfo.getOrganizationId();
                 apiToAdd.setVisibleOrganizations(visibleOrgs);
             }
+            OrganizationTiers parentOrgTiers = new OrganizationTiers(orgInfo.getOrganizationId(),
+                    apiToAdd.getAvailableTiers());
+            Set<OrganizationTiers> currentOrganizationTiers = apiToAdd.getAvailableTiersForOrganizations();
+            if (currentOrganizationTiers == null) {
+                currentOrganizationTiers = new HashSet<>();
+            }
+            currentOrganizationTiers.add(parentOrgTiers);
+            apiToAdd.setAvailableTiersForOrganizations(currentOrganizationTiers);
         } else {
             // Set the visibility to tenant domain if user does not belong to an organization.
             apiToAdd.setVisibleOrganizations(organization);
@@ -1447,6 +1532,12 @@ public class PublisherCommonUtils {
         }
         apiProvider.addAPI(apiToAdd);
         checkGovernanceComplianceAsync(apiToAdd.getUuid(), APIMGovernableState.API_CREATE, artifactType, organization);
+        // Remove parentOrgTiers from OrganizationTiers list
+        Set<OrganizationTiers> updatedOrganizationTiers = apiToAdd.getAvailableTiersForOrganizations();
+        if (updatedOrganizationTiers != null) {
+            updatedOrganizationTiers.removeIf(tier -> tier.getOrganizationID().equals(orgInfo.getOrganizationId()));
+            apiToAdd.setAvailableTiersForOrganizations(updatedOrganizationTiers);
+        }
         return apiToAdd;
     }
 
@@ -2992,8 +3083,7 @@ public class PublisherCommonUtils {
             if (!complianceResult.isEmpty()
                     && complianceResult.get(GOVERNANCE_COMPLIANCE_KEY) != null
                     && !Boolean.parseBoolean(complianceResult.get(GOVERNANCE_COMPLIANCE_KEY))) {
-                throw new APIComplianceException(complianceResult
-                        .get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+                throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
             }
             PublisherCommonUtils.checkGovernanceComplianceAsync(apiTypeWrapper.getUuid(),
                     APIMGovernableState.API_PUBLISH, ArtifactType.API, organization);
@@ -3470,7 +3560,13 @@ public class PublisherCommonUtils {
         });
     }
 
-    //mthod to invoke evaluateComplianceDryRunSync
+    /**
+     * Check governance compliance for the API artifact in a dry run mode.
+     *
+     * @param fileInputStream API artifact input stream
+     * @param organization    Organization of the logged-in user
+     * @return Map of compliance violations
+     */
     public static Map<String, String> checkGovernanceComplianceDryRun(InputStream fileInputStream,
                                                                       String organization) {
         Map<String, String> responseMap = new HashMap<>(2);
@@ -3479,7 +3575,7 @@ public class PublisherCommonUtils {
             byte[] fileBytes = IOUtils.toByteArray(fileInputStream);
 
             ArtifactComplianceDryRunInfo artifactComplianceDryRunInfo = apimGovernanceService
-                    .evaluateComplianceDryRunSync(ExtendedArtifactType.REST_API, fileBytes, organization);
+                    .evaluateComplianceDryRunSync(ArtifactType.API, fileBytes, organization);
             return responseMap;
         } catch (APIMGovernanceException e) {
             log.error("Error occurred while executing governance ", e);

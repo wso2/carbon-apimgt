@@ -36,9 +36,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -197,20 +197,22 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                                           String requestId, List<String> policyIds)
             throws SQLException {
 
+        List<String> newPolicyIds = new ArrayList<>(policyIds);
         List<String> existingPolicyIds = getPolicyIdsForRequest(connection, requestId);
-        policyIds.removeAll(existingPolicyIds);
+        newPolicyIds.removeAll(existingPolicyIds);
+
+        if (newPolicyIds.isEmpty()) {
+            return;
+        }
 
         String sqlQuery = SQLConstants.ADD_REQ_POLICY_MAPPING;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            for (String policyId : policyIds) {
-                try {
-                    prepStmnt.setString(1, requestId);
-                    prepStmnt.setString(2, policyId);
-                    prepStmnt.execute();
-                } catch (SQLException e) {
-                    throw e;
-                }
+            for (String policyId : newPolicyIds) {
+                prepStmnt.setString(1, requestId);
+                prepStmnt.setString(2, policyId);
+                prepStmnt.addBatch();
             }
+            prepStmnt.executeBatch();
         }
     }
 
@@ -218,41 +220,102 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     /**
      * Update the evaluation status of a pending request to processing
      *
-     * @param requestId Request ID
+     * @param request Compliance Evaluation Request
      * @return True if the update is successful, false otherwise
      * @throws APIMGovernanceException If an error occurs while updating the evaluation status
      */
     @Override
-    public boolean updatePendingRequestToProcessing(String requestId) throws APIMGovernanceException {
+    public boolean updatePendingRequestToProcessing(ComplianceEvaluationRequest request)
+            throws APIMGovernanceException {
 
-        String sqlQuery = SQLConstants.UPDATE_GOV_REQ_STATUS_TO_PROCESSING;
-        try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            Timestamp processingTime = new Timestamp(System.currentTimeMillis());
-            prepStmnt.setTimestamp(1, processingTime);
-            prepStmnt.setString(2, requestId);
-            int affectedRows = prepStmnt.executeUpdate();
-            return affectedRows > 0;
-        } catch (SQLIntegrityConstraintViolationException e) {
-            return false;
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
+            String checkQuery = SQLConstants.GET_PROCESSING_REQ_FOR_ARTIFACT;
+            try (PreparedStatement checkStmnt = connection.prepareStatement(checkQuery)) {
+                checkStmnt.setString(1, request.getArtifactRefId());
+                checkStmnt.setString(2, String.valueOf(request.getArtifactType()));
+                checkStmnt.setString(3, request.getOrganization());
+                try (ResultSet resultSet = checkStmnt.executeQuery()) {
+                    if (resultSet.next()) {
+                        return false;
+                    }
+                }
+            }
+
+            connection.setAutoCommit(false);
+            String sqlQuery = SQLConstants.UPDATE_GOV_REQ_STATUS_TO_PROCESSING;
+            try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
+                Timestamp processingTime = new Timestamp(System.currentTimeMillis());
+                prepStmnt.setTimestamp(1, processingTime);
+                prepStmnt.setString(2, request.getId());
+                int affectedRows = prepStmnt.executeUpdate();
+                connection.commit();
+                return affectedRows > 0;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes
-                    .ERROR_WHILE_UPDATING_GOV_EVAL_REQUEST, e, requestId);
+                    .ERROR_WHILE_UPDATING_GOV_EVAL_REQUEST, e, request.getId());
         }
     }
 
     /**
-     * Update the evaluation status of all processing requests to pending
+     * Delete long lasting processing requests
      *
-     * @throws APIMGovernanceException If an error occurs while updating the evaluation status
+     * @param taskCleanupInterval Task Cleanup Interval in minutes
+     * @throws APIMGovernanceException If an error occurs while deleting the long lasting processing requests
      */
     @Override
-    public void updateProcessingRequestToPending() throws APIMGovernanceException {
+    public void deleteLongLastingProcessingReqs(int taskCleanupInterval)
+            throws APIMGovernanceException {
 
-        String sqlQuery = SQLConstants.UPDATE_GOV_REQ_STATUS_FROM_PROCESSING_TO_PENDING;
-        try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            prepStmnt.executeUpdate();
+        Map<String, Timestamp> longLastingProcessing = new HashMap<>();
+        Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
+
+            String processingReqQuery = SQLConstants.GET_PROCESSING_REQ;
+            try (PreparedStatement reqStmnt = connection.prepareStatement(processingReqQuery);
+                 ResultSet resultSet = reqStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    String reqId = resultSet.getString("REQ_ID");
+                    Timestamp processingTimestamp = resultSet.getTimestamp("PROCESSING_TIMESTAMP");
+
+                    long timeDifference = currentTime.getTime() - processingTimestamp.getTime();
+                    if (timeDifference > taskCleanupInterval * 60L * 1000) {
+                        longLastingProcessing.put(reqId, processingTimestamp);
+                    }
+                }
+            }
+            if (longLastingProcessing.isEmpty()) {
+                return;
+            }
+
+            connection.setAutoCommit(false);
+            try {
+                String sqlQuery = SQLConstants.DELETE_REQ_POLICY_MAPPING;
+                try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
+                    for (String reqId : longLastingProcessing.keySet()) {
+                        prepStmnt.setString(1, reqId);
+                        prepStmnt.addBatch();
+                    }
+                    prepStmnt.executeBatch();
+                }
+
+                sqlQuery = SQLConstants.DELETE_GOV_REQ;
+                try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
+                    for (String reqId : longLastingProcessing.keySet()) {
+                        prepStmnt.setString(1, reqId);
+                        prepStmnt.addBatch();
+                    }
+                    prepStmnt.executeBatch();
+                }
+
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_CHANGING_PROCESSING_REQ_TO_PENDING, e);
@@ -369,27 +432,6 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_GETTING_GOV_EVAL_REQUESTS, e);
-        }
-    }
-
-    /**
-     * Add an artifact compliance evaluation request event
-     *
-     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType  Artifact Type
-     * @param organization  Organization
-     * @return Request ID
-     * @throws APIMGovernanceException If an error occurs while adding the artifact compliance evaluation
-     *                                 request
-     */
-    @Override
-    public String getPendingEvalRequest(String artifactRefId, ArtifactType artifactType,
-                                        String organization) throws APIMGovernanceException {
-        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
-            return getPendingEvalRequest(connection, artifactRefId, artifactType, organization);
-        } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes
-                    .ERROR_WHILE_GETTING_GOV_EVAL_REQUEST_FOR_ARTIFACT, e, artifactRefId);
         }
     }
 
@@ -1012,6 +1054,39 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
             return artifactInfos;
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_GOVERNANCE_RESULTS, e);
+        }
+    }
+
+
+    /**
+     * Get pending policies for an artifact
+     *
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
+     * @return List of pending policies
+     * @throws APIMGovernanceException If an error occurs while getting the pending policies
+     */
+    @Override
+    public List<String> getPendingPoliciesForArtifact(String artifactRefId,
+                                                      ArtifactType artifactType,
+                                                      String organization) throws APIMGovernanceException {
+        String sqlQuery = SQLConstants.GET_PENDING_POLICIES_FOR_ARTIFACT;
+        List<String> policyIds = new ArrayList<>();
+        try (Connection connection = APIMGovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
+            prepStmnt.setString(1, artifactRefId);
+            prepStmnt.setString(2, String.valueOf(artifactType));
+            prepStmnt.setString(3, organization);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    policyIds.add(resultSet.getString("POLICY_ID"));
+                }
+            }
+            return policyIds;
+        } catch (SQLException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes
+                    .ERROR_WHILE_GETTING_EVAL_PENDING_POLICIES_FOR_ARTIFACT, e);
         }
     }
 
