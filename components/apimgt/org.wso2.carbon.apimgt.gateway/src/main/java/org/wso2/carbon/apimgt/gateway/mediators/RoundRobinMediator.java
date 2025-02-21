@@ -16,6 +16,7 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.ManagedLifecycle;
@@ -68,15 +69,23 @@ public class RoundRobinMediator extends AbstractMediator implements ManagedLifec
 
         DataHolder.getInstance().initCache(GatewayUtils.getAPIKeyForEndpoints(messageContext));
 
-        RBPolicyConfigDTO endpoints = new Gson().fromJson(roundRobinConfigs, RBPolicyConfigDTO.class);
-        List<ModelEndpointDTO> activeEndpoints = GatewayUtils.getActiveEndpoints(endpoints, messageContext);
+        RBPolicyConfigDTO endpoints;
+        try {
+            endpoints = new Gson().fromJson(roundRobinConfigs, RBPolicyConfigDTO.class);
+        } catch (JsonSyntaxException e) {
+            log.error("Failed to parse weighted round robin configuration", e);
+            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
+                    APIConstants.AIAPIConstants.REJECT_ENDPOINT);
+            return false;
+        }
 
+        List<ModelEndpointDTO> activeEndpoints = GatewayUtils.getActiveEndpoints(endpoints, messageContext);
         if (activeEndpoints != null && !activeEndpoints.isEmpty()) {
             ModelEndpointDTO nextEndpoint = getRoundRobinEndpoint(activeEndpoints);
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, nextEndpoint.getEndpointId());
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_MODEL, nextEndpoint.getModel());
             messageContext.setProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION,
-                    endpoints.getSuspendDuration() * 1000);
+                    endpoints.getSuspendDuration() * APIConstants.AIAPIConstants.MILLISECONDS_IN_SECOND);
         } else {
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
                     APIConstants.AIAPIConstants.REJECT_ENDPOINT);
@@ -88,7 +97,7 @@ public class RoundRobinMediator extends AbstractMediator implements ManagedLifec
      * Selects an endpoint using a round-robin selection mechanism.
      *
      * @param endpoints List of active endpoints.
-     * @return The selected RBEndpointDTO based on round-robin order.
+     * @return The selected ModelEndpointDTO based on round-robin order.
      */
     private ModelEndpointDTO getRoundRobinEndpoint(List<ModelEndpointDTO> endpoints) {
 

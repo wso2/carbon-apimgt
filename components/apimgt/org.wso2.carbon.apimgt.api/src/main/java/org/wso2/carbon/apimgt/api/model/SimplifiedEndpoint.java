@@ -41,32 +41,38 @@ public class SimplifiedEndpoint {
     public SimplifiedEndpoint(EndpointDTO endpointDTO) {
 
         if (endpointDTO == null) {
-            return;
+            throw new IllegalArgumentException("EndpointDTO cannot be null");
+        }
+        if (!PRODUCTION.equals(endpointDTO.getDeploymentStage()) &&
+                !SANDBOX.equals(endpointDTO.getDeploymentStage())) {
+            throw new IllegalArgumentException(
+                    "Invalid deployment stage: " + endpointDTO.getDeploymentStage());
         }
 
         this.endpointUuid = endpointDTO.getId();
         this.endpointName = endpointDTO.getName();
         this.deploymentStage = endpointDTO.getDeploymentStage();
 
-        if (endpointDTO.getEndpointConfig() != null) {
-            EndpointConfigDTO.EndpointSecurityConfig securityConfig =
-                    endpointDTO.getEndpointConfig().getEndpointSecurity();
-            if (securityConfig != null) {
-                this.endpointSecurityEnabled = true;
-                EndpointSecurity endpointSecurity = null;
-                if (PRODUCTION.equals(deploymentStage)) {
-                    endpointSecurity = securityConfig.getProduction();
-                } else if (SANDBOX.equals(deploymentStage)) {
-                    endpointSecurity = securityConfig.getSandbox();
-                }
-                if (endpointSecurity != null && endpointSecurity.isEnabled()) {
-                    this.apiKeyIdentifier = endpointSecurity.getApiKeyIdentifier();
-                    this.apiKeyValue = endpointSecurity.getApiKeyValue();
-                    this.apiKeyIdentifierType = endpointSecurity.getApiKeyIdentifierType();
-                }
-            } else {
-                this.endpointSecurityEnabled = false;
-            }
+        EndpointConfigDTO config = endpointDTO.getEndpointConfig();
+        EndpointConfigDTO.EndpointSecurityConfig securityConfig =
+                config != null ? config.getEndpointSecurity() : null;
+
+        if (securityConfig == null) {
+            this.endpointSecurityEnabled = false;
+            return;
+        }
+
+        EndpointSecurity endpointSecurity = PRODUCTION.equals(deploymentStage)
+                ? securityConfig.getProduction()
+                : securityConfig.getSandbox();
+
+        this.endpointSecurityEnabled = endpointSecurity != null &&
+                endpointSecurity.isEnabled();
+
+        if (this.endpointSecurityEnabled) {
+            this.apiKeyIdentifier = endpointSecurity.getApiKeyIdentifier();
+            this.apiKeyValue = endpointSecurity.getApiKeyValue();
+            this.apiKeyIdentifierType = endpointSecurity.getApiKeyIdentifierType();
         }
     }
 

@@ -1830,7 +1830,7 @@ public class GatewayUtils {
     /**
      * Generates a unique key for an endpoint based on the endpoint's ID and model.
      *
-     * @param endpoint The RBEndpointDTO object containing the endpoint details.
+     * @param endpoint The ModelEndpointDTO object containing the endpoint details.
      * @return A unique key in the format "{endpointId}_{model}".
      */
     public static String getEndpointKey(ModelEndpointDTO endpoint) {
