@@ -18,9 +18,11 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.io.InputStream;
 
@@ -28,8 +30,6 @@ import java.io.InputStream;
  * This interface used to handle newly introduced 2025 version of Developer Portal's configuration with APIM.
  */
 public interface DevPortalHandler {
-
-    boolean isPortalEnabled();
 
     String publishAPIMetadata(String organization, API api) throws APIManagementException;
 

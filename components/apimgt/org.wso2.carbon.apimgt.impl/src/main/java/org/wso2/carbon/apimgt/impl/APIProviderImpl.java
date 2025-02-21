@@ -123,6 +123,7 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
+import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
@@ -1057,14 +1058,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             recommendationThread.start();
         }
 
-        // Update API in new Dev Portal
-        DevPortalHandler devPortalHandler = DevPortalHandlerImpl.getInstance();
-        if (devPortalHandler.isPortalEnabled() && APIConstants.PUBLISHED.equals(api.getStatus())) {
-            try {
-                String refId = apiMgtDAO.getRefId(api.getUuid(), organization);
-                devPortalHandler.updateAPIMetadata(organization, api, refId);
-            } catch (APIManagementException e) {
-                log.error(e.getMessage());
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String portalType = apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_TYPE);
+
+        if (DevPortalConstants.DEVPORTAL_V2.equals(portalType)) {
+            if (APIConstants.PUBLISHED.equals(api.getStatus())) {
+                try {
+                    DevPortalHandler devPortalHandler = DevPortalHandlerV2Impl.getInstance();
+                    String refId = apiMgtDAO.getRefId(api.getUuid(), organization);
+                    devPortalHandler.updateAPIMetadata(organization, api, refId);
+                } catch (APIManagementException e) {
+                    log.error(e.getMessage());
+                }
             }
         }
 
@@ -2671,9 +2677,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
 
-                // Delete from new Developer Portal
-                DevPortalHandler devPortalHandler = DevPortalHandlerImpl.getInstance();
-                if (devPortalHandler.isPortalEnabled()) {
+                APIManagerConfiguration apiManagerConfiguration =
+                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                String portalType = apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_TYPE);
+
+                if (DevPortalConstants.DEVPORTAL_V2.equals(portalType)) {
+                    DevPortalHandler devPortalHandler = DevPortalHandlerV2Impl.getInstance();
                     try {
                         String refId = apiMgtDAO.getRefId(api.getUuid(), organization);
                         devPortalHandler.unpublishAPIMetadata(organization, api, refId);

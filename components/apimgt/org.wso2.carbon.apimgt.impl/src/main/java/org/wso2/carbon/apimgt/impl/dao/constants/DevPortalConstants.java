@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.dao.constants;
 
 public class DevPortalConstants {
+    public static final String DEVPORTAL_V2 = "DevPortalV2";
     public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
     public static final String DRAFTED_ORG_THEME = "DRAFTED_ORG_THEME";
     public static final String PUBLISHED_ORG_THEME = "PUBLISHED_ORG_THEME";

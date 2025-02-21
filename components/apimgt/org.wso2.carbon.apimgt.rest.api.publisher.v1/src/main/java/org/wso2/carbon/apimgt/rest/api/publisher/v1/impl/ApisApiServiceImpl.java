@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.OperationPoliciesApiServiceImplUtils;
@@ -5133,8 +5134,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response updateApiThemeStatus(String apiId, String id, ContentPublishStatusDTO contentPublishStatusDTO,
                                          MessageContext messageContext) throws APIManagementException {
-        DevPortalHandler devPortalHandler = DevPortalHandlerImpl.getInstance();
-        if (devPortalHandler.isPortalEnabled()) {
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String portalType = apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_TYPE);
+
+        if (DevPortalConstants.DEVPORTAL_V2.equals(portalType)) {
+            DevPortalHandler devPortalHandler = DevPortalHandlerV2Impl.getInstance();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String action = contentPublishStatusDTO.getAction().value();
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();

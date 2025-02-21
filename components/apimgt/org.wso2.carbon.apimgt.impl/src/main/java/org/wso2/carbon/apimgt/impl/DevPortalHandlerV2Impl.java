@@ -67,10 +67,10 @@ import org.wso2.carbon.base.ServerConfiguration;
 /**
  * This class used to handle newly introduced 2025 version of Developer Portal's configuration with APIM.
  */
-public class DevPortalHandlerImpl implements DevPortalHandler {
+public class DevPortalHandlerV2Impl implements DevPortalHandler {
 
-    private static final Log log = LogFactory.getLog(DevPortalHandlerImpl.class);
-    private static final String baseUrl = getNewPortalURL();
+    private static final Log log = LogFactory.getLog(DevPortalHandlerV2Impl.class);
+    private static final String baseUrl = getPortalURL();
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Map<String, String> orgIdMap = new ConcurrentHashMap<>();
 
@@ -83,13 +83,13 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         }
     }
 
-    private DevPortalHandlerImpl() {}
+    private DevPortalHandlerV2Impl() {}
 
     private static class Holder {
-        private static final DevPortalHandlerImpl INSTANCE = new DevPortalHandlerImpl();
+        private static final DevPortalHandlerV2Impl INSTANCE = new DevPortalHandlerV2Impl();
     }
 
-    public static DevPortalHandlerImpl getInstance() {
+    public static DevPortalHandlerV2Impl getInstance() {
         return Holder.INSTANCE;
     }
 
@@ -109,11 +109,6 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         private String getResponseBody() {
             return responseBody;
         }
-    }
-
-    @Override
-    public boolean isPortalEnabled() {
-        return Boolean.parseBoolean(getConfigProperty(APIConstants.API_STORE_NEW_PORTAL_ENABLED, "false"));
     }
 
     @Override
@@ -626,8 +621,8 @@ public class DevPortalHandlerImpl implements DevPortalHandler {
         }
     }
 
-    private static String getNewPortalURL() {
-        return getConfigProperty(APIConstants.API_STORE_NEW_PORTAL_URL, "");
+    private static String getPortalURL() {
+        return getConfigProperty(APIConstants.API_STORE_ACCESS_URL, "");
     }
 
     private static String getConfigProperty(String key, String defaultValue) {
