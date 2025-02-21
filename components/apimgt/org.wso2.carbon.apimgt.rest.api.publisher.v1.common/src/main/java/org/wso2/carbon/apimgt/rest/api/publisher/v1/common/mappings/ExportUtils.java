@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
@@ -218,6 +219,7 @@ public class ExportUtils {
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         addOperationPoliciesToArchive(archivePath, tenantDomain, exportFormat, apiProvider,
                 api, currentApiUuid);
+        addAPIEndpointsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider, organization);
 
         if (api != null && !StringUtils.isEmpty(api.getEndpointConfig())) {
             JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
@@ -709,19 +711,25 @@ public class ExportUtils {
                 List<OperationPolicy> operationPolicies = uriTemplate.getOperationPolicies();
                 if (operationPolicies != null && !operationPolicies.isEmpty()) {
                     for (OperationPolicy policy : operationPolicies) {
-                        if (!exportedPolicies.contains(policy.getPolicyName() + "_" + policy.getPolicyVersion())) {
-                            String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
-                                    policy.getPolicyVersion());
+                        if (!exportedPolicies.contains(policy.getPolicyName() + "_" + policy.getPolicyVersion() + "_" +
+                                policy.getPolicyType())) {
                             if (policy.getPolicyId() != null) {
+                                String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
+                                        policy.getPolicyVersion(), policy.getPolicyType());
+
                                 OperationPolicyData policyData =
                                         apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(),
                                                 currentApiUuid, tenantDomain, true);
                                 if (policyData != null) {
                                     exportPolicyData(policyFileName, policyData, archivePath, exportFormat);
-                                    exportedPolicies.add(policy.getPolicyName() + "_" + policy.getPolicyVersion());
+                                    exportedPolicies.add(policy.getPolicyName() + "_" + policy.getPolicyVersion() + "_"
+                                            + policy.getPolicyType());
                                 }
                             } else {
                                 // This path is to handle migrated APIs with mediation policies attached
+                                // These are considered as API policies by default
+                                String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
+                                        policy.getPolicyVersion(), ImportExportConstants.POLICY_TYPE_API);
                                 if (APIUtil.isSequenceDefined(api.getInSequence())
                                         || APIUtil.isSequenceDefined(api.getOutSequence())
                                         || APIUtil.isSequenceDefined(api.getFaultSequence())) {
@@ -736,7 +744,8 @@ public class ExportUtils {
                                             policy.getDirection(), tenantDomain);
                                     if (policyData != null) {
                                         exportPolicyData(policyFileName, policyData, archivePath, exportFormat);
-                                        exportedPolicies.add(policy.getPolicyName() + "_" + policy.getPolicyVersion());
+                                        exportedPolicies.add(policy.getPolicyName() + "_" + policy.getPolicyVersion() +
+                                                "_" + ImportExportConstants.POLICY_TYPE_API);
                                     }
                                 }
                             }
@@ -748,14 +757,15 @@ public class ExportUtils {
             if (api.getApiPolicies() != null && !api.getApiPolicies().isEmpty()) {
                 for (OperationPolicy policy : api.getApiPolicies()) {
                     String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
-                            policy.getPolicyVersion());
+                            policy.getPolicyVersion(), policy.getPolicyType());
                     if (!exportedPolicies.contains(policyFileName)) {
                         OperationPolicyData policyData =
                                 apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(),
                                         currentApiUuid, tenantDomain, true);
                         if (policyData != null) {
                             exportPolicyData(policyFileName, policyData, archivePath, exportFormat);
-                            exportedPolicies.add(policy.getPolicyName() + "_" + policy.getPolicyVersion());
+                            exportedPolicies.add(policy.getPolicyName() + "_" + policy.getPolicyVersion() + "_" +
+                                    policy.getPolicyType());
                         }
                     }
                 }
@@ -794,6 +804,36 @@ public class ExportUtils {
         if (policyData.getCcPolicyDefinition() != null) {
             CommonUtil.writeFile(policyName + APIConstants.CC_POLICY_DEFINITION_EXTENSION,
                     policyData.getCcPolicyDefinition().getContent());
+        }
+    }
+
+    /**
+     * Save All API Endpoints To Zip File.
+     *
+     * @param archivePath  path to save API Endpoints
+     * @param apiID        Unique Identifier of API
+     * @param exportFormat Format of export
+     * @param apiProvider  API provider
+     * @param organization Organization identifier
+     * @throws APIManagementException
+     */
+    public static void addAPIEndpointsToArchive(String archivePath, String apiID, ExportFormat exportFormat,
+            APIProvider apiProvider, String organization) throws APIManagementException {
+        try {
+            List<APIEndpointInfo> apiEndpointList = apiProvider.getAllAPIEndpointsByUUID(apiID, organization);
+
+            if (!apiEndpointList.isEmpty()) {
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                JsonElement apiEndpointsObj = gson.toJsonTree(apiEndpointList);
+                JsonArray apiEndpointsJson = (JsonArray) apiEndpointsObj;
+                CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_ENDPOINTS_FILE_LOCATION,
+                        exportFormat, ImportExportConstants.API_ENDPOINTS_TYPE, apiEndpointsJson);
+            }
+        } catch (APIImportExportException e) {
+            throw new APIManagementException("Error while adding operation endpoints details for API: " + apiID, e);
+        } catch (IOException e) {
+            throw new APIManagementException(
+                    "Error while saving deployment operation endpoints details for API: " + apiID + " as File", e);
         }
     }
 

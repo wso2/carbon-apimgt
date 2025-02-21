@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.MeApiService;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.impl.MeApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -34,6 +35,23 @@ public class MeApi  {
 
 MeApiService delegate = new MeApiServiceImpl();
 
+
+    @GET
+    @Path("/organization-information")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get the Organization information of the user", notes = "Using this operation, logged-in user can get their organization information. ", response = OrganizationInfoDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "Users",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Key Manager list returned ", response = OrganizationInfoDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
+    public Response organizationInformation() throws APIManagementException{
+        return delegate.organizationInformation(securityContext);
+    }
 
     @HEAD
     @Path("/roles/{roleId}")

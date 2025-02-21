@@ -20,10 +20,14 @@ package org.wso2.carbon.apimgt.rest.api.store.v1.utils;
 
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.OrganizationTiers;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDefaultVersionURLsDTO;
@@ -198,5 +202,51 @@ public class APIUtils {
         }
 
         return apiEndpointsList;
+    }
+    
+    public static List<KeyManagerConfigurationDTO> filterAllowedKeyManagersForOrganizations(
+            List<KeyManagerConfigurationDTO> keymanagerConfigs, OrganizationInfo orgInfo) {
+
+        List<KeyManagerConfigurationDTO> allowedList = new ArrayList<KeyManagerConfigurationDTO>();
+        String organization = orgInfo.getOrganizationId();
+        for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keymanagerConfigs) {
+            List<String> allowedOrgs = keyManagerConfigurationDTO.getAllowedOrganizations();
+            if (allowedOrgs == null || allowedOrgs.isEmpty() || allowedOrgs.contains("ALL") || allowedOrgs.contains(organization)) {
+                allowedList.add(keyManagerConfigurationDTO);
+            }
+            
+        }
+
+        return allowedList;
+    }
+
+    /**
+     * Update available tiers in the API according to the organization.
+     * @param api           API object
+     * @param organization  Organization name
+     */
+    public static void updateAvailableTiersByOrganization(API api, String organization) {
+
+        if (organization != null) {
+            Set<Tier> availableTiers = new HashSet<>();
+            Set<OrganizationTiers> availableTiersForOrganizations = api.getAvailableTiersForOrganizations();
+            for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
+                String orgName = organizationTiers.getOrganizationID();
+                if (organization.equals(orgName)) {
+                    availableTiers = organizationTiers.getTiers();
+                    break;
+                }
+            }
+            if (availableTiers.isEmpty()) {
+                for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
+                    if (APIConstants.DEFAULT_VISIBLE_ORG.equals(organizationTiers.getOrganizationID())) {
+                        availableTiers = organizationTiers.getTiers();
+                        break;
+                    }
+                }
+            }
+            api.removeAllTiers();
+            api.setAvailableTiers(availableTiers);
+        }
     }
 }

@@ -1,6 +1,8 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIExternalStoreListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
@@ -18,6 +20,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ClientCertificatesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ContentPublishStatusDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ContentPublishStatusResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
@@ -27,6 +31,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityIn
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import java.util.List;
@@ -37,6 +42,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PatchRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PostRequestBodyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.RequestLabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
@@ -202,6 +208,23 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @POST
+    @Path("/{apiId}/endpoints")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Add an Endpoint", notes = "This operation can be used to add an endpoint to an API. ", response = APIEndpointDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "API Endpoints",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 201, message = "Created. Successful response with the newly created API Endpoint object in the body. ", response = APIEndpointDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
+    public Response addApiEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "Endpoint object that needs to be added" ,required=true) APIEndpointDTO apIEndpointDTO) throws APIManagementException{
+        return delegate.addApiEndpoint(apiId, apIEndpointDTO, securityContext);
+    }
+
+    @POST
     @Path("/{apiId}/comments")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -298,6 +321,25 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response apisApiIdEnvironmentsEnvIdKeysPut(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Env ID** consisting of the **UUID** of the gateway environment. ",required=true) @PathParam("envId") String envId, @ApiParam(value = "" ,required=true) Map<String, String> requestBody) throws APIManagementException{
         return delegate.apisApiIdEnvironmentsEnvIdKeysPut(apiId, envId, requestBody, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/attach-labels")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Attach Labels to an API", notes = "This operation can be used to attach labels to an API. ", response = LabelListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+        })
+    }, tags={ "API Labels Attach",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with updated Label object list ", response = LabelListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response attachLabelsToAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "List of labels to be attached to the API " ,required=true) RequestLabelListDTO requestLabelListDTO) throws APIManagementException{
+        return delegate.attachLabelsToAPI(apiId, requestLabelListDTO, securityContext);
     }
 
     @POST
@@ -537,6 +579,43 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @DELETE
+    @Path("/{apiId}/endpoints/{endpointId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete an Endpoint", notes = "This operation can be used to delete a API endpoint. ", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "API Endpoints",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Endpoint deleted successfully. ", response = Void.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response deleteApiEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId) throws APIManagementException{
+        return delegate.deleteApiEndpoint(apiId, endpointId, securityContext);
+    }
+
+    @DELETE
+    @Path("/{apiId}/api-themes/{id}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Delete an API theme", notes = "Deletes the API theme for the given API ID.", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Successfully deleted", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response deleteApiTheme(@ApiParam(value = "",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "",required=true) @PathParam("id") String id) throws APIManagementException{
+        return delegate.deleteApiTheme(apiId, id, securityContext);
+    }
+
+    @DELETE
     @Path("/{apiId}/comments/{commentId}")
     
     @Produces({ "application/json" })
@@ -575,6 +654,25 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response deployAPIRevision(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Revision ID of an API ")  @QueryParam("revisionId") String revisionId, @ApiParam(value = "Deployment object that needs to be added" ) List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO) throws APIManagementException{
         return delegate.deployAPIRevision(apiId, revisionId, apIRevisionDeploymentDTO, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/detach-labels")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Detach Labels from an API", notes = "This operation can be used to detach labels from an API. ", response = LabelListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+        })
+    }, tags={ "API Labels Detach",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with updated Label object list ", response = LabelListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response detachLabelsFromAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "List of labels to be detached from the API " ,required=true) RequestLabelListDTO requestLabelListDTO) throws APIManagementException{
+        return delegate.detachLabelsFromAPI(apiId, requestLabelListDTO, securityContext);
     }
 
     @PATCH
@@ -1113,8 +1211,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource. ", response = Void.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response getAPISubscriptionPolicies(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Indicates the quota policy type to be AI API quota or not. ", defaultValue="false") @DefaultValue("false") @QueryParam("isAiApi") Boolean isAiApi) throws APIManagementException{
-        return delegate.getAPISubscriptionPolicies(apiId, xWSO2Tenant, ifNoneMatch, isAiApi, securityContext);
+    public Response getAPISubscriptionPolicies(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Indicates the quota policy type to be AI API quota or not. ", defaultValue="false") @DefaultValue("false") @QueryParam("isAiApi") Boolean isAiApi,  @ApiParam(value = "Indicates the organization ID ")  @QueryParam("organizationID") String organizationID) throws APIManagementException{
+        return delegate.getAPISubscriptionPolicies(apiId, xWSO2Tenant, ifNoneMatch, isAiApi, organizationID, securityContext);
     }
 
     @GET
@@ -1193,8 +1291,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. List of qualifying APIs is returned. ", response = APIListDTO.class),
         @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response getAllAPIs( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Criteria for sorting. ", allowableValues="apiName, version, createdTime, status", defaultValue="createdTime") @DefaultValue("createdTime") @QueryParam("sortBy") String sortBy,  @ApiParam(value = "Order of sorting(ascending/descending). ", allowableValues="asc, desc", defaultValue="desc") @DefaultValue("desc") @QueryParam("sortOrder") String sortOrder,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"<attribute>:\"** modifier.  Eg. \"provider:wso2\" will match an API if the provider of the API contains \"wso2\". \"provider:\"wso2\"\" will match an API if the provider of the API is exactly \"wso2\". \"status:PUBLISHED\" will match an API if the API is in PUBLISHED state.  Also you can use combined modifiers Eg. name:pizzashack version:v1 will match an API if the name of the API is pizzashack and version is v1.  Supported attribute modifiers are [**version, context, name, status, description, provider, api-category, tags, doc, contexttemplate, lcstate, content, type, label, enablestore, thirdparty**]  If no advanced attribute modifier has been specified,  the API names containing the search term will be returned as a result.  Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl) ")  @QueryParam("query") String query,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
-        return delegate.getAllAPIs(limit, offset, sortBy, sortOrder, xWSO2Tenant, query, ifNoneMatch, accept, securityContext);
+    public Response getAllAPIs( @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retirieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  You can search in attributes by using an **\"<attribute>:\"** modifier.  Eg. \"provider:wso2\" will match an API if the provider of the API contains \"wso2\". \"provider:\"wso2\"\" will match an API if the provider of the API is exactly \"wso2\". \"status:PUBLISHED\" will match an API if the API is in PUBLISHED state.  Also you can use combined modifiers Eg. name:pizzashack version:v1 will match an API if the name of the API is pizzashack and version is v1.  Supported attribute modifiers are [**version, context, name, status, description, provider, api-category, tags, doc, contexttemplate, lcstate, content, type, label, enablestore, thirdparty**]  If no advanced attribute modifier has been specified,  the API names containing the search term will be returned as a result.  Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl) ")  @QueryParam("query") String query,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
+        return delegate.getAllAPIs(limit, offset, xWSO2Tenant, query, ifNoneMatch, accept, securityContext);
     }
 
     @GET
@@ -1249,6 +1347,83 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response getAmazonResourceNamesOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
         return delegate.getAmazonResourceNamesOfAPI(apiId, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/endpoints/{endpointId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get an Endpoint", notes = "This operation can be used to get an endpoint of an API by UUID. ", response = APIEndpointDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "API Endpoints",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. API Endpoint object is returned. ", response = APIEndpointDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response getApiEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId) throws APIManagementException{
+        return delegate.getApiEndpoint(apiId, endpointId, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/endpoints")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get all API Endpoints", notes = "This operation can be used to get all the available endpoints of an API. ", response = APIEndpointListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "API Endpoints",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. List of API endpoints. ", response = APIEndpointListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getApiEndpoints(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset) throws APIManagementException{
+        return delegate.getApiEndpoints(apiId, limit, offset, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/api-themes/{id}/content")
+    
+    @Produces({ "application/zip", "application/json" })
+    @ApiOperation(value = "Retrieve API theme as zip", notes = "Returns the API theme as a zip file for the given API ID.", response = File.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Returns the API theme zip file", response = File.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getApiThemeContent(@ApiParam(value = "",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "",required=true) @PathParam("id") String id) throws APIManagementException{
+        return delegate.getApiThemeContent(apiId, id, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/api-themes")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve API themes", notes = "Returns the list of API themes and their publish status for the given API.", response = ContentPublishStatusResponseDTO.class, responseContainer = "List", authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "List of API themes", response = ContentPublishStatusResponseDTO.class, responseContainer = "List"),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response getApiThemes(@ApiParam(value = "",required=true) @PathParam("apiId") String apiId,  @ApiParam(value = "Filter themes based on published status")  @QueryParam("publish") Boolean publish) throws APIManagementException{
+        return delegate.getApiThemes(apiId, publish, securityContext);
     }
 
     @GET
@@ -1344,6 +1519,25 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response getGraphQLPolicyComplexityTypesOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
         return delegate.getGraphQLPolicyComplexityTypesOfAPI(apiId, securityContext);
+    }
+
+    @GET
+    @Path("/{apiId}/labels")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get Labels of an API", notes = "This operation can be used to get the labels of an API. ", response = LabelListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
+        })
+    }, tags={ "API Labels",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Successful response with Label object list ", response = LabelListDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
+    public Response getLabelsOfAPI(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId) throws APIManagementException{
+        return delegate.getLabelsOfAPI(apiId, securityContext);
     }
 
     @GET
@@ -1482,8 +1676,28 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 409, message = "Conflict. Specified resource already exists.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response importAPI( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider ")  @QueryParam("preserveProvider") Boolean preserveProvider,  @ApiParam(value = "Once the revision max limit reached, undeploy and delete the earliest revision and create a new revision ")  @QueryParam("rotateRevision") Boolean rotateRevision,  @ApiParam(value = "Whether to update the API or not. This is used when updating already existing APIs ")  @QueryParam("overwrite") Boolean overwrite,  @ApiParam(value = "Preserve Portal Configurations. This is used to preserve the portal configurations of the API ")  @QueryParam("preservePortalConfigurations") Boolean preservePortalConfigurations,  @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
-        return delegate.importAPI(fileInputStream, fileDetail, preserveProvider, rotateRevision, overwrite, preservePortalConfigurations, accept, securityContext);
+    public Response importAPI( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail,  @ApiParam(value = "Preserve Original Provider of the API. This is the user choice to keep or replace the API provider ")  @QueryParam("preserveProvider") Boolean preserveProvider,  @ApiParam(value = "Once the revision max limit reached, undeploy and delete the earliest revision and create a new revision ")  @QueryParam("rotateRevision") Boolean rotateRevision,  @ApiParam(value = "Whether to update the API or not. This is used when updating already existing APIs ")  @QueryParam("overwrite") Boolean overwrite,  @ApiParam(value = "Preserve Portal Configurations. This is used to preserve the portal configurations of the API ")  @QueryParam("preservePortalConfigurations") Boolean preservePortalConfigurations,  @ApiParam(value = "Dry Run. This is used to validate the API without importing it ", defaultValue="false") @DefaultValue("false") @QueryParam("dryRun") Boolean dryRun,  @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
+        return delegate.importAPI(fileInputStream, fileDetail, preserveProvider, rotateRevision, overwrite, preservePortalConfigurations, dryRun, accept, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/api-themes")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Import API theme", notes = "Imports an API theme as a zip file.", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Successfully imported", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response importApiTheme(@ApiParam(value = "",required=true) @PathParam("apiId") String apiId,  @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail) throws APIManagementException{
+        return delegate.importApiTheme(apiId, fileInputStream, fileDetail, securityContext);
     }
 
     @POST
@@ -1518,8 +1732,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = APIDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response importGraphQLSchema( @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @Multipart(value = "type", required = false)  String type,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail, @Multipart(value = "additionalProperties", required = false)  String additionalProperties) throws APIManagementException{
-        return delegate.importGraphQLSchema(ifMatch, type, fileInputStream, fileDetail, additionalProperties, securityContext);
+    public Response importGraphQLSchema( @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @Multipart(value = "type", required = false)  String type,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail, @Multipart(value = "url", required = false)  String url, @Multipart(value = "schema", required = false)  String schema, @Multipart(value = "additionalProperties", required = false)  String additionalProperties) throws APIManagementException{
+        return delegate.importGraphQLSchema(ifMatch, type, fileInputStream, fileDetail, url, schema, additionalProperties, securityContext);
     }
 
     @POST
@@ -1877,6 +2091,45 @@ ApisApiService delegate = new ApisApiServiceImpl();
     }
 
     @PUT
+    @Path("/{apiId}/endpoints/{endpointId}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update an Endpoint", notes = "This operation can be used to update a API endpoint. ", response = APIEndpointDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={ "API Endpoints",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Updated API Endpoint is returned. ", response = APIEndpointDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response updateApiEndpoint(@ApiParam(value = "**API ID** consisting of the **UUID** of the API. ",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "**Endpoint ID** consisting of the **UUID** of the Endpoint**. ",required=true) @PathParam("endpointId") String endpointId, @ApiParam(value = "API Endpoint object with updated details" ) APIEndpointDTO apIEndpointDTO) throws APIManagementException{
+        return delegate.updateApiEndpoint(apiId, endpointId, apIEndpointDTO, securityContext);
+    }
+
+    @POST
+    @Path("/{apiId}/api-themes/{id}/status")
+    @Consumes({ "application/json" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Update publish status of an API theme", notes = "Publishes or unpublishes an API theme for the given API ID.", response = Void.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:api_view", description = "View API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+        })
+    }, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "Successfully updated status", response = Void.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response updateApiThemeStatus(@ApiParam(value = "",required=true) @PathParam("apiId") String apiId, @ApiParam(value = "",required=true) @PathParam("id") String id, @ApiParam(value = "" ,required=true) ContentPublishStatusDTO contentPublishStatusDTO) throws APIManagementException{
+        return delegate.updateApiThemeStatus(apiId, id, contentPublishStatusDTO, securityContext);
+    }
+
+    @PUT
     @Path("/{apiId}/graphql-policies/complexity")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
@@ -2018,8 +2271,8 @@ ApisApiService delegate = new ApisApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. API definition validation information is returned ", response = GraphQLValidationResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response validateGraphQLSchema( @Multipart(value = "file") InputStream fileInputStream, @Multipart(value = "file" ) Attachment fileDetail) throws APIManagementException{
-        return delegate.validateGraphQLSchema(fileInputStream, fileDetail, securityContext);
+    public Response validateGraphQLSchema( @ApiParam(value = "Specify whether to use Introspection to obtain the GraphQL Schema ", defaultValue="false") @DefaultValue("false") @QueryParam("useIntrospection") Boolean useIntrospection,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail, @Multipart(value = "url", required = false)  String url) throws APIManagementException{
+        return delegate.validateGraphQLSchema(useIntrospection, fileInputStream, fileDetail, url, securityContext);
     }
 
     @POST

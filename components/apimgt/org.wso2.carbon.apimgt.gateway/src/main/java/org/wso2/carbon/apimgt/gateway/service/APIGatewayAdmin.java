@@ -42,8 +42,8 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.rest.api.APIData;
 import org.wso2.carbon.rest.api.ResourceData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
+import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -800,6 +800,14 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
             for (String endpoint : gatewayAPIDTO.getEndpointEntriesToBeRemove()) {
                 if (endpointAdminServiceProxy.isEndpointExist(endpoint)) {
                     endpointAdminServiceProxy.deleteEndpoint(endpoint);
+                } else if (endpoint.contains(AIAPIConstants.API_LLM_ENDPOINT + "*")) {
+                    String prefix = endpoint.replace("*", ".*");
+                    String[] allEndpoints = endpointAdminServiceProxy.getEndpoints();
+                    for (String existingEndpoint : allEndpoints) {
+                        if (existingEndpoint.matches(prefix)) {
+                            endpointAdminServiceProxy.deleteEndpoint(existingEndpoint);
+                        }
+                    }
                 }
             }
         }

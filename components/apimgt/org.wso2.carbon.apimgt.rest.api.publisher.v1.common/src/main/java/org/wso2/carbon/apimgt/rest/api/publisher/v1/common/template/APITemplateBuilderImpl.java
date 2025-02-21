@@ -23,6 +23,8 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.wso2.carbon.apimgt.api.dto.EndpointConfigDTO;
+import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -55,6 +57,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     public static final String TEMPLATE_TYPE_VELOCITY = "velocity_template";
     public static final String TEMPLATE_WEBSUB_API = "websub_api_template";
     public static final String TEMPLATE_TYPE_PROTOTYPE = "prototype_template";
+    public static final String TEMPLATE_AI_API = "ai_api_template";
     public static final String TEMPLATE_DEFAULT_API = "default_api_template";
     public static final String TEMPLATE_DEFAULT_WS_API = "default_ws_api_template";
     private static final Log log = LogFactory.getLog(APITemplateBuilderImpl.class);
@@ -90,6 +93,43 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
         this.api = api;
         this.apiProduct = apiProduct;
+    }
+
+    @Override
+    public String getConfigStringForAIAPI(Environment environment, List<EndpointDTO> endpointDTOList)
+            throws APITemplateException {
+
+        StringWriter writer = new StringWriter();
+
+        try {
+            ConfigContext configcontext = null;
+
+            if (api != null) {
+                configcontext = createAIAPIConfigContext(api, environment, endpointDTOList);
+            }
+
+            configcontext.validate();
+
+            VelocityContext context = configcontext.getContext();
+            context.internalGetKeys();
+            VelocityEngine velocityengine = new VelocityEngine();
+            APIUtil.initializeVelocityContext(velocityengine);
+
+            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
+            initVelocityEngine(velocityengine);
+
+            Template t = null;
+
+            if (api != null) {
+                t = velocityengine.getTemplate(getAIAPITemplatePath());
+            }
+            context.put("llmProviderId", api.getAiConfiguration().getLlmProviderId());
+            t.merge(context, writer);
+        } catch (Exception e) {
+            log.error("Velocity Error", e);
+            throw new APITemplateException("Velocity Error", e);
+        }
+        return writer.toString();
     }
 
     @Override
@@ -216,15 +256,23 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
      * @throws APITemplateException Thrown if an error occurred
      */
     @Override
-    public String getConfigStringForEndpointTemplate(String endpointType) throws APITemplateException {
+    public String getConfigStringForEndpointTemplate(String endpointType, String endpointUuid,
+                                                     EndpointConfigDTO endpointConfig)
+            throws APITemplateException {
 
         StringWriter writer = new StringWriter();
 
         try {
             ConfigContext configcontext = new APIConfigContext(this.api);
-            configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api);
             configcontext = new TemplateUtilContext(configcontext);
-            configcontext = new SecurityConfigContext(configcontext, api);
+
+            if (APIConstants.API_SUBTYPE_DEFAULT.equals(api.getSubtype())) {
+                configcontext = new SecurityConfigContext(configcontext, api);
+                configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api);
+            } else if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+                configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api, endpointConfig);
+            }
+
 
             configcontext.validate();
 
@@ -239,6 +287,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             initVelocityEngine(velocityengine);
 
             context.put("type", endpointType);
+            if (endpointUuid != null) {
+                context.put("endpointUuid", endpointUuid);
+            }
 
             Template template = velocityengine.getTemplate(this.getEndpointTemplatePath());
 
@@ -335,6 +386,32 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         return configcontext;
     }
 
+    /**
+     * Creates a configuration context for the AI API using the given API and environment.
+     *
+     * @param api             The API instance for which the configuration context is created.
+     * @param environment     The deployment environment associated with the API.
+     * @param endpointDTOList
+     * @return A fully initialized {@code ConfigContext} for the AI API.
+     */
+    private ConfigContext createAIAPIConfigContext(API api, Environment environment,
+                                                   List<EndpointDTO> endpointDTOList) {
+
+        ConfigContext configcontext = new APIConfigContext(api);
+        configcontext = new TransportConfigContext(configcontext, api);
+        configcontext = new ResourceConfigContext(configcontext, api);
+        configcontext = new EndpointBckConfigContext(configcontext, api);
+        configcontext = new EndpointConfigContext(configcontext, api);
+        configcontext = new SecurityConfigContext(configcontext, api);
+        configcontext = new JwtConfigContext(configcontext);
+        configcontext = new HandlerConfigContex(configcontext, handlers);
+        configcontext = new EnvironmentConfigContext(configcontext, environment);
+        configcontext = new TemplateUtilContext(configcontext);
+        configcontext = new EndpointsContext(configcontext, api, endpointDTOList);
+
+        return configcontext;
+    }
+
     public void addHandler(String handlerName, Map<String, String> properties) {
 
         addHandlerPriority(handlerName, properties, handlers.size());
@@ -382,6 +459,12 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
         return "repository" + File.separator + "resources" + File.separator + "api_templates" +
                 File.separator + APITemplateBuilderImpl.TEMPLATE_TYPE_API_PRODUCT + ".xml";
+    }
+
+    public String getAIAPITemplatePath() {
+
+        return "repository" + File.separator + "resources" + File.separator + "api_templates" +
+                File.separator + APITemplateBuilderImpl.TEMPLATE_AI_API + ".xml";
     }
 
     public String getVelocityLogger() {

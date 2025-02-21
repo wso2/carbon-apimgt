@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationServiceImpl;
@@ -214,6 +215,14 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         if (context == null) {
             if (log.isDebugEnabled()) {
                 log.debug("Cannot retrieve API information with null context");
+            }
+            return null;
+        }
+        if (JWTConstants.GATEWAY_JWKS_API_CONTEXT.equals(context) && StringUtils.isEmpty(version)
+                && ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getJwtConfigurationDto().isJWKSApiEnabled()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cannot retrieve API information for JWKS API");
             }
             return null;
         }

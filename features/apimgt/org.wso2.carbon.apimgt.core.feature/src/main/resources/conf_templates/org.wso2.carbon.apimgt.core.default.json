@@ -57,6 +57,8 @@
   "apim.ai.marketplace_assistant_api_count_resource": "/ai/spec-populator/api-count",
   "apim.ai.api_chat_prepare_resource": "/ai/api-chat/prepare",
   "apim.ai.api_chat_execute_resource": "/ai/api-chat/execute",
+  "apim.ai.design_assistant_chat_resource": "/ai/api-design-assistant/chat",
+  "apim.ai.design_assistant_gen_api_payload_resource": "/ai/api-design-assistant/generate-api-payload",
   "apim.api_quota_limit.enable": false,
   "apim.http_client.max_total": "100",
   "apim.http_client.default_max_per_route": "50",

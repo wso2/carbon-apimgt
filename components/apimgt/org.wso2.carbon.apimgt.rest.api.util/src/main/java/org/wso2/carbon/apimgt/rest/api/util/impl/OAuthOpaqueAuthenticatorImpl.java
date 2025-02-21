@@ -17,11 +17,15 @@
 
 package org.wso2.carbon.apimgt.rest.api.util.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.message.Message;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -35,12 +39,17 @@ import org.wso2.carbon.identity.oauth2.OAuth2TokenValidationService;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2ClientApplicationDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationRequestDTO;
 import org.wso2.carbon.identity.oauth2.dto.OAuth2TokenValidationResponseDTO;
+import org.wso2.carbon.user.api.Claim;
+import org.wso2.carbon.user.api.ClaimMapping;
 import org.wso2.carbon.user.api.UserStoreException;
+import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.UserStoreManager;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.carbon.apimgt.api.OAuthTokenInfo;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.rest.api.util.authenticators.AbstractOAuthAuthenticator;
 
 import java.util.HashMap;
@@ -98,6 +107,9 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
         try {
             if (tokenInfo == null) {
                 tokenInfo = getTokenMetaData(accessToken);
+                if (tokenInfo.getEndUserName() != null) {
+                    tokenInfo.setUserOrganizationInfo(getOrganizationInfo(tokenInfo.getEndUserName()));
+                }
             }
         } catch (APIManagementException e) {
             log.error("Error while retrieving token information for token: " + accessToken, e);
@@ -148,6 +160,10 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
                     carbonContext.setUsername(username);
                     message.put(RestApiConstants.AUTH_TOKEN_INFO, tokenInfo);
                     message.put(RestApiConstants.SUB_ORGANIZATION, tenantDomain);
+                    if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                            .getAPIManagerConfiguration().getOrgAccessControl().isEnabled()) {
+                        message.put(RestApiConstants.ORGANIZATION_INFO, tokenInfo.getUserOrganizationInfo());
+                    }
                     if (!tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
                         APIUtil.loadTenantConfigBlockingMode(tenantDomain);
                     }
@@ -235,5 +251,84 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
 
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getFirstProperty(property);
+    }
+    
+    public OrganizationInfo getOrganizationInfo(String username) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Retrieving organization information for user: " + username);
+        }
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        OrganizationInfo orgInfo = new OrganizationInfo();
+        orgInfo.setSuperOrganization(tenantDomain);
+
+        Boolean isSuperTenant = true;
+        int tenantId = MultitenantConstants.SUPER_TENANT_ID;
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String orgNameClaim = config.getOrgAccessControl().getOrgNameLocalClaim();
+        String orgIdClaim = config.getOrgAccessControl().getOrgIdLocalClaim();
+
+        if (StringUtils.isBlank(orgNameClaim)) {
+            orgNameClaim = "http://wso2.org/claims/organization";
+        }
+        if (StringUtils.isBlank(orgIdClaim)) {
+            orgIdClaim = "http://wso2.org/claims/organizationId";
+        }
+
+        String organization = null;
+        String organizationId = null;
+        try {
+            if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                isSuperTenant = true;
+            }
+
+            RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+
+            //if the user is not in the super tenant domain then find the domain name and tenant id.
+            if (!isSuperTenant) {
+                tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
+                        .getTenantId(tenantDomain);
+            }
+            if (MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                //when the username is an email in supertenant, it has at least 2 occurrences of '@'
+                long count = username.chars().filter(ch -> ch == '@').count();
+                //in the case of email, there will be more than one '@'
+                boolean isEmailUsernameEnabled = Boolean.parseBoolean(CarbonUtils.getServerConfiguration().
+                        getFirstProperty("EnableEmailUserName"));
+                if (isEmailUsernameEnabled || (username.endsWith(SUPER_TENANT_SUFFIX) && count <= 1)) {
+                    username = MultitenantUtils.getTenantAwareUsername(username);
+                }
+            }
+
+            
+            UserRealm realm = (UserRealm) realmService.getTenantUserRealm(tenantId);
+            UserStoreManager manager = realm.getUserStoreManager();
+            organization =
+                    manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), orgNameClaim, null);
+            if (organization != null && "super".equals(organization.toLowerCase())) {
+                organization = tenantDomain;
+            }
+            if (realm.getClaimManager().getClaim(orgIdClaim) != null) {
+                organizationId =
+                        manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), orgIdClaim, null);
+                // Get the internal organization id using externa id
+                if (!StringUtils.isEmpty(organizationId)) {
+                    organizationId = APIUtil.getOrganizationIdFromExternalReference(organizationId, organization,
+                            tenantDomain);
+                }
+            }
+            orgInfo.setName(organization);
+            orgInfo.setOrganizationId(organizationId);
+            
+            if (log.isDebugEnabled()) {
+                log.debug("organization = " + organization + " ,organizationId = " + organizationId);
+            }
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            String error = "Error while checking user existence for " + username;
+            log.error(error, e);
+            throw new APIManagementException(error, e);
+        } 
+        
+        return orgInfo;
     }
 }

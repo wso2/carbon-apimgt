@@ -105,6 +105,15 @@
         </GatewayJWTGeneration>
     </JWTConfiguration>
 
+    {% if apim.organization_based_access_control is defined %}
+    <OrganizationBasedAccessControl>
+        <Enable>{{apim.organization_based_access_control.enable}}</Enable>
+        <OrganizationNameLocalClaim>{{apim.organization_based_access_control.organization_name_local_claim}}</OrganizationNameLocalClaim>
+        <OrganizationIDLocalClaim>{{apim.organization_based_access_control.organization_id_local_claim}}</OrganizationIDLocalClaim>
+        <OrgaizationSelectorLocalClaim>{{apim.organization_based_access_control.organization_selector_local_claim}}</OrgaizationSelectorLocalClaim>
+    </OrganizationBasedAccessControl>
+    {% endif %}
+    
     <!-- Primary/secondary login configuration for API Developer Portal. If user likes to keep two login attributes in a distributed setup, to login the API Developer Portal,
 		he should configure this section. Primary login doesn't have a claimUri associated with it. But secondary login, which is a claim attribute,
 		is associated with a claimuri.-->
@@ -133,6 +142,10 @@
                 <Name>{{environment_name.name}}</Name>
                 <DisplayName>{{environment_name.display_name}}</DisplayName>
                 <GatewayType>{{environment_name.gateway_type}}</GatewayType>
+                <!-- Configure Visibility -->
+                {% if environment_name.visibility is defined %}
+                <Visibility>{% for role in environment_name.visibility %}{{role}}{{ "," if not loop.last }}{% endfor %}</Visibility>
+                {% endif %}
                 <Description>{{environment_name.description}}</Description>
                 <!-- Server URL of the API gateway -->
                 <ServerURL>{{environment_name.service_url}}</ServerURL>
@@ -427,6 +440,24 @@
         </Resources>
     </MarketplaceAssistant>
 
+    <DesignAssistant>
+        <!-- Enable Design Assistant for API Manager -->
+        <Enabled>{{apim.ai.enable}}</Enabled>
+
+        <AuthToken>{{apim.ai.token}}</AuthToken>
+
+        <Key>{{apim.ai.key}}</Key>
+
+        <Endpoint>{{apim.ai.endpoint}}</Endpoint>
+
+        <TokenEndpoint>{{apim.ai.token_endpoint}}</TokenEndpoint>
+
+        <Resources>
+            <ChatResource>{{apim.ai.design_assistant_chat_resource}}</ChatResource>
+            <GenApiPayloadResource>{{apim.ai.design_assistant_gen_api_payload_resource}}</GenApiPayloadResource>
+        </Resources>
+    </DesignAssistant>
+
     <!--
         API key validator configuration used by API key manager (IS), API Developer Portal and API gateway.
         API gateway uses it to validate and authenticate users against the provided API keys.
@@ -678,6 +709,17 @@
         <VelocityLogger>{{apim.velocity_log.name}}</VelocityLogger>
     {% endif %}
 
+    <!-- This property is to configure the API Manager Governance capabilities -->
+    <APIMGovernance>
+        <DataSource>{{apim.governance.datasource.name}}</DataSource>
+        <SchedulerConfigurations>
+            <ThreadPoolSize>{{apim.governance.scheduler.thread_pool_size}}</ThreadPoolSize>
+            <QueueSize>{{apim.governance.scheduler.queue_size}}</QueueSize>
+            <TaskCheckIntervalMinutes>{{apim.governance.scheduler.task_check_interval_minutes}}</TaskCheckIntervalMinutes>
+            <TaskCleanupIntervalMinutes>{{apim.governance.scheduler.task_cleanup_interval_minutes}}</TaskCleanupIntervalMinutes>
+        </SchedulerConfigurations>
+    </APIMGovernance>
+
     <RESTAPI>
         <!--Configure allowed URIs of REST API. Accessing allowed URIs does not require credentials (does not require Authorization header). -->
         <AllowedURIs>
@@ -872,6 +914,14 @@
             <AllowedURI>
                 <URI>/api/am/devportal/{version}/marketplace-assistant/chat</URI>
                 <HTTPMethods>POST</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/governance/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/governance/{version}/swagger.json</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
         </AllowedURIs>
         <BasicAuthBlockedURIs>
@@ -1661,6 +1711,8 @@
             <Sequence>_block_api_handler_.xml</Sequence>
             <Sequence>_backend_failure_handler_.xml</Sequence>
             <Sequence>_opa_policy_failure_handler_.xml</Sequence>
+            <Sequence>_ai_api_request_seq_.xml</Sequence>
+            <Sequence>_ai_api_response_seq_.xml</Sequence>
         {% if apim.sync_runtime_artifacts.gateway.skip_list.sequences is defined %}
             {%- for sequence in apim.sync_runtime_artifacts.gateway.skip_list.sequences -%}
             <Sequence>{{sequence}}</Sequence>

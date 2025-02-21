@@ -24,10 +24,12 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayFeatureCatalog;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayFeatureCatalogDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityAuditAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsDTO;
@@ -87,6 +89,7 @@ public class SettingsMappingUtil {
             settingsDTO.setExternalStoresEnabled(
                     APIUtil.isExternalStoresEnabled(RestApiCommonUtil.getLoggedInUserTenantDomain()));
             settingsDTO.setDocVisibilityEnabled(APIUtil.isDocVisibilityLevelsEnabled());
+            settingsDTO.setOrgAccessControlEnabled(APIUtil.isOrganizationAccessControlEnabled());
             settingsDTO.setPortalConfigurationOnlyModeEnabled(APIUtil.isPortalConfigurationOnlyModeEnabled());
             settingsDTO.setCrossTenantSubscriptionEnabled(APIUtil.isCrossTenantSubscriptionsEnabled());
             settingsDTO.setAllowSubscriptionValidationDisabling(
@@ -100,6 +103,7 @@ public class SettingsMappingUtil {
                 authorizationHeader = APIConstants.AUTHORIZATION_HEADER_DEFAULT;
             }
             settingsDTO.setAuthorizationHeader(authorizationHeader);
+            settingsDTO.setGatewayFeatureCatalog(getGatewayFeatureCatalog());
         }
         return settingsDTO;
     }
@@ -176,5 +180,15 @@ public class SettingsMappingUtil {
             properties.setBaseUrl(baseUrl);
         }
         return properties;
+    }
+
+    private GatewayFeatureCatalogDTO getGatewayFeatureCatalog() throws APIManagementException {
+        GatewayFeatureCatalog gatewayFeatureCatalog = APIUtil.getGatewayFeatureCatalog();
+
+        GatewayFeatureCatalogDTO gatewayFeatureCatalogDTO = new GatewayFeatureCatalogDTO();
+        gatewayFeatureCatalogDTO.setApiTypes(gatewayFeatureCatalog.getApiTypes());
+        gatewayFeatureCatalogDTO.setGatewayFeatures(gatewayFeatureCatalog.getGatewayFeatures());
+
+        return gatewayFeatureCatalogDTO;
     }
 }

@@ -88,6 +88,7 @@ public final class ImportExportConstants {
     public static final String ENDPOINTS_CERTIFICATE_FILE = File.separator + "endpoint_certificates";
 
     public static final String CLIENT_CERTIFICATE_FILE = File.separator + "client_certificates";
+    public static final String ENDPOINTS_FILE = "endpoints";
 
     public static final String APIS_DIRECTORY = "APIs";
 
@@ -203,7 +204,7 @@ public final class ImportExportConstants {
 
     public static final String TYPE_POLICY_SPECIFICATION = "operation_policy_specification";
 
-    public static final String APIM_VERSION = "v4.4.0";
+    public static final String APIM_VERSION = "v4.5.0";
 
     public static final String ENDPOINT_CONFIG = "endpointConfig";
 
@@ -316,4 +317,11 @@ public final class ImportExportConstants {
     public static final String EXPORT_POLICY_TYPE_JSON = "JSON";
 
     public static final String POLICY_NAME = "name";
+
+    public static final String POLICY_TYPE_API = "api";
+    public static final String POLICY_TYPE_COMMON = "common";
+
+    // API Endpoints related constants
+    public static final String API_ENDPOINTS_TYPE = "endpoints";
+    public static final String API_ENDPOINTS_FILE_LOCATION = File.separator + "endpoints";
 }

@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal;
 
+import lombok.Getter;
+import lombok.Setter;
+import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.user.core.service.RealmService;
@@ -28,19 +31,29 @@ import org.wso2.carbon.user.core.service.RealmService;
  */
 public class ServiceReferenceHolder {
 
+    /**
+     * -- GETTER --
+     *  Returns the singleton instance of
+     * .
+     *
+     */
+    @Getter
     private static final ServiceReferenceHolder instance = new ServiceReferenceHolder();
 
     private APIManagerConfiguration apimConfiguration;
-    private RealmService realmService;
-
     /**
-     * Returns the singleton instance of {@code ServiceReferenceHolder}.
+     * -- GETTER --
+     *  Retrieves the current instance of the RealmService.
      *
-     * @return The singleton instance of {@code ServiceReferenceHolder}.
+     *
+     * -- SETTER --
+     *  Sets the RealmService instance.
+     *
      */
-    public static ServiceReferenceHolder getInstance() {
-        return instance;
-    }
+    @Setter
+    @Getter
+    private RealmService realmService;
+    private APIMGovernanceService apimGovernanceService;
 
     /**
      * Private constructor to prevent instantiation.
@@ -73,20 +86,14 @@ public class ServiceReferenceHolder {
     }
 
     /**
-     * Retrieves the current instance of the RealmService.
+     * The APIM Governance Service instance.
      *
-     * @return the RealmService instance
      */
-    public RealmService getRealmService() {
-        return realmService;
+    public void setAPIMGovernanceService(APIMGovernanceService service) {
+        this.apimGovernanceService = service;
     }
 
-    /**
-     * Sets the RealmService instance.
-     *
-     * @param realmService the RealmService to be set
-     */
-    public void setRealmService(RealmService realmService) {
-        this.realmService = realmService;
+    public APIMGovernanceService getAPIMGovernanceService() {
+        return apimGovernanceService;
     }
 }

@@ -40,7 +40,7 @@ public class VHostDTO   {
   @ApiModelProperty(example = "mg.wso2.com", required = true, value = "")
   @JsonProperty("host")
   @NotNull
- @Pattern(regexp="^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$") @Size(min=1,max=255)  public String getHost() {
+ @Size(min=1,max=255)  public String getHost() {
     return host;
   }
   public void setHost(String host) {

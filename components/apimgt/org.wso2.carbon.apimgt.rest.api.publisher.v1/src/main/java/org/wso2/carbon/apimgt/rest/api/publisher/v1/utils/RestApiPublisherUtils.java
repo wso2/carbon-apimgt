@@ -45,6 +45,8 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -57,6 +59,8 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class RestApiPublisherUtils {
@@ -469,5 +473,29 @@ public class RestApiPublisherUtils {
         }
 
         return resolvedPath;
+    }
+
+    /**
+     * Fetches subscription policies for the relevant organization ID.
+     * @param apiInfo           APIDTO object
+     * @param organizationID    Organziation ID
+     * @return                  List of subscription policies
+     */
+    public static List<String> getSubscriptionPoliciesForOrganization(APIDTO apiInfo, String organizationID) {
+
+        if (organizationID == null) {
+            return apiInfo.getPolicies();
+        }
+        List<String> policies = new ArrayList<>();
+        List<OrganizationPoliciesDTO> organizationPoliciesDTOs = apiInfo.getOrganizationPolicies();
+        if (organizationPoliciesDTOs != null && !organizationPoliciesDTOs.isEmpty()) {
+            for (OrganizationPoliciesDTO organizationPoliciesDTO : organizationPoliciesDTOs) {
+                if (StringUtils.equals(organizationID, organizationPoliciesDTO.getOrganizationID())) {
+                    policies = organizationPoliciesDTO.getPolicies();
+                    break;
+                }
+            }
+        }
+        return policies;
     }
 }

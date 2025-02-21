@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.DuplicateAPIException;
 import org.wso2.carbon.apimgt.api.model.OAuthAppRequest;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.AMDefaultKeyManagerImpl;
@@ -381,7 +382,7 @@ public class RestApiUtil {
      * @return a new BadRequestException with the specified details as a response DTO
      */
     public static BadRequestException buildBadRequestException(String description) {
-        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400l, description);
+        ErrorDTO errorDTO = getErrorDTO(RestApiConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, 400L, description);
         return new BadRequestException(errorDTO);
     }
 
@@ -638,6 +639,17 @@ public class RestApiUtil {
     public static void handleBadRequest(String msg, Log log) throws BadRequestException {
         BadRequestException badRequestException = buildBadRequestException(msg);
         log.error(msg);
+        throw badRequestException;
+    }
+
+    /**
+     * Logs the error, builds a BadRequestException with specified details and throws it
+     *
+     * @param msg error message
+     * @throws BadRequestException
+     */
+    public static void handleBadRequest(String msg) throws BadRequestException {
+        BadRequestException badRequestException = buildBadRequestException(msg);
         throw badRequestException;
     }
 
@@ -1298,6 +1310,20 @@ public class RestApiUtil {
         }
         return organization;
     }
+    
+    /**
+     * Method to extract the User organization
+     * @param ctx MessageContext
+     * @return organization
+     */
+
+    public static OrganizationInfo getOrganizationInfo(MessageContext ctx) throws APIManagementException {
+        OrganizationInfo organizationInfo = new OrganizationInfo();
+        if (ctx.get(RestApiConstants.ORGANIZATION_INFO) != null) {
+            organizationInfo = (OrganizationInfo) ctx.get(RestApiConstants.ORGANIZATION_INFO);
+        }
+        return organizationInfo;
+    }
 
 
     /**
@@ -1339,5 +1365,30 @@ public class RestApiUtil {
         properties.put(APIConstants.PROPERTY_QUERY_KEY, message.get(Message.QUERY_STRING));
         String organization = resolver.resolve(properties);
         return  organization;
+    }
+    
+    public static boolean isOrganizationVisibilityAllowed(String userName, String visibleOrgs, String userOrg)
+            throws APIManagementException {
+        boolean allowed = false;
+
+        if (APIUtil.areOrganizationsRegistered()) {
+            String[] roles = APIUtil.getListOfRoles(APIUtil.getUserNameWithTenantSuffix(userName));
+            if (Arrays.asList(roles).contains("admin")) {
+                return true;
+            }
+            if (StringUtils.isEmpty(visibleOrgs) || APIConstants.DEFAULT_VISIBLE_ORG.equals(visibleOrgs)) {
+                allowed = true;
+            } else {
+                List<String> visibleOrgList = Arrays.asList(visibleOrgs.split(","));
+
+                if (visibleOrgList.contains(userOrg)) {
+                    allowed = true;
+                } else {
+                    allowed = false;
+                }
+            }
+            return allowed;
+        }
+        return true;
     }
 }

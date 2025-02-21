@@ -29,6 +29,7 @@ import org.apache.synapse.core.axis2.MessageContextCreatorForAxis2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.gateway.dto.WebSocketThrottleResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -193,6 +194,22 @@ public class WebsocketUtil {
 		boolean isApplicationLevelThrottled = ServiceReferenceHolder.getInstance().getThrottleDataHolder()
 				                                                              .isThrottled(applicationLevelThrottleKey);
 		return (isApiLevelThrottled || isApplicationLevelThrottled || isSubscriptionLevelThrottled);
+	}
+
+	public static WebSocketThrottleResponseDTO getThrottleStatus(String resourceLevelThrottleKey,
+	                                                             String subscriptionLevelThrottleKey,
+	                                                             String applicationLevelThrottleKey) {
+		// Check each level and record reason if throttling occurs
+		if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().isAPIThrottled(resourceLevelThrottleKey)) {
+			return new WebSocketThrottleResponseDTO(true, "Throttled due to resource-level constraints");
+		} else if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().isThrottled(
+				subscriptionLevelThrottleKey)) {
+			return new WebSocketThrottleResponseDTO(true, "Throttled due to subscription-level constraints");
+		} else if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().isThrottled(
+				applicationLevelThrottleKey)) {
+			return new WebSocketThrottleResponseDTO(true, "Throttled due to application-level constraints");
+		}
+		return null;
 	}
 
 	public static String getAccessTokenCacheKey(String accessToken, String apiContext, String matchingResource) {

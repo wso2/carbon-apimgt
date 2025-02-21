@@ -39,6 +39,7 @@ public final class RestApiConstants {
     public static final String AUTHENTICATION_REQUIRED = "authentication_required";
     public static final String HEADER_X_WSO2_TENANT = "x-wso2-tenant";
     public static final String ORGANIZATION = "organization";
+    public static final String ORGANIZATION_INFO = "organization_info";
     public static final String SUB_ORGANIZATION = "sub_organization";
     public static final String MASKED_TOKEN = "maskedToken";
 
@@ -85,6 +86,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_COMMENTS = "comments";
     public static final String RESOURCE_MEDIATION_POLICY = "mediation-policy";
     public static final String RESOURCE_API_CATEGORY = "API Category";
+    public static final String RESOURCE_LABEL = "Label";
 
     public static final String API_ID_DELIMITER = "-";
     public static final String QUERY_PARAM = "{query}";
@@ -132,8 +134,10 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL = RESOURCE_PATH_THROTTLING_POLICIES
             + "/custom";
     public static final String RESOURCE_PATH_CATEGORY = "/categories";
+    public static final String RESOURCE_PATH_LABEL = "/labels";
     public static final String RESOURCE_PATH_LLM_PROVIDER = "/llm-providers";
     public static final String KEY_MANAGERS = "/key-managers";
+    public static final String ORGANIZATIONS_PATH= "/organizations";
 
     // Used in XACML authentication interceptor: Deprecated
     public static final String SERVER_URL = "server_url";
@@ -161,6 +165,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_PRODUCT_DOCUMENT_CONTENT = RESOURCE_PATH_PRODUCT_DOCUMENTS_DOCUMENT_ID + "/content";
     public static final String RESOURCE_PATH_RESOURCE_PATHS = "/resource-paths";
     public static final String RESOURCE_PATH_COMMENTS = "/comments";
+    public static final String RESOURCE_PATH_API_ENDPOINT = "/endpoints";
     public static final String RESOURCE_PATH_SWAGGER= "/swagger.yaml";
     public static final String REST_API_STORE_VERSION_0 ="v0.16";
     public static final String RESOURCE_PATH_API_CATEGORIES = "/api-categories";
@@ -181,6 +186,8 @@ public final class RestApiConstants {
     public static final String REST_API_PUBLISHER_CONTEXT_FULL =
             REST_API_PUBLISHER_CONTEXT + REST_API_PUBLISHER_VERSION;
     public static final String REST_API_ADMIN_CONTEXT = "/api/am/admin/";
+    public static final String REST_API_GOVERNANCE_CONTEXT = "api/am/governance/";
+    public static final String REST_API_GOVERNANCE_VERSION = "v1";
     public static final String REST_API_ADMIN_VERSION_0 = "v0.16";
     public static final String REST_API_ADMIN_VERSION = "v4";
     public static final String REST_API_DCR_CONTEXT_FULL = "/client-registration/v0.17";
@@ -188,6 +195,7 @@ public final class RestApiConstants {
     public static final String REST_API_DCR_VERSION = "v0.17";
     public static final String REST_API_ADMIN_CONTEXT_FULL_0 = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION_0;
     public static final String REST_API_ADMIN_CONTEXT_FULL = REST_API_ADMIN_CONTEXT + REST_API_ADMIN_VERSION;
+    public static final String REST_API_GOVERNANCE_CONTEXT_FULL = REST_API_GOVERNANCE_CONTEXT + REST_API_GOVERNANCE_VERSION;
     public static final String REST_API_SERVICE_CATALOG_CONTEXT_FULL = "/api/am/service-catalog";
     public static final String REST_API_PROVIDER = "admin";
     public static final String REST_API_WEB_APP_AUTHENTICATOR_IMPL_CLASS_NAME = "org.wso2.carbon.apimgt.rest.api.util.impl.WebAppAuthenticatorImpl";
@@ -196,6 +204,9 @@ public final class RestApiConstants {
     public static final Pattern REGEX_BEARER_PATTERN = Pattern.compile("Bearer\\s");
     public static final String COOKIE_HEADER_NAME = "cookie";
     public static final String AUTH_COOKIE_NAME = "AM_ACC_TOKEN_DEFAULT_P2"; // This cookie name should be used when setting the cookie for SPA app in SPA app user authentication response to REST API context as path directive
+    public static final String REFERER_COOKIE_NAME = "referer";
+    public static final String GOVERNANCE_ADMIN_AUTH_COOKIE_NAME = "AM_ADMIN_ACC_TOKEN_DEFAULT_P2";
+    public static final String GOVERNANCE_PUBLISHER_AUTH_COOKIE_NAME = "AM_PUBLISHER_ACC_TOKEN_DEFAULT_P2";
 
     public static final String API_VERSION = "API_VERSION";
     public static final String REQUEST_URL = "org.apache.cxf.request.uri";
@@ -348,7 +359,7 @@ public final class RestApiConstants {
     public static final int TAG_OFFSET_DEFAULT = 0;
 
     public static final String RESOURCE_PATH_OPERATION_POLICIES = "operation-policies";
-
+    public static final String RESOURCE_PATH_API_ENDPOINTS = "api-endpoints";
     public static final String RESOURCE_PATH_GATEWAY_POLICIES = "gateway-policies";
 
     public static final String AUTH_TOKEN_INFO = "AUTH_TOKEN_INFO";

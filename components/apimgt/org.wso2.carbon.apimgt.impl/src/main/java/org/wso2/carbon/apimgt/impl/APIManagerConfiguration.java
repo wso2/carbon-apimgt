@@ -29,12 +29,15 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
@@ -44,6 +47,7 @@ import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
+import org.wso2.carbon.apimgt.impl.dto.OrgAccessControl;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TokenValidationDto;
@@ -62,6 +66,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -122,6 +127,8 @@ public class APIManagerConfiguration {
     private ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
     private static MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDTO();
     private static ApiChatConfigurationDTO apiChatConfigurationDto = new ApiChatConfigurationDTO();
+    private static DesignAssistantConfigurationDTO designAssistantConfigurationDto = new DesignAssistantConfigurationDTO();
+    private static final APIMGovernanceConfigDTO apimGovConfigurationDto = new APIMGovernanceConfigDTO();
 
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
@@ -133,6 +140,15 @@ public class APIManagerConfiguration {
     private static String certificateBoundAccessEnabled;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     private RedisConfig redisConfig = new RedisConfig();
+    private OrgAccessControl orgAccessControl = new OrgAccessControl();
+    public OrgAccessControl getOrgAccessControl() {
+        return orgAccessControl;
+    }
+
+    public void setOrgAccessControl(OrgAccessControl orgAccessControl) {
+        this.orgAccessControl = orgAccessControl;
+    }
+
     private Map<String, List<String>> restApiJWTAuthAudiences = new HashMap<>();
     private JSONObject subscriberAttributes = new JSONObject();
     private static Map<String, String> analyticsMaskProps;
@@ -180,6 +196,11 @@ public class APIManagerConfiguration {
     public ApiChatConfigurationDTO getApiChatConfigurationDto() {
 
         return apiChatConfigurationDto;
+    }
+
+    public DesignAssistantConfigurationDTO getDesignAssistantConfigurationDto() {
+
+        return designAssistantConfigurationDto;
     }
 
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
@@ -663,10 +684,14 @@ public class APIManagerConfiguration {
                 setMarketplaceAssistantConfiguration(element);
             } else if (APIConstants.AI.API_CHAT.equals(localName)) {
                 setApiChatConfiguration(element);
+            } else if (APIConstants.AI.DESIGN_ASSISTANT.equals(localName)) {
+                setDesignAssistantConfiguration(element);
             } else if (APIConstants.AI.AI_CONFIGURATION.equals(localName)){
                 setAiConfiguration(element);
             } else if (APIConstants.TokenValidationConstants.TOKEN_VALIDATION_CONFIG.equals(localName)) {
                 setTokenValidation(element);
+            } else if (APIConstants.ORG_BASED_ACCESS_CONTROL.equals(localName)) {
+                setOrgBasedAccessControlConfigs(element);
             } else if (APIConstants.HASHING.equals(localName)) {
                 setHashingAlgorithm(element);
             } else if (APIConstants.TransactionCounter.TRANSACTIONCOUNTER.equals(localName)) {
@@ -674,12 +699,33 @@ public class APIManagerConfiguration {
                 if (counterEnabled != null) {
                     isTransactionCounterEnabled = Boolean.parseBoolean(counterEnabled.getText());
                 }
+            } else if (APIConstants.APIMGovernance.GOVERNANCE_CONFIG.equals(localName)) {
+                setAPIMGovernanceConfigurations(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
         }
     }
 
+    private void setOrgBasedAccessControlConfigs(OMElement element) {
+        OMElement orgEnableElement =
+                element.getFirstChildWithName(new QName(APIConstants.ORG_BASED_ACCESS_CONTROL_ENABLE));
+        if (orgEnableElement != null) {
+            orgAccessControl.setEnabled(Boolean.parseBoolean(orgEnableElement.getText()));
+        }
+        
+        OMElement orgNameElement =
+                element.getFirstChildWithName(new QName(APIConstants.ORG_BASED_ACCESS_CONTROL_ORG_NAME_CLAIM));
+        if (orgNameElement != null) {
+            orgAccessControl.setOrgNameLocalClaim(orgNameElement.getText());;
+        }
+        OMElement orgIdElement =
+                element.getFirstChildWithName(new QName(APIConstants.ORG_BASED_ACCESS_CONTROL_ORG_ID_CLAIM));
+        if (orgIdElement != null) {
+            orgAccessControl.setOrgIdLocalClaim(orgIdElement.getText());
+        }
+    }
+        
     public boolean getTransactionCounterProperties() {
         return isTransactionCounterEnabled;
     }
@@ -759,6 +805,24 @@ public class APIManagerConfiguration {
             gatewayType = APIConstants.API_GATEWAY_TYPE_REGULAR;
         }
         environment.setGatewayType(gatewayType);
+        GatewayVisibilityPermissionConfigurationDTO permissionsDTO = new GatewayVisibilityPermissionConfigurationDTO();
+        OMElement visibility = environmentElem.getFirstChildWithName(new QName(APIConstants.API_GATEWAY_VISIBILITY));
+        List<String> visibilityRoles = new LinkedList<>();
+        String[] visibilityRolesArray;
+        if (visibility == null || StringUtils.isEmpty(visibility.getText())) {
+            permissionsDTO.setPermissionType(APIConstants.PERMISSION_NOT_RESTRICTED);
+            environment.setVisibility(APIConstants.PERMISSION_NOT_RESTRICTED);
+            visibilityRolesArray = new String[]{APIConstants.EVERYONE_ROLE};
+        } else {
+            String visibilityString = visibility.getText();
+            visibilityRolesArray = visibilityString.split(",");
+            Collections.addAll(visibilityRoles, visibilityRolesArray);
+            permissionsDTO.setPermissionType(APIConstants.PERMISSION_ALLOW);
+            permissionsDTO.setRoles(visibilityRoles);
+            environment.setVisibility(visibilityString);
+        }
+        environment.setVisibility(visibilityRolesArray);
+        environment.setPermissions(permissionsDTO);
         if (StringUtils.isEmpty(environment.getDisplayName())) {environment.setDisplayName(environment.getName());}
         environment.setServerURL(APIUtil.replaceSystemProperty(environmentElem.getFirstChildWithName(new QName(
                         APIConstants.API_GATEWAY_SERVER_URL)).getText()));
@@ -2623,7 +2687,112 @@ public class APIManagerConfiguration {
         return false;
     }
 
+    public void setDesignAssistantConfiguration(OMElement omElement){
+        OMElement designAssistantEnableElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_ENABLED));
+        if (designAssistantEnableElement != null) {
+            designAssistantConfigurationDto.setEnabled(Boolean.parseBoolean(designAssistantEnableElement.getText()));
+        }
+        if (designAssistantConfigurationDto.isEnabled()) {
+            OMElement designAssistantEndpoint =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_ENDPOINT));
+            if (designAssistantEndpoint != null) {
+                designAssistantConfigurationDto.setEndpoint(designAssistantEndpoint.getText());
+            }
+            OMElement designAssistantTokenEndpoint =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_TOKEN_ENDPOINT));
+            if (designAssistantTokenEndpoint != null) {
+                designAssistantConfigurationDto.setTokenEndpoint(designAssistantTokenEndpoint.getText());
+            }
+            OMElement designAssistantKey =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_KEY));
+
+            if (designAssistantKey != null) {
+                String Key = MiscellaneousUtil.resolve(designAssistantKey, secretResolver);
+                designAssistantConfigurationDto.setKey(Key);
+                if (!Key.isEmpty()){
+                    designAssistantConfigurationDto.setKeyProvided(true);
+                }
+            }
+            OMElement designAssistantToken =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_AUTH_TOKEN));
+            if (designAssistantToken != null) {
+                String AccessToken = MiscellaneousUtil.resolve(designAssistantToken, secretResolver);
+                designAssistantConfigurationDto.setAccessToken(AccessToken);
+                if (!AccessToken.isEmpty()){
+                    designAssistantConfigurationDto.setAuthTokenProvided(true);
+                }
+            }
+            OMElement resources =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.RESOURCES));
+
+            OMElement designAssistantChatResource =
+                    resources.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_CHAT_RESOURCE));
+            if (designAssistantChatResource != null) {
+                designAssistantConfigurationDto.setChatResource(designAssistantChatResource.getText());
+            }
+            OMElement designAssistantGenApiPayloadResource =
+                    resources.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE));
+            if (designAssistantGenApiPayloadResource != null) {
+                designAssistantConfigurationDto.setGenApiPayloadResource(designAssistantGenApiPayloadResource.getText());
+            }
+        }
+    }
+
     public TokenValidationDto getTokenValidationDto() {
         return tokenValidationDto;
+    }
+
+    /**
+     * Set APIM Governance Configurations
+     *
+     * @param omElement XML Config
+     */
+    public void setAPIMGovernanceConfigurations(OMElement omElement) {
+        OMElement dataSource = omElement
+                .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DATA_SOURCE_NAME));
+        if (dataSource != null) {
+            String dataSourceName = dataSource.getText();
+            apimGovConfigurationDto.setDataSourceName(dataSourceName);
+        }
+
+        OMElement schedulerConfig = omElement
+                .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_CONFIG));
+
+        if (schedulerConfig != null) {
+            OMElement threadPoolSize = schedulerConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_THREAD_POOL_SIZE));
+            if (threadPoolSize != null) {
+                apimGovConfigurationDto.setSchedulerThreadPoolSize(Integer.parseInt(threadPoolSize.getText()));
+            }
+
+            OMElement queueSize = schedulerConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_QUEUE_SIZE));
+            if (queueSize != null) {
+                apimGovConfigurationDto.setSchedulerQueueSize(Integer.parseInt(queueSize.getText()));
+            }
+
+            OMElement checkInterval = schedulerConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_TASK_CHECK_INTERVAL));
+            if (checkInterval != null) {
+                apimGovConfigurationDto.setSchedulerTaskCheckInterval(Integer.parseInt(checkInterval.getText()));
+            }
+
+            OMElement cleanupInterval = schedulerConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_TASK_CLEANUP_INTERVAL));
+            if (cleanupInterval != null) {
+                apimGovConfigurationDto.setSchedulerTaskCleanupInterval(Integer.parseInt(cleanupInterval.getText()));
+            }
+        }
+
+    }
+
+    /**
+     * Get APIM Governance Configuration DTO
+     *
+     * @return APIMGovernanceConfigDTO
+     */
+    public APIMGovernanceConfigDTO getAPIMGovernanceConfigurationDto() {
+        return apimGovConfigurationDto;
     }
 }

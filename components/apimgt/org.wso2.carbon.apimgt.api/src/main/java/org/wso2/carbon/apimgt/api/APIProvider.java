@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.dto.EnvironmentPropertiesDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.api.model.*;
@@ -1534,6 +1535,101 @@ public interface APIProvider extends APIManager {
     Environment getEnvironment(String organization, String uuid) throws APIManagementException;
 
     /**
+     * Returns all labels of the tenant
+     *
+     * @param tenantDomain    tenant domain
+     * @return List<Label> list of Label objects
+     * @throws APIManagementException if failed to get labels
+     */
+    List<Label> getAllLabels(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Returns all attached labels of the API
+     *
+     * @param apiID      API UUID
+     * @return List<Label> list of Label objects
+     * @throws APIManagementException if failed to get labels
+     */
+    List<Label> getAllLabelsOfApi(String apiID) throws APIManagementException;
+
+    /**
+     * Attach labels to an API
+     *
+     * @param apiID        API UUID
+     * @param labelList    List of Labels
+     * @param tenantDomain Tenant domain
+     * @return List<String> list of Label IDs
+     * @throws APIManagementException if failed to get labels
+     */
+    List<Label> attachApiLabels(String apiID, List<String> labelList, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Detach labels from an API
+     *
+     * @param apiID        API UUID
+     * @param labelList    List of Labels
+     * @param tenantDomain Tenant domain
+     * @return List<String> list of Label IDs
+     * @throws APIManagementException if failed to get labels
+     */
+    List<Label> detachApiLabels(String apiID, List<String> labelList, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get endpoint details by providing API UUID. If provided UUID is an API revision UUID, it returns the revision
+     * endpoint details.
+     *
+     * @param uuid         Unique identifier of API
+     * @param organization Organization name
+     * @return List<APIEndpointInfo> List of APIEndpointInfo objects
+     * @throws APIManagementException if an error occurs while retrieving endpoints details
+     */
+    List<APIEndpointInfo> getAllAPIEndpointsByUUID(String uuid, String organization) throws APIManagementException;
+
+    /**
+     * Get endpoint details by providing API UUID and endpoint UUID.
+     *
+     * @param apiUUID      Unique identifier of API
+     * @param endpointUUID Unique identifier of Endpoint
+     * @param organization Organization name
+     * @return APIEndpointInfo Object with endpoint details
+     * @throws APIManagementException if an error occurs while retrieving endpoint details
+     */
+    APIEndpointInfo getAPIEndpointByUUID(String apiUUID, String endpointUUID, String organization)
+            throws APIManagementException;
+
+    /**
+     * Add an endpoint to the provided API with the given endpoint details.
+     *
+     * @param apiUUID      Unique identifier of API
+     * @param apiEndpoint  API endpoint details
+     * @param organization Organization name
+     * @return created endpoint UUID
+     * @throws APIManagementException if an error occurs while inserting endpoint detail
+     */
+    String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint, String organization)
+            throws APIManagementException;
+
+    /**
+     * Delete an API endpoint by providing the endpoint UUID.
+     *
+     * @param endpointUUID Unique identifier of Endpoint
+     * @throws APIManagementException if an error occurs while deleting the endpoint
+     */
+    void deleteAPIEndpointById(String endpointUUID) throws APIManagementException;
+
+    /**
+     * Update endpoint details of the provided API.
+     *
+     * @param apiId        API UUID
+     * @param apiEndpoint  Endpoint with updated details
+     * @param organization Organization name
+     * @return Updated APIEndpointInfo object
+     * @throws APIManagementException if an error occurs while updating the endpoint
+     */
+    APIEndpointInfo updateAPIEndpoint(String apiId, APIEndpointInfo apiEndpoint, String organization)
+            throws APIManagementException;
+
+    /**
      * Set existing operation policy mapping to the URI Templates
      *
      * @param apiId        API UUID
@@ -1543,8 +1639,10 @@ public interface APIProvider extends APIManager {
     void setOperationPoliciesToURITemplates(String apiId, Set<URITemplate> uriTemplates) throws APIManagementException;
 
     /**
-     * Import an operation policy from the API CTL project. This will either create a new API specific policy,
-     * update existing API specific policy or return the policyID of existing policy if policy content is not changed.
+     * Import an operation policy from the API CTL project which is exported from a product version prior to the update
+     * level which introduced to have an API and a Common policy with identical names and versions.
+     * This will either create a new API specific policy, update existing API specific policy or return the
+     * policyID of existing policy if policy content is not changed.
      *
      * @param operationPolicyData Operation Policy Data
      * @param organization        Organization name
@@ -1553,6 +1651,21 @@ public interface APIProvider extends APIManager {
      */
     String importOperationPolicy(OperationPolicyData operationPolicyData, String organization)
             throws APIManagementException;
+
+    /**
+     * Import an operation policy of a given policy type, from the API CTL project.
+     * This will either create a new API specific policy, update existing API specific policy or return the
+     * policyID of existing policy if policy content is not changed.
+     *
+     * @param operationPolicyData Operation Policy Data
+     * @param organization        Organization name
+     * @param policyType Policy Type
+     * @return UUID of the imported operation policy
+     * @throws APIManagementException
+     */
+    String importOperationPolicyOfGivenType(OperationPolicyData operationPolicyData, String policyType,
+                                            String organization) throws APIManagementException;
+
 
     /**
      * Add an API specific operation policy
@@ -2035,4 +2148,67 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException
      */
     WorkflowDTO retrieveWorkflow(String workflowReferenceID) throws APIManagementException;
+
+    /**
+     * 
+     * Retrieves list of organizations available for the given parent organization.
+     * 
+     * @param parentOrgId parent organization id
+     * @param tenantDomain super domain
+     * @return organization list
+     */
+    List<OrganizationDetailsDTO> getOrganizations(String orgId, String superOrganization) throws APIManagementException;
+
+    /**
+     * Imports a drafted api theme for the given organization and API ID.
+     *
+     * @param organization Organization name.
+     * @param themeContent Theme content as InputStream.
+     * @param apiId        API Identifier.
+     * @throws APIManagementException If a database error occurs.
+     */
+    void importDraftedApiTheme(String organization, InputStream themeContent, String apiId)
+            throws APIManagementException;
+
+    /**
+     * Updates the api theme status as published or unpublished.
+     *
+     * @param organization Organization name.
+     * @param action       Action to perform ("PUBLISH" or "UNPUBLISH").
+     * @param apiId        API Identifier.
+     * @throws APIManagementException If a database error occurs.
+     */
+    void updateApiThemeStatus(String organization, String action, String apiId)
+            throws APIManagementException;
+
+    /**
+     * Deletes an API theme.
+     *
+     * @param organization Organization name.
+     * @param themeId      Theme ID to delete.
+     * @param apiId        API Identifier.
+     * @throws APIManagementException If a database error occurs.
+     */
+    void deleteApiTheme(String organization, String themeId, String apiId) throws APIManagementException;
+
+    /**
+     * Gets an API theme.
+     *
+     * @param uuid      Theme ID to retrieve.
+     * @param organization Organization name.
+     * @param apiId        API Identifier.
+     * @return Input stream of API theme.
+     * @throws APIManagementException If a database error occurs.
+     */
+    InputStream getApiTheme(String uuid, String organization, String apiId) throws APIManagementException;
+
+    /**
+     * Gets API theme array.
+     *
+     * @param organization Organization name.
+     * @param apiId        API Identifier.
+     * @return Hash map of publish unpublish state and theme IDs.
+     * @throws APIManagementException If a database error occurs.
+     */
+    Map<String, String> getApiThemes(String organization, String apiId) throws APIManagementException;
 }
