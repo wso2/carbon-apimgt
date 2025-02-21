@@ -1,11 +1,11 @@
-# Copyright (c) 2024, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+# Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
 #
 # This software is the property of WSO2 LLC. and its suppliers, if any.
 # Dissemination of any information or reproduction of any material contained
 # herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
 # You may not alter or remove any copyright or other notice from copies of this content.
 
-name: WSO2 Style Guidelines
+name: WSO2 Rest API Design Guidelines
 description: >-
   A set of guidelines focused on enforcing uniformity in API style, including
   naming conventions, formatting, and documentation to ensure clarity and
@@ -19,14 +19,11 @@ rulesetContent:
   aliases:
     API_Document:
       description: "The complete API specification document. This can be used to target
-        any part of the OpenAPI document using **field**.\n\n*Use this if you don't
-        find specific targets that cater to your usecase.* "
+          any part of the OpenAPI document using **field**.\n\n*Use this if you don't
+          find specific targets that cater to your usecase.* "
       targets:
         - formats:
             - oas2
-          given:
-            - "$"
-        - formats:
             - oas3
           given:
             - "$"
@@ -35,21 +32,22 @@ rulesetContent:
       targets:
         - formats:
             - oas2
-          given:
-            - "#Path_Item[get,put,post,delete,options,head,patch,trace]"
-        - formats:
             - oas3
           given:
-            - "#Path_Item[get,put,post,delete,options,head,patch,trace]"
+            - "#Path_Item['get']"
+            - "#Path_Item['put']"
+            - "#Path_Item['post']"
+            - "#Path_Item['delete']"
+            - "#Path_Item['options']"
+            - "#Path_Item['head']"
+            - "#Path_Item['patch']"
+            - "#Path_Item['trace']"
     Operation_Responses:
       description: Responses for all operations including get, put, post, delete, options,
         head, patch, trace.
       targets:
         - formats:
             - oas2
-          given:
-            - "#Operation_Object.responses"
-        - formats:
             - oas3
           given:
             - "#Operation_Object.responses"
@@ -58,9 +56,6 @@ rulesetContent:
       targets:
         - formats:
             - oas2
-          given:
-            - "$.paths[*]"
-        - formats:
             - oas3
           given:
             - "$.paths[*]"
@@ -69,9 +64,6 @@ rulesetContent:
       targets:
         - formats:
             - oas2
-          given:
-            - "$.info.contact"
-        - formats:
             - oas3
           given:
             - "$.info.contact"
@@ -80,9 +72,6 @@ rulesetContent:
       targets:
         - formats:
             - oas2
-          given:
-            - "$.info.license"
-        - formats:
             - oas3
           given:
             - "$.info.license"
@@ -91,20 +80,15 @@ rulesetContent:
       targets:
         - formats:
             - oas2
-          given:
-            - "$..[description,title]"
-        - formats:
             - oas3
           given:
-            - "$..[description,title]"
+            - "$..description"
+            - "$..title"
     API_Tags:
       description: Tags on an API object
       targets:
         - formats:
             - oas2
-          given:
-            - "#Operation_Object.tags"
-        - formats:
             - oas3
           given:
             - "#Operation_Object.tags"
@@ -139,9 +123,6 @@ rulesetContent:
       targets:
         - formats:
             - oas2
-          given:
-            - "$..parameters[*]"
-        - formats:
             - oas3
           given:
             - "$..parameters[*]"
@@ -150,25 +131,19 @@ rulesetContent:
       targets:
         - formats:
             - oas2
-          given:
-            - "$.paths"
-        - formats:
             - oas3
           given:
             - "$.paths"
     API_Document_RecursiveSearch:
       description: "The complete API specification document. This can be used to target
-        any part of the OpenAPI document using **field**.\n\n*Use this if you don't
-        find specific targets that cater to your usecase.* "
+          any part of the OpenAPI document using **field**.\n\n*Use this if you don't
+          find specific targets that cater to your usecase.* "
       targets:
         - formats:
             - oas2
-          given:
-            - "$.."
-        - formats:
             - oas3
           given:
-            - "$.."
+            - "$..*"
     All_Example:
       description: All examples across the API document
       targets:
@@ -190,9 +165,6 @@ rulesetContent:
       targets:
         - formats:
             - oas2
-          given:
-            - "$.tags[*]"
-        - formats:
             - oas3
           given:
             - "$.tags[*]"
@@ -212,17 +184,19 @@ rulesetContent:
       targets:
         - formats:
             - oas2
-          given:
-            - "$..[?(@ && @.type=='array')]"
-        - formats:
             - oas3
-          given:
-            - "$..[?(@ && @.type=='array')]"
-        - formats:
             - oas3.0
           given:
             - "$..[?(@ && @.type=='array')]"
-            - "$..[?(@ && @.type && @.type.constructor.name === 'Array' && @.type.includes('array'))]"
+
+    Request_Parameter_Path:
+      description: "All request path parameters"
+      targets:
+        - formats:
+            - oas2
+            - oas3
+          given:
+            - "$..parameters[?(@ && @.in==\"path\")]"
 
   rules:
     contact-url:
@@ -233,7 +207,7 @@ rulesetContent:
         function: truthy
         field: url
       description: |-
-        The `contact` object should have a valid organization URL. 
+        The `contact` object should have a valid organization URL.
 
         **Valid Example**
 
@@ -242,10 +216,11 @@ rulesetContent:
           "contact": {
              ... ,
              "url": "https://acme.com",
-             ... 
+             ...
           },
         ```
       message: Contact object should have "url".
+
     contact-email:
       given:
         - "#API_Contact"
@@ -254,7 +229,7 @@ rulesetContent:
         function: truthy
         field: email
       description: |-
-        The `contact` object should have a valid email. 
+        The `contact` object should have a valid email.
 
         **Valid Example**
 
@@ -314,6 +289,7 @@ rulesetContent:
         }
         ```
       message: Info object should have "description" object.
+
     info-license:
       given:
         - "#API_Document"
@@ -407,6 +383,7 @@ rulesetContent:
         }
         ```
       message: Markdown descriptions must not have "<script>" tags.
+
     openapi-tags-alphabetical:
       given:
         - "#API_Document"
@@ -563,27 +540,19 @@ rulesetContent:
         }
         ```
       message: OperationId should not have characters that are invalid when used in URL.
-    operation-singular-tag:
-      given:
-        - "#API_Tags"
-      severity: 'off'
-      then:
-        function: length
-        functionOptions:
-          max: 1
-      description: Operation should not have more than a single tag.
-      message: Operation should not have more than a single tag.
 
     operation-tags:
       given:
         - "#Operation_Object"
       severity: warn
       then:
-        function: length
-        functionOptions:
-          max: 999
-          min: 1
-        field: tags
+        - function: length
+          functionOptions:
+            max: 999
+            min: 1
+          field: tags
+        - function: truthy
+          field: tags
       description: |-
         At least one tag should be defined for each operation.
 
@@ -600,7 +569,7 @@ rulesetContent:
 
     path-declarations-must-exist:
       given:
-        - "#Path_Item"
+        - "#Path_Object"
       severity: error
       then:
         function: pattern
@@ -619,14 +588,15 @@ rulesetContent:
         `/users/{userId}`
       message: Path parameter declarations must not be empty, e.g., "/given/{}" is invalid.
 
+
     paths-no-trailing-slash:
       given:
-        - "$.paths"
+        - "#Path_Object"
       severity: error
       then:
         function: pattern
         functionOptions:
-          notMatch: '\\/$'
+          notMatch: '.+\/$'
         field: "@key"
       description: |-
         Paths must not end with a trailing slash.
@@ -654,7 +624,6 @@ rulesetContent:
           }
         }
         ```
-      message: Paths must not end with a trailing slash.
 
     contact-name:
       given:
@@ -676,36 +645,7 @@ rulesetContent:
         }
         ```
       message: Contact object should have "name".
-    path-keys-no-trailing-slash:
-      given:
-        - "#Path_Object"
-      severity: warn
-      then:
-        function: pattern
-        functionOptions:
-          notMatch: '.+\\/$'
-        field: "@key"
-      description: |-
-        Path keys should not end in forward slashes. This is a best practice for working with web tooling, such as mock servers, code generators, application frameworks, and more.
 
-        **Invalid Example**
-
-        ```json
-        {
-          "/users/": {
-          }
-        }
-        ```
-
-        **Valid Example**
-
-        ```json
-        {
-          "/users": {
-          }
-        }
-        ```
-      message: Path should not end with slash.
     path-not-include-query:
       given:
         - "#Path_Object"
@@ -713,7 +653,7 @@ rulesetContent:
       then:
         function: pattern
         functionOptions:
-          notMatch: '\\?'
+          notMatch: '\?'
         field: "@key"
       description: |-
         Paths should not include `query` string items. Instead, add them as parameters with `in: query`.
@@ -745,6 +685,7 @@ rulesetContent:
         }
         ```
       message: Path should not include query string.
+
     tag-description:
       given:
         - "#API_Tags_Item"
@@ -768,12 +709,14 @@ rulesetContent:
         }
         ```
       message: Tag object should have "description".
+
     api-servers:
       given:
-        - "#API_Server"
+        - "#API_Document"
       severity: warn
       then:
         function: schema
+        field: "servers"
         functionOptions:
           schema:
             type: array
@@ -813,6 +756,7 @@ rulesetContent:
         }
         ```
       message: Server should be present.
+
     server-trailing-slash:
       given:
         - "#API_Server_URL"
@@ -848,9 +792,10 @@ rulesetContent:
         }
         ```
       message: Server URL should not have trailing slash.
+
     server-lowercase:
       given:
-        - "$.servers[*].url"
+        - "#API_Server_URL"
       severity: error
       then:
         function: pattern
@@ -889,6 +834,7 @@ rulesetContent:
       message: Server URL must be lowercase.
       formats:
         - oas3
+
     oas2-api-schemes:
       given:
         - "#API_Document"
@@ -904,8 +850,8 @@ rulesetContent:
           dialect: draft7
         field: schemes
       description: |
-        OpenAPI 2 host `schemes` reflect the transfer protocol of the API. 
-        Host schemes must be present and an array with one or more of these values: 
+        OpenAPI 2 host `schemes` reflect the transfer protocol of the API.
+        Host schemes must be present and an array with one or more of these values:
         `http`, `https`, `ws`, or `wss`.
 
         **Valid Example**
@@ -923,6 +869,7 @@ rulesetContent:
       message: OpenAPI host "schemes" must be present and non-empty array
       formats:
         - oas2
+
     server-not-example:
       given:
         - "#API_Server_URL"
@@ -932,7 +879,7 @@ rulesetContent:
         functionOptions:
           notMatch: 'example.com'
       description: |
-        Server URLs must not direct to example.com. This helps ensure URLs 
+        Server URLs must not direct to example.com. This helps ensure URLs
         are valid before you distribute your API document.
 
         **Invalid Example**
@@ -961,6 +908,7 @@ rulesetContent:
         }
         ```
       message: Server URL must not point at example.com.
+
     parameter-description:
       given:
         - "#Request_Parameter_All"
@@ -988,110 +936,7 @@ rulesetContent:
         }
         ```
       message: Parameter objects must have "description".
-    oas2-anyOf:
-      given:
-        - "#API_Document_RecursiveSearch"
-      severity: warn
-      then:
-        function: undefined
-        field: anyOf
-      description: |
-        The `anyOf` keyword is not supported in OAS2. Only `allOf` is supported.
 
-        **Invalid Example**
-
-        ```json
-        {
-          "schema": {
-            "anyOf": [
-              {
-                "properties": {
-                  "firstName": {
-                    "type": "string"
-                  },
-                  "lastName": {
-                    "type": "string"
-                  }
-                }
-              },
-              {}
-            ]
-          }
-        }
-        ```
-
-        **Valid Example**
-
-        ```json
-        {
-          "schema": {
-            "type": "object",
-            "properties": {
-              "firstName": {
-                "type": "string"
-              },
-              "lastName": {
-                "type": "string"
-              }
-            }
-          }
-        }
-        ```
-      message: anyOf is not available in OpenAPI v2, it was added in OpenAPI v3
-      formats:
-        - oas2
-    oas2-oneOf:
-      given:
-        - "#API_Document_RecursiveSearch"
-      severity: warn
-      then:
-        function: undefined
-        field: oneOf
-      description: |
-        The `oneOf` keyword is not supported in OAS2. Only `allOf` is supported.
-
-        **Invalid Example**
-
-        ```json
-        {
-          "schema": {
-            "oneOf": [
-              {
-                "properties": {
-                  "firstName": {
-                    "type": "string"
-                  },
-                  "lastName": {
-                    "type": "string"
-                  }
-                }
-              },
-              {}
-            ]
-          }
-        }
-        ```
-
-        **Valid Example**
-
-        ```json
-        {
-          "schema": {
-            "type": "object",
-            "properties": {
-              "firstName": {
-                "type": "string"
-              },
-              "lastName": {
-                "type": "string"
-              }
-            }
-          }
-        }
-        ```
-      message: oneOf is not available in OpenAPI v2, it was added in OpenAPI v3
-      formats:
-        - oas2
     oas3-examples-value-or-externalValue:
       given:
         - "#All_Example"
@@ -1145,6 +990,7 @@ rulesetContent:
       message: Examples must have either "value" or "externalValue" field.
       formats:
         - oas3
+
     array-items:
       given:
         - "#All_Array_Item"
@@ -1182,6 +1028,7 @@ rulesetContent:
                 type: array
         ```
       message: 'Schemas with "type: array", require a sibling "items" field'
+
     path-parameters-on-path-only:
       given:
         - "$.paths[*][*].parameters[?(@.in == 'path')]"
@@ -1196,7 +1043,7 @@ rulesetContent:
         The `user_id` path parameter on line 8 should not be included with the `patch` operation.
 
         ```json
-        {      
+        {
           "patch": {
             "parameters": [
               {
@@ -1232,7 +1079,8 @@ rulesetContent:
           }
         }
         ```
-      message: Path parameters should be defined on the path level instead of the operation level.
+      message: Path parameters should be defined on the path level.
+
     paths-no-query-params:
       given:
         - "$.paths"
@@ -1240,7 +1088,7 @@ rulesetContent:
       then:
         function: pattern
         functionOptions:
-          notMatch: '\\?'
+          notMatch: '\?'
         field: "@key"
       description: |-
         Paths should not have query parameters in them. They should be defined separately in the OpenAPI.
@@ -1270,3 +1118,163 @@ rulesetContent:
         }
         ```
       message: Paths should not have query parameters in them. They should be defined separately in the OpenAPI.
+
+    path-casing:
+      given:
+        - $.paths
+      severity: error
+      then:
+        function: pattern
+        functionOptions:
+          match: '^\/([a-z0-9]+(-[a-z0-9]+)*)?(\/[a-z0-9]+(-[a-z0-9]+)*|\/\{.+\})*$'
+        field: '@key'
+      description: |-
+        Paths must be `kebab-case`, with hyphens separating words.
+
+        **Invalid Example**
+
+        `userInfo` must be separated with a hyphen.
+
+        ```json
+        {
+            "/userInfo": {
+                "post: }
+               ....
+        }
+        ```
+
+        **Valid Example**
+
+        ```json
+        {
+            "/user-info": {
+               "post: }
+               ....
+        }
+        ```
+      message: Paths must be kebab-case
+
+    resource-names-plural:
+      given:
+        - $.paths
+      severity: warn
+      then:
+        function: pattern
+        functionOptions:
+          match: '^((\/v\d+)*((\/[\w+-]*s)(\/\{.*\})*)*)$'
+        field: '@key'
+      description: |-
+        Resource names should generally be plural.
+
+        **Invalid Example**
+
+        ```json
+        {
+            "paths": {
+              "/user":
+            }
+          }
+        ```
+
+        **Valid Example**
+
+        ```json
+        {
+            "paths": {
+              "/users":
+            }
+        }
+        ```
+      message: Resource names should generally be plural
+
+    paths-no-http-verbs:
+      given:
+        - $.paths
+      severity: error
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: >-
+            \b(GET|PUT|POST|DELETE|LIST|CREATE|REMOVE|get|put|post|delete|list|create|remove|Get|Put|Post|Delete|List|Create|Remove)\b
+        field: '@key'
+      description: >-
+        Verbs such as `get`, `delete`, and `put` must not be included in paths
+        because this information is conveyed by the HTTP method.
+
+
+        **Invalid Example**
+
+
+        The path contains the verb `get`.
+
+
+        ```json
+
+        {
+            "/getUsers": {
+               "post: }
+               ....
+        }
+
+        ```
+
+
+        **Valid Example**
+
+
+        ```json
+
+        {
+            "/user": {
+               "post: }
+               ....
+        }
+
+        ```
+      message: Paths must not have HTTP verbs in them
+
+    paths-avoid-special-characters:
+      given:
+        - $.paths
+      severity: warn
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: '^(.*)([\$&+,;=?@%]+)(.*)$'
+          match: ''
+        field: '@key'
+      description: >-
+        Paths should not contain special characters, such as `$` `&` `+` `,` `;`
+        `=` `?` and `@%`.
+
+
+        **Invalid Example**
+
+
+        The path contains an ampersand.
+
+
+        ```json
+
+        {
+            "/user&info": {
+               "post: }
+               ....
+        }
+
+        ```
+
+
+        **Valid Example**
+
+
+        ```json
+
+        {
+            "/user": {
+               "post: }
+               ....
+        }
+
+        ```
+      message: Avoid using special characters in paths
