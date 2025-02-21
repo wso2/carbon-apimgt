@@ -4521,6 +4521,18 @@ public final class APIUtil {
     }
 
     /**
+     * Return the endpoints sequence name.
+     * eg: OpenAIAPI--v2.3.0
+     *
+     * @param api
+     * @return
+     */
+    public static String getEndpointSequenceName(API api) {
+
+        return api.getId().getApiName() + "--" + api.getId().getVersion();
+    }
+
+    /**
      * Return the Custom Backend name
      *
      * @param apiUUID API Id
