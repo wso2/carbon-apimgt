@@ -1796,8 +1796,8 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.wso2.orbit.com.amazonaws</groupId>
-                <artifactId>awslambda</artifactId>
+                <groupId>org.wso2.orbit.software.amazon.awssdk</groupId>
+                <artifactId>aws-core</artifactId>
                 <version>${org.wso2.orbit.com.amazonaws.version}</version>
             </dependency>
             <dependency>
@@ -2280,8 +2280,8 @@
         <import.package.version.commons.io>[2.4.0,3.0.0)</import.package.version.commons.io>
         <import.package.version.commons.codec>[1.14.0,3.0.0)</import.package.version.commons.codec>
 
-        <com.amazonaws.version>1.12.671</com.amazonaws.version>
-        <org.wso2.orbit.com.amazonaws.version>1.12.671.wso2v1</org.wso2.orbit.com.amazonaws.version>
+        <org.wso2.orbit.com.amazonaws.version>2.30.22.wso2v1</org.wso2.orbit.com.amazonaws.version>
+        <org.wso2.orbit.com.amazonaws.version.range>[2.20, 2.50]</org.wso2.orbit.com.amazonaws.version.range>
 
         <zipkin.version>2.27.1</zipkin.version>
         <okhttp.wso2.version>4.12.0.wso2v1</okhttp.wso2.version>
@@ -2299,6 +2299,7 @@
         <org.wso2.orbit.atlassian.oai.version>2.12.1.wso2v2</org.wso2.orbit.atlassian.oai.version>
         <maven.spotbugsplugin.exclude.file>${project.parent.basedir}/../../spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>
         <skip.aspectj>false</skip.aspectj>
+        <org.aspectj.weaver.openarchives.limit>1500</org.aspectj.weaver.openarchives.limit>
         <javax.jms.version>2.0.1</javax.jms.version>
         <com.damnhandy.version>2.1.6</com.damnhandy.version>
         <damnhandy.version>${com.damnhandy.version}.wso2v2</damnhandy.version>
