@@ -90,6 +90,13 @@ public class AzureOpenAiLLMProviderService extends BuiltInLLMProviderService {
                     APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_REMAINING_TOKEN_COUNT, false));
             llmProviderConfiguration.setMetadata(llmProviderMetadata);
 
+            // Set default model List
+            List<String> modelList = new ArrayList<>();
+            modelList.add("gpt-4o");
+            modelList.add("gpt-4o-mini");
+            modelList.add("o3-mini");
+            llmProvider.setModelList(modelList);
+
             llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());
             return llmProvider;
         } catch (Exception e) {
