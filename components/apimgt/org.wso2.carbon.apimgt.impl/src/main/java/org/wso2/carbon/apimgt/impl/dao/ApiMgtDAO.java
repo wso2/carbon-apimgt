@@ -24480,7 +24480,7 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Delete endpoint with provided UUID.
+     * Delete endpoint with provided endpoint UUID.
      *
      * @param endpointUuid unique identifier of endpoint
      * @throws APIManagementException if an error occurs while deleting the API endpoint.
@@ -24499,6 +24499,29 @@ public class ApiMgtDAO {
             }
         } catch (SQLException e) {
             handleException("Error while deleting API Endpoint : " + endpointUuid, e);
+        }
+    }
+
+    /**
+     * Delete endpoints associated with provided API UUID
+     *
+     * @param apiUUID API identifier
+     * @throws APIManagementException if an error occurs while deleting the API Endpoints
+     */
+    public void deleteAPIEndpointsByApiUUID(String apiUUID) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try (PreparedStatement statement = connection.prepareStatement(
+                    SQLConstants.APIEndpointsSQLConstants.DELETE_API_ENDPOINTS_BY_API_UUID)) {
+                statement.setString(1, apiUUID);
+                statement.executeUpdate();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error while deleting API Endpoints associated with API UUID : " + apiUUID, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error while deleting API Endpoints associated with API UUID : " + apiUUID, e);
         }
     }
 
@@ -24630,7 +24653,22 @@ public class ApiMgtDAO {
     }
 
     /**
-     * Delete existing primary endpoint mappings
+     * Delete primary endpoint mappings related to provided API UUID from AM_API_PRIMARY_EP_MAPPING
+     *
+     * @param apiUUID API identifier
+     * @throws APIManagementException if error occurs while deleting primary endpoint mappings
+     */
+    public void deleteAPIPrimaryEndpointMappings(String apiUUID) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            deleteExistingAPIPrimaryEndpointsMapping(connection, apiUUID);
+        } catch (SQLException e) {
+            handleException("Error while deleting primary endpoint mappings of API : " +  apiUUID, e);
+        }
+    }
+
+    /**
+     * Delete existing primary endpoint mappings using the provided DB connection
      *
      * @param connection DB connection
      * @param apiUUID    API identifier

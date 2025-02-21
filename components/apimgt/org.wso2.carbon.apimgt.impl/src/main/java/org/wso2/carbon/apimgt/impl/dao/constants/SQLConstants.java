@@ -4771,6 +4771,8 @@ public class SQLConstants {
 
         public static final String DELETE_API_ENDPOINTS_BY_API_UUID_AND_REVISION_UUID =
                 "DELETE FROM AM_API_ENDPOINTS WHERE API_UUID = ? AND REVISION_UUID = ? ";
+
+        public static final String DELETE_API_ENDPOINTS_BY_API_UUID = "DELETE FROM AM_API_ENDPOINTS WHERE API_UUID = ?";
     }
 
 }
