@@ -344,7 +344,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                     "Failed to delete API Endpoint with UUID %s. This Endpoint is defined as a primary endpoint.",
                     endpointUuid);
             throw new APIManagementException(errorMessage,
-                    ExceptionCodes.from(ExceptionCodes.ERROR_DELETING_PRIMARY_API_ENDPPOINT, endpointUuid));
+                    ExceptionCodes.from(ExceptionCodes.ERROR_DELETING_PRIMARY_API_ENDPOINT, endpointUuid));
 
         }
 
