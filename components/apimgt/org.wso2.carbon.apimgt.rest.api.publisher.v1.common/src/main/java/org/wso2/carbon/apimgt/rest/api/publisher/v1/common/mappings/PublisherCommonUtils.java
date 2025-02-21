@@ -3571,21 +3571,21 @@ public class PublisherCommonUtils {
      * @param organization    Organization of the logged-in user
      * @return Map of compliance violations
      */
-    public static Map<String, String> checkGovernanceComplianceDryRun(InputStream fileInputStream,
-                                                                      String organization) {
-        Map<String, String> responseMap = new HashMap<>(2);
+    public static String checkGovernanceComplianceDryRun(InputStream fileInputStream,
+                                                         String organization) {
 
         try {
             byte[] fileBytes = IOUtils.toByteArray(fileInputStream);
 
-            ArtifactComplianceDryRunInfo artifactComplianceDryRunInfo = apimGovernanceService
+            ArtifactComplianceDryRunInfo dryRunResults = apimGovernanceService
                     .evaluateComplianceDryRunSync(ArtifactType.API, fileBytes, organization);
-            return responseMap;
+            return ArtifactComplianceDryRunInfo.toJson(dryRunResults);
         } catch (APIMGovernanceException e) {
-            log.error("Error occurred while executing governance ", e);
-        } finally {
-            return responseMap;
+            log.error("Error occurred while executing governance for API in dry run mode", e);
+        } catch (IOException e) {
+            log.error("Error occurred while reading the input stream ", e);
         }
+        return null;
     }
 
     /**
