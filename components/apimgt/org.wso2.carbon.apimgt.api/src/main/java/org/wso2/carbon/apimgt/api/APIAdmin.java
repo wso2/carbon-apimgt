@@ -545,9 +545,10 @@ public interface APIAdmin  {
      *
      * @param organization Organization name.
      * @param action       Action to perform ("PUBLISH" or "UNPUBLISH").
+     * @return Published or unpublished input stream.
      * @throws APIManagementException If a database error occurs.
      */
-    void updateOrgThemeStatus(String organization, String action) throws APIManagementException;
+    InputStream updateOrgThemeStatus(String organization, String action) throws APIManagementException;
 
     /**
      * Deletes an organization theme.

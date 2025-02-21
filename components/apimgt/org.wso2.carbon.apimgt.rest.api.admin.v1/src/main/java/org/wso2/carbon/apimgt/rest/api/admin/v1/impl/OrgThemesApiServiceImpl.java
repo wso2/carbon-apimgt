@@ -21,8 +21,9 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 import org.apache.commons.io.FileUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.impl.APIAdminImpl;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.*;
+import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalConstants;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.OrgThemesApiService;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -30,8 +31,6 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ContentPublishStatusDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ContentPublishStatusResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.RestApiAdminUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 
@@ -115,12 +114,30 @@ public class OrgThemesApiServiceImpl implements OrgThemesApiService {
     }
 
     @Override
-    public Response updateOrgThemeStatus(String id, ContentPublishStatusDTO contentPublishStatusDTO, MessageContext messageContext)
-        throws APIManagementException {
+    public Response updateOrgThemeStatus(String id, ContentPublishStatusDTO contentPublishStatusDTO,
+                                         MessageContext messageContext) throws APIManagementException {
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String portalType = apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_TYPE);
+
+        if (DevPortalConstants.DEVPORTAL_V2.equals(portalType)) {
+            DevPortalHandler devPortalHandler = DevPortalHandlerV2Impl.getInstance();
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             String action = contentPublishStatusDTO.getAction().value();
             APIAdminImpl apiAdmin = new APIAdminImpl();
-            apiAdmin.updateOrgThemeStatus(tenantDomain, action);
+            try (InputStream content = apiAdmin.updateOrgThemeStatus(tenantDomain, action)) {
+                if (DevPortalConstants.PUBLISH.equals(action)) {
+                    devPortalHandler.publishOrgContent(tenantDomain, content);
+                } else if (DevPortalConstants.UNPUBLISH.equals(action)) {
+                    devPortalHandler.unpublishOrgContent(tenantDomain);
+                }
+            } catch (IOException e) {
+                throw new APIManagementException("Failed to update API theme status", e);
+            }
             return Response.status(Response.Status.OK).entity("Status updated successfully").build();
+        } else {
+            return Response.status(Response.Status.PRECONDITION_FAILED).entity("Please enable Next Gen Devportal " +
+                    "to publish or unpublish").build();
+        }
     }
 }

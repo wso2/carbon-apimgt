@@ -1700,8 +1700,8 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public void updateOrgThemeStatus(String organization, String action) throws APIManagementException {
-        apiMgtDAO.updateOrgThemeStatus(organization, action);
+    public InputStream updateOrgThemeStatus(String organization, String action) throws APIManagementException {
+        return apiMgtDAO.updateOrgThemeStatus(organization, action);
     }
 
     @Override

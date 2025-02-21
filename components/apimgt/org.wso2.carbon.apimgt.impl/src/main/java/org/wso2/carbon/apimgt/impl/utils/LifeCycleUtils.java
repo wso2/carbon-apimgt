@@ -8,8 +8,9 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalConstants;
 import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notification.NotificationDTO;
@@ -74,7 +75,36 @@ public class LifeCycleUtils {
             sendEmailNotification(apiTypeWrapper, orgId);
         }
 
-        // Change the lifecycle state in the database
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String portalType = apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_TYPE);
+
+        if (DevPortalConstants.DEVPORTAL_V2.equals(portalType)) {
+            DevPortalHandler devPortalHandler = DevPortalHandlerV2Impl.getInstance();
+
+            if (Arrays.asList(APIConstants.PUBLISH, APIConstants.REPUBLISH).contains(action)) {
+                try {
+                    API api = apiTypeWrapper.getApi();
+                    String refId = devPortalHandler.publishAPIMetadata(orgId, api);
+                    apiMgtDAO.addRefId(api.getUuid(), refId, orgId);
+                } catch (APIManagementException e) {
+                    log.error(e.getMessage());
+                }
+            }
+
+            if (Arrays.asList(APIConstants.DEPRECATE, APIConstants.BLOCK, APIConstants.DEMOTE_TO_CREATED).contains(action)) {
+                try {
+                    API api = apiTypeWrapper.getApi();
+                    String refId = apiMgtDAO.getRefId(api.getUuid(), orgId);
+                    devPortalHandler.unpublishAPIMetadata(orgId, api, refId);
+                    apiMgtDAO.removeRefId(api.getUuid(), orgId);
+                } catch (APIManagementException e) {
+                    log.error(e.getMessage());
+                }
+            }
+        }
+
+        // Change the lifecycle state in the databases
         addLCStateChangeInDatabase(user, apiTypeWrapper, currentStatus, targetStatus, uuid);
 
         // Add LC state change event to the event queue

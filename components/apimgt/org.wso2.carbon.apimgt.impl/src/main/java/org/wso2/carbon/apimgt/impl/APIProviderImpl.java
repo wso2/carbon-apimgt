@@ -123,6 +123,7 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
+import org.wso2.carbon.apimgt.impl.dao.constants.DevPortalConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
@@ -1055,6 +1056,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     extractor = new RecommenderDetailsExtractor(api, organization, APIConstants.ADD_API);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
+        }
+
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String portalType = apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_TYPE);
+
+        if (DevPortalConstants.DEVPORTAL_V2.equals(portalType)) {
+            if (APIConstants.PUBLISHED.equals(api.getStatus())) {
+                try {
+                    DevPortalHandler devPortalHandler = DevPortalHandlerV2Impl.getInstance();
+                    String refId = apiMgtDAO.getRefId(api.getUuid(), organization);
+                    devPortalHandler.updateAPIMetadata(organization, api, refId);
+                } catch (APIManagementException e) {
+                    log.error(e.getMessage());
+                }
+            }
         }
 
         return api;
@@ -2657,6 +2674,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (apiStoreSet != null && !apiStoreSet.isEmpty()) {
                     for (APIStore store : apiStoreSet) {
                         wso2APIPublisher.deleteFromStore(api.getId(), APIUtil.getExternalAPIStore(store.getName(), tenantId));
+                    }
+                }
+
+                APIManagerConfiguration apiManagerConfiguration =
+                        ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+                String portalType = apiManagerConfiguration.getFirstProperty(APIConstants.API_STORE_TYPE);
+
+                if (DevPortalConstants.DEVPORTAL_V2.equals(portalType)) {
+                    DevPortalHandler devPortalHandler = DevPortalHandlerV2Impl.getInstance();
+                    try {
+                        String refId = apiMgtDAO.getRefId(api.getUuid(), organization);
+                        devPortalHandler.unpublishAPIMetadata(organization, api, refId);
+                        apiMgtDAO.removeRefId(api.getUuid(), organization);
+                    } catch (APIManagementException e) {
+                        log.error(e.getMessage());
                     }
                 }
             } catch (APIManagementException e) {
@@ -8144,9 +8176,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
-    public void updateApiThemeStatus(String organization, String action, String apiId)
+    public InputStream updateApiThemeStatus(String organization, String action, String apiId)
             throws APIManagementException {
-        apiMgtDAO.updateApiThemeStatus(organization, action, apiId);
+        return apiMgtDAO.updateApiThemeStatus(organization, action, apiId);
     }
 
     @Override
