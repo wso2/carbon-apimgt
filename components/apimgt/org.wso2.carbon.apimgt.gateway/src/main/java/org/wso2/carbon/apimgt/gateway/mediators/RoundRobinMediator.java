@@ -79,8 +79,21 @@ public class RoundRobinMediator extends AbstractMediator implements ManagedLifec
             return false;
         }
 
-        List<ModelEndpointDTO> activeEndpoints = GatewayUtils.getActiveEndpoints(endpoints, messageContext);
-        if (activeEndpoints != null && !activeEndpoints.isEmpty()) {
+        String apiKeyType = (String) messageContext.getProperty(org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE);
+
+        List<ModelEndpointDTO> selectedEndpoints = org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE_PRODUCTION
+                .equals(apiKeyType)
+                ? endpoints.getProduction()
+                : endpoints.getSandbox();
+
+        if (selectedEndpoints == null || selectedEndpoints.isEmpty()) {
+            log.debug("RoundRobin policy is not set for " + apiKeyType + ", bypassing mediation.");
+            return true;
+        }
+
+        List<ModelEndpointDTO> activeEndpoints = GatewayUtils.filterActiveEndpoints(selectedEndpoints, messageContext);
+
+        if (!activeEndpoints.isEmpty()) {
             ModelEndpointDTO nextEndpoint = getRoundRobinEndpoint(activeEndpoints);
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, nextEndpoint.getEndpointId());
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_MODEL, nextEndpoint.getModel());

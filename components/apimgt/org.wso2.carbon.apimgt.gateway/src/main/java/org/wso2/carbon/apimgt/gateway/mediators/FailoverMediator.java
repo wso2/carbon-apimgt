@@ -24,6 +24,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyConfigDTO;
+import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyDeploymentConfigDTO;
 import org.wso2.carbon.apimgt.api.gateway.ModelEndpointDTO;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -90,17 +91,23 @@ public class FailoverMediator extends AbstractMediator implements ManagedLifecyc
             return false;
         }
 
-        List<ModelEndpointDTO> activeEndpoints = GatewayUtils.getActiveEndpoints(policyConfig, messageContext);
+        String apiKeyType = (String) messageContext.getProperty(APIConstants.API_KEY_TYPE);
 
-        ModelEndpointDTO targetEndpointModel =
-                APIConstants.API_KEY_TYPE_PRODUCTION.equals(messageContext.getProperty(APIConstants.API_KEY_TYPE))
-                        ? policyConfig.getProduction().getTargetModelEndpoint()
-                        : policyConfig.getSandbox().getTargetModelEndpoint();
+        FailoverPolicyDeploymentConfigDTO targetConfig =
+                APIConstants.API_KEY_TYPE_PRODUCTION.equals(apiKeyType)
+                        ? policyConfig.getProduction()
+                        : policyConfig.getSandbox();
 
-        if (targetEndpointModel == null) {
-            log.error("Target endpoint model is null");
-            return false;
+        if ((targetConfig == null || targetConfig.getFallbackModelEndpoints() == null
+                || targetConfig.getFallbackModelEndpoints().isEmpty())) {
+            log.debug("Failover policy is not set for " + apiKeyType + ", bypassing mediation.");
+            return true;
         }
+
+        List<ModelEndpointDTO> activeEndpoints =
+                GatewayUtils.filterActiveEndpoints(targetConfig.getFallbackModelEndpoints(), messageContext);
+
+        ModelEndpointDTO targetEndpointModel = targetConfig.getTargetModelEndpoint();
 
         messageContext.setProperty(AIAPIConstants.FAILOVER_TARGET_ENDPOINT, targetEndpointModel.getEndpointId());
         messageContext.setProperty(AIAPIConstants.FAILOVER_TARGET_MODEL, targetEndpointModel.getModel());

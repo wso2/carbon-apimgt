@@ -1758,8 +1758,8 @@ public class GatewayUtils {
      * @param messageContext    Synapse message context.
      * @return The selected ModelEndpointDTO list, or null if no active endpoints are available.
      */
-    private static List<ModelEndpointDTO> filterActiveEndpoints(List<ModelEndpointDTO> selectedEndpoints,
-                                                                org.apache.synapse.MessageContext messageContext) {
+    public static List<ModelEndpointDTO> filterActiveEndpoints(List<ModelEndpointDTO> selectedEndpoints,
+                                                               org.apache.synapse.MessageContext messageContext) {
 
         if (selectedEndpoints == null || selectedEndpoints.isEmpty()) {
             return null;
@@ -1773,45 +1773,6 @@ public class GatewayUtils {
             }
         }
         return activeEndpoints.isEmpty() ? null : activeEndpoints;
-    }
-
-    /**
-     * Retrieves available endpoints for round robin policies.
-     *
-     * @param policyConfig   RBEndpointsPolicyDTO object containing endpoint configurations.
-     * @param messageContext Synapse message context.
-     * @return The selected ModelEndpointDTO list, or null if no active endpoints are available.
-     */
-    public static List<ModelEndpointDTO> getActiveEndpoints(RBPolicyConfigDTO policyConfig,
-                                                            org.apache.synapse.MessageContext messageContext) {
-
-        if (policyConfig == null) {
-            throw new IllegalArgumentException("RBPolicyConfigDTO cannot be null");
-        }
-        List<ModelEndpointDTO> selectedEndpoints = APIConstants.API_KEY_TYPE_PRODUCTION
-                .equals(messageContext.getProperty(APIConstants.API_KEY_TYPE))
-                ? policyConfig.getProduction()
-                : policyConfig.getSandbox();
-
-        return filterActiveEndpoints(selectedEndpoints, messageContext);
-    }
-
-    /**
-     * Retrieves available endpoints for failover policies.
-     *
-     * @param policyConfigDTO FailoverPolicyConfigDTO object containing endpoint configurations.
-     * @param messageContext  Synapse message context.
-     * @return The selected ModelEndpointDTO list, or null if no active endpoints are available.
-     */
-    public static List<ModelEndpointDTO> getActiveEndpoints(FailoverPolicyConfigDTO policyConfigDTO,
-                                                            org.apache.synapse.MessageContext messageContext) {
-
-        List<ModelEndpointDTO> selectedEndpoints = APIConstants.API_KEY_TYPE_PRODUCTION
-                .equals(messageContext.getProperty(APIConstants.API_KEY_TYPE))
-                ? policyConfigDTO.getProduction().getFallbackModelEndpoints()
-                : policyConfigDTO.getSandbox().getFallbackModelEndpoints();
-
-        return filterActiveEndpoints(selectedEndpoints, messageContext);
     }
 
     /**
