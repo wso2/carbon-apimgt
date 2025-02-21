@@ -10387,7 +10387,7 @@ public final class APIUtil {
             try {
                 return ApiMgtDAO.getInstance().areOrganizationsRegistered();
             } catch(APIManagementException e) {
-                log.error("Error while checking existance of organizatoin", e);
+                log.error("Error while checking existance of organization", e);
                 return false;
             }
 
