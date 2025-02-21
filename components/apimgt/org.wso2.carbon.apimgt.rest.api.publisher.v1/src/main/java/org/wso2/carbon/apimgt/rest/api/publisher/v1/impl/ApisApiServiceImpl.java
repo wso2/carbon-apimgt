@@ -100,6 +100,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -265,6 +266,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             List<String> orglist = apiToReturn.getVisibleOrganizations();
             ArrayList<String> newOrgList = new ArrayList<String>(orglist);
             newOrgList.remove(organizationInfo.getOrganizationId());
+            newOrgList.remove(organization);
             if (newOrgList.isEmpty()) {
                 newOrgList.add(APIConstants.VISIBLE_ORG_NONE);
             }
@@ -275,6 +277,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 organizationPolicies.removeIf(tier -> tier.getOrganizationID().equals(organizationInfo.getOrganizationId()));
                 apiToReturn.setOrganizationPolicies(organizationPolicies);
             }
+        } else {
+            // Default visibility 'none'
+            apiToReturn.setVisibleOrganizations(Collections.singletonList(APIConstants.VISIBLE_ORG_NONE)); 
         }
 
         return Response.ok().entity(apiToReturn).build();
