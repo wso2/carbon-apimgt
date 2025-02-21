@@ -63,7 +63,7 @@ public class WeightedRoundRobinMediator extends AbstractMediator implements Mana
     public boolean mediate(MessageContext messageContext) {
 
         if (log.isDebugEnabled()) {
-            log.debug("AIAPIRoundRobinMediator mediation started.");
+            log.debug("WeightedRoundRobinMediator mediation started.");
         }
 
         DataHolder.getInstance().initCache(GatewayUtils.getAPIKeyForEndpoints(messageContext));

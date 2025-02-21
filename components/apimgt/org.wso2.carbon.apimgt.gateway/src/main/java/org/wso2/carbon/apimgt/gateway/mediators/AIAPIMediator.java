@@ -16,6 +16,7 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
@@ -100,10 +101,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                 log.error("No LLM provider found for provider ID: " + llmProviderId);
                 return false;
             }
-
             LLMProviderConfiguration providerConfiguration = provider.getConfigurations();
-            LLMProviderService llmProviderService = ServiceReferenceHolder.getInstance()
-                    .getLLMProviderService(providerConfiguration.getConnectorType());
+            LLMProviderService llmProviderService =
+                    ServiceReferenceHolder.getInstance().getLLMProviderService(providerConfiguration.getConnectorType());
 
             if (llmProviderService == null) {
                 log.error("LLM provider service not found for provider ID: " + llmProviderId);
@@ -138,45 +138,202 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @throws XMLStreamException If an error occurs while processing the XML stream.
      * @throws IOException        If an I/O error occurs.
      */
-    private void processInboundRequest(MessageContext messageContext, LLMProviderConfiguration providerConfiguration)
-            throws XMLStreamException, IOException {
+    private void processInboundRequest(MessageContext messageContext, LLMProviderConfiguration providerConfiguration) throws XMLStreamException, IOException {
 
-        Axis2MessageContext axis2MessageContext = (Axis2MessageContext) messageContext;
-        RelayUtils.buildMessage(axis2MessageContext.getAxis2MessageContext());
-
-        messageContext.setProperty(APIConstants.AIAPIConstants.REQUEST_PAYLOAD,
-                JsonUtil.jsonPayloadToString(axis2MessageContext.getAxis2MessageContext()));
-        messageContext.setProperty(APIConstants.AIAPIConstants.REQUEST_HEADERS,
-                axis2MessageContext.getAxis2MessageContext()
-                        .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
-        messageContext.setProperty(APIConstants.AIAPIConstants.REQUEST_HTTP_METHOD,
-                axis2MessageContext.getAxis2MessageContext()
-                        .getProperty(PassThroughConstants.HTTP_METHOD));
-        messageContext.setProperty(APIConstants.AIAPIConstants.REQUEST_REST_URL_POSTFIX,
-                axis2MessageContext.getAxis2MessageContext()
-                        .getProperty(NhttpConstants.REST_URL_POSTFIX));
-
-        String targetEndpoint = (String) messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT);
         String targetModel = (String) messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_MODEL);
+        String targetEndpoint = (String) messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT);
 
         if (APIConstants.AIAPIConstants.REJECT_ENDPOINT.equals(targetEndpoint)) {
             return;
         }
 
-        if (targetEndpoint != null && targetModel != null) {
-            LLMProviderMetadata targetModelMetadata = getTargetModelMetadata(providerConfiguration);
+        org.apache.axis2.context.MessageContext axis2Ctx =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
-            if (targetModelMetadata != null
-                    && APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(
-                    targetModelMetadata.getInputSource())) {
-                modifyRequestPayload(targetModel, targetModelMetadata, axis2MessageContext.getAxis2MessageContext());
-            } else {
-                log.debug("Unsupported input source for attribute: " + (targetModelMetadata != null ?
-                        targetModelMetadata.getAttributeName() : "unknown"));
-            }
+        if (targetModel != null) {
+            handleLoadBalancing(axis2Ctx, providerConfiguration, targetModel);
+            return;
+        }
+
+        prepareForFailoverIfNeeded(messageContext, axis2Ctx, providerConfiguration);
+
+        messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
+                APIConstants.AIAPIConstants.DEFAULT_ENDPOINT);
+    }
+
+    /**
+     * Prepares the request for failover if a failover target model is specified.
+     * It rebuilds the message, extracts the request model, and preserves request properties if needed.
+     *
+     * @param messageContext        The Synapse {@link MessageContext} containing API request details.
+     * @param axis2Ctx              The Axis2 {@link org.apache.axis2.context.MessageContext} containing the request
+     *                              payload.
+     * @param providerConfiguration The {@link LLMProviderConfiguration} containing provider-specific configurations.
+     * @throws XMLStreamException If an error occurs while processing the XML message.
+     * @throws IOException        If an I/O error occurs during payload handling.
+     */
+    private void prepareForFailoverIfNeeded(MessageContext messageContext,
+                                            org.apache.axis2.context.MessageContext axis2Ctx,
+                                            LLMProviderConfiguration providerConfiguration) throws XMLStreamException
+            , IOException {
+
+        Object failoverTargetModel = messageContext.getProperty(APIConstants.AIAPIConstants.FAILOVER_TARGET_MODEL);
+        if (failoverTargetModel == null) {
+            return;
+        }
+
+        RelayUtils.buildMessage(axis2Ctx);
+
+        LLMProviderMetadata requestModelMetadata = getTargetModelMetadata(providerConfiguration);
+        String requestModel = extractRequestModel(requestModelMetadata, axis2Ctx);
+
+        if (requestModel != null && requestModel.equals(failoverTargetModel.toString())) {
+            preserveRequestProperties(messageContext, axis2Ctx, requestModel);
+        }
+    }
+
+    /**
+     * Extracts the request model from the request payload and removes any surrounding quotes.
+     *
+     * @param requestModelMetadata The {@link LLMProviderMetadata} containing metadata for extracting the model
+     *                             attribute.
+     * @param axis2Ctx             The Axis2 {@link org.apache.axis2.context.MessageContext} containing the request
+     *                             payload.
+     * @return The extracted request model as a {@code String} with quotes removed, or {@code null} if extraction fails.
+     */
+    private String extractRequestModel(LLMProviderMetadata requestModelMetadata,
+                                       org.apache.axis2.context.MessageContext axis2Ctx) {
+
+        String requestModel = getRequestModel(requestModelMetadata, axis2Ctx);
+        return (requestModel != null) ? requestModel.replaceAll("\"", "").replace("\"", "") : null;
+    }
+
+    /**
+     * Preserves the request properties by extracting relevant information from the Axis2 message context
+     * and storing it in the Synapse message context.
+     *
+     * @param messageContext The Synapse {@link MessageContext} where the request properties are stored.
+     * @param axis2Ctx       The Axis2 {@link org.apache.axis2.context.MessageContext} containing the request details.
+     * @param requestModel   The request model associated with the API request.
+     */
+    private void preserveRequestProperties(MessageContext messageContext,
+                                           org.apache.axis2.context.MessageContext axis2Ctx, String requestModel) {
+
+        messageContext.setProperty(APIConstants.AIAPIConstants.REQUEST_PAYLOAD, JsonUtil.jsonPayloadToString(axis2Ctx));
+        messageContext.setProperty(APIConstants.AIAPIConstants.REQUEST_HEADERS,
+                axis2Ctx.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
+        messageContext.setProperty(APIConstants.AIAPIConstants.REQUEST_HTTP_METHOD,
+                axis2Ctx.getProperty(PassThroughConstants.HTTP_METHOD));
+        messageContext.setProperty(APIConstants.AIAPIConstants.REQUEST_REST_URL_POSTFIX,
+                axis2Ctx.getProperty(NhttpConstants.REST_URL_POSTFIX));
+        messageContext.setProperty(APIConstants.AIAPIConstants.REQUEST_MODEL, requestModel);
+    }
+
+    /**
+     * Handles load balancing by modifying the request payload based on the target model metadata.
+     *
+     * @param axis2Ctx              The Axis2 {@link org.apache.axis2.context.MessageContext} containing the request
+     *                              details.
+     * @param providerConfiguration The {@link LLMProviderConfiguration} containing provider-specific configurations.
+     * @param targetModel           The target model for which load balancing is applied.
+     * @throws XMLStreamException If an error occurs while processing the XML message.
+     * @throws IOException        If an I/O error occurs during request modification.
+     */
+    private void handleLoadBalancing(org.apache.axis2.context.MessageContext axis2Ctx,
+                                     LLMProviderConfiguration providerConfiguration, String targetModel) throws XMLStreamException, IOException {
+
+        LLMProviderMetadata targetModelMetadata = getTargetModelMetadata(providerConfiguration);
+        if (targetModelMetadata == null) {
+            log.error("Target model metadata is null for model: " + targetModel);
+            return;
+        }
+
+        if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(targetModelMetadata.getInputSource())) {
+            RelayUtils.buildMessage(axis2Ctx);
+            modifyRequestPayload(targetModel, targetModelMetadata, axis2Ctx);
         } else {
-            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
-                    APIConstants.AIAPIConstants.DEFAULT_ENDPOINT);
+            log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
+        }
+    }
+
+    /**
+     * Retrieves the request model from the request payload based on its content type.
+     *
+     * @param requestModelMetadata The {@link LLMProviderMetadata} containing metadata for extracting the model
+     *                             attribute.
+     * @param axis2MessageContext  The Axis2 {@link org.apache.axis2.context.MessageContext} containing the request
+     *                             payload.
+     * @return The extracted request model as a {@code String}, or {@code null} if the content type is unsupported
+     * or the model cannot be extracted.
+     */
+    private String getRequestModel(LLMProviderMetadata requestModelMetadata,
+                                   org.apache.axis2.context.MessageContext axis2MessageContext) {
+
+        String contentType = (String) axis2MessageContext.getProperty(APIMgtGatewayConstants.REST_CONTENT_TYPE);
+        if (contentType == null) {
+            return null;
+        }
+
+        String normalizedContentType = contentType.toLowerCase();
+        if (isUnsupportedContentType(normalizedContentType)) {
+            return null;
+        }
+
+        if (normalizedContentType.contains(MediaType.APPLICATION_JSON)) {
+            return extractRequestModelFromJson(requestModelMetadata, axis2MessageContext);
+        }
+
+        return null;
+    }
+
+    /**
+     * Checks if the given content type is unsupported.
+     *
+     * @param contentType The content type of the request.
+     * @return {@code true} if the content type is unsupported (XML or plain text), {@code false} otherwise.
+     */
+    private boolean isUnsupportedContentType(String contentType) {
+
+        return contentType.contains(MediaType.APPLICATION_XML) ||
+                contentType.contains(MediaType.TEXT_XML) ||
+                contentType.contains(MediaType.TEXT_PLAIN);
+    }
+
+    /**
+     * Extracts the request model from the JSON payload based on the provided metadata.
+     *
+     * @param requestModelMetadata The {@link LLMProviderMetadata} containing metadata for extracting the model
+     *                             attribute.
+     * @param axis2MessageContext  The Axis2 {@link org.apache.axis2.context.MessageContext} containing the JSON
+     *                             payload.
+     * @return The extracted request model as a {@code String}, or {@code null} if the payload is missing,
+     * the input source is unsupported, or the attribute is not found.
+     */
+    private String extractRequestModelFromJson(LLMProviderMetadata requestModelMetadata,
+                                               org.apache.axis2.context.MessageContext axis2MessageContext) {
+
+        if (!JsonUtil.hasAJsonPayload(axis2MessageContext)) {
+            log.debug("No JSON payload found.");
+            return null;
+        }
+
+        String jsonPayload = JsonUtil.jsonPayloadToString(axis2MessageContext);
+        if (jsonPayload == null) {
+            log.debug("Payload is null, cannot extract metadata for attribute: " + requestModelMetadata.getAttributeName());
+            return null;
+        }
+
+        String inputSource = requestModelMetadata.getInputSource();
+        if (!APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(inputSource)) {
+            log.debug("Unsupported input source: " + inputSource + " for attribute: " + requestModelMetadata.getAttributeName());
+            return null;
+        }
+
+        try {
+            return JsonPath.read(jsonPayload, requestModelMetadata.getAttributeIdentifier()).toString();
+        } catch (PathNotFoundException e) {
+            log.debug("Attribute not found in the payload for identifier: " + requestModelMetadata.getAttributeIdentifier());
+            return null;
         }
     }
 
@@ -192,9 +349,11 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @throws XMLStreamException     If an error occurs while processing the XML stream.
      * @throws IOException            If an I/O error occurs.
      */
-    private void processOutboundResponse(MessageContext messageContext, LLMProviderConfiguration providerConfiguration,
-                                         LLMProviderService llmProviderService, Map<String, String> metadataMap)
-            throws APIManagementException, XMLStreamException, IOException {
+    private void processOutboundResponse(MessageContext messageContext,
+                                         LLMProviderConfiguration providerConfiguration,
+                                         LLMProviderService llmProviderService,
+                                         Map<String, String> metadataMap) throws APIManagementException,
+            XMLStreamException, IOException {
 
         String payload = extractPayloadFromContext(messageContext, providerConfiguration);
         Map<String, String> queryParams = extractQueryParamsFromContext(messageContext);
@@ -205,29 +364,105 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         messageContext.setProperty(APIConstants.AIAPIConstants.AI_API_RESPONSE_METADATA, metadataMap);
 
         String targetModel = (String) messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_MODEL);
-        String targetEndpoint = (String) messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT);
-        List<ModelEndpointDTO> failoverEndpoints =
-                (List<ModelEndpointDTO>) messageContext.getProperty(APIConstants.AIAPIConstants.FAILOVER_ENDPOINTS);
+        String requestModel = (String) messageContext.getProperty(APIConstants.AIAPIConstants.REQUEST_MODEL);
 
-        if (targetEndpoint == null || targetModel == null) {
+        if (targetModel == null && requestModel == null) {
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
                     APIConstants.AIAPIConstants.EXIT_ENDPOINT);
             return;
         }
 
         int statusCode = (int) ((Axis2MessageContext) messageContext)
-                .getAxis2MessageContext().getProperty(APIMgtGatewayConstants.HTTP_SC);
-        if (statusCode >= 200 && statusCode < 300) {
+                .getAxis2MessageContext()
+                .getProperty(APIMgtGatewayConstants.HTTP_SC);
+
+        if (handleSuccessfulResponse(messageContext, statusCode)) {
+            return;
+        }
+
+        String targetEndpoint = (String) messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT);
+        Long suspendDuration = (Long) messageContext.getProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION);
+
+        if (suspendTargetEndpointIfNeeded(messageContext, targetEndpoint, targetModel, suspendDuration)) {
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
                     APIConstants.AIAPIConstants.EXIT_ENDPOINT);
             return;
         }
 
-        Long suspendDuration = (Long) messageContext.getProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION);
-        DataHolder.getInstance().suspendEndpoint(GatewayUtils.getAPIKeyForEndpoints(messageContext),
-                getEndpointId(targetEndpoint, targetModel), suspendDuration * 1000);
+        if (handleFailoverIfNeeded(messageContext, providerConfiguration)) {
+            return;
+        }
+        messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
+                APIConstants.AIAPIConstants.EXIT_ENDPOINT);
+    }
 
-        handleFailover(messageContext, failoverEndpoints, providerConfiguration);
+    /**
+     * Handles a successful response by checking the HTTP status code and updating the target endpoint accordingly.
+     *
+     * @param messageContext The Synapse {@link MessageContext} to be updated.
+     * @param statusCode     The HTTP status code of the response.
+     * @return {@code true} if the response is considered successful (status code 2xx), {@code false} otherwise.
+     */
+    private boolean handleSuccessfulResponse(MessageContext messageContext, int statusCode) {
+
+        if (statusCode >= 200 && statusCode < 300) {
+            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
+                    APIConstants.AIAPIConstants.EXIT_ENDPOINT);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Handles failover if needed by checking the request model and available failover endpoints.
+     *
+     * @param messageContext        The Synapse {@link MessageContext} containing API request details.
+     * @param providerConfiguration The {@link LLMProviderConfiguration} containing provider-specific configurations.
+     * @return {@code true} if failover handling was triggered, {@code false} if no failover was needed.
+     * @throws XMLStreamException If an error occurs while processing the XML message.
+     * @throws IOException        If an I/O error occurs during failover handling.
+     */
+    private boolean handleFailoverIfNeeded(MessageContext messageContext,
+                                           LLMProviderConfiguration providerConfiguration)
+            throws XMLStreamException, IOException {
+
+        String requestModel = (String) messageContext.getProperty(APIConstants.AIAPIConstants.REQUEST_MODEL);
+        if (requestModel == null) {
+            return false;
+        }
+
+        List<ModelEndpointDTO> failoverEndpoints = (List<ModelEndpointDTO>) messageContext
+                .getProperty(APIConstants.AIAPIConstants.FAILOVER_ENDPOINTS);
+
+        if (failoverEndpoints != null) {
+            handleFailover(messageContext, failoverEndpoints, providerConfiguration);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Suspends the target endpoint if the necessary parameters are provided.
+     *
+     * @param messageContext  The Synapse {@link MessageContext} containing API request details.
+     * @param targetEndpoint  The ID of the target endpoint to be suspended.
+     * @param targetModel     The model associated with the target endpoint.
+     * @param suspendDuration The duration (in milliseconds) for which the endpoint should be suspended.
+     * @return {@code true} if the endpoint was successfully suspended, {@code false} if required parameters are
+     * missing.
+     */
+    private boolean suspendTargetEndpointIfNeeded(MessageContext messageContext, String targetEndpoint,
+                                                  String targetModel, Long suspendDuration) {
+
+        if (targetModel == null || targetEndpoint == null || suspendDuration == null) {
+            return false;
+        }
+        DataHolder.getInstance().suspendEndpoint(
+                GatewayUtils.getAPIKeyForEndpoints(messageContext),
+                getEndpointId(targetEndpoint, targetModel),
+                suspendDuration
+        );
+        return true;
     }
 
     /**
@@ -239,30 +474,58 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @throws XMLStreamException If an error occurs while handling XML streams.
      * @throws IOException        If an I/O error occurs during processing.
      */
-    private void handleFailover(MessageContext messageContext, List<ModelEndpointDTO> failoverEndpoints,
-                                LLMProviderConfiguration providerConfiguration) throws XMLStreamException, IOException {
+    private void handleFailover(MessageContext messageContext,
+                                List<ModelEndpointDTO> failoverEndpoints,
+                                LLMProviderConfiguration providerConfiguration)
+            throws XMLStreamException, IOException {
 
-        if (failoverEndpoints == null || failoverEndpoints.isEmpty()) {
-            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
-                    APIConstants.AIAPIConstants.EXIT_ENDPOINT);
-            return;
-        }
+        int currentEndpointIndex = getCurrentFailoverIndex(messageContext);
 
-        Object currentEndpointObj = messageContext.getProperty(APIConstants.AIAPIConstants.CURRENT_ENDPOINT_INDEX);
-        int currentEndpointIndex = (currentEndpointObj instanceof Integer) ? (int) currentEndpointObj : 0;
-
-        if (currentEndpointIndex >= failoverEndpoints.size()) {
+        if ((currentEndpointIndex >= 0 && failoverEndpoints.isEmpty())
+                || currentEndpointIndex >= failoverEndpoints.size()) {
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
                     APIConstants.AIAPIConstants.REJECT_ENDPOINT);
             return;
         }
 
-        ModelEndpointDTO failoverEndpoint = failoverEndpoints.get(currentEndpointIndex);
-        messageContext.setProperty(APIConstants.AIAPIConstants.CURRENT_ENDPOINT_INDEX, ++currentEndpointIndex);
-        messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, failoverEndpoint.getEndpointId());
-        messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_MODEL, failoverEndpoint.getModel());
+        if (currentEndpointIndex > 0) {
+            Long suspendDuration = (Long) messageContext.getProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION);
+            ModelEndpointDTO previousEndpoint = failoverEndpoints.get(currentEndpointIndex - 1);
 
+            suspendTargetEndpointIfNeeded(messageContext, previousEndpoint.getEndpointId(),
+                    previousEndpoint.getModel(), suspendDuration);
+        }
+        ModelEndpointDTO failoverEndpoint = failoverEndpoints.get(currentEndpointIndex);
         buildFailoverRequest(messageContext, failoverEndpoint, providerConfiguration);
+
+        updateFailoverContext(messageContext, currentEndpointIndex + 1, failoverEndpoint);
+    }
+
+    /**
+     * Retrieves the current failover endpoint index from the message context.
+     * If the index is not set or is not an integer, it defaults to 0.
+     *
+     * @param messageContext The Synapse {@link MessageContext} containing the failover index property.
+     * @return The current failover endpoint index, or 0 if not set or invalid.
+     */
+    private int getCurrentFailoverIndex(MessageContext messageContext) {
+
+        Object currentEndpointObj = messageContext.getProperty(APIConstants.AIAPIConstants.CURRENT_ENDPOINT_INDEX);
+        return (currentEndpointObj instanceof Integer) ? (int) currentEndpointObj : 0;
+    }
+
+    /**
+     * Updates the failover context in the message by setting the next endpoint index and target endpoint ID.
+     *
+     * @param messageContext   The Synapse {@link MessageContext} to update with failover details.
+     * @param nextIndex        The index of the next failover endpoint to be used.
+     * @param failoverEndpoint The {@link ModelEndpointDTO} representing the failover endpoint.
+     */
+    private void updateFailoverContext(MessageContext messageContext, int nextIndex,
+                                       ModelEndpointDTO failoverEndpoint) {
+
+        messageContext.setProperty(APIConstants.AIAPIConstants.CURRENT_ENDPOINT_INDEX, nextIndex);
+        messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, failoverEndpoint.getEndpointId());
     }
 
     /**
@@ -279,29 +542,73 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                                       LLMProviderConfiguration providerConfiguration)
             throws XMLStreamException, IOException {
 
-        String requestPayload = (String) messageContext.getProperty(APIConstants.AIAPIConstants.REQUEST_PAYLOAD);
         Axis2MessageContext axis2MessageContext = (Axis2MessageContext) messageContext;
-        RelayUtils.buildMessage(axis2MessageContext.getAxis2MessageContext());
-        JsonUtil.getNewJsonPayload(axis2MessageContext.getAxis2MessageContext(), requestPayload, true, true);
+        org.apache.axis2.context.MessageContext axis2Ctx = axis2MessageContext.getAxis2MessageContext();
+
+        updateJsonPayload(messageContext, axis2Ctx);
+        modifyPayloadIfNeeded(failoverEndpoint, providerConfiguration, axis2Ctx);
+        updateRequestMetadata(messageContext, axis2Ctx);
+    }
+
+    /**
+     * Updates the JSON payload of the request by retrieving the payload from the Synapse message context
+     * and setting it in the Axis2 message context.
+     *
+     * @param messageContext The Synapse {@link MessageContext} containing the request payload.
+     * @param axis2Ctx       The Axis2 {@link org.apache.axis2.context.MessageContext} where the updated payload is set.
+     * @throws XMLStreamException If an error occurs while processing the XML message.
+     * @throws IOException        If an I/O error occurs during payload modification.
+     */
+    private void updateJsonPayload(MessageContext messageContext, org.apache.axis2.context.MessageContext axis2Ctx)
+            throws XMLStreamException, IOException {
+
+        String requestPayload = (String) messageContext.getProperty(APIConstants.AIAPIConstants.REQUEST_PAYLOAD);
+        RelayUtils.buildMessage(axis2Ctx);
+        JsonUtil.getNewJsonPayload(axis2Ctx, requestPayload, true, true);
+    }
+
+    /**
+     * Modifies the request payload if needed based on the target model metadata.
+     *
+     * @param failoverEndpoint      The {@link ModelEndpointDTO} representing the failover endpoint.
+     * @param providerConfiguration The {@link LLMProviderConfiguration} containing provider-specific configurations.
+     * @param axis2Ctx              The Axis2 {@link org.apache.axis2.context.MessageContext} for the current request.
+     * @throws XMLStreamException If an error occurs while processing the XML payload.
+     * @throws IOException        If an I/O error occurs during payload modification.
+     */
+    private void modifyPayloadIfNeeded(ModelEndpointDTO failoverEndpoint,
+                                       LLMProviderConfiguration providerConfiguration,
+                                       org.apache.axis2.context.MessageContext axis2Ctx)
+            throws XMLStreamException, IOException {
 
         LLMProviderMetadata targetModelMetadata = getTargetModelMetadata(providerConfiguration);
-        if (targetModelMetadata != null &&
-                APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD
-                        .equalsIgnoreCase(targetModelMetadata.getInputSource())) {
-            modifyRequestPayload(failoverEndpoint.getModel(), targetModelMetadata,
-                    axis2MessageContext.getAxis2MessageContext());
-        } else {
-            log.debug("Unsupported input source for attribute: " + (targetModelMetadata != null ?
-                    targetModelMetadata.getAttributeName() : "unknown"));
+        if (targetModelMetadata == null) {
+            log.debug("Target model metadata is null, skipping request payload modification.");
+            return;
         }
 
-        axis2MessageContext.getAxis2MessageContext().setProperty(NhttpConstants.REST_URL_POSTFIX,
+        if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(targetModelMetadata.getInputSource())) {
+            modifyRequestPayload(failoverEndpoint.getModel(), targetModelMetadata, axis2Ctx);
+        } else {
+            log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
+        }
+    }
+
+    /**
+     * Updates the request metadata by setting relevant properties in the Axis2 message context.
+     *
+     * @param messageContext The Synapse {@link MessageContext} containing API request details.
+     * @param axis2Ctx       The Axis2 {@link org.apache.axis2.context.MessageContext} to be updated.
+     */
+    private void updateRequestMetadata(MessageContext messageContext,
+                                       org.apache.axis2.context.MessageContext axis2Ctx) {
+
+        axis2Ctx.setProperty(NhttpConstants.REST_URL_POSTFIX,
                 messageContext.getProperty(APIConstants.AIAPIConstants.REQUEST_REST_URL_POSTFIX));
-        axis2MessageContext.getAxis2MessageContext().setProperty(PassThroughConstants.HTTP_METHOD,
+        axis2Ctx.setProperty(PassThroughConstants.HTTP_METHOD,
                 messageContext.getProperty(APIConstants.AIAPIConstants.REQUEST_HTTP_METHOD));
-        axis2MessageContext.getAxis2MessageContext()
-                .setProperty(APIMgtGatewayConstants.TRANSPORT_HEADERS,
-                        messageContext.getProperty(APIConstants.AIAPIConstants.REQUEST_HEADERS));
+        axis2Ctx.setProperty(APIMgtGatewayConstants.TRANSPORT_HEADERS,
+                messageContext.getProperty(APIConstants.AIAPIConstants.REQUEST_HEADERS));
     }
 
     /**
@@ -328,10 +635,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                                                             String... attributeNames) {
 
         for (String attributeName : attributeNames) {
-            LLMProviderMetadata metadata = metadataList.stream()
-                    .filter(meta -> attributeName.equals(meta.getAttributeName()))
-                    .findFirst()
-                    .orElse(null);
+            LLMProviderMetadata metadata =
+                    metadataList.stream().filter(meta ->
+                            attributeName.equals(meta.getAttributeName())).findFirst().orElse(null);
             if (metadata != null) {
                 return metadata;
             }
@@ -351,10 +657,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      */
 
     public static void modifyRequestPayload(String targetModel, LLMProviderMetadata targetModelMetadata,
-                                            org.apache.axis2.context.MessageContext axis2MessageContext)
-            throws XMLStreamException, IOException {
+                                            org.apache.axis2.context.MessageContext axis2MessageContext) throws XMLStreamException, IOException {
 
-        RelayUtils.buildMessage(axis2MessageContext);
         String contentType = (String) axis2MessageContext.getProperty(APIMgtGatewayConstants.REST_CONTENT_TYPE);
 
         if (contentType == null) {
@@ -363,8 +667,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         String normalizedContentType = contentType.toLowerCase();
         String attributeIdentifier = targetModelMetadata.getAttributeIdentifier();
 
-        if (normalizedContentType.contains(MediaType.APPLICATION_XML)
-                || normalizedContentType.contains(MediaType.TEXT_XML)) {
+        if (normalizedContentType.contains(MediaType.APPLICATION_XML) || normalizedContentType.contains(MediaType.TEXT_XML)) {
         } else if (normalizedContentType.contains(MediaType.APPLICATION_JSON)) {
             modifyJsonPayload(axis2MessageContext, attributeIdentifier, targetModel);
         } else if (normalizedContentType.contains(MediaType.TEXT_PLAIN)) {
@@ -381,19 +684,16 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      *                            containing the JSON payload
      * @param jsonPath            the JSONPath expression specifying the field to modify
      * @param newValue            the new value to set for the specified JSON field
-     * @return {@code true} if the JSON payload was successfully modified, {@code false}
-     * if the message context does not contain a valid JSON payload
      */
-    private static Boolean modifyJsonPayload(org.apache.axis2.context.MessageContext axis2MessageContext,
-                                             String jsonPath, String newValue) throws AxisFault {
+    private static void modifyJsonPayload(org.apache.axis2.context.MessageContext axis2MessageContext,
+                                          String jsonPath, String newValue) throws AxisFault {
 
         if (!JsonUtil.hasAJsonPayload(axis2MessageContext)) {
-            return false;
+            return;
         }
         String jsonPayload = JsonUtil.jsonPayloadToString(axis2MessageContext);
         String updatedJson = JsonPath.parse(jsonPayload).set(jsonPath, newValue).jsonString();
         JsonUtil.getNewJsonPayload(axis2MessageContext, updatedJson, true, true);
-        return true;
     }
 
     /**
@@ -403,19 +703,15 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param axis2MessageContext the Axis2 {@link org.apache.axis2.context.MessageContext}
      *                            containing the SOAP envelope
      * @param newValue            the new text value to set for the first element in the SOAP body
-     * @return {@code true} if the text was successfully modified, {@code false} if
-     * no first element was found in the SOAP body
      */
 
-    private static Boolean modifyTextPayload(org.apache.axis2.context.MessageContext axis2MessageContext,
-                                             String newValue) {
+    private static void modifyTextPayload(org.apache.axis2.context.MessageContext axis2MessageContext,
+                                          String newValue) {
 
         OMElement bodyElement = axis2MessageContext.getEnvelope().getBody().getFirstElement();
         if (bodyElement != null) {
             bodyElement.setText(newValue);
-            return true;
         }
-        return false;
 
     }
 
@@ -477,8 +773,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param config         LLM provider configuration
      * @return extracted payload
      */
-    private String extractPayloadFromContext(MessageContext messageContext, LLMProviderConfiguration config)
-            throws XMLStreamException, IOException {
+    private String extractPayloadFromContext(MessageContext messageContext, LLMProviderConfiguration config) throws XMLStreamException, IOException {
 
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
@@ -508,8 +803,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         }
 
         String normalizedContentType = contentType.toLowerCase();
-        if (normalizedContentType.contains(MediaType.APPLICATION_XML)
-                || normalizedContentType.contains(MediaType.TEXT_XML)) {
+        if (normalizedContentType.contains(MediaType.APPLICATION_XML) || normalizedContentType.contains(MediaType.TEXT_XML)) {
             return axis2MessageContext.getEnvelope().getBody().getFirstElement().toString();
         } else if (normalizedContentType.contains(MediaType.APPLICATION_JSON)) {
             if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
@@ -575,25 +869,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
 
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        return (Map<String, String>)
-                axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-    }
-
-    /**
-     * Finds and returns the {@link LLMProviderMetadata} object from the given list
-     * that matches the specified attribute name.
-     *
-     * @param metadataList  the list of {@link LLMProviderMetadata} objects to search
-     * @param attributeName the attribute name to match
-     * @return the first {@link LLMProviderMetadata} with the given attribute name,
-     * or {@code null} if no match is found
-     */
-
-    public static LLMProviderMetadata findMetadataByAttributeName(List<LLMProviderMetadata> metadataList,
-                                                                  String attributeName) {
-
-        return metadataList.stream().filter(metadata ->
-                attributeName.equals(metadata.getAttributeName())).findFirst().orElse(null);
+        return (Map<String, String>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
     }
 
     /**
