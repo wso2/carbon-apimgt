@@ -111,15 +111,6 @@ public interface APIMGovernanceService {
             throws APIMGovernanceException;
 
     /**
-     * Delete governance related data for the given label
-     *
-     * @param label        Label id to delete governance data
-     * @param organization Organization
-     * @throws APIMGovernanceException If an error occurs while deleting governance data
-     */
-    void deleteGovernanceDataForLabel(String label, String organization) throws APIMGovernanceException;
-
-    /**
      * Delete all governance data related to the artifact
      *
      * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)

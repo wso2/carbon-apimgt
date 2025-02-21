@@ -3527,6 +3527,18 @@ public class PublisherCommonUtils {
         return errorPropertyNames;
     }
 
+    /**
+     * This method is used to check governance compliance synchronously.
+     *
+     * @param artifactID             API ID
+     * @param state                  API state
+     * @param type                   API type
+     * @param organization           Organization of the logged-in user
+     * @param revisionId             Revision ID
+     * @param artifactProjectContent Content of the artifact project
+     * @return Map of compliance violations
+     * @throws APIManagementException If an error occurs while checking governance compliance
+     */
     public static Map<String, String> checkGovernanceComplianceSync(String artifactID, APIMGovernableState state,
                                                                     ArtifactType type, String organization,
                                                                     String revisionId, Map<RuleType,
@@ -3548,18 +3560,26 @@ public class PublisherCommonUtils {
                 }
             }
         } catch (APIMGovernanceException e) {
-            log.error("Error occurred while executing governance for API " + artifactID, e);
+            log.error("Error occurred while executing governance compliance validation for API " + artifactID, e);
         }
         return responseMap;
     }
 
+    /**
+     * Check governance compliance for the API artifact asynchronously.
+     *
+     * @param artifactID   API ID
+     * @param state        API state
+     * @param type         API type
+     * @param organization Organization of the logged-in user
+     */
     public static void checkGovernanceComplianceAsync(String artifactID, APIMGovernableState state, ArtifactType type,
                                                       String organization) {
         CompletableFuture.runAsync(() -> {
             try {
                 apimGovernanceService.evaluateComplianceAsync(artifactID, type, state, organization);
             } catch (APIMGovernanceException e) {
-                log.error("Error occurred while scheduling governance validation for " + artifactID, e);
+                log.error("Error occurred while scheduling governance compliance validation for " + artifactID, e);
             }
         });
     }
@@ -3572,7 +3592,7 @@ public class PublisherCommonUtils {
      * @return Map of compliance violations
      */
     public static String checkGovernanceComplianceDryRun(InputStream fileInputStream,
-                                                         String organization) {
+                                                         String organization) throws APIComplianceException {
 
         try {
             byte[] fileBytes = IOUtils.toByteArray(fileInputStream);
@@ -3581,11 +3601,12 @@ public class PublisherCommonUtils {
                     .evaluateComplianceDryRunSync(ArtifactType.API, fileBytes, organization);
             return ArtifactComplianceDryRunInfo.toJson(dryRunResults);
         } catch (APIMGovernanceException e) {
-            log.error("Error occurred while executing governance for API in dry run mode", e);
+            throw new APIComplianceException("Error occurred while executing governance compliance validation in dry " +
+                    "run mode: " + e.getMessage(), ExceptionCodes.ERROR_WHILE_EXECUTING_COMPLIANCE_DRY_RUN);
         } catch (IOException e) {
-            log.error("Error occurred while reading the input stream ", e);
+            throw new APIComplianceException("Error occurred while reading the input stream: " + e.getMessage(),
+                    ExceptionCodes.ERROR_WHILE_EXECUTING_COMPLIANCE_DRY_RUN);
         }
-        return null;
     }
 
     /**
@@ -3638,6 +3659,14 @@ public class PublisherCommonUtils {
         return violationDetails;
     }
 
+    /**
+     * Execute governance on label attach.
+     *
+     * @param labels       List of label Ids
+     * @param artifactType Type of the artifact
+     * @param artifactId   Id of the artifact
+     * @param organization Organization of the logged-in user
+     */
     public static void executeGovernanceOnLabelAttach(List<Label> labels, String artifactType, String artifactId,
                                                       String organization) {
         List<String> labelsIdList = new ArrayList<>();
@@ -3652,16 +3681,13 @@ public class PublisherCommonUtils {
         }
     }
 
-    public static void deleteGovernanceDataOnLabelDelete(List<Label> label, String organization) {
-        try {
-            for (Label labelId : label) {
-                apimGovernanceService.deleteGovernanceDataForLabel(labelId.getLabelId(), organization);
-            }
-        } catch (APIMGovernanceException e) {
-            log.info("Error occurred while deleting governance data on deletion of label " + label, e);
-        }
-    }
-
+    /**
+     * Clear governance data on deletion of an artifact.
+     *
+     * @param artifactId   Id of the artifact
+     * @param artifactType Type of the artifact
+     * @param organization Organization of the logged-in user
+     */
     public static void clearArtifactComplianceInfo(String artifactId, String artifactType, String organization) {
         try {
             apimGovernanceService.clearArtifactComplianceInfo(artifactId, ArtifactType.fromString(artifactType),

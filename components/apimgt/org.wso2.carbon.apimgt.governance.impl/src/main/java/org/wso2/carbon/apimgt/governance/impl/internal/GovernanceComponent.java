@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.governance.impl.internal;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -31,11 +32,15 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.apimgt.governance.api.ValidationEngine;
 import org.wso2.carbon.apimgt.governance.impl.APIMGovernanceConstants;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceEvaluationScheduler;
+import org.wso2.carbon.apimgt.governance.impl.listener.APIMGovServerStartupShutdownListener;
 import org.wso2.carbon.apimgt.governance.impl.observer.APIMGovernanceConfigDeployer;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceDBUtil;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineService;
 import org.wso2.carbon.apimgt.governance.impl.validator.ValidationEngineServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
+import org.wso2.carbon.core.ServerShutdownHandler;
+import org.wso2.carbon.core.ServerStartupObserver;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 
 /**
@@ -47,6 +52,7 @@ import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 public class GovernanceComponent {
 
     private static final Log log = LogFactory.getLog(GovernanceComponent.class);
+    private ServiceRegistration registration;
 
     @Activate
     protected void activate(ComponentContext componentContext) throws Exception {
@@ -56,6 +62,14 @@ public class GovernanceComponent {
         }
 
         BundleContext bundleContext = componentContext.getBundleContext();
+        APIMGovServerStartupShutdownListener startupShutdownListener
+                = new APIMGovServerStartupShutdownListener();
+        registration = bundleContext
+                .registerService(ServerStartupObserver.class, startupShutdownListener, null);
+        registration = bundleContext
+                .registerService(ServerShutdownHandler.class, startupShutdownListener, null);
+        registration = bundleContext
+                .registerService(JMSListenerShutDownService.class, startupShutdownListener, null);
 
         APIMGovernanceDBUtil.initialize();
         ComplianceEvaluationScheduler.initialize();
@@ -70,6 +84,9 @@ public class GovernanceComponent {
     @Deactivate
     protected void deactivate(ComponentContext componentContext) {
         ComplianceEvaluationScheduler.shutdown();
+        if (registration != null) {
+            registration.unregister();
+        }
     }
 
     @Reference(
