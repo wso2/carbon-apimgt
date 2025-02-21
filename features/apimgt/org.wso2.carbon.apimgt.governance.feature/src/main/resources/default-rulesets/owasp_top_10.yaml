@@ -1,336 +1,353 @@
-rules:
-  'owasp:api2:2023-no-http-basic':
-    given:
-      - '$.components.securitySchemes[*]'
-    severity: error
-    then:
-      function: pattern
-      functionOptions:
-        notMatch: basic
-      field: scheme
-    description: >-
-      Basic authentication credentials transported over network are more
-      susceptible to interception than other forms of authentication, and as
-      they are not encrypted it means passwords and tokens are more easily
-      leaked.
-    message: >-
-      Security scheme uses HTTP Basic. Use a more secure authentication
-      method, like OAuth 2, or OpenID.
-    resolved: true
-    formats:
-      - oas2
-      - oas3
-  'owasp:api2:2023-jwt-best-practices':
-    given:
-      - '$.components.securitySchemes[?(@ && @.type=="oauth2")]'
-      - >-
-        $.components.securitySchemes[?(@ && (@.bearerFormat=="jwt" ||
-        @.bearerFormat=="JWT"))]
-    severity: error
-    then:
-      - function: truthy
-        field: description
-      - function: pattern
+# Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+#
+# This software is the property of WSO2 LLC. and its suppliers, if any.
+# Dissemination of any information or reproduction of any material contained
+# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
+# You may not alter or remove any copyright or other notice from copies of this content.
+
+name: OWASP Top 10
+description: >-
+  A set of rules enforcing OWASP security guidelines to prevent common
+  vulnerabilities and ensure secure coding practices.
+ruleCategory: SPECTRAL
+ruleType: API_DEFINITION
+artifactType: REST_API
+documentationLink: "https://wso2.com/choreo/docs/api-management/api-governance/default-rulesets/owasp_top_10_doc/"
+provider: WSO2
+rulesetContent:
+  rules:
+    'owasp:api2:2023-no-http-basic':
+      given:
+        - '$.components.securitySchemes[*]'
+      severity: error
+      then:
+        function: pattern
         functionOptions:
-          match: .*RFC8725.*
+          notMatch: basic
+        field: scheme
+      description: >-
+        Basic authentication credentials transported over network are more
+        susceptible to interception than other forms of authentication, and as
+        they are not encrypted it means passwords and tokens are more easily
+        leaked.
+      message: >-
+        Security scheme uses HTTP Basic. Use a more secure authentication
+        method, like OAuth 2, or OpenID.
+      resolved: true
+      formats:
+        - oas2
+        - oas3
+    'owasp:api2:2023-jwt-best-practices':
+      given:
+        - '$.components.securitySchemes[?(@ && @.type=="oauth2")]'
+        - >-
+          $.components.securitySchemes[?(@ && (@.bearerFormat=="jwt" ||
+          @.bearerFormat=="JWT"))]
+      severity: error
+      then:
+        - function: truthy
+          field: description
+        - function: pattern
+          functionOptions:
+            match: .*RFC8725.*
+          field: description
+      description: >-
+        JSON Web Tokens RFC7519 is a compact, URL-safe, means of representing
+        claims to be transferred between two parties. JWT can be enclosed in
+        encrypted or signed tokens like JWS and JWE.
+
+
+        The [JOSE IANA
+        registry](https://www.iana.org/assignments/jose/jose.xhtml) provides
+        algorithms information.
+
+
+        RFC8725 describes common pitfalls in the JWx specifications and in
+
+        their implementations, such as:
+
+        - the ability to ignore algorithms, eg. `{"alg": "none"}`;
+
+        - using insecure algorithms like `RSASSA-PKCS1-v1_5` eg. `{"alg":
+        "RS256"}`.
+
+        An API using JWT should explicit in the `description`
+
+        that the implementation conforms to RFC8725.
+
+        ```
+
+        components:
+          securitySchemes:
+            JWTBearer:
+              type: http
+              scheme: bearer
+              bearerFormat: JWT
+              description: |-
+                A bearer token in the format of a JWS and conformato
+                to the specifications included in RFC8725.
+        ```
+      message: >-
+        Security schemes using JWTs must explicitly declare support for RFC8725
+        in the description.
+      resolved: true
+      formats:
+        - oas2
+        - oas3
+    'owasp:api3:2023-no-additionalProperties':
+      given:
+        - '$..[?(@ && @.type=="object" && @.additionalProperties)]'
+      severity: warn
+      then:
+        function: falsy
+        field: additionalProperties
+      description: >-
+        By default JSON Schema allows additional properties, which can
+        potentially lead to mass assignment issues, where unspecified fields are
+        passed to the API without validation. Disable them with
+        `additionalProperties: false` or add `maxProperties`.
+      message: If the additionalProperties keyword is used it must be set to false.
+      resolved: true
+      formats:
+        - oas3_0
+    'owasp:api3:2023-constrained-additionalProperties':
+      given:
+        - >-
+          $..[?(@ && @.type=="object" && @.additionalProperties && 
+          @.additionalProperties!=true &&  @.additionalProperties!=false )]
+      severity: warn
+      then:
+        function: defined
+        field: maxProperties
+      description: >-
+        By default JSON Schema allows additional properties, which can
+        potentially lead to mass assignment issues, where unspecified fields are
+        passed to the API without validation. Disable them with
+        `additionalProperties: false` or add `maxProperties`
+      message: Objects should not allow unconstrained additionalProperties.
+      resolved: true
+      formats:
+        - oas3_0
+    'owasp:api3:2023-no-unevaluatedProperties':
+      given:
+        - '$..[?(@ && @.type=="object" && @.unevaluatedProperties)]'
+      severity: warn
+      then:
+        function: falsy
+        field: unevaluatedProperties
+      description: >-
+        By default JSON Schema allows unevaluated properties, which can
+        potentially lead to mass assignment issues, where unspecified fields are
+        passed to the API without validation. Disable them with
+        `unevaluatedProperties: false` or add `maxProperties`.
+      message: If the unevaluatedProperties keyword is used it must be set to false.
+      resolved: true
+      formats:
+        - oas3_1
+    'owasp:api3:2023-constrained-unevaluatedProperties':
+      given:
+        - >-
+          $..[?(@ && @.type=="object" && @.unevaluatedProperties && 
+          @.unevaluatedProperties!=true &&  @.unevaluatedProperties!=false )]
+      severity: warn
+      then:
+        function: defined
+        field: maxProperties
+      description: >-
+        By default JSON Schema allows unevaluated properties, which can
+        potentially lead to mass assignment issues, where unspecified fields are
+        passed to the API without validation. Disable them with
+        `unevaluatedProperties: false` or add `maxProperties`
+      message: Objects should not allow unconstrained unevaluatedProperties.
+      resolved: true
+      formats:
+        - oas3_1
+    'owasp:api4:2023-rate-limit-retry-after':
+      given:
+        - '$..responses[429].headers'
+      severity: error
+      then:
+        function: defined
+        field: Retry-After
+      description: >-
+        Define proper rate limiting to avoid attackers overloading the API. Part
+        of that involves setting a Retry-After header so well meaning consumers
+        are not polling and potentially exacerbating problems.
+      message: A 429 response should define a Retry-After header.
+      resolved: true
+      formats:
+        - oas3
+    'owasp:api4:2023-rate-limit-responses-429':
+      given:
+        - $.paths..responses
+      severity: warn
+      then:
+        - function: truthy
+          field: '429'
+        - function: truthy
+          field: 429.content
+      description: >-
+        OWASP API Security recommends defining schemas for all responses, even
+        errors. A HTTP 429 response signals the API client is making too many
+        requests, and will supply information about when to retry so that the
+        client can back off calmly without everything breaking. Defining this
+        response is important not just for documentation, but to empower
+        contract testing to make sure the proper JSON structure is being
+        returned instead of leaking implementation details in backtraces. It
+        also ensures your API/framework/gateway actually has rate limiting set
+        up.
+      message: 'Operation is missing rate limiting response in {{property}}.'
+      resolved: true
+      formats:
+        - oas2
+        - oas3
+    'owasp:api8:2023-no-scheme-http':
+      given:
+        - $.schemes.*
+      severity: error
+      then:
+        function: schema
+        functionOptions:
+          schema:
+            type: string
+            enum:
+              - https
+              - wss
+      description: >-
+        Server interactions must use the http protocol as it's inherently
+        insecure and can lead to PII and other sensitive information being
+        leaked through traffic sniffing or man-in-the-middle attacks. Use the
+        https or wss schemes instead.
+
+
+        Learn more about the importance of TLS (over SSL) here:
+        [https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html)
+      message: Server schemes must not use http. Use https or wss instead.
+      resolved: true
+      formats:
+        - oas2
+    'owasp:api8:2023-no-server-http':
+      given:
+        - $.servers..url
+      severity: error
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: '/^http:/'
+      description: >-
+        Server interactions must not use the http:// as it's inherently insecure
+        and can lead to PII and other sensitive information being leaked through
+        traffic sniffing or man-in-the-middle attacks. Use https:// or wss://
+        protocols instead.
+
+
+        Learn more about the importance of TLS (over SSL) here:
+        [https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html)
+      message: 'Server URLs must not use http://. Use https:// or wss:// instead.'
+      resolved: true
+      formats:
+        - oas3
+    'owasp:api8:2023-define-error-validation':
+      given:
+        - $.paths..responses
+      severity: warn
+      then:
+        function: schema
+        functionOptions:
+          schema:
+            type: object
+            anyOf:
+              - required:
+                  - '400'
+              - required:
+                  - '422'
+              - required:
+                  - 4XX
+      description: >-
+        Carefully define schemas for all the API responses, including either
+        400, 422 or 4XX responses which describe errors caused by invalid
+        requests.
+      message: 'Missing error response of either 400, 422 or 4XX.'
+      resolved: true
+      formats:
+        - oas2
+        - oas3
+    'owasp:api8:2023-define-error-responses-401':
+      given:
+        - $.paths..responses
+      severity: warn
+      then:
+        - function: truthy
+          field: '401'
+        - function: truthy
+          field: 401.content
+      description: >-
+        OWASP API Security recommends defining schemas for all responses, even
+        errors. The 401 describes what happens when a request is unauthorized,
+        so its important to define this not just for documentation, but to
+        empower contract testing to make sure the proper JSON structure is being
+        returned instead of leaking implementation details in backtraces.
+      message: 'Operation is missing {{property}}.'
+      resolved: true
+      formats:
+        - oas2
+        - oas3
+    'owasp:api8:2023-define-error-responses-500':
+      given:
+        - $.paths..responses
+      severity: warn
+      then:
+        - function: truthy
+          field: '500'
+        - function: truthy
+          field: 500.content
+      description: >-
+        OWASP API Security recommends defining schemas for all responses, even
+        errors. The 500 describes what happens when a request fails with an
+        internal server error, so its important to define this not just for
+        documentation, but to empower contract testing to make sure the proper
+        JSON structure is being returned instead of leaking implementation
+        details in backtraces.
+      message: 'Operation is missing {{property}}.'
+      resolved: true
+      formats:
+        - oas2
+        - oas3
+    'owasp:api9:2023-inventory-access':
+      given:
+        - $.servers.*
+      severity: error
+      then:
+        function: defined
+        field: x-internal
+      description: >-
+        Servers are required to use vendor extension x-internal set to true or
+        false to explicitly explain the audience for the API, which will be
+        picked up by most documentation tools.
+      message: >-
+        Declare intended audience of every server by defining
+        servers{{property}} as true/false.
+      resolved: true
+      formats:
+        - oas3
+    'owasp:api9:2023-inventory-environment':
+      given:
+        - $.servers.*
+      severity: error
+      then:
+        function: pattern
+        functionOptions:
+          match: >-
+            /(local|sandbox|alpha|beta|test|testing|stag|staging|prod|production|next|preprod|preproduction)/i
         field: description
-    description: >-
-      JSON Web Tokens RFC7519 is a compact, URL-safe, means of representing
-      claims to be transferred between two parties. JWT can be enclosed in
-      encrypted or signed tokens like JWS and JWE.
-      
-      
-      The [JOSE IANA
-      registry](https://www.iana.org/assignments/jose/jose.xhtml) provides
-      algorithms information.
-      
-      
-      RFC8725 describes common pitfalls in the JWx specifications and in
-      
-      their implementations, such as:
-      
-      - the ability to ignore algorithms, eg. `{"alg": "none"}`;
-      
-      - using insecure algorithms like `RSASSA-PKCS1-v1_5` eg. `{"alg":
-      "RS256"}`.
-      
-      An API using JWT should explicit in the `description`
-      
-      that the implementation conforms to RFC8725.
-      
-      ```
-      
-      components:
-        securitySchemes:
-          JWTBearer:
-            type: http
-            scheme: bearer
-            bearerFormat: JWT
-            description: |-
-              A bearer token in the format of a JWS and conformato
-              to the specifications included in RFC8725.
-      ```
-    message: >-
-      Security schemes using JWTs must explicitly declare support for RFC8725
-      in the description.
-    resolved: true
-    formats:
-      - oas2
-      - oas3
-  'owasp:api3:2023-no-additionalProperties':
-    given:
-      - '$..[?(@ && @.type=="object" && @.additionalProperties)]'
-    severity: warn
-    then:
-      function: falsy
-      field: additionalProperties
-    description: >-
-      By default JSON Schema allows additional properties, which can
-      potentially lead to mass assignment issues, where unspecified fields are
-      passed to the API without validation. Disable them with
-      `additionalProperties: false` or add `maxProperties`.
-    message: If the additionalProperties keyword is used it must be set to false.
-    resolved: true
-    formats:
-      - oas3_0
-  'owasp:api3:2023-constrained-additionalProperties':
-    given:
-      - >-
-        $..[?(@ && @.type=="object" && @.additionalProperties && 
-        @.additionalProperties!=true &&  @.additionalProperties!=false )]
-    severity: warn
-    then:
-      function: defined
-      field: maxProperties
-    description: >-
-      By default JSON Schema allows additional properties, which can
-      potentially lead to mass assignment issues, where unspecified fields are
-      passed to the API without validation. Disable them with
-      `additionalProperties: false` or add `maxProperties`
-    message: Objects should not allow unconstrained additionalProperties.
-    resolved: true
-    formats:
-      - oas3_0
-  'owasp:api3:2023-no-unevaluatedProperties':
-    given:
-      - '$..[?(@ && @.type=="object" && @.unevaluatedProperties)]'
-    severity: warn
-    then:
-      function: falsy
-      field: unevaluatedProperties
-    description: >-
-      By default JSON Schema allows unevaluated properties, which can
-      potentially lead to mass assignment issues, where unspecified fields are
-      passed to the API without validation. Disable them with
-      `unevaluatedProperties: false` or add `maxProperties`.
-    message: If the unevaluatedProperties keyword is used it must be set to false.
-    resolved: true
-    formats:
-      - oas3_1
-  'owasp:api3:2023-constrained-unevaluatedProperties':
-    given:
-      - >-
-        $..[?(@ && @.type=="object" && @.unevaluatedProperties && 
-        @.unevaluatedProperties!=true &&  @.unevaluatedProperties!=false )]
-    severity: warn
-    then:
-      function: defined
-      field: maxProperties
-    description: >-
-      By default JSON Schema allows unevaluated properties, which can
-      potentially lead to mass assignment issues, where unspecified fields are
-      passed to the API without validation. Disable them with
-      `unevaluatedProperties: false` or add `maxProperties`
-    message: Objects should not allow unconstrained unevaluatedProperties.
-    resolved: true
-    formats:
-      - oas3_1
-  'owasp:api4:2023-rate-limit-retry-after':
-    given:
-      - '$..responses[429].headers'
-    severity: error
-    then:
-      function: defined
-      field: Retry-After
-    description: >-
-      Define proper rate limiting to avoid attackers overloading the API. Part
-      of that involves setting a Retry-After header so well meaning consumers
-      are not polling and potentially exacerbating problems.
-    message: A 429 response should define a Retry-After header.
-    resolved: true
-    formats:
-      - oas3
-  'owasp:api4:2023-rate-limit-responses-429':
-    given:
-      - $.paths..responses
-    severity: warn
-    then:
-      - function: truthy
-        field: '429'
-      - function: truthy
-        field: 429.content
-    description: >-
-      OWASP API Security recommends defining schemas for all responses, even
-      errors. A HTTP 429 response signals the API client is making too many
-      requests, and will supply information about when to retry so that the
-      client can back off calmly without everything breaking. Defining this
-      response is important not just for documentation, but to empower
-      contract testing to make sure the proper JSON structure is being
-      returned instead of leaking implementation details in backtraces. It
-      also ensures your API/framework/gateway actually has rate limiting set
-      up.
-    message: 'Operation is missing rate limiting response in {{property}}.'
-    resolved: true
-    formats:
-      - oas2
-      - oas3
-  'owasp:api8:2023-no-scheme-http':
-    given:
-      - $.schemes.*
-    severity: error
-    then:
-      function: schema
-      functionOptions:
-        schema:
-          type: string
-          enum:
-            - https
-            - wss
-    description: >-
-      Server interactions must use the http protocol as it's inherently
-      insecure and can lead to PII and other sensitive information being
-      leaked through traffic sniffing or man-in-the-middle attacks. Use the
-      https or wss schemes instead.
-      
-      
-      Learn more about the importance of TLS (over SSL) here:
-      [https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html)
-    message: Server schemes must not use http. Use https or wss instead.
-    resolved: true
-    formats:
-      - oas2
-  'owasp:api8:2023-no-server-http':
-    given:
-      - $.servers..url
-    severity: error
-    then:
-      function: pattern
-      functionOptions:
-        notMatch: '/^http:/'
-    description: >-
-      Server interactions must not use the http:// as it's inherently insecure
-      and can lead to PII and other sensitive information being leaked through
-      traffic sniffing or man-in-the-middle attacks. Use https:// or wss://
-      protocols instead.
-      
-      
-      Learn more about the importance of TLS (over SSL) here:
-      [https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html](https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html)
-    message: 'Server URLs must not use http://. Use https:// or wss:// instead.'
-    resolved: true
-    formats:
-      - oas3
-  'owasp:api8:2023-define-error-validation':
-    given:
-      - $.paths..responses
-    severity: warn
-    then:
-      function: schema
-      functionOptions:
-        schema:
-          type: object
-          anyOf:
-            - required:
-                - '400'
-            - required:
-                - '422'
-            - required:
-                - 4XX
-    description: >-
-      Carefully define schemas for all the API responses, including either
-      400, 422 or 4XX responses which describe errors caused by invalid
-      requests.
-    message: 'Missing error response of either 400, 422 or 4XX.'
-    resolved: true
-    formats:
-      - oas2
-      - oas3
-  'owasp:api8:2023-define-error-responses-401':
-    given:
-      - $.paths..responses
-    severity: warn
-    then:
-      - function: truthy
-        field: '401'
-      - function: truthy
-        field: 401.content
-    description: >-
-      OWASP API Security recommends defining schemas for all responses, even
-      errors. The 401 describes what happens when a request is unauthorized,
-      so its important to define this not just for documentation, but to
-      empower contract testing to make sure the proper JSON structure is being
-      returned instead of leaking implementation details in backtraces.
-    message: 'Operation is missing {{property}}.'
-    resolved: true
-    formats:
-      - oas2
-      - oas3
-  'owasp:api8:2023-define-error-responses-500':
-    given:
-      - $.paths..responses
-    severity: warn
-    then:
-      - function: truthy
-        field: '500'
-      - function: truthy
-        field: 500.content
-    description: >-
-      OWASP API Security recommends defining schemas for all responses, even
-      errors. The 500 describes what happens when a request fails with an
-      internal server error, so its important to define this not just for
-      documentation, but to empower contract testing to make sure the proper
-      JSON structure is being returned instead of leaking implementation
-      details in backtraces.
-    message: 'Operation is missing {{property}}.'
-    resolved: true
-    formats:
-      - oas2
-      - oas3
-  'owasp:api9:2023-inventory-access':
-    given:
-      - $.servers.*
-    severity: error
-    then:
-      function: defined
-      field: x-internal
-    description: >-
-      Servers are required to use vendor extension x-internal set to true or
-      false to explicitly explain the audience for the API, which will be
-      picked up by most documentation tools.
-    message: >-
-      Declare intended audience of every server by defining
-      servers{{property}} as true/false.
-    resolved: true
-    formats:
-      - oas3
-  'owasp:api9:2023-inventory-environment':
-    given:
-      - $.servers.*
-    severity: error
-    then:
-      function: pattern
-      functionOptions:
-        match: >-
-          /(local|sandbox|alpha|beta|test|testing|stag|staging|prod|production|next|preprod|preproduction)/i
-      field: description
-    description: >-
-      Make it clear which servers are expected to run as which environment to
-      avoid unexpected problems, exposing test data to the public, or letting
-      bad actors bypass security measures to get to production-like
-      environments.
-    message: >-
-      Declare intended environment in server descriptions using terms like
-      local, staging, production.
-    resolved: true
-    formats:
-      - oas3
+      description: >-
+        Make it clear which servers are expected to run as which environment to
+        avoid unexpected problems, exposing test data to the public, or letting
+        bad actors bypass security measures to get to production-like
+        environments.
+      message: >-
+        Declare intended environment in server descriptions using terms like
+        local, staging, production.
+      resolved: true
+      formats:
+        - oas3
