@@ -103,7 +103,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             }
             LLMProviderConfiguration providerConfiguration = provider.getConfigurations();
             LLMProviderService llmProviderService =
-                    ServiceReferenceHolder.getInstance().getLLMProviderService(providerConfiguration.getConnectorType());
+                    ServiceReferenceHolder.getInstance()
+                            .getLLMProviderService(providerConfiguration.getConnectorType());
 
             if (llmProviderService == null) {
                 log.error("LLM provider service not found for provider ID: " + llmProviderId);
@@ -138,7 +139,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @throws XMLStreamException If an error occurs while processing the XML stream.
      * @throws IOException        If an I/O error occurs.
      */
-    private void processInboundRequest(MessageContext messageContext, LLMProviderConfiguration providerConfiguration) throws XMLStreamException, IOException {
+    private void processInboundRequest(MessageContext messageContext, LLMProviderConfiguration providerConfiguration)
+            throws XMLStreamException, IOException {
 
         String targetModel = (String) messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_MODEL);
         String targetEndpoint = (String) messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT);
@@ -240,7 +242,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @throws IOException        If an I/O error occurs during request modification.
      */
     private void handleLoadBalancing(org.apache.axis2.context.MessageContext axis2Ctx,
-                                     LLMProviderConfiguration providerConfiguration, String targetModel) throws XMLStreamException, IOException {
+                                     LLMProviderConfiguration providerConfiguration, String targetModel)
+            throws XMLStreamException, IOException {
 
         LLMProviderMetadata targetModelMetadata = getTargetModelMetadata(providerConfiguration);
         if (targetModelMetadata == null) {
@@ -319,20 +322,23 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
 
         String jsonPayload = JsonUtil.jsonPayloadToString(axis2MessageContext);
         if (jsonPayload == null) {
-            log.debug("Payload is null, cannot extract metadata for attribute: " + requestModelMetadata.getAttributeName());
+            log.debug("Payload is null, cannot extract metadata for attribute: "
+                    + requestModelMetadata.getAttributeName());
             return null;
         }
 
         String inputSource = requestModelMetadata.getInputSource();
         if (!APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(inputSource)) {
-            log.debug("Unsupported input source: " + inputSource + " for attribute: " + requestModelMetadata.getAttributeName());
+            log.debug("Unsupported input source: " + inputSource + " for attribute: "
+                    + requestModelMetadata.getAttributeName());
             return null;
         }
 
         try {
             return JsonPath.read(jsonPayload, requestModelMetadata.getAttributeIdentifier()).toString();
         } catch (PathNotFoundException e) {
-            log.debug("Attribute not found in the payload for identifier: " + requestModelMetadata.getAttributeIdentifier());
+            log.debug("Attribute not found in the payload for identifier: "
+                    + requestModelMetadata.getAttributeIdentifier());
             return null;
         }
     }
@@ -657,7 +663,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      */
 
     public static void modifyRequestPayload(String targetModel, LLMProviderMetadata targetModelMetadata,
-                                            org.apache.axis2.context.MessageContext axis2MessageContext) throws XMLStreamException, IOException {
+                                            org.apache.axis2.context.MessageContext axis2MessageContext)
+            throws IOException {
 
         String contentType = (String) axis2MessageContext.getProperty(APIMgtGatewayConstants.REST_CONTENT_TYPE);
 
@@ -667,7 +674,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         String normalizedContentType = contentType.toLowerCase();
         String attributeIdentifier = targetModelMetadata.getAttributeIdentifier();
 
-        if (normalizedContentType.contains(MediaType.APPLICATION_XML) || normalizedContentType.contains(MediaType.TEXT_XML)) {
+        if (normalizedContentType.contains(MediaType.APPLICATION_XML)
+                || normalizedContentType.contains(MediaType.TEXT_XML)) {
         } else if (normalizedContentType.contains(MediaType.APPLICATION_JSON)) {
             modifyJsonPayload(axis2MessageContext, attributeIdentifier, targetModel);
         } else if (normalizedContentType.contains(MediaType.TEXT_PLAIN)) {
@@ -773,7 +781,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param config         LLM provider configuration
      * @return extracted payload
      */
-    private String extractPayloadFromContext(MessageContext messageContext, LLMProviderConfiguration config) throws XMLStreamException, IOException {
+    private String extractPayloadFromContext(MessageContext messageContext, LLMProviderConfiguration config)
+            throws XMLStreamException, IOException {
 
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
@@ -803,7 +812,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         }
 
         String normalizedContentType = contentType.toLowerCase();
-        if (normalizedContentType.contains(MediaType.APPLICATION_XML) || normalizedContentType.contains(MediaType.TEXT_XML)) {
+        if (normalizedContentType.contains(MediaType.APPLICATION_XML)
+                || normalizedContentType.contains(MediaType.TEXT_XML)) {
             return axis2MessageContext.getEnvelope().getBody().getFirstElement().toString();
         } else if (normalizedContentType.contains(MediaType.APPLICATION_JSON)) {
             if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
@@ -869,7 +879,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
 
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        return (Map<String, String>) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+        return (Map<String, String>) axis2MessageContext
+                .getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
     }
 
     /**
