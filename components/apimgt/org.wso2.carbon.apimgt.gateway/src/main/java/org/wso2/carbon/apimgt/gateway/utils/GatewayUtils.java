@@ -1785,6 +1785,9 @@ public class GatewayUtils {
     public static List<ModelEndpointDTO> getActiveEndpoints(RBPolicyConfigDTO policyConfig,
                                                             org.apache.synapse.MessageContext messageContext) {
 
+        if (policyConfig == null) {
+            throw new IllegalArgumentException("RBPolicyConfigDTO cannot be null");
+        }
         List<ModelEndpointDTO> selectedEndpoints = APIConstants.API_KEY_TYPE_PRODUCTION
                 .equals(messageContext.getProperty(APIConstants.API_KEY_TYPE))
                 ? policyConfig.getProduction()
@@ -1835,6 +1838,15 @@ public class GatewayUtils {
      */
     public static String getEndpointKey(ModelEndpointDTO endpoint) {
 
+        if (endpoint == null) {
+            throw new IllegalArgumentException("ModelEndpointDTO cannot be null");
+        }
+        if (StringUtils.isEmpty(endpoint.getEndpointId())) {
+            throw new IllegalArgumentException("Endpoint ID cannot be null or empty");
+        }
+        if (StringUtils.isEmpty(endpoint.getModel())) {
+            throw new IllegalArgumentException("Endpoint model cannot be null or empty");
+        }
         return endpoint.getEndpointId() + "_" + endpoint.getModel();
     }
 
