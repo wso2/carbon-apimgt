@@ -3515,11 +3515,11 @@ public class ApiMgtDAO {
                 applicationId = Integer.parseInt(rs.getString(1));
             }
             String appOrg = application.getSubOrganization();
-            if (appOrg == null) {
-                appOrg = organization;
+            if (appOrg != null) {
+                application.getApplicationAttributes().put(APIConstants.ApplicationAttributes.USER_ORGANIZATION,
+                        appOrg);
             }
-            application.getApplicationAttributes().put(APIConstants.ApplicationAttributes.USER_ORGANIZATION,
-                    appOrg);
+            
             //Adding data to AM_APPLICATION_ATTRIBUTES table
             if (application.getApplicationAttributes() != null) {
                 addApplicationAttributes(conn, application.getApplicationAttributes(), applicationId, tenantId);
@@ -3577,11 +3577,11 @@ public class ApiMgtDAO {
             }
 
             String appOrg = application.getSubOrganization();
-            if (appOrg == null) {
-                appOrg = application.getOrganization();
+            if (appOrg != null) {
+                application.getApplicationAttributes().put(APIConstants.ApplicationAttributes.USER_ORGANIZATION,
+                        appOrg);
             }
-            application.getApplicationAttributes().put(APIConstants.ApplicationAttributes.USER_ORGANIZATION,
-                    appOrg);
+            
             if (application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
                 addApplicationAttributes(conn, application.getApplicationAttributes(), application.getId(), tenantId);
             }
