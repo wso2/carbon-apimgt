@@ -2174,7 +2174,7 @@
         <httpcomponents.version>4.5.10</httpcomponents.version>
         <commons-codec.version>1.16.0</commons-codec.version>
         <com.nimbusds.wso2.version>9.37.3.wso2v1</com.nimbusds.wso2.version>
-        <json-smart.version>2.5.0</json-smart.version>
+        <json-smart.version>2.5.2</json-smart.version>
         <org.slf4j.version>2.0.12</org.slf4j.version>
         <slf4j.api.version>2.0.12</slf4j.api.version>
         <spring-web.version>5.3.23</spring-web.version>
