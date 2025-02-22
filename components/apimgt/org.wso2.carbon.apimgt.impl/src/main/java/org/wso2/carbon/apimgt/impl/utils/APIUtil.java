@@ -4521,6 +4521,18 @@ public final class APIUtil {
     }
 
     /**
+     * Return the endpoints sequence name.
+     * eg: OpenAIAPI--v2.3.0
+     *
+     * @param api
+     * @return
+     */
+    public static String getEndpointSequenceName(API api) {
+
+        return api.getId().getApiName() + "--" + api.getId().getVersion();
+    }
+
+    /**
      * Return the Custom Backend name
      *
      * @param apiUUID API Id
@@ -10262,35 +10274,48 @@ public final class APIUtil {
     /**
      * Validate sandbox and production endpoint URLs.
      *
-     * @param endpoints sandbox and production endpoint URLs inclusive list
+     * @param endpoints list of endpoint URLs to validate
      * @return validity of given URLs
      */
     public static boolean validateEndpointURLs(ArrayList<String> endpoints) {
+        for (String endpoint : endpoints) {
+            if (!validateEndpointURL(endpoint)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Validate the given endpoint URL.
+     *
+     * @param endpoint endpoint URL to validate
+     * @return validity of the given URL
+     */
+    public static boolean validateEndpointURL(String endpoint) {
         long validatorOptions =
                 UrlValidator.ALLOW_2_SLASHES + UrlValidator.ALLOW_ALL_SCHEMES + UrlValidator.ALLOW_LOCAL_URLS;
         RegexValidator authorityValidator = new RegexValidator(".*");
         UrlValidator urlValidator = new UrlValidator(authorityValidator, validatorOptions);
 
-        for (String endpoint : endpoints) {
-            // If url is a JMS connection url or a Consul service discovery related url, or a parameterized URL
-            // validation is skipped. If not, validity is checked.
-            if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(") && !endpoint.contains("{") &&
-                    !endpoint.contains("}") && !urlValidator.isValid(endpoint)) {
-                try {
-                    // If the url is not identified as valid from the above check,
-                    // next step is determine the validity of the encoded url (done through the URI constructor).
-                    URL endpointUrl = new URL(endpoint);
-                    URI endpointUri = new URI(endpointUrl.getProtocol(), endpointUrl.getAuthority(),
-                            endpointUrl.getPath(), endpointUrl.getQuery(), null);
+        // If url is a JMS connection url or a Consul service discovery related url, or a parameterized URL
+        // validation is skipped. If not, validity is checked.
+        if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(") && !endpoint.contains("{") &&
+                !endpoint.contains("}") && !urlValidator.isValid(endpoint)) {
+            try {
+                // If the url is not identified as valid from the above check,
+                // next step is determine the validity of the encoded url (done through the URI constructor).
+                URL endpointUrl = new URL(endpoint);
+                URI endpointUri = new URI(endpointUrl.getProtocol(), endpointUrl.getAuthority(),
+                        endpointUrl.getPath(), endpointUrl.getQuery(), null);
 
-                    if (!urlValidator.isValid(endpointUri.toString())) {
-                        log.error("Invalid endpoint url " + endpointUrl);
-                        return false;
-                    }
-                } catch (URISyntaxException | MalformedURLException e) {
-                    log.error("Error while parsing the endpoint url " + endpoint);
+                if (!urlValidator.isValid(endpointUri.toString())) {
+                    log.error("Invalid endpoint url " + endpointUrl);
                     return false;
                 }
+            } catch (URISyntaxException | MalformedURLException e) {
+                log.error("Error while parsing the endpoint url " + endpoint);
+                return false;
             }
         }
         return true;

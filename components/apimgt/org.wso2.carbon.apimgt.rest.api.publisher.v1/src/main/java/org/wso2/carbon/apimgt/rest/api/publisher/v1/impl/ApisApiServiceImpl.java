@@ -298,7 +298,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     (apiId, apiEndpointDTO, organization, apiProvider);
             APIEndpointInfo createdAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, createdAPIEndpointId,
                     organization);
-            APIEndpointDTO createdAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(createdAPIEndpoint);
+            APIEndpointDTO createdAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(createdAPIEndpoint,
+                    organization, false);
             removeAPIEndpointSecrets(createdAPIEndpointDTO);
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId
                     + RestApiConstants.RESOURCE_PATH_API_ENDPOINT + "/" + createdAPIEndpointId;
@@ -329,11 +330,37 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response deleteApiEndpoint(String apiId, String endpointUuid, MessageContext messageContext)
             throws APIManagementException {
+
+        //validate if api exists
+        CommonUtils.validateAPIExistence(apiId);
+
+        // Handle scenario where original API endpoints appearing under emdpoint config in API object is tried to be
+        // deleted. This is not allowed. One can delete this only by updating the API endpoint config.
+        if (endpointUuid.equals(
+                apiId + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.PRODUCTION) ||
+                endpointUuid.equals(apiId +
+                        APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.SANDBOX)) {
+            String errorMessage = String.format(
+                    "Failed to delete API Endpoint with UUID %s. This Endpoint is read only", endpointUuid);
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.ENDPOINT_READONLY, endpointUuid));
+        }
+
+        // Validate if endpoint is defined as a primary endpoint in the API object. If so, it cannot be deleted.
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIDTO apiDTO = getAPIByID(apiId, apiProvider, organization);
+        String primaryProductionEndpointId = apiDTO.getPrimaryProductionEndpointId();
+        String primarySandboxEndpointId = apiDTO.getPrimarySandboxEndpointId();
+        if (endpointUuid.equals(primaryProductionEndpointId) || endpointUuid.equals(primarySandboxEndpointId)) {
+            String errorMessage = String.format(
+                    "Failed to delete API Endpoint with UUID %s. This Endpoint is defined as a primary endpoint.",
+                    endpointUuid);
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.ERROR_DELETING_PRIMARY_API_ENDPOINT, endpointUuid));
+        }
+
         try {
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            //validate if api exists
-            CommonUtils.validateAPIExistence(apiId);
             //validate API Endpoint
             APIEndpointInfo existingApiEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointUuid, organization);
             if (existingApiEndpoint != null) {
@@ -363,11 +390,20 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response updateApiEndpoint(String apiId, String endpointId, APIEndpointDTO apIEndpointDTO,
             MessageContext messageContext) throws APIManagementException {
+        if (endpointId.equals(
+                apiId + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.PRODUCTION) ||
+                endpointId.equals(apiId +
+                        APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.SANDBOX)) {
+            String errorMessage = String.format("Failed to update API Endpoint with UUID %s. This Endpoint is read only", endpointId);
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(
+                    ExceptionCodes.ENDPOINT_READONLY, endpointId)
+            );
+        }
         try {
             APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
             if (apiRevision != null && apiRevision.getApiUUID() != null) {
                 throw new APIManagementException("Cannot Update API Endpoint in Revision View : " + endpointId,
-                        ExceptionCodes.ERROR_UPDATING_API_ENDPOINT_API);
+                        ExceptionCodes.ERROR_UPDATING_API_ENDPOINT);
             }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -375,7 +411,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             CommonUtils.validateAPIExistence(apiId);
             PublisherCommonUtils.updateAPIEndpoint(apiId, endpointId, apIEndpointDTO, organization, apiProvider);
             APIEndpointInfo updatedAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointId, organization);
-            APIEndpointDTO updatedAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(updatedAPIEndpoint);
+            APIEndpointDTO updatedAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(updatedAPIEndpoint,
+                    organization, false);
             removeAPIEndpointSecrets(updatedAPIEndpointDTO);
             return Response.ok().entity(updatedAPIEndpointDTO).build();
         } catch (APIManagementException | JsonProcessingException e) {
@@ -405,7 +442,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
             //get API endpoint by UUID
-            APIEndpointDTO apiEndpointDTO = PublisherCommonUtils.getAPIEndpoint(apiId, endpointId, apiProvider);
+            APIEndpointDTO apiEndpointDTO = PublisherCommonUtils.getAPIEndpoint(apiId, endpointId, apiProvider, false);
             removeAPIEndpointSecrets(apiEndpointDTO);
             return Response.ok().entity(apiEndpointDTO).build();
         } catch (APIManagementException | JsonProcessingException e) {
