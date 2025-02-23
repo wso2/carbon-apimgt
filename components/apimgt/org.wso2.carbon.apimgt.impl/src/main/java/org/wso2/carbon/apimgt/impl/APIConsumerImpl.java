@@ -3965,6 +3965,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 checkVisibilityPermission(userNameWithoutChange, devPortalApi.getVisibility(),
                         devPortalApi.getVisibleRoles(), devPortalApi.getPublisherAccessControl(),
                         devPortalApi.getPublisherAccessControlRoles());
+                List<Documentation> existingDocs = getAllDocumentation(uuid, organization);
+                devPortalApi.setMarkdownOverview(false);
+                for (Documentation doc : existingDocs) {
+                    if (doc.getOtherTypeName() != null && doc.getOtherTypeName().equals("_overview")) {
+                        devPortalApi.setMarkdownOverview(true);
+                        break;
+                    }
+                }
                 if (APIConstants.API_PRODUCT.equalsIgnoreCase(devPortalApi.getType())) {
                     APIProduct apiProduct = APIMapper.INSTANCE.toApiProduct(devPortalApi);
                     apiProduct.setID(new APIProductIdentifier(devPortalApi.getProviderName(),
@@ -4418,6 +4426,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
         checkAPIVisibilityRestriction(apiId, organization);
         return super.getDocumentationContent(apiId, docId, organization);
+    }
+
+    @Override
+    public DocumentationContent getMarkdownOverviewContent(String apiId, String organization)
+            throws APIManagementException {
+
+        checkAPIVisibilityRestriction(apiId, organization);
+        return super.getMarkdownOverviewContent(apiId, organization);
     }
 
     @Override

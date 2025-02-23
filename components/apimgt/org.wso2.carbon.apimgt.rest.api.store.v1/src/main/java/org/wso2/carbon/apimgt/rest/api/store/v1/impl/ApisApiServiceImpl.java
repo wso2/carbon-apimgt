@@ -1218,6 +1218,33 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
+    @Override
+    public Response getMarkdownContentOfAPI(String apiId, String xWSO2Tenant, String ifNoneMatch,
+                                            MessageContext messageContext) throws APIManagementException {
+        try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
+
+            DocumentationContent docContent = apiConsumer.getMarkdownOverviewContent(apiId, organization);
+            if (docContent == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, "");
+                return null;
+            }
+            String content = docContent.getTextContent();
+            return Response.ok(content)
+                    .header(RestApiConstants.HEADER_CONTENT_TYPE, APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE)
+                    .build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+            } else {
+                String errorMessage = "Error while retrieving overview markdown document of the API " + apiId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        }
+        return null;
+    }
+
     /**
      * To check whether a particular exception is due to access control restriction.
      *

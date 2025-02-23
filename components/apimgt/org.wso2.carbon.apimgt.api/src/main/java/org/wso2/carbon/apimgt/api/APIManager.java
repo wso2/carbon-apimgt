@@ -231,6 +231,17 @@ public interface APIManager {
             throws APIManagementException;
 
     /**
+     * Get the markdown overview documentation Content by api id
+     *
+     * @param apiId         ID of the API
+     * @param organization  Identifier of an organization
+     * @return DocumentationContent
+     * @throws APIManagementException if failed to get Documentation
+     */
+    DocumentationContent getMarkdownOverviewContent(String apiId, String organization)
+            throws APIManagementException;
+
+    /**
      * Returns the GraphqlComplexityInfo object for a given API ID
      *
      * @param  apiId UUID of the API
