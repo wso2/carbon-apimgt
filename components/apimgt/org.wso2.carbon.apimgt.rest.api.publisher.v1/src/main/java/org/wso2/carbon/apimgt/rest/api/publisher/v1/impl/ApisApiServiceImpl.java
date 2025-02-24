@@ -18,7 +18,6 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
-import com.amazonaws.SdkClientException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
@@ -50,6 +49,7 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.ExternalGatewayAPIValidationException;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
@@ -83,6 +83,7 @@ import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
+import software.amazon.awssdk.core.exception.SdkClientException;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -297,7 +298,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                     (apiId, apiEndpointDTO, organization, apiProvider);
             APIEndpointInfo createdAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, createdAPIEndpointId,
                     organization);
-            APIEndpointDTO createdAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(createdAPIEndpoint);
+            APIEndpointDTO createdAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(createdAPIEndpoint,
+                    organization, false);
             removeAPIEndpointSecrets(createdAPIEndpointDTO);
             String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + apiId
                     + RestApiConstants.RESOURCE_PATH_API_ENDPOINT + "/" + createdAPIEndpointId;
@@ -328,11 +330,37 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response deleteApiEndpoint(String apiId, String endpointUuid, MessageContext messageContext)
             throws APIManagementException {
+
+        //validate if api exists
+        CommonUtils.validateAPIExistence(apiId);
+
+        // Handle scenario where original API endpoints appearing under emdpoint config in API object is tried to be
+        // deleted. This is not allowed. One can delete this only by updating the API endpoint config.
+        if (endpointUuid.equals(
+                apiId + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.PRODUCTION) ||
+                endpointUuid.equals(apiId +
+                        APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.SANDBOX)) {
+            String errorMessage = String.format(
+                    "Failed to delete API Endpoint with UUID %s. This Endpoint is read only", endpointUuid);
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.ENDPOINT_READONLY, endpointUuid));
+        }
+
+        // Validate if endpoint is defined as a primary endpoint in the API object. If so, it cannot be deleted.
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIDTO apiDTO = getAPIByID(apiId, apiProvider, organization);
+        String primaryProductionEndpointId = apiDTO.getPrimaryProductionEndpointId();
+        String primarySandboxEndpointId = apiDTO.getPrimarySandboxEndpointId();
+        if (endpointUuid.equals(primaryProductionEndpointId) || endpointUuid.equals(primarySandboxEndpointId)) {
+            String errorMessage = String.format(
+                    "Failed to delete API Endpoint with UUID %s. This Endpoint is defined as a primary endpoint.",
+                    endpointUuid);
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.ERROR_DELETING_PRIMARY_API_ENDPOINT, endpointUuid));
+        }
+
         try {
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            //validate if api exists
-            CommonUtils.validateAPIExistence(apiId);
             //validate API Endpoint
             APIEndpointInfo existingApiEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointUuid, organization);
             if (existingApiEndpoint != null) {
@@ -362,11 +390,20 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response updateApiEndpoint(String apiId, String endpointId, APIEndpointDTO apIEndpointDTO,
             MessageContext messageContext) throws APIManagementException {
+        if (endpointId.equals(
+                apiId + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.PRODUCTION) ||
+                endpointId.equals(apiId +
+                        APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.SANDBOX)) {
+            String errorMessage = String.format("Failed to update API Endpoint with UUID %s. This Endpoint is read only", endpointId);
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(
+                    ExceptionCodes.ENDPOINT_READONLY, endpointId)
+            );
+        }
         try {
             APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
             if (apiRevision != null && apiRevision.getApiUUID() != null) {
                 throw new APIManagementException("Cannot Update API Endpoint in Revision View : " + endpointId,
-                        ExceptionCodes.ERROR_UPDATING_API_ENDPOINT_API);
+                        ExceptionCodes.ERROR_UPDATING_API_ENDPOINT);
             }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -374,7 +411,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             CommonUtils.validateAPIExistence(apiId);
             PublisherCommonUtils.updateAPIEndpoint(apiId, endpointId, apIEndpointDTO, organization, apiProvider);
             APIEndpointInfo updatedAPIEndpoint = apiProvider.getAPIEndpointByUUID(apiId, endpointId, organization);
-            APIEndpointDTO updatedAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(updatedAPIEndpoint);
+            APIEndpointDTO updatedAPIEndpointDTO = APIMappingUtil.fromAPIEndpointToDTO(updatedAPIEndpoint,
+                    organization, false);
             removeAPIEndpointSecrets(updatedAPIEndpointDTO);
             return Response.ok().entity(updatedAPIEndpointDTO).build();
         } catch (APIManagementException | JsonProcessingException e) {
@@ -404,7 +442,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             //validate if api exists
             CommonUtils.validateAPIExistence(apiId);
             //get API endpoint by UUID
-            APIEndpointDTO apiEndpointDTO = PublisherCommonUtils.getAPIEndpoint(apiId, endpointId, apiProvider);
+            APIEndpointDTO apiEndpointDTO = PublisherCommonUtils.getAPIEndpoint(apiId, endpointId, apiProvider, false);
             removeAPIEndpointSecrets(apiEndpointDTO);
             return Response.ok().entity(apiEndpointDTO).build();
         } catch (APIManagementException | JsonProcessingException e) {
@@ -1107,6 +1145,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (CryptoException e) {
             String errorMessage = "Error while decrypting the secret key of the API: " + apiId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while parsing sts endpoint URI: " + apiId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (APIManagementException e) {
             String errorMessage = "Error while retrieving the API: " + apiId;
@@ -2893,7 +2934,11 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else {
                 updatedSwagger = updateSwagger(apiId, apiDefinition, organization);
             }
+            PublisherCommonUtils.checkGovernanceComplianceAsync(apiId, APIMGovernableState.API_UPDATE,
+                    ArtifactType.API, organization);
             return Response.ok().entity(updatedSwagger).build();
+        } catch (ExternalGatewayAPIValidationException e) {
+            RestApiUtil.handleBadRequest(e.getMessage(), log);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need
             // to expose the existence of the resource
@@ -3919,10 +3964,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                 .get(RestApiConstants.USER_REST_API_SCOPES);
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
 
-        if(dryRun) {
-            Map<String, String> responseMap = PublisherCommonUtils.checkGovernanceComplianceDryRun(fileInputStream,
-                    organization);
-            return Response.ok().entity(responseMap).build();
+        if (dryRun) {
+            String dryRunResults = PublisherCommonUtils
+                    .checkGovernanceComplianceDryRun(fileInputStream, organization);
+            return Response.ok(dryRunResults, MediaType.APPLICATION_JSON).build();
         }
         ImportedAPIDTO importedAPIDTO = importExportAPI.importAPI(fileInputStream, preserveProvider, rotateRevision, overwrite,
                 preservePortalConfigurations, tokenScopes, organization);
@@ -4190,6 +4235,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                     ArtifactType.API, organization);
             return Response.created(createdApiUri).entity(createdApiRevisionDTO).build();
         } catch (APIManagementException e) {
+            if (e instanceof APIComplianceException) {
+                throw e;
+            }
             String errorMessage = "Error while adding new API Revision for API : " + apiId;
             if ((e.getErrorHandler()
                     .getErrorCode() == ExceptionCodes.THIRD_PARTY_API_REVISION_CREATION_UNSUPPORTED.getErrorCode())

@@ -709,6 +709,7 @@
         <VelocityLogger>{{apim.velocity_log.name}}</VelocityLogger>
     {% endif %}
 
+    {% if apim.governance.datasource.name is defined %}
     <!-- This property is to configure the API Manager Governance capabilities -->
     <APIMGovernance>
         <DataSource>{{apim.governance.datasource.name}}</DataSource>
@@ -719,6 +720,7 @@
             <TaskCleanupIntervalMinutes>{{apim.governance.scheduler.task_cleanup_interval_minutes}}</TaskCleanupIntervalMinutes>
         </SchedulerConfigurations>
     </APIMGovernance>
+    {% endif %}
 
     <RESTAPI>
         <!--Configure allowed URIs of REST API. Accessing allowed URIs does not require credentials (does not require Authorization header). -->
@@ -1711,8 +1713,6 @@
             <Sequence>_block_api_handler_.xml</Sequence>
             <Sequence>_backend_failure_handler_.xml</Sequence>
             <Sequence>_opa_policy_failure_handler_.xml</Sequence>
-            <Sequence>_ai_api_request_seq_.xml</Sequence>
-            <Sequence>_ai_api_response_seq_.xml</Sequence>
         {% if apim.sync_runtime_artifacts.gateway.skip_list.sequences is defined %}
             {%- for sequence in apim.sync_runtime_artifacts.gateway.skip_list.sequences -%}
             <Sequence>{{sequence}}</Sequence>

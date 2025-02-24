@@ -16,6 +16,7 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.ManagedLifecycle;
@@ -23,9 +24,8 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.api.APIConstants;
-import org.wso2.carbon.apimgt.api.gateway.RBEndpointDTO;
-import org.wso2.carbon.apimgt.api.gateway.RBEndpointsPolicyDTO;
-import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.api.gateway.ModelEndpointDTO;
+import org.wso2.carbon.apimgt.api.gateway.RBPolicyConfigDTO;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 
@@ -69,14 +69,36 @@ public class RoundRobinMediator extends AbstractMediator implements ManagedLifec
 
         DataHolder.getInstance().initCache(GatewayUtils.getAPIKeyForEndpoints(messageContext));
 
-        RBEndpointsPolicyDTO endpoints = new Gson().fromJson(roundRobinConfigs, RBEndpointsPolicyDTO.class);
-        List<RBEndpointDTO> activeEndpoints = GatewayUtils.getActiveEndpoints(endpoints, messageContext);
+        RBPolicyConfigDTO endpoints;
+        try {
+            endpoints = new Gson().fromJson(roundRobinConfigs, RBPolicyConfigDTO.class);
+        } catch (JsonSyntaxException e) {
+            log.error("Failed to parse weighted round robin configuration", e);
+            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
+                    APIConstants.AIAPIConstants.REJECT_ENDPOINT);
+            return false;
+        }
 
-        if (activeEndpoints != null && !activeEndpoints.isEmpty()) {
-            RBEndpointDTO nextEndpoint = getRoundRobinEndpoint(activeEndpoints);
+        String apiKeyType = (String) messageContext.getProperty(org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE);
+
+        List<ModelEndpointDTO> selectedEndpoints = org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE_PRODUCTION
+                .equals(apiKeyType)
+                ? endpoints.getProduction()
+                : endpoints.getSandbox();
+
+        if (selectedEndpoints == null || selectedEndpoints.isEmpty()) {
+            log.debug("RoundRobin policy is not set for " + apiKeyType + ", bypassing mediation.");
+            return true;
+        }
+
+        List<ModelEndpointDTO> activeEndpoints = GatewayUtils.filterActiveEndpoints(selectedEndpoints, messageContext);
+
+        if (!activeEndpoints.isEmpty()) {
+            ModelEndpointDTO nextEndpoint = getRoundRobinEndpoint(activeEndpoints);
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, nextEndpoint.getEndpointId());
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_MODEL, nextEndpoint.getModel());
-            messageContext.setProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION, endpoints.getSuspendDuration());
+            messageContext.setProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION,
+                    endpoints.getSuspendDuration() * APIConstants.AIAPIConstants.MILLISECONDS_IN_SECOND);
         } else {
             messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
                     APIConstants.AIAPIConstants.REJECT_ENDPOINT);
@@ -88,9 +110,9 @@ public class RoundRobinMediator extends AbstractMediator implements ManagedLifec
      * Selects an endpoint using a round-robin selection mechanism.
      *
      * @param endpoints List of active endpoints.
-     * @return The selected RBEndpointDTO based on round-robin order.
+     * @return The selected ModelEndpointDTO based on round-robin order.
      */
-    private RBEndpointDTO getRoundRobinEndpoint(List<RBEndpointDTO> endpoints) {
+    private ModelEndpointDTO getRoundRobinEndpoint(List<ModelEndpointDTO> endpoints) {
 
         int index = counter.getAndIncrement() % endpoints.size();
         return endpoints.get(index);

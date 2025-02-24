@@ -3286,9 +3286,7 @@ public final class APIConstants {
 
     //Property for enabling tenant aware sub claims when invoking APIs with API key
     public static final String ENABLE_TENANT_AWARE_SUB_CLAIM= "enable.tenant.aware.subclaim";
-
-    public static final String PRODUCTION = "PRODUCTION";
-    public static final String SANDBOX = "SANDBOX";
+    public static final String OM_ELEMENT_NAME = "name";
     public static class TokenValidationConstants {
         public static final String TOKEN_VALIDATION_CONFIG = "TokenValidation";
         public static final String ENFORCE_JWT_TYPE_HEADER_VALIDATION = "EnforceTypeHeaderValidation";
@@ -3313,8 +3311,10 @@ public final class APIConstants {
         public static final String PRODUCTION = "PRODUCTION";
         public static final String SANDBOX = "SANDBOX";
         public static final String PRIMARY_ENDPOINT_ID_SEPARATOR = "--";
-        public static final String DEFAULT_PROD_ENDPOINT = "Default Production Endpoint";
-        public static final String DEFAULT_SANDBOX_ENDPOINT = "Default Sandbox Endpoint";
+        public static final String DEFAULT_PROD_ENDPOINT_NAME = "Default Production Endpoint";
+        public static final String DEFAULT_SANDBOX_ENDPOINT_NAME = "Default Sandbox Endpoint";
+        public static final String ENDPOINT_CONFIG_PRODUCTION_ENDPOINTS = "production_endpoints";
+        public static final String ENDPOINT_CONFIG_SANDBOX_ENDPOINTS = "sandbox_endpoints";
     }
 
     // For APIM governance configurations

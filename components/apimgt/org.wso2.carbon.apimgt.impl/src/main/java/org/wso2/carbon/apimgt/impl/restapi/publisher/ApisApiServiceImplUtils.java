@@ -18,22 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
-import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.BasicSessionCredentials;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.lambda.AWSLambda;
-import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
-import com.amazonaws.services.lambda.model.FunctionConfiguration;
-import com.amazonaws.services.lambda.model.ListFunctionsResult;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
-import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
-import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
-import com.amazonaws.services.securitytoken.model.Credentials;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -88,7 +73,21 @@ import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.utils.CarbonUtils;
-
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.http.SdkHttpClient;
+import software.amazon.awssdk.http.apache.ApacheHttpClient;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain;
+import software.amazon.awssdk.services.lambda.LambdaClient;
+import software.amazon.awssdk.services.lambda.model.FunctionConfiguration;
+import software.amazon.awssdk.services.lambda.model.ListFunctionsResponse;
+import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
+import software.amazon.awssdk.services.sts.model.AssumeRoleResponse;
+import software.amazon.awssdk.services.sts.model.Credentials;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,6 +97,8 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
@@ -163,7 +164,7 @@ public class ApisApiServiceImplUtils {
      * @throws SdkClientException if AWSLambda SDK throws an error
      */
     public static JSONObject getAmazonResourceNames(API api)
-            throws ParseException, CryptoException, SdkClientException {
+            throws ParseException, CryptoException, SdkClientException, URISyntaxException {
         JSONObject arns = new JSONObject();
         String endpointConfigString = api.getEndpointConfig();
         if (StringUtils.isNotEmpty(endpointConfigString)) {
@@ -182,17 +183,17 @@ public class ApisApiServiceImplUtils {
                 String roleArn = (String) endpointConfig.get(APIConstants.AMZN_ROLE_ARN);
                 String roleSessionName = (String) endpointConfig.get(APIConstants.AMZN_ROLE_SESSION_NAME);
                 String roleRegion = (String) endpointConfig.get(APIConstants.AMZN_ROLE_REGION);
-                AWSLambda awsLambdaClient = getAWSLambdaClient(accessKey, secretKey, region,
+                LambdaClient awsLambdaClient = getAWSLambdaClient(accessKey, secretKey, region,
                         roleArn, roleSessionName, roleRegion);
                 if (awsLambdaClient == null) {
                     return new JSONObject();
                 }
-                ListFunctionsResult listFunctionsResult = awsLambdaClient.listFunctions();
-                List<FunctionConfiguration> functionConfigurations = listFunctionsResult.getFunctions();
+                ListFunctionsResponse listFunctionsResult = awsLambdaClient.listFunctions();
+                List<FunctionConfiguration> functionConfigurations = listFunctionsResult.functions();
                 arns.put("count", functionConfigurations.size());
                 JSONArray list = new JSONArray();
                 for (FunctionConfiguration functionConfiguration : functionConfigurations) {
-                    list.put(functionConfiguration.getFunctionArn());
+                    list.put(functionConfiguration.functionArn());
                 }
                 arns.put("list", list);
                 return arns;
@@ -211,9 +212,10 @@ public class ApisApiServiceImplUtils {
      * @return AWS Lambda Client
      * @throws CryptoException when decoding secrets fail
      */
-    private static AWSLambda getAWSLambdaClient(String accessKey, String secretKey, String region,
-                                          String roleArn, String roleSessionName, String roleRegion) throws CryptoException {
-        AWSLambda awsLambdaClient;
+    private static LambdaClient getAWSLambdaClient(String accessKey, String secretKey, String region,
+            String roleArn, String roleSessionName, String roleRegion)
+            throws CryptoException, URISyntaxException {
+        LambdaClient awsLambdaClient;
         if (StringUtils.isEmpty(accessKey) && StringUtils.isEmpty(secretKey)) {
             awsLambdaClient = getARNsWithIAMRole(roleArn, roleSessionName, roleRegion);
             return awsLambdaClient;
@@ -234,45 +236,44 @@ public class ApisApiServiceImplUtils {
      * @param roleRegion      AWS role region
      * @return AWS Lambda Client
      */
-    private static AWSLambda getARNsWithIAMRole(String roleArn, String roleSessionName, String roleRegion) {
-        AWSLambda awsLambdaClient;
+    private static LambdaClient getARNsWithIAMRole(String roleArn, String roleSessionName, String roleRegion)
+            throws URISyntaxException {
+        LambdaClient awsLambdaClient;
+        SdkHttpClient httpClient = ApacheHttpClient.builder().build();
         if (log.isDebugEnabled()) {
             log.debug("Using temporary credentials supplied by the IAM role attached to AWS " +
                     "instance");
         }
         if (StringUtils.isEmpty(roleArn) && StringUtils.isEmpty(roleSessionName)
                 && StringUtils.isEmpty(roleRegion)) {
-            awsLambdaClient = AWSLambdaClientBuilder.standard()
-                    .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+            awsLambdaClient = LambdaClient.builder().httpClient(httpClient)
+                    .credentialsProvider(DefaultCredentialsProvider.create())
                     .build();
             return awsLambdaClient;
         } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
                 && StringUtils.isNotEmpty(roleRegion)) {
-            String stsRegion = String.valueOf(Regions.getCurrentRegion());
-            AWSSecurityTokenService awsSTSClient;
+            String stsRegion = new DefaultAwsRegionProviderChain().getRegion().toString();
+            StsClient awsSTSClient;
             if (StringUtils.isEmpty(stsRegion)) {
-                awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
-                        .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                awsSTSClient = StsClient.builder()
+                        .credentialsProvider(DefaultCredentialsProvider.create())
                         .build();
             } else {
-                awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
-                        .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
-                        .withEndpointConfiguration(new EndpointConfiguration("https://sts."
-                                + stsRegion + ".amazonaws.com", stsRegion))
-                        .build();
+                URI stsEndpoint = new URI("https://sts." + stsRegion + ".amazonaws.com");
+                awsSTSClient = StsClient.builder()
+                        .credentialsProvider(DefaultCredentialsProvider.create())
+                        .endpointOverride(stsEndpoint).build();
             }
-            AssumeRoleRequest roleRequest = new AssumeRoleRequest()
-                    .withRoleArn(roleArn)
-                    .withRoleSessionName(roleSessionName);
-            AssumeRoleResult assumeRoleResult = awsSTSClient.assumeRole(roleRequest);
-            Credentials sessionCredentials = assumeRoleResult.getCredentials();
-            BasicSessionCredentials basicSessionCredentials = new BasicSessionCredentials(
-                    sessionCredentials.getAccessKeyId(),
-                    sessionCredentials.getSecretAccessKey(),
-                    sessionCredentials.getSessionToken());
-            awsLambdaClient = AWSLambdaClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(basicSessionCredentials))
-                    .withRegion(roleRegion)
+            AssumeRoleRequest roleRequest = AssumeRoleRequest.builder()
+                    .roleArn(roleArn)
+                    .roleSessionName(roleSessionName)
+                    .build();
+            AssumeRoleResponse assumeRoleResult = awsSTSClient.assumeRole(roleRequest);
+            Credentials sessionCredentials = assumeRoleResult.credentials();
+            AwsSessionCredentials basicSessionCredentials = AwsSessionCredentials.create(sessionCredentials.accessKeyId(), sessionCredentials.secretAccessKey(), sessionCredentials.sessionToken());
+            awsLambdaClient = LambdaClient.builder().httpClient(httpClient)
+                    .credentialsProvider(StaticCredentialsProvider.create(basicSessionCredentials))
+                    .region(Region.of(roleRegion))
                     .build();
             return awsLambdaClient;
         } else {
@@ -291,10 +292,10 @@ public class ApisApiServiceImplUtils {
      * @return AWS Lambda Client
      * @throws CryptoException when decoding secrets fail
      */
-    private static AWSLambda getARNsWithStoredCredentials(String accessKey, String secretKey, String region,
+    private static LambdaClient getARNsWithStoredCredentials(String accessKey, String secretKey, String region,
                                                           String roleArn, String roleSessionName, String roleRegion)
-            throws CryptoException {
-        AWSLambda awsLambdaClient;
+            throws CryptoException, URISyntaxException {
+        LambdaClient awsLambdaClient;
         if (log.isDebugEnabled()) {
             log.debug("Using user given stored credentials");
         }
@@ -303,33 +304,32 @@ public class ApisApiServiceImplUtils {
             secretKey = new String(cryptoUtil.base64DecodeAndDecrypt(secretKey),
                     StandardCharsets.UTF_8);
         }
-        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(accessKey, secretKey);
+        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(accessKey, secretKey);
         if (StringUtils.isEmpty(roleArn) && StringUtils.isEmpty(roleSessionName)
                 && StringUtils.isEmpty(roleRegion)) {
-            awsLambdaClient = AWSLambdaClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                    .withRegion(region)
+            SdkHttpClient httpClient = ApacheHttpClient.builder().build();
+            awsLambdaClient = LambdaClient.builder()
+                    .credentialsProvider(StaticCredentialsProvider.create(awsCredentials)).httpClient(httpClient)
+                    .region(Region.of(region))
                     .build();
             return awsLambdaClient;
         } else if (StringUtils.isNotEmpty(roleArn) && StringUtils.isNotEmpty(roleSessionName)
                 && StringUtils.isNotEmpty(roleRegion)) {
-            AWSSecurityTokenService awsSTSClient = AWSSecurityTokenServiceClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials))
-                    .withEndpointConfiguration(new EndpointConfiguration("https://sts."
-                            + region + ".amazonaws.com", region))
+            URI stsEndpoint = new URI("https://sts." + region + ".amazonaws.com");
+            StsClient awsSTSClient = StsClient.builder()
+                    .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+                    .endpointOverride(stsEndpoint).build();
+            AssumeRoleRequest roleRequest = AssumeRoleRequest.builder()
+                    .roleArn(roleArn)
+                    .roleSessionName(roleSessionName)
                     .build();
-            AssumeRoleRequest roleRequest = new AssumeRoleRequest()
-                    .withRoleArn(roleArn)
-                    .withRoleSessionName(roleSessionName);
-            AssumeRoleResult assumeRoleResult = awsSTSClient.assumeRole(roleRequest);
-            Credentials sessionCredentials = assumeRoleResult.getCredentials();
-            BasicSessionCredentials basicSessionCredentials = new BasicSessionCredentials(
-                    sessionCredentials.getAccessKeyId(),
-                    sessionCredentials.getSecretAccessKey(),
-                    sessionCredentials.getSessionToken());
-            awsLambdaClient = AWSLambdaClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(basicSessionCredentials))
-                    .withRegion(roleRegion)
+            AssumeRoleResponse assumeRoleResult = awsSTSClient.assumeRole(roleRequest);
+            Credentials sessionCredentials = assumeRoleResult.credentials();
+            AwsSessionCredentials basicSessionCredentials = AwsSessionCredentials.create(sessionCredentials.accessKeyId(), sessionCredentials.secretAccessKey(), sessionCredentials.sessionToken());
+            SdkHttpClient httpClient = ApacheHttpClient.builder().build();
+            awsLambdaClient = LambdaClient.builder()
+                    .credentialsProvider(StaticCredentialsProvider.create(basicSessionCredentials)).httpClient(httpClient)
+                    .region(Region.of(roleRegion))
                     .build();
             return awsLambdaClient;
         } else {

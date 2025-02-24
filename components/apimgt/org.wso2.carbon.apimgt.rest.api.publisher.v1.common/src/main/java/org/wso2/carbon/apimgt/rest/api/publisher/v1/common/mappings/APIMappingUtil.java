@@ -52,6 +52,8 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.BackendThrottlingConfiguration;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
@@ -67,8 +69,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
-import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.lifecycle.CheckListItem;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
@@ -143,6 +143,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -525,15 +526,21 @@ public class APIMappingUtil {
         model.setPrimaryProductionEndpointId(dto.getPrimaryProductionEndpointId());
         model.setPrimarySandboxEndpointId(dto.getPrimarySandboxEndpointId());
 
-        ExternalGatewayDeployer deployer =
-                org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
-                        .getExternalGatewayDeployer(model.getGatewayType());
-        if (deployer != null) {
-            try {
-                deployer.transformAPI(model);
-            } catch (DeployerException e) {
-                throw new APIManagementException("Error while applying gateway standards to the API. ", e);
+        try {
+            GatewayAgentConfiguration gatewayConfiguration =
+                    org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().
+                    getExternalGatewayConnectorConfiguration(model.getGatewayType());
+            if (gatewayConfiguration != null) {
+                GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation()).
+                        getDeclaredConstructor().newInstance();
+                if (deployer != null) {
+                    deployer.transformAPI(model);
+                }
             }
+        } catch (NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException |
+                 InvocationTargetException e) {
+            String msg = "Error while fetching gateway deployer instance";
+            handleException(msg, e);
         }
         return model;
     }
@@ -3363,14 +3370,27 @@ public class APIMappingUtil {
 
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
                 .getProviderName()));
-        if (checkEndpointSecurityPasswordEnabled(tenantDomain) | preserveCredentials) {
+        if (checkEndpointSecurityPasswordEnabled(tenantDomain) || preserveCredentials) {
             return endpointSecurity;
         }
+        return handleEndpointSecurity(endpointSecurity);
+    }
+
+    private static JSONObject handleEndpointSecurity(JSONObject endpointSecurity, String organization,
+            boolean preserveCredentials) throws APIManagementException {
+        if (checkEndpointSecurityPasswordEnabled(organization) || preserveCredentials) {
+            return endpointSecurity;
+        }
+        return handleEndpointSecurity(endpointSecurity);
+    }
+
+    private static JSONObject handleEndpointSecurity(JSONObject endpointSecurity) {
+
         JSONObject endpointSecurityElement = new JSONObject();
         endpointSecurityElement.putAll(endpointSecurity);
         if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
-            JSONObject sandboxEndpointSecurity =
-                    (JSONObject) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+            JSONObject sandboxEndpointSecurity = new JSONObject(
+                    (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX));
             if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase((String) sandboxEndpointSecurity
                     .get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
                 sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
@@ -3381,10 +3401,11 @@ public class APIMappingUtil {
             if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
                 sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
             }
+            endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, sandboxEndpointSecurity);
         }
         if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
-            JSONObject productionEndpointSecurity =
-                    (JSONObject) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+            JSONObject productionEndpointSecurity = new JSONObject(
+                    (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION));
             if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase((String) productionEndpointSecurity
                     .get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
                 productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
@@ -3395,6 +3416,39 @@ public class APIMappingUtil {
             if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
                 productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
             }
+            endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
+        }
+        return endpointSecurityElement;
+    }
+
+    private static JSONObject handleEndpointSecurityDecrypt(JSONObject endpointSecurity) {
+        JSONObject endpointSecurityElement = new JSONObject();
+        endpointSecurityElement.putAll(endpointSecurity);
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        try {
+            if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                JSONObject sandboxEndpointSecurity = new JSONObject(
+                        (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX));
+                String apiKeyValue = (String) sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
+                if (StringUtils.isNotEmpty(apiKeyValue)) {
+                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
+                            new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
+                }
+                endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, sandboxEndpointSecurity);
+            }
+            if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                JSONObject productionEndpointSecurity = new JSONObject(
+                        (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION));
+                String apiKeyValue = (String) productionEndpointSecurity.get(
+                        APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
+                if (StringUtils.isNotEmpty(apiKeyValue)) {
+                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
+                            new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
+                }
+                endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
+            }
+        } catch (CryptoException e) {
+            log.error("Error while decrypting client credentials", e);
         }
         return endpointSecurityElement;
     }
@@ -3510,24 +3564,36 @@ public class APIMappingUtil {
         return apiRevisionDeploymentDTO;
     }
 
-    public static APIEndpointListDTO fromAPIEndpointListToDTO(List<APIEndpointInfo> apiEndpoints)
-            throws APIManagementException {
+    public static APIEndpointListDTO fromAPIEndpointListToDTO(List<APIEndpointInfo> apiEndpoints, String organization,
+            boolean preserveCredentials) throws APIManagementException {
         APIEndpointListDTO apiEndpointListDTO = new APIEndpointListDTO();
         List<APIEndpointDTO> apiEndpointDTOs = new ArrayList<>();
         for (APIEndpointInfo apiEndpoint : apiEndpoints) {
-            apiEndpointDTOs.add(fromAPIEndpointToDTO(apiEndpoint));
+            apiEndpointDTOs.add(fromAPIEndpointToDTO(apiEndpoint, organization, preserveCredentials));
         }
         apiEndpointListDTO.setCount(apiEndpointDTOs.size());
         apiEndpointListDTO.setList(apiEndpointDTOs);
         return apiEndpointListDTO;
     }
 
-    public static APIEndpointDTO fromAPIEndpointToDTO(APIEndpointInfo apiEndpoint) throws APIManagementException {
+    public static APIEndpointDTO fromAPIEndpointToDTO(APIEndpointInfo apiEndpoint, String organization,
+            boolean preserveCredentials) throws APIManagementException {
+
         APIEndpointDTO apiEndpointDTO = new APIEndpointDTO();
         apiEndpointDTO.setId(apiEndpoint.getEndpointUuid());
         apiEndpointDTO.setName(apiEndpoint.getEndpointName());
         apiEndpointDTO.setDeploymentStage(apiEndpoint.getDeploymentStage());
-        apiEndpointDTO.setEndpointConfig(apiEndpoint.getEndpointConfig());
+
+        Map<String, Object> endpointConfig = apiEndpoint.getEndpointConfig();
+        Map endpointSecurityMap = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+        if (endpointSecurityMap != null && !endpointSecurityMap.isEmpty()) {
+            JSONObject endpointSecurity = new JSONObject(endpointSecurityMap);
+            endpointSecurity = handleEndpointSecurityDecrypt(endpointSecurity);
+            endpointSecurity = handleEndpointSecurity(endpointSecurity, organization, preserveCredentials);
+            endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+        }
+        apiEndpointDTO.setEndpointConfig(endpointConfig);
+
         return apiEndpointDTO;
     }
 
@@ -3544,7 +3610,6 @@ public class APIMappingUtil {
             throw new APIManagementException("Endpoint Config is missing of API Endpoint.",
                     ExceptionCodes.ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API);
         }
-//        apiEndpoint.setOrganization(organization);
         return apiEndpoint;
     }
 

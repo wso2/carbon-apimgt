@@ -551,18 +551,18 @@ public class APIMGovernanceUtil {
      * Get artifact project
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
-     * @param revisionNo    Revision Number
+     * @param revisionId    Revision Number
      * @param artifactType  Artifact Type
      * @param organization  Organization
      * @return byte[]
      * @throws APIMGovernanceException If an error occurs while getting the artifact project
      */
-    public static byte[] getArtifactProjectWithRevision(String artifactRefId, String revisionNo,
+    public static byte[] getArtifactProjectWithRevision(String artifactRefId, String revisionId,
                                                         ArtifactType artifactType,
                                                         String organization) throws APIMGovernanceException {
 
         ArtifactGovernanceHandler handler = ArtifactGovernanceFactory.getInstance().getHandler(artifactType);
-        return handler.getArtifactProject(artifactRefId, revisionNo, organization);
+        return handler.getArtifactProject(artifactRefId, revisionId, organization);
     }
 
     /**

@@ -73,6 +73,9 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
+import org.wso2.carbon.apimgt.api.model.GatewayAPIValidationResult;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
@@ -134,6 +137,7 @@ import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
+import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
@@ -221,6 +225,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -545,7 +550,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         validateAndSetAPISecurity(api);
 
         //Validate API with Federated Gateway
-        validateApiWithFederatedGateway(api);
+        APIUtil.validateApiWithFederatedGateway(api);
 
         //Set version timestamp to the API
         String latestTimestamp = calculateVersionTimestamp(provider, apiName,
@@ -625,6 +630,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         addURITemplates(apiId, api, tenantId);
         addAPIPolicies(api, tenantDomain);
         addSubtypeConfiguration(api);
+        addPrimaryEndpoints(api);
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -657,6 +663,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
             AIConfiguration aiConfiguration = api.getAiConfiguration();
             addAIConfiguration(api.getUuid(), null, aiConfiguration, api.getOrganization());
+        }
+    }
+
+    /**
+     * Add primary endpoint mappings for the API.
+     *
+     * @param api API object
+     * @throws APIManagementException if an error occurs while adding primary endpoints
+     */
+    private void addPrimaryEndpoints(API api) throws APIManagementException {
+        if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+            apiMgtDAO.addDefaultPrimaryEndpointMappings(api);
         }
     }
 
@@ -991,9 +1009,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
             migrateMediationPoliciesOfAPI(api, tenantDomain, false);
         }
-
-        //Validate API with Federated Gateway
-        validateApiWithFederatedGateway(api);
 
         //get product resource mappings on API before updating the API. Update uri templates on api will remove all
         //product mappings as well.
@@ -2084,36 +2099,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Validate Api with the federated gateways
-     *
-     * @param api API Object
-     */
-    private static void validateApiWithFederatedGateway(API api) throws APIManagementException {
-
-        ExternalGatewayDeployer deployer =
-                ServiceReferenceHolder.getInstance().getExternalGatewayDeployer(api.getGatewayType());
-        if (deployer != null) {
-            List<String> errorList = null;
-            try {
-                errorList = deployer.validateApi(api);
-                if (!errorList.isEmpty()) {
-                    throw new APIManagementException(
-                            "Error occurred while validating the API with the federated gateway: "
-                            + api.getGatewayType(),
-                            ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
-                                    api.getGatewayType(), errorList.toString()));
-                }
-            } catch (DeployerException e) {
-                throw new APIManagementException(
-                        "Error occurred while validating the API with the federated gateway: "
-                        + api.getGatewayType(), e,
-                        ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
-                        api.getGatewayType()));
-            }
-        }
-    }
-
-    /**
      * To validate the API Security options and set it.
      *
      * @param apiProduct Relevant APIProduct that need to be validated.
@@ -2584,10 +2569,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 // Remove API-Label mappings
                 removeAPILabelMappings(apiUuid);
 
-                // Delete mappings for External deployed APIs
-                if (!api.getGatewayVendor().equalsIgnoreCase(APIConstants.WSO2_GATEWAY_ENVIRONMENT)) {
-                    APIUtil.deleteApiExternalApiMappings(api.getUuid());
-                }
+                // Remove API endpoints
+                removeAPIEndpoints(apiUuid);
 
                 // Remove Custom Backend entries of the API
                 deleteCustomBackendByAPIID(apiUuid);
@@ -8122,6 +8105,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
     }
 
+    /**
+     * This method is used to remove primary endpoint mappings(if any) and API endpoints(if any) for the given API.
+     *
+     * @param apiUUID API identifier
+     * @throws APIManagementException if an error occurs while removing endpoints
+     */
+    private void removeAPIEndpoints(String apiUUID) throws APIManagementException {
+        try {
+            apiMgtDAO.deleteAPIPrimaryEndpointMappings(apiUUID);
+            apiMgtDAO.deleteAPIEndpointsByApiUUID(apiUUID);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while removing endpoints for API " + apiUUID, e);
+        }
+    }
+
     private boolean allLabelsValid(List<String> labelIDs, String tenantDomain)
             throws APIManagementException {
         try {
@@ -8199,7 +8197,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *
      * @param api API model Object
      * @param uuid unique identifier of an API
-     * @throws APIManagementException
+     * @throws APIManagementException if an error occurs while fetching the primary endpoint mappings
      */
     private void populateAPIPrimaryEndpointsMapping(API api, String uuid) throws APIManagementException {
         String organization = api.getOrganization();
@@ -8212,14 +8210,35 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             currentApiUuid = uuid;
         }
-        // Get primary production Endpoint mapping
-        String productionEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
-                APIConstants.APIEndpoint.PRODUCTION, revisionUuid, organization);
-        api.setPrimaryProductionEndpointId(productionEndpointId);
-        // Get primary sandbox endpoint endpoint
-        String sandboxEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
-                APIConstants.APIEndpoint.SANDBOX, revisionUuid, organization);
-        api.setPrimarySandboxEndpointId(sandboxEndpointId);
+
+        // Handle scenario where default primary endpoints were set on AI API creation. Hence, these endpoint UUIDs
+        // will not be available under the AM_API_ENDPOINTS table.
+        List<String> endpointIds = apiMgtDAO.getPrimaryEndpointUUIDByAPIId(currentApiUuid);
+        if (endpointIds != null && !endpointIds.isEmpty()) {
+            for (String endpointId : endpointIds) {
+                if (endpointId.equals(
+                        currentApiUuid + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.PRODUCTION)) {
+                    api.setPrimaryProductionEndpointId(endpointId);
+                } else if (endpointId.equals(
+                        currentApiUuid + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.SANDBOX)) {
+                    api.setPrimarySandboxEndpointId(endpointId);
+                }
+            }
+        }
+
+        if (endpointIds != null && !endpointIds.isEmpty() && api.getPrimaryProductionEndpointId() == null) {
+            // Get primary production Endpoint mapping
+            String productionEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
+                    APIConstants.APIEndpoint.PRODUCTION, revisionUuid, organization);
+            api.setPrimaryProductionEndpointId(productionEndpointId);
+        }
+
+        if (endpointIds != null && !endpointIds.isEmpty() && api.getPrimarySandboxEndpointId() == null) {
+            // Get primary sandbox endpoint endpoint
+            String sandboxEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
+                    APIConstants.APIEndpoint.SANDBOX, revisionUuid, organization);
+            api.setPrimarySandboxEndpointId(sandboxEndpointId);
+        }
     }
 
 }

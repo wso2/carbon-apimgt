@@ -716,10 +716,25 @@ public class ImportUtils {
 
     public static void populateAPIWithEndpoints(API api, APIProvider provider, String extractedFolderPath,
             String organization) throws APIManagementException {
-        // Delete previously added endpoints
 
-        // Retrieve endpoints from artifact
+        // Delete existing endpoints
+        List<APIEndpointInfo> existingAPIEndpoints = provider.getAllAPIEndpointsByUUID(api.getUuid(), organization);
+        for (APIEndpointInfo existingAPIEndpoint : existingAPIEndpoints) {
+            try {
+                provider.deleteAPIEndpointById(existingAPIEndpoint.getEndpointUuid());
+                if (log.isDebugEnabled()) {
+                    log.debug("Deleted API Endpoint with UUID : " + existingAPIEndpoint.getEndpointUuid());
+                }
+            } catch (APIManagementException e) {
+                throw new APIManagementException(
+                        "Error while deleting API Endpoint with UUID: " + existingAPIEndpoint.getEndpointUuid(), e,
+                        ExceptionCodes.from(ExceptionCodes.ERROR_DELETING_API_ENDPOINT,
+                                existingAPIEndpoint.getEndpointUuid()));
+            }
+        }
+
         try {
+            // Retrieve endpoints from artifact
             String jsonContent = getFileContentAsJson(
                     extractedFolderPath + ImportExportConstants.API_ENDPOINTS_FILE_LOCATION);
             if (jsonContent != null) {
@@ -727,31 +742,21 @@ public class ImportUtils {
                 JsonElement endpointsJson = new JsonParser().parse(jsonContent).getAsJsonObject()
                         .get(APIConstants.DATA);
                 if (endpointsJson != null) {
-                    // Add API Endpoints if endpoints file is defined
                     JsonArray endpoints = endpointsJson.getAsJsonArray();
                     for (JsonElement endpointElement : endpoints) {
                         JsonObject endpointObj = endpointElement.getAsJsonObject();
                         APIEndpointInfo apiEndpointInfo = new Gson().fromJson(endpointObj, APIEndpointInfo.class);
                         String endpointUUID = apiEndpointInfo.getEndpointUuid();
                         try {
-                            // Check if endpoint already exists. If not, add it.
-                            APIEndpointInfo retrievedAPIEndpoint = provider.getAPIEndpointByUUID(api.getUuid(),
-                                    endpointUUID, organization);
-                            if (retrievedAPIEndpoint != null) {
-                                if (log.isDebugEnabled()) {
-                                    log.debug("API Endpoint with ID: " + endpointUUID + " already exists in the API");
-                                }
-                            } else {
-                                String createdEndpointUUID = provider.addAPIEndpoint(api.getUuid(), apiEndpointInfo,
-                                        organization);
-                                if (log.isDebugEnabled()) {
-                                    log.debug("API Endpoint with ID: " + createdEndpointUUID +
-                                            " has been added to the API");
-                                }
+                            String createdEndpointUUID = provider.addAPIEndpoint(api.getUuid(), apiEndpointInfo,
+                                    organization);
+                            if (log.isDebugEnabled()) {
+                                log.debug("API Endpoint with UUID: " + createdEndpointUUID +
+                                        " has been added to the API");
                             }
                         } catch (APIManagementException e) {
                             throw new APIManagementException("Error while adding API Endpoint with ID: " + endpointUUID,
-                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINTS, endpointUUID));
+                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINT, endpointUUID));
                         }
                     }
                 } else {
@@ -767,20 +772,6 @@ public class ImportUtils {
             throw new APIManagementException("Error while adding API endpoints to the API", e,
                     ExceptionCodes.ERROR_ADDING_API_ENDPOINTS);
         }
-
-        // Add primary endpoints if primaryProductionEndpointId and/or primarySandboxEndpointId is defined
-        //        if (api.getPrimaryProductionEndpointId() != null || api.getPrimarySandboxEndpointId() != null) {
-        //            try {
-        //                provider.addPrimaryEndpoints(api.getUuid(), api.getPrimaryProductionEndpointId(),
-        //                        api.getPrimarySandboxEndpointId());
-        //                if (log.isDebugEnabled()) {
-        //                    log.debug("Primary endpoints have been added to the API");
-        //                }
-        //            } catch (APIManagementException e) {
-        //                throw new APIManagementException("Error while adding primary endpoints to the API", e,
-        //                        ExceptionCodes.ERROR_ADDING_PRIMARY_ENDPOINTS);
-        //            }
-        //        }
     }
 
     /**
@@ -2504,6 +2495,14 @@ public class ImportUtils {
         }
     }
 
+    /**
+     * Retrieves endpoint configurations from a given archive path.
+     * The method attempts to load the endpoint configurations from either a YAML or JSON file.
+     *
+     * @param pathToArchive The file path to the archive containing endpoint configuration files.
+     * @return A list of EndpointDTO objects parsed from the retrieved configuration file.
+     * @throws APIManagementException If an error occurs while reading the endpoint file.
+     */
     public static List<EndpointDTO> retrieveEndpointConfigs(String pathToArchive)
             throws APIManagementException {
 
@@ -2514,16 +2513,13 @@ public class ImportUtils {
         String pathToJsonFile = pathToArchive + File.separator + ImportExportConstants.ENDPOINTS_FILE
                 + ImportExportConstants.JSON_EXTENSION;
         try {
-            // try loading file as YAML
             if (CommonUtil.checkFileExistence(pathToYamlFile)) {
                 log.debug("Found endpoint file " + pathToYamlFile);
                 String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
                 jsonContent = CommonUtil.yamlToJson(yamlContent);
             } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
-                // load as a json fallback
                 log.debug("Found endpoint file " + pathToJsonFile);
-                jsonContent = FileUtils.
-                        readFileToString(new File(pathToJsonFile)).replace("{}", "\"{}\"");
+                jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
             }
             if (jsonContent == null) {
                 log.debug("No endpoint file found to be added, skipping");
@@ -2531,9 +2527,7 @@ public class ImportUtils {
             }
             JsonElement endpointsElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
             JsonArray endpointsArray = endpointsElement.getAsJsonArray();
-
-            Gson gson = new Gson();
-            return gson.fromJson(endpointsArray, new TypeToken<ArrayList<EndpointDTO>>() {
+            return new Gson().fromJson(endpointsArray, new TypeToken<ArrayList<EndpointDTO>>() {
             }.getType());
         } catch (IOException e) {
             throw new APIManagementException("Error in reading endpoint file", e);
