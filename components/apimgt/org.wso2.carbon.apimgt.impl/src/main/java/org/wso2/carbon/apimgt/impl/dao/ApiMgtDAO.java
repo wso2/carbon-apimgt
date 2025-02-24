@@ -3514,7 +3514,12 @@ public class ApiMgtDAO {
             while (rs.next()) {
                 applicationId = Integer.parseInt(rs.getString(1));
             }
-
+            String appOrg = application.getSubOrganization();
+            if (appOrg != null) {
+                application.getApplicationAttributes().put(APIConstants.ApplicationAttributes.USER_ORGANIZATION,
+                        appOrg);
+            }
+            
             //Adding data to AM_APPLICATION_ATTRIBUTES table
             if (application.getApplicationAttributes() != null) {
                 addApplicationAttributes(conn, application.getApplicationAttributes(), applicationId, tenantId);
@@ -3571,6 +3576,12 @@ public class ApiMgtDAO {
                 log.debug("Old attributes of application - " + application.getName() + " are removed");
             }
 
+            String appOrg = application.getSubOrganization();
+            if (appOrg != null) {
+                application.getApplicationAttributes().put(APIConstants.ApplicationAttributes.USER_ORGANIZATION,
+                        appOrg);
+            }
+            
             if (application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
                 addApplicationAttributes(conn, application.getApplicationAttributes(), application.getId(), tenantId);
             }
@@ -4270,6 +4281,8 @@ public class ApiMgtDAO {
 
                 // Get custom attributes of application
                 Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                application.setSubOrganization(applicationAttributes.get(APIConstants.ApplicationAttributes.USER_ORGANIZATION));
+                applicationAttributes.remove(APIConstants.ApplicationAttributes.USER_ORGANIZATION);
                 application.setApplicationAttributes(applicationAttributes);
                 application.setSharedOrganization(rs.getString("SHARED_ORGANIZATION"));
 
@@ -6434,6 +6447,8 @@ public class ApiMgtDAO {
                 }
                 if (application != null) {
                     Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                    application.setSubOrganization(applicationAttributes.get(APIConstants.ApplicationAttributes.USER_ORGANIZATION));
+                    applicationAttributes.remove(APIConstants.ApplicationAttributes.USER_ORGANIZATION);
                     application.setApplicationAttributes(applicationAttributes);
                 }
             }
@@ -6514,6 +6529,8 @@ public class ApiMgtDAO {
             }
             if (application != null) {
                 Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                application.setSubOrganization(applicationAttributes.get(APIConstants.ApplicationAttributes.USER_ORGANIZATION));
+                applicationAttributes.remove(APIConstants.ApplicationAttributes.USER_ORGANIZATION);
                 application.setApplicationAttributes(applicationAttributes);
             }
         } catch (SQLException e) {
@@ -6670,6 +6687,8 @@ public class ApiMgtDAO {
 
             if (application != null) {
                 Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                application.setSubOrganization(applicationAttributes.get(APIConstants.ApplicationAttributes.USER_ORGANIZATION));
+                applicationAttributes.remove(APIConstants.ApplicationAttributes.USER_ORGANIZATION);
                 application.setApplicationAttributes(applicationAttributes);
             }
 
@@ -6748,6 +6767,8 @@ public class ApiMgtDAO {
             // Get custom attributes of application
             if (application != null) {
                 Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                application.setSubOrganization(applicationAttributes.get(APIConstants.ApplicationAttributes.USER_ORGANIZATION));
+                applicationAttributes.remove(APIConstants.ApplicationAttributes.USER_ORGANIZATION);
                 application.setApplicationAttributes(applicationAttributes);
             }
         } catch (SQLException e) {
@@ -16119,6 +16140,8 @@ public class ApiMgtDAO {
             }
             if (application != null) {
                 Map<String, String> applicationAttributes = getApplicationAttributes(connection, applicationId);
+                application.setSubOrganization(applicationAttributes.get(APIConstants.ApplicationAttributes.USER_ORGANIZATION));
+                applicationAttributes.remove(APIConstants.ApplicationAttributes.USER_ORGANIZATION);
                 application.setApplicationAttributes(applicationAttributes);
             }
         } catch (SQLException e) {

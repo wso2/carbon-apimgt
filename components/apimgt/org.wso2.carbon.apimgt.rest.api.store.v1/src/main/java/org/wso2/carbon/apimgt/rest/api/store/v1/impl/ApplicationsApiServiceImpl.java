@@ -384,6 +384,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         //subscriber field of the body is not honored. It is taken from the context
         Application application = ApplicationMappingUtil.fromDTOtoApplication(applicationDto, username);
+        application.setSubOrganization(sharedOrganization);
         
         application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD); // default
         if ((applicationDto.getVisibility() != null)
@@ -563,6 +564,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
         Application application = ApplicationMappingUtil.fromDTOtoApplication(applicationDto, username);
+        application.setSubOrganization(oldApplication.getSubOrganization());
 
         //we do not honor the application id which is sent via the request body
         application.setUUID(oldApplication != null ? oldApplication.getUUID() : null);
