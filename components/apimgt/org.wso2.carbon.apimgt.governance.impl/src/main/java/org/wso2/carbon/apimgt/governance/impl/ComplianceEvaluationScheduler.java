@@ -401,11 +401,19 @@ public class ComplianceEvaluationScheduler {
      */
     private static void logProcessorPoolStatus() {
         if (processorPool != null) {
-            AuditLogger.log("Scheduler Pool Status", "Active Count: %s, " +
-                            "Completed Task Count: %s, Task Count: %s, " +
-                            "Queue Size: %s, Core Pool Size: %s, Maximum Pool Size: %s, Pool Size: %s",
-                    processorPool.getActiveCount(), processorPool.getCompletedTaskCount(), processorPool.getTaskCount(),
-                    processorPool.getQueue().size(), processorPool.getCorePoolSize(),
+            AuditLogger.log("Scheduler Thread Pool Status",
+                    "Active Thread Count: %s -- | -- " +
+                            "Completed Task Count: %s -- | -- " +
+                            "Submitted Task Count: %s -- | -- " +
+                            "Queue Size: %s -- | -- " +
+                            "Core Pool Size: %s -- | -- " +
+                            "Maximum Pool Size: %s -- | -- " +
+                            "Current Pool Size: %s",
+                    processorPool.getActiveCount(),
+                    processorPool.getCompletedTaskCount(),
+                    processorPool.getTaskCount(),
+                    processorPool.getQueue().size(),
+                    processorPool.getCorePoolSize(),
                     processorPool.getMaximumPoolSize(),
                     processorPool.getPoolSize());
         }
