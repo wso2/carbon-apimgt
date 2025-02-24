@@ -74,6 +74,7 @@ public class API implements Serializable {
     private Date lastUpdated;
     private String updatedBy;
     private Set<Tier> availableTiers = new LinkedHashSet<Tier>();
+    private Set<OrganizationTiers> availableTiersForOrganizations = new LinkedHashSet<>();
     private Set<Policy> availableSubscriptionLevelPolicies = new LinkedHashSet<Policy>();
     private String apiLevelPolicy;
     private AuthorizationPolicy authorizationPolicy;
@@ -102,6 +103,7 @@ public class API implements Serializable {
     private String visibility;
     private String visibleRoles;
     private String visibleTenants;
+    private String visibleOrganizations;
 
     private boolean endpointSecured = false;
     private boolean endpointAuthDigest = false;
@@ -237,6 +239,10 @@ public class API implements Serializable {
     private AIConfiguration aiConfiguration;
 
     private BackendThrottlingConfiguration backendThrottlingConfiguration;
+  
+    private String primarySandboxEndpointId;
+  
+    private String primaryProductionEndpointId;
 
     public AIConfiguration getAiConfiguration() {
 
@@ -765,8 +771,16 @@ public class API implements Serializable {
         availableSubscriptionLevelPolicies.clear();
     }
 
-    public void removeAvailableTiers(Set<Tier> availableTiers) {
-        this.availableTiers.removeAll(availableTiers);
+    public Set<OrganizationTiers> getAvailableTiersForOrganizations() {
+        return availableTiersForOrganizations;
+    }
+
+    public void setAvailableTiersForOrganizations(Set<OrganizationTiers> availableTiersForOrganizations) {
+        this.availableTiersForOrganizations = availableTiersForOrganizations;
+    }
+
+    public void removeAllTiersForOrganizations() {
+        availableTiersForOrganizations.clear();
     }
 
     public Set<URITemplate> getUriTemplates() {
@@ -1561,6 +1575,14 @@ public class API implements Serializable {
     public void setApiPolicies(List<OperationPolicy> apiPolicies) {
         this.apiPolicies = apiPolicies;
     }
+    
+    public String getVisibleOrganizations() {
+        return visibleOrganizations;
+    }
+
+    public void setVisibleOrganizations(String visibleOrganizations) {
+        this.visibleOrganizations = visibleOrganizations;
+    }
 
     /**
      * Property to hold whether the API isEGRESS (1)
@@ -1573,5 +1595,23 @@ public class API implements Serializable {
 
     public void setEgress(int egress) {
         isEgress = egress;
+    }
+
+    public String getPrimaryProductionEndpointId() {
+
+        return primaryProductionEndpointId;
+    }
+
+    public void setPrimaryProductionEndpointId(String primaryProductionEndpointId) {
+
+        this.primaryProductionEndpointId = primaryProductionEndpointId;
+    }
+
+    public String getPrimarySandboxEndpointId() {
+        return primarySandboxEndpointId;
+    }
+
+    public void setPrimarySandboxEndpointId(String primarySandboxEndpointId) {
+        this.primarySandboxEndpointId = primarySandboxEndpointId;
     }
 }

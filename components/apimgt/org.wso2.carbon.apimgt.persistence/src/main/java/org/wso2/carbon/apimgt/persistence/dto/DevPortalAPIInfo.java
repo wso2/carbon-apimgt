@@ -15,6 +15,10 @@
  */
 package org.wso2.carbon.apimgt.persistence.dto;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -24,6 +28,7 @@ import java.util.Set;
  * APIs in DevPortal which are stored in the persistence layer are included in this.
  */
 public class DevPortalAPIInfo {
+    private static final Log log = LogFactory.getLog(DevPortalAPIInfo.class);
     private String id;
     private String apiName;
     private String version;
@@ -34,6 +39,7 @@ public class DevPortalAPIInfo {
     private String businessOwner;
     private String status;
     private Set<String> availableTierNames;
+    private Set<OrganizationTiers> availableTiersForOrganizations = new LinkedHashSet<>();;
     private String subscriptionAvailability; 
     private String subscriptionAvailableOrgs;
     private String createdTime;
@@ -131,6 +137,15 @@ public class DevPortalAPIInfo {
     public void setAvailableTierNames(Set<String> availableTierNames) {
         this.availableTierNames = availableTierNames;
     }
+
+    public Set<OrganizationTiers> getAvailableTiersForOrganizations() {
+        return availableTiersForOrganizations;
+    }
+
+    public void setAvailableTiersForOrganizations(Set<OrganizationTiers> availableTiersForOrganizations) {
+        this.availableTiersForOrganizations = availableTiersForOrganizations;
+    }
+
     public String getSubscriptionAvailableOrgs() {
         return subscriptionAvailableOrgs;
     }

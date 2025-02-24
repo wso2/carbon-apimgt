@@ -35,6 +35,7 @@ public class SettingsDTO   {
     private Boolean isAnonymousModeEnabled = true;
     private Boolean isPasswordChangeEnabled = true;
     private Boolean isJWTEnabledForLoginTokens = false;
+    private Boolean orgAccessControlEnabled = null;
     private String userStorePasswordPattern = null;
     private String passwordPolicyPattern = null;
     private Integer passwordPolicyMinLength = null;
@@ -42,6 +43,7 @@ public class SettingsDTO   {
     private Boolean apiChatEnabled = true;
     private Boolean aiAuthTokenProvided = false;
     private Boolean marketplaceAssistantEnabled = true;
+    private Boolean orgWideAppUpdateEnabled = false;
 
   /**
    **/
@@ -249,6 +251,24 @@ public class SettingsDTO   {
   }
 
   /**
+   * Is Organization-based access control configuration enabled 
+   **/
+  public SettingsDTO orgAccessControlEnabled(Boolean orgAccessControlEnabled) {
+    this.orgAccessControlEnabled = orgAccessControlEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "Is Organization-based access control configuration enabled ")
+  @JsonProperty("orgAccessControlEnabled")
+  public Boolean isOrgAccessControlEnabled() {
+    return orgAccessControlEnabled;
+  }
+  public void setOrgAccessControlEnabled(Boolean orgAccessControlEnabled) {
+    this.orgAccessControlEnabled = orgAccessControlEnabled;
+  }
+
+  /**
    * The &#39;PasswordJavaRegEx&#39; cofigured in the UserStoreManager
    **/
   public SettingsDTO userStorePasswordPattern(String userStorePasswordPattern) {
@@ -374,6 +394,23 @@ public class SettingsDTO   {
     this.marketplaceAssistantEnabled = marketplaceAssistantEnabled;
   }
 
+  /**
+   **/
+  public SettingsDTO orgWideAppUpdateEnabled(Boolean orgWideAppUpdateEnabled) {
+    this.orgWideAppUpdateEnabled = orgWideAppUpdateEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("orgWideAppUpdateEnabled")
+  public Boolean isOrgWideAppUpdateEnabled() {
+    return orgWideAppUpdateEnabled;
+  }
+  public void setOrgWideAppUpdateEnabled(Boolean orgWideAppUpdateEnabled) {
+    this.orgWideAppUpdateEnabled = orgWideAppUpdateEnabled;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -396,18 +433,20 @@ public class SettingsDTO   {
         Objects.equals(isAnonymousModeEnabled, settings.isAnonymousModeEnabled) &&
         Objects.equals(isPasswordChangeEnabled, settings.isPasswordChangeEnabled) &&
         Objects.equals(isJWTEnabledForLoginTokens, settings.isJWTEnabledForLoginTokens) &&
+        Objects.equals(orgAccessControlEnabled, settings.orgAccessControlEnabled) &&
         Objects.equals(userStorePasswordPattern, settings.userStorePasswordPattern) &&
         Objects.equals(passwordPolicyPattern, settings.passwordPolicyPattern) &&
         Objects.equals(passwordPolicyMinLength, settings.passwordPolicyMinLength) &&
         Objects.equals(passwordPolicyMaxLength, settings.passwordPolicyMaxLength) &&
         Objects.equals(apiChatEnabled, settings.apiChatEnabled) &&
         Objects.equals(aiAuthTokenProvided, settings.aiAuthTokenProvided) &&
-        Objects.equals(marketplaceAssistantEnabled, settings.marketplaceAssistantEnabled);
+        Objects.equals(marketplaceAssistantEnabled, settings.marketplaceAssistantEnabled) &&
+        Objects.equals(orgWideAppUpdateEnabled, settings.orgWideAppUpdateEnabled);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, isJWTEnabledForLoginTokens, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength, apiChatEnabled, aiAuthTokenProvided, marketplaceAssistantEnabled);
+    return Objects.hash(grantTypes, scopes, applicationSharingEnabled, mapExistingAuthApps, apiGatewayEndpoint, monetizationEnabled, recommendationEnabled, isUnlimitedTierPaid, identityProvider, isAnonymousModeEnabled, isPasswordChangeEnabled, isJWTEnabledForLoginTokens, orgAccessControlEnabled, userStorePasswordPattern, passwordPolicyPattern, passwordPolicyMinLength, passwordPolicyMaxLength, apiChatEnabled, aiAuthTokenProvided, marketplaceAssistantEnabled, orgWideAppUpdateEnabled);
   }
 
   @Override
@@ -427,6 +466,7 @@ public class SettingsDTO   {
     sb.append("    isAnonymousModeEnabled: ").append(toIndentedString(isAnonymousModeEnabled)).append("\n");
     sb.append("    isPasswordChangeEnabled: ").append(toIndentedString(isPasswordChangeEnabled)).append("\n");
     sb.append("    isJWTEnabledForLoginTokens: ").append(toIndentedString(isJWTEnabledForLoginTokens)).append("\n");
+    sb.append("    orgAccessControlEnabled: ").append(toIndentedString(orgAccessControlEnabled)).append("\n");
     sb.append("    userStorePasswordPattern: ").append(toIndentedString(userStorePasswordPattern)).append("\n");
     sb.append("    passwordPolicyPattern: ").append(toIndentedString(passwordPolicyPattern)).append("\n");
     sb.append("    passwordPolicyMinLength: ").append(toIndentedString(passwordPolicyMinLength)).append("\n");
@@ -434,6 +474,7 @@ public class SettingsDTO   {
     sb.append("    apiChatEnabled: ").append(toIndentedString(apiChatEnabled)).append("\n");
     sb.append("    aiAuthTokenProvided: ").append(toIndentedString(aiAuthTokenProvided)).append("\n");
     sb.append("    marketplaceAssistantEnabled: ").append(toIndentedString(marketplaceAssistantEnabled)).append("\n");
+    sb.append("    orgWideAppUpdateEnabled: ").append(toIndentedString(orgWideAppUpdateEnabled)).append("\n");
     sb.append("}");
     return sb.toString();
   }

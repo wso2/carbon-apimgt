@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.internal.service.dto.AIConfigurationDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.OperationPolicyDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.URLMappingDTO;
 import javax.validation.constraints.*;
@@ -27,6 +26,7 @@ public class APIDTO   {
     private String name = null;
     private String version = null;
     private String context = null;
+    private String contextTemplate = null;
     private String policy = null;
     private String apiType = null;
     private String status = null;
@@ -36,7 +36,6 @@ public class APIDTO   {
     private List<URLMappingDTO> urlMappings = new ArrayList<>();
     private String securityScheme = null;
     private Boolean isSubscriptionValidationDisabled = false;
-    private AIConfigurationDTO aiConfiguration = null;
     private Boolean isEgress = null;
     private String subtype = null;
 
@@ -145,6 +144,24 @@ public class APIDTO   {
   }
   public void setContext(String context) {
     this.context = context;
+  }
+
+  /**
+   * Context template of the API.
+   **/
+  public APIDTO contextTemplate(String contextTemplate) {
+    this.contextTemplate = contextTemplate;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Context template of the API.")
+  @JsonProperty("contextTemplate")
+  public String getContextTemplate() {
+    return contextTemplate;
+  }
+  public void setContextTemplate(String contextTemplate) {
+    this.contextTemplate = contextTemplate;
   }
 
   /**
@@ -308,23 +325,6 @@ public class APIDTO   {
   }
 
   /**
-   **/
-  public APIDTO aiConfiguration(AIConfigurationDTO aiConfiguration) {
-    this.aiConfiguration = aiConfiguration;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("aiConfiguration")
-  public AIConfigurationDTO getAiConfiguration() {
-    return aiConfiguration;
-  }
-  public void setAiConfiguration(AIConfigurationDTO aiConfiguration) {
-    this.aiConfiguration = aiConfiguration;
-  }
-
-  /**
    * Indicates if the API is an egress API.
    **/
   public APIDTO isEgress(Boolean isEgress) {
@@ -376,6 +376,7 @@ public class APIDTO   {
         Objects.equals(name, API.name) &&
         Objects.equals(version, API.version) &&
         Objects.equals(context, API.context) &&
+        Objects.equals(contextTemplate, API.contextTemplate) &&
         Objects.equals(policy, API.policy) &&
         Objects.equals(apiType, API.apiType) &&
         Objects.equals(status, API.status) &&
@@ -385,14 +386,13 @@ public class APIDTO   {
         Objects.equals(urlMappings, API.urlMappings) &&
         Objects.equals(securityScheme, API.securityScheme) &&
         Objects.equals(isSubscriptionValidationDisabled, API.isSubscriptionValidationDisabled) &&
-        Objects.equals(aiConfiguration, API.aiConfiguration) &&
         Objects.equals(isEgress, API.isEgress) &&
         Objects.equals(subtype, API.subtype);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuid, apiId, provider, name, version, context, policy, apiType, status, organization, isDefaultVersion, apiPolicies, urlMappings, securityScheme, isSubscriptionValidationDisabled, aiConfiguration, isEgress, subtype);
+    return Objects.hash(uuid, apiId, provider, name, version, context, contextTemplate, policy, apiType, status, organization, isDefaultVersion, apiPolicies, urlMappings, securityScheme, isSubscriptionValidationDisabled, isEgress, subtype);
   }
 
   @Override
@@ -406,6 +406,7 @@ public class APIDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
+    sb.append("    contextTemplate: ").append(toIndentedString(contextTemplate)).append("\n");
     sb.append("    policy: ").append(toIndentedString(policy)).append("\n");
     sb.append("    apiType: ").append(toIndentedString(apiType)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
@@ -415,7 +416,6 @@ public class APIDTO   {
     sb.append("    urlMappings: ").append(toIndentedString(urlMappings)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
     sb.append("    isSubscriptionValidationDisabled: ").append(toIndentedString(isSubscriptionValidationDisabled)).append("\n");
-    sb.append("    aiConfiguration: ").append(toIndentedString(aiConfiguration)).append("\n");
     sb.append("    isEgress: ").append(toIndentedString(isEgress)).append("\n");
     sb.append("    subtype: ").append(toIndentedString(subtype)).append("\n");
     sb.append("}");

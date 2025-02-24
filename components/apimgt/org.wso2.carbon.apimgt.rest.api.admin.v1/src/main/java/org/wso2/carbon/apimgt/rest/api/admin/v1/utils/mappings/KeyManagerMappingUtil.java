@@ -218,6 +218,10 @@ public class KeyManagerMappingUtil {
             jsonObject.remove(APIConstants.KeyManager.CONSUMER_KEY_CLAIM);
         }
         keyManagerDTO.setAdditionalProperties(new Gson().fromJson(jsonObject, Map.class));
+        
+        if (keyManagerConfigurationDTO.getAllowedOrganizations() != null) {
+            keyManagerDTO.setAllowedOrganizations(keyManagerConfigurationDTO.getAllowedOrganizations());
+        }
         return keyManagerDTO;
     }
 
@@ -316,6 +320,10 @@ public class KeyManagerMappingUtil {
             }
         }
         keyManagerConfigurationDTO.setEndpoints(endpoints);
+        
+        if (keyManagerDTO.getAllowedOrganizations() != null) {
+            keyManagerConfigurationDTO.setAllowedOrganizations(keyManagerDTO.getAllowedOrganizations());
+        }
         additionalProperties
                 .put(APIConstants.KeyManager.ENABLE_OAUTH_APP_CREATION, keyManagerDTO.isEnableOAuthAppCreation());
         additionalProperties.put(APIConstants.KeyManager.ENABLE_MAP_OAUTH_CONSUMER_APPS,
@@ -380,6 +388,7 @@ public class KeyManagerMappingUtil {
                 keyManagerCertificatesDTO.setValue(openIdConnectConfiguration.getJwksEndpoint());
                 keyManagerDto.setCertificates(keyManagerCertificatesDTO);
             }
+            keyManagerDto.setUserInfoEndpoint(openIdConnectConfiguration.getUserInfoEndpoint());
             keyManagerWellKnownResponseDTO.setValue(keyManagerDto);
         }
         return keyManagerWellKnownResponseDTO;

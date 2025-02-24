@@ -17,11 +17,13 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
+import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdditionalPropertyDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentPermissionsDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.VHostDTO;
 
 import java.util.ArrayList;
@@ -68,6 +70,14 @@ public class EnvironmentMappingUtil {
                 .collect(Collectors.toList()));
         envDTO.setAdditionalProperties(fromAdditionalPropertiesToAdditionalPropertiesDTO
                 (env.getAdditionalProperties()));
+        GatewayVisibilityPermissionConfigurationDTO permissions = env.getPermissions();
+        if (permissions != null) {
+            EnvironmentPermissionsDTO environmentPermissionsDTO = new EnvironmentPermissionsDTO();
+            environmentPermissionsDTO.setPermissionType(EnvironmentPermissionsDTO.PermissionTypeEnum
+                    .fromValue(permissions.getPermissionType()));
+            environmentPermissionsDTO.setRoles(permissions.getRoles());
+            envDTO.setPermissions(environmentPermissionsDTO);
+        }
         return envDTO;
     }
 
@@ -139,6 +149,15 @@ public class EnvironmentMappingUtil {
                 .collect(Collectors.toList()));
         env.setAdditionalProperties(fromAdditionalPropertiesDTOToAdditionalProperties
                 (envDTO.getAdditionalProperties()));
+        EnvironmentPermissionsDTO permissions = envDTO.getPermissions();
+        if (permissions != null && permissions.getPermissionType() != null) {
+            GatewayVisibilityPermissionConfigurationDTO permissionsConfiguration = new GatewayVisibilityPermissionConfigurationDTO();
+            permissionsConfiguration.setPermissionType(permissions.getPermissionType().toString());
+            permissionsConfiguration.setRoles(permissions.getRoles());
+            env.setPermissions(permissionsConfiguration);
+        } else {
+            env.setPermissions(new GatewayVisibilityPermissionConfigurationDTO());
+        }
         return env;
     }
 

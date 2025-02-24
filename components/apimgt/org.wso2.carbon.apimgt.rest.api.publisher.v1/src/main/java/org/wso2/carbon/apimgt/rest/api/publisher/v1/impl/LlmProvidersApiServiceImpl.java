@@ -58,15 +58,15 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
     }
 
     @Override
-    public Response getLLMProviderApiDefinition(String name, String apiVersion, MessageContext messageContext)
+    public Response getLLMProviderApiDefinition(String llmProviderId, MessageContext messageContext)
             throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         try {
-            List<LLMProvider> providerList = apiAdmin
-                    .getLLMProviders(organization, name, apiVersion, null);
-            String apiDefinition = providerList.get(0).getApiDefinition();
+            LLMProvider provider = apiAdmin
+                    .getLLMProvider(organization, llmProviderId);
+            String apiDefinition = provider.getApiDefinition();
             return Response.ok().entity(apiDefinition).build();
         } catch (APIManagementException e) {
             log.warn("Error while trying to retrieve LLM Provider's API definition");
@@ -75,16 +75,15 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
     }
 
     @Override
-    public Response getLLMProviderEndpointConfiguration(String name, String apiVersion, MessageContext messageContext)
+    public Response getLLMProviderEndpointConfiguration(String llmProviderId, MessageContext messageContext)
             throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        try {
-            List<LLMProvider> providerList = apiAdmin
-                    .getLLMProviders(organization, name, apiVersion, null);
+            LLMProvider provider = apiAdmin
+                    .getLLMProvider(organization, llmProviderId);
             LLMProviderConfiguration providerConfiguration = new Gson()
-                    .fromJson(providerList.get(0).getConfigurations(), LLMProviderConfiguration.class);
+                    .fromJson(provider.getConfigurations(), LLMProviderConfiguration.class);
             LLMProviderEndpointConfigurationDTO endpointConfigurationDTO = new LLMProviderEndpointConfigurationDTO();
             if (providerConfiguration.getAuthHeader() != null) {
                 endpointConfigurationDTO.setAuthHeader(providerConfiguration.getAuthHeader());
@@ -93,8 +92,21 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
                 endpointConfigurationDTO.setAuthQueryParameter(providerConfiguration.getAuthQueryParameter());
             }
             return Response.ok().entity(endpointConfigurationDTO).build();
+
+    }
+
+    @Override
+    public Response getLLMProviderModels(String llmProviderId, MessageContext messageContext)
+            throws APIManagementException {
+
+        APIAdmin apiAdmin = new APIAdminImpl();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        try {
+            LLMProvider provider = apiAdmin.getLLMProvider(organization, llmProviderId);
+            List<String> modelList = provider.getModelList();
+            return Response.ok().entity(modelList).build();
         } catch (APIManagementException e) {
-            log.warn("Error while trying to retrieve LLM Provider's API definition");
+            log.warn("Error while trying to retrieve LLM Provider's models");
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }
@@ -104,15 +116,10 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        try {
-            List<LLMProvider> LLMProviderList = apiAdmin
-                    .getLLMProviders(organization, null, null, null);
-            LLMProviderSummaryResponseListDTO providerListDTO =
-                    LLMProviderMappingUtil.fromProviderSummaryListToProviderSummaryListDTO(LLMProviderList);
-            return Response.ok().entity(providerListDTO).build();
-        } catch (APIManagementException e) {
-            log.warn("Error while trying to retrieve LLM Providers");
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
+        List<LLMProvider> LLMProviderList = apiAdmin
+                .getLLMProviders(organization, null, null, null);
+        LLMProviderSummaryResponseListDTO providerListDTO =
+                LLMProviderMappingUtil.fromProviderSummaryListToProviderSummaryListDTO(LLMProviderList);
+        return Response.ok().entity(providerListDTO).build();
     }
 }

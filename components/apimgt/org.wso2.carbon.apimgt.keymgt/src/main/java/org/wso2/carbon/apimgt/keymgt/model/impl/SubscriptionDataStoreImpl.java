@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.subscription.CacheableEntity;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationServiceImpl;
@@ -214,6 +215,14 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         if (context == null) {
             if (log.isDebugEnabled()) {
                 log.debug("Cannot retrieve API information with null context");
+            }
+            return null;
+        }
+        if (JWTConstants.GATEWAY_JWKS_API_CONTEXT.equals(context) && StringUtils.isEmpty(version)
+                && ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getJwtConfigurationDto().isJWKSApiEnabled()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Cannot retrieve API information for JWKS API");
             }
             return null;
         }
@@ -774,13 +783,18 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
         for (API api : apiMap.values()) {
             apiContextAPIMap.put(api.getContext(), api);
             if (api.isDefaultVersion()) {
-                String context = api.getContext();
-                String defaultContext = context;
-                int index =  context.lastIndexOf("/" + api.getApiVersion());
-                if (index != -1) {
-                    defaultContext = context.substring(0, index);
+                if (api.getContextTemplate() != null) {
+                    String context = api.getContextTemplate().replace("/" + APIConstants.VERSION_PLACEHOLDER, "")
+                            .replace(APIConstants.VERSION_PLACEHOLDER, "");
+                    apiContextAPIMap.put(context, api);
+                } else {
+                    String context = api.getContext();
+                    int index =  context.lastIndexOf("/" + api.getApiVersion());
+                    if (index >= 0) {
+                        context = context.substring(0, index);
+                    }
+                    apiContextAPIMap.put(context, api);
                 }
-                apiContextAPIMap.put(defaultContext, api);
             }
         }
         return apiContextAPIMap;

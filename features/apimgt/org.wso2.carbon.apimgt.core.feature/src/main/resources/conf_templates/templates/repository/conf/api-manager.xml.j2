@@ -36,7 +36,8 @@
     <JWTConfiguration>
         <!-- Enable/Disable JWT generation. Default is false. -->
         <EnableJWTGeneration>{{apim.jwt.enable}}</EnableJWTGeneration>
-
+        <!-- Enable/Disable JWKS in memory API deployment. Default is true. -->
+        <EnableJWKSApi>{{apim.jwt.enable_jwks_api}}</EnableJWKSApi>
         <!-- Name of the security context header to be added to the validated requests. -->
         <JWTHeader>{{apim.jwt.header}}</JWTHeader>
 
@@ -104,6 +105,15 @@
         </GatewayJWTGeneration>
     </JWTConfiguration>
 
+    {% if apim.organization_based_access_control is defined %}
+    <OrganizationBasedAccessControl>
+        <Enable>{{apim.organization_based_access_control.enable}}</Enable>
+        <OrganizationNameLocalClaim>{{apim.organization_based_access_control.organization_name_local_claim}}</OrganizationNameLocalClaim>
+        <OrganizationIDLocalClaim>{{apim.organization_based_access_control.organization_id_local_claim}}</OrganizationIDLocalClaim>
+        <OrgaizationSelectorLocalClaim>{{apim.organization_based_access_control.organization_selector_local_claim}}</OrgaizationSelectorLocalClaim>
+    </OrganizationBasedAccessControl>
+    {% endif %}
+    
     <!-- Primary/secondary login configuration for API Developer Portal. If user likes to keep two login attributes in a distributed setup, to login the API Developer Portal,
 		he should configure this section. Primary login doesn't have a claimUri associated with it. But secondary login, which is a claim attribute,
 		is associated with a claimuri.-->
@@ -132,6 +142,10 @@
                 <Name>{{environment_name.name}}</Name>
                 <DisplayName>{{environment_name.display_name}}</DisplayName>
                 <GatewayType>{{environment_name.gateway_type}}</GatewayType>
+                <!-- Configure Visibility -->
+                {% if environment_name.visibility is defined %}
+                <Visibility>{% for role in environment_name.visibility %}{{role}}{{ "," if not loop.last }}{% endfor %}</Visibility>
+                {% endif %}
                 <Description>{{environment_name.description}}</Description>
                 <!-- Server URL of the API gateway -->
                 <ServerURL>{{environment_name.service_url}}</ServerURL>
@@ -195,47 +209,47 @@
             {% endfor %}
         </Environments>
         <TransactionCounter>
-            {% if integration.transaction_counter.enable is defined %}
-            <Enabled>{{integration.transaction_counter.enable}}</Enabled>
+            {% if apim.transaction_counter.enable is defined %}
+            <Enabled>{{apim.transaction_counter.enable}}</Enabled>
             {% endif %}
-            {% if integration.transaction_counter.server_id is defined %}
-            <ServerID>{{integration.transaction_counter.server_id}}</ServerID>
+            {% if apim.transaction_counter.server_id is defined %}
+            <ServerID>{{apim.transaction_counter.server_id}}</ServerID>
             {% endif %}
-            {% if integration.transaction_counter.store_impl is defined %}
-            <StoreClass>{{integration.transaction_counter.store_impl}}</StoreClass>
+            {% if apim.transaction_counter.store_impl is defined %}
+            <StoreClass>{{apim.transaction_counter.store_impl}}</StoreClass>
             {% endif %}
-            {% if integration.transaction_counter.record_queue_size is defined %}
-            <QueueSize>{{integration.transaction_counter.record_queue_size}}</QueueSize>
+            {% if apim.transaction_counter.record_queue_size is defined %}
+            <QueueSize>{{apim.transaction_counter.record_queue_size}}</QueueSize>
             {% endif %}
-            {% if integration.transaction_counter.producer_counting_thread_pool_size is defined %}
-            <ProducerThreadPoolSize>{{integration.transaction_counter.producer_counting_thread_pool_size}}</ProducerThreadPoolSize>
+            {% if apim.transaction_counter.producer_counting_thread_pool_size is defined %}
+            <ProducerThreadPoolSize>{{apim.transaction_counter.producer_counting_thread_pool_size}}</ProducerThreadPoolSize>
             {% endif %}
-            {% if integration.transaction_counter.producer_scheduled_interval is defined %}
-            <ProducerScheduledInterval>{{integration.transaction_counter.producer_scheduled_interval}}</ProducerScheduledInterval>
+            {% if apim.transaction_counter.producer_scheduled_interval is defined %}
+            <ProducerScheduledInterval>{{apim.transaction_counter.producer_scheduled_interval}}</ProducerScheduledInterval>
             {% endif %}
-            {% if integration.transaction_counter.max_transaction_count_per_record is defined %}
-            <MaxTransactionCount>{{integration.transaction_counter.max_transaction_count_per_record}}</MaxTransactionCount>
+            {% if apim.transaction_counter.max_transaction_count_per_record is defined %}
+            <MaxTransactionCount>{{apim.transaction_counter.max_transaction_count_per_record}}</MaxTransactionCount>
             {% endif %}
-            {% if integration.transaction_counter.min_transaction_count_per_record is defined %}
-            <MinTransactionCount>{{integration.transaction_counter.min_transaction_count_per_record}}</MinTransactionCount>
+            {% if apim.transaction_counter.min_transaction_count_per_record is defined %}
+            <MinTransactionCount>{{apim.transaction_counter.min_transaction_count_per_record}}</MinTransactionCount>
             {% endif %}
-            {% if integration.transaction_counter.publisher_scheduled_interval is defined %}
-            <PublisherScheduledInterval>{{integration.transaction_counter.publisher_scheduled_interval}}</PublisherScheduledInterval>
+            {% if apim.transaction_counter.publisher_scheduled_interval is defined %}
+            <PublisherScheduledInterval>{{apim.transaction_counter.publisher_scheduled_interval}}</PublisherScheduledInterval>
             {% endif %}
-            {% if integration.transaction_counter.publisher_max_batch_size is defined %}
-            <MaxBatchSize>{{integration.transaction_counter.publisher_max_batch_size}}</MaxBatchSize>
+            {% if apim.transaction_counter.publisher_max_batch_size is defined %}
+            <MaxBatchSize>{{apim.transaction_counter.publisher_max_batch_size}}</MaxBatchSize>
             {% endif %}
-            {% if integration.transaction_counter.publisher_max_retries is defined %}
-            <MaxRetryCount>{{integration.transaction_counter.publisher_max_retries}}</MaxRetryCount>
+            {% if apim.transaction_counter.publisher_max_retries is defined %}
+            <MaxRetryCount>{{apim.transaction_counter.publisher_max_retries}}</MaxRetryCount>
             {% endif %}
-            {% if integration.transaction_counter.service_url is defined %}
-            <ServiceURL>{{integration.transaction_counter.service_url}}</ServiceURL>
+            {% if apim.transaction_counter.service_url is defined %}
+            <ServiceURL>{{apim.transaction_counter.service_url}}</ServiceURL>
             {% endif %}
-            {% if integration.transaction_counter.service_username is defined %}
-            <ServiceUsername>{{integration.transaction_counter.service_username}}</ServiceUsername>
+            {% if apim.transaction_counter.service_username is defined %}
+            <ServiceUsername>{{apim.transaction_counter.service_username}}</ServiceUsername>
             {% endif %}
-            {% if integration.transaction_counter.service_password is defined %}
-            <ServicePassword>{{integration.transaction_counter.service_password}}</ServicePassword>
+            {% if apim.transaction_counter.service_password is defined %}
+            <ServicePassword>{{apim.transaction_counter.service_password}}</ServicePassword>
             {% endif %}
         </TransactionCounter>
     </APIGateway>
@@ -425,6 +439,24 @@
             <ApiCountResource>{{apim.ai.marketplace_assistant_api_count_resource}}</ApiCountResource>
         </Resources>
     </MarketplaceAssistant>
+
+    <DesignAssistant>
+        <!-- Enable Design Assistant for API Manager -->
+        <Enabled>{{apim.ai.enable}}</Enabled>
+
+        <AuthToken>{{apim.ai.token}}</AuthToken>
+
+        <Key>{{apim.ai.key}}</Key>
+
+        <Endpoint>{{apim.ai.endpoint}}</Endpoint>
+
+        <TokenEndpoint>{{apim.ai.token_endpoint}}</TokenEndpoint>
+
+        <Resources>
+            <ChatResource>{{apim.ai.design_assistant_chat_resource}}</ChatResource>
+            <GenApiPayloadResource>{{apim.ai.design_assistant_gen_api_payload_resource}}</GenApiPayloadResource>
+        </Resources>
+    </DesignAssistant>
 
     <!--
         API key validator configuration used by API key manager (IS), API Developer Portal and API gateway.
@@ -677,6 +709,19 @@
         <VelocityLogger>{{apim.velocity_log.name}}</VelocityLogger>
     {% endif %}
 
+    {% if apim.governance.datasource.name is defined %}
+    <!-- This property is to configure the API Manager Governance capabilities -->
+    <APIMGovernance>
+        <DataSource>{{apim.governance.datasource.name}}</DataSource>
+        <SchedulerConfigurations>
+            <ThreadPoolSize>{{apim.governance.scheduler.thread_pool_size}}</ThreadPoolSize>
+            <QueueSize>{{apim.governance.scheduler.queue_size}}</QueueSize>
+            <TaskCheckIntervalMinutes>{{apim.governance.scheduler.task_check_interval_minutes}}</TaskCheckIntervalMinutes>
+            <TaskCleanupIntervalMinutes>{{apim.governance.scheduler.task_cleanup_interval_minutes}}</TaskCleanupIntervalMinutes>
+        </SchedulerConfigurations>
+    </APIMGovernance>
+    {% endif %}
+
     <RESTAPI>
         <!--Configure allowed URIs of REST API. Accessing allowed URIs does not require credentials (does not require Authorization header). -->
         <AllowedURIs>
@@ -872,7 +917,26 @@
                 <URI>/api/am/devportal/{version}/marketplace-assistant/chat</URI>
                 <HTTPMethods>POST</HTTPMethods>
             </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/governance/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/governance/{version}/swagger.json</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
         </AllowedURIs>
+        <BasicAuthBlockedURIs>
+        <!--Configure Basic Auth blocked URIs of REST API. URIs included cannot be invoked with basic auth-->
+        {% if apim.rest_api.basic_auth_blocked_uri is defined %}
+            {% for uri in apim.rest_api.basic_auth_blocked_uri %}
+                <BasicAuthBlockedURI>
+                    <URI>{{uri.uri_path}}</URI>
+                    <HTTPMethods>{{uri.http_method}}</HTTPMethods>
+                </BasicAuthBlockedURI>
+            {% endfor %}
+        {% endif %}
+        </BasicAuthBlockedURIs>
         <ETagSkipList>
             <ETagSkipURI>
                 <URI>/api/am/devportal/{version}/apis</URI>
@@ -1739,4 +1803,8 @@
             </CustomProperties>
         </PropertyConfigurations>
       {% endif %}
+
+      <Hashing>
+        <HashingAlgorithm>{{apim.hashing.hashing_algorithm}}</HashingAlgorithm>
+      </Hashing>
 </APIManager>

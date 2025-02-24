@@ -40,7 +40,6 @@ public class TransactionRecordsApiServiceImpl implements TransactionRecordsApiSe
 
     public Response insertTransactionRecords(List<TransactionRecordDTO> body, MessageContext messageContext) {
         TransactionCountDAO transactionCountDAO = TransactionCountDAO.getInstance();
-
         try {
             TransactionCountDTO[] transactionCountDTOArray = body.stream().map(recordDTO -> {
                 TransactionCountDTO transactionCountDTO = new TransactionCountDTO();

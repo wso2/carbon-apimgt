@@ -130,8 +130,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
-        - $ref: '#/components/parameters/sortBy'
-        - $ref: '#/components/parameters/sortOrder'
         - $ref: '#/components/parameters/requestedTenant'
         - name: query
           in: query
@@ -263,6 +261,85 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/apis"'
       operationId: createAPI
+
+  #######################################################
+  # The "API Design Assistant - Chat" resource APIs
+  #######################################################
+  /design-assistant/chat:
+    post:
+      tags:
+        - API Design Assistant
+      summary: Generate API Specifications with API Design Assistant
+      description: |
+        Generates API specifications based on natural language input.
+
+        Key features:
+        - Converts text descriptions into structured API specifications
+        - Provides QoS suggestions and other improvements
+        - Supports session-based API generation
+      requestBody:
+        description: Input for API specification generation
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DesignAssistantChatQuery'
+      responses:
+        200:
+          description: Successful API specification generation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DesignAssistantChatResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d "{\"text\": \"create an API for a banking transaction.\", \"sessionId\": \"1234567890\"}" "https://127.0.0.1:9443/api/am/publisher/v4/design-assistant/chat"'
+      operationId: designAssistantChat
+
+  ######################################################################
+  # The "API Design Assistant - Generate API Payloads" resource APIs
+  ######################################################################
+  /design-assistant/generate-api-payload:
+    post:
+      tags:
+        - API Design Assistant
+      summary: Create API Payload with API Design Assistant
+      description: |
+        Creates an API payload using the stored specification.
+      requestBody:
+        description: Input for API payload creation
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DesignAssistantGenAPIPayload'
+      responses:
+        200:
+          description: API payload successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DesignAssistantAPIPayloadResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d "{\"sessionId\": \"1234567890\"}" "https://127.0.0.1:9443/api/am/publisher/v4/design-assistant/generate-api-payload"'
+      operationId: designAssistantApiPayloadGen
 
   ######################################################
   # The "Individual API" resource APIs
@@ -1296,6 +1373,7 @@ paths:
         - $ref: '#/components/parameters/requestedTenant'
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/isAiApi'
+        - $ref: '#/components/parameters/organizationID'
       responses:
         200:
           description: |
@@ -1691,6 +1769,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/APIRevision'
+        400:
+          $ref: '#/components/responses/BadRequest'
         404:
           $ref: '#/components/responses/NotFound'
         412:
@@ -2607,6 +2687,12 @@ paths:
                   type: string
                   description: Definition to uploads a file
                   format: binary
+                url:
+                  type: string
+                  description: Definition url
+                schema:
+                  type: string
+                  description: Definition schema
                 additionalProperties:
                   type: string
                   description: Additional attributes specified as a stringified JSON
@@ -2868,17 +2954,26 @@ paths:
       summary: Validate a GraphQL SDL
       description: |
         This operation can be used to validate a graphQL definition and retrieve a summary.
+      parameters:
+        - name: useIntrospection
+          in: query
+          description: |
+            Specify whether to use Introspection to obtain the GraphQL Schema
+          schema:
+            type: boolean
+            default: false
       requestBody:
         content:
           multipart/form-data:
             schema:
-              required:
-                - file
               properties:
                 file:
                   type: string
                   description: Definition to upload as a file
                   format: binary
+                url:
+                  type: string
+                  description: Definition to upload using url
         required: true
       responses:
         200:
@@ -3979,6 +4074,34 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/resource-paths"'
       operationId: getAPIResourcePaths
 
+  /organizations:
+    get:
+      tags:
+        - Organizations
+      summary: Get all registered Organizations
+      description: |
+        Get all Registered Organizations
+      responses:
+        200:
+          description: |
+            OK.
+            Organizations returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationList'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:api_import_export
+            - apim:api_product_import_export
+            - apim:publisher_organization_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/organizations"'
+
   /apis/{apiId}/auditapi:
     get:
       tags:
@@ -4280,6 +4403,14 @@ paths:
           required: false
           schema:
             type: boolean
+        - name: dryRun
+          in: query
+          description: |
+            Dry Run. This is used to validate the API without importing it
+          required: false
+          schema:
+            type: boolean
+            default: false
         - $ref: '#/components/parameters/Accept'
       requestBody:
         content:
@@ -7444,6 +7575,33 @@ paths:
           source: 'curl -k -I -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/me/roles/SW50ZXJuYWwvcHVibGlzaGVyCQ"'
 
+  /me/organization-information:
+    get:
+      tags:
+        - Users
+      summary: Get the Organization information of the user
+      description: |
+        Using this operation, logged-in user can get their organization information.
+      operationId: organizationInformation
+      responses:
+        200:
+          description: |
+            OK.
+            Key Manager list returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationInfo'
+        400:
+          $ref: '#/components/responses/BadRequest'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/publisher/v4/me/organization"'
   ######################################################
   # The "ExternalStore Collection" resource APIs
   ######################################################
@@ -8490,6 +8648,524 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/operation-policies/f56eb8b4-128c-45aa-ad35-9c87a546261a/content"'
 
   ######################################################
+  # The "API Endpoint Collection" resource APIs
+  ######################################################
+  /apis/{apiId}/endpoints:
+    get:
+      tags:
+        - API Endpoints
+      summary: Get all API Endpoints
+      description: |
+        This operation can be used to get all the available endpoints of an API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        200:
+          description: |
+            OK.
+            List of API endpoints.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIEndpointList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/endpoints?limit=10&offset=0"'
+      operationId: getApiEndpoints
+
+    post:
+      tags:
+        - API Endpoints
+      summary: Add an Endpoint
+      description: |
+        This operation can be used to add an endpoint to an API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      requestBody:
+        description: Endpoint object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIEndpoint'
+        required: true
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created API Endpoint object in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIEndpoint'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+      security:
+        - OAuth2Security:
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/endpoints"'
+      operationId: addApiEndpoint
+
+  /apis/{apiId}/endpoints/{endpointId}:
+    get:
+      tags:
+        - API Endpoints
+      summary: Get an Endpoint
+      description: |
+        This operation can be used to get an endpoint of an API by UUID.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/endpointId'
+      responses:
+        200:
+          description: |
+            OK.
+            API Endpoint object is returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIEndpoint'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/endpoints/13092607-ed01-4fa1-bc64-5da0e2abe92c"'
+      operationId: getApiEndpoint
+
+    put:
+      tags:
+        - API Endpoints
+      summary: Update an Endpoint
+      description: |
+        This operation can be used to update a API endpoint.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/endpointId'
+      requestBody:
+        description: API Endpoint object with updated details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIEndpoint'
+      responses:
+        200:
+          description: |
+            OK.
+            Updated API Endpoint is returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIEndpoint'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json 
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/endpoints/13092607-ed01-4fa1-bc64-5da0e2abe92c"'
+      operationId: updateApiEndpoint
+
+    delete:
+      tags:
+        - API Endpoints
+      summary: Delete an Endpoint
+      description: |
+        This operation can be used to delete a API endpoint.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/endpointId'
+      responses:
+        200:
+          description: |
+            OK.
+            Endpoint deleted successfully.
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/endpoints/13092607-ed01-4fa1-bc64-5da0e2abe92c"'
+      operationId: deleteApiEndpoint
+
+  ######################################################
+  # API Labels APIs
+  ######################################################
+  /apis/{apiId}/labels:
+    get:
+      tags:
+        - API Labels
+      summary: Get Labels of an API
+      description: |
+        This operation can be used to get the labels of an API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with Label object list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelList'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v4/apis/96077508-fd01-4fae-bc64-5de0e2baf43c/labels"'
+      operationId: getLabelsOfAPI
+
+  /apis/{apiId}/attach-labels:
+    post:
+      tags:
+        - API Labels Attach
+      summary: Attach Labels to an API
+      description: |
+        This operation can be used to attach labels to an API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      requestBody:
+        description: |
+          List of labels to be attached to the API
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestLabelList'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated Label object list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json
+            "https://127.0.0.1:9443/api/am/publisher/v4/apis/01234567-0123-0123-0123-012345678901/attach-labels"'
+      operationId: attachLabelsToAPI
+
+  /apis/{apiId}/detach-labels:
+    post:
+      tags:
+        - API Labels Detach
+      summary: Detach Labels from an API
+      description: |
+        This operation can be used to detach labels from an API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      requestBody:
+        description: |
+          List of labels to be detached from the API
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestLabelList'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated Label object list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json
+            "https://127.0.0.1:9443/api/am/publisher/v4/apis/01234567-0123-0123-0123-012345678901/detach-labels"'
+      operationId: detachLabelsFromAPI
+
+  ######################################################
+  # API themes related APIs
+  ######################################################
+  /apis/{apiId}/api-themes:
+    get:
+      operationId: getApiThemes
+      summary: Retrieve API themes
+      description: Returns the list of API themes and their publish status for the given API.
+      parameters:
+        - name: publish
+          in: query
+          description: Filter themes based on published status
+          required: false
+          schema:
+            type: boolean
+        - name: apiId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of API themes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContentPublishStatusResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X GET -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://127.0.0.1:9443/api/am/publisher/v4/apis/{apiId}/api-themes"'
+
+    post:
+      operationId: importApiTheme
+      summary: Import API theme
+      description: Imports an API theme as a zip file.
+      parameters:
+        - name: apiId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  description: |
+                    The API theme zip file
+                  format: binary
+      responses:
+        200:
+          description: Successfully imported
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F "file=@api-theme.zip" "https://127.0.0.1:9443/api/am/publisher/v4/apis/{apiId}/api-themes"'
+
+  /apis/{apiId}/api-themes/{id}/content:
+    get:
+      operationId: getApiThemeContent
+      summary: Retrieve API theme as zip
+      description: Returns the API theme as a zip file for the given API ID.
+      parameters:
+        - name: apiId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns the API theme zip file
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X GET -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://127.0.0.1:9443/api/am/publisher/v4/apis/{apiId}/api-themes/{id}/content" -o api-theme.zip'
+
+  /apis/{apiId}/api-themes/{id}:
+    delete:
+      operationId: deleteApiTheme
+      summary: Delete an API theme
+      description: Deletes the API theme for the given API ID.
+      parameters:
+        - name: apiId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully deleted
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" "https://127.0.0.1:9443/api/am/publisher/v4/apis/{apiId}/api-themes/{id}"'
+
+  /apis/{apiId}/api-themes/{id}/status:
+    post:
+      operationId: updateApiThemeStatus
+      summary: Update publish status of an API theme
+      description: Publishes or unpublishes an API theme for the given API ID.
+      parameters:
+        - name: apiId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentPublishStatus"
+      responses:
+        200:
+          description: Successfully updated status
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d ''{"ACTION": "PUBLISH"}'' "https://127.0.0.1:9443/api/am/publisher/v4/apis/{apiId}/api-themes/{id}/status"'
+
+  ######################################################
   # LLM Providers resource APIs
   ######################################################
   /llm-providers:
@@ -8526,7 +9202,7 @@ paths:
             "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers"'
       operationId: getLLMProviders
 
-  /llm-providers/api-definition:
+  /llm-providers/{llmProviderId}/api-definition:
     get:
       tags:
         - LLMProvider
@@ -8534,13 +9210,8 @@ paths:
       description: |
         Get LLM Provider's API Definition
       parameters:
-        - name: name
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: apiVersion
-          in: query
+        - name: llmProviderId
+          in: path
           required: true
           schema:
             type: string
@@ -8559,10 +9230,10 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/api-definition?name=OpenAI&apiVersion=1.0.0"'
+          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f/api-definition"'
       operationId: getLLMProviderApiDefinition
 
-  /llm-providers/endpoint-configuration:
+  /llm-providers/{llmProviderId}/endpoint-configuration:
     get:
       tags:
         - LLMProvider
@@ -8570,13 +9241,8 @@ paths:
       description: |
         Get LLM provider's endpoint security configurations
       parameters:
-        - name: name
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: apiVersion
-          in: query
+        - name: llmProviderId
+          in: path
           required: true
           schema:
             type: string
@@ -8595,8 +9261,41 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/endpoint-configuration?name=OpenAI&apiVersion=1.0.0"'
+          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f/endpoint-configuration"'
       operationId: getLLMProviderEndpointConfiguration
+
+  /llm-providers/{llmProviderId}/models:
+    get:
+      tags:
+        - LLMProvider
+      summary: Get LLM provider's model list
+      description: |
+        Get LLM provider's model list
+      parameters:
+        - name: llmProviderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            List of models
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+      security:
+        - OAuth2Security:
+            - apim:llm_provider_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f/models"'
+      operationId: getLLMProviderModels
 
   ######################################################
   # The "Individual LLM Provider" resource APIs
@@ -8631,7 +9330,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f/openapi-definition"'
+          "https://127.0.0.1:9443/api/am/publisher/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f"'
       operationId: getLLMProvider
 
   /operation-policies:
@@ -9546,8 +10245,103 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/workflows/update-workflow-status?workflowReferenceId=56e3a170-a7a7-45f8-b051-7e43a58a67e1"'
+
+  ######################################################
+  # The "Label Collection" resource API
+  ######################################################
+  /labels:
+    get:
+      tags:
+        - Labels (Collection)
+      summary: Get all Labels
+      description: |
+        Get all Labels
+      responses:
+        200:
+          description: |
+            OK.
+            Labels returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelList'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/labels"'
+      operationId: getAllLabels
+
 components:
   schemas:
+    ContentPublishStatus:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+            - PUBLISH
+            - UNPUBLISH
+      example:
+        action: PUBLISH
+    ContentPublishStatusResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: UUID of the api-theme
+        published:
+          type: boolean
+          description: Publish status of the api-theme
+    DesignAssistantChatQuery:
+      type: object
+      properties:
+        text:
+          type: string
+          example: create an API for a banking transaction
+        session_id:
+          type: string
+          example: 1234567890
+    DesignAssistantChatResponse:
+      type: object
+      properties:
+        backendResponse:
+          type: string
+        isSuggestions:
+          type: boolean
+          example: true
+        typeOfApi:
+          type: string
+          example: REST
+        code:
+          type: string
+        paths:
+          type: array
+          example: []
+          items:
+            type: string
+        apiTypeSuggestion:
+          type: string
+          example: This is suitable for CRUD operations in banking. Do you want to proceed?
+        missingValues:
+          type: string
+        state:
+          type: string
+          example: COMPLETE
+    DesignAssistantGenAPIPayload:
+      type: object
+      properties:
+        session_id:
+          type: string
+          example: 1234567890
+    DesignAssistantAPIPayloadResponse:
+      type: object
+      properties:
+        generated_payload:
+          type: string
     SequenceBackendList:
       title: Sequence Backend List
       type: object
@@ -10070,12 +10864,6 @@ components:
             - SSE
             - WEBHOOK
             - ASYNC
-        subtype:
-          type: string
-          description: Subtype of the API.
-          default: DEFAULT
-          example: AIAPI
-          readOnly: true
         audience:
           type: string
           description: The audience of the API. Accepted values are PUBLIC, SINGLE
@@ -10114,6 +10902,13 @@ components:
             - Unlimited
           items:
             type: string
+          x-otherScopes:
+            - apim:api_publish
+            - apim:api_manage
+        organizationPolicies:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationPolicies'
           x-otherScopes:
             - apim:api_publish
             - apim:api_manage
@@ -10173,6 +10968,12 @@ components:
             - apim:api_manage
         visibleTenants:
           type: array
+          example: []
+          items:
+            type: string
+        visibleOrganizations:
+          type: array
+          description: The organizations that are able to access the API in Developer Portal
           example: []
           items:
             type: string
@@ -10391,6 +11192,12 @@ components:
               url: https://localhost:9443/am/sample/pizzashack/v3/api/
             production_endpoints:
               url: https://localhost:9443/am/sample/pizzashack/v3/api/
+        primaryProductionEndpointId:
+          type: string
+          example: "13092607-ed01-4fa1-bc64-5da0e2abe92c"
+        primarySandboxEndpointId:
+          type: string
+          example: "13092607-ed01-4fa1-bc64-5da0e2abe92c"
         endpointImplementationType:
           type: string
           example: INLINE
@@ -10399,13 +11206,19 @@ components:
             - INLINE
             - ENDPOINT
             - MOCKED_OAS
-        aiConfiguration:
+        subtypeConfiguration:
           type: object
+          description: Configuration settings for the API subtype.
           properties:
-            llmProviderName:
+            subtype:
               type: string
-            llmProviderApiVersion:
-              type: string
+              description: The designated name of the API subtype.
+              default: DEFAULT
+              example: AIAPI
+              readOnly: true
+            configuration:
+              type: object
+              description: Specific configuration properties related to the API subtype.
         scopes:
           type: array
           items:
@@ -10472,12 +11285,16 @@ components:
           type: string
           example:
             wso2
+            external
         gatewayType:
           title: Field to identify gateway type.
           type: string
           description: The gateway type selected for the API policies. Accepts one of the
             following. wso2/synapse, wso2/apk.
-          example: wso2/synapse
+          example:
+            wso2/synapse
+            wso2/apk
+            AWS
           default: wso2/synapse
         asyncTransportProtocols:
           type: array
@@ -11860,6 +12677,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AdditionalProperty'
+        permissions:
+          type: object
+          properties:
+            permissionType:
+              type: string
+              example: ALLOW
+              default: PUBLIC
+              enum:
+                - PUBLIC
+                - ALLOW
+                - DENY
+            roles:
+              type: array
+              items:
+                type: string
+                example: Internal/everyone
     EnvironmentList:
       title: Environment List
       type: object
@@ -11873,6 +12706,41 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
+    APIEndpoint:
+      title: Endpoint
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: string
+          example: "57a380b7-d852-4f56-bb23-db172722e9d4"
+        name:
+          type: string
+          example: "Endpoint1"
+        deploymentStage:
+          type: string
+          example: "PRODUCTION or SANDBOX"
+        endpointConfig:
+          type: object
+          properties: {}
+          description: |
+            Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.
+    APIEndpointList:
+      title: Endpoints List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Endpoints returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIEndpoint'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
     LLMProviderResponse:
       title: LLMProviderResponse
       type: object
@@ -12216,6 +13084,51 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Endpoint'
+    Organization:
+      title: Organization
+      required:
+        - organizationId
+      type: object
+      properties:
+        organizationId:
+          type: string
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+          readOnly: true
+          description: |
+            UUID of the organization.
+        externalOrganizationId:
+          type: string
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+          description: |
+            External id of the organization.
+        parentOrganizationId:
+          type: string
+          readOnly: true
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+          description: |
+            UUID of the parent organization if there is any.
+        displayName:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: My Organization
+        description:
+          maxLength: 1023
+          type: string
+          example: My Organization Description
+    OrganizationList:
+      title: Organization List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Organizationa returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Organization'
     Scope:
       title: Scope
       required:
@@ -12386,6 +13299,20 @@ components:
           example: ""
         operationPolicies:
           $ref: '#/components/schemas/APIOperationPolicies'
+    OrganizationPolicies:
+      title: Organization based Subscription Policies
+      type: object
+      required:
+        - organizationID
+      properties:
+        organizationID:
+          type: string
+          example: "36c87e00-57f0-4000-9f97-b379acc4e577"
+        policies:
+          type: array
+          example: ["Silver", "Gold", "Unlimited"]
+          items:
+            type: string
     ScopeList:
       title: Scope List
       type: object
@@ -13145,8 +14072,23 @@ components:
           example:
             - Regular
             - APK
+            - AWS
           items:
             type: string
+        GatewayFeatureCatalog:
+          title: Gateway feature Catalog
+          type: object
+          properties:
+            gatewayFeatures:
+              type: object
+              additionalProperties:
+                type: object
+            apiTypes:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
         scopes:
           type: array
           example:
@@ -13208,6 +14150,11 @@ components:
         IsJWTEnabledForLoginTokens:
           type: boolean
           default: false
+        orgAccessControlEnabled:
+          type: boolean
+          description: |
+            Is Organization-based access control configuration enabled
+          example: true
         allowSubscriptionValidationDisabling:
           type: boolean
           description: |
@@ -13543,6 +14490,8 @@ components:
         policyVersion:
           type: string
           default: v1
+        policyType:
+          type: string
         policyId:
           type: string
         parameters:
@@ -13564,6 +14513,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/OperationPolicy'
+    OrganizationInfo:
+      title: Organization Info
+      type: object
+      properties:
+        organizationId:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          type: string
+          example: My Organization
     GatewayPolicyMappings:
       title: Gateway Policy Mappings
       type: object
@@ -13719,8 +14678,13 @@ components:
         supportedApiTypes:
           type: array
           items:
-            type: string
-            example: REST
+            type: object
+            properties: {}
+          description: |
+            Supported API types as an array of strings, or an array of maps
+            [HTTP, SOAP] 
+            [{apiType: HTTP, subType: AI}, {apiType: SOAP}]
+          example: [HTTP, SOAP]
         isAPISpecific:
           type: boolean
           example: true
@@ -13783,6 +14747,50 @@ components:
           description: |
             Revision of the imported API
           example: 1
+    Label:
+      title: Label
+      required:
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: d7cf8523-9180-4255-84fa-6cb171c1f779
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: Health
+        description:
+          maxLength: 1024
+          type: string
+          example: Health related APIs
+    RequestLabelList:
+      title: Label ID List for Request
+      type: object
+      properties:
+        labels:
+          type: array
+          description: List of label IDs.
+          items:
+            type: string
+            example: d7cf8523-9180-4255-84fa-6cb171c1f779
+    LabelList:
+      title: Label List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Number of labels returned.
+          example: 1
+        list:
+          type: array
+          description: List of labels.
+          items:
+            $ref: '#/components/schemas/Label'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -13958,9 +14966,7 @@ components:
       name: apiId
       in: query
       description: |
-        **API ID** consisting of the **UUID** of the API.
-        The combination of the provider of the API, name of the API and the version is also accepted as a valid API I.
-        Should be formatted as **provider-name-version**.
+        **API ID** consisting of the **UUID** of the API**.
       required: true
       schema:
         type: string
@@ -14199,6 +15205,13 @@ components:
       schema:
         type: boolean
         default: false
+    organizationID:
+      name: organizationID
+      in: query
+      description: |
+        Indicates the organization ID
+      schema:
+        type: string
     offset:
       name: offset
       in: query
@@ -14207,30 +15220,6 @@ components:
       schema:
         type: integer
         default: 0
-    sortBy:
-      name: sortBy
-      in: query
-      description: |
-        Criteria for sorting.
-      schema:
-        type: string
-        default: createdTime
-        enum:
-          - apiName
-          - version
-          - createdTime
-          - status
-    sortOrder:
-      name: sortOrder
-      in: query
-      description: |
-        Order of sorting(ascending/descending).
-      schema:
-        type: string
-        default: desc
-        enum:
-          - asc
-          - desc
     If-None-Match:
       name: If-None-Match
       in: header
@@ -14408,3 +15397,7 @@ components:
             apim:subscription_approval_view: Approve subscription creation requests
             apim:subscription_approval_manage: Approve subscription update requests
             apim:llm_provider_read: Read LLM Providers
+            apim:publisher_organization_read: Read organization
+            apim:gov_policy_read: Retrieve governance policies
+            apim:gov_result_read: Retrieve governance results
+            apim:gov_rule_read: Retrieve governance rules

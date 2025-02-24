@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.persistence.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import org.apache.axis2.context.ConfigurationContext;
 import org.apache.commons.lang3.ArrayUtils;
@@ -40,6 +42,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPI;
+import org.wso2.carbon.apimgt.persistence.dto.OrganizationTiers;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.PersistenceException;
@@ -83,7 +86,9 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -258,6 +263,11 @@ public class RegistryPersistenceUtil {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
             }
 
+            if (getAvailableTiersForOrganizationsAsString(api) != null) {
+                artifact.setAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS,
+                        getAvailableTiersForOrganizationsAsString(api));
+            }
+
             if (APIConstants.PUBLISHED.equals(apiStatus)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_IS_LATEST, "true");
             }
@@ -317,6 +327,7 @@ public class RegistryPersistenceUtil {
             if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) && !apiSecurity
                                             .contains(APIConstants.API_SECURITY_API_KEY)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
+                artifact.setAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS, "");
             }
 
             //set gateway vendor for the API
@@ -334,6 +345,100 @@ public class RegistryPersistenceUtil {
             throw new APIManagementException(msg, e);
         }
         return artifact;
+    }
+
+    /**
+     * Get available tiers for organizations as a string.
+     *
+     * @param api API object
+     * @return String object of the organization based tiers
+     */
+    private static String getAvailableTiersForOrganizationsAsString(API api) {
+
+        Set<org.wso2.carbon.apimgt.api.model.OrganizationTiers> availableTiersForOrganizations
+                = api.getAvailableTiersForOrganizations();
+        if (availableTiersForOrganizations == null || availableTiersForOrganizations.isEmpty()) {
+            return "";
+        }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(availableTiersForOrganizations);
+        } catch (JsonProcessingException e) {
+            log.error("Error while converting availableTiersForOrganizations to string for API : " + api.getUuid(), e);
+            return null;
+        } catch (Exception e) {
+            log.error("Unexpected error while processing availableTiersForOrganizations for API : " + api.getUuid(), e);
+            return null;
+        }
+    }
+
+    /**
+     * Convert string object to an org.wso2.carbon.apimgt.api.model.OrganizationTiers set.
+     *
+     * @param tiersString String object to be converted
+     * @return OrganziationTiers set
+     */
+    public static Set<org.wso2.carbon.apimgt.api.model.OrganizationTiers> getAvailableTiersForOrganizationsFromString(
+            String tiersString) {
+
+        if (tiersString == null || tiersString.isEmpty()) {
+            return new LinkedHashSet<>();
+        }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            org.wso2.carbon.apimgt.api.model.OrganizationTiers[] tiersArray = objectMapper.readValue(tiersString,
+                    org.wso2.carbon.apimgt.api.model.OrganizationTiers[].class);
+            return new LinkedHashSet<>(Arrays.asList(tiersArray));
+        } catch (Exception e) {
+            log.error("Error while converting string to availableTiersForOrganizations object", e);
+            return new LinkedHashSet<>();
+        }
+    }
+
+    /**
+     * Convert string object to an org.wso2.carbon.apimgt.persistence.dto.OrganizationTiers set.
+     *
+     * @param tiersString String object to be converted
+     * @return OrganziationTiers set
+     */
+    public static Set<OrganizationTiers> getOrganizationTiersFromString(String tiersString) {
+
+        Set<OrganizationTiers> availableTiersForOrganizations = new LinkedHashSet<>();;
+        if (tiersString == null || tiersString.isEmpty()) {
+            return availableTiersForOrganizations;
+        }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            org.wso2.carbon.apimgt.api.model.OrganizationTiers[] tiersArray = objectMapper.readValue(tiersString,
+                    org.wso2.carbon.apimgt.api.model.OrganizationTiers[].class);
+            for (org.wso2.carbon.apimgt.api.model.OrganizationTiers organizationTiersToMap : tiersArray) {
+                OrganizationTiers organizationTiers = getOrganizationTiers(organizationTiersToMap);
+                availableTiersForOrganizations.add(organizationTiers);
+            }
+        } catch (Exception e) {
+            log.error("Error while converting string to OrganizationTiers set.", e);
+        }
+        return availableTiersForOrganizations;
+    }
+
+    /**
+     * Map org.wso2.carbon.apimgt.api.model.OrganizationTiers to org.wso2.carbon.apimgt.persistence.dto.OrganizationTiers
+     *
+     * @param organizationTiersToMap org.wso2.carbon.apimgt.api.model.OrganizationTiers object
+     * @return org.wso2.carbon.apimgt.persistence.dto.OrganizationTiers object
+     */
+    private static OrganizationTiers getOrganizationTiers(
+            org.wso2.carbon.apimgt.api.model.OrganizationTiers organizationTiersToMap) {
+
+        OrganizationTiers organizationTiers = new OrganizationTiers();
+        organizationTiers.setOrganizationID(organizationTiersToMap.getOrganizationID());
+        Set<Tier> tiersToMap = organizationTiersToMap.getTiers();
+        Set<String> tiers = new LinkedHashSet<>();
+        for (Tier tierToMap : tiersToMap) {
+            tiers.add(tierToMap.getName());
+        }
+        organizationTiers.setTiers(tiers);
+        return organizationTiers;
     }
 
     private static String getWsUriMappingJsonFromDto(Map<String, String> wsUriMapping) {
@@ -736,6 +841,10 @@ public class RegistryPersistenceUtil {
             }
             api.setAvailableTiers(availableTiers );
 
+            // Set available tiers for organizations
+            String organizationTiers = artifact.getAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS);
+            api.setAvailableTiersForOrganizations(getAvailableTiersForOrganizationsFromString(organizationTiers));
+
             // This contains the resolved context
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             // We set the context template here
@@ -864,6 +973,11 @@ public class RegistryPersistenceUtil {
             }
         }
         api.setAccessControl(apiResource.getProperty(APIConstants.ACCESS_CONTROL));
+        String visibleOrg = apiResource.getProperty(APIConstants.VISIBLE_ORGANIZATIONS);
+        if (visibleOrg != null) {
+            visibleOrg = visibleOrg.replace("+", " ");
+        }
+        api.setVisibleOrganizations(visibleOrg);
 
         String accessControlRoles = null;
 
@@ -1900,5 +2014,85 @@ public class RegistryPersistenceUtil {
 
     private static RegistryService getRegistryService() {
         return ServiceReferenceHolder.getInstance().getRegistryService();
+    }
+    
+    public static Map<String, String> getFields(String query) {
+        // Map to hold the final output
+        Map<String, String> outputMap = new HashMap<>();
+
+        // Split the query by '&'
+        String[] parameters = query.split("&");
+
+        // Process each parameter
+        for (String parameter : parameters) {
+            // Split each parameter by '=' to get key and value
+            String[] keyValue = parameter.split("=");
+            // Extract the key and value
+            String key = keyValue[0];
+            String value = keyValue.length > 1 ? keyValue[1] : "";
+
+            // Map keys to the corresponding output format
+            switch (key) {
+                case "group":
+                    outputMap.put("group", value);
+                    break;
+                case "group.field":
+                    outputMap.put("group.field", "overview_" + value);
+                    break;
+                case "group.ngroups":
+                    outputMap.put("group.ngroups", value);
+                    break;
+                case "group.sort":
+                    outputMap.put("group.sort", "overview_" + value);
+                    break;
+                case "tags":
+                    outputMap.put("tags", value);
+                    break;
+                case "apiCategories_categoryName":
+                    outputMap.put("apiCategories_categoryName", value.toLowerCase());
+                    break;
+                default:
+                    // Add any other cases if needed
+                    outputMap.put("overview_" + key, value.toLowerCase());
+                    break;
+            }
+        }
+        outputMap.put("mediaType", "application/vnd.wso2-api+xml");
+        //since store_view_roles and overview_visible_organizations are passed as property search value, remove this.
+        outputMap.remove("overview_store_view_roles"); 
+        outputMap.remove("overview_visible_organizations");
+        return outputMap;
+    }
+
+    public static String buildFQStringForProperties(String query) {
+        String fq = "";
+        boolean hasStoreViewRoles = query.contains("store_view_roles");
+        boolean hasVisibleOrganizations = query.contains("visible_organizations");
+
+        // Build fq string based on the availability of store_view_roles and visible_organizations
+        if (hasStoreViewRoles) {
+            String storeViewRoles = extractValue(query, "store_view_roles");
+            fq += "fq=store_view_roles_ss:" + storeViewRoles;
+        }
+
+        if (hasVisibleOrganizations) {
+            if (!fq.isEmpty()) {
+                fq += "&";
+            }
+            String visibleOrganizations = extractValue(query, "visible_organizations");
+            fq += "fq=visible_organizations_ss:" + visibleOrganizations;
+        }
+
+        return fq;
+    }
+
+    private static String extractValue(String query, String paramName) {
+        String paramPrefix = paramName + "=";
+        int startIndex = query.indexOf(paramPrefix) + paramPrefix.length();
+        int endIndex = query.indexOf("&", startIndex);
+        if (endIndex == -1) {
+            endIndex = query.length();
+        }
+        return query.substring(startIndex, endIndex);
     }
 }

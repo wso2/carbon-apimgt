@@ -82,6 +82,8 @@ public class WorkflowMappingUtil {
             workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.API_PRODUCT_STATE);
         } else if (workflow.getWorkflowType().equals("AM_REVISION_DEPLOYMENT")) {
             workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.REVISION_DEPLOYMENT);
+        } else if (workflow.getWorkflowType().equals("AM_SUBSCRIPTION_UPDATE")) {
+            workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.SUBSCRIPTION_UPDATE);
         }
         workflowInfoDTO.setWorkflowStatus(WorkflowInfoDTO.WorkflowStatusEnum.valueOf(workflow.getStatus().toString()));
         workflowInfoDTO.setCreatedTime(workflow.getCreatedTime());

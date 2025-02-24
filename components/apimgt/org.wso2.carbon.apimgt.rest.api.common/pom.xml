@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.30.49-SNAPSHOT</version>
+        <version>9.31.46-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -192,6 +192,27 @@
                                     </directory>
                                     <includes>
                                         <include>devportal-api.yaml</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-governance-api-def</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <overwrite>true</overwrite>
+                            <outputDirectory>src/main/resources/</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>
+                                        ${project.parent.parent.basedir}/components/apimgt/org.wso2.carbon.apimgt.governance.rest.api/src/main/resources
+                                    </directory>
+                                    <includes>
+                                        <include>governance-api.yaml</include>
                                     </includes>
                                 </resource>
                             </resources>

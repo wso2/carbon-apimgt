@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsGatewayConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SettingsKeyManagerConfigurationDTO;
 import javax.validation.constraints.*;
 
@@ -26,8 +27,11 @@ public class SettingsDTO   {
     private List<String> scopes = new ArrayList<String>();
     private List<String> gatewayTypes = new ArrayList<String>();
     private Boolean isJWTEnabledForLoginTokens = false;
+    private Boolean orgAccessControlEnabled = null;
     private List<SettingsKeyManagerConfigurationDTO> keyManagerConfiguration = new ArrayList<SettingsKeyManagerConfigurationDTO>();
+    private List<SettingsGatewayConfigurationDTO> gatewayConfiguration = new ArrayList<SettingsGatewayConfigurationDTO>();
     private Boolean analyticsEnabled = null;
+    private Boolean transactionCounterEnable = null;
 
   /**
    **/
@@ -81,6 +85,24 @@ public class SettingsDTO   {
   }
 
   /**
+   * Is Organization-based access control configuration enabled 
+   **/
+  public SettingsDTO orgAccessControlEnabled(Boolean orgAccessControlEnabled) {
+    this.orgAccessControlEnabled = orgAccessControlEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "Is Organization-based access control configuration enabled ")
+  @JsonProperty("orgAccessControlEnabled")
+  public Boolean isOrgAccessControlEnabled() {
+    return orgAccessControlEnabled;
+  }
+  public void setOrgAccessControlEnabled(Boolean orgAccessControlEnabled) {
+    this.orgAccessControlEnabled = orgAccessControlEnabled;
+  }
+
+  /**
    **/
   public SettingsDTO keyManagerConfiguration(List<SettingsKeyManagerConfigurationDTO> keyManagerConfiguration) {
     this.keyManagerConfiguration = keyManagerConfiguration;
@@ -96,6 +118,24 @@ public class SettingsDTO   {
   }
   public void setKeyManagerConfiguration(List<SettingsKeyManagerConfigurationDTO> keyManagerConfiguration) {
     this.keyManagerConfiguration = keyManagerConfiguration;
+  }
+
+  /**
+   **/
+  public SettingsDTO gatewayConfiguration(List<SettingsGatewayConfigurationDTO> gatewayConfiguration) {
+    this.gatewayConfiguration = gatewayConfiguration;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("gatewayConfiguration")
+  public List<SettingsGatewayConfigurationDTO> getGatewayConfiguration() {
+    return gatewayConfiguration;
+  }
+  public void setGatewayConfiguration(List<SettingsGatewayConfigurationDTO> gatewayConfiguration) {
+    this.gatewayConfiguration = gatewayConfiguration;
   }
 
   /**
@@ -116,6 +156,24 @@ public class SettingsDTO   {
     this.analyticsEnabled = analyticsEnabled;
   }
 
+  /**
+   * To determine whether the transaction counter is enabled or not
+   **/
+  public SettingsDTO transactionCounterEnable(Boolean transactionCounterEnable) {
+    this.transactionCounterEnable = transactionCounterEnable;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "To determine whether the transaction counter is enabled or not")
+  @JsonProperty("transactionCounterEnable")
+  public Boolean isTransactionCounterEnable() {
+    return transactionCounterEnable;
+  }
+  public void setTransactionCounterEnable(Boolean transactionCounterEnable) {
+    this.transactionCounterEnable = transactionCounterEnable;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -129,13 +187,16 @@ public class SettingsDTO   {
     return Objects.equals(scopes, settings.scopes) &&
         Objects.equals(gatewayTypes, settings.gatewayTypes) &&
         Objects.equals(isJWTEnabledForLoginTokens, settings.isJWTEnabledForLoginTokens) &&
+        Objects.equals(orgAccessControlEnabled, settings.orgAccessControlEnabled) &&
         Objects.equals(keyManagerConfiguration, settings.keyManagerConfiguration) &&
-        Objects.equals(analyticsEnabled, settings.analyticsEnabled);
+        Objects.equals(gatewayConfiguration, settings.gatewayConfiguration) &&
+        Objects.equals(analyticsEnabled, settings.analyticsEnabled) &&
+        Objects.equals(transactionCounterEnable, settings.transactionCounterEnable);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, keyManagerConfiguration, analyticsEnabled);
+    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, orgAccessControlEnabled, keyManagerConfiguration, gatewayConfiguration, analyticsEnabled, transactionCounterEnable);
   }
 
   @Override
@@ -146,8 +207,11 @@ public class SettingsDTO   {
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    gatewayTypes: ").append(toIndentedString(gatewayTypes)).append("\n");
     sb.append("    isJWTEnabledForLoginTokens: ").append(toIndentedString(isJWTEnabledForLoginTokens)).append("\n");
+    sb.append("    orgAccessControlEnabled: ").append(toIndentedString(orgAccessControlEnabled)).append("\n");
     sb.append("    keyManagerConfiguration: ").append(toIndentedString(keyManagerConfiguration)).append("\n");
+    sb.append("    gatewayConfiguration: ").append(toIndentedString(gatewayConfiguration)).append("\n");
     sb.append("    analyticsEnabled: ").append(toIndentedString(analyticsEnabled)).append("\n");
+    sb.append("    transactionCounterEnable: ").append(toIndentedString(transactionCounterEnable)).append("\n");
     sb.append("}");
     return sb.toString();
   }

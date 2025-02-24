@@ -17,13 +17,17 @@
 */
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.ApiResult;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
+import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.Workflow;
@@ -267,6 +271,53 @@ public interface APIAdmin  {
     APICategory getAPICategoryByID(String apiCategoryId) throws APIManagementException;
 
     /**
+     * Adds a new label for the tenant
+     *
+     * @param label      label to add
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException if failed add label
+     */
+    Label addLabel(Label label, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Updates a label
+     *
+     * @param labelID       label ID to update
+     * @param updateLabelBody   label data to update
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException if failed update label
+     */
+    Label updateLabel(String labelID, Label updateLabelBody, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Delete a label
+     *
+     * @param labelID       label ID to delete
+     * @param tenantDomain tenant domain
+     * @throws APIManagementException if failed delete label
+     */
+    void deleteLabel(String labelID, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Returns all labels of the tenant
+     *
+     * @param tenantDomain  tenant domain
+     * @return List<Label> list of Label objects
+     * @throws APIManagementException if failed to get labels
+     */
+    List<Label> getAllLabelsOfTenant(String tenantDomain) throws APIManagementException;
+
+    /**
+     * Get mapped APIs for the given label
+     *
+     * @param labelID label UUID
+     * @param tenantDomain  tenant domain
+     * @return List<ApiResult> list of ApiResult objects
+     * @throws APIManagementException
+     */
+    List<ApiResult> getMappedApisForLabel(String labelID, String tenantDomain) throws APIManagementException;
+
+    /**
      * The method converts the date into timestamp
      *
      * @param date
@@ -353,6 +404,14 @@ public interface APIAdmin  {
      * @throws APIManagementException
      */
     KeyManagerPermissionConfigurationDTO getKeyManagerPermissions(String id) throws APIManagementException;
+
+    /**
+     * This method used to get gateway visibility permissions with gateway environment id and role
+     * @param id uuid of gateway environment
+     * @return gateway visibility permissions
+     * @throws APIManagementException
+     */
+    GatewayVisibilityPermissionConfigurationDTO getGatewayVisibilityPermissions(String id) throws APIManagementException;
 
     /**
      * hTis method used to delete IDP mapped with key manager
@@ -472,6 +531,52 @@ public interface APIAdmin  {
 
     String getTenantConfig(String organization) throws APIManagementException;
 
+    /**
+     * Imports a drafted organization theme for the given organization.
+     *
+     * @param organization Organization name.
+     * @param themeContent Theme content as InputStream.
+     * @throws APIManagementException If a database error occurs.
+     */
+    void importDraftedOrgTheme(String organization, InputStream themeContent) throws APIManagementException;
+
+    /**
+     * Updates the organization theme status as published or unpublished.
+     *
+     * @param organization Organization name.
+     * @param action       Action to perform ("PUBLISH" or "UNPUBLISH").
+     * @throws APIManagementException If a database error occurs.
+     */
+    void updateOrgThemeStatus(String organization, String action) throws APIManagementException;
+
+    /**
+     * Deletes an organization theme.
+     *
+     * @param organization Organization name.
+     * @param themeId      Theme ID to delete.
+     * @throws APIManagementException If a database error occurs.
+     */
+    void deleteOrgTheme(String organization, String themeId) throws APIManagementException;
+
+    /**
+     * Gets an organization theme.
+     *
+     * @param uuid         Theme ID to retrieve.
+     * @param organization Organization name.
+     * @return Input stream of Org theme.
+     * @throws APIManagementException If a database error occurs.
+     */
+    InputStream getOrgTheme(String uuid, String organization) throws APIManagementException;
+
+    /**
+     * Retrieves the themes associated with the given organization.
+     *
+     * @param organization Organization name.
+     * @return Hash map of publish unpublish state and theme IDs.
+     * @throws APIManagementException If a database error occurs.
+     */
+    Map<String, String> getOrgThemes(String organization) throws APIManagementException;
+
     void updateTenantConfig(String organization, String config) throws APIManagementException;
 
     String getTenantConfigSchema(String organization);
@@ -545,11 +650,12 @@ public interface APIAdmin  {
     /**
      * Adds a new LLM Provider for the given organization.
      *
+     * @param organization the organization name to filter
      * @param provider The LLM Provider to add.
      * @return The added LLM Provider.
      * @throws APIManagementException If adding fails.
      */
-    LLMProvider addLLMProvider(LLMProvider provider) throws APIManagementException;
+    LLMProvider addLLMProvider(String organization, LLMProvider provider) throws APIManagementException;
 
     /**
      * Retrieves a list of LLM providers based on the given filters.
@@ -564,24 +670,35 @@ public interface APIAdmin  {
     List<LLMProvider> getLLMProviders(String organization, String name, String apiVersion, Boolean builtInSupport) throws APIManagementException;
 
     /**
+     * Retrieves the list of models registered under the LLM provider
+     *
+     * @param organization  The organization name
+     * @param llmProviderId The ID of the LLM provider
+     * @return list of models registered under the LLM provider
+     * @throws APIManagementException If an error occurs while retrieving the models
+     */
+    List<String> getLLMProviderModels(String organization, String llmProviderId) throws APIManagementException;
+
+    /**
      * Deletes an LLM Provider by ID for the given organization.
      *
-     * @param organization  The organization name.
-     * @param llmProviderId The ID of the LLM Provider.
-     * @param builtIn       Whether the provider is built-in.
-     * @return Deleted LLM Provider.
+     * @param organization The organization name.
+     * @param provider     LLM Provider.
+     * @param builtIn      Whether the provider is built-in.
+     * @return Deleted LLM Provider UUID.
      * @throws APIManagementException If deletion fails.
      */
-    LLMProvider deleteLLMProvider(String organization, String llmProviderId, boolean builtIn) throws APIManagementException;
+    String deleteLLMProvider(String organization, LLMProvider provider, boolean builtIn) throws APIManagementException;
 
     /**
      * Updates an LLM Provider for the given organization.
      *
+     * @param organization  The organization name.
      * @param provider The LLM Provider with updated data.
      * @return Updated LLM Provider.
      * @throws APIManagementException If update fails.
      */
-    LLMProvider updateLLMProvider(LLMProvider provider) throws APIManagementException;
+    LLMProvider updateLLMProvider(String organization, LLMProvider provider) throws APIManagementException;
 
     /**
      * Retrieves an LLM Provider by ID for the given organization.
@@ -592,4 +709,54 @@ public interface APIAdmin  {
      * @throws APIManagementException If retrieval fails.
      */
     LLMProvider getLLMProvider(String organization, String llmProviderId) throws APIManagementException;
+
+    /**
+     * 
+     * Retrieves list of organizations available for the given parent organization.
+     * 
+     * @param parentOrgId parent organization id
+     * @param tenantDomain super domain
+     * @return organization list
+     */
+    List<OrganizationDetailsDTO> getOrganizations(String parentOrgId, String tenantDomain) throws APIManagementException;
+
+    /**
+     * Add new organization 
+     * @param orgDto organization details
+     * @param parentOrgId organization id of the parent
+     * @param tenantDomain super organization domain
+     * @return organization details
+     * @throws APIManagementException
+     */
+    OrganizationDetailsDTO addOrganization(OrganizationDetailsDTO orgDto, String parentOrgId, String tenantDomain)
+            throws APIManagementException;
+
+    /**
+     * Get organization details 
+     * @param organizationId organization id
+     * @param tenantDomain tenant domain
+     * @return
+     * @throws APIManagementException
+     */
+    OrganizationDetailsDTO getOrganizationDetails(String organizationId, String tenantDomain)
+            throws APIManagementException;
+
+    /**
+     * Update organization details 
+     * @param organizationInfoDTO organization details
+     * @param parentOrgId organization id of the parent
+     * @param tenantDomain uper organization domain
+     * @return updated organization details
+     * @throws APIManagementException
+     */
+    OrganizationDetailsDTO updateOrganization(OrganizationDetailsDTO organizationInfoDTO, String parentOrgId,
+            String tenantDomain) throws APIManagementException;
+
+    /**
+     * Delete organization
+     * @param organizationId organization
+     * @param tenantDomain tenantDomain
+     */
+    void deleteOrganization(String organizationId, String tenantDomain) throws APIManagementException;
+
 }

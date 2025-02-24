@@ -47,7 +47,8 @@ public class LLMProviderRegistrationService {
     public static void registerDefaultLLMProviders(String organization) throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
-        List<LLMProvider> builtInLLMProviders = apiAdmin.getLLMProviders(organization, null, null, true);
+        List<LLMProvider> builtInLLMProviders = apiAdmin
+                .getLLMProviders(organization, null, null, true);
         Map<String, String> llmProviderMap = mapLLMProviders(builtInLLMProviders);
 
         Map<String, LLMProviderService> llmProviderServiceMap =
@@ -55,15 +56,12 @@ public class LLMProviderRegistrationService {
 
         Set<String> llmProviderConnectorTypes = llmProviderMap.keySet();
         Set<String> llmProviderServiceConnectorTypes = llmProviderServiceMap.keySet();
-
-        String apiDefinitionFilePath = CarbonUtils.getCarbonHome()
-                + APIConstants.AIAPIConstants.AI_API_DEFINITION_FILE_PATH;
         for (String connectorType : llmProviderConnectorTypes) {
             if (!llmProviderServiceConnectorTypes.contains(connectorType)) {
-                LLMProvider provider = apiAdmin.deleteLLMProvider(organization, llmProviderMap.get(connectorType), true);
-                if (provider == null) {
-                    log.debug("Failed to delete LLM Provider with ID: " + llmProviderMap.get(connectorType) + "in " +
-                            "organization " + organization);
+                LLMProvider retrievedProvider = apiAdmin
+                        .getLLMProvider(organization, llmProviderMap.get(connectorType));
+                if (retrievedProvider != null) {
+                    apiAdmin.deleteLLMProvider(organization, retrievedProvider, true);
                 }
             }
         }
@@ -72,9 +70,9 @@ public class LLMProviderRegistrationService {
                 LLMProviderService llmProviderService = llmProviderServiceMap.get(connectorType);
                 if (llmProviderService instanceof BuiltInLLMProviderService) {
                     LLMProvider llmProvider = llmProviderService
-                            .registerLLMProvider(organization, apiDefinitionFilePath);
+                            .getLLMProvider();
                     if (llmProvider != null) {
-                        apiAdmin.addLLMProvider(llmProvider);
+                        apiAdmin.addLLMProvider(organization, llmProvider);
                     }
                 } else {
                     log.debug("Skipping non-built-in LLM service provider: "

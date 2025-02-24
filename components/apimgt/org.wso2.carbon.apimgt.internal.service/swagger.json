@@ -913,14 +913,15 @@
           "required" : false,
           "type" : "string"
         }, {
-          "name" : "organization",
-          "in" : "query",
-          "required" : false,
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n            retrieved from.\n",
+          "required" : true,
           "type" : "string"
         } ],
         "responses" : {
           "200" : {
-            "description" : "Event Received success",
+            "description" : "LLM providers received success",
             "schema" : {
               "$ref" : "#/definitions/LLMProviderList"
             }
@@ -943,6 +944,12 @@
         "parameters" : [ {
           "name" : "llmProviderId",
           "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n            retrieved from.\n",
           "required" : true,
           "type" : "string"
         } ],
@@ -1330,6 +1337,10 @@
           "type" : "string",
           "description" : "Context of the API."
         },
+        "contextTemplate" : {
+          "type" : "string",
+          "description" : "Context template of the API."
+        },
         "policy" : {
           "type" : "string",
           "description" : "API level throttling policy."
@@ -1377,9 +1388,6 @@
           "description" : "Whether subscription validation is disabled.",
           "default" : false
         },
-        "aiConfiguration" : {
-          "$ref" : "#/definitions/AIConfiguration"
-        },
         "isEgress" : {
           "type" : "boolean",
           "example" : false,
@@ -1389,14 +1397,6 @@
           "type" : "string",
           "example" : "Default",
           "description" : "The subtype of the API."
-        }
-      }
-    },
-    "AIConfiguration" : {
-      "properties" : {
-        "llmProviderId" : {
-          "type" : "string",
-          "description" : "UUID of the LLM (Large Language Model) provider."
         }
       }
     },
@@ -2208,7 +2208,7 @@
     },
     "LLMProviderList" : {
       "properties" : {
-        "apis" : {
+        "llmProviders" : {
           "type" : "array",
           "items" : {
             "$ref" : "#/definitions/LLMProvider"

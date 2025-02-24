@@ -3,7 +3,7 @@
     <parent>
         <artifactId>apimgt</artifactId>
         <groupId>org.wso2.carbon.apimgt</groupId>
-        <version>9.30.49-SNAPSHOT</version>
+        <version>9.31.46-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -82,16 +82,6 @@
                     </dependency>
                 </dependencies>
             </plugin>
-
-            <plugin>
-            <groupId>org.jacoco</groupId>
-            <artifactId>jacoco-maven-plugin</artifactId>
-            <configuration>
-              <excludes>
-                <exclude>*</exclude>
-              </excludes>
-            </configuration>
-          </plugin>
         </plugins>
     </build>
 	<dependencies>
@@ -102,6 +92,12 @@
         <dependency>
             <groupId>org.wso2.carbon.governance</groupId>
             <artifactId>org.wso2.carbon.governance.api</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>jboss</groupId>
+                    <artifactId>javassist</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -115,10 +111,6 @@
             <groupId>javassist</groupId>
             <artifactId>javassist</artifactId>
         </dependency>
-		<dependency>
-			<groupId>org.wso2.carbon.apimgt</groupId>
-			<artifactId>org.wso2.carbon.apimgt.api</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.wso2.carbon.apimgt</groupId>
 			<artifactId>org.wso2.carbon.apimgt.api</artifactId>

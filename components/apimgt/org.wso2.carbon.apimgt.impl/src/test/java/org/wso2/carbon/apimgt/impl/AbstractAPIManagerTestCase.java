@@ -148,7 +148,7 @@ public class AbstractAPIManagerTestCase {
         value.setPublisherAPIInfoList(publisherAPIInfoList);
         
         Mockito.when(apiPersistenceInstance.searchAPIsForPublisher(any(Organization.class), anyString(),
-                anyInt(), anyInt(), any(UserContext.class), isNull(), isNull())).thenReturn(value);
+                anyInt(), anyInt(), any(UserContext.class))).thenReturn(value);
         List<API> apis = abstractAPIManager.getAllAPIs();
         Assert.assertNotNull(apis);
         Assert.assertEquals(apis.size(), 1);

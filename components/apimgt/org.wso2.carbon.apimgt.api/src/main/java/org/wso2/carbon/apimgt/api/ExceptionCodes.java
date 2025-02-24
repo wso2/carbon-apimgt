@@ -100,6 +100,7 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_CONTEXT(900346, "Invalid context provided", 400, "Invalid context provided for API: %s:%s"),
     INVALID_ENDPOINT_URL(900346, "Endpoint URL(s) is(are) not valid", 400, "Endpoint URL(s) is(are) not valid"),
     USER_ROLES_CANNOT_BE_NULL(900610, "Access control roles cannot be empty", 400, "Access control roles cannot be empty when visibility is restricted"),
+    ORGS_CANNOT_BE_NULL(900610, "Access control organizatoins cannot be empty", 400, "Access control organizations cannot be empty when visibility is restricted"),
     API_REVISION_NOT_FOUND(900347, "API Revision Not Found", 404, "Requested API Revision with id %s not found"),
     EXISTING_API_REVISION_DEPLOYMENT_FOUND(900348, "Can not delete API Revision ", 400, "Couldn't delete API revision since API revision is currently deployed to a gateway. " +
             "You need to undeploy the API Revision from the gateway before attempting deleting API Revision: %s "),
@@ -119,6 +120,7 @@ public enum ExceptionCodes implements ErrorHandler {
     API_PRODUCT_NOT_FOUND(900360, "API Product Not Found", 404, "Requested API Product with id '%s' not found"),
     SUB_ORGANIZATION_NOT_IDENTIFIED(900361, "User's Organization Not Identified", 403, "User's Organization is not identified"),
     CANNOT_CREATE_API_VERSION(900362, "New API Version cannot be created from a different provider", 409, "Initial provider of an API must be preserved in all versions of that API"),
+    INTERNAL_ERROR_WHILE_UPDATING_API(900363, "Internal Server Error occurred while updating the API", 500, "Internal Server Error. '%s'"),
     ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES(903010, "Error while updating required properties", 400, "Error while updating required properties."),
 
     //Lifecycle related codes
@@ -170,6 +172,8 @@ public enum ExceptionCodes implements ErrorHandler {
             400, "Gateway Environment VHOST name not provided"),
     INVALID_VHOST(900512, "Invalid virtual host name provided",
             400, "Virtual host with provided vhost name does not exist"),
+    FEDERATED_GATEWAY_VALIDATION_FAILED(900513, "API Validation Failed with Federated Gateway",
+            400, "API Validation Failed with %s Gateway. %s", false),
 
     // Workflow related codes
     WORKFLOW_EXCEPTION(900550, "Workflow error", 500,
@@ -220,16 +224,13 @@ public enum ExceptionCodes implements ErrorHandler {
 
 
     // Labels related codes
-    LABEL_INFORMATION_CANNOT_BE_NULL(900650, "Label information cannot be null", 400, "Label information cannot be " +
-            "null"),
-    LABEL_EXCEPTION(900651, "Label Error", 500, "Error occurred while retrieving label information"),
-    LABEL_NOT_FOUND(900652, "Label Not Found", 404, "Label with specified name cannot be found."),
-    LABEL_NOT_FOUND_IN_API(900653, "Label Not Found In API", 404, "Label with specified name"
-            + " cannot be found in the API."),
-    LABEL_ADDING_FAILED(900654, "Label Error", 500, "Error occurred while trying to add label"),
-    LABEL_UPDATE_FAILED(900655, "Label Error", 500, "Error occurred while trying to update label"),
-    LABEL_DELETION_FAILED(900656, "Label Error", 500, "Error occurred while trying to delete label"),
-
+    LABEL_NAME_ALREADY_EXISTS(900650, "Label Name Already Exists", 409, "Label with name '%s' already exists", false),
+    LABEL_NOT_FOUND(900651, "Label Not Found", 404, "Label not found for the given label ID: %s", false),
+    LABEL_ADDING_FAILED(900652, "Failed To Create Label", 400, "Error occurred while trying to add label. %s", false),
+    LABEL_UPDATE_FAILED(900653, "Failed To Update Label", 400, "Error occurred while trying to update label. %s", false),
+    LABEL_CANNOT_DELETE_ASSOCIATED(900654, "Label Deletion Failed", 409, "The label cannot be deleted as it is associated with API(s).", false),
+    LABEL_ATTACHMENT_FAILED(900655, "Label Attachment Failed", 400, "Error occurred while attaching label(s) to API. %s", false),
+    LABEL_DETACHMENT_FAILED(900656, "Label Detachment Failed", 400, "Error occurred while detaching label(s) from API. %s", false),
 
     //WSDL related codes
     INVALID_WSDL_URL_EXCEPTION(900675, "Invalid WSDL", 400, "Invalid WSDL URL"),
@@ -267,6 +268,7 @@ public enum ExceptionCodes implements ErrorHandler {
     ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
 
     ERROR_READING_ASYNCAPI_SPECIFICATION(900765, "AsyncAPI specification read error", 500, "Exception occurred while reading the AsyncAPI Specification file"),
+    ERROR_RETRIEVE_KM_INFORMATION(900766, "Failed to retrieve key manager information", 500, "Couldn't get the key manager information by name or UUID"),
 
     // REST API related codes
     PARAMETER_NOT_PROVIDED(900700, "Parameter value missing", 400,
@@ -285,12 +287,17 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_SORT_CRITERIA(900707, "Invalid sort criteria", 400, "Sort criteria contain a non-allowable value"),
 
     //GraphQL API related codes
-    API_NOT_GRAPHQL(900800, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
-    GRAPHQL_SCHEMA_CANNOT_BE_NULL(900801, "GraphQL Schema cannot be empty or nul", 400,
+    API_NOT_GRAPHQL(900870, "This API is not a GraphQL API", 400, "This API is not a GraphQL API"),
+    GRAPHQL_SCHEMA_CANNOT_BE_NULL(900871, "GraphQL Schema cannot be empty or nul", 400,
             "GraphQL Schema cannot be empty or null"),
-    UNSUPPORTED_GRAPHQL_FILE_EXTENSION(900802, "Unsupported GraphQL Schema File Extension", 400,
+    UNSUPPORTED_GRAPHQL_FILE_EXTENSION(900872, "Unsupported GraphQL Schema File Extension", 400,
             "Unsupported extension. Only supported extensions are .graphql, .txt and .sdl"),
-
+    INVALID_GRAPHQL_FILE(900873, "GraphQL filename cannot be null or invalid", 400,
+            "GraphQL filename cannot be null or invalid"),
+    GENERATE_GRAPHQL_SCHEMA_FROM_INTROSPECTION_ERROR(900874, "Error while generating GraphQL schema from introspection",
+            400, "Error while generating GraphQL schema from introspection"),
+    RETRIEVE_GRAPHQL_SCHEMA_FROM_URL_ERROR(900875, "Error while retrieving GraphQL schema from URL", 400,
+            "Error while retrieving GraphQL schema from URL"),
 
     // Oauth related codes
     AUTH_GENERAL_ERROR(900900, "Authorization Error", 403, " Error in authorization"),
@@ -422,6 +429,10 @@ public enum ExceptionCodes implements ErrorHandler {
 
     // Tenant related
     INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found"),
+    
+    // Organization related
+    INVALID_ORGANINATION(901301,"Organization Not Found", 404, "Organization Not Found"),
+    MISSING_ORGANINATION(901302,"Organization Not Found", 403, "User does not belong to any organization"),
     // Key Manager Related
     INVALID_KEY_MANAGER_TYPE(901400, "Key Manager Type not configured", 400, "Key Manager Type not configured"),
     REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING(901401,"Required Key Manager configuration missing",400,"Missing " +
@@ -470,6 +481,22 @@ public enum ExceptionCodes implements ErrorHandler {
     TENANT_THEME_IMPORT_NOT_ALLOWED(901702, "Super Tenant not allowed to import tenant theme", 400,
             "Super Tenant %s is not allowed to import a tenant theme"),
 
+    ORG_THEME_IMPORT_FAILED(901703, "Failed to import organization theme of organization %s", 500,
+            "%s"),
+    ORG_THEME_STATUS_UPDATE_FAILED(901704, "Failed to update status of theme of organization %s", 500,
+            "%s"),
+    ORG_THEME_DELETE_FAILED(901705, "Failed to delete organization theme of organization %s", 500,
+            "%s"),
+    ORG_THEME_EXPORT_FAILED(901706, "Failed to export org theme of organization %s", 500,
+            "%s"),
+    ID_CANNOT_BE_FOUND_IN_DRAFTED_STATE(901707, "ID cannot be found in drafted state", 404,
+            "ID cannot be found in drafted state"),
+    ID_CANNOT_BE_FOUND_IN_PUBLISHED_STATE(901708, "ID cannot be found in published state", 404,
+            "ID cannot be found in published state"),
+    USER_DOES_NOT_HAVE_THE_THEME(901709, "User does not use the theme", 400,
+            "User does not use the theme"),
+    USER_DOES_NOT_HAVE_ANY_PUBLISHED_OR_DRAFTED_THEMES(901710, "User does not have any drafted or published themes", 404,
+            "User does not have any drafted or published themes"),
     INVALID_API_IDENTIFIER(900851, "Provided API identifier (%s) is invalid", 400,
             "Provided API identifier (%s) is invalid"),
     API_NAME_OR_VERSION_NOT_NULL(900852, "name or version couldn't be null", 400, "name or version couldn't be null"),
@@ -512,6 +539,7 @@ public enum ExceptionCodes implements ErrorHandler {
     LOGGING_API_INCORRECT_LOG_LEVEL(901401, "Bad Request", 400, "Log level should be either OFF, BASIC, STANDARD or FULL"),
     LOGGING_API_MISSING_DATA(901402, "Missing data", 400, "API context or log level is missing"),
     LOGGING_API_RESOURCE_NOT_FOUND(901403, "Requested Resource Not Found", 404, "Requested API Resource Not Found"),
+    LOGGING_API_NOT_FOUND_IN_TENANT(901404, "Requested API Not Found", 404, "Requested API Not Found"),
     CORRELATION_CONFIG_BAD_REQUEST(902020, "Bad Request", 400, "Request body can not have empty elements"),
     CORRELATION_CONFIG_BAD_REQUEST_INVALID_NAME(902021, "Bad Request", 400, "Request body contains invalid correlation component name"),
     //Service Catalog related error codes
@@ -574,6 +602,9 @@ public enum ExceptionCodes implements ErrorHandler {
     AI_SERVICE_QUOTA_EXCEEDED(903102, "Quota exceeded for AI service", 429, "Quota exceeded for AI service"),
     DOCUMENT_NAME_ILLEGAL_CHARACTERS(902016, "Document name cannot contain illegal characters", 400, "Document name contains one or more illegal characters"),
 
+    // Compliance related errors
+    COMPLIANCE_VIOLATION_ERROR(903300, "Request does not adhere to governance standards", 400, "%s", false),
+    ERROR_WHILE_EXECUTING_COMPLIANCE_DRY_RUN(903301, "Error while performing compliance dry run", 500, "%s"),
     // Subscriptions related
     SUBSCRIPTION_ID_NOT_SPECIFIED(902017, "Subscription ID not specified.", 400,
             "Subscription ID not specified."),
@@ -754,7 +785,28 @@ public enum ExceptionCodes implements ErrorHandler {
     WORKFLOW_STATUS_NOT_DEFINED(902036, "Workflow status not defined", 400,
             "Workflow status is not defined"),
     RESOURCE_URI_TEMPLATE_NOT_DEFINED(902032, "Resource URI template value not defined", 400,
-            "Resource URI template value (target) not defined", false);
+            "Resource URI template value (target) not defined", false),
+    API_ENDPOINT_NOT_FOUND(902040, "Cannot find the required API endpoint details.", 404,
+            "Requested API endpoint with id '%s' not found."),
+    ERROR_UPDATING_API_ENDPOINT(902041, "Error while updating the API endpoint.", 500,
+            "Error while updating the API endpoint."),
+    ENDPOINT_READONLY(902042, "API endpoint is read only", 400,
+            "API endpoint with UUID %s is read only"),
+    ERROR_ADDING_API_ENDPOINT(902043, "Failed to add endpoint to API.", 500,
+            "Error while adding API endpoint."),
+    ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API(902044, "Mandatory endpoint config is missing " +
+            "in endpoint", 500, "Mandatory endpoint config is either missing or empty"),
+    ERROR_READING_API_ENDPOINTS_FILE(902045, "Error while reading API endpoints from the endpoints file",
+            400, "Error while reading API endpoints from the endpoints file"),
+    ERROR_ADDING_API_ENDPOINTS(902046, "Error while adding API Endpoints to the API", 500,
+            "Error while adding API Endpoint to the API"),
+    ERROR_DELETING_API_ENDPOINT(902047, "Error while deleting API endpoint", 500,
+            "Error while deleting API endpoint with UUID '%s'."),
+    ERROR_DELETING_PRIMARY_API_ENDPOINT(902048, "Failed to delete API endpoint since endpoint is " +
+            "defined as a primary endpoint", 400,
+            "Failed to delete API endpoint with UUID '%s' since it is defined as a primary endpoint."),
+    API_ENDPOINT_URL_INVALID(902049, "Endpoint URL is invalid", 400,
+            "Endpoint URL is invalid");
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

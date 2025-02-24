@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -51,6 +52,7 @@ public class RegistrySearchUtil {
     public static final String SEARCH_AND_TAG = "&";
     public static final String TAGS_SEARCH_TYPE_PREFIX = "tags";
     public static final String NAME_TYPE_PREFIX = "name";
+    public static final String AND_WITH_SPACES = " AND ";
     public static final String API_STATUS = "STATUS";
     public static final String API_PROVIDER = "Provider";
     public static final String DOCUMENT_INDEXER = "org.wso2.carbon.apimgt.impl.indexing.indexer.DocumentIndexer";
@@ -61,6 +63,9 @@ public class RegistrySearchUtil {
     public static final String SOAP_DEFINITION_INDEXER = "org.wso2.carbon.apimgt.impl.indexing.indexer" +
             ".SOAPAPIDefinitionIndexer";
     public static final String STORE_VIEW_ROLES = "store_view_roles";
+    public static final String STORE_VIEW_ROLES_FIELD = "store_view_roles_ss:";
+    public static final String VISIBLE_ORGANIZATIONS = "visible_organizations";
+    public static final String VISIBLE_ORGANIZATIONS_FIELD = "visible_organizations_ss:";
     public static final String PUBLISHER_ROLES = "publisher_roles";
     public static final String DOCUMENT_MEDIA_TYPE_KEY = "application/vnd.wso2-document\\+xml";
     public static final String API_DEF_MEDIA_TYPE_KEY = "application/json";
@@ -122,6 +127,7 @@ public class RegistrySearchUtil {
             newSearchQuery = getSingleSearchCriteria(inputSearchQuery);
         } else {
             String[] criterea = inputSearchQuery.split(" ");
+            criterea = processInput(criterea);
             Map<String, List<String>> critereaMap = new HashMap<>();
             List<String> untaggedContent = new ArrayList();
             for (int i = 0; i < criterea.length; i++) {
@@ -152,6 +158,14 @@ public class RegistrySearchUtil {
             for (Map.Entry<String, List<String>> entry : critereaMap.entrySet()) {
                 String nextCriterea = "";
                 if (entry.getValue().size() > 1) {
+                    if (TAG_SEARCH_TYPE_PREFIX.equals(entry.getKey()) ||
+                            TAGS_SEARCH_TYPE_PREFIX.equals(entry.getKey())) {
+                        List<String> updatedValues = entry.getValue().stream()
+                                .map(value -> value.replace(" ", "\\ "))
+                                .collect(Collectors.toList());
+                        entry.setValue(updatedValues);
+                    }
+
                     nextCriterea = entry.getKey() + "=" + getORBasedSearchCriteria(
                             entry.getValue().toArray(new String[0]));
                 } else {
@@ -172,6 +186,47 @@ public class RegistrySearchUtil {
         }
 
         return newSearchQuery;
+    }
+
+    /**
+     * Processes an input array of strings by grouping related elements.
+     *
+     * This method consolidates input strings by combining elements around delimiter strings
+     * containing a colon (':'), creating a new array where each entry represents a consolidated group.
+     *
+     * @param input An array of strings to be processed
+     * @return A processed array of strings where related elements are grouped together
+     *
+     * Key behaviors:
+     * - Identifies delimiter strings containing a colon
+     * - Aggregates subsequent strings with delimiter entries
+     * - Trims whitespace from consolidated entries
+     *
+     * Example:
+     * Input:  ["tag:Sample", "APIs", "-", "New", "name:Google"]
+     * Output: ["tag:Sample APIs - New ", "name:Google"]
+     */
+    private static String[] processInput(String[] input) {
+        List<String> result = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+
+        for (String element : input) {
+            if (element.contains(":")) {
+                if (current.length() > 0) {
+                    result.add(current.toString().trim());
+                    current.setLength(0);
+                }
+                current.append(element);
+            } else {
+                current.append(" ").append(element);
+            }
+        }
+
+        if (current.length() > 0) {
+            result.add(current.toString().trim());
+        }
+
+        return result.toArray(new String[0]);
     }
 
     /**
@@ -196,7 +251,7 @@ public class RegistrySearchUtil {
                 // if search key is 'tag' instead of 'tags', allow it as well since rest api document says query
                 // param to use for tag search is 'tag'
 
-                if (TAG_SEARCH_TYPE_PREFIX.equals(searchKey)) {
+                if (TAG_SEARCH_TYPE_PREFIX.equals(searchKey) || TAGS_SEARCH_TYPE_PREFIX.equals(searchKey)) {
                     searchKey = TAGS_SEARCH_TYPE_PREFIX;
                     searchValue = searchValue.replace(" ", "\\ ");
                 }
@@ -212,6 +267,22 @@ public class RegistrySearchUtil {
                         }
                         if (!searchValue.startsWith("*")) {
                             searchValue = "*" + searchValue;
+                        }
+                    } else {
+                        if (CONTEXT_SEARCH_TYPE_PREFIX.equalsIgnoreCase(searchKey)) {
+                            //Remove quotation marks and forward slash to get the context for exact search.
+                            searchValue = searchValue.substring(1, searchValue.length() - 1);
+                            if (searchValue.startsWith("/")) {
+                                searchValue = searchValue.substring(1);
+                            }
+                            if (searchValue.endsWith("/")) {
+                                searchValue = searchValue.substring(0, searchValue.length() - 1);
+                            }
+                            if (!searchValue.isEmpty()) {
+                                searchValue = "(*\\/" + searchValue + "\\/*" + " OR " + "\\/" + searchValue + ")";
+                            } else {
+                                searchValue = "\"\"";
+                            }
                         }
                     }
                 }
@@ -241,12 +312,28 @@ public class RegistrySearchUtil {
         String apiState = "";
         String publisherRoles = "";
         Map<String, String> attributes = new HashMap<String, String>();
+        String devportalFilterQuery = "";
+        String devportalFilterQueryField = "";
         for (String searchCriterea : searchQueries) {
             String[] keyVal = searchCriterea.split("=");
             if (STORE_VIEW_ROLES.equals(keyVal[0])) {
-                attributes.put("propertyName", keyVal[0]);
-                attributes.put("rightPropertyValue", keyVal[1]);
-                attributes.put("rightOp", "eq");
+                if (!StringUtils.isEmpty(keyVal[1])) {
+                    if (StringUtils.isEmpty(devportalFilterQuery)) {
+                        devportalFilterQueryField = STORE_VIEW_ROLES;
+                        devportalFilterQuery = keyVal[1];
+                    } else {
+                        devportalFilterQuery += (AND_WITH_SPACES + STORE_VIEW_ROLES_FIELD + keyVal[1]);
+                    }
+                }
+            } else if (VISIBLE_ORGANIZATIONS.equals(keyVal[0])) {
+                if (!StringUtils.isEmpty(keyVal[1])) {
+                    if (StringUtils.isEmpty(devportalFilterQuery)) {
+                        devportalFilterQueryField = VISIBLE_ORGANIZATIONS;
+                        devportalFilterQuery = keyVal[1];
+                    } else {
+                        devportalFilterQuery += (AND_WITH_SPACES + VISIBLE_ORGANIZATIONS_FIELD + keyVal[1]);
+                    }
+                }
             } else if (PUBLISHER_ROLES.equals(keyVal[0])) {
                 publisherRoles = keyVal[1];
             } else {
@@ -257,6 +344,11 @@ public class RegistrySearchUtil {
                 keyVal[1] = keyVal[1].replaceAll(" ", "&&");
                 attributes.put(keyVal[0], keyVal[1]);
             }
+        }
+        if (!StringUtils.isEmpty(devportalFilterQueryField)) {
+            attributes.put("propertyName", devportalFilterQueryField);
+            attributes.put("rightPropertyValue", devportalFilterQuery);
+            attributes.put("rightOp", "eq");
         }
 
         //check whether the new document indexer is engaged
@@ -431,6 +523,31 @@ public class RegistrySearchUtil {
         return criteria;
     }
 
+    private static String getOrganizationVisibilityWrappedQuery(String query, UserContext context, String userTenantDomain) {
+        if (PersistenceUtil.isAdminUser(context)) {
+            log.debug("Admin user. no modifications to the query");
+            return query;
+        }
+        String criteria;
+        String orgId = context.getOrganization().getId();
+
+        if (userTenantDomain.equals(context.getOrganization().getName())) {
+            criteria = VISIBLE_ORGANIZATIONS + "=" + "(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR " + orgId + " OR "
+                    + userTenantDomain + ")";
+        } else {
+            criteria = VISIBLE_ORGANIZATIONS + "=" + "(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR " + orgId + ")";
+        }
+        
+        if (query != null && !query.trim().isEmpty()) {
+            criteria = criteria + "&" + query;
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Organization visibility wrapped query : " + criteria);
+        }
+        return criteria;
+    }
+
+
     private static String getUserRolesQuery(String[] userRoles, String skippedRoles) {
 
         StringBuilder rolesQuery = new StringBuilder();
@@ -523,10 +640,14 @@ public class RegistrySearchUtil {
                 }
             }
 
-            String apiOverviewStateCriteria = APIConstants.API_OVERVIEW_STATUS_SEARCH_TYPE_KEY;
-            apiOverviewStateCriteria = apiOverviewStateCriteria + getORBasedSearchCriteria(statusList);
+            if (!modifiedQuery.startsWith(APIConstants.API_OVERVIEW_STATUS_SEARCH_TYPE_KEY) && !modifiedQuery
+                    .contains(APIConstants.SEARCH_AND_TAG + APIConstants.API_OVERVIEW_STATUS_SEARCH_TYPE_KEY)) {
 
-            modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + apiOverviewStateCriteria;
+                String apiOverviewStateCriteria = APIConstants.API_OVERVIEW_STATUS_SEARCH_TYPE_KEY;
+                apiOverviewStateCriteria = apiOverviewStateCriteria + getORBasedSearchCriteria(statusList);
+
+                modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + apiOverviewStateCriteria;
+            }
         }
         modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(extractQuery(modifiedQuery, true), ctx);
         return modifiedQuery;
@@ -579,7 +700,7 @@ public class RegistrySearchUtil {
 
     
     public static Map<String, String> getDevPortalSearchAttributes(String searchQuery, UserContext ctx,
-           boolean isCrossTenant, boolean displayMultipleStatus) throws APIPersistenceException {
+           boolean isCrossTenant, boolean displayMultipleStatus, String userTenantDomain) throws APIPersistenceException {
         String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
 
         if (!(StringUtils.containsIgnoreCase(modifiedQuery, APIConstants.API_STATUS))) {
@@ -596,6 +717,9 @@ public class RegistrySearchUtil {
             String searchString = APIConstants.API_STATUS + "=";
             modifiedQuery = StringUtils.replaceIgnoreCase(modifiedQuery, searchString,
                     APIConstants.LCSTATE_SEARCH_TYPE_KEY);
+        }
+        if (PersistenceUtil.areOrganizationsRegistered(ctx)) {
+            modifiedQuery = RegistrySearchUtil.getOrganizationVisibilityWrappedQuery(modifiedQuery, ctx, userTenantDomain);
         }
         modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(modifiedQuery, ctx);
         modifiedQuery = RegistrySearchUtil.getDevPortalVisibilityWrappedQuery(modifiedQuery, isCrossTenant);

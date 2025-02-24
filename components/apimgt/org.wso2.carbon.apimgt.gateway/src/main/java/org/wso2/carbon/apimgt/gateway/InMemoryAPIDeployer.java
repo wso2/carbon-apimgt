@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
@@ -210,7 +211,11 @@ public class InMemoryAPIDeployer {
 
         if (!redeployChangedAPIs) {
             try {
-                deployJWKSSynapseAPI(tenantDomain); // Deploy JWKS API
+                boolean isJWKSApiEnabled =  ServiceReferenceHolder
+                        .getInstance().getAPIManagerConfiguration().getJwtConfigurationDto().isJWKSApiEnabled();
+                if(isJWKSApiEnabled) {
+                    deployJWKSSynapseAPI(tenantDomain); // Deploy JWKS API
+                }
                 if (APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomain)) {
                     deployHealthCheckSynapseAPI(tenantDomain); // Deploy HealthCheck API for the super tenant
                 }
@@ -357,7 +362,7 @@ public class InMemoryAPIDeployer {
 
                     GatewayUtils.setCustomSequencesToBeRemoved(api, gatewayAPIDTO);
                     GatewayUtils.setCustomBackendToBeRemoved(gatewayAPIDTO);
-
+                    GatewayUtils.setEndpointSequencesToBeRemoved(api, gatewayAPIDTO);
                 }
                 gatewayAPIDTO.setLocalEntriesToBeRemove(
                         GatewayUtils
@@ -365,6 +370,7 @@ public class InMemoryAPIDeployer {
                 apiGatewayAdmin.unDeployAPI(gatewayAPIDTO);
                 DataHolder.getInstance().getApiToCertificatesMap().remove(gatewayEvent.getUuid());
                 DataHolder.getInstance().removeKeyManagerToAPIMapping(gatewayAPIDTO.getApiId());
+                DataHolder.getInstance().releaseCache(generateAPIKeyForEndpoints(gatewayAPIDTO));
             }
     }
 
@@ -610,5 +616,16 @@ public class InMemoryAPIDeployer {
             MessageContext.destroyCurrentMessageContext();
             PrivilegedCarbonContext.endTenantFlow();
         }
+    }
+
+    /**
+     * Generates an API key for endpoints by combining the provider, name, and version from the GatewayAPIDTO.
+     *
+     * @param gatewayEvent The GatewayAPIDTO containing provider, name, and version information of the API.
+     * @return The generated API key in the format "provider_name_version".
+     */
+    private String generateAPIKeyForEndpoints(GatewayAPIDTO gatewayEvent) {
+
+        return gatewayEvent.getTenantDomain() + "_" + gatewayEvent.getName() + "_" + gatewayEvent.getVersion();
     }
 }

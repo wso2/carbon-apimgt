@@ -25,6 +25,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -104,5 +105,24 @@ public class PublisherCommonServiceComponent {
      */
     protected void unsetRealmService(RealmService realmService) {
         ServiceReferenceHolder.getInstance().setRealmService(null);
+    }
+
+    @Reference(name = "org.wso2.carbon.apimgt.governance.service",
+            service = APIMGovernanceService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetAPIMGovernanceService")
+    protected void setAPIMGovernanceService(APIMGovernanceService service) {
+        if (log.isDebugEnabled()) {
+            log.debug("APIMGovernanceService set in PublisherServiceComponent");
+        }
+        ServiceReferenceHolder.getInstance().setAPIMGovernanceService(service);
+    }
+
+    protected void unsetAPIMGovernanceService(APIMGovernanceService service) {
+        if (log.isDebugEnabled()) {
+            log.debug("APIMGovernanceService unset in PublisherServiceComponent");
+        }
+        ServiceReferenceHolder.getInstance().setAPIMGovernanceService(null);
     }
 }

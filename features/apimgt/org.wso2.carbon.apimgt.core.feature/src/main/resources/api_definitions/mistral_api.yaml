@@ -2028,9 +2028,10 @@ components:
         max_tokens:
           anyOf:
             - type: integer
-              minimum: 0
+              minimum: 300
             - type: 'null'
           title: Max Tokens
+          default: 300
           description: >-
             The maximum number of tokens to generate in the completion. The
             token count of your prompt plus `max_tokens` cannot exceed the
@@ -2173,9 +2174,10 @@ components:
         max_tokens:
           anyOf:
             - type: integer
-              minimum: 0
+              minimum: 300
             - type: 'null'
           title: Max Tokens
+          default: 300
           description: >-
             The maximum number of tokens to generate in the completion. The
             token count of your prompt plus `max_tokens` cannot exceed the
@@ -2421,9 +2423,10 @@ components:
         max_tokens:
           anyOf:
             - type: integer
-              minimum: 0
+              minimum: 300
             - type: 'null'
           title: Max Tokens
+          default: 300
           description: >-
             The maximum number of tokens to generate in the completion. The
             token count of your prompt plus `max_tokens` cannot exceed the

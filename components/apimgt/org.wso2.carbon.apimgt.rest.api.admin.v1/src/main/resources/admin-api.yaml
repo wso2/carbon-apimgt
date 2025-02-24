@@ -1752,7 +1752,12 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/LLMProvider'
+              required:
+                - name
+                - apiVersion
+                - configurations
+                - apiDefinition
+              $ref: '#/components/schemas/LLMProviderRequest'
         required: true
       responses:
         201:
@@ -1793,7 +1798,9 @@ paths:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/LLMProvider'
+              required:
+                - apiDefinition
+              $ref: '#/components/schemas/LLMProviderRequest'
         required: true
       responses:
         200:
@@ -1841,7 +1848,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v4/environments/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f"'
+          "https://127.0.0.1:9443/api/am/admin/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f"'
       operationId: deleteLLMProvider
 
     get:
@@ -1867,7 +1874,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://127.0.0.1:9443/api/am/admin/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f/openapi-definition"'
+          "https://127.0.0.1:9443/api/am/admin/v4/llm-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f"'
       operationId: getLLMProvider
 
   ######################################################
@@ -1936,6 +1943,41 @@ paths:
   # The "Individual Environment" resource APIs
   ######################################################
   /environments/{environmentId}:
+    get:
+      tags:
+        - Environments
+      summary: Get a Gateway Environment Configuration
+      description: |
+        Retrieve a single Gateway Environment Configuration. We should provide the Id of the Environment as a path parameter.
+      parameters:
+        - $ref: '#/components/parameters/environmentId'
+      responses:
+        200:
+          description: |
+            OK.
+            Gateway Environment Configuration returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:environment_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/environments/8d263942-a6df-4cc2-a804-7a2525501450"'
     put:
       tags:
         - Environments
@@ -1999,6 +2041,191 @@ paths:
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v4/environments/d7cf8523-9180-4255-84fa-6cb171c1f779"'
 
+  ######################################################
+  # The "Organizations" resource API
+  ######################################################
+  /organizations:
+    get:
+      tags:
+        - Organizations
+      summary: Get all registered Organizations
+      description: |
+        Get all Registered Organizations
+      responses:
+        200:
+          description: |
+            OK.
+            Organizations returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationList'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:organization_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/organizations"'
+
+    post:
+      tags:
+        - Organizations
+      summary: Add an Organizations
+      description: |
+        Add a new organization
+      requestBody:
+        description: |
+          Organization object that should to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+        required: true
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created organization as entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        400:
+          $ref: '#/components/responses/BadRequest'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:organization_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/organizations"'
+
+  ######################################################
+  # The "Individual Environment" resource APIs
+  ######################################################
+  /organizations/{organizationId}:
+    get:
+      tags:
+        - Organizations
+      summary: Get an Organization
+      description: |
+        Get an organization by organization Id
+      parameters:
+        - $ref: '#/components/parameters/organizationId'
+      responses:
+        200:
+          description: |
+            OK.
+            Organization.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:organization_read
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X GET -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/organizations/d7cf8523-9180-4255-84fa-6cb171c1f779"'
+    put:
+      tags:
+        - Organizations
+      summary: Update an Organization
+      description: |
+        Update an organization by organization Id
+      parameters:
+        - $ref: '#/components/parameters/organizationId'
+      requestBody:
+        description: |
+          Organization object with updated information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Organization updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:organization_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/organizations/d7cf8523-9180-4255-84fa-6cb171c1f779"'
+
+    delete:
+      tags:
+        - Organizations
+      summary: Delete an Organization
+      description: |
+        Delete an organization by organization Id
+      parameters:
+        - $ref: '#/components/parameters/organizationId'
+      responses:
+        200:
+          description: |
+            OK.
+            Organization successfully deleted.
+          content: {}
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:organization_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/organizations/d7cf8523-9180-4255-84fa-6cb171c1f779"'
+ 
+  /me/organization-information:
+    get:
+      tags:
+        - Users
+      summary: Get the Organization information of the user
+      description: |
+        Using this operation, logged-in user can get their organization information.
+      operationId: organizationInformation
+      responses:
+        200:
+          description: |
+            OK.
+            Key Manager list returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationInfo'
+        400:
+          $ref: '#/components/responses/BadRequest'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:admin_settings
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/publisher/v4/me/organization"'
   ######################################################
   # The Bot Detection Data API resources
   ######################################################
@@ -3075,6 +3302,194 @@ paths:
           -F file=@theme.zip "https://127.0.0.1:9443/api/am/admin/v4/tenant-theme"'
 
   ######################################################
+  # Organization theme of Devportal related APIs
+  ######################################################
+  /org-themes:
+    get:
+      operationId: getOrgThemes
+      summary: Retrieve UUIDs of org-theme contents
+      description: Returns the UUIDs of org-theme contents and their publish status.
+      parameters:
+        - name: publish
+          in: query
+          description: Filter themes based on published status
+          required: false
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: List of org themes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContentPublishStatusResponse'
+        404:
+          $ref: '#/components/responses/NotFound'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:tenant_theme_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X GET -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                "https://127.0.0.1:9443/api/am/admin/v4/org-themes?publish=true"'
+
+    post:
+      operationId: importOrgTheme
+      summary: Import org theme
+      description: Imports a drafted zip of an org theme to APIM.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  description: |
+                    The org-content.zip file
+                  format: binary
+      responses:
+        200:
+          description: Successfully imported
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        413:
+          $ref: '#/components/responses/PayloadTooLarge'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:tenant_theme_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" 
+                -F "file=@org-content.zip" 
+                "https://127.0.0.1:9443/api/am/admin/v4/org-themes"'
+
+  /org-themes/{id}/content:
+    get:
+      operationId: getOrgThemeContent
+      summary: Retrieve org theme as zip
+      description: Returns the org theme as a zip file for the given ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Returns the org theme zip
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+        404:
+          $ref: '#/components/responses/NotFound'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:tenant_theme_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X GET -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                "https://127.0.0.1:9443/api/am/admin/v4/org-themes/{id}/content" 
+                -o org-content.zip'
+
+  /org-themes/{id}:
+    delete:
+      operationId: deleteOrgTheme
+      summary: Delete an org theme
+      description: Deletes the org theme for the given ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully deleted
+        404:
+          $ref: '#/components/responses/NotFound'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:tenant_theme_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                "https://127.0.0.1:9443/api/am/admin/v4/org-themes/{id}"'
+
+  /org-themes/{id}/status:
+    post:
+      operationId: updateOrgThemeStatus
+      summary: Update publish status of an org theme
+      description: Publishes or unpublishes an org theme to the dev portal.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContentPublishStatus"
+      responses:
+        200:
+          description: Successfully updated status
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:tenant_theme_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" 
+                -H "Content-Type: application/json" 
+                -d ''{"ACTION": "PUBLISH"}'' 
+                "https://127.0.0.1:9443/api/am/admin/v4/org-themes/{id}/status"'
+
+  ######################################################
   # The Tenant config resource APIs
   ######################################################
   /tenant-config:
@@ -3788,6 +4203,173 @@ paths:
       security:
         - OAuth2Security:
             - apim:admin
+  ######################################################
+  # The "Label Collection" resource API
+  ######################################################
+  /labels:
+    get:
+      tags:
+        - Labels (Collection)
+      summary: Get all Labels
+      description: |
+        Get all Labels
+      responses:
+        200:
+          description: |
+            OK.
+            Labels returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelList'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/labels"'
+      operationId: getAllLabels
+
+    post:
+      tags:
+        - Label (Individual)
+      summary: Add a new Label
+      description: |
+        Add a new Label
+      requestBody:
+        description: |
+            Label object that should to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Label'
+        required: true
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Label'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        409:
+            $ref: '#/components/responses/Conflict'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/labels"'
+      operationId: createLabel
+
+  ######################################################
+  # The "Individual Label" resource APIs
+  ######################################################
+  /labels/{labelId}:
+    put:
+      tags:
+        - Label (Individual)
+      summary: Update a Label
+      description: |
+        Update a Label by label id
+      parameters:
+        - $ref: '#/components/parameters/labelId'
+      requestBody:
+        description: |
+          Label object with updated information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Label'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Label updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Label'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/labels/d7cf8523-9180-4255-84fa-6cb171c1f779"'
+      operationId: updateLabel
+
+    delete:
+      tags:
+        - Label (Individual)
+      summary: Delete a Label
+      description: |
+        Delete a Label by label id
+      parameters:
+        - $ref: '#/components/parameters/labelId'
+      responses:
+        200:
+          description: |
+            OK.
+            Label successfully deleted.
+          content: {}
+        409:
+          $ref: '#/components/responses/Conflict'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/labels/d7cf8523-9180-4255-84fa-6cb171c1f779"'
+      operationId: deleteLabel
+
+  ######################################################
+  # The "Label Usage Individual" resource API
+  ######################################################
+  /labels/{labelId}/usage:
+    get:
+      tags:
+        - Label (Individual)
+      summary: Get a Label Usage
+      description: |
+        Retrieve a single Label Usage. We should provide the Id of the Label as a path parameter.
+      parameters:
+        - $ref: '#/components/parameters/labelId'
+      responses:
+        200:
+          description: |
+            OK.
+            Label Usage returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LabelUsage'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/labels/d7cf8523-9180-4255-84fa-6cb171c1f779/usage"'
+      operationId: getLabelUsage
+
 components:
   schemas:
     Error:
@@ -3833,6 +4415,25 @@ components:
           type: string
           description: |
             Description about individual errors occurred
+    ContentPublishStatus:
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+            - PUBLISH
+            - UNPUBLISH
+      example:
+        action: PUBLISH
+    ContentPublishStatusResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: UUID of the org-theme
+        published:
+          type: boolean
+          description: Publish status of the org-theme
     ThrottlePolicyList:
       title: Throttle Policy List
       type: object
@@ -4692,6 +5293,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AdditionalProperty'
+        permissions:
+          type: object
+          properties:
+            permissionType:
+              type: string
+              example: ALLOW
+              default: PUBLIC
+              enum:
+                - PUBLIC
+                - ALLOW
+                - DENY
+            roles:
+              type: array
+              items:
+                type: string
+                example: Internal/everyone
     EnvironmentList:
       title: Environment List
       type: object
@@ -4705,14 +5322,55 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
-    LLMProvider:
-      title: LLMProvider
+    Organization:
+      title: Organization
+      required:
+        - externalOrganizationId
       type: object
       properties:
-        id:
+        organizationId:
+          type: string
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+          readOnly: true
+          description: |
+            UUID of the organization.
+        externalOrganizationId:
+          type: string
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+          description: |
+            External id of the organization.
+        parentOrganizationId:
           type: string
           readOnly: true
           example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+          description: |
+            UUID of the parent organization if there is any.
+        displayName:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: My Organization
+        description:
+          maxLength: 1023
+          type: string
+          example: My Organization Description
+    OrganizationList:
+      title: Organization List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Organizationa returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Organization'
+    LLMProviderRequest:
+      title: LLMProvider
+      type: object
+      properties:
         name:
           maxLength: 255
           minLength: 1
@@ -4734,6 +5392,45 @@ components:
           type: string
           description: OpenAPI specification
           format: binary
+        modelList:
+          type: string
+          description: List of models supported by the LLM Provider as a stringified JSON array
+    LLMProviderResponse:
+      title: LLMProviderResponse
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: OpenAI
+        apiVersion:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: 1.0.0
+        builtInSupport:
+          type: boolean
+          description: Is built-in support
+        description:
+          maxLength: 1023
+          type: string
+          example: OpenAI LLM
+        configurations:
+          type: string
+          description: LLM Provider configurations
+        apiDefinition:
+          type: string
+          description: OpenAPI specification
+        modelList:
+          type: array
+          items:
+            type: string
+          description: List of models supported by the LLM Provider
     LLMProviderSummaryResponse:
       title: LLMProviderSummaryResponse
       type: object
@@ -4772,37 +5469,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/LLMProviderSummaryResponse'
-    LLMProviderResponse:
-      title: LLMProviderResponse
-      type: object
-      properties:
-        id:
-          type: string
-          readOnly: true
-          example: ece92bdc-e1e6-325c-b6f4-656208a041e9
-        name:
-          maxLength: 255
-          minLength: 1
-          type: string
-          example: OpenAI
-        apiVersion:
-          maxLength: 255
-          minLength: 1
-          type: string
-          example: 1.0.0
-        builtInSupport:
-          type: boolean
-          description: Is built-in support
-        description:
-          maxLength: 1023
-          type: string
-          example: OpenAI LLM
-        configurations:
-          type: string
-          description: LLM Provider configurations
-        apiDefinition:
-          type: string
-          description: OpenAPI specification
     VHost:
       title: Virtual Host
       required:
@@ -4812,8 +5478,6 @@ components:
         host:
           maxLength: 255
           minLength: 1
-          # hostname regex as per RFC 1123 (http://tools.ietf.org/html/rfc1123) and appended *
-          pattern: '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
           type: string
           example: mg.wso2.com
         httpContext:
@@ -5015,9 +5679,14 @@ components:
           type: array
           items:
             type: string
-        IsJWTEnabledForLoginTokens: 
+        IsJWTEnabledForLoginTokens:
           type: boolean
           default: false
+        orgAccessControlEnabled:
+          type: boolean
+          description: |
+            Is Organization-based access control configuration enabled
+          example: true
         keyManagerConfiguration:
           type: array
           items:
@@ -5043,9 +5712,31 @@ components:
                 type: array
                 items:
                   $ref: '#/components/schemas/KeyManagerConfiguration'
+        gatewayConfiguration:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                example: default
+              displayName:
+                type: string
+                example: default
+              configurations:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GatewayConfiguration'
+              defaultHostnameTemplate:
+                type: string
+                example: '{apiId}.execute-api.{region}.amazonaws.com'
         analyticsEnabled:
           type: boolean
           description: To determine whether analytics is enabled or not
+          example: false
+        transactionCounterEnable:
+          type: boolean
+          description: To determine whether the transaction counter is enabled or not
           example: false
     ScopeList:
       title: Scope Role Mapping List
@@ -5275,7 +5966,10 @@ components:
             - EXCHANGED
             - DIRECT
             - BOTH
-
+        allowedOrganizations:
+          type: array
+          items:
+            type: string
     KeyManagerEndpoint:
       title: Key Manager Endpoint.
       required:
@@ -5352,6 +6046,40 @@ components:
         tooltip:
           type: string
           example: Enter username to connect to key manager
+        default:
+          type: object
+          properties: { }
+          example: admin
+        values:
+          type: array
+          items:
+            type: object
+            properties: { }
+    GatewayConfiguration:
+      title: Gateway Configuration
+      type: object
+      properties:
+        name:
+          type: string
+          example: consumer_key
+        label:
+          type: string
+          example: Consumer Key
+        type:
+          type: string
+          example: select
+        required:
+          type: boolean
+          example: true
+        mask:
+          type: boolean
+          example: true
+        multiple:
+          type: boolean
+          example: true
+        tooltip:
+          type: string
+          example: Enter username
         default:
           type: object
           properties: {}
@@ -5718,6 +6446,16 @@ components:
           type: string
           description: The IP of the client
           example: 127.0.0.1
+    OrganizationInfo:
+      title: Organization Info
+      type: object
+      properties:
+        organizationId:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          type: string
+          example: My Organization
     RoleAliasList:
       title: Role alias list
       type: object
@@ -5826,6 +6564,59 @@ components:
         count:
           type: integer
           example: 120
+    Label:
+      title: Label
+      required:
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+          example: d7cf8523-9180-4255-84fa-6cb171c1f779
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: Health
+        description:
+          maxLength: 1024
+          type: string
+          example: Health related APIs
+    LabelList:
+      title: Label List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Number of labels returned.
+          example: 1
+        list:
+          type: array
+          description: List of labels.
+          items:
+            $ref: '#/components/schemas/Label'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    LabelUsage:
+      title: Label Usage
+      type: object
+      properties:
+        apis:
+          type: object
+          description: |
+            List of APIs associated with the label.
+          properties:
+            count:
+              type: integer
+              description: Number of APIs associated with the label.
+              example: 1
+            list:
+              type: array
+              description: List of APIs associated with the label.
+              items:
+                $ref: '#/components/schemas/ApiResult'
+
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
@@ -6019,6 +6810,14 @@ components:
       required: true
       schema:
         type: string
+    organizationId:
+      name: organizationId
+      in: path
+      description: |
+        Organization UUID
+      required: true
+      schema:
+        type: string
     llmProviderId:
       name: llmProviderId
       in: path
@@ -6141,6 +6940,14 @@ components:
       required: true
       schema:
         type: string
+    labelId:
+      name: labelId
+      in: path
+      description: |
+        Label UUID
+      required: true
+      schema:
+        type: string
   securitySchemes:
     OAuth2Security:
       type: oauth2
@@ -6184,3 +6991,10 @@ components:
             apim:keymanagers_manage: Manage Key Managers
             apim:api_provider_change: Retrieve and manage applications
             apim:llm_provider_manage: Manage LLM Providers
+            apim:gov_policy_read: Retrieve governance policies
+            apim:gov_policy_manage: Manage governance policies
+            apim:gov_result_read: Retrieve governance results
+            apim:gov_rule_read: Retrieve governance rules
+            apim:gov_rule_manage: Manage governance rules
+            apim:organization_manage: Manage Organizations
+            apim:organization_read: Read Organizations

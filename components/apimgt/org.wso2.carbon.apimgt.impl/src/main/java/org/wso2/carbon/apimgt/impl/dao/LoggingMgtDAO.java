@@ -76,6 +76,21 @@ public class LoggingMgtDAO {
         }
     }
 
+    public boolean checkIfAPIExists(String organization, String apiId) throws APIManagementException {
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement preparedStatement =
+                     connection.prepareStatement(SQLConstants.CHECK_PER_API_IS_AVAILABLE_LOGGING_SQL)) {
+            preparedStatement.setString(1, apiId);
+            preparedStatement.setString(2, organization);
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.next();
+            }
+        } catch (SQLException e) {
+            handleException("Failed to check if API exists with the UUID " + apiId + " for tenant " + organization, e);
+        }
+        return false;
+    }
+
     public void addAPILoggerPerResource(String organization, String apiId, String logLevel, String resourceMethod,
                                         String resourcePath) throws APIManagementException {
         try (Connection addLoggingCon = APIMgtDBUtil.getConnection()) {

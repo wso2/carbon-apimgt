@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
-import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -433,6 +432,7 @@ public class SubscriptionValidationDAO {
                         api.setOrganization(resultSet.getString("ORGANIZATION"));
                         String publishedDefaultApiVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
                         String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
+                        api.setContextTemplate(contextTemplate);
 
                         setDefaultVersionContext(apiType, api, version, publishedDefaultApiVersion, context, contextTemplate);
 
@@ -1142,11 +1142,6 @@ public class SubscriptionValidationDAO {
                         api.setStatus(resultSet.getString("STATUS"));
                         api.setPolicy(resultSet.getString("API_TIER"));
                         api.setOrganization(resultSet.getString("ORGANIZATION"));
-                        if (resultSet.getString("AI_CONFIGURATION_UUID") != null) {
-                            AIConfiguration aiConfiguration = new AIConfiguration();
-                            aiConfiguration.setLlmProviderId(resultSet.getString("LLM_PROVIDER_UUID"));
-                            api.setAiConfiguration(aiConfiguration);
-                        }
                         if (resultSet.getString("IS_EGRESS") != null) {
                             api.setEgress(parseInt(resultSet.getString("IS_EGRESS")));
                         }
@@ -1157,6 +1152,7 @@ public class SubscriptionValidationDAO {
                         }
                         String publishedDefaultApiVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
                         String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
+                        api.setContextTemplate(contextTemplate);
 
                         setDefaultVersionContext(apiType, api, version, publishedDefaultApiVersion, context,
                                 contextTemplate);
@@ -1198,6 +1194,7 @@ public class SubscriptionValidationDAO {
             }
             String synapseContext = context + "/" + APIConstants.API_PRODUCT_VERSION_1_0_0;
             api.setContext(synapseContext);
+            api.setContextTemplate(context);
         }
     }
 
@@ -1273,15 +1270,11 @@ public class SubscriptionValidationDAO {
                         api.setApiType(apiType);
                         api.setPolicy(resultSet.getString("API_TIER"));
                         api.setContext(resultSet.getString("CONTEXT"));
+                        api.setContextTemplate(resultSet.getString("CONTEXT_TEMPLATE"));
                         String revision = resultSet.getString("REVISION_UUID");
                         api.setStatus(resultSet.getString("STATUS"));
                         api.setOrganization(resultSet.getString("ORGANIZATION"));
                         api.setIsDefaultVersion(isAPIDefaultVersion(connection, provider, name, version));
-                        if (resultSet.getString("AI_CONFIGURATION_UUID") != null) {
-                            AIConfiguration aiConfiguration = new AIConfiguration();
-                            aiConfiguration.setLlmProviderId(resultSet.getString("LLM_PROVIDER_UUID"));
-                            api.setAiConfiguration(aiConfiguration);
-                        }
                         if (resultSet.getString("IS_EGRESS") != null) {
                             api.setEgress(parseInt(resultSet.getString("IS_EGRESS")));
                         }
@@ -1497,11 +1490,7 @@ public class SubscriptionValidationDAO {
                         api.setPolicy(resultSet.getString("API_TIER"));
                         api.setContext(context);
                         api.setStatus(resultSet.getString("STATUS"));
-                        if (resultSet.getString("AI_CONFIGURATION_UUID") != null) {
-                            AIConfiguration aiConfiguration = new AIConfiguration();
-                            aiConfiguration.setLlmProviderId(resultSet.getString("LLM_PROVIDER_UUID"));
-                            api.setAiConfiguration(aiConfiguration);
-                        }
+                        api.setContextTemplate(contextTemplate);
                         if (resultSet.getString("IS_EGRESS") != null) {
                             api.setEgress(parseInt(resultSet.getString("IS_EGRESS")));
                         }
@@ -1597,11 +1586,6 @@ public class SubscriptionValidationDAO {
                         String revision = resultSet.getString("REVISION_UUID");
                         api.setRevision(revision);
                         api.setEnvironment(deploymentName);
-                        if (resultSet.getString("AI_CONFIGURATION_UUID") != null) {
-                            AIConfiguration aiConfiguration = new AIConfiguration();
-                            aiConfiguration.setLlmProviderId(resultSet.getString("LLM_PROVIDER_UUID"));
-                            api.setAiConfiguration(aiConfiguration);
-                        }
                         if (resultSet.getString("IS_EGRESS") != null) {
                             api.setEgress(parseInt(resultSet.getString("IS_EGRESS")));
                         }
@@ -1612,6 +1596,7 @@ public class SubscriptionValidationDAO {
                         }
                         String publishedDefaultApiVersion = resultSet.getString("PUBLISHED_DEFAULT_API_VERSION");
                         String contextTemplate = resultSet.getString("CONTEXT_TEMPLATE");
+                        api.setContextTemplate(contextTemplate);
 
                         setDefaultVersionContext(apiType, api, version, publishedDefaultApiVersion, context,
                                 contextTemplate);

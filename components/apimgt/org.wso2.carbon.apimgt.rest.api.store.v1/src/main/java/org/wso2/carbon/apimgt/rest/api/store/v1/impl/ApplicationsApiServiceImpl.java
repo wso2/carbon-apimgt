@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -62,6 +63,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRevokeRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO.VisibilityEnum;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyGenerateRequestDTO;
@@ -104,7 +106,9 @@ import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
+    public static final String SP_NAME_APPLICATION = "sp.name.application";
 
+    boolean orgWideAppUpdateEnabled = Boolean.getBoolean(APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
 
     /**
      * Retrieves all the applications that the user has access to
@@ -137,12 +141,14 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         groupId = RestApiUtil.getLoggedInUserGroupId();
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
             Subscriber subscriber = new Subscriber(username);
             Application[] applications;
+            String sharedOrganization = orgInfo.getOrganizationId();
             applications = apiConsumer
                     .getApplicationsWithPagination(new Subscriber(username), groupId, offset, limit, query, sortBy,
-                            sortOrder, organization);
+                            sortOrder, organization, sharedOrganization);
             if (applications != null) {
                 JSONArray applicationAttributesFromConfig = apiConsumer.getAppAttributesFromConfig(username);
                 for (Application application : applications) {
@@ -243,15 +249,16 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
 
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
 
             if (APIUtil.isApplicationExist(ownerId, applicationDTO.getName(), applicationGroupId, organization) && update != null
                     && update) {
                 int appId = APIUtil.getApplicationId(applicationDTO.getName(), ownerId);
                 Application oldApplication = apiConsumer.getApplicationById(appId);
                 application = preProcessAndUpdateApplication(ownerId, applicationDTO, oldApplication,
-                        oldApplication.getUUID());
+                        oldApplication.getUUID(), orgInfo);
             } else {
-                application = preProcessAndAddApplication(ownerId, applicationDTO, organization);
+                application = preProcessAndAddApplication(ownerId, applicationDTO, organization, orgInfo.getOrganizationId());
                 update = Boolean.FALSE;
             }
 
@@ -323,7 +330,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             body.setTokenType(ApplicationDTO.TokenTypeEnum.JWT);
 
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            Application createdApplication = preProcessAndAddApplication(username, body, organization);
+            OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+            Application createdApplication = preProcessAndAddApplication(username, body, organization,
+                    orgInfo.getOrganizationId());
             ApplicationDTO createdApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(createdApplication);
 
             //to be set as the Location header
@@ -356,8 +365,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @param organization   Identifier of an organization
      * @return Created application
      */
-    private Application preProcessAndAddApplication(String username, ApplicationDTO applicationDto, String organization)
-            throws APIManagementException {
+    private Application preProcessAndAddApplication(String username, ApplicationDTO applicationDto, String organization,
+            String sharedOrganization) throws APIManagementException {
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
 
         //validate the tier specified for the application
@@ -375,6 +384,12 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         //subscriber field of the body is not honored. It is taken from the context
         Application application = ApplicationMappingUtil.fromDTOtoApplication(applicationDto, username);
+        
+        application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD); // default
+        if ((applicationDto.getVisibility() != null)
+                && applicationDto.getVisibility() == VisibilityEnum.SHARED_WITH_ORG && sharedOrganization != null) {
+            application.setSharedOrganization(sharedOrganization);
+        } 
 
         int applicationId = apiConsumer.addApplication(application, username, organization);
 
@@ -395,6 +410,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId, organization);
             if (application != null) {
@@ -419,7 +435,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     }
                 }
                 application.setApplicationAttributes(applicationAttributes);
-                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)
+                        || (orgInfo.getOrganizationId() != null
+                                && orgInfo.getOrganizationId().equals(application.getSharedOrganization()))) {
                     ApplicationDTO applicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(application);
                     applicationDTO.setHashEnabled(OAuthServerConfiguration.getInstance().isClientSecretHashEnabled());
                     Set<Scope> scopes = apiConsumer
@@ -458,7 +476,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
 
-            if (!RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
+            if (!orgWideAppUpdateEnabled && !RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
             if (body.getName() != null && !body.getName().equalsIgnoreCase(oldApplication.getName())) {
@@ -468,8 +486,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             "A duplicate application already exists by the name - " + body.getName());
                 }
             }
+            OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             Application updatedApplication = preProcessAndUpdateApplication(username, body, oldApplication,
-                    applicationId);
+                    applicationId, orgInfo);
             ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
             return Response.ok().entity(updatedApplicationDTO).build();
 
@@ -503,7 +522,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 RestApiUtil.handleBadRequest("Username cannot be null", log);
             }
 
-            String userId = applicationThrottleResetDTO.getUserName();
+            String user = applicationThrottleResetDTO.getUserName();
+            String userId = MultitenantUtils.getTenantAwareUsername(user);
             String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
             String organization = RestApiUtil.getOrganization(messageContext);
 
@@ -531,7 +551,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return Updated application
      */
     private Application preProcessAndUpdateApplication(String username, ApplicationDTO applicationDto,
-            Application oldApplication, String applicationId) throws APIManagementException {
+            Application oldApplication, String applicationId, OrganizationInfo sharedOrganizationInfo) throws APIManagementException {
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
         Object applicationAttributesFromUser = applicationDto.getAttributes();
         Map<String, String> applicationAttributes = new ObjectMapper()
@@ -547,7 +567,40 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         //we do not honor the application id which is sent via the request body
         application.setUUID(oldApplication != null ? oldApplication.getUUID() : null);
 
+        application.setSharedOrganization(oldApplication.getSharedOrganization()); // default
+        String sharedOrganization = sharedOrganizationInfo.getOrganizationId();
+
+        if (applicationDto.getVisibility() != null) {
+            if (applicationDto.getVisibility() == VisibilityEnum.SHARED_WITH_ORG && sharedOrganization != null) {
+                application.setSharedOrganization(sharedOrganization);
+            } else if (applicationDto.getVisibility() == VisibilityEnum.PRIVATE) {
+                application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD);
+            }
+
+        } 
         apiConsumer.updateApplication(application);
+
+        // Added to use the application name as part of sp name instead of application UUID when specified
+        String applicationSpNameProp = System.getProperty(SP_NAME_APPLICATION);
+        boolean applicationSpName = Boolean.parseBoolean(applicationSpNameProp);
+        //If application name is renamed, need to update SP app as well
+        if (applicationSpName && !application.getName().equals(oldApplication.getName())) {
+            //Fetch Application Keys
+            Set<APIKey> applicationKeys = getApplicationKeys(applicationId, apiConsumer.getRequestedTenant(),
+                                                             sharedOrganizationInfo);
+            //Check what application JSON params are
+            for (APIKey key : applicationKeys) {
+                if (!APIConstants.OAuthAppMode.MAPPED.name().equals(key.getCreateMode())) {
+                    JsonObject jsonParams = new JsonObject();
+                    String grantTypes = StringUtils.join(key.getGrantTypes(), ',');
+                    jsonParams.addProperty(APIConstants.JSON_GRANT_TYPES, grantTypes);
+                    jsonParams.addProperty(APIConstants.JSON_USERNAME, username);
+                    apiConsumer.updateAuthClient(username, application,
+                                                 key.getType(), key.getCallbackUrl(), null, null, null,
+                                                 application.getGroupId(), new Gson().toJson(jsonParams), key.getKeyManager());
+                }
+            }
+        }
 
         //retrieves the updated application and send as the response
         return apiConsumer.getApplicationByUUID(applicationId);
@@ -665,7 +718,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     org.json.JSONObject decodedBody = new org.json.JSONObject(
                                         new String(Base64.getUrlDecoder().decode(splitToken[1])));
                     if (application != null) {
-                        if (RestAPIStoreUtils.isUserOwnerOfApplication(application)
+                        if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)
                                 || RestAPIStoreUtils.isApplicationSharedtoUser(application)) {
                             if (decodedBody.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION) != null) {
                                 org.json.JSONObject appInfo =
@@ -748,7 +801,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
             if (application != null) {
-                if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+                if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
                     apiConsumer.removeApplication(application, username);
                     if (APIConstants.ApplicationStatus.DELETE_PENDING.equals(application.getStatus())) {
                         if (application.getId() == -1) {
@@ -789,7 +842,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
-                if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+                if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
                     String[] accessAllowDomainsArray = {"ALL"};
                     JSONObject jsonParamObj = new JSONObject();
                     jsonParamObj.put(ApplicationConstants.OAUTH_CLIENT_USERNAME, username);
@@ -896,16 +949,19 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * Used to get all keys of an application
      *
      * @param applicationUUID Id of the application
+     * @param orgInfo 
      * @return List of application keys
      */
-    private Set<APIKey> getApplicationKeys(String applicationUUID, String tenantDomain) {
+    private Set<APIKey> getApplicationKeys(String applicationUUID, String tenantDomain, OrganizationInfo orgInfo) {
 
         String username = RestApiCommonUtil.getLoggedInUsername();
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationUUID);
             if (application != null) {
-                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+                if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)
+                        || (orgInfo != null && orgInfo.getOrganizationId() != null
+                                && orgInfo.getOrganizationId().equals(application.getSharedOrganization()))) {
                     return apiConsumer.getApplicationKeysOfApplication(application.getId(), tenantDomain);
                 } else {
                     RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationUUID, log);
@@ -927,7 +983,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      */
     private Set<APIKey> getApplicationKeys(String applicationUUID) {
 
-        return getApplicationKeys(applicationUUID, null);
+        return getApplicationKeys(applicationUUID, null, null);
     }
 
     @Override
@@ -1070,7 +1126,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getApplicationByUUID(applicationId);
             if (application != null) {
-                if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+                if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
                     String grantTypes = StringUtils.join(body.getSupportedGrantTypes(), ',');
                     JsonObject jsonParams = new JsonObject();
                     jsonParams.addProperty(APIConstants.JSON_GRANT_TYPES, grantTypes);
@@ -1175,7 +1231,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             keyManagerName = body.getKeyManager();
         }
         if (application != null) {
-            if (RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+            if (orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
                 String clientId = body.getConsumerKey();
                 String keyType = body.getKeyType().toString();
                 String tokenType = APIConstants.DEFAULT_TOKEN_TYPE;
@@ -1203,7 +1259,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                                                           String xWso2Tenant, MessageContext messageContext)
             throws APIManagementException {
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        Set<APIKey> applicationKeys = getApplicationKeys(applicationId, organization);
+        OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
+        Set<APIKey> applicationKeys = getApplicationKeys(applicationId, organization, orgInfo);
         List<ApplicationKeyDTO> keyDTOList = new ArrayList<>();
         ApplicationKeyListDTO applicationKeyListDTO = new ApplicationKeyListDTO();
         applicationKeyListDTO.setCount(0);
@@ -1269,9 +1326,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         String username = RestApiCommonUtil.getLoggedInUsername();
         APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(username);
         Application application = apiConsumer.getApplicationByUUID(applicationId);
+        OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
 
         if (application != null) {
-            if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
+            if (RestAPIStoreUtils.isUserAccessAllowedForApplication(application) || (orgInfo.getOrganizationId() != null
+                    && orgInfo.getOrganizationId().equals(application.getSharedOrganization()))) {
                 ApplicationKeyDTO appKey = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
                 if (appKey != null) {
                     String jsonInput = null;
@@ -1352,7 +1411,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         }
             if (application != null) {
                 ApplicationKeyDTO appKey = getApplicationKeyByAppIDAndKeyMapping(applicationId, keyMappingId);
-                if (RestAPIStoreUtils.isUserOwnerOfApplication(application) && appKey != null) {
+                if ((orgWideAppUpdateEnabled || RestAPIStoreUtils.isUserOwnerOfApplication(application))
+                        && appKey != null) {
                     String grantTypes = StringUtils.join(body.getSupportedGrantTypes(), ',');
                     JsonObject jsonParams = new JsonObject();
                     jsonParams.addProperty(APIConstants.JSON_GRANT_TYPES, grantTypes);

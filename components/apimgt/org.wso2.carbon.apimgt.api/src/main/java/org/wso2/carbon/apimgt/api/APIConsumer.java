@@ -32,10 +32,11 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
-import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.ResourceFile;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
@@ -461,12 +462,13 @@ public interface APIConsumer extends APIManager {
      * @param offset
      * @param groupingId   the groupId to which the applications must belong.
      * @param organization Identifier of an organization
+     * @param sharedOrganization 
      * @return Applications
      * @throws APIManagementException if failed to applications for given subscriber
      */
 
     Application[] getApplicationsWithPagination(Subscriber subscriber, String groupingId, int start, int offset,
-                                                String search, String sortColumn, String sortOrder, String organization)
+            String search, String sortColumn, String sortOrder, String organization, String sharedOrganization)
             throws APIManagementException;
 
     /**
@@ -571,6 +573,18 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException if error occurred while obtaining the swagger definition
      */
     String getOpenAPIDefinitionForEnvironment(API api, String environmentName)
+            throws APIManagementException;
+
+    /**
+     * Returns the swagger definition of the API for the given gateway environment and key manager as a string
+     *
+     * @param api
+     * @param environmentName API Gateway environment name
+     * @param kmId            Key Manager UUID
+     * @return swagger string
+     * @throws APIManagementException if error occurred while obtaining the swagger definition
+     */
+    String getOpenAPIDefinitionForEnvironmentByKm(API api, String environmentName, String kmId)
             throws APIManagementException;
 
     /**
@@ -872,6 +886,16 @@ public interface APIConsumer extends APIManager {
             throws APIManagementException;
 
     /**
+     * This method used to retrieve gateway environment for tenant
+     * @param organization organization of the gateway environment
+     * @param username username of the logged-in user
+     * @return Environment list
+     * @throws APIManagementException if error occurred
+     */
+    Map<String, Environment> getGatewayEnvironmentsByOrganization(String organization, String username)
+            throws APIManagementException;
+
+    /**
      * Remove application keys.
      * @param application   application
      * @param keyMappingId  key mapping id
@@ -879,4 +903,26 @@ public interface APIConsumer extends APIManager {
      * @throws APIManagementException
      */
     boolean removalKeys(Application application, String keyMappingId, String xWSO2Tenant) throws APIManagementException;
+    
+    /**
+     * @param searchQuery search query. ex : provider:admin
+     * @param organizationInfo Identifier of an organization
+     * @param start starting number
+     * @param end ending number
+     * @return
+     * @throws APIManagementException
+     */
+    Map<String, Object> searchPaginatedAPIs(String searchQuery, OrganizationInfo organizationInfo, int start, int end,
+            String sortBy, String sortOrder) throws APIManagementException;
+
+    /**
+     * @param searchQuery search query
+     * @param organizationInfo Information about the organization
+     * @param start
+     * @param end
+     * @return
+     * @throws APIManagementException
+     */
+    Map<String, Object> searchPaginatedContent(String searchQuery, OrganizationInfo organizationInfo, int start, int end)
+            throws APIManagementException;
 }

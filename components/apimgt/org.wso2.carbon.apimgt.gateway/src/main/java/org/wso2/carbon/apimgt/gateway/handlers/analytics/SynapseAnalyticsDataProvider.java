@@ -455,16 +455,16 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         Map<String, Integer> aiTokenUsage = new HashMap<>();
         aiMetadata.put(
                 Constants.AI_VENDOR_NAME,
-                aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_NAME).toString()
+                aiApiResponseMetadata.get(AIAPIConstants.NAME).toString()
         );
         aiMetadata.put(
                 Constants.AI_VENDOR_VERSION,
-                aiApiResponseMetadata.get(AIAPIConstants.LLM_PROVIDER_API_VERSION).toString()
+                aiApiResponseMetadata.get(AIAPIConstants.API_VERSION).toString()
         );
         aiMetadata.put(
                 Constants.AI_MODEL,
                 Optional.ofNullable(aiApiResponseMetadata.get(
-                            AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_MODEL)
+                            AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_RESPONSE_MODEL)
                         )
                         .map(Object::toString)
                         .orElse(null)
@@ -522,7 +522,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
 
         int errorCode = getErrorCode();
         return errorCode >= Constants.ERROR_CODE_RANGES.AUTH_FAILURE_START
-                && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END;
+                && errorCode < Constants.ERROR_CODE_RANGES.AUTH_FAILURE__END
+                && errorCode != Constants.RESOURCE_NOT_FOUND_APIM_ERROR_CODE;
     }
 
     private boolean isThrottledFaultRequest() {

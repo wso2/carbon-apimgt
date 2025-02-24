@@ -54,6 +54,24 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
         return delegate.environmentsEnvironmentIdDelete(environmentId, securityContext);
     }
 
+    @GET
+    @Path("/{environmentId}")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get a Gateway Environment Configuration", notes = "Retrieve a single Gateway Environment Configuration. We should provide the Id of the Environment as a path parameter. ", response = EnvironmentDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
+        })
+    }, tags={ "Environments",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Gateway Environment Configuration returned ", response = EnvironmentDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response environmentsEnvironmentIdGet(@ApiParam(value = "Environment UUID (or Environment name defined in config) ",required=true) @PathParam("environmentId") String environmentId) throws APIManagementException{
+        return delegate.environmentsEnvironmentIdGet(environmentId, securityContext);
+    }
+
     @PUT
     @Path("/{environmentId}")
     @Consumes({ "application/json" })

@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -26,6 +28,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.internal.LinkedTreeMap;
 import feign.Feign;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
@@ -40,7 +43,6 @@ import org.apache.axis2.description.TransportOutDescription;
 import org.apache.axis2.engine.AxisConfiguration;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
@@ -52,8 +54,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.validator.routines.RegexValidator;
 import org.apache.commons.validator.routines.UrlValidator;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -77,6 +77,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
@@ -91,7 +92,9 @@ import org.wso2.carbon.apimgt.api.doc.model.APIDefinition;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.doc.model.Operation;
 import org.wso2.carbon.apimgt.api.doc.model.Parameter;
+import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.OrganizationDetailsDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -108,6 +111,12 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayAPIValidationResult;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
+import org.wso2.carbon.apimgt.api.model.GatewayPortalConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayFeatureCatalog;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
@@ -117,6 +126,7 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.Provider;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
@@ -152,6 +162,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
+import org.wso2.carbon.apimgt.impl.ExternalGatewayAPIValidationException;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
@@ -180,6 +191,8 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.resolver.OnPremResolver;
+import org.wso2.carbon.apimgt.persistence.dto.DevPortalAPIInfo;
+import org.wso2.carbon.apimgt.persistence.dto.OrganizationTiers;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.context.CarbonContext;
@@ -200,6 +213,7 @@ import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.governance.api.util.GovernanceUtils;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.oauth.OAuthAdminService;
 import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.registry.core.ActionConstants;
@@ -233,6 +247,7 @@ import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -240,6 +255,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -273,6 +290,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -290,6 +308,8 @@ import javax.cache.CacheConfiguration;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import java.security.cert.X509Certificate;
+import java.text.Normalizer;
+
 import javax.validation.constraints.NotNull;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -298,6 +318,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+
+import static org.wso2.carbon.apimgt.impl.APIConstants.SHA_256;
 
 /**
  * This class contains the utility methods used by the implementations of APIManager, APIProvider
@@ -348,6 +370,10 @@ public final class APIUtil {
     private static Schema tenantConfigJsonSchema;
     private static Schema operationPolicySpecSchema;
     private static final String contextRegex = "^[a-zA-Z0-9_${}/.;()-]+$";
+    private static String hashingAlgorithm = SHA_256;
+
+    private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
+    private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
 
     private APIUtil() {
 
@@ -430,6 +456,7 @@ public final class APIUtil {
                     eventPublisherFactory.getEventPublisher(EventPublisherType.KEYMGT_EVENT));
             eventPublishers.putIfAbsent(EventPublisherType.LLMPROVIDER_EVENT,
                     eventPublisherFactory.getEventPublisher(EventPublisherType.LLMPROVIDER_EVENT));
+            hashingAlgorithm = apiManagerConfiguration.getHashingAlgorithm();
         } catch (EventPublisherException e) {
             log.error("Could not initialize the event publishers. Events might not be published properly.");
             throw new APIManagementException(e);
@@ -678,6 +705,10 @@ public final class APIUtil {
                 }
             }
 
+            // Set available tiers for organizations
+            String organizationTiers = artifact.getAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS);
+            api.setAvailableTiersForOrganizations(getAvailableTiersForOrganizationsFromString(organizationTiers));
+
             api.addAvailableTiers(availablePolicy);
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             api.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
@@ -802,6 +833,11 @@ public final class APIUtil {
                 }
             }
             api.addAvailableTiers(availablePolicy);
+
+            // Set available tiers for organizations
+            String organizationTiers = artifact.getAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS);
+            api.setAvailableTiersForOrganizations(getAvailableTiersForOrganizationsFromString(organizationTiers));
+
             String tenantDomainName = MultitenantUtils.getTenantDomain(replaceEmailDomainBack(providerName));
             api.setMonetizationCategory(getAPIMonetizationCategory(availablePolicy, tenantDomainName));
 
@@ -981,6 +1017,11 @@ public final class APIUtil {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, tiers);
             }
 
+            if (getAvailableTiersForOrganizationsAsString(api) != null) {
+                artifact.setAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS,
+                        getAvailableTiersForOrganizationsAsString(api));
+            }
+
             if (APIConstants.PUBLISHED.equals(apiStatus)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_IS_LATEST, "true");
             }
@@ -1037,6 +1078,7 @@ public final class APIUtil {
             if (apiSecurity != null && !apiSecurity.contains(APIConstants.DEFAULT_API_SECURITY_OAUTH2) &&
                     !apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
                 artifact.setAttribute(APIConstants.API_OVERVIEW_TIER, "");
+                artifact.setAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS, "");
             }
         } catch (GovernanceException e) {
             String msg = "Failed to create API for : " + api.getId().getApiName();
@@ -1400,6 +1442,23 @@ public final class APIUtil {
 
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR + apiProvider + RegistryConstants.PATH_SEPARATOR +
                 apiName + RegistryConstants.PATH_SEPARATOR + apiVersion + RegistryConstants.PATH_SEPARATOR;
+    }
+
+    /**
+     * Utility method to get the introspection query for GraphQL
+     * @return introspection query
+     * @throws APIManagementException
+     */
+    public static String getIntrospectionQuery() throws APIManagementException {
+        String introspectionQueryFilePath = APIConstants.GRAPHQL_INTROSPECTION_QUERY_FILE;
+        try (InputStream fileStream = APIUtil.class.getClassLoader().getResourceAsStream(introspectionQueryFilePath)) {
+            if (fileStream == null) {
+                throw new APIManagementException("Graphql introspection query file not found: " + introspectionQueryFilePath);
+            }
+            return IOUtils.toString(fileStream, StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new APIManagementException("Error reading graphql introspection query file", e);
+        }
     }
 
     public static String getRevisionPath(String apiUUID, int revisionId) {
@@ -2473,7 +2532,6 @@ public final class APIUtil {
      * Retrieves the role list of a user
      *
      * @param username A username
-     * @param username A username
      * @throws APIManagementException If an error occurs
      */
     public static String[] getListOfRoles(String username) throws APIManagementException {
@@ -2492,6 +2550,10 @@ public final class APIUtil {
         try {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
                     .getTenantId(tenantDomain);
+            // If tenant Id is not set in the tokenReqContext, deriving it from username.
+            if (tenantId == 0 || tenantId == -1) {
+                tenantId = IdentityTenantUtil.getTenantIdOfUser(username);
+            }
             UserStoreManager manager = ServiceReferenceHolder.getInstance().getRealmService()
                     .getTenantUserRealm(tenantId).getUserStoreManager();
             roles = manager.getRoleListOfUser(MultitenantUtils.getTenantAwareUsername(username));
@@ -2688,6 +2750,10 @@ public final class APIUtil {
             Map<String, Tier> definedTiers = getTiers(tenantId);
             Set<Tier> availableTier = getAvailableTiers(definedTiers, tiers, apiName);
             api.addAvailableTiers(availableTier);
+
+            // Set available tiers for organizations
+            String organizationTiers = artifact.getAttribute(APIConstants.API_OVERVIEW_ORGANIZATION_TIERS);
+            api.setAvailableTiersForOrganizations(getAvailableTiersForOrganizationsFromString(organizationTiers));
 
             api.setContext(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT));
             api.setContextTemplate(artifact.getAttribute(APIConstants.API_OVERVIEW_CONTEXT_TEMPLATE));
@@ -3307,9 +3373,108 @@ public final class APIUtil {
         // Get the gateway types from the deployment.toml
         List<String> gatewayTypesList = new ArrayList<>();
         if (gatewayTypes != null && !gatewayTypes.isEmpty()) {
-            gatewayTypesList = Arrays.asList(gatewayTypes.split(","));
+            gatewayTypesList = Arrays.asList(gatewayTypes.replace(" ", "").split(","));
         }
         return gatewayTypesList;
+    }
+
+    public static GatewayFeatureCatalog getGatewayFeatureCatalog() throws APIManagementException {
+
+        Gson gson = new Gson();
+        Type type = new TypeToken<Map<String, Object>>() {}.getType();
+        Map<String, Object> gatewayConfigsMap = new HashMap<>();
+        Map<String, List<String>> apiData = new HashMap<>();
+        JsonObject synapseConfigJSON = null;
+        JsonObject apkConfigJSON = null;
+        try (InputStream synapseInputStream = APIUtil.class.getClassLoader()
+                .getResourceAsStream("gatewayFeatureCatalog/synapse-gateway-feature-catalog.json")) {
+            if (synapseInputStream == null) {
+                throw new APIManagementException("Synapse Gateway Feature Catalog JSON not found");
+            }
+            InputStreamReader reader = new InputStreamReader(synapseInputStream, StandardCharsets.UTF_8);
+            synapseConfigJSON = JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading Synapse Gateway Feature Catalog JSON", e);
+        }
+
+        try (InputStream apkInputStream = APIUtil.class.getClassLoader()
+                .getResourceAsStream("gatewayFeatureCatalog/apk-gateway-feature-catalog.json")) {
+            if (apkInputStream == null) {
+                throw new APIManagementException("APK Gateway Feature Catalog JSON not found");
+            }
+            InputStreamReader reader = new InputStreamReader(apkInputStream, StandardCharsets.UTF_8);
+            apkConfigJSON = JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading APK Gateway Feature Catalog JSON", e);
+        }
+
+        if (synapseConfigJSON == null || apkConfigJSON == null) {
+            throw new APIManagementException("Error while reading Gateway Feature Catalog JSON");
+        }
+
+        JsonObject synapseConfigsJSONValue = synapseConfigJSON.getAsJsonObject(APIConstants.WSO2_SYNAPSE_GATEWAY);
+        JsonObject apkConfigsJSONValue = apkConfigJSON.getAsJsonObject(APIConstants.WSO2_APK_GATEWAY);
+
+        JsonObject synapseJSON = synapseConfigsJSONValue.getAsJsonObject("gatewayFeatures");
+        JsonObject apkJSON = apkConfigsJSONValue.getAsJsonObject("gatewayFeatures");
+
+        Map<String, Object> synapseMap = gson.fromJson(synapseJSON, type);
+        Map<String, Object> apkMap = gson.fromJson(apkJSON, type);
+
+        gatewayConfigsMap.put(APIConstants.WSO2_SYNAPSE_GATEWAY, synapseMap);
+        gatewayConfigsMap.put(APIConstants.WSO2_APK_GATEWAY, apkMap);
+
+        JsonArray synapseApiTypes = synapseConfigsJSONValue.getAsJsonArray("apiTypes");
+        JsonArray apkApiTypes = apkConfigsJSONValue.getAsJsonArray("apiTypes");
+        for (String key : APIConstants.API_TYPES) {
+            apiData.put(key, new ArrayList<>());
+        }
+
+        for (int i = 0; i < synapseApiTypes.size(); i++) {
+            String apiType = synapseApiTypes.get(i).getAsString();
+            if (apiData.containsKey(apiType)) {
+                apiData.get(apiType).add(APIConstants.WSO2_SYNAPSE_GATEWAY);
+            }
+        }
+
+        for (int i = 0; i < apkApiTypes.size(); i++) {
+            String apiType = apkApiTypes.get(i).getAsString();
+            if (apiData.containsKey(apiType)) {
+                apiData.get(apiType).add(APIConstants.WSO2_APK_GATEWAY);
+            }
+        }
+
+        Map<String, GatewayAgentConfiguration> externalGatewayConnectorConfigurationMap =
+                ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
+        externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
+            GatewayPortalConfiguration config = null;
+            try {
+                config = gatewayConfiguration.getGatewayFeatureCatalog();
+            } catch (APIManagementException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (config != null) {
+
+                LinkedTreeMap<String, Object> supportedFeaturesMap = new Gson().fromJson(
+                        (JsonObject)config.getSupportedFeatures(), LinkedTreeMap.class);
+                gatewayConfigsMap.put(config.getGatewayType(), supportedFeaturesMap);
+
+                List<String> types = config.getSupportedAPITypes();
+                for (int i = 0; i < types.size(); i++) {
+                    String apiType = types.get(i);
+                    if (apiData.containsKey(apiType)) {
+                        apiData.get(apiType).add(config.getGatewayType());
+                    }
+                }
+            }
+        });
+
+        GatewayFeatureCatalog gatewayFeatureCatalog = new GatewayFeatureCatalog();
+        gatewayFeatureCatalog.setApiTypes(apiData);
+        gatewayFeatureCatalog.setGatewayFeatures(gatewayConfigsMap);
+
+        return gatewayFeatureCatalog;
     }
 
     /**
@@ -3559,6 +3724,35 @@ public final class APIUtil {
     public static float getAverageRating(int apiId) throws APIManagementException {
 
         return ApiMgtDAO.getInstance().getAverageRating(apiId);
+    }
+
+    /**
+     * Update available tiers in the DevPortalAPIInfo according to the organization.
+     * @param devPortalAPIInfo  DevPortalAPIInfo object
+     * @param organization      Organization ID
+     */
+    public static void updateAvailableTiersByOrganization(DevPortalAPIInfo devPortalAPIInfo, String organization) {
+
+        if (organization != null) {
+            Set<OrganizationTiers> availableTiersForOrganizations = devPortalAPIInfo.getAvailableTiersForOrganizations();
+            Set<String> availableTiers = new HashSet<>();
+            for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
+                String orgID = organizationTiers.getOrganizationID();
+                if (organization.equals(orgID)) {
+                    availableTiers = organizationTiers.getTiers();
+                    break;
+                }
+            }
+            if (availableTiers.isEmpty()) {
+                for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
+                    if (APIConstants.DEFAULT_VISIBLE_ORG.equals(organizationTiers.getOrganizationID())) {
+                        availableTiers = organizationTiers.getTiers();
+                        break;
+                    }
+                }
+            }
+            devPortalAPIInfo.setAvailableTierNames(availableTiers);
+        }
     }
 
     public static List<Tenant> getAllTenantsWithSuperTenant() throws UserStoreException {
@@ -4327,6 +4521,18 @@ public final class APIUtil {
     }
 
     /**
+     * Return the endpoints sequence name.
+     * eg: OpenAIAPI--v2.3.0
+     *
+     * @param api
+     * @return
+     */
+    public static String getEndpointSequenceName(API api) {
+
+        return api.getId().getApiName() + "--" + api.getId().getVersion();
+    }
+
+    /**
      * Return the Custom Backend name
      *
      * @param apiUUID API Id
@@ -4419,8 +4625,8 @@ public final class APIUtil {
                     "Error while retrieving MessageDigest for the provided hash algorithm: " + hashAlgorithm, e);
         }
         JSONObject object = new JSONObject();
-        object.put("algorithm", hashAlgorithm);
-        object.put("hash", bytesToHex(hash));
+        object.put(APIConstants.DigestAuthConstants.ALGORITHM, hashAlgorithm);
+        object.put(APIConstants.HASH, bytesToHex(hash));
 
         return object.toString();
     }
@@ -4821,11 +5027,19 @@ public final class APIUtil {
      */
     public static void loadTenantConfigBlockingMode(String tenantDomain) {
 
+        boolean isTenantFlowStarted = false;
         try {
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+            isTenantFlowStarted = true;
             ConfigurationContext ctx = ServiceReferenceHolder.getContextService().getServerConfigContext();
             TenantAxisUtils.getTenantAxisConfiguration(tenantDomain, ctx);
         } catch (Exception e) {
             log.error("Error while creating axis configuration for tenant " + tenantDomain, e);
+        } finally {
+            if (isTenantFlowStarted) {
+                PrivilegedCarbonContext.endTenantFlow();
+            }
         }
     }
 
@@ -5021,25 +5235,124 @@ public final class APIUtil {
         return environmentStringSet;
     }
 
+    public static Set<String> extractVisibleEnvironmentsForUser(List<Environment> environments, String organization, String username) throws APIManagementException {
+
+        Map<String, Environment> permittedEnvironments;
+        if (environments != null) {
+            permittedEnvironments = extractVisibleEnvironmentsForUser(environments, username);
+        } else {
+            Map<String, Environment> environmentsMap = getEnvironments(organization);
+            List<Environment> environmentsList = new ArrayList<Environment>(environmentsMap.values());
+            permittedEnvironments = extractVisibleEnvironmentsForUser(environmentsList, username);
+        }
+        return permittedEnvironments.keySet();
+    }
+
+    public static Map<String, Environment> extractVisibleEnvironmentsForUser(List<Environment> environments, String username) throws APIManagementException {
+
+        Map<String, Environment> permittedGatewayEnvironments = new LinkedHashMap<>();
+        if (environments.size() > 0) {
+            for (Environment environment : environments) {
+                if (isGatewayAllowedForUser(environment, username)) {
+                    permittedGatewayEnvironments.put(environment.getName(), environment);
+                }
+            }
+        }
+        return permittedGatewayEnvironments;
+    }
+
+    /**
+     * This method is used to check if gateway environment is allowed for user
+     *
+     * @param environment gateway environment
+     * @param username  username of the logged-in user
+     * @return boolean returns if the gateway environment is allowed for the logged-in user
+     * @throws APIManagementException if error occurred
+     */
+    public static boolean isGatewayAllowedForUser(Environment environment, String username) throws APIManagementException {
+
+        GatewayVisibilityPermissionConfigurationDTO permissions;
+        if (environment.getPermissions() == null) {
+            APIAdmin apiAdmin = new APIAdminImpl();
+            permissions = apiAdmin.getGatewayVisibilityPermissions(environment.getUuid());
+        } else {
+            permissions = environment.getPermissions();
+        }
+        String permissionType = permissions.getPermissionType();
+        if (permissions != null && !permissionType.equals(APIConstants.PERMISSION_NOT_RESTRICTED)) {
+            String[] permissionRoles = permissions.getRoles()
+                    .stream()
+                    .toArray(String[]::new);
+            String[] userRoles = APIUtil.getListOfRoles(username);
+            boolean roleIsRestricted = hasIntersection(userRoles, permissionRoles);
+            if ((APIConstants.PERMISSION_ALLOW.equals(permissionType) && !roleIsRestricted)
+                    || (APIConstants.PERMISSION_DENY.equals(permissionType) && roleIsRestricted)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean hasIntersection(String[] arr1, String[] arr2) {
+
+        Set<String> set = new HashSet<>();
+
+        for (String element : arr1) {
+            set.add(element);
+        }
+
+        for (String element : arr2) {
+            if (set.contains(element)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static Set<String> extractEnvironmentsForAPI(String environments, String organization) throws APIManagementException {
 
         Set<String> environmentStringSet = null;
         if (environments == null) {
             environmentStringSet = new HashSet<>(getEnvironments(organization).keySet());
         } else {
-            //handle not to publish to any of the gateways
+            // Handle not to publish to any of the gateways
             if (APIConstants.API_GATEWAY_NONE.equals(environments)) {
                 environmentStringSet = new HashSet<String>();
             }
-            //handle to set published gateways nto api object
+            // Handle to set published gateways into api object
             else if (!"".equals(environments)) {
                 String[] publishEnvironmentArray = environments.split(",");
                 environmentStringSet = new HashSet<String>(Arrays.asList(publishEnvironmentArray));
                 environmentStringSet.remove(APIConstants.API_GATEWAY_NONE);
             }
-            //handle to publish to any of the gateways when api creating stage
+            // Handle to publish to any of the gateways when api creating stage
             else if ("".equals(environments)) {
                 environmentStringSet = new HashSet<>(getEnvironments(organization).keySet());
+            }
+        }
+
+        return environmentStringSet;
+    }
+
+    public static Set<String> extractEnvironmentsForAPI(List<Environment> environments, String organization, String userName) throws APIManagementException {
+
+        Set<String> environmentStringSet = null;
+        if (environments == null) {
+            environmentStringSet = extractVisibleEnvironmentsForUser(null, organization, userName);
+        } else {
+            // Handle not to publish to any of the gateways
+            if (environments.contains(APIConstants.API_GATEWAY_NONE)) {
+                environmentStringSet = new HashSet<String>();
+            }
+            // Handle to set published gateways into api object
+            else if (!environments.isEmpty()) {
+                environmentStringSet = extractVisibleEnvironmentsForUser(environments, organization, userName);
+                environmentStringSet.remove(APIConstants.API_GATEWAY_NONE);
+            }
+            // Handle to publish to any of the gateways when api creating stage
+            else if ("".equals(environments)) {
+                environmentStringSet = extractVisibleEnvironmentsForUser(environments, organization, userName);
             }
         }
 
@@ -5110,6 +5423,24 @@ public final class APIUtil {
 
         for (Environment environment : gatewayEnvironments.values()) {
             for (String apiEnvironment : apiEnvironments) {
+                if (environment.getName().equals(apiEnvironment)) {
+                    returnEnvironments.add(environment);
+                    break;
+                }
+            }
+        }
+        return returnEnvironments;
+    }
+
+    public static List<Environment> getEnvironmentsOfAPIProduct(APIProduct apiProduct) throws APIManagementException {
+
+        String organization = apiProduct.getOrganization();
+        Map<String, Environment> gatewayEnvironments = getEnvironments(organization);
+        Set<String> apiProductEnvironments = apiProduct.getEnvironments();
+        List<Environment> returnEnvironments = new ArrayList<Environment>();
+
+        for (Environment environment : gatewayEnvironments.values()) {
+            for (String apiEnvironment : apiProductEnvironments) {
                 if (environment.getName().equals(apiEnvironment)) {
                     returnEnvironments.add(environment);
                     break;
@@ -7035,7 +7366,7 @@ public final class APIUtil {
     public static void logAuditMessage(String entityType, String entityInfo, String action, String performedBy) {
 
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("typ", entityType);
+        jsonObject.put("type", entityType);
         jsonObject.put("action", action);
         jsonObject.put("performedBy", performedBy);
         if (entityInfo != null && !StringUtils.isBlank(entityInfo)) {
@@ -7654,6 +7985,22 @@ public final class APIUtil {
         return keyManagerConfiguration;
     }
 
+    public static GatewayConfiguration extractGatewayConfiguration(Environment environment, String organization)
+            throws APIManagementException {
+        GatewayConfiguration gatewayConfiguration = new GatewayConfiguration();
+        if (environment != null) {
+            gatewayConfiguration.setName(environment.getName());
+            gatewayConfiguration.setType(environment.getType());
+            gatewayConfiguration.setTenantDomain(organization);
+            Map<String, Object> configurations = new HashMap<>();
+            if (environment.getAdditionalProperties() != null) {
+                configurations.putAll(environment.getAdditionalProperties());
+            }
+            gatewayConfiguration.setConfiguration(configurations);
+        }
+        return gatewayConfiguration;
+    }
+
     /**
      * Get if there any tenant-specific application configurations from the tenant
      * registry
@@ -8002,6 +8349,36 @@ public final class APIUtil {
         Map<String, Environment> allEnvironments = new LinkedHashMap<>(getReadOnlyEnvironments());
         allEnvironments.putAll(envFromDB);
         return allEnvironments;
+    }
+
+    // Federated Gateway related API Reference mapping methods
+    public static void addApiExternalApiMapping(String apiId, String environmentId, String referenceArtifact)
+            throws APIManagementException {
+
+        ApiMgtDAO.getInstance().addApiExternalApiMapping(apiId, environmentId, referenceArtifact);
+    }
+
+    public static void updateApiExternalApiMapping(String apiId, String environmentId, String referenceArtifact)
+            throws APIManagementException {
+
+        ApiMgtDAO.getInstance().updateApiExternalApiMapping(apiId, environmentId, referenceArtifact);
+    }
+
+    public static String getApiExternalApiMappingReferenceByApiId(String apiId, String environmentId)
+            throws APIManagementException {
+
+        return ApiMgtDAO.getInstance().getApiExternalApiMappingReference(apiId, environmentId);
+    }
+
+    public static void deleteApiExternalApiMapping(String apiId, String environmentId)
+            throws APIManagementException {
+
+        ApiMgtDAO.getInstance().deleteApiExternalApiMapping(apiId, environmentId);
+    }
+
+    public static void deleteApiExternalApiMappings(String apiId) throws APIManagementException {
+
+        ApiMgtDAO.getInstance().deleteApiExternalApiMappings(apiId);
     }
 
     /**
@@ -8643,7 +9020,10 @@ public final class APIUtil {
             properties.put(APIConstants.USER_CTX_PROPERTY_ISADMIN, true);
         }
         properties.put(APIConstants.USER_CTX_PROPERTY_SKIP_ROLES, APIUtil.getSkipRolesByRegex());
-
+        
+        if (APIUtil.areOrganizationsRegistered()) {
+            properties.put(APIConstants.USER_CTX_PROPERTY_ORGS_AVAILABLE, true);
+        }
         return properties;
     }
 
@@ -9894,35 +10274,48 @@ public final class APIUtil {
     /**
      * Validate sandbox and production endpoint URLs.
      *
-     * @param endpoints sandbox and production endpoint URLs inclusive list
+     * @param endpoints list of endpoint URLs to validate
      * @return validity of given URLs
      */
     public static boolean validateEndpointURLs(ArrayList<String> endpoints) {
+        for (String endpoint : endpoints) {
+            if (!validateEndpointURL(endpoint)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Validate the given endpoint URL.
+     *
+     * @param endpoint endpoint URL to validate
+     * @return validity of the given URL
+     */
+    public static boolean validateEndpointURL(String endpoint) {
         long validatorOptions =
                 UrlValidator.ALLOW_2_SLASHES + UrlValidator.ALLOW_ALL_SCHEMES + UrlValidator.ALLOW_LOCAL_URLS;
         RegexValidator authorityValidator = new RegexValidator(".*");
         UrlValidator urlValidator = new UrlValidator(authorityValidator, validatorOptions);
 
-        for (String endpoint : endpoints) {
-            // If url is a JMS connection url or a Consul service discovery related url, or a parameterized URL
-            // validation is skipped. If not, validity is checked.
-            if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(") && !endpoint.contains("{") &&
-                    !endpoint.contains("}") && !urlValidator.isValid(endpoint)) {
-                try {
-                    // If the url is not identified as valid from the above check,
-                    // next step is determine the validity of the encoded url (done through the URI constructor).
-                    URL endpointUrl = new URL(endpoint);
-                    URI endpointUri = new URI(endpointUrl.getProtocol(), endpointUrl.getAuthority(),
-                            endpointUrl.getPath(), endpointUrl.getQuery(), null);
+        // If url is a JMS connection url or a Consul service discovery related url, or a parameterized URL
+        // validation is skipped. If not, validity is checked.
+        if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(") && !endpoint.contains("{") &&
+                !endpoint.contains("}") && !urlValidator.isValid(endpoint)) {
+            try {
+                // If the url is not identified as valid from the above check,
+                // next step is determine the validity of the encoded url (done through the URI constructor).
+                URL endpointUrl = new URL(endpoint);
+                URI endpointUri = new URI(endpointUrl.getProtocol(), endpointUrl.getAuthority(),
+                        endpointUrl.getPath(), endpointUrl.getQuery(), null);
 
-                    if (!urlValidator.isValid(endpointUri.toString())) {
-                        log.error("Invalid endpoint url " + endpointUrl);
-                        return false;
-                    }
-                } catch (URISyntaxException | MalformedURLException e) {
-                    log.error("Error while parsing the endpoint url " + endpoint);
+                if (!urlValidator.isValid(endpointUri.toString())) {
+                    log.error("Invalid endpoint url " + endpointUrl);
                     return false;
                 }
+            } catch (URISyntaxException | MalformedURLException e) {
+                log.error("Error while parsing the endpoint url " + endpoint);
+                return false;
             }
         }
         return true;
@@ -10018,6 +10411,34 @@ public final class APIUtil {
     }
 
     /**
+     * Get org access control enabled status
+     *
+     * @return true or false
+     */
+    public static boolean isOrganizationAccessControlEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getOrgAccessControl().isEnabled();
+    }
+    
+    /**
+     * Check whether organizations are available in the system
+     * @return
+     */
+    public static boolean areOrganizationsRegistered() {
+        if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getOrgAccessControl().isEnabled()) {
+            // check database if configs is enabled.
+            try {
+                return ApiMgtDAO.getInstance().areOrganizationsRegistered();
+            } catch(APIManagementException e) {
+                log.error("Error while checking existance of organization", e);
+                return false;
+            }
+
+        }
+        return false;
+    }
+    /**
      * Get registered API Definition Parsers as a Map
      *
      * @return Map of Registered API Definition Parsers
@@ -10029,13 +10450,16 @@ public final class APIUtil {
     /**
      * Check whether there are external environments registered
      */
-    public static boolean isAnyExternalGateWayProviderExists() {
-
-        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-        for (Environment environment : gatewayEnvironments.values()) {
-            if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getProvider())) {
-                return true;
+    public static boolean isAnyExternalGateWayProviderExists(String tenantDomain) {
+        try {
+            Map<String, Environment> environments = getEnvironments(tenantDomain);
+            for (Environment environment : environments.values()) {
+                if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getProvider())) {
+                    return true;
+                }
             }
+        } catch (APIManagementException e) {
+            throw new RuntimeException(e);
         }
         return false;
     }
@@ -10078,8 +10502,9 @@ public final class APIUtil {
                                 OperationPolicyData policyData = new OperationPolicyData();
                                 policyData.setSpecification(policySpec);
                                 policyData.setOrganization(organization);
+                                //since the directory contains common policies only, files are not renamed with type
                                 String policyFileName = getOperationPolicyFileName(policySpec.getName(),
-                                        policySpec.getVersion());
+                                        policySpec.getVersion(), null);
                                 OperationPolicyDefinition synapsePolicyDefinition =
                                         getOperationPolicyDefinitionFromFile(policyDefinitionLocation,
                                                 policyFileName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
@@ -10095,7 +10520,7 @@ public final class APIUtil {
                                     policyData.setCcPolicyDefinition(ccPolicyDefinition);
                                 }
 
-                                policyData.setMd5Hash(getMd5OfOperationPolicy(policyData));
+                                policyData.setMd5Hash(getHashOfOperationPolicy(policyData));
                                 apiMgtDAO.addCommonOperationPolicy(policyData);
                                 log.info("Common operation policy " + policySpec.getName() + "_" + policySpec.getVersion()
                                         + " was added to the organization " + organization + " successfully");
@@ -10164,7 +10589,7 @@ public final class APIUtil {
                 String yamlContent = FileUtils.readFileToString(new File(fileName));
                 policyDefinition = new OperationPolicyDefinition();
                 policyDefinition.setContent(yamlContent);
-                policyDefinition.setMd5Hash(getMd5OfOperationPolicyDefinition(policyDefinition));
+                policyDefinition.setMd5Hash(getHashOfOperationPolicyDefinition(policyDefinition));
                 if (StringUtils.equals(APIConstants.CC_POLICY_DEFINITION_EXTENSION, fileExtension)) {
                     policyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.ChoreoConnect);
                 }
@@ -10271,13 +10696,14 @@ public final class APIUtil {
     }
 
     /**
-     * Return the md5 hash of the provided policy. To generate the md5 hash, policy Specification and the
+     * Return the hash value of the provided policy. To generate the hash, policy Specification and the
      * two definitions are used
      *
      * @param policyData  Operation policy data
-     * @return md5 hash
+     * @return hash
      */
-    public static String getMd5OfOperationPolicy(OperationPolicyData policyData) {
+    public static String getHashOfOperationPolicy(OperationPolicyData policyData)
+            throws APIManagementException {
 
         String policySpecificationAsString = "";
         String synapsePolicyDefinitionAsString = "";
@@ -10293,26 +10719,27 @@ public final class APIUtil {
             ccPolicyDefinitionAsString = new Gson().toJson(policyData.getCcPolicyDefinition());
         }
 
-        return DigestUtils.md5Hex(policySpecificationAsString + synapsePolicyDefinitionAsString
+        return generateHashValue(policySpecificationAsString + synapsePolicyDefinitionAsString
                 + ccPolicyDefinitionAsString);
     }
 
     /**
-     * Return the md5 hash of the policy definition string
+     * Return the hash of the policy definition string
      *
      * @param policyDefinition  Operation policy definition
-     * @return md5 hash of the definition content
+     * @return hash of the definition content
      */
-    public static String getMd5OfOperationPolicyDefinition(OperationPolicyDefinition policyDefinition) {
+    public static String getHashOfOperationPolicyDefinition(OperationPolicyDefinition policyDefinition)
+            throws APIManagementException {
 
-        String md5Hash = "";
+        String hash = "";
 
         if (policyDefinition != null) {
             if (policyDefinition.getContent() != null) {
-                md5Hash = DigestUtils.md5Hex(policyDefinition.getContent());
+                hash = generateHashValue(policyDefinition.getContent());
             }
         }
-        return md5Hash;
+        return hash;
     }
 
     /**
@@ -10324,7 +10751,8 @@ public final class APIUtil {
      * @throws APIManagementException
      */
     public static OperationPolicyData getPolicyDataForMediationFlow(API api, String policyDirection,
-                                                                    String organization) {
+                                                                    String organization)
+            throws APIManagementException {
 
         OperationPolicyData policyData = null;
         switch (policyDirection) {
@@ -10355,7 +10783,8 @@ public final class APIUtil {
 
     public static OperationPolicyData generateOperationPolicyDataObject(String apiUuid, String organization,
                                                                         String policyName,
-                                                                        String policyDefinitionString) {
+                                                                        String policyDefinitionString)
+            throws APIManagementException {
 
         OperationPolicySpecification policySpecification = new OperationPolicySpecification();
         policySpecification.setCategory(OperationPolicySpecification.PolicyCategory.Mediation);
@@ -10367,7 +10796,7 @@ public final class APIUtil {
         gatewayList.add(APIConstants.OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE);
         policySpecification.setSupportedGateways(gatewayList);
 
-        ArrayList<String> supportedAPIList = new ArrayList<>();
+        ArrayList<Object> supportedAPIList = new ArrayList<>();
         supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP);
         supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_SOAP);
         supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_SOAPTOREST);
@@ -10389,21 +10818,24 @@ public final class APIUtil {
             OperationPolicyDefinition policyDefinition = new OperationPolicyDefinition();
             policyDefinition.setContent(policyDefinitionString);
             policyDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
-            policyDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(policyDefinition));
+            policyDefinition.setMd5Hash(APIUtil.getHashOfOperationPolicyDefinition(policyDefinition));
             policyData.setSynapsePolicyDefinition(policyDefinition);
         }
 
-        policyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(policyData));
+        policyData.setMd5Hash(APIUtil.getHashOfOperationPolicy(policyData));
 
         return policyData;
     }
 
 
-    public static String getOperationPolicyFileName(String policyName, String policyVersion) {
+    public static String getOperationPolicyFileName(String policyName, String policyVersion, String policyType) {
         if (StringUtils.isEmpty(policyVersion)) {
             policyVersion = "v1";
         }
-        return policyName + "_" + policyVersion;
+        if (policyType == null) {
+            return policyName + "_" + policyVersion;
+        }
+        return policyName + "_" + policyVersion + "_" + policyType;
     }
 
     public static String getCustomBackendFileName(String apiUUID, String endpointType) {
@@ -10440,10 +10872,8 @@ public final class APIUtil {
      * @return gateway vendor for the API
      */
     public static String setGatewayVendorBeforeInsertion(String gatewayVendorType, String gatewayType) {
-        if (gatewayType != null && APIConstants.WSO2_APK_GATEWAY.equals(gatewayType)) {
-            gatewayVendorType =  APIConstants.WSO2_APK_GATEWAY;
-        }
-        return gatewayVendorType;
+
+        return !APIConstants.WSO2_SYNAPSE_GATEWAY.equals(gatewayType) ? gatewayType: gatewayVendorType;
     }
 
     /**
@@ -10456,8 +10886,8 @@ public final class APIUtil {
         String gatewayType = null;
         if (APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(gatewayVendor)) {
             gatewayType = APIConstants.WSO2_SYNAPSE_GATEWAY;
-        } else if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor)) {
-            gatewayType = APIConstants.WSO2_APK_GATEWAY;
+        } else {
+            return gatewayVendor;
         }
         return gatewayType;
     }
@@ -10469,10 +10899,12 @@ public final class APIUtil {
      * @return wso2 gateway vendor type
      */
     public static String handleGatewayVendorRetrieval(String gatewayVendor) {
-        if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor)) {
-            gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+        if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor) ||
+                APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(gatewayVendor)) {
+            return APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+        } else {
+            return APIConstants.EXTERNAL_GATEWAY_VENDOR;
         }
-        return  gatewayVendor;
     }
 
     /**
@@ -10508,7 +10940,7 @@ public final class APIUtil {
     public static String generateCodeChallenge(String codeVerifier) throws UnsupportedEncodingException,
             NoSuchAlgorithmException {
         byte[] bytes = codeVerifier.getBytes(APIConstants.US_ASCII);
-        MessageDigest messageDigest = MessageDigest.getInstance(APIConstants.SHA_256);
+        MessageDigest messageDigest = MessageDigest.getInstance(SHA_256);
         messageDigest.update(bytes, 0, bytes.length);
         byte[] digest = messageDigest.digest();
         return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
@@ -10818,5 +11250,276 @@ public final class APIUtil {
 
     public static String getAPIMVersion() {
         return CarbonUtils.getServerConfiguration().getFirstProperty("Version");
+    }
+
+    /**
+     * This method will generate the hash value of the given byte[] payload
+     * @param payload
+     * @return
+     * @throws APIManagementException
+     */
+    public static String generateHashValue(byte[] payload) throws APIManagementException {
+
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance(hashingAlgorithm);
+            byte[] hashByteArray = messageDigest.digest(payload);
+            StringBuilder sb = new StringBuilder();
+            for (byte hashByte : hashByteArray) {
+                sb.append(Integer.toString((hashByte & 0xff) + 0x100, 16).substring(1));
+            }
+            return hashToJson(sb.toString());
+        } catch (NoSuchAlgorithmException e) {
+            throw new APIManagementException("Error when calculating the " + hashingAlgorithm + " hash", e);
+        }
+    }
+
+    /**
+     * This method is used to generate the hash value of the given payload
+     *
+     * @param payload payload to generate the hash value
+     * @return hash value
+     * @throws APIManagementException if an error occurs while generating the hash value
+     */
+    public static String generateHashValue(String payload) throws APIManagementException {
+
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance(hashingAlgorithm);
+            byte[] hashByteArray = messageDigest.digest(payload.getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte hashByte : hashByteArray) {
+                sb.append(Integer.toString((hashByte & 0xff) + 0x100, 16).substring(1));
+            }
+            return hashToJson(sb.toString());
+        } catch (NoSuchAlgorithmException e) {
+            throw new APIManagementException("Error when calculating the " + hashingAlgorithm + " hash", e);
+        }
+    }
+
+    /**
+     * This method is used to verify the hash values of the operation policies
+     *
+     * @param policy1 existing operation policy
+     * @param policy2 new operation policy
+     * @return true if the hash values are equal
+     */
+    public static boolean verifyHashValues(OperationPolicyData policy1, OperationPolicyData policy2)
+            throws APIManagementException {
+
+        if (policy1.getMd5Hash().startsWith("{") == policy2.getMd5Hash().startsWith("{")) {
+            return policy1.getMd5Hash().equals(policy2.getMd5Hash());
+        } else if (policy1.getMd5Hash().startsWith("{")) {
+            return policy1.getMd5Hash().equals(APIUtil.getHashOfOperationPolicy(policy2));
+        } else {
+            return policy2.getMd5Hash().equals(APIUtil.getHashOfOperationPolicy(policy1));
+        }
+    }
+
+    /**
+     * This method is used to verify the hash values of the service catalog entries
+     *
+     * @param existingService existing service catalog entry
+     * @param newService new service catalog entry
+     * @return true if the hash values are equal
+     */
+    public static boolean verifyHashValues(ServiceEntry existingService, ServiceEntry newService)
+            throws APIManagementException {
+
+        if (existingService.getMd5().startsWith("{") == newService.getMd5().startsWith("{")) {
+            return existingService.getMd5().equals(newService.getMd5());
+        } else {
+            ByteArrayOutputStream existingServiceEndpointClone = new ByteArrayOutputStream();
+            ByteArrayOutputStream newServiceEndpointClone = new ByteArrayOutputStream();
+
+            try {
+                existingService.getEndpointDef().transferTo(existingServiceEndpointClone);
+                newService.getEndpointDef().transferTo(newServiceEndpointClone);
+
+                return generateHashValue(existingServiceEndpointClone.toByteArray())
+                        .equals(generateHashValue(newServiceEndpointClone.toByteArray()));
+            } catch (IOException e) {
+                throw new APIManagementException("Error when calculating the hash values to compare the service " +
+                        "catalog update ", e);
+            } finally {
+                existingService.setEndpointDef(new ByteArrayInputStream(existingServiceEndpointClone.toByteArray()));
+                newService.setEndpointDef(new ByteArrayInputStream(newServiceEndpointClone.toByteArray()));
+
+                try {
+                    existingServiceEndpointClone.close();
+                    newServiceEndpointClone.close();
+                } catch (IOException e) {
+                    log.error("Error occurred while closing the byte array output streams", e);
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * @param hashValue
+     * @return
+     */
+    private static String hashToJson(String hashValue) {
+
+        Map<String, String> hashValueMap = new HashMap<>();
+        hashValueMap.put(APIConstants.HASH, hashValue);
+        hashValueMap.put(APIConstants.DigestAuthConstants.ALGORITHM, hashingAlgorithm);
+        return new Gson().toJson(hashValueMap);
+    }
+
+    /**
+     * This method is join two byte arrays
+     *
+     * @param array1 first byte array
+     * @param array2 second byte array
+     * @return joined byte array
+     */
+    public static byte[] joinByteArrays(byte[] array1, byte[] array2) {
+
+        byte[] result = new byte[array1.length + array2.length];
+        System.arraycopy(array1, 0, result, 0, array1.length);
+        System.arraycopy(array2, 0, result, array1.length, array2.length);
+        return result;
+    }
+
+    /**
+     * This method checks whether the transaction counter feature is enabled.
+     *
+     * @return true if the transaction counter is enabled, false otherwise
+     */
+    public static boolean getTransactionCounterEnable() {
+       return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration().getTransactionCounterProperties();
+    }
+
+    /**
+     * Checks if organization-wide application updates are enabled.
+     * <p>
+     * This method retrieves the value of the system property defined by
+     * ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED.
+     * If the property is not set, it returns false by default.
+     *
+     * @return {true} if organization-wide application updates are enabled;
+     *         {false} otherwise.
+     */
+    public static Boolean isOrgWideAppUpdateEnabled() {
+
+        return Boolean.getBoolean(
+                APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
+    }
+
+    /**
+     * Get available tiers for organizations as a string.
+     *
+     * @param api API object
+     * @return String object of the organization based tiers
+     */
+    private static String getAvailableTiersForOrganizationsAsString(API api) {
+
+        Set<org.wso2.carbon.apimgt.api.model.OrganizationTiers> availableTiersForOrganizations
+                = api.getAvailableTiersForOrganizations();
+        if (availableTiersForOrganizations == null || availableTiersForOrganizations.isEmpty()) {
+            return "";
+        }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(availableTiersForOrganizations);
+        } catch (JsonProcessingException e) {
+            log.error("Error while converting availableTiersForOrganizations to string for API : " + api.getUuid(), e);
+            return null;
+        } catch (Exception e) {
+            log.error("Unexpected error while processing availableTiersForOrganizations for API : " + api.getUuid(), e);
+            return null;
+        }
+    }
+
+    /**
+     * Convert string object to a OrganizationTiers set.
+     *
+     * @param tiersString String object to be converted
+     * @return OrganziationTiers set
+     */
+    public static Set<org.wso2.carbon.apimgt.api.model.OrganizationTiers> getAvailableTiersForOrganizationsFromString(
+            String tiersString) {
+
+        if (tiersString == null || tiersString.isEmpty()) {
+            return new LinkedHashSet<>();
+        }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            org.wso2.carbon.apimgt.api.model.OrganizationTiers[] tiersArray = objectMapper.readValue(tiersString,
+                    org.wso2.carbon.apimgt.api.model.OrganizationTiers[].class);
+            return new LinkedHashSet<>(Arrays.asList(tiersArray));
+        } catch (Exception e) {
+            log.error("Error while converting string to availableTiersForOrganizations object", e);
+            return new LinkedHashSet<>();
+        }
+    }
+
+    public static synchronized String getOrganizationIdFromExternalReference(String referenceId,
+            String organizationName, String rootOrganization) throws APIManagementException {
+        String organizationId = null;
+        OrganizationDetailsDTO orgDetails = ApiMgtDAO.getInstance().getOrganizationDetalsByExternalOrgId(referenceId,
+                rootOrganization);
+        if (orgDetails != null) {
+            organizationId = orgDetails.getOrganizationId();
+        } else {
+            // No organization entry in the db. add entry without parent info.
+            OrganizationDetailsDTO info = new OrganizationDetailsDTO();
+            info.setExternalOrganizationReference(referenceId);
+            info.setName(organizationName);
+            info.setOrganizationHandle(getOrganizationHandle(organizationName));
+            OrganizationDetailsDTO addedInfo = ApiMgtDAO.getInstance().addOrganization(info, null, rootOrganization);
+            if (addedInfo != null) {
+                organizationId = addedInfo.getOrganizationId();
+            }
+        }
+        return organizationId;
+    }
+
+    public static String getOrganizationHandle(String name) {
+        String sanatizedName = null;
+        if (name == null) {
+            return sanatizedName;
+        }
+        String nowhitespace = WHITESPACE.matcher(name).replaceAll("-"); // Replace spaces with hyphens
+        String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD); // Decompose Unicode characters
+        sanatizedName = NONLATIN.matcher(normalized).replaceAll(""); // Remove non-alphanumeric characters
+        // Convert to lowercase and trim hyphens from the beginning/end
+        sanatizedName = sanatizedName.toLowerCase(Locale.ENGLISH).replaceAll("^-+|-+$", "");
+        return sanatizedName;
+    }
+
+    /**
+     * Validate Api with the federated gateways
+     *
+     * @param api API Object
+     */
+    public static void validateApiWithFederatedGateway(API api) throws APIManagementException {
+
+        try {
+            GatewayAgentConfiguration gatewayConfiguration = org.wso2.carbon.apimgt.impl.internal.
+                    ServiceReferenceHolder.getInstance().
+                    getExternalGatewayConnectorConfiguration(api.getGatewayType());
+            if (gatewayConfiguration != null) {
+                GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation())
+                        .getDeclaredConstructor().newInstance();
+                if (deployer != null) {
+                    GatewayAPIValidationResult errorList = null;
+                    errorList = deployer.validateApi(api);
+                    if (!errorList.getErrors().isEmpty()) {
+                        throw new ExternalGatewayAPIValidationException(
+                                "Error occurred while validating the API with the federated gateway: "
+                                        + api.getGatewayType(),
+                                ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
+                                        api.getGatewayType(), errorList.getErrors().toString()));
+                    }
+                }
+            }
+        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
+                 IllegalAccessException | InvocationTargetException e) {
+            throw new APIManagementException(
+                    "Error occurred while validating the API with the federated gateway: "
+                            + api.getGatewayType(), e);
+        }
     }
 }

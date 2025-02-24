@@ -253,6 +253,17 @@ paths:
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/requestedTenant'
         - $ref: '#/components/parameters/requestedTenant-Q'
+        - name: query
+          in: query
+          description: |
+            **Key Manager Specific Swagger Generation**.
+            To retrieve an OpenAPI Specification (OAS) definition for a specific Key Manager, please specify the Key Manager's ID in your request. 
+              
+            For example, by passing the query parameter `kmId=65e30b46-85e4-4788-85b7-b1c3de06b2e0`, you will receive the OAS definition containing all relevant information for the Key Manager associated with that ID.
+              
+            **Important:** If you're using a client that does not automatically handle URL encoding (such as `curl`), please ensure that you encode the URL properly.
+          schema:
+            type: string
       responses:
         200:
           description: |
@@ -2603,6 +2614,9 @@ paths:
         2. Retrieving APIs which are subscribed by a specific application.
         `GET https://localhost:9443/api/am/devportal/v3/subscriptions?applicationId=c43a325c-260b-4302-81cb-768eafaa3aed`
 
+        If application sharing is enabled, the **groupId** can be used to include subscriptions associated with the
+        specified **groupId** in the results, provided the application is shared within the group.
+        
         **IMPORTANT:**
         * It is mandatory to provide either **apiId** or **applicationId**.
       parameters:
@@ -3739,7 +3753,33 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/me/change-password"'
 
-
+  /me/organization-information:
+    get:
+      tags:
+        - Users
+      summary: Get the Organization information of the user
+      description: |
+        Using this operation, logged-in user can get their organization information.
+      operationId: organizationInformation
+      responses:
+        200:
+          description: |
+            OK.
+            Key Manager list returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationInfo'
+        400:
+          $ref: '#/components/responses/BadRequest'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/me/organization"'
+          
   ######################################################
   # The "Marketplace Assistant Feature" resource APIs
   ######################################################
@@ -4385,6 +4425,11 @@ components:
           type: string
           readOnly: true
           example: 1651555310208
+        visibility:
+          type: string
+          enum:
+            - PRIVATE
+            - SHARED_WITH_ORG
     ApplicationInfo:
       title: Application info object with basic application details
       type: object
@@ -5573,6 +5618,11 @@ components:
         IsJWTEnabledForLoginTokens: 
           type: boolean
           default: false
+        orgAccessControlEnabled:
+          type: boolean
+          description: |
+            Is Organization-based access control configuration enabled
+          example: true
         userStorePasswordPattern:
           type: string
           description: The 'PasswordJavaRegEx' cofigured in the UserStoreManager
@@ -5611,6 +5661,9 @@ components:
           type: boolean
           description: Specifies whether Marketplace Assistant feature is enabled.
           default: true
+        orgWideAppUpdateEnabled:
+          type: boolean
+          default: false
     ApplicationAttribute:
       title: Application attributes
       type: object
@@ -5759,6 +5812,16 @@ components:
           type: string
           description: Average rating of the API
           example: "4.5"
+    OrganizationInfo:
+      title: Organization Info
+      type: object
+      properties:
+        organizationId:
+          type: string
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          type: string
+          example: My Organization
     KeyManagerInfo:
       title: Key Manager Info
       required:

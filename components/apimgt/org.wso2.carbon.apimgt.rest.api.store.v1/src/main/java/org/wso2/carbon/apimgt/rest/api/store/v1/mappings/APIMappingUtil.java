@@ -36,12 +36,18 @@ import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIType;
+import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
+import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
+import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.VHostUtils;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
@@ -66,6 +72,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -241,6 +248,12 @@ public class APIMappingUtil {
         if (model.getEnvironmentList() != null) {
             List<String> environmentListToReturn = new ArrayList<>();
             environmentListToReturn.addAll(model.getEnvironmentList());
+            dto.setEnvironmentList(environmentListToReturn);
+        }
+
+        if (model.getEnvironments() != null) {
+            List<String> environmentListToReturn = new ArrayList<>();
+            environmentListToReturn.addAll(model.getEnvironments());
             dto.setEnvironmentList(environmentListToReturn);
         }
 
@@ -506,7 +519,9 @@ public class APIMappingUtil {
     public static List<APIEndpointURLsDTO> fromAPIRevisionListToEndpointsList(APIDTO apidto, String organization)
             throws APIManagementException {
 
-        Map<String, Environment> environments = APIUtil.getEnvironments(organization);
+        Map<String, Environment> environmentsMap = APIUtil.getEnvironments(organization);
+        List<Environment> environmentsList = new ArrayList<Environment>(environmentsMap.values());
+        Map<String, Environment> permittedEnvironments = APIUtil.extractVisibleEnvironmentsForUser(environmentsList, RestApiCommonUtil.getLoggedInUsername());
         APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
         List<APIRevisionDeployment> revisionDeployments = apiConsumer.getAPIRevisionDeploymentListOfAPI(apidto.getId());
 
@@ -522,7 +537,7 @@ public class APIMappingUtil {
         for (APIRevisionDeployment revisionDeployment : revisionDeployments) {
             if (revisionDeployment.isDisplayOnDevportal()) {
                 // Deployed environment
-                Environment environment = environments.get(revisionDeployment.getDeployment());
+                Environment environment = permittedEnvironments.get(revisionDeployment.getDeployment());
                 if (environment != null) {
                     APIEndpointURLsDTO apiEndpointURLsDTO = fromAPIRevisionToEndpoints(apidto, environment,
                             revisionDeployment.getVhost(), customGatewayUrl, organization);
@@ -559,11 +574,23 @@ public class APIMappingUtil {
         boolean isGQLSubscription = StringUtils.equalsIgnoreCase(APIConstants.GRAPHQL_API, apidto.getType())
                 && isGraphQLSubscriptionsAvailable(apidto);
         if (!isWs) {
+            //prevent context appending in case the gateway is an external one
+            GatewayDeployer gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain,
+                    environment.getName());
+            context = gatewayDeployer != null ? "" : context;
+
+            String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(apidto.getId(),
+                    environment.getUuid());
+            String httpUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(externalReference)
+                    : vHost.getHttpUrl();
+            String httpsUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(externalReference)
+                    : vHost.getHttpsUrl();
+
             if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
-                apiurLsDTO.setHttp(vHost.getHttpUrl() + context);
+                apiurLsDTO.setHttp(httpUrl + context);
             }
             if (apidto.getTransport().contains(APIConstants.HTTPS_PROTOCOL)) {
-                apiurLsDTO.setHttps(vHost.getHttpsUrl() + context);
+                apiurLsDTO.setHttps(httpsUrl + context);
             }
         }
         if (isWs || isGQLSubscription) {
@@ -1107,6 +1134,35 @@ public class APIMappingUtil {
             apiInfoDTO.setMonetizationLabel(RestApiConstants.FREEMIUM);
         }
         apiInfoDTO.setThrottlingPolicies(throttlingPolicyNames);
+    }
+
+    /**
+     * Retrieves the value of the specified query parameter from a query string.
+     *
+     * @param query The query string containing key-value pairs.
+     * @return The value of the "kmId" parameter, or null if not found or if the query is empty or null.
+     */
+    public static String getKmIdValue(String query) {
+
+        if (StringUtils.isBlank(query)) {
+            return null;
+        }
+
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split(":");
+            if (keyValue.length > 0) {
+                String key = keyValue[0].trim();
+                if (key.equals("kmId")) {
+                    if (keyValue.length > 1) {
+                        return keyValue[1].trim();
+                    } else {
+                        return "";
+                    }
+                }
+            }
+        }
+        return null;
     }
 
 }

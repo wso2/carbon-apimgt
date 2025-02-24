@@ -31,6 +31,7 @@
 
     <suppress checks="MethodNameCheck" files=".*/*CommandProvider.java" />
     <suppress checks="Regexp" files=".*/*CommandProvider.java" />
+    <suppress checks="Regexp" files=".*/*GovernanceException.java"/>
 
 
     <!-- copied from apache hadoop, won't fix style to keep diff minimal -->

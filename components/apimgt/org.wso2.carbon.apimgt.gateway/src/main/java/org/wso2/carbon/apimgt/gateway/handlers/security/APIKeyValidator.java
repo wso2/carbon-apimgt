@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -399,22 +400,31 @@ public class APIKeyValidator {
             if (selectedApi != null) {
                 Resource[] selectedAPIResources = selectedApi.getResources();
 
-                Set<Resource> acceptableResources = new LinkedHashSet<Resource>();
+                List<Resource> acceptableResourcesList = new LinkedList<>();
 
                 for (Resource resource : selectedAPIResources) {
                     //If the requesting method is OPTIONS or if the Resource contains the requesting method
-                    if (RESTConstants.METHOD_OPTIONS.equals(httpMethod) ||
+                    if (RESTConstants.METHOD_OPTIONS.equals(httpMethod) &&
                             (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
-                        acceptableResources.add(resource);
+                        acceptableResourcesList.add(0, resource);
+                    } else if (RESTConstants.METHOD_OPTIONS.equals(httpMethod) ||
+                            (resource.getMethods() != null && Arrays.asList(resource.getMethods()).contains(httpMethod))) {
+                        acceptableResourcesList.add(resource);
                     }
                 }
+
+                Set<Resource> acceptableResources = new LinkedHashSet<>(acceptableResourcesList);
 
                 if (acceptableResources.size() > 0) {
                     for (RESTDispatcher dispatcher : RESTUtils.getDispatchers()) {
                         Resource resource = dispatcher.findResource(synCtx, acceptableResources);
                         if (resource != null && Arrays.asList(resource.getMethods()).contains(httpMethod)) {
                             selectedResource = resource;
-                            break;
+                            if (selectedResource.getDispatcherHelper()
+                                    .getString() != null && !selectedResource.getDispatcherHelper().getString()
+                                    .contains("/*")) {
+                                break;
+                            }
                         }
                     }
                 }
@@ -743,9 +753,9 @@ public class APIKeyValidator {
     }
 
     public APIKeyValidationInfoDTO validateSubscription(String context, String version, int appID,
-                                                        String tenantDomain)
+                                                        String tenantDomain, String keyType)
             throws APISecurityException {
-        return dataStore.validateSubscription(context, version, appID,tenantDomain);
+        return dataStore.validateSubscription(context, version, appID,tenantDomain, keyType);
     }
 
     /**
