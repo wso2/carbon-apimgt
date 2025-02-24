@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
+import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -100,11 +101,10 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         // Check whether the artifact is governable and if not return
         boolean isArtifactGovernable = APIMGovernanceUtil.isArtifactGovernable(artifactRefId, artifactType);
         if (!isArtifactGovernable) {
-            if (log.isDebugEnabled()) {
-                log.debug(String.format("Compliance evaluation is not supported for artifact %s ." +
-                                " Hence skipping the compliance evaluation",
-                        artifactRefId));
-            }
+            String message = String.format("Skipping async compliance evaluation for artifact %s " +
+                    "in organization %s due to incompatible artifact type", artifactRefId, organization);
+            log.debug(message);
+            AuditLogger.log("Skip Async Eval", message);
             return;
         }
 
@@ -124,7 +124,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
      * Evaluate compliance of the artifact synchronously
      *
      * @param artifactRefId          Artifact Reference ID (ID of the artifact on APIM side)
-     * @param revisionId             Revision number
+     * @param revisionId             Revision ID
      * @param artifactType           Artifact type ArtifactType.API
      * @param state                  State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
      * @param artifactProjectContent This is a map of RuleType and String which contains the content of the artifact
@@ -147,11 +147,10 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         // Check whether the artifact is governable and if not return
         boolean isArtifactGovernable = APIMGovernanceUtil.isArtifactGovernable(artifactRefId, artifactType);
         if (!isArtifactGovernable) {
-            if (log.isDebugEnabled()) {
-                log.debug(String.format("Compliance evaluation is not supported for artifact %s . " +
-                                "Hence skipping the compliance evaluation",
-                        artifactRefId));
-            }
+            String message = String.format("Skipping sync compliance evaluation for artifact %s " +
+                    "in organization %s due to incompatible artifact type", artifactRefId, organization);
+            log.debug(message);
+            AuditLogger.log("Skip Sync Eval", message);
             ArtifactComplianceInfo artifactComplianceInfo = new ArtifactComplianceInfo();
             artifactComplianceInfo.setBlockingNecessary(false);
             return artifactComplianceInfo;
@@ -190,10 +189,11 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
                 .getExtendedArtifactTypeFromProject(zipArchive, artifactType);
 
         if (extendedArtifactType == null) {
-            if (log.isDebugEnabled()) {
-                log.debug("Compliance evaluation is not supported for the provided artifact . Hence " +
-                        "skipping the compliance evaluation");
-            }
+            String message = String.format(
+                    "Skipping sync compliance evaluation for given artifact in organization %s " +
+                            "due to incompatible artifact type", organization);
+            log.debug(message);
+            AuditLogger.log("Skip Dry Run Eval", message);
             return null;
         }
 
