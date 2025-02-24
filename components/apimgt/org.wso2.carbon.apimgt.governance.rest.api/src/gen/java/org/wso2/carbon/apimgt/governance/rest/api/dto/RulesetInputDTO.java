@@ -138,7 +138,7 @@ return null;
   @ApiModelProperty(example = "API Security Ruleset", required = true, value = "Name of the ruleset.")
   @JsonProperty("name")
   @NotNull
-  public String getName() {
+ @Size(max=256)  public String getName() {
     return name;
   }
   public void setName(String name) {
@@ -156,7 +156,7 @@ return null;
   
   @ApiModelProperty(example = "A ruleset designed to enforce security standards for APIs.", value = "A brief description of the ruleset.")
   @JsonProperty("description")
-  public String getDescription() {
+ @Size(max=1024)  public String getDescription() {
     return description;
   }
   public void setDescription(String description) {
