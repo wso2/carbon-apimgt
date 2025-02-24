@@ -1094,124 +1094,6 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * This method will encrypt the OAuth 2.0 API Key and API Secret.
-     *
-     * @param cryptoUtil     cryptography util
-     * @param oldApiSecret   existing API secret
-     * @param apiEndpointDTO apiEndpointDTO
-     * @param endpointConfig endpoint configuration of API
-     * @throws CryptoException        if an error occurs while encrypting and base64 encode
-     * @throws APIManagementException if an error occurs due to a problem in the endpointConfig payload
-     */
-    public static void encryptEndpointSecurityOAuthCredentials(APIEndpointDTO apiEndpointDTO, CryptoUtil cryptoUtil,
-            String oldApiSecret, Map endpointConfig) throws CryptoException, APIManagementException {
-
-        // OAuth 2.0 backend protection: API Key and API Secret encryption
-        String customParametersString;
-        if (endpointConfig != null) {
-            if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
-                Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
-                if (apiEndpointDTO.getDeploymentStage()
-                        .equals(APIConstants.APIEndpoint.PRODUCTION) && endpointSecurity.get(
-                        APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
-                    Map endpointSecurityProduction = (Map) endpointSecurity
-                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
-                    String productionEndpointType = (String) endpointSecurityProduction
-                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
-
-                    // Change default value of customParameters JSONObject to String
-                    if (!(endpointSecurityProduction
-                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String)) {
-                        LinkedHashMap<String, String> customParametersHashMap = (LinkedHashMap<String, String>)
-                                endpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
-                        customParametersString = JSONObject.toJSONString(customParametersHashMap);
-                    } else if (endpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS)
-                            != null) {
-                        customParametersString = (String) endpointSecurityProduction
-                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
-                    } else {
-                        customParametersString = "{}";
-                    }
-                    endpointSecurityProduction
-                            .put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
-
-                    if (APIConstants.OAuthConstants.OAUTH.equals(productionEndpointType)) {
-                        if (endpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null
-                                && StringUtils.isNotBlank(
-                                endpointSecurityProduction.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)
-                                        .toString())) {
-                            String apiSecret = endpointSecurityProduction
-                                    .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
-                            String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
-                            endpointSecurityProduction
-                                    .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
-                        } else if (StringUtils.isNotBlank(oldApiSecret)) {
-                            endpointSecurityProduction
-                                    .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldApiSecret);
-                        } else {
-                            String errorMessage = "Client secret is not provided for production endpoint security";
-                            throw new APIManagementException(
-                                    ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
-                        }
-                    }
-                    endpointSecurity
-                            .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION, endpointSecurityProduction);
-                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
-                    apiEndpointDTO.setEndpointConfig(endpointConfig);
-                }
-                if (apiEndpointDTO.getDeploymentStage()
-                        .equals(APIConstants.APIEndpoint.SANDBOX) && endpointSecurity.get(
-                        APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
-                    Map endpointSecuritySandbox = (Map) endpointSecurity
-                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
-                    String sandboxEndpointType = (String) endpointSecuritySandbox
-                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
-
-                    // Change default value of customParameters JSONObject to String
-                    if (!(endpointSecuritySandbox
-                            .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) instanceof String)) {
-                        Map<String, String> customParametersHashMap = (Map<String, String>) endpointSecuritySandbox
-                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
-                        customParametersString = JSONObject.toJSONString(customParametersHashMap);
-                    } else if (endpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS)
-                            != null) {
-                        customParametersString = (String) endpointSecuritySandbox
-                                .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
-                    } else {
-                        customParametersString = "{}";
-                    }
-                    endpointSecuritySandbox
-                            .put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParametersString);
-
-                    if (APIConstants.OAuthConstants.OAUTH.equals(sandboxEndpointType)) {
-                        if (endpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET) != null
-                                && StringUtils.isNotBlank(
-                                endpointSecuritySandbox.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET)
-                                        .toString())) {
-                            String apiSecret = endpointSecuritySandbox
-                                    .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET).toString();
-                            String encryptedApiSecret = cryptoUtil.encryptAndBase64Encode(apiSecret.getBytes());
-                            endpointSecuritySandbox
-                                    .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, encryptedApiSecret);
-                        } else if (StringUtils.isNotBlank(oldApiSecret)) {
-                            endpointSecuritySandbox
-                                    .put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET, oldApiSecret);
-                        } else {
-                            String errorMessage = "Client secret is not provided for sandbox endpoint security";
-                            throw new APIManagementException(
-                                    ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
-                        }
-                    }
-                    endpointSecurity
-                            .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecuritySandbox);
-                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
-                    apiEndpointDTO.setEndpointConfig(endpointConfig);
-                }
-            }
-        }
-    }
-
-    /**
      * Check whether the token has APIDTO class level Scope annotation.
      *
      * @return true if the token has APIDTO class level Scope annotation
@@ -3456,33 +3338,33 @@ public class PublisherCommonUtils {
         Map endpointConfig = (Map) apiEndpointDTO.getEndpointConfig();
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
 
-        // OAuth 2.0 backend protection: API Key and API Secret encryption
-        encryptEndpointSecurityOAuthCredentials(apiEndpointDTO, cryptoUtil, oldApiEndpointSecret, endpointConfig);
-
         encryptEndpointSecurityApiKeyCredentials(apiEndpointDTO, cryptoUtil, oldApiEndpointSecret, endpointConfig);
-
-        // AWS Lambda: secret key encryption while updating the API
-        if (apiEndpointDTO.getEndpointConfig() != null) {
-            if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
-                String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
-                if (!StringUtils.isEmpty(secretKey)) {
-                    if (!APIConstants.AWS_SECRET_KEY.equals(secretKey)) {
-                        String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
-                        endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
-                        apiEndpointDTO.setEndpointConfig(endpointConfig);
-                    } else {
-                        String encryptedSecretKey = (String) oldEndpointConfig.get(APIConstants.AMZN_SECRET_KEY);
-                        endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
-                        apiEndpointDTO.setEndpointConfig(endpointConfig);
-                    }
-                }
-            }
-        }
 
         APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
         if (apiEndpoint.getEndpointUuid() == null) {
             apiEndpoint.setEndpointUuid(endpointId);
         }
+
+        // extract endpoint URL
+        Object endpointURLObj;
+        if (apiEndpoint.getDeploymentStage().equals(APIConstants.APIEndpoint.PRODUCTION)) {
+            endpointURLObj = apiEndpoint.getEndpointConfig()
+                    .get(APIConstants.APIEndpoint.ENDPOINT_CONFIG_PRODUCTION_ENDPOINTS);
+        } else if (apiEndpoint.getDeploymentStage().equals(APIConstants.APIEndpoint.SANDBOX)) {
+            endpointURLObj = apiEndpoint.getEndpointConfig()
+                    .get(APIConstants.APIEndpoint.ENDPOINT_CONFIG_SANDBOX_ENDPOINTS);
+        } else {
+            throw new APIManagementException("Invalid deployment stage. Deployment stage should be either " +
+                    "'PRODUCTION' or 'SANDBOX'", ExceptionCodes.ERROR_ADDING_API_ENDPOINT);
+        }
+        String endpointURL = ((LinkedHashMap) endpointURLObj).get("url").toString();
+
+        // validate endpoint URL
+        if (!APIUtil.validateEndpointURL(endpointURL)) {
+            throw new APIManagementException("Invalid/Malformed endpoint URL detected",
+                    ExceptionCodes.API_ENDPOINT_URL_INVALID);
+        }
+
         APIEndpointInfo apiEndpointUpdated = apiProvider.updateAPIEndpoint(apiId, apiEndpoint, organization);
         if (apiEndpointUpdated == null) {
             throw new APIManagementException("Error occurred while updating endpoint with UUID " + endpointId +
@@ -3508,7 +3390,6 @@ public class PublisherCommonUtils {
         // API Key and API Secret encryption
         Map endpointConfig = (Map) apiEndpointDTO.getEndpointConfig();
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-        encryptEndpointSecurityOAuthCredentials(apiEndpointDTO, cryptoUtil, StringUtils.EMPTY, endpointConfig);
         encryptEndpointSecurityApiKeyCredentials(apiEndpointDTO, cryptoUtil, StringUtils.EMPTY, endpointConfig);
 
         APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
@@ -3525,7 +3406,6 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Invalid deployment stage. Deployment stage should be either " +
                     "'PRODUCTION' or 'SANDBOX'", ExceptionCodes.ERROR_ADDING_API_ENDPOINT);
         }
-
         String endpointURL = ((LinkedHashMap) endpointURLObj).get("url").toString();
 
         // validate endpoint URL
