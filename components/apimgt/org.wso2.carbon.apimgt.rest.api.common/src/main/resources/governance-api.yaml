@@ -970,10 +970,12 @@ components:
       properties:
         name:
           type: string
+          maxLength: 256
           description: Name of the ruleset.
           example: "API Security Ruleset"
         description:
           type: string
+          maxLength: 1024
           description: A brief description of the ruleset.
           example: "A ruleset designed to enforce security standards for APIs."
         rulesetContent:
@@ -1122,10 +1124,12 @@ components:
         name:
           type: string
           description: Name of the governance policy.
+          maxLength: 256
           example: "API Security Policy"
         description:
           type: string
           description: A brief description of the governance policy.
+          maxLength: 1024
           example: "Policy for enforcing security standards across all APIs."
         governableStates:
           type: array
