@@ -1516,9 +1516,9 @@
                 <version>${google.guava.version}</version>
             </dependency>
             <dependency>
-                <groupId>javax.validation</groupId>
-                <artifactId>validation-api</artifactId>
-                <version>${javax.validation-api}</version>
+                <groupId>jakarta.validation</groupId>
+                <artifactId>jakarta.validation-api</artifactId>
+                <version>${jakarta.validation-api.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.inject</groupId>
@@ -2178,7 +2178,7 @@
         <org.slf4j.version>2.0.12</org.slf4j.version>
         <slf4j.api.version>2.0.12</slf4j.api.version>
         <spring-web.version>5.3.23</spring-web.version>
-        <hibernate-validator.version>6.0.23.Final</hibernate-validator.version>
+        <hibernate-validator.version>6.2.5.Final</hibernate-validator.version>
         <swagger-jaxrs.version>1.6.1</swagger-jaxrs.version>
         <junit.version>4.13.1</junit.version>
         <opensaml3.version>3.3.1</opensaml3.version>
@@ -2221,7 +2221,7 @@
         <commons.scxml.version>0.9.0.wso2v2</commons.scxml.version>
         <velocity.version>2.4</velocity.version>
         <fasterxml.jackson.version>2.17.2</fasterxml.jackson.version>
-        <javax.validation-api>2.0.1.Final</javax.validation-api>
+        <jakarta.validation-api.version>2.0.2</jakarta.validation-api.version>
         <javax.inject.version>1</javax.inject.version>
         <carbon.broker.version>3.3.35</carbon.broker.version>
         <andes.version>3.3.33</andes.version>
