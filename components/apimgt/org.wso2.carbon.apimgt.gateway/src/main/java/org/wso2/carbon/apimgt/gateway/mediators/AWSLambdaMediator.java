@@ -143,7 +143,7 @@ public class AWSLambdaMediator extends AbstractMediator {
             if (JsonUtil.hasAJsonPayload(axis2MessageContext)) {
                 String jsonPayload = JsonUtil.jsonPayloadToString(axis2MessageContext);
                 if (!isContentEncodingEnabled) {
-                    payload.add(BODY_PARAMETER, new JsonParser().parse(body).getAsJsonObject());
+                    payload.add(BODY_PARAMETER, new JsonParser().parse(jsonPayload).getAsJsonObject());
                 } else {
                     payload.addProperty(BODY_PARAMETER, Base64.encodeBase64String(jsonPayload.getBytes()));
                 }
