@@ -162,7 +162,7 @@ public class OAuthAuthenticator implements Authenticator {
                             boolean isConsumerKeyHeaderAvailable = false;
                             for (String element : elements) {
                                 if (!"".equals(element.trim())) {
-                                    if (consumerKeyHeaderSegment.equals(elements[j].trim())) {
+                                    if (consumerKeyHeaderSegment.equalsIgnoreCase(elements[j].trim())) {
                                         isConsumerKeyHeaderAvailable = true;
                                     } else if (isConsumerKeyHeaderAvailable) {
                                         accessToken = removeLeadingAndTrailing(elements[j].trim());
