@@ -80,9 +80,10 @@ public interface ComplianceMgtDAO {
      * Delete long lasting processing requests
      *
      * @param taskCleanupInterval Task cleanup interval in minutes
+     * @return List of deleted request IDs
      * @throws APIMGovernanceException If an error occurs while deleting the long-lasting processing requests
      */
-    void deleteLongLastingProcessingReqs(int taskCleanupInterval) throws APIMGovernanceException;
+    List<String> deleteLongLastingProcessingReqs(int taskCleanupInterval) throws APIMGovernanceException;
 
     /**
      * Delete an evaluation request

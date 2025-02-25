@@ -198,7 +198,8 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         RulesetManager rulesetManager = new RulesetManager();
 
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
-        rulesetManager.deleteRuleset(rulesetId, organization);
+        String username = APIMGovernanceAPIUtil.getLoggedInUsername();
+        rulesetManager.deleteRuleset(rulesetId, username, organization);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 

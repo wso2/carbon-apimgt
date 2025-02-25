@@ -115,7 +115,7 @@ public class APIMGovernanceMessageListener implements MessageListener {
                 return;
             }
             if (log.isDebugEnabled()) {
-                log.debug("Label delete event received for label ID: " + label);
+                log.debug("Label delete event received for label " + label);
             }
             // Handle label delete event
             try {

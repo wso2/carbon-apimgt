@@ -264,10 +264,11 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
      * Delete long lasting processing requests
      *
      * @param taskCleanupInterval Task Cleanup Interval in minutes
+     * @return List of deleted request IDs
      * @throws APIMGovernanceException If an error occurs while deleting the long lasting processing requests
      */
     @Override
-    public void deleteLongLastingProcessingReqs(int taskCleanupInterval)
+    public List<String> deleteLongLastingProcessingReqs(int taskCleanupInterval)
             throws APIMGovernanceException {
 
         Map<String, Timestamp> longLastingProcessing = new HashMap<>();
@@ -288,7 +289,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 }
             }
             if (longLastingProcessing.isEmpty()) {
-                return;
+                return new ArrayList<>();
             }
 
             connection.setAutoCommit(false);
@@ -312,6 +313,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                 }
 
                 connection.commit();
+                return new ArrayList<>(longLastingProcessing.keySet());
             } catch (SQLException e) {
                 connection.rollback();
                 throw e;

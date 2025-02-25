@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
+import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +68,11 @@ public class PolicyManager {
         checkForInvalidActions(governancePolicy);
         addMissingNotifyActions(governancePolicy);
 
-        return policyMgtDAO.createGovernancePolicy(governancePolicy, organization);
+        APIMGovernancePolicy newPolicy = policyMgtDAO.createGovernancePolicy(governancePolicy, organization);
+        AuditLogger.log("Governance Policy",
+                "New governance policy %s with ID %s created by user %s in organization %s",
+                newPolicy.getName(), newPolicy.getId(), newPolicy.getCreatedBy(), organization);
+        return newPolicy;
     }
 
     /**
@@ -97,7 +102,11 @@ public class PolicyManager {
         checkForInvalidActions(governancePolicy);
         addMissingNotifyActions(governancePolicy);
 
-        return policyMgtDAO.updateGovernancePolicy(policyId, governancePolicy, organization);
+        APIMGovernancePolicy updatedPolicy = policyMgtDAO.updateGovernancePolicy(policyId, governancePolicy,
+                organization);
+        AuditLogger.log("Governance Policy", "Governance policy %s with ID %s updated by user %s in organization %s",
+                updatedPolicy.getName(), updatedPolicy.getId(), updatedPolicy.getUpdatedBy(), organization);
+        return updatedPolicy;
     }
 
     /**
@@ -165,16 +174,20 @@ public class PolicyManager {
      * Delete a Governance Policy
      *
      * @param policyId     Policy ID
+     * @param username     Username
      * @param organization Organization
      * @throws APIMGovernanceException If an error occurs while deleting the policy
      */
 
-    public void deletePolicy(String policyId, String organization) throws APIMGovernanceException {
-        if (policyMgtDAO.getGovernancePolicyByID(policyId, organization) == null) {
+    public void deletePolicy(String policyId, String username, String organization) throws APIMGovernanceException {
+        APIMGovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
+        if (policy == null) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, policyId);
         }
 
         policyMgtDAO.deletePolicy(policyId, organization);
+        AuditLogger.log("Governance Policy", "Governance policy %s with ID %s deleted by user %s in organization %s",
+                policy.getName(), policy.getId(), username, organization);
     }
 
     /**
@@ -361,5 +374,6 @@ public class PolicyManager {
      */
     public void deleteLabelPolicyMappings(String label) throws APIMGovernanceException {
         policyMgtDAO.deleteLabelPolicyMappings(label);
+        AuditLogger.log("Governance Policy", "Label policy mappings deleted for label %s", label);
     }
 }
