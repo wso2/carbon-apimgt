@@ -184,7 +184,7 @@ public class EndpointSecurityDTO {
         return customParameters;
     }
 
-    public void setCustomParameters(String customParameters) {
+    public void setCustomParameters(Object customParameters) {
 
         this.customParameters = customParameters;
     }
