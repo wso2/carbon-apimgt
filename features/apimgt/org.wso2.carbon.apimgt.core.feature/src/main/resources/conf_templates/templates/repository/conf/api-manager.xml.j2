@@ -407,6 +407,11 @@
 
     <AiConfiguration>
         <Enabled>{{apim.ai.llm_provider_events_enabled}}</Enabled>
+        <FailoverConfigurations>
+            <FailoverEndpointsLimit>{{apim.ai.failover_configurations.failover_endpoints_limit}}</FailoverEndpointsLimit>
+            <DefaultRequestTimout>{{apim.ai.failover_configurations.default_request_timeout}}</DefaultRequestTimout>
+        </FailoverConfigurations>
+        <DefaultRequestTimout>{{apim.ai.default_request_timeout}}</DefaultRequestTimout>
     </AiConfiguration>
 
     <!--
