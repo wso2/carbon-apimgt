@@ -425,7 +425,7 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
                 return Files.readAllBytes(apiProject.toPath());
             } catch (APIManagementException | APIImportExportException | IOException e) {
                 throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_APIM_PROJECT, e,
-                        apiId);
+                        apiId, organization);
             }
         }
     }
