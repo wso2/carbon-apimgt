@@ -2518,6 +2518,27 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return exist;
     }
 
+    @Override
+    public boolean isAnotherOverviewDocumentationExist(String uuid, String documentId, String docOtherTypeName, String organization) throws APIManagementException {
+        boolean exist = false;
+        UserContext ctx = null;
+        try {
+            DocumentSearchResult result = apiPersistenceInstance.searchDocumentation(new Organization(organization), uuid, 0, 0,
+                    "other:_overview", ctx);
+            if (result != null && result.getDocumentationList() != null && !result.getDocumentationList().isEmpty()) {
+                String returnDocOtherTypeName = result.getDocumentationList().get(0).getOtherTypeName();
+                String returnDocId = result.getDocumentationList().get(0).getId();
+                if ((documentId == null || !documentId.equals(returnDocId))
+                        && returnDocOtherTypeName != null && returnDocOtherTypeName.equals(docOtherTypeName)) {
+                    exist = true;
+                }
+            }
+        } catch (DocumentationPersistenceException e) {
+            handleException("Failed to search documentation for other type name " + docOtherTypeName, e);
+        }
+        return exist;
+    }
+
     /**
      * Returns the details of all the life-cycle changes done per API or API Product
      *
