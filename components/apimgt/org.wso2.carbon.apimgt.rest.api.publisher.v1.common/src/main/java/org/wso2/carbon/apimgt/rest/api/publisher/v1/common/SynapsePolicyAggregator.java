@@ -243,7 +243,7 @@ public class SynapsePolicyAggregator {
         try {
             sequence = updateSequenceName(sequence, sequenceName);
         } catch (Exception ex) {
-            throw new APIManagementException("Error when updating the sequence name");
+            throw new APIManagementException("Error when updating the sequence name: " + sequenceName, ex);
         }
         return sequence;
     }
