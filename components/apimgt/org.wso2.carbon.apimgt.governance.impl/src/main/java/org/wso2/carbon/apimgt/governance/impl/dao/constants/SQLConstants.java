@@ -302,7 +302,6 @@ public class SQLConstants {
                     "    WHERE GA.ARTIFACT_REF_ID = ? " +
                     "    AND GA.ARTIFACT_TYPE = ? " +
                     "    AND GA.ORGANIZATION = ? " +
-                    "    LIMIT 1" +
                     ")";
 
 
