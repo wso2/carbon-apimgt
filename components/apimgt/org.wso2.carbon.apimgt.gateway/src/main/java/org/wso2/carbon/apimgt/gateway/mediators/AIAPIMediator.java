@@ -197,8 +197,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @throws IOException        If an I/O error occurs during payload handling.
      */
     private void prepareForFailover(MessageContext messageContext,
-                                    LLMProviderConfiguration providerConfiguration, Map<String,
-            FailoverPolicyConfigDTO> failoverConfigMap)
+                                    LLMProviderConfiguration providerConfiguration,
+                                    Map<String, FailoverPolicyConfigDTO> failoverConfigMap)
             throws XMLStreamException, IOException, APIManagementException {
 
         org.apache.axis2.context.MessageContext axis2Ctx =
@@ -536,8 +536,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                     getRemainingTokenCountMetadata(providerConfiguration).getAttributeIdentifier();
 
             if (remainingTokenCountHeader != null && transportHeaders.containsKey(remainingTokenCountHeader)) {
-                long remainingTokenCount = Long.parseLong((String) transportHeaders
-                        .get(getRemainingTokenCountMetadata(providerConfiguration).getAttributeIdentifier()));
+                long remainingTokenCount = Long.parseLong((String) transportHeaders.get(remainingTokenCountHeader));
                 if (remainingTokenCount <= 0) {
                     if (roundRobinConfigs != null) {
 
