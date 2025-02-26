@@ -2603,7 +2603,9 @@ public class APIManagerConfiguration {
         }
         OMElement aiConfigurationEnabledElement =
                 omElement.getFirstChildWithName(new QName(APIConstants.AI.ENABLED));
-        if (aiConfigurationEnabledElement != null) {
+        if (aiConfigurationEnabledElement != null
+                && StringUtils.isNotEmpty(aiConfigurationEnabledElement.getText())) {
+
             aiapiConfigurationsDTO.setEnabled(Boolean.parseBoolean(aiConfigurationEnabledElement.getText().trim()));
 
             OMElement failoverConfigurationsElement =
@@ -2616,7 +2618,8 @@ public class APIManagerConfiguration {
                 OMElement failoverEndpointsLimitElement =
                         failoverConfigurationsElement.getFirstChildWithName(new QName(APIConstants.AI
                                 .AI_CONFIGURATION_FAILOVER_CONFIGURATIONS_FAILOVER_ENDPOINTS_LIMIT));
-                if (failoverEndpointsLimitElement != null) {
+                if (failoverEndpointsLimitElement != null
+                        && StringUtils.isNotEmpty(failoverEndpointsLimitElement.getText())) {
                     try {
                         failoverConfigurations.setFailoverEndpointsLimit(Integer.parseInt(
                                 failoverEndpointsLimitElement.getText().trim()));
@@ -2627,7 +2630,8 @@ public class APIManagerConfiguration {
                 OMElement defaultRequestTimeoutElement =
                         failoverConfigurationsElement.getFirstChildWithName(new QName(APIConstants.AI
                                 .AI_CONFIGURATION_DEFAULT_REQUEST_TIMEOUT));
-                if (defaultRequestTimeoutElement != null) {
+                if (defaultRequestTimeoutElement != null
+                        && StringUtils.isNotEmpty(defaultRequestTimeoutElement.getText())) {
                     try {
                         failoverConfigurations.setDefaultRequestTimeout(Long.parseLong(
                                 defaultRequestTimeoutElement.getText().trim()));
@@ -2642,7 +2646,8 @@ public class APIManagerConfiguration {
             OMElement defaultRequestTimeoutElement =
                     omElement.getFirstChildWithName(new QName(APIConstants.AI
                             .AI_CONFIGURATION_DEFAULT_REQUEST_TIMEOUT));
-            if (defaultRequestTimeoutElement != null) {
+            if (defaultRequestTimeoutElement != null
+                    && StringUtils.isNotEmpty(defaultRequestTimeoutElement.getText())) {
                 aiapiConfigurationsDTO.setDefaultRequestTimeout(Long.parseLong(
                         defaultRequestTimeoutElement.getText().trim()));
             } else {
