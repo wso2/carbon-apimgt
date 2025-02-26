@@ -198,7 +198,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      */
     private void prepareForFailover(MessageContext messageContext,
                                     LLMProviderConfiguration providerConfiguration, Map<String,
-                                    FailoverPolicyConfigDTO> failoverConfigMap)
+            FailoverPolicyConfigDTO> failoverConfigMap)
             throws XMLStreamException, IOException, APIManagementException {
 
         org.apache.axis2.context.MessageContext axis2Ctx =
@@ -532,26 +532,32 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                     .getAxis2MessageContext().getProperty(
                             org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
-            long remainingTokenCount = Long.parseLong((String) transportHeaders
-                    .get(getRemainingTokenCountMetadata(providerConfiguration).getAttributeIdentifier()));
+            String remainingTokenCountHeader =
+                    getRemainingTokenCountMetadata(providerConfiguration).getAttributeIdentifier();
 
-            if (remainingTokenCount <= 0) {
-                if (roundRobinConfigs != null) {
+            if (remainingTokenCountHeader != null && transportHeaders.containsKey(remainingTokenCountHeader)) {
+                long remainingTokenCount = Long.parseLong((String) transportHeaders
+                        .get(getRemainingTokenCountMetadata(providerConfiguration).getAttributeIdentifier()));
+                if (remainingTokenCount <= 0) {
+                    if (roundRobinConfigs != null) {
 
-                    ModelEndpointDTO targetModelEndpoint =
-                            (ModelEndpointDTO) roundRobinConfigs.get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
-                    Long suspendDuration = (Long) roundRobinConfigs.get(APIConstants.AIAPIConstants.SUSPEND_DURATION);
+                        ModelEndpointDTO targetModelEndpoint = (ModelEndpointDTO) roundRobinConfigs
+                                .get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
+                        Long suspendDuration = (Long) roundRobinConfigs
+                                .get(APIConstants.AIAPIConstants.SUSPEND_DURATION);
 
-                    suspendTargetEndpoint(messageContext, targetEndpoint, targetModelEndpoint.getModel(),
-                            suspendDuration);
-                } else if (failoverConfigs != null) {
+                        suspendTargetEndpoint(messageContext, targetEndpoint, targetModelEndpoint.getModel(),
+                                suspendDuration);
+                    } else if (failoverConfigs != null) {
 
-                    ModelEndpointDTO failoverTargetEndpoint =
-                            (ModelEndpointDTO) failoverConfigs.get(APIConstants.AIAPIConstants.FAILOVER_TARGET_MODEL_ENDPOINT);
-                    Long suspendDuration = (Long) failoverConfigs.get(APIConstants.AIAPIConstants.SUSPEND_DURATION);
+                        ModelEndpointDTO failoverTargetEndpoint = (ModelEndpointDTO) failoverConfigs
+                                .get(APIConstants.AIAPIConstants.FAILOVER_TARGET_MODEL_ENDPOINT);
+                        Long suspendDuration = (Long) failoverConfigs
+                                .get(APIConstants.AIAPIConstants.SUSPEND_DURATION);
 
-                    suspendTargetEndpoint(messageContext, failoverTargetEndpoint.getEndpointId(),
-                            failoverTargetEndpoint.getModel(), suspendDuration);
+                        suspendTargetEndpoint(messageContext, failoverTargetEndpoint.getEndpointId(),
+                                failoverTargetEndpoint.getModel(), suspendDuration);
+                    }
                 }
             }
 
