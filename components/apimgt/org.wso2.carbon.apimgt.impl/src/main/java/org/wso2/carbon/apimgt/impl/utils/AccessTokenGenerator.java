@@ -52,7 +52,7 @@ public class AccessTokenGenerator {
     }
 
     public String getAccessToken() {
-        AccessTokenInfo accessTokenInfo = accessTokenInfoMap.get(tokenEndpoint);
+        AccessTokenInfo accessTokenInfo = accessTokenInfoMap.get(authKey);
         if (accessTokenInfo != null) {
             long expiryTime = accessTokenInfo.getIssuedTime() + accessTokenInfo.getValidityPeriod();
             long buffer = 20000;
@@ -61,9 +61,9 @@ public class AccessTokenGenerator {
                 if (log.isDebugEnabled()) {
                     log.debug("Access token expired. New token requested");
                 }
-                accessTokenInfoMap.remove(tokenEndpoint);
+                accessTokenInfoMap.remove(authKey);
                 accessTokenInfo = generateNewAccessToken();
-                accessTokenInfoMap.put(tokenEndpoint, accessTokenInfo);
+                accessTokenInfoMap.put(authKey, accessTokenInfo);
                 assert accessTokenInfo != null;
                 return accessTokenInfo.getAccessToken();
             } else {
@@ -75,7 +75,7 @@ public class AccessTokenGenerator {
         } else {
             accessTokenInfo = generateNewAccessToken();
             if (accessTokenInfo != null) {
-                accessTokenInfoMap.put(tokenEndpoint, accessTokenInfo);
+                accessTokenInfoMap.put(authKey, accessTokenInfo);
                 return accessTokenInfo.getAccessToken();
             }
         }
