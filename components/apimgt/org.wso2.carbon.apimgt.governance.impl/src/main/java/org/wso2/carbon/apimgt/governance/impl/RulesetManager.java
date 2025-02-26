@@ -35,6 +35,8 @@ import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class implements the Ruleset Manager.
@@ -272,23 +274,22 @@ public class RulesetManager {
      */
     private Map<String, String> getRulesetSearchCriteria(String query) {
         Map<String, String> criteriaMap = new HashMap<>();
-        String[] criteria = query.split(" ");
 
-        for (String criterion : criteria) {
-            String[] parts = criterion.split(":");
+        // Regex to match key-value pairs, allowing values with spaces
+        Pattern pattern = Pattern.compile("(\\w+):([^:]+)(?=\\s+\\w+:|$)");
+        Matcher matcher = pattern.matcher(query);
 
-            if (parts.length == 2) {
-                String searchPrefix = parts[0];
-                String searchValue = parts[1];
+        while (matcher.find()) {
+            String searchPrefix = matcher.group(1);
+            String searchValue = matcher.group(2);
 
-                // Add valid prefixes to criteriaMap
-                if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE)) {
-                    criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, searchValue);
-                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE)) {
-                    criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE, searchValue);
-                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.NAME)) {
-                    criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.NAME, searchValue);
-                }
+            // Add valid prefixes to criteriaMap
+            if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE)) {
+                criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, searchValue);
+            } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE)) {
+                criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE, searchValue);
+            } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.NAME)) {
+                criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.NAME, searchValue);
             }
         }
 

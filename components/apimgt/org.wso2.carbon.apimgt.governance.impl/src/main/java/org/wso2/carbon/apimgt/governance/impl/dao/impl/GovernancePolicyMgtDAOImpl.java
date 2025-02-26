@@ -708,10 +708,10 @@ public class GovernancePolicyMgtDAOImpl implements GovernancePolicyMgtDAO {
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.SEARCH_POLICIES)) {
             prepStmt.setString(1, organization);
-            prepStmt.setString(2, searchCriteria.getOrDefault(
-                    APIMGovernanceConstants.PolicySearchAttributes.NAME, ""));
-            prepStmt.setString(3, searchCriteria.getOrDefault(
-                    APIMGovernanceConstants.PolicySearchAttributes.STATE, ""));
+            prepStmt.setString(2, "%" + searchCriteria.getOrDefault(
+                    APIMGovernanceConstants.PolicySearchAttributes.NAME, "") + "%");
+            prepStmt.setString(3, "%" + searchCriteria.getOrDefault(
+                    APIMGovernanceConstants.PolicySearchAttributes.STATE, "") + "%");
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 while (resultSet.next()) {
                     APIMGovernancePolicy policy = new APIMGovernancePolicy();

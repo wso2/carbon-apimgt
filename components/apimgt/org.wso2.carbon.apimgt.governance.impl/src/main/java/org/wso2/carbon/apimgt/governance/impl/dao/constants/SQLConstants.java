@@ -77,8 +77,8 @@ public class SQLConstants {
             "RULE_TYPE, ARTIFACT_TYPE, DOCUMENTATION_LINK, PROVIDER, ORGANIZATION, " +
             "CREATED_BY, CREATED_TIME, " +
             "UPDATED_BY, LAST_UPDATED_TIME FROM GOV_RULESET WHERE ORGANIZATION = ? " +
-            "AND NAME LIKE %?% AND RULE_TYPE LIKE %?% " +
-            "AND ARTIFACT_TYPE LIKE %?%";
+            "AND NAME LIKE ? AND RULE_TYPE LIKE ? " +
+            "AND ARTIFACT_TYPE LIKE ?";
 
     public static final String DELETE_RULESET =
             "DELETE FROM GOV_RULESET WHERE RULESET_ID = ? AND ORGANIZATION = ?";
@@ -146,11 +146,10 @@ public class SQLConstants {
             "SELECT DISTINCT GP.POLICY_ID, GP.NAME, GP.DESCRIPTION, GP.CREATED_BY, GP.CREATED_TIME, " +
                     "GP.UPDATED_BY, GP.LAST_UPDATED_TIME, GP.IS_GLOBAL " +
                     "FROM GOV_POLICY GP " +
-                    "JOIN GOV_POLICY_LABEL GPL ON GP.POLICY_ID = GPL.POLICY_ID " +
                     "JOIN GOV_POLICY_GOVERNABLE_STATE GPS ON GP.POLICY_ID = GPS.POLICY_ID " +
                     "WHERE GP.ORGANIZATION = ? " +
-                    "AND GP.NAME LIKE %?% " +
-                    "AND GPS.STATE LIKE %?%";
+                    "AND GP.NAME LIKE ? " +
+                    "AND GPS.STATE LIKE ?";
 
     public static final String UPDATE_POLICY =
             "UPDATE GOV_POLICY SET NAME = ?, DESCRIPTION = ?, UPDATED_BY = ?, IS_GLOBAL = ?, " +
