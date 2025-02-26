@@ -62,7 +62,7 @@ public class SimplifiedEndpoint {
             return;
         }
 
-        EndpointSecurity endpointSecurity = PRODUCTION.equals(deploymentStage)
+        EndpointSecurityDTO endpointSecurity = PRODUCTION.equals(deploymentStage)
                 ? securityConfig.getProduction()
                 : securityConfig.getSandbox();
 
