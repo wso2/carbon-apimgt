@@ -5,7 +5,7 @@
 # herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
 # You may not alter or remove any copyright or other notice from copies of this content.
 
-name: WSO2 Rest API Design Guidelines
+name: WSO2 REST API Design Guidelines
 description: >-
   A set of guidelines focused on enforcing uniformity in API style, including
   naming conventions, formatting, and documentation to ensure clarity and
