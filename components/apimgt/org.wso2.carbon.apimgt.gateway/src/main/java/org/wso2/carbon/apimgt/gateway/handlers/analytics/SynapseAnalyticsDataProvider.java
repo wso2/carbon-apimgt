@@ -428,12 +428,12 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
-        if (messageContext.getProperty("AI_API_RESPONSE_METADATA") != null) {
+        if (messageContext.getProperty(AIAPIConstants.AI_API_RESPONSE_METADATA) != null) {
             Object requestStartTimeObj = messageContext.getProperty(Constants.REQUEST_START_TIME_PROPERTY);
             long requestStartTime = requestStartTimeObj == null ? 0L : (long) requestStartTimeObj;
             int requestStartHour = getHourByUTC(requestStartTime);
             getAiAnalyticsData(
-                    (Map) messageContext.getProperty("AI_API_RESPONSE_METADATA"),
+                    (Map) messageContext.getProperty(AIAPIConstants.AI_API_RESPONSE_METADATA),
                     requestStartHour,
                     customProperties
             );
