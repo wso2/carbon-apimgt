@@ -198,8 +198,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      */
     private void prepareForFailover(MessageContext messageContext,
                                     LLMProviderConfiguration providerConfiguration, Map<String,
-            FailoverPolicyConfigDTO> failoverConfigMap) throws XMLStreamException
-            , IOException, APIManagementException {
+                                    FailoverPolicyConfigDTO> failoverConfigMap)
+            throws XMLStreamException, IOException, APIManagementException {
 
         org.apache.axis2.context.MessageContext axis2Ctx =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
