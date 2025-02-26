@@ -423,7 +423,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         org.wso2.carbon.apimgt.keymgt.model.entity.API api =
                 (org.wso2.carbon.apimgt.keymgt.model.entity.API) messageContext.getProperty(API_OBJECT);
         customProperties.put(Constants.IS_EGRESS, api.getEgress());
-        customProperties.put(Constants.SUB_TYPE, api.getSubtype());
+        customProperties.put(Constants.SUBTYPE, api.getSubtype());
 
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
