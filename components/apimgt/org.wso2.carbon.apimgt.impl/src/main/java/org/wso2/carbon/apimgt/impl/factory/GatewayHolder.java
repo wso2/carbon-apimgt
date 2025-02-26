@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.GatewayDto;
 import org.wso2.carbon.apimgt.impl.dto.OrganizationGatewayDto;
@@ -97,12 +98,19 @@ public class GatewayHolder {
                 Map<String, Environment> environmentMap = APIUtil.getEnvironments(organization);
                 Environment environment = environmentMap.get(gatewayName);
                 if (environment != null) {
+                    // environment fetched from DB might have encrypted properties, hence need to decrypt before
+                    // initializing the deployer
+                    APIAdminImpl apiAdmin = new APIAdminImpl();
+                    Environment resolvedEnvironment = apiAdmin.getEnvironmentWithoutPropertyMasking(organization,
+                            environment.getUuid());
+                    resolvedEnvironment = apiAdmin.decryptGatewayConfigurationValues(resolvedEnvironment);
+
                     GatewayAgentConfiguration gatewayAgentConfiguration = ServiceReferenceHolder.getInstance().
                             getExternalGatewayConnectorConfiguration(environment.getGatewayType());
                     if (gatewayAgentConfiguration != null) {
                         GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayAgentConfiguration.getImplementation())
                                 .getDeclaredConstructor().newInstance();
-                        deployer.init(environment);
+                        deployer.init(resolvedEnvironment);
                         return deployer;
 
                     }
