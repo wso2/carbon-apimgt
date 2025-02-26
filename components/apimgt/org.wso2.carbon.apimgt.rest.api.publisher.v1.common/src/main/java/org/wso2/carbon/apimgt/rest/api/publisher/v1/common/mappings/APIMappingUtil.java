@@ -3580,8 +3580,8 @@ public class APIMappingUtil {
             boolean preserveCredentials) throws APIManagementException {
 
         APIEndpointDTO apiEndpointDTO = new APIEndpointDTO();
-        apiEndpointDTO.setId(apiEndpoint.getEndpointUuid());
-        apiEndpointDTO.setName(apiEndpoint.getEndpointName());
+        apiEndpointDTO.setId(apiEndpoint.getId());
+        apiEndpointDTO.setName(apiEndpoint.getName());
         apiEndpointDTO.setDeploymentStage(apiEndpoint.getDeploymentStage());
 
         Map<String, Object> endpointConfig = apiEndpoint.getEndpointConfig();
@@ -3600,8 +3600,8 @@ public class APIMappingUtil {
     public static APIEndpointInfo fromDTOtoAPIEndpoint(APIEndpointDTO apiEndpointDTO, String organization)
             throws APIManagementException {
         APIEndpointInfo apiEndpoint = new APIEndpointInfo();
-        apiEndpoint.setEndpointUuid(apiEndpointDTO.getId());
-        apiEndpoint.setEndpointName(apiEndpointDTO.getName());
+        apiEndpoint.setId(apiEndpointDTO.getId());
+        apiEndpoint.setName(apiEndpointDTO.getName());
         apiEndpoint.setDeploymentStage(apiEndpointDTO.getDeploymentStage());
         try {
             HashMap endpointConfigHashMap = (HashMap) apiEndpointDTO.getEndpointConfig();

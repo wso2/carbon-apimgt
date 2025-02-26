@@ -213,7 +213,10 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Add an Endpoint", notes = "This operation can be used to add an endpoint to an API. ", response = APIEndpointDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "API Endpoints",  })
     @ApiResponses(value = { 
@@ -585,7 +588,10 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Delete an Endpoint", notes = "This operation can be used to delete a API endpoint. ", response = Void.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "API Endpoints",  })
     @ApiResponses(value = { 
@@ -1357,7 +1363,10 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Get an Endpoint", notes = "This operation can be used to get an endpoint of an API by UUID. ", response = APIEndpointDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "API Endpoints",  })
     @ApiResponses(value = { 
@@ -1375,7 +1384,10 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @ApiOperation(value = "Get all API Endpoints", notes = "This operation can be used to get all the available endpoints of an API. ", response = APIEndpointListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_view", description = "View API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "API Endpoints",  })
     @ApiResponses(value = { 
@@ -2097,7 +2109,10 @@ ApisApiService delegate = new ApisApiServiceImpl();
     @Produces({ "application/json" })
     @ApiOperation(value = "Update an Endpoint", notes = "This operation can be used to update a API endpoint. ", response = APIEndpointDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
+            @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
     }, tags={ "API Endpoints",  })
     @ApiResponses(value = { 

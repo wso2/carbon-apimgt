@@ -3221,7 +3221,7 @@ public class PublisherCommonUtils {
     public static APIEndpointInfo getAPIEndpointFromEndpointConfig(String apiUUID, Map<String, Object> endpointConfig,
             String environment) {
         APIEndpointInfo apiEndpointInfo = new APIEndpointInfo();
-        apiEndpointInfo.setEndpointUuid(apiUUID + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + environment);
+        apiEndpointInfo.setId(apiUUID + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + environment);
 
         String endpointName;
         if (Objects.equals(environment, APIConstants.APIEndpoint.PRODUCTION)) {
@@ -3229,7 +3229,7 @@ public class PublisherCommonUtils {
         } else {
             endpointName = APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_NAME;
         }
-        apiEndpointInfo.setEndpointName(endpointName);
+        apiEndpointInfo.setName(endpointName);
         apiEndpointInfo.setDeploymentStage(environment);
         apiEndpointInfo.setEndpointConfig(endpointConfig);
         return apiEndpointInfo;
@@ -3341,8 +3341,8 @@ public class PublisherCommonUtils {
         encryptEndpointSecurityApiKeyCredentials(apiEndpointDTO, cryptoUtil, oldApiEndpointSecret, endpointConfig);
 
         APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
-        if (apiEndpoint.getEndpointUuid() == null) {
-            apiEndpoint.setEndpointUuid(endpointId);
+        if (apiEndpoint.getId() == null) {
+            apiEndpoint.setId(endpointId);
         }
 
         // extract endpoint URL

@@ -73,9 +73,6 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.GatewayAPIValidationResult;
-import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
-import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
@@ -128,8 +125,6 @@ import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
 import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
-import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.dto.APIRevisionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
@@ -137,7 +132,6 @@ import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
-import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
@@ -225,7 +219,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -630,7 +623,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         addURITemplates(apiId, api, tenantId);
         addAPIPolicies(api, tenantDomain);
         addSubtypeConfiguration(api);
-        addPrimaryEndpoints(api);
+
+        // Handle primary endpoint mapping addition if the API is an AI API
+        if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+            String primaryProductionEndpointId = api.getPrimaryProductionEndpointId();
+            String primarySandboxEndpointId = api.getPrimarySandboxEndpointId();
+            if (primarySandboxEndpointId == null && primaryProductionEndpointId == null) {
+                addDefaultPrimaryEndpoints(api, true, false);
+            }
+        }
+
         APIEvent apiEvent = new APIEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                 APIConstants.EventType.API_CREATE.name(), tenantId, api.getOrganization(), api.getId().getApiName(),
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
@@ -667,15 +669,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Add primary endpoint mappings for the API.
+     * Add default primary endpoint mappings for the API.
      *
-     * @param api API object
+     * @param api                  API object
+     * @param isProductionEndpoint boolean flag to indicate whether to add primary endpoint mapping for production
+     * @param isSandboxEndpoint    boolean flag to indicate whether to add primary endpoint mapping for sandbox
      * @throws APIManagementException if an error occurs while adding primary endpoints
      */
-    private void addPrimaryEndpoints(API api) throws APIManagementException {
-        if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
-            apiMgtDAO.addDefaultPrimaryEndpointMappings(api);
-        }
+    private void addDefaultPrimaryEndpoints(API api, boolean isProductionEndpoint, boolean isSandboxEndpoint)
+            throws APIManagementException {
+        apiMgtDAO.addDefaultPrimaryEndpointMappings(api, isProductionEndpoint, isSandboxEndpoint);
     }
 
     /**
@@ -1165,7 +1168,40 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException If fails to update primary endpoints of the API.
      */
     private void updateAPIPrimaryEndpointsMapping(API api) throws APIManagementException {
-        apiMgtDAO.updateAPIPrimaryEndpointsMapping(api);
+        if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+            // Delete any existing primary endpoint mappings
+            deleteAPIPrimaryEndpointMappings(api.getUuid());
+
+            // Handle primary endpoint mapping addition if the API is an AI API
+            String primaryProductionEndpointId = api.getPrimaryProductionEndpointId();
+            String primarySandboxEndpointId = api.getPrimarySandboxEndpointId();
+            if (primarySandboxEndpointId == null && primaryProductionEndpointId == null) {
+                addDefaultPrimaryEndpoints(api, true, false);
+            } else {
+                boolean isProductionEndpointFromAPIEndpointConfig = primaryProductionEndpointId != null &&
+                        primaryProductionEndpointId.endsWith(APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR +
+                                APIConstants.APIEndpoint.PRODUCTION);
+                boolean isSandboxEndpointFromAPIEndpointConfig = primarySandboxEndpointId != null &&
+                        primarySandboxEndpointId.endsWith(APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR +
+                                APIConstants.APIEndpoint.SANDBOX);
+
+                if (isProductionEndpointFromAPIEndpointConfig && isSandboxEndpointFromAPIEndpointConfig) {
+                    addDefaultPrimaryEndpoints(api, true, true);
+                } else if (isProductionEndpointFromAPIEndpointConfig) {
+                    addDefaultPrimaryEndpoints(api, true, false);
+                    if (primarySandboxEndpointId != null) {
+                        apiMgtDAO.addPrimaryEndpointMapping(api.getUuid(), primarySandboxEndpointId);
+                    }
+                } else if (isSandboxEndpointFromAPIEndpointConfig) {
+                    addDefaultPrimaryEndpoints(api, false, true);
+                    if (primaryProductionEndpointId != null) {
+                        apiMgtDAO.addPrimaryEndpointMapping(api.getUuid(), primaryProductionEndpointId);
+                    }
+                } else {
+                    apiMgtDAO.addAPIPrimaryEndpointMappings(api);
+                }
+            }
+        }
     }
 
     /**
@@ -8113,8 +8149,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void removeAPIEndpoints(String apiUUID) throws APIManagementException {
         try {
-            apiMgtDAO.deleteAPIPrimaryEndpointMappings(apiUUID);
-            apiMgtDAO.deleteAPIEndpointsByApiUUID(apiUUID);
+            deleteAPIPrimaryEndpointMappings(apiUUID);
+            deleteAPIEndpointsByApiUUID(apiUUID);
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while removing endpoints for API " + apiUUID, e);
         }
@@ -8165,8 +8201,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint, String organization)
             throws APIManagementException {
-        String endpointUUID = UUID.randomUUID().toString();
-        apiEndpoint.setEndpointUuid(endpointUUID);
+
+        if (apiEndpoint.getId() == null) {
+            String endpointUUID = UUID.randomUUID().toString();
+            apiEndpoint.setId(endpointUUID);
+        }
+
         return apiMgtDAO.addAPIEndpoint(apiUUID, apiEndpoint, organization);
     }
 
@@ -8180,6 +8220,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public APIEndpointInfo updateAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint, String organization)
             throws APIManagementException {
         return apiMgtDAO.updateAPIEndpoint(apiUUID, apiEndpoint, organization);
+    }
+
+    @Override
+    public void deleteAPIPrimaryEndpointMappings(String apiId) throws APIManagementException {
+        apiMgtDAO.deleteAPIPrimaryEndpointMappings(apiId);
+    }
+
+    @Override
+    public void deleteAPIEndpointsByApiUUID(String apiId) throws APIManagementException {
+        apiMgtDAO.deleteAPIEndpointsByApiUUID(apiId);
     }
 
     @Override
