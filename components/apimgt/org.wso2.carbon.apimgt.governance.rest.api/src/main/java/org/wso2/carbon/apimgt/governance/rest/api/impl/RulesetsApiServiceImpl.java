@@ -82,6 +82,18 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
                                   MessageContext messageContext) throws APIMGovernanceException {
         RulesetInfoDTO createdRulesetDTO;
         URI createdRulesetURI;
+
+        // Validation done manually for multipart form data
+        if (name != null && name.length() > 256) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                    String.format("Rule name `%s` exceeds " +
+                            "the maximum length of 256 characters", name));
+        } else if (description != null && description.length() > 1024) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                    String.format("Rule description `%s` exceeds " +
+                            "the maximum length of 1024 characters", description));
+        }
+
         Ruleset ruleset = new Ruleset();
         try {
             ruleset.setName(name);
@@ -146,6 +158,17 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
                                       String description, String ruleCategory, String documentationLink,
                                       String provider, MessageContext messageContext)
             throws APIMGovernanceException {
+
+        // Validation done manually to multipart form data
+        if (name != null && name.length() > 256) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                    String.format("Rule name `%s` exceeds " +
+                            "the maximum length of 256 characters", name));
+        } else if (description != null && description.length() > 1024) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                    String.format("Rule description `%s` exceeds " +
+                            "the maximum length of 1024 characters", description));
+        }
 
         try {
             Ruleset ruleset = new Ruleset();

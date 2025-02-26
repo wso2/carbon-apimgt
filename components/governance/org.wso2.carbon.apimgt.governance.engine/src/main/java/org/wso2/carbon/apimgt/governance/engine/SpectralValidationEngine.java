@@ -110,7 +110,17 @@ public class SpectralValidationEngine implements ValidationEngine {
                 Map<String, Object> ruleDetails = entry.getValue();
 
                 String name = entry.getKey();
+                if (name != null && name.length() > 256) {
+                    throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                            "Rule name `" + name + "` exceeds the maximum allowed length of 256 characters.");
+                }
+
                 String description = (String) ruleDetails.get("description");
+                if (description != null && description.length() > 1024) {
+                    log.warn("Rule description of rule `" + name + "` exceeds 1024 characters." +
+                            " Truncating description.");
+                    description = description.substring(0, 1024);
+                }
 
                 String severityString = (String) ruleDetails.get("severity");
                 RuleSeverity severity = RuleSeverity.fromString(severityString);
@@ -189,8 +199,20 @@ public class SpectralValidationEngine implements ValidationEngine {
             for (JsonNode node : jsonNode) {
                 RuleViolation violation = new RuleViolation();
                 violation.setRuleName(node.get("ruleName").asText());
-                violation.setViolatedPath(node.get("path").asText());
-                violation.setRuleMessage(node.get("message").asText());
+                String path = node.get("path").asText();
+                if (path != null && path.length() > 1024) {
+                    throw new APIMGovernanceException("Violated path `" + path + "` in rule `"
+                            + violation.getRuleName() +
+                            "` exceeds the maximum allowed length of 1024 characters.");
+                }
+                violation.setViolatedPath(path);
+                String message = node.get("message").asText();
+                if (message != null && message.length() > 1024) {
+                    log.warn("Rule message of rule `" + violation.getRuleName() + "` exceeds 1024 characters. " +
+                            "Truncating message.");
+                    message = message.substring(0, 1024);
+                }
+                violation.setRuleMessage(message);
                 violation.setSeverity(RuleSeverity.fromString(node.get("severity").asText()));
                 violation.setRulesetId(ruleset.getId());
                 violations.add(violation);
