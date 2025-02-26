@@ -1752,6 +1752,36 @@ public class GatewayUtils {
     }
 
     /**
+     * Retrieves the appropriate failover policy configuration (Production/Sandbox).
+     * If no valid configuration is found, logs a debug message and returns null.
+     *
+     * @param messageContext The Synapse {@link MessageContext}.
+     * @param policyConfig   The failover policy configuration DTO.
+     * @return The appropriate {@link FailoverPolicyDeploymentConfigDTO}, or null if invalid.
+     */
+    public static FailoverPolicyDeploymentConfigDTO getTargetConfig(org.apache.synapse.MessageContext messageContext,
+                                                                    FailoverPolicyConfigDTO policyConfig) {
+
+        if (policyConfig == null) {
+            return null;
+        }
+
+        String apiKeyType = (String) messageContext.getProperty(APIConstants.API_KEY_TYPE);
+        FailoverPolicyDeploymentConfigDTO targetConfig = APIConstants.API_KEY_TYPE_PRODUCTION.equals(apiKeyType)
+                ? policyConfig.getProduction()
+                : policyConfig.getSandbox();
+
+        if (targetConfig == null || targetConfig.getFallbackModelEndpoints() == null
+                || targetConfig.getFallbackModelEndpoints().isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failover policy is not set");
+            }
+            return null;
+        }
+        return targetConfig;
+    }
+
+    /**
      * Retrieves available endpoints for the given policy configuration.
      *
      * @param selectedEndpoints List of ModelEndpointDTO containing endpoint configurations.
@@ -1810,5 +1840,4 @@ public class GatewayUtils {
         }
         return endpoint.getEndpointId() + "_" + endpoint.getModel();
     }
-
 }

@@ -178,6 +178,7 @@ import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.ai.AIAPIConfigurationsDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -3657,6 +3658,81 @@ public final class APIUtil {
         } catch (UserStoreException e) {
             throw new APIManagementException("Error while creating role: " + roleName, e);
         }
+    }
+
+    /**
+     * Retrieves the retry attempts limit for failover configurations.
+     *
+     * @return The number of retry attempts allowed for failover.
+     * @throws APIManagementException If the configuration service or failover settings are unavailable.
+     */
+    public static int getRetryAttemptsForFailoverConfigurations() throws APIManagementException {
+
+        APIManagerConfigurationService configService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+
+        if (configService == null) {
+            log.error("API Manager Configuration Service is not available.");
+            throw new APIManagementException("API Manager Configuration Service is not initialized.");
+        }
+
+        AIAPIConfigurationsDTO aiConfig = configService.getAPIManagerConfiguration().getAiApiConfigurationsDTO();
+        if (aiConfig == null || aiConfig.getFailoverConfigurations() == null) {
+            log.warn("Missing AI API Failover configurations.");
+            throw new APIManagementException("Missing required AI API Failover configurations.");
+        }
+
+        return aiConfig.getFailoverConfigurations().getFailoverEndpointsLimit();
+    }
+
+    /**
+     * Retrieves the default request timeout for AI APIs.
+     *
+     * @return The default request timeout in milliseconds.
+     * @throws APIManagementException If the configuration service or failover settings are unavailable.
+     */
+    public static long getDefaultRequestTimeoutsForAIAPIs() throws APIManagementException {
+
+        APIManagerConfigurationService configService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+
+        if (configService == null) {
+            log.error("API Manager Configuration Service is not available.");
+            throw new APIManagementException("API Manager Configuration Service is not initialized.");
+        }
+
+        AIAPIConfigurationsDTO aiConfig = configService.getAPIManagerConfiguration().getAiApiConfigurationsDTO();
+        if (aiConfig == null || aiConfig.getFailoverConfigurations() == null) {
+            log.warn("Missing AI API Failover configurations.");
+            throw new APIManagementException("Missing required AI API Failover configurations.");
+        }
+
+        return aiConfig.getDefaultRequestTimeout();
+    }
+
+    /**
+     * Retrieves the default request timeout for failover configurations.
+     *
+     * @return The default request timeout in milliseconds.
+     * @throws APIManagementException If the configuration service or failover settings are unavailable.
+     */
+    public static long getDefaultRequestTimeoutForFailoverConfigurations() throws APIManagementException {
+
+        APIManagerConfigurationService configService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+
+        if (configService == null) {
+            log.error("API Manager Configuration Service is not available.");
+            throw new APIManagementException("API Manager Configuration Service is not initialized.");
+        }
+
+        AIAPIConfigurationsDTO aiConfig = configService.getAPIManagerConfiguration().getAiApiConfigurationsDTO();
+        if (aiConfig == null || aiConfig.getFailoverConfigurations() == null) {
+            log.warn("Missing AI API Failover configurations.");
+            throw new APIManagementException("Missing required AI API Failover configurations.");
+        }
+
+        return aiConfig.getFailoverConfigurations().getDefaultRequestTimeout();
     }
 
     public void setupSelfRegistration(APIManagerConfiguration config, int tenantId) throws APIManagementException {

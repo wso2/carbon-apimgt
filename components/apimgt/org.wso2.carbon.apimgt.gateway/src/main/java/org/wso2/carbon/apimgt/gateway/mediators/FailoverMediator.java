@@ -28,10 +28,10 @@ import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyDeploymentConfigDTO;
 import org.wso2.carbon.apimgt.api.gateway.ModelEndpointDTO;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Mediator responsible for handling AI API failover policies. This mediator processes failover configurations,
@@ -91,31 +91,20 @@ public class FailoverMediator extends AbstractMediator implements ManagedLifecyc
             return false;
         }
 
-        String apiKeyType = (String) messageContext.getProperty(APIConstants.API_KEY_TYPE);
-
-        FailoverPolicyDeploymentConfigDTO targetConfig =
-                APIConstants.API_KEY_TYPE_PRODUCTION.equals(apiKeyType)
-                        ? policyConfig.getProduction()
-                        : policyConfig.getSandbox();
-
-        if ((targetConfig == null || targetConfig.getFallbackModelEndpoints() == null
-                || targetConfig.getFallbackModelEndpoints().isEmpty())) {
-            log.debug("Failover policy is not set for " + apiKeyType + ", bypassing mediation.");
+        FailoverPolicyDeploymentConfigDTO targetConfig = GatewayUtils.getTargetConfig(messageContext, policyConfig);
+        if (targetConfig == null) {
             return true;
         }
 
-        List<ModelEndpointDTO> activeEndpoints =
-                GatewayUtils.filterActiveEndpoints(targetConfig.getFallbackModelEndpoints(), messageContext);
+        Map<String, FailoverPolicyConfigDTO> failoverConfigMap =
+                (Map<String, FailoverPolicyConfigDTO>) messageContext.getProperty(AIAPIConstants.FAILOVER_CONFIG_MAP);
+        if (failoverConfigMap == null) {
+            failoverConfigMap = new HashMap<>();
+        }
 
-        ModelEndpointDTO targetEndpointModel = targetConfig.getTargetModelEndpoint();
-
-        messageContext.setProperty(AIAPIConstants.FAILOVER_TARGET_ENDPOINT, targetEndpointModel.getEndpointId());
-        messageContext.setProperty(AIAPIConstants.FAILOVER_TARGET_MODEL, targetEndpointModel.getModel());
-        messageContext.setProperty(AIAPIConstants.FAILOVER_ENDPOINTS, activeEndpoints);
-        messageContext.setProperty(AIAPIConstants.SUSPEND_DURATION,
-                policyConfig.getSuspendDuration() * AIAPIConstants.MILLISECONDS_IN_SECOND);
-        messageContext.setProperty(AIAPIConstants.ENDPOINT_TIMEOUT,
-                policyConfig.getRequestTimeout() * AIAPIConstants.MILLISECONDS_IN_SECOND);
+        ModelEndpointDTO targetModelEndpoint = targetConfig.getTargetModelEndpoint();
+        failoverConfigMap.put(targetModelEndpoint.getModel(), policyConfig);
+        messageContext.setProperty(AIAPIConstants.FAILOVER_CONFIG_MAP, failoverConfigMap);
 
         return true;
     }

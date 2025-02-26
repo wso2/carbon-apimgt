@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
+import org.wso2.carbon.apimgt.impl.dto.ai.AIAPIConfigurationsDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
@@ -128,6 +129,7 @@ public class APIManagerConfiguration {
     private static MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDTO();
     private static ApiChatConfigurationDTO apiChatConfigurationDto = new ApiChatConfigurationDTO();
     private static DesignAssistantConfigurationDTO designAssistantConfigurationDto = new DesignAssistantConfigurationDTO();
+    private static AIAPIConfigurationsDTO aiapiConfigurationsDTO = new AIAPIConfigurationsDTO();
     private static final APIMGovernanceConfigDTO apimGovConfigurationDto = new APIMGovernanceConfigDTO();
 
     private WorkflowProperties workflowProperties = new WorkflowProperties();
@@ -2588,23 +2590,75 @@ public class APIManagerConfiguration {
         }
     }
 
+    /**
+     * Parses the AI configuration XML and populates the AIAPIConfigurationsDTO.
+     *
+     * @param omElement The root OMElement containing AI configuration details.
+     */
     private void setAiConfiguration(OMElement omElement) {
 
-        OMElement aiConfigurationEnabled =
+        if (omElement == null) {
+            log.debug("AI configuration element is null. Skipping configuration parsing.");
+            return;
+        }
+        OMElement aiConfigurationEnabledElement =
                 omElement.getFirstChildWithName(new QName(APIConstants.AI.ENABLED));
-        if (aiConfigurationEnabled != null) {
-            setEnableAiConfiguration(Boolean.parseBoolean(aiConfigurationEnabled.getText()));
+        if (aiConfigurationEnabledElement != null) {
+            aiapiConfigurationsDTO.setEnabled(Boolean.parseBoolean(aiConfigurationEnabledElement.getText().trim()));
+
+            OMElement failoverConfigurationsElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI
+                            .AI_CONFIGURATION_FAILOVER_CONFIGURATIONS));
+
+            if (failoverConfigurationsElement != null) {
+                AIAPIConfigurationsDTO.FailoverConfigurations failoverConfigurations =
+                        new AIAPIConfigurationsDTO.FailoverConfigurations();
+                OMElement failoverEndpointsLimitElement =
+                        failoverConfigurationsElement.getFirstChildWithName(new QName(APIConstants.AI
+                                .AI_CONFIGURATION_FAILOVER_CONFIGURATIONS_FAILOVER_ENDPOINTS_LIMIT));
+                if (failoverEndpointsLimitElement != null) {
+                    try {
+                        failoverConfigurations.setFailoverEndpointsLimit(Integer.parseInt(
+                                failoverEndpointsLimitElement.getText().trim()));
+                    } catch (NumberFormatException e) {
+                        log.warn("Invalid value for FailoverEndpointsLimit", e);
+                    }
+                }
+                OMElement defaultRequestTimeoutElement =
+                        failoverConfigurationsElement.getFirstChildWithName(new QName(APIConstants.AI
+                                .AI_CONFIGURATION_DEFAULT_REQUEST_TIMEOUT));
+                if (defaultRequestTimeoutElement != null) {
+                    try {
+                        failoverConfigurations.setDefaultRequestTimeout(Long.parseLong(
+                                defaultRequestTimeoutElement.getText().trim()));
+                    } catch (NumberFormatException e) {
+                        log.warn("Invalid value for defaultRequestTimeout.", e);
+                    }
+                }
+                aiapiConfigurationsDTO.setFailoverConfigurations(failoverConfigurations);
+            } else {
+                log.debug("Failover configurations are not defined in AI configuration.");
+            }
+            OMElement defaultRequestTimeoutElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI
+                            .AI_CONFIGURATION_DEFAULT_REQUEST_TIMEOUT));
+            if (defaultRequestTimeoutElement != null) {
+                aiapiConfigurationsDTO.setDefaultRequestTimeout(Long.parseLong(
+                        defaultRequestTimeoutElement.getText().trim()));
+            } else {
+                log.debug("RoundRobin configurations are not defined in AI configuration.");
+            }
         }
     }
 
     public boolean isEnableAiConfiguration() {
 
-        return enableAiConfiguration;
+        return getAiApiConfigurationsDTO().isEnabled();
     }
 
-    public void setEnableAiConfiguration(boolean enableAiConfiguration) {
+    public static AIAPIConfigurationsDTO getAiApiConfigurationsDTO() {
 
-        this.enableAiConfiguration = enableAiConfiguration;
+        return aiapiConfigurationsDTO;
     }
 
     private void setHashingAlgorithm(OMElement omElement) {

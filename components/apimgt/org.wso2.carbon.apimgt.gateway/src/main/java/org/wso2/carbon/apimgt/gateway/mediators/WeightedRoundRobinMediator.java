@@ -23,14 +23,19 @@ import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.mediators.AbstractMediator;
-import org.wso2.carbon.apimgt.api.APIConstants;
+import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.ModelEndpointDTO;
 import org.wso2.carbon.apimgt.api.gateway.RBPolicyConfigDTO;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -74,20 +79,20 @@ public class WeightedRoundRobinMediator extends AbstractMediator implements Mana
             endpoints = new Gson().fromJson(weightedRoundRobinConfigs, RBPolicyConfigDTO.class);
         } catch (JsonSyntaxException e) {
             log.error("Failed to parse weighted round robin configuration", e);
-            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
-                    APIConstants.AIAPIConstants.REJECT_ENDPOINT);
             return false;
         }
 
-        String apiKeyType = (String) messageContext.getProperty(org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE);
+        String apiKeyType = (String) messageContext.getProperty(APIConstants.API_KEY_TYPE);
 
-        List<ModelEndpointDTO> selectedEndpoints = org.wso2.carbon.apimgt.impl.APIConstants.API_KEY_TYPE_PRODUCTION
+        List<ModelEndpointDTO> selectedEndpoints = APIConstants.API_KEY_TYPE_PRODUCTION
                 .equals(apiKeyType)
                 ? endpoints.getProduction()
                 : endpoints.getSandbox();
 
         if (selectedEndpoints == null || selectedEndpoints.isEmpty()) {
-            log.debug("RoundRobin policy is not set for " + apiKeyType + ", bypassing mediation.");
+            if (log.isDebugEnabled()) {
+                log.debug("RoundRobin policy is not set for " + apiKeyType + ", bypassing mediation.");
+            }
             return true;
         }
 
@@ -95,13 +100,13 @@ public class WeightedRoundRobinMediator extends AbstractMediator implements Mana
 
         if (activeEndpoints != null && !activeEndpoints.isEmpty()) {
             ModelEndpointDTO nextEndpoint = getWeightedRandomEndpoint(activeEndpoints);
-            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, nextEndpoint.getEndpointId());
-            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_MODEL, nextEndpoint.getModel());
-            messageContext.setProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION,
-                    endpoints.getSuspendDuration() * APIConstants.AIAPIConstants.MILLISECONDS_IN_SECOND);
+            Map<String, Object> roundRobinConfigs = new HashMap<>();
+            roundRobinConfigs.put(AIAPIConstants.TARGET_MODEL_ENDPOINT, nextEndpoint);
+            roundRobinConfigs.put(AIAPIConstants.SUSPEND_DURATION,
+                    endpoints.getSuspendDuration() * AIAPIConstants.MILLISECONDS_IN_SECOND);
+            messageContext.setProperty(AIAPIConstants.ROUND_ROBIN_CONFIGS, roundRobinConfigs);
         } else {
-            messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
-                    APIConstants.AIAPIConstants.REJECT_ENDPOINT);
+            messageContext.setProperty(AIAPIConstants.TARGET_ENDPOINT, AIAPIConstants.REJECT_ENDPOINT);
         }
         return true;
     }
