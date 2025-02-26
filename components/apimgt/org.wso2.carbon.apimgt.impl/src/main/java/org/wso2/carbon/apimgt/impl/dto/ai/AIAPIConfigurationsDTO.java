@@ -23,9 +23,11 @@ package org.wso2.carbon.apimgt.impl.dto.ai;
  */
 public class AIAPIConfigurationsDTO {
 
+    private static final long DEFAULT_REQUEST_TIMEOUT = 30;
+    private static final int DEFAULT_FAILOVER_ENDPOINT_LIMIT = 10;
     private boolean enabled;
     private FailoverConfigurations failoverConfigurations = new FailoverConfigurations();
-    private Long defaultRequestTimeout;
+    private Long defaultRequestTimeout = DEFAULT_REQUEST_TIMEOUT;
 
     /**
      * Gets the enabled status.
@@ -92,8 +94,8 @@ public class AIAPIConfigurationsDTO {
      */
     public static class FailoverConfigurations {
 
-        private int failoverEndpointsLimit;
-        private long defaultRequestTimeout;
+        private int failoverEndpointsLimit = DEFAULT_FAILOVER_ENDPOINT_LIMIT;
+        private long defaultRequestTimeout = DEFAULT_REQUEST_TIMEOUT;
 
         /**
          * Gets failover endpoints limit.
