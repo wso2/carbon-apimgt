@@ -202,8 +202,7 @@ public class APIAdminImpl implements APIAdmin {
         validateForUniqueVhostNames(environment);
         Environment environmentToStore =  new Environment(environment);
         encryptGatewayConfigurationValues(null, environmentToStore);
-        apiMgtDAO.addEnvironment(tenantDomain, environmentToStore);
-        return environment;
+        return apiMgtDAO.addEnvironment(tenantDomain, environmentToStore);
     }
 
     @Override
