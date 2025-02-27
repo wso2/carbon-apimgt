@@ -11168,9 +11168,9 @@ public final class APIUtil {
         try {
             if (tokenEndpoint != null) {
                 if (tokenGenerator == null) {
-                    tokenGenerator = new AccessTokenGenerator(tokenEndpoint, key);
+                    tokenGenerator = new AccessTokenGenerator();
                 }
-                String token = tokenGenerator.getAccessToken();
+                String token = tokenGenerator.getAccessToken(tokenEndpoint, key);
                 request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
                         APIConstants.AUTHORIZATION_BEARER + token);
             } else {
