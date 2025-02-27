@@ -26,6 +26,8 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayFeatureCatalog;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentListDTO;
@@ -104,6 +106,11 @@ public class SettingsMappingUtil {
             }
             settingsDTO.setAuthorizationHeader(authorizationHeader);
             settingsDTO.setGatewayFeatureCatalog(getGatewayFeatureCatalog());
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
+                getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            settingsDTO.setDesignAssistantEnabled(config.getDesignAssistantConfigurationDto().isEnabled());
+            settingsDTO.setAiAuthTokenProvided(config.getDesignAssistantConfigurationDto().isAuthTokenProvided() ||
+                    config.getDesignAssistantConfigurationDto().isKeyProvided());
         }
         return settingsDTO;
     }
