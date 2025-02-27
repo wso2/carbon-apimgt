@@ -9623,10 +9623,8 @@ public final class APIUtil {
             String keyManagerUrl;
             String enableTokenEncryption =
                     apiManagerConfiguration.getFirstProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE);
-            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.AUTHSERVER_URL)) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.AUTHSERVER_URL,
-                        apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL));
-            }
+            keyManagerConfigurationDTO.addProperty(APIConstants.AUTHSERVER_URL,
+                    apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL));
             keyManagerUrl =
                     (String) keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.AUTHSERVER_URL);
             if (StringUtils.isNotEmpty(keyManagerUrl)){
@@ -9640,17 +9638,10 @@ public final class APIUtil {
                 keyManagerConfigurationDTO.addProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE,
                         Boolean.parseBoolean(enableTokenEncryption));
             }
-            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.REVOKE_URL)) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.REVOKE_URL,
-                        keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                                .concat(APIConstants.IDENTITY_REVOKE_ENDPOINT));
-            }
-            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.TOKEN_URL)) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.TOKEN_URL,
-                        keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                                .concat(APIConstants.IDENTITY_TOKEN_ENDPOINT_CONTEXT));
-            }
-
+            keyManagerConfigurationDTO.addProperty(APIConstants.REVOKE_URL, keyManagerUrl.split("/" +
+                    APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(APIConstants.IDENTITY_REVOKE_ENDPOINT));
+            keyManagerConfigurationDTO.addProperty(APIConstants.TOKEN_URL, keyManagerUrl.split("/" +
+                    APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(APIConstants.IDENTITY_TOKEN_ENDPOINT_CONTEXT));
             if (!keyManagerConfigurationDTO.getAdditionalProperties()
                     .containsKey(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE)) {
                 keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE,
@@ -9675,16 +9666,10 @@ public final class APIUtil {
                     .containsKey(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION)) {
                 keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION, true);
             }
-            if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                    .containsKey(APIConstants.KeyManager.TOKEN_ENDPOINT)) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.TOKEN_ENDPOINT,
-                        keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.TOKEN_URL));
-            }
-            if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                    .containsKey(APIConstants.KeyManager.REVOKE_ENDPOINT)) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.REVOKE_ENDPOINT,
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.TOKEN_ENDPOINT,
+                    keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.TOKEN_URL));
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.REVOKE_ENDPOINT,
                         keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.REVOKE_URL));
-            }
             if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
                     APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD)) {
                 keyManagerConfigurationDTO.addProperty(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD,
