@@ -14175,6 +14175,15 @@ components:
           description: |
             Allow subscription validation disabling for OAuth tokens
           default: true
+        designAssistantEnabled:
+          type: boolean
+          description: |
+            Specifies whether Design Assistant enabled
+          default: true
+        aiAuthTokenProvided:
+          type: boolean
+          description: Checks if the auth token is provided for AI service usage.
+          default: false
         customProperties:
           type: array
           items:
