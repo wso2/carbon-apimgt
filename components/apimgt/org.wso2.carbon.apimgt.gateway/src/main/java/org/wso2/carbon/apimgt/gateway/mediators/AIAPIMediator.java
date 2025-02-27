@@ -512,15 +512,17 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
     }
 
     /**
-     * Handles a successful response by checking the HTTP status code and updating the target endpoint accordingly.
+     * Handles the successful response by checking the status code and processing token count headers.
+     * If the remaining token count is zero or below, it triggers the suspension of the target endpoint
+     * based on round robin or failover configurations.
      *
-     * @param messageContext        The Synapse {@link MessageContext} to be updated.
+     * @param messageContext        The message context containing the request and response data.
      * @param statusCode            The HTTP status code of the response.
-     * @param providerConfiguration
-     * @param targetEndpoint
-     * @param roundRobinConfigs
-     * @param failoverConfigs
-     * @return {@code true} if the response is considered successful (status code 2xx), {@code false} otherwise.
+     * @param providerConfiguration The LLM provider configuration used for fetching token metadata.
+     * @param targetEndpoint        The target endpoint for the current request.
+     * @param roundRobinConfigs     The configuration for round robin load balancing.
+     * @param failoverConfigs       The configuration for failover handling.
+     * @return True if the response is successful and further processing is done, false otherwise.
      */
     private boolean handleSuccessfulResponse(MessageContext messageContext, int statusCode,
                                              LLMProviderConfiguration providerConfiguration, String targetEndpoint,
@@ -548,14 +550,28 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                         suspendTargetEndpoint(messageContext, targetEndpoint, targetModelEndpoint.getModel(),
                                 suspendDuration);
                     } else if (failoverConfigs != null) {
+                        int currentEndpointIndex = getCurrentFailoverIndex(messageContext);
 
-                        ModelEndpointDTO failoverTargetEndpoint = (ModelEndpointDTO) failoverConfigs
-                                .get(APIConstants.AIAPIConstants.FAILOVER_TARGET_MODEL_ENDPOINT);
-                        Long suspendDuration = (Long) failoverConfigs
-                                .get(APIConstants.AIAPIConstants.SUSPEND_DURATION);
+                        if (currentEndpointIndex == 0) {
+                            ModelEndpointDTO failoverTargetModelEndpoint = (ModelEndpointDTO) failoverConfigs
+                                    .get(APIConstants.AIAPIConstants.FAILOVER_TARGET_MODEL_ENDPOINT);
+                            Long suspendDuration = (Long) failoverConfigs
+                                    .get(APIConstants.AIAPIConstants.SUSPEND_DURATION);
+                            suspendTargetEndpoint(messageContext, failoverTargetModelEndpoint.getEndpointId(),
+                                    failoverTargetModelEndpoint.getModel(), suspendDuration);
+                        }
+                        if (currentEndpointIndex > 0) {
+                            List<ModelEndpointDTO> failoverEndpoints =
+                                    (List<ModelEndpointDTO>) failoverConfigs
+                                            .get(APIConstants.AIAPIConstants.FAILOVER_ENDPOINTS);
+                            ModelEndpointDTO previousEndpoint = failoverEndpoints
+                                    .get(currentEndpointIndex - 1);
+                            Long suspendDuration = (Long) failoverConfigs
+                                    .get(APIConstants.AIAPIConstants.SUSPEND_DURATION);
 
-                        suspendTargetEndpoint(messageContext, failoverTargetEndpoint.getEndpointId(),
-                                failoverTargetEndpoint.getModel(), suspendDuration);
+                            suspendTargetEndpoint(messageContext, previousEndpoint.getEndpointId(),
+                                    previousEndpoint.getModel(), suspendDuration);
+                        }
                     }
                 }
             }
@@ -617,8 +633,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         }
 
         if (currentEndpointIndex > 0) {
-            Long suspendDuration = (Long) messageContext.getProperty(APIConstants.AIAPIConstants.SUSPEND_DURATION);
             ModelEndpointDTO previousEndpoint = failoverEndpoints.get(currentEndpointIndex - 1);
+            Long suspendDuration = (Long) failoverConfigs.get(APIConstants.AIAPIConstants.SUSPEND_DURATION);
 
             suspendTargetEndpoint(messageContext, previousEndpoint.getEndpointId(),
                     previousEndpoint.getModel(), suspendDuration);
