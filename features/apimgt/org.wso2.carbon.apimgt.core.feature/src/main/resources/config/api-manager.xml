@@ -210,14 +210,11 @@
     <DesignAssistant>
         <!-- Enable API Design Assistant for API Manager -->
         <Enabled>true</Enabled>
-
         <AuthToken></AuthToken>
-
         <Endpoint>http://localhost:9090</Endpoint>
-
         <Resources>
-            <PrepareResource>/prepare</PrepareResource>
-            <ExecuteResource>/execute</ExecuteResource>
+            <ChatResource>/chat</ChatResource>
+            <GenApiPayloadResource>/generate-api-payload</GenApiPayloadResource>
         </Resources>
 
     </DesignAssistant>
