@@ -30,6 +30,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 @Path("/swagger.yaml")
 @Consumes({ "text/yaml" })
@@ -62,9 +64,11 @@ public class SwaggerYamlApi {
             if (openAPIDef == null) {
                 synchronized (LOCK_ADMIN_OPENAPI_DEF) {
                     if (openAPIDef == null) {
-                        String definition = IOUtils
-                                .toString(this.getClass().getResourceAsStream("/admin-api.yaml"), "UTF-8");
-                        openAPIDef = new OAS3Parser().removeExamplesFromOpenAPI(definition);
+                        try (InputStream defStream = this.getClass()
+                                .getClassLoader().getResourceAsStream("admin-api.yaml")) {
+                            String definition = IOUtils.toString(defStream, StandardCharsets.UTF_8);
+                            openAPIDef = new OAS3Parser().removeExamplesFromOpenAPI(definition);
+                        }
                     }
                 }
             }
