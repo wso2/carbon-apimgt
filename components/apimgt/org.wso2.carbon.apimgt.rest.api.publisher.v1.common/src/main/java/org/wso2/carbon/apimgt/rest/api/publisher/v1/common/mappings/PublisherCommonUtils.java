@@ -2613,6 +2613,11 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Requested document '" + documentName + "' already exists",
                     ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
         }
+        if (documentDto.getType() == DocumentDTO.TypeEnum.OTHER && documentDto.getOtherTypeName() != null && apiProvider
+                .isAnotherOverviewDocumentationExist(apiId, null, documentDto.getOtherTypeName(), organization)) {
+            throw new APIManagementException("Requested other document type _overview already exists",
+                    ExceptionCodes.DOCUMENT_ALREADY_EXISTS);
+        }
         documentation = apiProvider.addDocumentation(apiId, documentation, organization);
 
         return documentation;
