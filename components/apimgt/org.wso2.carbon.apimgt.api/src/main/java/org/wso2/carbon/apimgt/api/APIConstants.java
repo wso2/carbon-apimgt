@@ -18,8 +18,6 @@
 
 package org.wso2.carbon.apimgt.api;
 
-import java.io.File;
-
 /**
  * This class contains common constants for APIs.
  */
@@ -48,22 +46,20 @@ public class APIConstants {
     public static final String ENDPOINT_CONFIG_SESSION_TIMEOUT = "sessionTimeOut";
 
     public static class AIAPIConstants {
+        public static final int MILLISECONDS_IN_SECOND = 1000;
         public static final String LLM_PROVIDERS = "llmProviders";
-        public static final String LLM_PROVIDER_ID = "llmProviderId";
         public static final String API_KEY_IDENTIFIER_TYPE_HEADER = "HEADER";
         public static final String API_KEY_IDENTIFIER_TYPE_QUERY_PARAMETER = "QUERY_PARAMETER";
         public static final String AI_API_REQUEST_METADATA = "AI_API_REQUEST_METADATA";
         public static final String AI_API_RESPONSE_METADATA = "AI_API_RESPONSE_METADATA";
         public static final String INPUT_SOURCE_PAYLOAD = "payload";
+        public static final String INPUT_SOURCE_HEADER = "header";
         public static final String CONNECTOR_TYPE = "connectorType";
         public static final String ID = "id";
         public static final String NAME = "name";
         public static final String API_VERSION = "apiVersion";
-        public static final String LLM_PROVIDER_CONFIGURATIONS = "configurations";
         public static final String LLM_CONFIGS_ENDPOINT = "/llm-providers";
         public static final String CONFIGURATIONS = "configurations";
-        public static final String AI_API_DEFINITION_FILE_PATH = File.separator + "repository" + File.separator +
-                "resources" + File.separator + "api_definitions" + File.separator;
         public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_NAME = "AzureOpenAI";
         public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_VERSION = "1.0.0";
         public static final String LLM_PROVIDER_SERVICE_AZURE_OPENAI_CONNECTOR = "azureOpenAi_1.0.0";
@@ -82,19 +78,47 @@ public class APIConstants {
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_KEY = "Authorization";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_API_DEFINITION_FILE_NAME = "mistral_api.yaml";
         public static final String LLM_PROVIDER_SERVICE_MISTRALAI_DESCRIPTION = "Mistral AI service";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_REQUEST_MODEL = "requestModel";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_RESPONSE_MODEL = "responseModel";
         public static final String LLM_PROVIDER_SERVICE_METADATA_MODEL = "model";
         public static final String LLM_PROVIDER_SERVICE_METADATA_PROMPT_TOKEN_COUNT = "promptTokenCount";
         public static final String LLM_PROVIDER_SERVICE_METADATA_COMPLETION_TOKEN_COUNT = "completionTokenCount";
         public static final String LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT = "totalTokenCount";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_REMAINING_TOKEN_COUNT = "remainingTokenCount";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_MODEL = "$.model";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_PROMPT_TOKEN_COUNT = "$.usage" +
                 ".prompt_tokens";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_COMPLETION_TOKEN_COUNT = "$.usage" +
                 ".completion_tokens";
         public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_TOTAL_TOKEN_COUNT = "$.usage.total_tokens";
+        public static final String LLM_PROVIDER_SERVICE_METADATA_IDENTIFIER_REMAINING_TOKEN_COUNT = "x-ratelimit-remaining-tokens";
         public static final String LLM_PROVIDER_SERVICE_DEFAULT = "default";
         public static final String NULL = "null";
         public static final String LLM_PROVIDER = "LLM_PROVIDER";
         public static final String LLM_PROVIDER_TENANT_ALL = "ALL";
+
+        public static final String TRAFFIC_FLOW_DIRECTION_IN = "IN";
+        public static final String TRAFFIC_FLOW_DIRECTION_OUT = "OUT";
+        public static final String API_LLM_ENDPOINT = "_API_LLMEndpoint_";
+        public static final String ROUND_ROBIN_CONFIGS = "ROUND_ROBIN_CONFIGS";
+        public static final String FAILOVER_CONFIGS = "FAILOVER_CONFIGS";
+        public static final String TARGET_MODEL_ENDPOINT = "TARGET_MODEL_ENDPOINT";
+        public static final String TARGET_ENDPOINT = "TARGET_ENDPOINT";
+        public static final String FAILOVER_TARGET_MODEL_ENDPOINT = "FAILOVER_TARGET_MODEL_ENDPOINT";
+        public static final String FAILOVER_CONFIG_MAP = "FAILOVER_CONFIG_MAP";
+        public static final String SUSPEND_DURATION = "SUSPEND_DURATION";
+        public static final String FAILOVER_ENDPOINTS = "FAILOVER_ENDPOINTS";
+        public static final String REJECT_ENDPOINT = "REJECT";
+        public static final String DEFAULT_ENDPOINT = "DEFAULT";
+        public static final String EXIT_ENDPOINT = "EXIT";
+        public static final String REQUEST_PAYLOAD = "REQUEST_PAYLOAD";
+        public static final String REQUEST_HEADERS = "REQUEST_HEADERS";
+        public static final String REQUEST_HTTP_METHOD = "REQUEST_HTTP_METHOD";
+        public static final String REQUEST_REST_URL_POSTFIX = "REQUEST_REST_URL_POSTFIX";
+        public static final String CURRENT_ENDPOINT_INDEX = "CURRENT_ENDPOINT_INDEX";
+        public static final String DEFAULT_PRODUCTION_ENDPOINT_NAME = "DEFAULT PRODUCTION ENDPOINT";
+        public static final String DEFAULT_SANDBOX_ENDPOINT_NAME = "DEFAULT SANDBOX ENDPOINT";
+        public static final String ENDPOINT_SEQUENCE = "_EndpointsSeq";
+        public static final String REQUEST_TIMEOUT = "REQUEST_TIMEOUT";
     }
 }

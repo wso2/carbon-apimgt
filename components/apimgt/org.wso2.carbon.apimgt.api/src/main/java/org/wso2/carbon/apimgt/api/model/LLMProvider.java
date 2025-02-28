@@ -21,7 +21,8 @@ package org.wso2.carbon.apimgt.api.model;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represents a LLM (Large Language Model) Provider.
@@ -37,6 +38,7 @@ public class LLMProvider implements Serializable {
     private String configurations = null;
     private boolean builtInSupport = false;
     private String organization = null;
+    private List<String> modelList = new ArrayList<>();
 
     public LLMProvider(String name, String apiVersion) {
 
@@ -114,5 +116,13 @@ public class LLMProvider implements Serializable {
     public void setOrganization(String organization) {
 
         this.organization = organization;
+    }
+
+    public List<String> getModelList() {
+        return modelList;
+    }
+
+    public void setModelList(List<String> modelList) {
+        this.modelList = modelList;
     }
 }

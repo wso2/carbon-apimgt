@@ -67,6 +67,7 @@ public class LLMProviderMappingUtil {
         llmProviderResponseDTO.setApiDefinition(llmProvider.getApiDefinition());
         llmProviderResponseDTO.setBuiltInSupport(llmProvider.isBuiltInSupport());
         llmProviderResponseDTO.setConfigurations(llmProvider.getConfigurations());
+        llmProviderResponseDTO.setModelList(llmProvider.getModelList());
         return llmProviderResponseDTO;
     }
 

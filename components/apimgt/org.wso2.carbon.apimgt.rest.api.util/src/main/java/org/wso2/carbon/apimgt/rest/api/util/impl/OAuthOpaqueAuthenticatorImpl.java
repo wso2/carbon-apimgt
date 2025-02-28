@@ -278,8 +278,8 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
         String organization = null;
         String organizationId = null;
         try {
-            if (tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
-                isSuperTenant = true;
+            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                isSuperTenant = false;
             }
 
             RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
@@ -305,6 +305,9 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
             UserStoreManager manager = realm.getUserStoreManager();
             organization =
                     manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), orgNameClaim, null);
+            if (organization != null && "super".equals(organization.toLowerCase())) {
+                organization = tenantDomain;
+            }
             if (realm.getClaimManager().getClaim(orgIdClaim) != null) {
                 organizationId =
                         manager.getUserClaimValue(MultitenantUtils.getTenantAwareUsername(username), orgIdClaim, null);

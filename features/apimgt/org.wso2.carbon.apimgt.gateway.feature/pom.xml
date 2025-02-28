@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.31.14-SNAPSHOT</version>
+        <version>9.31.65-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -179,6 +179,10 @@
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-httpclient</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.orbit.software.amazon.awssdk</groupId>
+            <artifactId>aws-core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -287,7 +291,7 @@
                                 <bundleDef>org.wso2.orbit.graphQL:graphQL:${graphql.java.version}</bundleDef>
                                 <bundleDef>org.wso2.wsdl4j:wsdl4j.wso2:${wsdl4j.version}</bundleDef>
                                 <bundleDef>
-                                    org.wso2.orbit.com.amazonaws:awslambda:${org.wso2.orbit.com.amazonaws.version}
+                                    org.wso2.orbit.software.amazon.awssdk:aws-core:${org.wso2.orbit.com.amazonaws.version}
                                 </bundleDef>
                                 <bundleDef>
                                     com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${fasterxml.jackson.version}

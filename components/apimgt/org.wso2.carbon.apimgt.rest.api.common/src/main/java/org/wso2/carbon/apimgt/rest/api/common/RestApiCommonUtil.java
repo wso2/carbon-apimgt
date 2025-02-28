@@ -2,7 +2,6 @@ package org.wso2.carbon.apimgt.rest.api.common;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.core.util.Json;
-
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -18,7 +17,13 @@ import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.wso2.carbon.apimgt.api.*;
+import org.wso2.carbon.apimgt.api.APIConsumer;
+import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
+import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.OAuthTokenInfo;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -32,15 +37,16 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import org.wso2.uri.template.URITemplateException;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Set;
-import java.util.HashSet;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -49,6 +55,8 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.X_WSO2_BASEPATH;
 import static org.wso2.carbon.apimgt.impl.APIConstants.X_WSO2_DISABLE_SECURITY;
 import static org.wso2.carbon.apimgt.impl.APIConstants.X_WSO2_PRODUCTION_ENDPOINTS;
 import static org.wso2.carbon.apimgt.impl.APIConstants.X_WSO2_SANDBOX_ENDPOINTS;
+import static org.wso2.carbon.apimgt.rest.api.common.RestApiConstants.REST_API_GOVERNANCE_CONTEXT_FULL;
+import static org.wso2.carbon.apimgt.rest.api.common.RestApiConstants.REST_API_GOVERNANCE_VERSION;
 
 public class RestApiCommonUtil {
 
@@ -59,6 +67,7 @@ public class RestApiCommonUtil {
     private static Set<URITemplate> publisherResourceMappings;
     private static Set<URITemplate> adminAPIResourceMappings;
     private static Set<URITemplate> serviceCatalogAPIResourceMappings;
+    private static Set<URITemplate> governanceResourceMapping;
 
     public static void unsetThreadLocalRequestedTenant() {
 
@@ -183,6 +192,8 @@ public class RestApiCommonUtil {
             uriTemplates = RestApiCommonUtil.getServiceCatalogAPIResourceMapping();
         } else if (basePath.contains(RestApiConstants.REST_API_DCR_CONTEXT_FULL)) {
             uriTemplates = RestApiCommonUtil.getDCRAppResourceMapping();
+        } else if (basePath.contains(REST_API_GOVERNANCE_CONTEXT_FULL)) {
+            uriTemplates = RestApiCommonUtil.getGovernanceResourceMapping(REST_API_GOVERNANCE_VERSION);
         }
         return uriTemplates;
     }
@@ -203,15 +214,10 @@ public class RestApiCommonUtil {
         if (storeResourceMappings != null) {
             return storeResourceMappings;
         } else {
-            try {
-                String definition;
-                if (RestApiConstants.REST_API_STORE_VERSION_0.equals(version)) {
-                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/store-api.json"),
-                                    RestApiConstants.CHARSET);
-                } else {
-                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/devportal-api.yaml"),
-                                    RestApiConstants.CHARSET);
-                }
+            String defFileName = RestApiConstants.REST_API_STORE_VERSION_0.equals(version) ?
+                    "/store-api.json" : "/devportal-api.yaml";
+            try (InputStream defStream = RestApiCommonUtil.class.getResourceAsStream(defFileName)) {
+                String definition = IOUtils.toString(defStream, RestApiConstants.CHARSET);
                 APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content w created
                 storeResourceMappings = oasParser.getURITemplates(definition);
@@ -239,15 +245,10 @@ public class RestApiCommonUtil {
         if (adminAPIResourceMappings != null) {
             return adminAPIResourceMappings;
         } else {
-            try {
-                String definition;
-                if (RestApiConstants.REST_API_ADMIN_VERSION_0.equals(version)) {
-                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/admin-api.json"),
-                                    RestApiConstants.CHARSET);
-                } else {
-                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/admin-api.yaml"),
-                                    RestApiConstants.CHARSET);
-                }
+            String defFileName = RestApiConstants.REST_API_ADMIN_VERSION_0.equals(version) ?
+                    "/admin-api.json" : "/admin-api.yaml";
+            try (InputStream defStream = RestApiCommonUtil.class.getResourceAsStream(defFileName)) {
+                String definition = IOUtils.toString(defStream, RestApiConstants.CHARSET);
                 APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content we created
                 adminAPIResourceMappings = oasParser.getURITemplates(definition);
@@ -258,6 +259,35 @@ public class RestApiCommonUtil {
             }
             return adminAPIResourceMappings;
         }
+    }
+
+    /**
+     * This is static method to return URI Templates map of API Governance REST API.
+     * This content need to load only one time and keep it in memory as content will not change
+     * during runtime.
+     *
+     * @return URITemplate set associated with API Manager Governance REST API
+     */
+    public static Set<URITemplate> getGovernanceResourceMapping(String version) {
+
+        API api = new API(new APIIdentifier(RestApiConstants.REST_API_PROVIDER,
+                RestApiConstants.REST_API_GOVERNANCE_CONTEXT, RestApiConstants.REST_API_GOVERNANCE_VERSION));
+
+        if (governanceResourceMapping == null) {
+            try (InputStream defStream = RestApiCommonUtil.class.getResourceAsStream("/governance-api.yaml")) {
+                String definition;
+                definition = IOUtils.toString(defStream, RestApiConstants.CHARSET);
+                APIDefinition oasParser = OASParserUtil.getOASParser(definition);
+                //Get URL templates from swagger content we created
+                governanceResourceMapping = oasParser.getURITemplates(definition);
+            } catch (APIManagementException e) {
+                log.error("Error while reading resource mappings for Governance API: " + api.getId().getApiName(), e);
+            } catch (IOException e) {
+                log.error("Error while reading the swagger definition for Governance API: "
+                        + api.getId().getApiName(), e);
+            }
+        }
+        return governanceResourceMapping;
     }
 
     /**
@@ -274,15 +304,10 @@ public class RestApiCommonUtil {
         if (publisherResourceMappings != null) {
             return publisherResourceMappings;
         } else {
-            try {
-                String definition;
-                if (RestApiConstants.REST_API_PUBLISHER_VERSION_0.equals(version)) {
-                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/publisher-api.json"),
-                                    RestApiConstants.CHARSET);
-                } else {
-                    definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/publisher-api.yaml"),
-                                    RestApiConstants.CHARSET);
-                }
+            String defFileName = RestApiConstants.REST_API_PUBLISHER_VERSION_0.equals(version) ?
+                    "/publisher-api.json" : "/publisher-api.yaml";
+            try (InputStream defStream = RestApiCommonUtil.class.getResourceAsStream(defFileName)) {
+                String definition = IOUtils.toString(defStream, RestApiConstants.CHARSET);
                 APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content we created
                 publisherResourceMappings = oasParser.getURITemplates(definition);
@@ -307,8 +332,8 @@ public class RestApiCommonUtil {
                 RestApiConstants.REST_API_DCR_VERSION));
 
         if (dcrResourceMappings == null) {
-            try {
-                String definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/dcr.yaml"), "UTF-8");
+            try (InputStream resourceStream = RestApiCommonUtil.class.getResourceAsStream("/dcr.yaml")) {
+                String definition = IOUtils.toString(resourceStream, "UTF-8");
                 APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content we created
                 dcrResourceMappings = oasParser.getURITemplates(definition);
@@ -335,10 +360,9 @@ public class RestApiCommonUtil {
         if (serviceCatalogAPIResourceMappings != null) {
             return serviceCatalogAPIResourceMappings;
         } else {
-            try {
-                String definition;
-                definition = IOUtils.toString(RestApiCommonUtil.class.getResourceAsStream("/service-catalog-api.yaml"),
-                                RestApiConstants.CHARSET);
+            try (InputStream resourceStream = RestApiCommonUtil.class
+                    .getResourceAsStream("/service-catalog-api.yaml")) {
+                String definition = IOUtils.toString(resourceStream, RestApiConstants.CHARSET);
                 APIDefinition oasParser = OASParserUtil.getOASParser(definition);
                 //Get URL templates from swagger content we created
                 serviceCatalogAPIResourceMappings = oasParser.getURITemplates(definition);
@@ -356,17 +380,16 @@ public class RestApiCommonUtil {
      *
      * @return MAP of scope list for all portal
      */
-    public static  Map<String, List<String>> getScopesInfoFromAPIYamlDefinitions() throws APIManagementException {
+    public static Map<String, List<String>> getScopesInfoFromAPIYamlDefinitions() throws APIManagementException {
 
-        Map<String, List<String>>   portalScopeList = new HashMap<>();
-        String [] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/devportal-api.yaml",
+        Map<String, List<String>> portalScopeList = new HashMap<>();
+        String[] fileNameArray = {"/admin-api.yaml", "/publisher-api.yaml", "/devportal-api.yaml",
                 "/service-catalog-api.yaml"};
         for (String fileName : fileNameArray) {
-            String definition = null;
-            try {
-                definition = IOUtils
-                        .toString(RestApiCommonUtil.class.getResourceAsStream(fileName), "UTF-8");
-            } catch (IOException  e) {
+            String definition;
+            try (InputStream resourceStream = RestApiCommonUtil.class.getResourceAsStream(fileName)) {
+                definition = IOUtils.toString(resourceStream, "UTF-8");
+            } catch (IOException e) {
                 throw new APIManagementException("Error while reading the swagger definition ,",
                         ExceptionCodes.DEFINITION_EXCEPTION);
             }

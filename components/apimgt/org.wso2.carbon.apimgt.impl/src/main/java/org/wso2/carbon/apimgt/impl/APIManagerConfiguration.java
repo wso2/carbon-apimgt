@@ -35,7 +35,10 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
+import org.wso2.carbon.apimgt.impl.dto.ai.AIAPIConfigurationsDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
@@ -125,6 +128,9 @@ public class APIManagerConfiguration {
     private ExtendedJWTConfigurationDto jwtConfigurationDto = new ExtendedJWTConfigurationDto();
     private static MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDTO();
     private static ApiChatConfigurationDTO apiChatConfigurationDto = new ApiChatConfigurationDTO();
+    private static DesignAssistantConfigurationDTO designAssistantConfigurationDto = new DesignAssistantConfigurationDTO();
+    private static AIAPIConfigurationsDTO aiapiConfigurationsDTO = new AIAPIConfigurationsDTO();
+    private static final APIMGovernanceConfigDTO apimGovConfigurationDto = new APIMGovernanceConfigDTO();
 
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
@@ -192,6 +198,11 @@ public class APIManagerConfiguration {
     public ApiChatConfigurationDTO getApiChatConfigurationDto() {
 
         return apiChatConfigurationDto;
+    }
+
+    public DesignAssistantConfigurationDTO getDesignAssistantConfigurationDto() {
+
+        return designAssistantConfigurationDto;
     }
 
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
@@ -675,6 +686,8 @@ public class APIManagerConfiguration {
                 setMarketplaceAssistantConfiguration(element);
             } else if (APIConstants.AI.API_CHAT.equals(localName)) {
                 setApiChatConfiguration(element);
+            } else if (APIConstants.AI.DESIGN_ASSISTANT.equals(localName)) {
+                setDesignAssistantConfiguration(element);
             } else if (APIConstants.AI.AI_CONFIGURATION.equals(localName)){
                 setAiConfiguration(element);
             } else if (APIConstants.TokenValidationConstants.TOKEN_VALIDATION_CONFIG.equals(localName)) {
@@ -688,6 +701,8 @@ public class APIManagerConfiguration {
                 if (counterEnabled != null) {
                     isTransactionCounterEnabled = Boolean.parseBoolean(counterEnabled.getText());
                 }
+            } else if (APIConstants.APIMGovernance.GOVERNANCE_CONFIG.equals(localName)) {
+                setAPIMGovernanceConfigurations(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -2575,23 +2590,80 @@ public class APIManagerConfiguration {
         }
     }
 
+    /**
+     * Parses the AI configuration XML and populates the AIAPIConfigurationsDTO.
+     *
+     * @param omElement The root OMElement containing AI configuration details.
+     */
     private void setAiConfiguration(OMElement omElement) {
 
-        OMElement aiConfigurationEnabled =
+        if (omElement == null) {
+            log.debug("AI configuration element is null. Skipping configuration parsing.");
+            return;
+        }
+        OMElement aiConfigurationEnabledElement =
                 omElement.getFirstChildWithName(new QName(APIConstants.AI.ENABLED));
-        if (aiConfigurationEnabled != null) {
-            setEnableAiConfiguration(Boolean.parseBoolean(aiConfigurationEnabled.getText()));
+        if (aiConfigurationEnabledElement != null
+                && StringUtils.isNotEmpty(aiConfigurationEnabledElement.getText())) {
+
+            aiapiConfigurationsDTO.setEnabled(Boolean.parseBoolean(aiConfigurationEnabledElement.getText().trim()));
+
+            OMElement failoverConfigurationsElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI
+                            .AI_CONFIGURATION_FAILOVER_CONFIGURATIONS));
+
+            if (failoverConfigurationsElement != null) {
+                AIAPIConfigurationsDTO.FailoverConfigurations failoverConfigurations =
+                        new AIAPIConfigurationsDTO.FailoverConfigurations();
+                OMElement failoverEndpointsLimitElement =
+                        failoverConfigurationsElement.getFirstChildWithName(new QName(APIConstants.AI
+                                .AI_CONFIGURATION_FAILOVER_CONFIGURATIONS_FAILOVER_ENDPOINTS_LIMIT));
+                if (failoverEndpointsLimitElement != null
+                        && StringUtils.isNotEmpty(failoverEndpointsLimitElement.getText())) {
+                    try {
+                        failoverConfigurations.setFailoverEndpointsLimit(Integer.parseInt(
+                                failoverEndpointsLimitElement.getText().trim()));
+                    } catch (NumberFormatException e) {
+                        log.warn("Invalid value for FailoverEndpointsLimit", e);
+                    }
+                }
+                OMElement defaultRequestTimeoutElement =
+                        failoverConfigurationsElement.getFirstChildWithName(new QName(APIConstants.AI
+                                .AI_CONFIGURATION_DEFAULT_REQUEST_TIMEOUT));
+                if (defaultRequestTimeoutElement != null
+                        && StringUtils.isNotEmpty(defaultRequestTimeoutElement.getText())) {
+                    try {
+                        failoverConfigurations.setDefaultRequestTimeout(Long.parseLong(
+                                defaultRequestTimeoutElement.getText().trim()));
+                    } catch (NumberFormatException e) {
+                        log.warn("Invalid value for defaultRequestTimeout.", e);
+                    }
+                }
+                aiapiConfigurationsDTO.setFailoverConfigurations(failoverConfigurations);
+            } else {
+                log.debug("Failover configurations are not defined in AI configuration.");
+            }
+            OMElement defaultRequestTimeoutElement =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI
+                            .AI_CONFIGURATION_DEFAULT_REQUEST_TIMEOUT));
+            if (defaultRequestTimeoutElement != null
+                    && StringUtils.isNotEmpty(defaultRequestTimeoutElement.getText())) {
+                aiapiConfigurationsDTO.setDefaultRequestTimeout(Long.parseLong(
+                        defaultRequestTimeoutElement.getText().trim()));
+            } else {
+                log.debug("RoundRobin configurations are not defined in AI configuration.");
+            }
         }
     }
 
     public boolean isEnableAiConfiguration() {
 
-        return enableAiConfiguration;
+        return getAiApiConfigurationsDTO().isEnabled();
     }
 
-    public void setEnableAiConfiguration(boolean enableAiConfiguration) {
+    public static AIAPIConfigurationsDTO getAiApiConfigurationsDTO() {
 
-        this.enableAiConfiguration = enableAiConfiguration;
+        return aiapiConfigurationsDTO;
     }
 
     private void setHashingAlgorithm(OMElement omElement) {
@@ -2674,7 +2746,112 @@ public class APIManagerConfiguration {
         return false;
     }
 
+    public void setDesignAssistantConfiguration(OMElement omElement){
+        OMElement designAssistantEnableElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_ENABLED));
+        if (designAssistantEnableElement != null) {
+            designAssistantConfigurationDto.setEnabled(Boolean.parseBoolean(designAssistantEnableElement.getText()));
+        }
+        if (designAssistantConfigurationDto.isEnabled()) {
+            OMElement designAssistantEndpoint =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_ENDPOINT));
+            if (designAssistantEndpoint != null) {
+                designAssistantConfigurationDto.setEndpoint(designAssistantEndpoint.getText());
+            }
+            OMElement designAssistantTokenEndpoint =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_TOKEN_ENDPOINT));
+            if (designAssistantTokenEndpoint != null) {
+                designAssistantConfigurationDto.setTokenEndpoint(designAssistantTokenEndpoint.getText());
+            }
+            OMElement designAssistantKey =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_KEY));
+
+            if (designAssistantKey != null) {
+                String Key = MiscellaneousUtil.resolve(designAssistantKey, secretResolver);
+                designAssistantConfigurationDto.setKey(Key);
+                if (!Key.isEmpty()){
+                    designAssistantConfigurationDto.setKeyProvided(true);
+                }
+            }
+            OMElement designAssistantToken =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_AUTH_TOKEN));
+            if (designAssistantToken != null) {
+                String AccessToken = MiscellaneousUtil.resolve(designAssistantToken, secretResolver);
+                designAssistantConfigurationDto.setAccessToken(AccessToken);
+                if (!AccessToken.isEmpty()){
+                    designAssistantConfigurationDto.setAuthTokenProvided(true);
+                }
+            }
+            OMElement resources =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.RESOURCES));
+
+            OMElement designAssistantChatResource =
+                    resources.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_CHAT_RESOURCE));
+            if (designAssistantChatResource != null) {
+                designAssistantConfigurationDto.setChatResource(designAssistantChatResource.getText());
+            }
+            OMElement designAssistantGenApiPayloadResource =
+                    resources.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE));
+            if (designAssistantGenApiPayloadResource != null) {
+                designAssistantConfigurationDto.setGenApiPayloadResource(designAssistantGenApiPayloadResource.getText());
+            }
+        }
+    }
+
     public TokenValidationDto getTokenValidationDto() {
         return tokenValidationDto;
+    }
+
+    /**
+     * Set APIM Governance Configurations
+     *
+     * @param omElement XML Config
+     */
+    public void setAPIMGovernanceConfigurations(OMElement omElement) {
+        OMElement dataSource = omElement
+                .getFirstChildWithName(new QName(APIConstants.APIMGovernance.DATA_SOURCE_NAME));
+        if (dataSource != null) {
+            String dataSourceName = dataSource.getText();
+            apimGovConfigurationDto.setDataSourceName(dataSourceName);
+        }
+
+        OMElement schedulerConfig = omElement
+                .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_CONFIG));
+
+        if (schedulerConfig != null) {
+            OMElement threadPoolSize = schedulerConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_THREAD_POOL_SIZE));
+            if (threadPoolSize != null) {
+                apimGovConfigurationDto.setSchedulerThreadPoolSize(Integer.parseInt(threadPoolSize.getText()));
+            }
+
+            OMElement queueSize = schedulerConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_QUEUE_SIZE));
+            if (queueSize != null) {
+                apimGovConfigurationDto.setSchedulerQueueSize(Integer.parseInt(queueSize.getText()));
+            }
+
+            OMElement checkInterval = schedulerConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_TASK_CHECK_INTERVAL));
+            if (checkInterval != null) {
+                apimGovConfigurationDto.setSchedulerTaskCheckInterval(Integer.parseInt(checkInterval.getText()));
+            }
+
+            OMElement cleanupInterval = schedulerConfig
+                    .getFirstChildWithName(new QName(APIConstants.APIMGovernance.SCHEDULER_TASK_CLEANUP_INTERVAL));
+            if (cleanupInterval != null) {
+                apimGovConfigurationDto.setSchedulerTaskCleanupInterval(Integer.parseInt(cleanupInterval.getText()));
+            }
+        }
+
+    }
+
+    /**
+     * Get APIM Governance Configuration DTO
+     *
+     * @return APIMGovernanceConfigDTO
+     */
+    public APIMGovernanceConfigDTO getAPIMGovernanceConfigurationDto() {
+        return apimGovConfigurationDto;
     }
 }

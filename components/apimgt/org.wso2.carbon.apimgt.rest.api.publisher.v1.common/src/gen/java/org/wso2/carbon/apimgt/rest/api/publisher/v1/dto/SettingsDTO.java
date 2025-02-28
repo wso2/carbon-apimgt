@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.EnvironmentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GatewayFeatureCatalogDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MonetizationAttributeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SettingsCustomPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubscriberContactAttributeDTO;
@@ -29,6 +30,7 @@ public class SettingsDTO   {
     private String devportalUrl = null;
     private List<EnvironmentDTO> environment = new ArrayList<EnvironmentDTO>();
     private List<String> gatewayTypes = new ArrayList<String>();
+    private GatewayFeatureCatalogDTO gatewayFeatureCatalog = null;
     private List<String> scopes = new ArrayList<String>();
     private List<MonetizationAttributeDTO> monetizationAttributes = new ArrayList<MonetizationAttributeDTO>();
     private List<SubscriberContactAttributeDTO> subscriberContactAttributes = new ArrayList<SubscriberContactAttributeDTO>();
@@ -44,6 +46,8 @@ public class SettingsDTO   {
     private Boolean isJWTEnabledForLoginTokens = false;
     private Boolean orgAccessControlEnabled = null;
     private Boolean allowSubscriptionValidationDisabling = true;
+    private Boolean designAssistantEnabled = true;
+    private Boolean aiAuthTokenProvided = false;
     private List<SettingsCustomPropertiesDTO> customProperties = new ArrayList<SettingsCustomPropertiesDTO>();
 
   /**
@@ -90,13 +94,31 @@ public class SettingsDTO   {
   }
 
   
-  @ApiModelProperty(example = "[\"Regular\",\"APK\"]", value = "")
+  @ApiModelProperty(example = "[\"Regular\",\"APK\",\"AWS\"]", value = "")
   @JsonProperty("gatewayTypes")
   public List<String> getGatewayTypes() {
     return gatewayTypes;
   }
   public void setGatewayTypes(List<String> gatewayTypes) {
     this.gatewayTypes = gatewayTypes;
+  }
+
+  /**
+   **/
+  public SettingsDTO gatewayFeatureCatalog(GatewayFeatureCatalogDTO gatewayFeatureCatalog) {
+    this.gatewayFeatureCatalog = gatewayFeatureCatalog;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("GatewayFeatureCatalog")
+  public GatewayFeatureCatalogDTO getGatewayFeatureCatalog() {
+    return gatewayFeatureCatalog;
+  }
+  public void setGatewayFeatureCatalog(GatewayFeatureCatalogDTO gatewayFeatureCatalog) {
+    this.gatewayFeatureCatalog = gatewayFeatureCatalog;
   }
 
   /**
@@ -368,6 +390,42 @@ public class SettingsDTO   {
   }
 
   /**
+   * Specifies whether Design Assistant enabled 
+   **/
+  public SettingsDTO designAssistantEnabled(Boolean designAssistantEnabled) {
+    this.designAssistantEnabled = designAssistantEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Specifies whether Design Assistant enabled ")
+  @JsonProperty("designAssistantEnabled")
+  public Boolean isDesignAssistantEnabled() {
+    return designAssistantEnabled;
+  }
+  public void setDesignAssistantEnabled(Boolean designAssistantEnabled) {
+    this.designAssistantEnabled = designAssistantEnabled;
+  }
+
+  /**
+   * Checks if the auth token is provided for AI service usage.
+   **/
+  public SettingsDTO aiAuthTokenProvided(Boolean aiAuthTokenProvided) {
+    this.aiAuthTokenProvided = aiAuthTokenProvided;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Checks if the auth token is provided for AI service usage.")
+  @JsonProperty("aiAuthTokenProvided")
+  public Boolean isAiAuthTokenProvided() {
+    return aiAuthTokenProvided;
+  }
+  public void setAiAuthTokenProvided(Boolean aiAuthTokenProvided) {
+    this.aiAuthTokenProvided = aiAuthTokenProvided;
+  }
+
+  /**
    **/
   public SettingsDTO customProperties(List<SettingsCustomPropertiesDTO> customProperties) {
     this.customProperties = customProperties;
@@ -398,6 +456,7 @@ public class SettingsDTO   {
     return Objects.equals(devportalUrl, settings.devportalUrl) &&
         Objects.equals(environment, settings.environment) &&
         Objects.equals(gatewayTypes, settings.gatewayTypes) &&
+        Objects.equals(gatewayFeatureCatalog, settings.gatewayFeatureCatalog) &&
         Objects.equals(scopes, settings.scopes) &&
         Objects.equals(monetizationAttributes, settings.monetizationAttributes) &&
         Objects.equals(subscriberContactAttributes, settings.subscriberContactAttributes) &&
@@ -413,12 +472,14 @@ public class SettingsDTO   {
         Objects.equals(isJWTEnabledForLoginTokens, settings.isJWTEnabledForLoginTokens) &&
         Objects.equals(orgAccessControlEnabled, settings.orgAccessControlEnabled) &&
         Objects.equals(allowSubscriptionValidationDisabling, settings.allowSubscriptionValidationDisabling) &&
+        Objects.equals(designAssistantEnabled, settings.designAssistantEnabled) &&
+        Objects.equals(aiAuthTokenProvided, settings.aiAuthTokenProvided) &&
         Objects.equals(customProperties, settings.customProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, gatewayTypes, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, customProperties);
+    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, designAssistantEnabled, aiAuthTokenProvided, customProperties);
   }
 
   @Override
@@ -429,6 +490,7 @@ public class SettingsDTO   {
     sb.append("    devportalUrl: ").append(toIndentedString(devportalUrl)).append("\n");
     sb.append("    environment: ").append(toIndentedString(environment)).append("\n");
     sb.append("    gatewayTypes: ").append(toIndentedString(gatewayTypes)).append("\n");
+    sb.append("    gatewayFeatureCatalog: ").append(toIndentedString(gatewayFeatureCatalog)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    monetizationAttributes: ").append(toIndentedString(monetizationAttributes)).append("\n");
     sb.append("    subscriberContactAttributes: ").append(toIndentedString(subscriberContactAttributes)).append("\n");
@@ -444,6 +506,8 @@ public class SettingsDTO   {
     sb.append("    isJWTEnabledForLoginTokens: ").append(toIndentedString(isJWTEnabledForLoginTokens)).append("\n");
     sb.append("    orgAccessControlEnabled: ").append(toIndentedString(orgAccessControlEnabled)).append("\n");
     sb.append("    allowSubscriptionValidationDisabling: ").append(toIndentedString(allowSubscriptionValidationDisabling)).append("\n");
+    sb.append("    designAssistantEnabled: ").append(toIndentedString(designAssistantEnabled)).append("\n");
+    sb.append("    aiAuthTokenProvided: ").append(toIndentedString(aiAuthTokenProvided)).append("\n");
     sb.append("    customProperties: ").append(toIndentedString(customProperties)).append("\n");
     sb.append("}");
     return sb.toString();

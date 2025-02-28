@@ -106,6 +106,7 @@ import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
+    public static final String SP_NAME_APPLICATION = "sp.name.application";
 
     boolean orgWideAppUpdateEnabled = Boolean.getBoolean(APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
 
@@ -255,7 +256,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                 int appId = APIUtil.getApplicationId(applicationDTO.getName(), ownerId);
                 Application oldApplication = apiConsumer.getApplicationById(appId);
                 application = preProcessAndUpdateApplication(ownerId, applicationDTO, oldApplication,
-                        oldApplication.getUUID(), orgInfo.getOrganizationId());
+                        oldApplication.getUUID(), orgInfo);
             } else {
                 application = preProcessAndAddApplication(ownerId, applicationDTO, organization, orgInfo.getOrganizationId());
                 update = Boolean.FALSE;
@@ -383,6 +384,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         //subscriber field of the body is not honored. It is taken from the context
         Application application = ApplicationMappingUtil.fromDTOtoApplication(applicationDto, username);
+        application.setSubOrganization(sharedOrganization);
         
         application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD); // default
         if ((applicationDto.getVisibility() != null)
@@ -487,7 +489,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             }
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             Application updatedApplication = preProcessAndUpdateApplication(username, body, oldApplication,
-                    applicationId, orgInfo.getOrganizationId());
+                    applicationId, orgInfo);
             ApplicationDTO updatedApplicationDTO = ApplicationMappingUtil.fromApplicationtoDTO(updatedApplication);
             return Response.ok().entity(updatedApplicationDTO).build();
 
@@ -550,7 +552,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @return Updated application
      */
     private Application preProcessAndUpdateApplication(String username, ApplicationDTO applicationDto,
-            Application oldApplication, String applicationId, String sharedOrganization) throws APIManagementException {
+            Application oldApplication, String applicationId, OrganizationInfo sharedOrganizationInfo) throws APIManagementException {
         APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
         Object applicationAttributesFromUser = applicationDto.getAttributes();
         Map<String, String> applicationAttributes = new ObjectMapper()
@@ -562,11 +564,14 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         //we do not honor the subscriber coming from the request body as we can't change the subscriber of the application
         Application application = ApplicationMappingUtil.fromDTOtoApplication(applicationDto, username);
+        application.setSubOrganization(oldApplication.getSubOrganization());
 
         //we do not honor the application id which is sent via the request body
         application.setUUID(oldApplication != null ? oldApplication.getUUID() : null);
 
         application.setSharedOrganization(oldApplication.getSharedOrganization()); // default
+        String sharedOrganization = sharedOrganizationInfo.getOrganizationId();
+
         if (applicationDto.getVisibility() != null) {
             if (applicationDto.getVisibility() == VisibilityEnum.SHARED_WITH_ORG && sharedOrganization != null) {
                 application.setSharedOrganization(sharedOrganization);
@@ -576,6 +581,28 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         } 
         apiConsumer.updateApplication(application);
+
+        // Added to use the application name as part of sp name instead of application UUID when specified
+        String applicationSpNameProp = System.getProperty(SP_NAME_APPLICATION);
+        boolean applicationSpName = Boolean.parseBoolean(applicationSpNameProp);
+        //If application name is renamed, need to update SP app as well
+        if (applicationSpName && !application.getName().equals(oldApplication.getName())) {
+            //Fetch Application Keys
+            Set<APIKey> applicationKeys = getApplicationKeys(applicationId, apiConsumer.getRequestedTenant(),
+                                                             sharedOrganizationInfo);
+            //Check what application JSON params are
+            for (APIKey key : applicationKeys) {
+                if (!APIConstants.OAuthAppMode.MAPPED.name().equals(key.getCreateMode())) {
+                    JsonObject jsonParams = new JsonObject();
+                    String grantTypes = StringUtils.join(key.getGrantTypes(), ',');
+                    jsonParams.addProperty(APIConstants.JSON_GRANT_TYPES, grantTypes);
+                    jsonParams.addProperty(APIConstants.JSON_USERNAME, username);
+                    apiConsumer.updateAuthClient(username, application,
+                                                 key.getType(), key.getCallbackUrl(), null, null, null,
+                                                 application.getGroupId(), new Gson().toJson(jsonParams), key.getKeyManager());
+                }
+            }
+        }
 
         //retrieves the updated application and send as the response
         return apiConsumer.getApplicationByUUID(applicationId);

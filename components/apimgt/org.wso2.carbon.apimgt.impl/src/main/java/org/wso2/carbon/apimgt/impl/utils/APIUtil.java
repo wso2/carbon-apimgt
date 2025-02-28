@@ -20,6 +20,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -27,6 +28,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.internal.LinkedTreeMap;
 import feign.Feign;
 import feign.gson.GsonDecoder;
 import feign.gson.GsonEncoder;
@@ -109,6 +111,12 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayAPIValidationResult;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
+import org.wso2.carbon.apimgt.api.model.GatewayPortalConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayFeatureCatalog;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
@@ -154,6 +162,7 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
+import org.wso2.carbon.apimgt.impl.ExternalGatewayAPIValidationException;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
@@ -169,8 +178,8 @@ import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.ai.AIAPIConfigurationsDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.DataLoadingException;
-import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -247,6 +256,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
@@ -361,7 +372,7 @@ public final class APIUtil {
     private static Schema operationPolicySpecSchema;
     private static final String contextRegex = "^[a-zA-Z0-9_${}/.;()-]+$";
     private static String hashingAlgorithm = SHA_256;
-    
+
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
 
@@ -3363,9 +3374,108 @@ public final class APIUtil {
         // Get the gateway types from the deployment.toml
         List<String> gatewayTypesList = new ArrayList<>();
         if (gatewayTypes != null && !gatewayTypes.isEmpty()) {
-            gatewayTypesList = Arrays.asList(gatewayTypes.split(","));
+            gatewayTypesList = Arrays.asList(gatewayTypes.replace(" ", "").split(","));
         }
         return gatewayTypesList;
+    }
+
+    public static GatewayFeatureCatalog getGatewayFeatureCatalog() throws APIManagementException {
+
+        Gson gson = new Gson();
+        Type type = new TypeToken<Map<String, Object>>() {}.getType();
+        Map<String, Object> gatewayConfigsMap = new HashMap<>();
+        Map<String, List<String>> apiData = new HashMap<>();
+        JsonObject synapseConfigJSON = null;
+        JsonObject apkConfigJSON = null;
+        try (InputStream synapseInputStream = APIUtil.class.getClassLoader()
+                .getResourceAsStream("gatewayFeatureCatalog/synapse-gateway-feature-catalog.json")) {
+            if (synapseInputStream == null) {
+                throw new APIManagementException("Synapse Gateway Feature Catalog JSON not found");
+            }
+            InputStreamReader reader = new InputStreamReader(synapseInputStream, StandardCharsets.UTF_8);
+            synapseConfigJSON = JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading Synapse Gateway Feature Catalog JSON", e);
+        }
+
+        try (InputStream apkInputStream = APIUtil.class.getClassLoader()
+                .getResourceAsStream("gatewayFeatureCatalog/apk-gateway-feature-catalog.json")) {
+            if (apkInputStream == null) {
+                throw new APIManagementException("APK Gateway Feature Catalog JSON not found");
+            }
+            InputStreamReader reader = new InputStreamReader(apkInputStream, StandardCharsets.UTF_8);
+            apkConfigJSON = JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading APK Gateway Feature Catalog JSON", e);
+        }
+
+        if (synapseConfigJSON == null || apkConfigJSON == null) {
+            throw new APIManagementException("Error while reading Gateway Feature Catalog JSON");
+        }
+
+        JsonObject synapseConfigsJSONValue = synapseConfigJSON.getAsJsonObject(APIConstants.WSO2_SYNAPSE_GATEWAY);
+        JsonObject apkConfigsJSONValue = apkConfigJSON.getAsJsonObject(APIConstants.WSO2_APK_GATEWAY);
+
+        JsonObject synapseJSON = synapseConfigsJSONValue.getAsJsonObject("gatewayFeatures");
+        JsonObject apkJSON = apkConfigsJSONValue.getAsJsonObject("gatewayFeatures");
+
+        Map<String, Object> synapseMap = gson.fromJson(synapseJSON, type);
+        Map<String, Object> apkMap = gson.fromJson(apkJSON, type);
+
+        gatewayConfigsMap.put(APIConstants.WSO2_SYNAPSE_GATEWAY, synapseMap);
+        gatewayConfigsMap.put(APIConstants.WSO2_APK_GATEWAY, apkMap);
+
+        JsonArray synapseApiTypes = synapseConfigsJSONValue.getAsJsonArray("apiTypes");
+        JsonArray apkApiTypes = apkConfigsJSONValue.getAsJsonArray("apiTypes");
+        for (String key : APIConstants.API_TYPES) {
+            apiData.put(key, new ArrayList<>());
+        }
+
+        for (int i = 0; i < synapseApiTypes.size(); i++) {
+            String apiType = synapseApiTypes.get(i).getAsString();
+            if (apiData.containsKey(apiType)) {
+                apiData.get(apiType).add(APIConstants.WSO2_SYNAPSE_GATEWAY);
+            }
+        }
+
+        for (int i = 0; i < apkApiTypes.size(); i++) {
+            String apiType = apkApiTypes.get(i).getAsString();
+            if (apiData.containsKey(apiType)) {
+                apiData.get(apiType).add(APIConstants.WSO2_APK_GATEWAY);
+            }
+        }
+
+        Map<String, GatewayAgentConfiguration> externalGatewayConnectorConfigurationMap =
+                ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
+        externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
+            GatewayPortalConfiguration config = null;
+            try {
+                config = gatewayConfiguration.getGatewayFeatureCatalog();
+            } catch (APIManagementException e) {
+                throw new RuntimeException(e);
+            }
+
+            if (config != null) {
+
+                LinkedTreeMap<String, Object> supportedFeaturesMap = new Gson().fromJson(
+                        (JsonObject)config.getSupportedFeatures(), LinkedTreeMap.class);
+                gatewayConfigsMap.put(config.getGatewayType(), supportedFeaturesMap);
+
+                List<String> types = config.getSupportedAPITypes();
+                for (int i = 0; i < types.size(); i++) {
+                    String apiType = types.get(i);
+                    if (apiData.containsKey(apiType)) {
+                        apiData.get(apiType).add(config.getGatewayType());
+                    }
+                }
+            }
+        });
+
+        GatewayFeatureCatalog gatewayFeatureCatalog = new GatewayFeatureCatalog();
+        gatewayFeatureCatalog.setApiTypes(apiData);
+        gatewayFeatureCatalog.setGatewayFeatures(gatewayConfigsMap);
+
+        return gatewayFeatureCatalog;
     }
 
     /**
@@ -3550,6 +3660,81 @@ public final class APIUtil {
         }
     }
 
+    /**
+     * Retrieves the retry attempts limit for failover configurations.
+     *
+     * @return The number of retry attempts allowed for failover.
+     * @throws APIManagementException If the configuration service or failover settings are unavailable.
+     */
+    public static int getRetryAttemptsForFailoverConfigurations() throws APIManagementException {
+
+        APIManagerConfigurationService configService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+
+        if (configService == null) {
+            log.error("API Manager Configuration Service is not available.");
+            throw new APIManagementException("API Manager Configuration Service is not initialized.");
+        }
+
+        AIAPIConfigurationsDTO aiConfig = configService.getAPIManagerConfiguration().getAiApiConfigurationsDTO();
+        if (aiConfig == null || aiConfig.getFailoverConfigurations() == null) {
+            log.warn("Missing AI API Failover configurations.");
+            throw new APIManagementException("Missing required AI API Failover configurations.");
+        }
+
+        return aiConfig.getFailoverConfigurations().getFailoverEndpointsLimit();
+    }
+
+    /**
+     * Retrieves the default request timeout for AI APIs.
+     *
+     * @return The default request timeout in milliseconds.
+     * @throws APIManagementException If the configuration service or failover settings are unavailable.
+     */
+    public static long getDefaultRequestTimeoutsForAIAPIs() throws APIManagementException {
+
+        APIManagerConfigurationService configService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+
+        if (configService == null) {
+            log.error("API Manager Configuration Service is not available.");
+            throw new APIManagementException("API Manager Configuration Service is not initialized.");
+        }
+
+        AIAPIConfigurationsDTO aiConfig = configService.getAPIManagerConfiguration().getAiApiConfigurationsDTO();
+        if (aiConfig == null || aiConfig.getFailoverConfigurations() == null) {
+            log.warn("Missing AI API Failover configurations.");
+            throw new APIManagementException("Missing required AI API Failover configurations.");
+        }
+
+        return aiConfig.getDefaultRequestTimeout();
+    }
+
+    /**
+     * Retrieves the default request timeout for failover configurations.
+     *
+     * @return The default request timeout in milliseconds.
+     * @throws APIManagementException If the configuration service or failover settings are unavailable.
+     */
+    public static long getDefaultRequestTimeoutForFailoverConfigurations() throws APIManagementException {
+
+        APIManagerConfigurationService configService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+
+        if (configService == null) {
+            log.error("API Manager Configuration Service is not available.");
+            throw new APIManagementException("API Manager Configuration Service is not initialized.");
+        }
+
+        AIAPIConfigurationsDTO aiConfig = configService.getAPIManagerConfiguration().getAiApiConfigurationsDTO();
+        if (aiConfig == null || aiConfig.getFailoverConfigurations() == null) {
+            log.warn("Missing AI API Failover configurations.");
+            throw new APIManagementException("Missing required AI API Failover configurations.");
+        }
+
+        return aiConfig.getFailoverConfigurations().getDefaultRequestTimeout();
+    }
+
     public void setupSelfRegistration(APIManagerConfiguration config, int tenantId) throws APIManagementException {
 
         boolean enabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_ENABLED));
@@ -3624,17 +3809,25 @@ public final class APIUtil {
      */
     public static void updateAvailableTiersByOrganization(DevPortalAPIInfo devPortalAPIInfo, String organization) {
 
-        Set<String> availableTiers = devPortalAPIInfo.getAvailableTierNames();
-        Set<OrganizationTiers> availableTiersForOrganizations = devPortalAPIInfo.getAvailableTiersForOrganizations();
         if (organization != null) {
+            Set<OrganizationTiers> availableTiersForOrganizations = devPortalAPIInfo.getAvailableTiersForOrganizations();
+            Set<String> availableTiers = new HashSet<>();
             for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
                 String orgID = organizationTiers.getOrganizationID();
                 if (organization.equals(orgID)) {
                     availableTiers = organizationTiers.getTiers();
-                    devPortalAPIInfo.setAvailableTierNames(availableTiers);
                     break;
                 }
             }
+            if (availableTiers.isEmpty()) {
+                for (OrganizationTiers organizationTiers : availableTiersForOrganizations) {
+                    if (APIConstants.DEFAULT_VISIBLE_ORG.equals(organizationTiers.getOrganizationID())) {
+                        availableTiers = organizationTiers.getTiers();
+                        break;
+                    }
+                }
+            }
+            devPortalAPIInfo.setAvailableTierNames(availableTiers);
         }
     }
 
@@ -4401,6 +4594,18 @@ public final class APIUtil {
     public static String getSequenceExtensionName(API api) {
 
         return api.getId().getApiName() + ":v" + api.getId().getVersion();
+    }
+
+    /**
+     * Return the endpoints sequence name.
+     * eg: OpenAIAPI--v2.3.0
+     *
+     * @param api
+     * @return
+     */
+    public static String getEndpointSequenceName(API api) {
+
+        return api.getId().getApiName() + "--" + api.getId().getVersion();
     }
 
     /**
@@ -7856,6 +8061,22 @@ public final class APIUtil {
         return keyManagerConfiguration;
     }
 
+    public static GatewayConfiguration extractGatewayConfiguration(Environment environment, String organization)
+            throws APIManagementException {
+        GatewayConfiguration gatewayConfiguration = new GatewayConfiguration();
+        if (environment != null) {
+            gatewayConfiguration.setName(environment.getName());
+            gatewayConfiguration.setType(environment.getType());
+            gatewayConfiguration.setTenantDomain(organization);
+            Map<String, Object> configurations = new HashMap<>();
+            if (environment.getAdditionalProperties() != null) {
+                configurations.putAll(environment.getAdditionalProperties());
+            }
+            gatewayConfiguration.setConfiguration(configurations);
+        }
+        return gatewayConfiguration;
+    }
+
     /**
      * Get if there any tenant-specific application configurations from the tenant
      * registry
@@ -8204,6 +8425,36 @@ public final class APIUtil {
         Map<String, Environment> allEnvironments = new LinkedHashMap<>(getReadOnlyEnvironments());
         allEnvironments.putAll(envFromDB);
         return allEnvironments;
+    }
+
+    // Federated Gateway related API Reference mapping methods
+    public static void addApiExternalApiMapping(String apiId, String environmentId, String referenceArtifact)
+            throws APIManagementException {
+
+        ApiMgtDAO.getInstance().addApiExternalApiMapping(apiId, environmentId, referenceArtifact);
+    }
+
+    public static void updateApiExternalApiMapping(String apiId, String environmentId, String referenceArtifact)
+            throws APIManagementException {
+
+        ApiMgtDAO.getInstance().updateApiExternalApiMapping(apiId, environmentId, referenceArtifact);
+    }
+
+    public static String getApiExternalApiMappingReferenceByApiId(String apiId, String environmentId)
+            throws APIManagementException {
+
+        return ApiMgtDAO.getInstance().getApiExternalApiMappingReference(apiId, environmentId);
+    }
+
+    public static void deleteApiExternalApiMapping(String apiId, String environmentId)
+            throws APIManagementException {
+
+        ApiMgtDAO.getInstance().deleteApiExternalApiMapping(apiId, environmentId);
+    }
+
+    public static void deleteApiExternalApiMappings(String apiId) throws APIManagementException {
+
+        ApiMgtDAO.getInstance().deleteApiExternalApiMappings(apiId);
     }
 
     /**
@@ -8845,7 +9096,10 @@ public final class APIUtil {
             properties.put(APIConstants.USER_CTX_PROPERTY_ISADMIN, true);
         }
         properties.put(APIConstants.USER_CTX_PROPERTY_SKIP_ROLES, APIUtil.getSkipRolesByRegex());
-
+        
+        if (APIUtil.areOrganizationsRegistered()) {
+            properties.put(APIConstants.USER_CTX_PROPERTY_ORGS_AVAILABLE, true);
+        }
         return properties;
     }
 
@@ -10096,35 +10350,48 @@ public final class APIUtil {
     /**
      * Validate sandbox and production endpoint URLs.
      *
-     * @param endpoints sandbox and production endpoint URLs inclusive list
+     * @param endpoints list of endpoint URLs to validate
      * @return validity of given URLs
      */
     public static boolean validateEndpointURLs(ArrayList<String> endpoints) {
+        for (String endpoint : endpoints) {
+            if (!validateEndpointURL(endpoint)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Validate the given endpoint URL.
+     *
+     * @param endpoint endpoint URL to validate
+     * @return validity of the given URL
+     */
+    public static boolean validateEndpointURL(String endpoint) {
         long validatorOptions =
                 UrlValidator.ALLOW_2_SLASHES + UrlValidator.ALLOW_ALL_SCHEMES + UrlValidator.ALLOW_LOCAL_URLS;
         RegexValidator authorityValidator = new RegexValidator(".*");
         UrlValidator urlValidator = new UrlValidator(authorityValidator, validatorOptions);
 
-        for (String endpoint : endpoints) {
-            // If url is a JMS connection url or a Consul service discovery related url, or a parameterized URL
-            // validation is skipped. If not, validity is checked.
-            if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(") && !endpoint.contains("{") &&
-                    !endpoint.contains("}") && !urlValidator.isValid(endpoint)) {
-                try {
-                    // If the url is not identified as valid from the above check,
-                    // next step is determine the validity of the encoded url (done through the URI constructor).
-                    URL endpointUrl = new URL(endpoint);
-                    URI endpointUri = new URI(endpointUrl.getProtocol(), endpointUrl.getAuthority(),
-                            endpointUrl.getPath(), endpointUrl.getQuery(), null);
+        // If url is a JMS connection url or a Consul service discovery related url, or a parameterized URL
+        // validation is skipped. If not, validity is checked.
+        if (!endpoint.startsWith("jms:") && !endpoint.startsWith("consul(") && !endpoint.contains("{") &&
+                !endpoint.contains("}") && !urlValidator.isValid(endpoint)) {
+            try {
+                // If the url is not identified as valid from the above check,
+                // next step is determine the validity of the encoded url (done through the URI constructor).
+                URL endpointUrl = new URL(endpoint);
+                URI endpointUri = new URI(endpointUrl.getProtocol(), endpointUrl.getAuthority(),
+                        endpointUrl.getPath(), endpointUrl.getQuery(), null);
 
-                    if (!urlValidator.isValid(endpointUri.toString())) {
-                        log.error("Invalid endpoint url " + endpointUrl);
-                        return false;
-                    }
-                } catch (URISyntaxException | MalformedURLException e) {
-                    log.error("Error while parsing the endpoint url " + endpoint);
+                if (!urlValidator.isValid(endpointUri.toString())) {
+                    log.error("Invalid endpoint url " + endpointUrl);
                     return false;
                 }
+            } catch (URISyntaxException | MalformedURLException e) {
+                log.error("Error while parsing the endpoint url " + endpoint);
+                return false;
             }
         }
         return true;
@@ -10221,12 +10488,31 @@ public final class APIUtil {
 
     /**
      * Get org access control enabled status
-     * 
+     *
      * @return true or false
      */
     public static boolean isOrganizationAccessControlEnabled() {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getOrgAccessControl().isEnabled();
+    }
+    
+    /**
+     * Check whether organizations are available in the system
+     * @return
+     */
+    public static boolean areOrganizationsRegistered() {
+        if (ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getOrgAccessControl().isEnabled()) {
+            // check database if configs is enabled.
+            try {
+                return ApiMgtDAO.getInstance().areOrganizationsRegistered();
+            } catch(APIManagementException e) {
+                log.error("Error while checking existance of organization", e);
+                return false;
+            }
+
+        }
+        return false;
     }
     /**
      * Get registered API Definition Parsers as a Map
@@ -10240,13 +10526,16 @@ public final class APIUtil {
     /**
      * Check whether there are external environments registered
      */
-    public static boolean isAnyExternalGateWayProviderExists() {
-
-        Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-        for (Environment environment : gatewayEnvironments.values()) {
-            if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getProvider())) {
-                return true;
+    public static boolean isAnyExternalGateWayProviderExists(String tenantDomain) {
+        try {
+            Map<String, Environment> environments = getEnvironments(tenantDomain);
+            for (Environment environment : environments.values()) {
+                if (!APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(environment.getProvider())) {
+                    return true;
+                }
             }
+        } catch (APIManagementException e) {
+            throw new RuntimeException(e);
         }
         return false;
     }
@@ -10583,7 +10872,7 @@ public final class APIUtil {
         gatewayList.add(APIConstants.OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE);
         policySpecification.setSupportedGateways(gatewayList);
 
-        ArrayList<String> supportedAPIList = new ArrayList<>();
+        ArrayList<Object> supportedAPIList = new ArrayList<>();
         supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_HTTP);
         supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_SOAP);
         supportedAPIList.add(APIConstants.OPERATION_POLICY_SUPPORTED_API_TYPE_SOAPTOREST);
@@ -10659,10 +10948,8 @@ public final class APIUtil {
      * @return gateway vendor for the API
      */
     public static String setGatewayVendorBeforeInsertion(String gatewayVendorType, String gatewayType) {
-        if (gatewayType != null && APIConstants.WSO2_APK_GATEWAY.equals(gatewayType)) {
-            gatewayVendorType =  APIConstants.WSO2_APK_GATEWAY;
-        }
-        return gatewayVendorType;
+
+        return !APIConstants.WSO2_SYNAPSE_GATEWAY.equals(gatewayType) ? gatewayType: gatewayVendorType;
     }
 
     /**
@@ -10675,8 +10962,8 @@ public final class APIUtil {
         String gatewayType = null;
         if (APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(gatewayVendor)) {
             gatewayType = APIConstants.WSO2_SYNAPSE_GATEWAY;
-        } else if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor)) {
-            gatewayType = APIConstants.WSO2_APK_GATEWAY;
+        } else {
+            return gatewayVendor;
         }
         return gatewayType;
     }
@@ -10688,10 +10975,12 @@ public final class APIUtil {
      * @return wso2 gateway vendor type
      */
     public static String handleGatewayVendorRetrieval(String gatewayVendor) {
-        if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor)) {
-            gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+        if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor) ||
+                APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(gatewayVendor)) {
+            return APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+        } else {
+            return APIConstants.EXTERNAL_GATEWAY_VENDOR;
         }
-        return  gatewayVendor;
     }
 
     /**
@@ -10879,9 +11168,9 @@ public final class APIUtil {
         try {
             if (tokenEndpoint != null) {
                 if (tokenGenerator == null) {
-                    tokenGenerator = new AccessTokenGenerator(tokenEndpoint, key);
+                    tokenGenerator = new AccessTokenGenerator();
                 }
-                String token = tokenGenerator.getAccessToken();
+                String token = tokenGenerator.getAccessToken(tokenEndpoint, key);
                 request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
                         APIConstants.AUTHORIZATION_BEARER + token);
             } else {
@@ -11034,7 +11323,7 @@ public final class APIUtil {
         }
         return applications.subList(offset, endIndex);
     }
-    
+
     public static String getAPIMVersion() {
         return CarbonUtils.getServerConfiguration().getFirstProperty("Version");
     }
@@ -11205,7 +11494,7 @@ public final class APIUtil {
         Set<org.wso2.carbon.apimgt.api.model.OrganizationTiers> availableTiersForOrganizations
                 = api.getAvailableTiersForOrganizations();
         if (availableTiersForOrganizations == null || availableTiersForOrganizations.isEmpty()) {
-            return null;
+            return "";
         }
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -11241,7 +11530,7 @@ public final class APIUtil {
             return new LinkedHashSet<>();
         }
     }
-    
+
     public static synchronized String getOrganizationIdFromExternalReference(String referenceId,
             String organizationName, String rootOrganization) throws APIManagementException {
         String organizationId = null;
@@ -11262,7 +11551,7 @@ public final class APIUtil {
         }
         return organizationId;
     }
-    
+
     public static String getOrganizationHandle(String name) {
         String sanatizedName = null;
         if (name == null) {
@@ -11274,5 +11563,39 @@ public final class APIUtil {
         // Convert to lowercase and trim hyphens from the beginning/end
         sanatizedName = sanatizedName.toLowerCase(Locale.ENGLISH).replaceAll("^-+|-+$", "");
         return sanatizedName;
+    }
+
+    /**
+     * Validate Api with the federated gateways
+     *
+     * @param api API Object
+     */
+    public static void validateApiWithFederatedGateway(API api) throws APIManagementException {
+
+        try {
+            GatewayAgentConfiguration gatewayConfiguration = org.wso2.carbon.apimgt.impl.internal.
+                    ServiceReferenceHolder.getInstance().
+                    getExternalGatewayConnectorConfiguration(api.getGatewayType());
+            if (gatewayConfiguration != null) {
+                GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation())
+                        .getDeclaredConstructor().newInstance();
+                if (deployer != null) {
+                    GatewayAPIValidationResult errorList = null;
+                    errorList = deployer.validateApi(api);
+                    if (!errorList.getErrors().isEmpty()) {
+                        throw new ExternalGatewayAPIValidationException(
+                                "Error occurred while validating the API with the federated gateway: "
+                                        + api.getGatewayType(),
+                                ExceptionCodes.from(ExceptionCodes.FEDERATED_GATEWAY_VALIDATION_FAILED,
+                                        api.getGatewayType(), errorList.getErrors().toString()));
+                    }
+                }
+            }
+        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
+                 IllegalAccessException | InvocationTargetException e) {
+            throw new APIManagementException(
+                    "Error occurred while validating the API with the federated gateway: "
+                            + api.getGatewayType(), e);
+        }
     }
 }

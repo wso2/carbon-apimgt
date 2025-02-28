@@ -23,9 +23,11 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.wso2.carbon.apimgt.api.dto.EndpointConfigDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.SimplifiedEndpoint;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
@@ -55,6 +57,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
     public static final String TEMPLATE_TYPE_VELOCITY = "velocity_template";
     public static final String TEMPLATE_WEBSUB_API = "websub_api_template";
     public static final String TEMPLATE_TYPE_PROTOTYPE = "prototype_template";
+    public static final String TEMPLATE_AI_API = "ai_api_template";
+    public static final String TEMPLATE_AI_API_ENDPOINTS_SEQUENCE = "ai_api_endpoints_seq_template";
     public static final String TEMPLATE_DEFAULT_API = "default_api_template";
     public static final String TEMPLATE_DEFAULT_WS_API = "default_ws_api_template";
     private static final Log log = LogFactory.getLog(APITemplateBuilderImpl.class);
@@ -90,6 +94,54 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
         this.api = api;
         this.apiProduct = apiProduct;
+    }
+
+    /**
+     * Generates the AI API configuration as a string using Apache Velocity templating.
+     *
+     * @param environment       The deployment environment for the API.
+     * @param productionEndpoint The production endpoint configuration.
+     * @param sandboxEndpoint    The sandbox endpoint configuration.
+     * @return The AI API configuration string after processing the Velocity template.
+     * @throws APITemplateException If an error occurs during the Velocity template processing.
+     */
+    @Override
+    public String getConfigStringForAIAPI(Environment environment, SimplifiedEndpoint productionEndpoint,
+                                          SimplifiedEndpoint sandboxEndpoint) throws APITemplateException {
+
+        StringWriter writer = new StringWriter();
+
+        try {
+            ConfigContext configcontext = null;
+
+            if (api != null) {
+                configcontext = createAIAPIConfigContext(api, environment);
+            }
+
+            configcontext.validate();
+
+            VelocityContext context = configcontext.getContext();
+            context.internalGetKeys();
+            VelocityEngine velocityengine = new VelocityEngine();
+            APIUtil.initializeVelocityContext(velocityengine);
+
+            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
+            initVelocityEngine(velocityengine);
+
+            Template t = null;
+
+            if (api != null) {
+                t = velocityengine.getTemplate(getAIAPITemplatePath());
+            }
+            context.put("llmProviderId", api.getAiConfiguration().getLlmProviderId());
+            context.put("defaultProductionEndpoint", productionEndpoint);
+            context.put("defaultSandboxEndpoint", sandboxEndpoint);
+            t.merge(context, writer);
+        } catch (Exception e) {
+            log.error("Velocity Error", e);
+            throw new APITemplateException("Velocity Error", e);
+        }
+        return writer.toString();
     }
 
     @Override
@@ -216,15 +268,23 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
      * @throws APITemplateException Thrown if an error occurred
      */
     @Override
-    public String getConfigStringForEndpointTemplate(String endpointType) throws APITemplateException {
+    public String getConfigStringEndpointConfigTemplate(String endpointType, String endpointUuid,
+                                                        EndpointConfigDTO endpointConfig)
+            throws APITemplateException {
 
         StringWriter writer = new StringWriter();
 
         try {
             ConfigContext configcontext = new APIConfigContext(this.api);
-            configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api);
             configcontext = new TemplateUtilContext(configcontext);
-            configcontext = new SecurityConfigContext(configcontext, api);
+
+            if (APIConstants.API_SUBTYPE_DEFAULT.equals(api.getSubtype())) {
+                configcontext = new SecurityConfigContext(configcontext, api);
+                configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api);
+            } else if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
+                configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api, endpointConfig);
+            }
+
 
             configcontext.validate();
 
@@ -239,6 +299,9 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             initVelocityEngine(velocityengine);
 
             context.put("type", endpointType);
+            if (endpointUuid != null) {
+                context.put("endpointUuid", endpointUuid);
+            }
 
             Template template = velocityengine.getTemplate(this.getEndpointTemplatePath());
 
@@ -291,6 +354,77 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         return writer.toString();
     }
 
+    /**
+     * Generates an endpoint configuration string using Velocity template.
+     *
+     * @param deploymentStage The stage of deployment (e.g., development, testing, production).
+     * @param endpoints       A list of configured endpoints for the API.
+     * @param defaultEndpoint The default endpoint to be used when no specific endpoint is provided.
+     * @return A string representation of the endpoint configuration after processing the Velocity template.
+     * @throws APITemplateException If an error occurs during the Velocity template processing.
+     */
+    @Override
+    public String getStringForEndpoints(String deploymentStage, List<SimplifiedEndpoint> endpoints,
+                                        SimplifiedEndpoint defaultEndpoint)
+            throws APITemplateException {
+
+        StringWriter writer = new StringWriter();
+        try {
+            ConfigContext configcontext = null;
+
+            if (api != null) {
+                configcontext = createContextForEndpoints(api, endpoints, defaultEndpoint);
+            }
+
+            configcontext.validate();
+
+            VelocityContext context = configcontext.getContext();
+            context.internalGetKeys();
+            VelocityEngine velocityengine = new VelocityEngine();
+            APIUtil.initializeVelocityContext(velocityengine);
+
+            velocityengine.setProperty(RuntimeConstants.FILE_RESOURCE_LOADER_PATH, CarbonUtils.getCarbonHome());
+            initVelocityEngine(velocityengine);
+
+            Template t = null;
+
+            if (api != null) {
+                t = velocityengine.getTemplate(getEndpointsSequenceTemplatePath());
+            }
+            context.put("llmProviderId", api.getAiConfiguration().getLlmProviderId());
+            context.put("deploymentStage", deploymentStage);
+            context.put("retryCount", APIUtil.getRetryAttemptsForFailoverConfigurations());
+            t.merge(context, writer);
+        } catch (Exception e) {
+            log.error("Velocity Error", e);
+            throw new APITemplateException("Velocity Error", e);
+        }
+        return writer.toString();
+    }
+
+    /**
+     * Creates and initializes a configuration context for processing AI API endpoints.
+     *
+     * @param api             The API for which the endpoint configuration is being generated.
+     * @param endpoints       A list of endpoints associated with the API.
+     * @param defaultEndpoint The default endpoint to be used if no specific endpoint is provided.
+     * @return A fully initialized {@link ConfigContext} containing endpoint-related configurations.
+     */
+    private ConfigContext createContextForEndpoints(API api, List<SimplifiedEndpoint> endpoints,
+                                                    SimplifiedEndpoint defaultEndpoint) {
+
+        ConfigContext configcontext = new APIConfigContext(api);
+        configcontext = new TransportConfigContext(configcontext, api);
+        configcontext = new EndpointBckConfigContext(configcontext, api);
+        configcontext = new EndpointConfigContext(configcontext, api);
+        configcontext = new SecurityConfigContext(configcontext, api);
+        configcontext = new JwtConfigContext(configcontext);
+        configcontext = new TemplateUtilContext(configcontext);
+        configcontext = new EndpointsContext(configcontext, api, endpoints, defaultEndpoint);
+
+        return configcontext;
+    }
+
     private ConfigContext createConfigContext(API api, Environment environment)
             throws UserStoreException, RegistryException {
 
@@ -331,6 +465,29 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         configcontext = new EnvironmentConfigContext(configcontext, environment);
         configcontext = new TemplateUtilContext(configcontext);
         configcontext = new SecurityConfigContext(configcontext, apiProduct, associatedAPIMap);
+
+        return configcontext;
+    }
+
+    /**
+     * Creates a configuration context for the AI API using the given API and environment.
+     *
+     * @param api             The API instance for which the configuration context is created.
+     * @param environment     The deployment environment associated with the API.
+     * @return A fully initialized {@code ConfigContext} for the AI API.
+     */
+    private ConfigContext createAIAPIConfigContext(API api, Environment environment) {
+
+        ConfigContext configcontext = new APIConfigContext(api);
+        configcontext = new TransportConfigContext(configcontext, api);
+        configcontext = new ResourceConfigContext(configcontext, api);
+        configcontext = new EndpointBckConfigContext(configcontext, api);
+        configcontext = new EndpointConfigContext(configcontext, api);
+        configcontext = new SecurityConfigContext(configcontext, api);
+        configcontext = new JwtConfigContext(configcontext);
+        configcontext = new HandlerConfigContex(configcontext, handlers);
+        configcontext = new EnvironmentConfigContext(configcontext, environment);
+        configcontext = new TemplateUtilContext(configcontext);
 
         return configcontext;
     }
@@ -382,6 +539,18 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
 
         return "repository" + File.separator + "resources" + File.separator + "api_templates" +
                 File.separator + APITemplateBuilderImpl.TEMPLATE_TYPE_API_PRODUCT + ".xml";
+    }
+
+    public String getAIAPITemplatePath() {
+
+        return "repository" + File.separator + "resources" + File.separator + "api_templates" +
+                File.separator + APITemplateBuilderImpl.TEMPLATE_AI_API + ".xml";
+    }
+
+    public String getEndpointsSequenceTemplatePath() {
+
+        return "repository" + File.separator + "resources" + File.separator + "api_templates" +
+                File.separator + APITemplateBuilderImpl.TEMPLATE_AI_API_ENDPOINTS_SEQUENCE + ".xml";
     }
 
     public String getVelocityLogger() {

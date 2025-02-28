@@ -16,6 +16,7 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationUsages;
+import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
@@ -35,6 +36,7 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.ws.rs.core.Response;
@@ -106,6 +108,15 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
                 apiAdmin.getKeyManagerConfigurationById(organization, keyManagerId);
         if (keyManagerConfigurationDTO != null) {
             KeyManagerDTO keyManagerDTO = KeyManagerMappingUtil.toKeyManagerDTO(keyManagerConfigurationDTO);
+            List<String> allowedOrgs = keyManagerDTO.getAllowedOrganizations();
+            OrganizationInfo userOrganizationInfo = RestApiUtil.getOrganizationInfo(messageContext);
+            if (userOrganizationInfo != null) {
+                if (allowedOrgs != null && allowedOrgs.size() == 1 && allowedOrgs.contains(userOrganizationInfo.getOrganizationId())) {
+                    allowedOrgs.clear();
+                    allowedOrgs.add("NONE");
+                    keyManagerDTO.setAllowedOrganizations(allowedOrgs);
+                }
+            }
             return Response.ok(keyManagerDTO).build();
         }
         throw new APIManagementException("Requested KeyManager not found", ExceptionCodes.KEY_MANAGER_NOT_FOUND);
@@ -116,6 +127,16 @@ public class KeyManagersApiServiceImpl implements KeyManagersApiService {
 
         String organization = RestApiUtil.getOrganization(messageContext);
         APIAdmin apiAdmin = new APIAdminImpl();
+
+        List<String> allowedOrgs = body.getAllowedOrganizations();
+        if (allowedOrgs != null && allowedOrgs.contains("NONE")) {
+            OrganizationInfo userOrganizationInfo = RestApiUtil.getOrganizationInfo(messageContext);
+            if (userOrganizationInfo != null) {
+                allowedOrgs.clear();
+                allowedOrgs.add(userOrganizationInfo.getOrganizationId());
+                body.setAllowedOrganizations(allowedOrgs);
+            }
+        }
         try {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO =
                     KeyManagerMappingUtil.toKeyManagerConfigurationDTO(organization, body);

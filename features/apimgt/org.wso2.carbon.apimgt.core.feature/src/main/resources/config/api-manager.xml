@@ -203,6 +203,21 @@
 
     </APIChat>
 
+    <!--
+        Configurations relevant to Design Assistant AI feature.
+        This enables the Design Assistant feature which leverages AI for API designing within Publisher Portal.
+    -->
+    <DesignAssistant>
+        <!-- Enable API Design Assistant for API Manager -->
+        <Enabled>true</Enabled>
+        <AuthToken></AuthToken>
+        <Endpoint>http://localhost:9090</Endpoint>
+        <Resources>
+            <ChatResource>/chat</ChatResource>
+            <GenApiPayloadResource>/generate-api-payload</GenApiPayloadResource>
+        </Resources>
+
+    </DesignAssistant>
 
     <!--
         API key validator configuration used by API key manager (IS), API store and API gateway.
@@ -537,6 +552,14 @@
             <AllowedURI>
                 <URI>/api/am/store/{version}/api-categories</URI>
                 <HTTPMethods>GET</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/governance/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/governance/{version}/swagger.json</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
         </AllowedURIs>
         <ETagSkipList>

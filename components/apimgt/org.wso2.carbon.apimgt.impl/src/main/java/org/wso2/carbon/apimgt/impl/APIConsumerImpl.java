@@ -68,6 +68,8 @@ import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
@@ -89,6 +91,7 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
+import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -100,6 +103,7 @@ import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
@@ -3439,8 +3443,17 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         apiTenantDomain = MultitenantUtils.getTenantDomain(
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
         hostsWithSchemes = getHostWithSchemeMappingForEnvironment(api, apiTenantDomain, environmentName);
-        api.setContext(getBasePath(apiTenantDomain, api.getContext()));
-        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
+
+        Environment environment = APIUtil.getEnvironments().get(environmentName);
+        GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
+                .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
+        if (gatewayConfiguration != null) {
+            api.setContext("");
+            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
+        } else {
+            api.setContext(getBasePath(apiTenantDomain, api.getContext()));
+            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
+        }
         return updatedDefinition;
     }
 
@@ -3611,13 +3624,29 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
 
             VHost vhost = VHostUtils.getVhostFromEnvironment(environment, host);
+            GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
+                    .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
+
+            boolean isExternalGateway = false;
+            GatewayDeployer gatewayDeployer = null;
+            if (gatewayConfiguration != null && StringUtils.isNotEmpty(gatewayConfiguration.getImplementation())) {
+                gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain, environmentName);
+                isExternalGateway = true;
+            }
+
+            String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(),
+                    environment.getUuid());
             if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)
                     && vhost.getHttpPort() != -1) {
-                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, vhost.getHttpUrl());
+                String httpUrl = isExternalGateway ? gatewayDeployer.getAPIExecutionURL(externalReference) :
+                        vhost.getHttpUrl();
+                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, httpUrl);
             }
             if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)
                     && vhost.getHttpsPort() != -1) {
-                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, vhost.getHttpsUrl());
+                String httpsUrl = isExternalGateway ? gatewayDeployer.getAPIExecutionURL(externalReference) :
+                        vhost.getHttpsUrl();
+                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, httpsUrl);
             }
         }
         return hostsWithSchemes;
@@ -3861,7 +3890,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         String[] roles = APIUtil.getListOfRoles(userName);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
         UserContext userCtx = new UserContext(userNameWithoutChange,
-                new Organization(organizationInfo.getOrganizationId()), properties, roles);
+                new Organization(organizationInfo.getName(), organizationInfo.getOrganizationId(), null), properties,
+                roles);
 
         return searchPaginatedAPIs(searchQuery, start, end, org, userCtx, organizationInfo);
     }
@@ -4249,8 +4279,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
         String[] roles = APIUtil.getFilteredUserRoles(userName);
 
-        UserContext ctx = new UserContext(userName, new Organization(organizationInfo.getOrganizationId()),
-                properties, roles);
+        UserContext ctx = new UserContext(userName,
+                new Organization(organizationInfo.getName(), organizationInfo.getOrganizationId(), null), properties,
+                roles);
         return  searchPaginatedContent(org, searchQuery, start, end, ctx);
     }
 

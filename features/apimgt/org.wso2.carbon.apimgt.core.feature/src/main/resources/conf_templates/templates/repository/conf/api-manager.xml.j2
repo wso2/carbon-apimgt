@@ -40,6 +40,7 @@
         <EnableJWKSApi>{{apim.jwt.enable_jwks_api}}</EnableJWKSApi>
         <!-- Name of the security context header to be added to the validated requests. -->
         <JWTHeader>{{apim.jwt.header}}</JWTHeader>
+        <JWTDecoding>{{apim.jwt.encoding}}</JWTDecoding>
 
         <!-- Fully qualified name of the class that will retrieve additional user claims
              to be appended to the JWT. If not specified no claims will be appended.If user wants to add all user claims in the
@@ -406,6 +407,11 @@
 
     <AiConfiguration>
         <Enabled>{{apim.ai.llm_provider_events_enabled}}</Enabled>
+        <FailoverConfigurations>
+            <FailoverEndpointsLimit>{{apim.ai.failover_configurations.failover_endpoints_limit}}</FailoverEndpointsLimit>
+            <DefaultRequestTimout>{{apim.ai.failover_configurations.default_request_timeout}}</DefaultRequestTimout>
+        </FailoverConfigurations>
+        <DefaultRequestTimout>{{apim.ai.default_request_timeout}}</DefaultRequestTimout>
     </AiConfiguration>
 
     <!--
@@ -439,6 +445,24 @@
             <ApiCountResource>{{apim.ai.marketplace_assistant_api_count_resource}}</ApiCountResource>
         </Resources>
     </MarketplaceAssistant>
+
+    <DesignAssistant>
+        <!-- Enable Design Assistant for API Manager -->
+        <Enabled>{{apim.ai.enable}}</Enabled>
+
+        <AuthToken>{{apim.ai.token}}</AuthToken>
+
+        <Key>{{apim.ai.key}}</Key>
+
+        <Endpoint>{{apim.ai.endpoint}}</Endpoint>
+
+        <TokenEndpoint>{{apim.ai.token_endpoint}}</TokenEndpoint>
+
+        <Resources>
+            <ChatResource>{{apim.ai.design_assistant_chat_resource}}</ChatResource>
+            <GenApiPayloadResource>{{apim.ai.design_assistant_gen_api_payload_resource}}</GenApiPayloadResource>
+        </Resources>
+    </DesignAssistant>
 
     <!--
         API key validator configuration used by API key manager (IS), API Developer Portal and API gateway.
@@ -691,6 +715,19 @@
         <VelocityLogger>{{apim.velocity_log.name}}</VelocityLogger>
     {% endif %}
 
+    {% if apim.governance.datasource.name is defined %}
+    <!-- This property is to configure the API Manager Governance capabilities -->
+    <APIMGovernance>
+        <DataSource>{{apim.governance.datasource.name}}</DataSource>
+        <SchedulerConfigurations>
+            <ThreadPoolSize>{{apim.governance.scheduler.thread_pool_size}}</ThreadPoolSize>
+            <QueueSize>{{apim.governance.scheduler.queue_size}}</QueueSize>
+            <TaskCheckIntervalMinutes>{{apim.governance.scheduler.task_check_interval_minutes}}</TaskCheckIntervalMinutes>
+            <TaskCleanupIntervalMinutes>{{apim.governance.scheduler.task_cleanup_interval_minutes}}</TaskCleanupIntervalMinutes>
+        </SchedulerConfigurations>
+    </APIMGovernance>
+    {% endif %}
+
     <RESTAPI>
         <!--Configure allowed URIs of REST API. Accessing allowed URIs does not require credentials (does not require Authorization header). -->
         <AllowedURIs>
@@ -885,6 +922,14 @@
             <AllowedURI>
                 <URI>/api/am/devportal/{version}/marketplace-assistant/chat</URI>
                 <HTTPMethods>POST</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/governance/{version}/swagger.yaml</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
+            </AllowedURI>
+            <AllowedURI>
+                <URI>/api/am/governance/{version}/swagger.json</URI>
+                <HTTPMethods>GET,HEAD</HTTPMethods>
             </AllowedURI>
         </AllowedURIs>
         <BasicAuthBlockedURIs>
@@ -1137,6 +1182,7 @@
                 {% else %}
                 <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
                 {% endif %}
+                <SequentialFailoverFromBeginning>{{apim.throttling.sequential_failover_from_beginning}}</SequentialFailoverFromBeginning>
             </JMSConnectionParameters>
         </JMSConnectionDetails>
 
@@ -1593,6 +1639,7 @@
              {% else %}
              <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}?{% if apim.throttling.jms.ssl is defined %}ssl='{{apim.throttling.jms.ssl}}'{% endif %}'</connectionfactory.TopicConnectionFactory>
              {% endif %}
+             <SequentialFailoverFromBeginning>{{apim.throttling.sequential_failover_from_beginning}}</SequentialFailoverFromBeginning>
          </EventReceiverConfiguration>
      </EventHubConfigurations>
 

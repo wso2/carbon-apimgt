@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -126,6 +127,7 @@ public class RegistrySearchUtil {
             newSearchQuery = getSingleSearchCriteria(inputSearchQuery);
         } else {
             String[] criterea = inputSearchQuery.split(" ");
+            criterea = processInput(criterea);
             Map<String, List<String>> critereaMap = new HashMap<>();
             List<String> untaggedContent = new ArrayList();
             for (int i = 0; i < criterea.length; i++) {
@@ -156,6 +158,14 @@ public class RegistrySearchUtil {
             for (Map.Entry<String, List<String>> entry : critereaMap.entrySet()) {
                 String nextCriterea = "";
                 if (entry.getValue().size() > 1) {
+                    if (TAG_SEARCH_TYPE_PREFIX.equals(entry.getKey()) ||
+                            TAGS_SEARCH_TYPE_PREFIX.equals(entry.getKey())) {
+                        List<String> updatedValues = entry.getValue().stream()
+                                .map(value -> value.replace(" ", "\\ "))
+                                .collect(Collectors.toList());
+                        entry.setValue(updatedValues);
+                    }
+
                     nextCriterea = entry.getKey() + "=" + getORBasedSearchCriteria(
                             entry.getValue().toArray(new String[0]));
                 } else {
@@ -176,6 +186,47 @@ public class RegistrySearchUtil {
         }
 
         return newSearchQuery;
+    }
+
+    /**
+     * Processes an input array of strings by grouping related elements.
+     *
+     * This method consolidates input strings by combining elements around delimiter strings
+     * containing a colon (':'), creating a new array where each entry represents a consolidated group.
+     *
+     * @param input An array of strings to be processed
+     * @return A processed array of strings where related elements are grouped together
+     *
+     * Key behaviors:
+     * - Identifies delimiter strings containing a colon
+     * - Aggregates subsequent strings with delimiter entries
+     * - Trims whitespace from consolidated entries
+     *
+     * Example:
+     * Input:  ["tag:Sample", "APIs", "-", "New", "name:Google"]
+     * Output: ["tag:Sample APIs - New ", "name:Google"]
+     */
+    private static String[] processInput(String[] input) {
+        List<String> result = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+
+        for (String element : input) {
+            if (element.contains(":")) {
+                if (current.length() > 0) {
+                    result.add(current.toString().trim());
+                    current.setLength(0);
+                }
+                current.append(element);
+            } else {
+                current.append(" ").append(element);
+            }
+        }
+
+        if (current.length() > 0) {
+            result.add(current.toString().trim());
+        }
+
+        return result.toArray(new String[0]);
     }
 
     /**
@@ -200,7 +251,7 @@ public class RegistrySearchUtil {
                 // if search key is 'tag' instead of 'tags', allow it as well since rest api document says query
                 // param to use for tag search is 'tag'
 
-                if (TAG_SEARCH_TYPE_PREFIX.equals(searchKey)) {
+                if (TAG_SEARCH_TYPE_PREFIX.equals(searchKey) || TAGS_SEARCH_TYPE_PREFIX.equals(searchKey)) {
                     searchKey = TAGS_SEARCH_TYPE_PREFIX;
                     searchValue = searchValue.replace(" ", "\\ ");
                 }
@@ -472,18 +523,21 @@ public class RegistrySearchUtil {
         return criteria;
     }
 
-    private static String getOrganizationVisibilityWrappedQuery(String query, UserContext context) {
+    private static String getOrganizationVisibilityWrappedQuery(String query, UserContext context, String userTenantDomain) {
         if (PersistenceUtil.isAdminUser(context)) {
             log.debug("Admin user. no modifications to the query");
             return query;
         }
+        String criteria;
+        String orgId = context.getOrganization().getId();
 
-        String orgName = context.getOrganization().getName();
-        if (orgName != null && orgName.contains(" ")) {
-            orgName = orgName.replace(" ", "+");
+        if (userTenantDomain.equals(context.getOrganization().getName())) {
+            criteria = VISIBLE_ORGANIZATIONS + "=" + "(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR " + orgId + " OR "
+                    + userTenantDomain + ")";
+        } else {
+            criteria = VISIBLE_ORGANIZATIONS + "=" + "(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR " + orgId + ")";
         }
-
-        String criteria = VISIBLE_ORGANIZATIONS + "=" + "(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR " + orgName + ")";
+        
         if (query != null && !query.trim().isEmpty()) {
             criteria = criteria + "&" + query;
         }
@@ -646,7 +700,7 @@ public class RegistrySearchUtil {
 
     
     public static Map<String, String> getDevPortalSearchAttributes(String searchQuery, UserContext ctx,
-           boolean isCrossTenant, boolean displayMultipleStatus) throws APIPersistenceException {
+           boolean isCrossTenant, boolean displayMultipleStatus, String userTenantDomain) throws APIPersistenceException {
         String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
 
         if (!(StringUtils.containsIgnoreCase(modifiedQuery, APIConstants.API_STATUS))) {
@@ -664,7 +718,9 @@ public class RegistrySearchUtil {
             modifiedQuery = StringUtils.replaceIgnoreCase(modifiedQuery, searchString,
                     APIConstants.LCSTATE_SEARCH_TYPE_KEY);
         }
-        modifiedQuery = RegistrySearchUtil.getOrganizationVisibilityWrappedQuery(modifiedQuery, ctx);
+        if (PersistenceUtil.areOrganizationsRegistered(ctx)) {
+            modifiedQuery = RegistrySearchUtil.getOrganizationVisibilityWrappedQuery(modifiedQuery, ctx, userTenantDomain);
+        }
         modifiedQuery = RegistrySearchUtil.getDevPortalRolesWrappedQuery(modifiedQuery, ctx);
         modifiedQuery = RegistrySearchUtil.getDevPortalVisibilityWrappedQuery(modifiedQuery, isCrossTenant);
         Map<String, String> attributes = RegistrySearchUtil.getSearchAttributes(modifiedQuery);

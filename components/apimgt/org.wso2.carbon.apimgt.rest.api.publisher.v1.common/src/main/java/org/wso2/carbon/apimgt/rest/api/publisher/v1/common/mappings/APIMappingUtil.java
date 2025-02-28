@@ -41,6 +41,7 @@ import org.wso2.carbon.apimgt.api.dto.APIEndpointValidationDTO;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
+import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -51,6 +52,8 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.BackendThrottlingConfiguration;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
@@ -78,6 +81,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDT
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO.AudienceEnum;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
@@ -138,6 +143,7 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URLDecoder;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -278,6 +284,10 @@ public class APIMappingUtil {
         Set<Scope> scopes = getScopes(dto);
         model.setScopes(scopes);
 
+        if (dto.getGatewayType() != null) {
+            model.setGatewayType(dto.getGatewayType());
+        }
+
         //URI Templates
         // No default topics for AsyncAPIs. Therefore set URITemplates only for non-AsyncAPIs.
         Set<URITemplate> uriTemplates = getURITemplates(model, dto.getOperations());
@@ -324,7 +334,6 @@ public class APIMappingUtil {
                     apiTiersForOrganization.add(new Tier(tier));
                 }
                 organizationTiers.setOrganizationID(organizationPoliciesDTO.getOrganizationID());
-                organizationTiers.setOrganizationName(organizationPoliciesDTO.getOrganizationName());
                 organizationTiers.setTiers(apiTiersForOrganization);
                 organizationAPITiers.add(organizationTiers);
             }
@@ -350,12 +359,12 @@ public class APIMappingUtil {
                 model.setVisibleTenants(visibleTenants);
             }
         }
-        
+
         if (dto.getVisibleOrganizations() != null && !dto.getVisibleOrganizations().isEmpty()) {
             String visibleOrgs = StringUtils.join(dto.getVisibleOrganizations(), ',');
             model.setVisibleOrganizations(visibleOrgs);
         } else {
-            model.setVisibleOrganizations(APIConstants.DEFAULT_VISIBLE_ORG);
+            model.setVisibleOrganizations(APIConstants.VISIBLE_ORG_NONE);
         }
 
         List<String> accessControlRoles = dto.getAccessControlRoles();
@@ -499,10 +508,6 @@ public class APIMappingUtil {
             model.setGatewayVendor(dto.getGatewayVendor());
         }
 
-        if (dto.getGatewayType() != null) {
-            model.setGatewayType(dto.getGatewayType());
-        }
-
         if (dto.getAsyncTransportProtocols() != null) {
             String asyncTransports = StringUtils.join(dto.getAsyncTransportProtocols(), ',');
             model.setAsyncTransportProtocols(asyncTransports);
@@ -515,6 +520,27 @@ public class APIMappingUtil {
                     AIConfiguration.class));
         } else {
             model.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
+        }
+
+        // Set primary endpoint mapping
+        model.setPrimaryProductionEndpointId(dto.getPrimaryProductionEndpointId());
+        model.setPrimarySandboxEndpointId(dto.getPrimarySandboxEndpointId());
+
+        try {
+            GatewayAgentConfiguration gatewayConfiguration =
+                    org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().
+                    getExternalGatewayConnectorConfiguration(model.getGatewayType());
+            if (gatewayConfiguration != null) {
+                GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation()).
+                        getDeclaredConstructor().newInstance();
+                if (deployer != null) {
+                    deployer.transformAPI(model);
+                }
+            }
+        } catch (NoSuchMethodException | ClassNotFoundException | InstantiationException | IllegalAccessException |
+                 InvocationTargetException e) {
+            String msg = "Error while fetching gateway deployer instance";
+            handleException(msg, e);
         }
         return model;
     }
@@ -1146,7 +1172,6 @@ public class APIMappingUtil {
         dto.setRevisionId(model.getRevisionId());
         dto.setEnableSchemaValidation(model.isEnabledSchemaValidation());
         dto.setEnableSubscriberVerification(model.isEnableSubscriberVerification());
-
         AdvertiseInfoDTO advertiseInfoDTO = new AdvertiseInfoDTO();
         advertiseInfoDTO.setAdvertised(model.isAdvertiseOnly());
         advertiseInfoDTO.setApiExternalProductionEndpoint(model.getApiExternalProductionEndpoint());
@@ -1284,14 +1309,12 @@ public class APIMappingUtil {
             inMedPolicy.setId(mediationPolicyUUID);
             mediationPolicies.add(inMedPolicy);
         }
-
         String outMedPolicyName = model.getOutSequence();
         if (outMedPolicyName != null && !outMedPolicyName.isEmpty()) {
             String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT;
             Mediation mediation = model.getOutSequenceMediation();
             String mediationPolicyUUID = (mediation != null) ? mediation.getUuid() : null;
             boolean sharedStatus = (mediation != null) ? mediation.isGlobal() : false;
-
             MediationPolicyDTO outMedPolicy = new MediationPolicyDTO();
             outMedPolicy.setName(outMedPolicyName);
             outMedPolicy.setType(type.toUpperCase());
@@ -1299,14 +1322,12 @@ public class APIMappingUtil {
             outMedPolicy.setId(mediationPolicyUUID);
             mediationPolicies.add(outMedPolicy);
         }
-
         String faultSequenceName = model.getFaultSequence();
         if (faultSequenceName != null && !faultSequenceName.isEmpty()) {
             String type = APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT;
             Mediation mediation = model.getFaultSequenceMediation();
             String mediationPolicyUUID = (mediation != null) ? mediation.getUuid() : null;
             boolean sharedStatus = (mediation != null) ? mediation.isGlobal() : false;
-
             MediationPolicyDTO faultMedPolicy = new MediationPolicyDTO();
             faultMedPolicy.setName(faultSequenceName);
             faultMedPolicy.setType(type.toUpperCase());
@@ -1314,30 +1335,24 @@ public class APIMappingUtil {
             faultMedPolicy.setId(mediationPolicyUUID);
             mediationPolicies.add(faultMedPolicy);
         }
-
         dto.setMediationPolicies(mediationPolicies);
         dto.setLifeCycleStatus(model.getStatus());
-
         if (model.getApiPolicies() != null) {
             dto.setApiPolicies(OperationPolicyMappingUtil.fromOperationPolicyListToDTO(model.getApiPolicies()));
         }
-
         String subscriptionAvailability = model.getSubscriptionAvailability();
         if (subscriptionAvailability != null) {
             dto.setSubscriptionAvailability(mapSubscriptionAvailabilityFromAPItoDTO(subscriptionAvailability));
         }
-
         if (model.getSubscriptionAvailableTenants() != null) {
             dto.setSubscriptionAvailableTenants(Arrays.asList(model.getSubscriptionAvailableTenants().split(",")));
         }
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(model.getId()
                 .getProviderName()));
-
         boolean isAsyncAPI = APIDTO.TypeEnum.WS.toString().equals(model.getType())
                 || APIDTO.TypeEnum.WEBSUB.toString().equals(model.getType())
                 || APIDTO.TypeEnum.SSE.toString().equals(model.getType())
                 || APIDTO.TypeEnum.ASYNC.toString().equals(model.getType());
-
         //Get Swagger definition which has URL templates, scopes and resource details
         model.getId().setUuid(model.getUuid());
         if (!isAsyncAPI) {
@@ -1349,16 +1364,13 @@ public class APIMappingUtil {
             } else {
                 apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getUuid(), tenantDomain);
             }
-
             //We will fetch operations from the swagger definition and not from the AM_API_URL_MAPPING table: table
             //entries may have API level throttling tiers listed in case API level throttling is selected for the API.
             //This will lead the x-throttling-tiers of API definition to get overwritten. (wso2/product-apim#11240)
             apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
-
             //since the operation details goes missing after fetching operations list from the swagger definition, we
             //have to set them back from the original API model.
             setOperationPoliciesToOperationsDTO(model, apiOperationsDTO);
-
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
@@ -1366,7 +1378,6 @@ public class APIMappingUtil {
             // Get from asyncapi definition
             List<APIOperationsDTO> apiOperationsDTO = getOperationsFromAPI(model);
             dto.setOperations(apiOperationsDTO);
-
             String asyncAPIDefinition;
             if (model.getAsyncApiDefinition() != null) {
                 asyncAPIDefinition = model.getAsyncApiDefinition();
@@ -1383,7 +1394,6 @@ public class APIMappingUtil {
         List<String> tagsToReturn = new ArrayList<>();
         tagsToReturn.addAll(apiTags);
         dto.setTags(tagsToReturn);
-
         Set<org.wso2.carbon.apimgt.api.model.Tier> apiTiers = model.getAvailableTiers();
         List<String> tiersToReturn = new ArrayList<>();
         for (org.wso2.carbon.apimgt.api.model.Tier tier : apiTiers) {
@@ -1409,7 +1419,6 @@ public class APIMappingUtil {
         } else {
             dto.setType(APIDTO.TypeEnum.fromValue(model.getType()));
         }
-
         if (!APIConstants.APITransportType.WS.toString().equals(model.getType())) {
             if (StringUtils.isEmpty(model.getTransports())) {
                 List<String> transports = new ArrayList<>();
@@ -1423,20 +1432,17 @@ public class APIMappingUtil {
             dto.setVisibility(APIDTO.VisibilityEnum.PUBLIC);
         }
         dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
-
         if (model.getVisibleRoles() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleRoles().split(",")));
         }
-
         if (model.getVisibleTenants() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleTenants().split(",")));
         }
-        
-        if (model.getVisibleOrganizations() != null
-                || !APIConstants.DEFAULT_VISIBLE_ORG.equals(model.getVisibleOrganizations())) {
+
+        if (model.getVisibleOrganizations() != null && !model.getVisibleOrganizations().isEmpty()) {
             dto.setVisibleOrganizations(Arrays.asList(model.getVisibleOrganizations().split(",")));
         } else {
-            dto.setVisibleOrganizations(Collections.EMPTY_LIST);
+            dto.setVisibleOrganizations(new ArrayList<>(List.of(APIConstants.VISIBLE_ORG_NONE)));
         }
 
         if (model.getAdditionalProperties() != null) {
@@ -1591,6 +1597,11 @@ public class APIMappingUtil {
             dto.setSubtypeConfiguration(subtypeConfigurationDTO);
         }
         dto.setSubtypeConfiguration(subtypeConfigurationDTO);
+
+        // Set primary endpoints
+        dto.setPrimaryProductionEndpointId(model.getPrimaryProductionEndpointId());
+        dto.setPrimarySandboxEndpointId(model.getPrimarySandboxEndpointId());
+
         return dto;
     }
 
@@ -2773,7 +2784,6 @@ public class APIMappingUtil {
         }
         organizationPoliciesDTO.setPolicies(tiersToReturn);
         organizationPoliciesDTO.setOrganizationID(organizationTiers.getOrganizationID());
-        organizationPoliciesDTO.setOrganizationName(organizationTiers.getOrganizationName());
         return organizationPoliciesDTO;
     }
 
@@ -3360,14 +3370,27 @@ public class APIMappingUtil {
 
         String tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId()
                 .getProviderName()));
-        if (checkEndpointSecurityPasswordEnabled(tenantDomain) | preserveCredentials) {
+        if (checkEndpointSecurityPasswordEnabled(tenantDomain) || preserveCredentials) {
             return endpointSecurity;
         }
+        return handleEndpointSecurity(endpointSecurity);
+    }
+
+    private static JSONObject handleEndpointSecurity(JSONObject endpointSecurity, String organization,
+            boolean preserveCredentials) throws APIManagementException {
+        if (checkEndpointSecurityPasswordEnabled(organization) || preserveCredentials) {
+            return endpointSecurity;
+        }
+        return handleEndpointSecurity(endpointSecurity);
+    }
+
+    private static JSONObject handleEndpointSecurity(JSONObject endpointSecurity) {
+
         JSONObject endpointSecurityElement = new JSONObject();
         endpointSecurityElement.putAll(endpointSecurity);
         if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
-            JSONObject sandboxEndpointSecurity =
-                    (JSONObject) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+            JSONObject sandboxEndpointSecurity = new JSONObject(
+                    (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX));
             if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase((String) sandboxEndpointSecurity
                     .get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
                 sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
@@ -3378,10 +3401,11 @@ public class APIMappingUtil {
             if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
                 sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
             }
+            endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, sandboxEndpointSecurity);
         }
         if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
-            JSONObject productionEndpointSecurity =
-                    (JSONObject) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+            JSONObject productionEndpointSecurity = new JSONObject(
+                    (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION));
             if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase((String) productionEndpointSecurity
                     .get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
                 productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_CLIENT_SECRET, "");
@@ -3392,6 +3416,39 @@ public class APIMappingUtil {
             if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
                 productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
             }
+            endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
+        }
+        return endpointSecurityElement;
+    }
+
+    private static JSONObject handleEndpointSecurityDecrypt(JSONObject endpointSecurity) {
+        JSONObject endpointSecurityElement = new JSONObject();
+        endpointSecurityElement.putAll(endpointSecurity);
+        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+        try {
+            if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                JSONObject sandboxEndpointSecurity = new JSONObject(
+                        (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX));
+                String apiKeyValue = (String) sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
+                if (StringUtils.isNotEmpty(apiKeyValue)) {
+                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
+                            new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
+                }
+                endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, sandboxEndpointSecurity);
+            }
+            if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                JSONObject productionEndpointSecurity = new JSONObject(
+                        (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION));
+                String apiKeyValue = (String) productionEndpointSecurity.get(
+                        APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
+                if (StringUtils.isNotEmpty(apiKeyValue)) {
+                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
+                            new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
+                }
+                endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
+            }
+        } catch (CryptoException e) {
+            log.error("Error while decrypting client credentials", e);
         }
         return endpointSecurityElement;
     }
@@ -3505,6 +3562,55 @@ public class APIMappingUtil {
             }
         }
         return apiRevisionDeploymentDTO;
+    }
+
+    public static APIEndpointListDTO fromAPIEndpointListToDTO(List<APIEndpointInfo> apiEndpoints, String organization,
+            boolean preserveCredentials) throws APIManagementException {
+        APIEndpointListDTO apiEndpointListDTO = new APIEndpointListDTO();
+        List<APIEndpointDTO> apiEndpointDTOs = new ArrayList<>();
+        for (APIEndpointInfo apiEndpoint : apiEndpoints) {
+            apiEndpointDTOs.add(fromAPIEndpointToDTO(apiEndpoint, organization, preserveCredentials));
+        }
+        apiEndpointListDTO.setCount(apiEndpointDTOs.size());
+        apiEndpointListDTO.setList(apiEndpointDTOs);
+        return apiEndpointListDTO;
+    }
+
+    public static APIEndpointDTO fromAPIEndpointToDTO(APIEndpointInfo apiEndpoint, String organization,
+            boolean preserveCredentials) throws APIManagementException {
+
+        APIEndpointDTO apiEndpointDTO = new APIEndpointDTO();
+        apiEndpointDTO.setId(apiEndpoint.getId());
+        apiEndpointDTO.setName(apiEndpoint.getName());
+        apiEndpointDTO.setDeploymentStage(apiEndpoint.getDeploymentStage());
+
+        Map<String, Object> endpointConfig = apiEndpoint.getEndpointConfig();
+        Map endpointSecurityMap = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+        if (endpointSecurityMap != null && !endpointSecurityMap.isEmpty()) {
+            JSONObject endpointSecurity = new JSONObject(endpointSecurityMap);
+            endpointSecurity = handleEndpointSecurityDecrypt(endpointSecurity);
+            endpointSecurity = handleEndpointSecurity(endpointSecurity, organization, preserveCredentials);
+            endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+        }
+        apiEndpointDTO.setEndpointConfig(endpointConfig);
+
+        return apiEndpointDTO;
+    }
+
+    public static APIEndpointInfo fromDTOtoAPIEndpoint(APIEndpointDTO apiEndpointDTO, String organization)
+            throws APIManagementException {
+        APIEndpointInfo apiEndpoint = new APIEndpointInfo();
+        apiEndpoint.setId(apiEndpointDTO.getId());
+        apiEndpoint.setName(apiEndpointDTO.getName());
+        apiEndpoint.setDeploymentStage(apiEndpointDTO.getDeploymentStage());
+        try {
+            HashMap endpointConfigHashMap = (HashMap) apiEndpointDTO.getEndpointConfig();
+            apiEndpoint.setEndpointConfig(endpointConfigHashMap);
+        } catch (ClassCastException e) {
+            throw new APIManagementException("Endpoint Config is missing of API Endpoint.",
+                    ExceptionCodes.ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API);
+        }
+        return apiEndpoint;
     }
 
     public static ApiEndpointValidationResponseDTO fromEndpointValidationToDTO(

@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIComplianceException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -42,8 +43,10 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
+import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 import org.wso2.carbon.apimgt.api.dto.ImportedAPIDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -64,6 +67,8 @@ import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence.Direction;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -305,6 +310,10 @@ public class ImportUtils {
                         setOperationsToDTO(importedApiDTO, validationResponse);
                     }
                 }
+
+                // Drop any API Endpoints (if exists)
+                dropAPIEndpoints(targetApi, apiProvider);
+
                 targetApi.setOrganization(organization);
                 if (preservePortalConfigurations) {
                     APIDTO convertedOldAPI = APIMappingUtil.fromAPItoDTO(targetApi);
@@ -391,6 +400,10 @@ public class ImportUtils {
 
             populateAPIWithPolicies(importedApi, apiProvider, extractedFolderPath, extractedPoliciesMap,
                     extractedAPIPolicies, currentTenantDomain);
+
+            // Handle API Endpoints if endpoints file is defined
+            populateAPIWithEndpoints(importedApi, apiProvider, extractedFolderPath, organization);
+
             // Update Custom Backend Data if endpoint type is selected to "custom_backend"
             Map endpointConf = (Map) importedApiDTO.getEndpointConfig();
             if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
@@ -399,6 +412,22 @@ public class ImportUtils {
             }
 
             API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
+            Map<String, String> complianceResult = PublisherCommonUtils
+                    .checkGovernanceComplianceSync(importedApi.getUuid(), APIMGovernableState.API_CREATE,
+                            ArtifactType.API, importedApi.getOrganization(), null, null);
+            if (!complianceResult.isEmpty()
+                    && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                    && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+                throw new APIComplianceException(complianceResult
+                        .get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+            }
+
+            // Populate the primary endpoint IDs to the importedApi object prior to the API update call
+            String primaryProductionEndpointId = importedApiDTO.getPrimaryProductionEndpointId();
+            String primarySandboxEndpointId = importedApiDTO.getPrimarySandboxEndpointId();
+            importedApi.setPrimaryProductionEndpointId(primaryProductionEndpointId);
+            importedApi.setPrimarySandboxEndpointId(primarySandboxEndpointId);
+
             apiProvider.updateAPI(importedApi, oldAPI);
 
             apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -522,6 +551,8 @@ public class ImportUtils {
                 log.info("Valid deployment environments were not found for the imported artifact. Only working copy "
                         + "was updated and not deployed in any of the gateway environments.");
             }
+            PublisherCommonUtils.checkGovernanceComplianceAsync(importedApi.getUuid(), APIMGovernableState.API_CREATE,
+                    ArtifactType.API, organization);
             return new ImportedAPIDTO(importedApi, revisionId);
         } catch (CryptoException | IOException e) {
             throw new APIManagementException(
@@ -690,6 +721,71 @@ public class ImportUtils {
             // If still the policy specification is not found, user has used a wrong policy name
             throw new APIManagementException("Invalid API policy added as " + policyFileName,
                     ExceptionCodes.INVALID_OPERATION_POLICY);
+        }
+    }
+
+    /**
+     * This method is used to drop any existing API endpoints of the API.
+     *
+     * @param api      API object
+     * @param provider API Provider
+     * @throws APIManagementException If an error occurs while dropping the API endpoints
+     */
+    private static void dropAPIEndpoints(API api, APIProvider provider) throws APIManagementException {
+        provider.deleteAPIPrimaryEndpointMappings(api.getUuid());
+        provider.deleteAPIEndpointsByApiUUID(api.getUuid());
+    }
+
+    /**
+     * This method is used to populate the API with endpoints.
+     *
+     * @param api                 API object
+     * @param provider            API Provider
+     * @param extractedFolderPath Extracted folder path of the API project
+     * @param organization        Organization
+     * @throws APIManagementException If an error occurs while populating the API with endpoints
+     */
+    public static void populateAPIWithEndpoints(API api, APIProvider provider, String extractedFolderPath,
+            String organization) throws APIManagementException {
+
+        try {
+            // Retrieve endpoints from artifact
+            String jsonContent = getFileContentAsJson(
+                    extractedFolderPath + ImportExportConstants.API_ENDPOINTS_FILE_LOCATION);
+            if (jsonContent != null) {
+                // Retrieving the field "data"
+                JsonElement endpointsJson = new JsonParser().parse(jsonContent).getAsJsonObject()
+                        .get(APIConstants.DATA);
+                if (endpointsJson != null) {
+                    JsonArray endpoints = endpointsJson.getAsJsonArray();
+                    for (JsonElement endpointElement : endpoints) {
+                        JsonObject endpointObj = endpointElement.getAsJsonObject();
+                        APIEndpointInfo apiEndpointInfo = new Gson().fromJson(endpointObj, APIEndpointInfo.class);
+                        String endpointUUID = apiEndpointInfo.getId();
+                        try {
+                            String createdEndpointUUID = provider.addAPIEndpoint(api.getUuid(), apiEndpointInfo,
+                                    organization);
+                            if (log.isDebugEnabled()) {
+                                log.debug("API Endpoint with UUID: " + createdEndpointUUID +
+                                        " has been added to the API");
+                            }
+                        } catch (APIManagementException e) {
+                            throw new APIManagementException("Error while adding API Endpoint with ID: " + endpointUUID,
+                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINT, endpointUUID));
+                        }
+                    }
+                } else {
+                    if (log.isDebugEnabled()) {
+                        log.debug("No API endpoints found in the API endpoints file");
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading API endpoints from path: " + extractedFolderPath, e,
+                    ExceptionCodes.ERROR_READING_API_ENDPOINTS_FILE);
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Error while adding API endpoints to the API", e,
+                    ExceptionCodes.ERROR_ADDING_API_ENDPOINTS);
         }
     }
 
@@ -2415,6 +2511,45 @@ public class ImportUtils {
     }
 
     /**
+     * Retrieves endpoint configurations from a given archive path.
+     * The method attempts to load the endpoint configurations from either a YAML or JSON file.
+     *
+     * @param pathToArchive The file path to the archive containing endpoint configuration files.
+     * @return A list of EndpointDTO objects parsed from the retrieved configuration file.
+     * @throws APIManagementException If an error occurs while reading the endpoint file.
+     */
+    public static List<EndpointDTO> retrieveEndpointConfigs(String pathToArchive)
+            throws APIManagementException {
+
+        String jsonContent = null;
+
+        String pathToYamlFile = pathToArchive + File.separator + ImportExportConstants.ENDPOINTS_FILE
+                + ImportExportConstants.YAML_EXTENSION;
+        String pathToJsonFile = pathToArchive + File.separator + ImportExportConstants.ENDPOINTS_FILE
+                + ImportExportConstants.JSON_EXTENSION;
+        try {
+            if (CommonUtil.checkFileExistence(pathToYamlFile)) {
+                log.debug("Found endpoint file " + pathToYamlFile);
+                String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
+                jsonContent = CommonUtil.yamlToJson(yamlContent);
+            } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
+                log.debug("Found endpoint file " + pathToJsonFile);
+                jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
+            }
+            if (jsonContent == null) {
+                log.debug("No endpoint file found to be added, skipping");
+                return new ArrayList<>();
+            }
+            JsonElement endpointsElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
+            JsonArray endpointsArray = endpointsElement.getAsJsonArray();
+            return new Gson().fromJson(endpointsArray, new TypeToken<ArrayList<EndpointDTO>>() {
+            }.getType());
+        } catch (IOException e) {
+            throw new APIManagementException("Error in reading endpoint file", e);
+        }
+    }
+
+    /**
      * This method adds API sequences to the imported API. If the sequence is a newly defined one, it is added.
      *
      * @param importedApi    API
@@ -2783,6 +2918,18 @@ public class ImportUtils {
 
                 //Once the new revision successfully created, artifacts will be deployed in mentioned gateway
                 //environments
+                Map<String, String> complianceResult = PublisherCommonUtils.
+                        checkGovernanceComplianceSync(importedApiProduct.getUuid(),
+                        APIMGovernableState.API_CREATE, ArtifactType.API, organization, revisionId, null);
+                if (!complianceResult.isEmpty()
+                        && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                        && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+                    throw new APIComplianceException(complianceResult
+                            .get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+
+                }
+                PublisherCommonUtils.checkGovernanceComplianceAsync(importedAPIUuid, APIMGovernableState.API_CREATE,
+                        ArtifactType.API, organization);
                 apiProvider.deployAPIProductRevision(importedAPIUuid, revisionId, apiProductRevisionDeployments);
             } else {
                 log.info("Valid deployment environments were not found for the imported artifact. Hence not deployed" +

@@ -24,7 +24,11 @@ import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.TransactionCountDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
-import java.sql.*;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.PreparedStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
 
 /**
  * This class represent the TransactionCountDAO.

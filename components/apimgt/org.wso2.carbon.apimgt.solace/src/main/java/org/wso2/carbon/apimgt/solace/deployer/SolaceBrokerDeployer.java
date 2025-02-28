@@ -15,6 +15,7 @@
  */
 package org.wso2.carbon.apimgt.solace.deployer;
 
+import com.google.gson.JsonObject;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import org.apache.commons.logging.Log;
@@ -28,6 +29,7 @@ import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
+import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -39,6 +41,7 @@ import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
 import org.wso2.carbon.context.CarbonContext;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -66,14 +69,15 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
     }
 
     /**
-     * Deploy API artifact to provided environment
+     * Deploy API artifact to provided environment in the external gateway
      *
-     * @param api         API to be deployed into Solace broker
+     * @param api API to be deployed into in the external gateway
      * @param environment Environment to be deployed
-     * @throws DeployerException if error occurs when deploying APIs to Solace broker
+     * @param referenceArtifact Reference API artifact
+     * @throws DeployerException if error occurs when deploying APIs to in the external gateway
      */
     @Override
-    public boolean deploy(API api, Environment environment) throws DeployerException {
+    public String deploy(API api, Environment environment, String referenceArtifact) throws DeployerException {
         String apiDefinition = api.getAsyncApiDefinition();
         Aai20Document aai20Document = (Aai20Document) Library.readDocumentFromJSONString(apiDefinition);
         String apiNameForRegistration = api.getId().getApiName() + "-" + api.getId().getVersion();
@@ -104,7 +108,7 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
                     log.info("API product '" + apiNameWithContext + "' already found in Solace. No need to create "
                             + "again");
                 }
-                return true;
+                return "SUCCESS";
             } else if (response4.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
                 // api product not found in solace. check existence of registered API in solace
                 if (log.isDebugEnabled()) {
@@ -125,7 +129,7 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
                             environment.getName(), aai20Document, apiNameWithContext, apiNameForRegistration);
                     if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
                         log.info("API product " + apiNameWithContext + " has been created in Solace broker");
-                        return true;
+                        return "SUCCESS";
                     } else {
                         if (log.isDebugEnabled()) {
                             log.error("Error while creating API product" + apiNameWithContext + " in Solace." +
@@ -153,7 +157,7 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
                                 environment.getName(), aai20Document, apiNameWithContext, apiNameForRegistration);
                         if (response3.getStatusLine().getStatusCode() == HttpStatus.SC_CREATED) {
                             log.info("API product '" + apiNameWithContext + "' has been created in Solace broker");
-                            return true;
+                            return "SUCCESS";
                         } else {
                             if (log.isDebugEnabled()) {
                                 log.error("Error while creating API product in Solace. : " + response2.
@@ -210,15 +214,17 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
     /**
      * Undeploy API artifact from provided environment
      *
+     * @param apiID API ID to be undeployed from the external gateway
      * @param apiName     Name of the API to be undeployed from Solace broker
      * @param apiVersion  Version of the API to be undeployed from Solace broker
      * @param apiContext  Context of the API to be undeployed from Solace broker
      * @param environment Environment needed to be undeployed API from
+     * @param referenceArtifact Reference API artifact
      * @throws DeployerException if error occurs when undeploying APIs from Solace broker
      */
     @Override
-    public boolean undeploy(String apiName, String apiVersion, String apiContext, Environment environment)
-            throws DeployerException {
+    public boolean undeploy(String apiID, String apiName, String apiVersion, String apiContext,
+                            Environment environment, String referenceArtifact) throws DeployerException {
         String apiNameForRegistration = apiName + "-" + apiVersion;
         String[] apiContextParts = apiContext.split("/");
         String apiNameWithContext = environment.getName() + "-" + apiName + "-" + apiContextParts[1] +
@@ -281,11 +287,13 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
     /**
      * Undeploy API artifact from provided environment in the external gateway when Api is retired
      *
-     * @param api         API to be un deployed from the external gateway
-     * @param environment Environment needed to be un deployed API from the external gateway
-     * @throws DeployerException if error occurs when un deploying APIs from the external gateway
+     * @param api API to be undeployed from the external gateway
+     * @param environment Environment needed to be undeployed API from the external gateway
+     * @param referenceArtifact Reference API artifact
+     * @throws DeployerException if error occurs when undeploying APIs from the external gateway
      */
-    public boolean undeployWhenRetire(API api, Environment environment) throws DeployerException {
+    public boolean undeployWhenRetire(API api, Environment environment, String referenceArtifact)
+            throws DeployerException {
         Application application;
         APIProvider apiProvider;
         APIConsumer apiConsumer;
@@ -317,8 +325,8 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
         }
 
         // undeploy API from Solace
-        boolean deletedFromSolace = undeploy(api.getId().getName(), api.getId().getVersion(), api.getContext(),
-                environment);
+        boolean deletedFromSolace = undeploy(api.getUuid(), api.getId().getApiName(), api.getId().getVersion(),
+                api.getContext(), environment, null);
         if (!deletedFromSolace) {
             throw new DeployerException("Error while deleting API product of API " + api.getUuid() + "from Solace " +
                     "broker");
@@ -326,4 +334,62 @@ public class SolaceBrokerDeployer implements ExternalGatewayDeployer {
         return true;
     }
 
+    /**
+     * Get the connection configurations for Solace broker
+     *
+     * @return List<ConfigurationDto> connectionConfigurations
+     */
+    @Override
+    public List<ConfigurationDto> getConnectionConfigurations() {
+        return new ArrayList<>();
+    }
+
+    /**
+     * This method returns the Gateway Feature Catalog
+     *
+     * @return JSON Object Gateway Feature Catalog
+     */
+    @Override
+    public JsonObject getGatewayFeatureCatalog() {
+        return null;
+    }
+
+    /**
+     * This method returns the validation result of a given API with the Solace gateway
+     *
+     * @return List<String> validation result
+     */
+    @Override
+    public List<String> validateApi(API api) {
+        return new ArrayList<>();
+    }
+
+    /**
+     * This method returns the resolved API execution URL by replacing all placeholders appropriately
+     * @param url Existing Execution URL
+     * @param environment Gateway Environment
+     * @param referenceArtifact Reference API artifact
+     *
+     * @return String api execution url
+     */
+    @Override
+    public String getAPIExecutionURL(String url, Environment environment, String referenceArtifact)
+            throws DeployerException {
+        return url;
+    }
+
+    /**
+     * This method returns refined API by manipulating the API object according to the external gateway requirements
+     *
+     * @param api API object
+     */
+    @Override
+    public void transformAPI(API api) throws DeployerException {
+        // No need to implement
+    }
+
+    @Override
+    public String getDefaultHostnameTemplate() {
+        return "";
+    }
 }

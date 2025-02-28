@@ -42,7 +42,8 @@
         "type": "string",
         "enum": [
           "Synapse",
-          "ChoreoConnect"
+          "ChoreoConnect",
+          "AWS"
         ]
       },
       "minItems": 1
@@ -50,12 +51,36 @@
     "supportedApiTypes": {
       "type": "array",
       "items": {
-        "type": "string",
-        "enum": [
-          "HTTP",
-          "SOAP",
-          "SOAPTOREST",
-          "GRAPHQL"
+        "oneOf": [
+          {
+            "type": "string",
+            "enum": [
+              "HTTP",
+              "SOAP",
+              "SOAPTOREST",
+              "GRAPHQL"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "apiType": {
+                "type": "string",
+                "enum": [
+                  "HTTP",
+                  "SOAP",
+                  "SOAPTOREST",
+                  "GRAPHQL"
+                ]
+              },
+              "subType": {
+                "type": "string",
+                "enum": [
+                  "AIAPI"
+                ]
+              }
+            }
+          }
         ]
       },
       "minItems": 1

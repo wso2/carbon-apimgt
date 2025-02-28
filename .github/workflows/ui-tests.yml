@@ -64,15 +64,15 @@ jobs:
           ref: refs/heads/master
           path: product-apim
       - name: Build Product-Apim with Maven
-        run: mvn clean install -Dcarbon.apimgt.ui.version=$(cat ../APIM_APPS_VERSION_FILE) -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file product-apim/pom.xml -DskipBenchMarkTest=true -DskipIntegrationTests=true
+        run: mvn clean install -Dcarbon.apimgt.ui.version=$(cat ../APIM_APPS_VERSION_FILE) -Dcarbon.apimgt.version=$(cat ../CARBON_APIMGT_VERSION_FILE) -fae --file product-apim/all-in-one-apim/pom.xml -DskipBenchMarkTest=true -DskipIntegrationTests=true
       - name: Get product.version
-        run: mvn help:evaluate -Dexpression=project.version -q --file product-apim/pom.xml -DforceStdout > ../PRODUCT_APIM_VERSION_FILE
+        run: mvn help:evaluate -Dexpression=project.version -q --file product-apim/all-in-one-apim/pom.xml -DforceStdout > ../PRODUCT_APIM_VERSION_FILE
       - name: Print product.apim.version
         run: |
             echo $(cat ../PRODUCT_APIM_VERSION_FILE)
       - name: start APIM server
         run: |
-            unzip product-apim/modules/distribution/product/target/wso2am-$(cat ../PRODUCT_APIM_VERSION_FILE).zip
+            unzip product-apim/all-in-one-apim/modules/distribution/product/target/wso2am-$(cat ../PRODUCT_APIM_VERSION_FILE).zip
             printf "\n[apim.devportal]\nenable_application_sharing = true\napplication_sharing_type = \"default\"\n" >> wso2am-$(cat ../PRODUCT_APIM_VERSION_FILE)/repository/conf/deployment.toml
             sh wso2am-$(cat ../PRODUCT_APIM_VERSION_FILE)/bin/api-manager.sh start
             sleep 5m # sleep for 5 min to start the server
