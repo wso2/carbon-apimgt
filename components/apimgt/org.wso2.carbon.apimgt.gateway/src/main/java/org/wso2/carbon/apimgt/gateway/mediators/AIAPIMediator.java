@@ -161,7 +161,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             return;
         }
 
-        Map<String, Object> roundRobinConfigs = null;
+        Map<String, Object> roundRobinConfigs;
         if (messageContext.getProperty(APIConstants.AIAPIConstants.ROUND_ROBIN_CONFIGS) != null) {
             roundRobinConfigs =
                     (Map<String, Object>) messageContext.getProperty(APIConstants.AIAPIConstants.ROUND_ROBIN_CONFIGS);
@@ -181,7 +181,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         }
 
         if (failoverConfigMap != null && !failoverConfigMap.isEmpty()) {
-            prepareForFailover(messageContext, providerConfiguration, failoverConfigMap);
+            initFailover(messageContext, providerConfiguration, failoverConfigMap);
         }
 
     }
@@ -196,9 +196,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @throws XMLStreamException If an error occurs while processing the XML message.
      * @throws IOException        If an I/O error occurs during payload handling.
      */
-    private void prepareForFailover(MessageContext messageContext,
-                                    LLMProviderConfiguration providerConfiguration,
-                                    Map<String, FailoverPolicyConfigDTO> failoverConfigMap)
+    private void initFailover(MessageContext messageContext,
+                              LLMProviderConfiguration providerConfiguration,
+                              Map<String, FailoverPolicyConfigDTO> failoverConfigMap)
             throws XMLStreamException, IOException, APIManagementException {
 
         org.apache.axis2.context.MessageContext axis2Ctx =
@@ -211,7 +211,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         if (requestModel == null || failoverConfig == null) {
             return;
         }
-        applyFailoverConfig(messageContext, failoverConfig, providerConfiguration);
+        applyFailoverConfigs(messageContext, failoverConfig, providerConfiguration);
     }
 
     /**
@@ -240,8 +240,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @throws IOException            If request modification fails.
      * @throws APIManagementException If an API management error occurs.
      */
-    private void applyFailoverConfig(MessageContext messageContext, FailoverPolicyConfigDTO policyConfig,
-                                     LLMProviderConfiguration providerConfiguration) throws IOException,
+    private void applyFailoverConfigs(MessageContext messageContext, FailoverPolicyConfigDTO policyConfig,
+                                      LLMProviderConfiguration providerConfiguration) throws IOException,
             APIManagementException {
 
         FailoverPolicyDeploymentConfigDTO targetConfig = GatewayUtils.getTargetConfig(messageContext, policyConfig);
@@ -268,7 +268,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             modifyRequestPayload(failoverEndpoint.getModel(), providerConfiguration, messageContext);
             updateTargetEndpoint(messageContext, 1, failoverEndpoint);
         }
-        preserverFailoverPropertiesInMsgContext(messageContext, policyConfig, targetModelEndpoint, failoverEndpoints);
+        preserveFailoverPropertiesInMsgCtx(messageContext, policyConfig, targetModelEndpoint, failoverEndpoints);
     }
 
     /**
@@ -280,40 +280,40 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param failoverEndpoints   The list of failover endpoints.
      * @throws APIManagementException If an API management error occurs.
      */
-    private void preserverFailoverPropertiesInMsgContext(MessageContext messageContext,
-                                                         FailoverPolicyConfigDTO policyConfig,
-                                                         ModelEndpointDTO targetModelEndpoint,
-                                                         List<ModelEndpointDTO> failoverEndpoints)
+    private void preserveFailoverPropertiesInMsgCtx(MessageContext messageContext,
+                                                    FailoverPolicyConfigDTO policyConfig,
+                                                    ModelEndpointDTO targetModelEndpoint,
+                                                    List<ModelEndpointDTO> failoverEndpoints)
             throws APIManagementException {
 
-        Map<String, Object> failoverConfigs = new HashMap<>();
+        Map<String, Object> failoverConfigurations = new HashMap<>();
 
-        failoverConfigs.put(APIConstants.AIAPIConstants.FAILOVER_TARGET_MODEL_ENDPOINT,
+        failoverConfigurations.put(APIConstants.AIAPIConstants.FAILOVER_TARGET_MODEL_ENDPOINT,
                 targetModelEndpoint);
-        failoverConfigs.put(APIConstants.AIAPIConstants.FAILOVER_ENDPOINTS,
+        failoverConfigurations.put(APIConstants.AIAPIConstants.FAILOVER_ENDPOINTS,
                 failoverEndpoints);
-        failoverConfigs.put(APIConstants.AIAPIConstants.SUSPEND_DURATION,
+        failoverConfigurations.put(APIConstants.AIAPIConstants.SUSPEND_DURATION,
                 policyConfig.getSuspendDuration() * APIConstants.AIAPIConstants.MILLISECONDS_IN_SECOND);
-        if (policyConfig.getRequestTimeout() != null) {
-            messageContext.setProperty(APIConstants.AIAPIConstants.REQUEST_TIMEOUT,
-                    policyConfig.getRequestTimeout());
-        } else {
-            messageContext.setProperty(APIConstants.AIAPIConstants.REQUEST_TIMEOUT,
-                    APIUtil.getDefaultRequestTimeoutForFailoverConfigurations());
-        }
-        org.apache.axis2.context.MessageContext axis2Ctx =
+
+        long requestTimeout = (policyConfig.getRequestTimeout() != null)
+                ? policyConfig.getRequestTimeout()
+                : APIUtil.getDefaultRequestTimeoutForFailoverConfigurations();
+        messageContext.setProperty(APIConstants.AIAPIConstants.REQUEST_TIMEOUT,
+                requestTimeout);
+
+        org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
-        failoverConfigs.put(APIConstants.AIAPIConstants.REQUEST_PAYLOAD,
-                JsonUtil.jsonPayloadToString(axis2Ctx));
-        failoverConfigs.put(APIConstants.AIAPIConstants.REQUEST_HEADERS,
-                axis2Ctx.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
-        failoverConfigs.put(APIConstants.AIAPIConstants.REQUEST_HTTP_METHOD,
-                axis2Ctx.getProperty(PassThroughConstants.HTTP_METHOD));
-        failoverConfigs.put(APIConstants.AIAPIConstants.REQUEST_REST_URL_POSTFIX,
-                axis2Ctx.getProperty(NhttpConstants.REST_URL_POSTFIX));
+        failoverConfigurations.put(APIConstants.AIAPIConstants.REQUEST_PAYLOAD,
+                JsonUtil.jsonPayloadToString(axis2MessageContext));
+        failoverConfigurations.put(APIConstants.AIAPIConstants.REQUEST_HEADERS,
+                axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS));
+        failoverConfigurations.put(APIConstants.AIAPIConstants.REQUEST_HTTP_METHOD,
+                axis2MessageContext.getProperty(PassThroughConstants.HTTP_METHOD));
+        failoverConfigurations.put(APIConstants.AIAPIConstants.REQUEST_REST_URL_POSTFIX,
+                axis2MessageContext.getProperty(NhttpConstants.REST_URL_POSTFIX));
 
-        messageContext.setProperty(APIConstants.AIAPIConstants.FAILOVER_CONFIGS, failoverConfigs);
+        messageContext.setProperty(APIConstants.AIAPIConstants.FAILOVER_CONFIGS, failoverConfigurations);
     }
 
     /**
@@ -336,20 +336,18 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             return;
         }
 
-        if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(targetModelMetadata.getInputSource())) {
+        ModelEndpointDTO targetModelEndpoint =
+                (ModelEndpointDTO) roundRobinConfigs.get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
 
+        if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(targetModelMetadata.getInputSource())) {
             org.apache.axis2.context.MessageContext axis2Ctx =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             RelayUtils.buildMessage(axis2Ctx);
-            ModelEndpointDTO targetModel =
-                    (ModelEndpointDTO) roundRobinConfigs.get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
-            modifyRequestPayload(targetModel.getModel(), targetModelMetadata, axis2Ctx);
+            modifyRequestPayload(targetModelEndpoint.getModel(), targetModelMetadata, axis2Ctx);
         } else {
             log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
         }
 
-        ModelEndpointDTO targetModelEndpoint =
-                (ModelEndpointDTO) roundRobinConfigs.get(APIConstants.AIAPIConstants.TARGET_MODEL_ENDPOINT);
         messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, targetModelEndpoint.getEndpointId());
     }
 
@@ -485,10 +483,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                 (int) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
                         .getProperty(APIMgtGatewayConstants.HTTP_SC);
 
-        String targetEndpoint = (String) messageContext.getProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT);
-
-        if (handleSuccessfulResponse(messageContext, statusCode, providerConfigs, targetEndpoint,
-                roundRobinConfigs, failoverConfigs)) {
+        if (handleSuccessfulResponse(messageContext, statusCode, providerConfigs, roundRobinConfigs, failoverConfigs)) {
             return;
         }
 
@@ -519,13 +514,12 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param messageContext        The message context containing the request and response data.
      * @param statusCode            The HTTP status code of the response.
      * @param providerConfiguration The LLM provider configuration used for fetching token metadata.
-     * @param targetEndpoint        The target endpoint for the current request.
      * @param roundRobinConfigs     The configuration for round robin load balancing.
      * @param failoverConfigs       The configuration for failover handling.
      * @return True if the response is successful and further processing is done, false otherwise.
      */
     private boolean handleSuccessfulResponse(MessageContext messageContext, int statusCode,
-                                             LLMProviderConfiguration providerConfiguration, String targetEndpoint,
+                                             LLMProviderConfiguration providerConfiguration,
                                              Map<String, Object> roundRobinConfigs,
                                              Map<String, Object> failoverConfigs) {
 
@@ -547,7 +541,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                         Long suspendDuration = (Long) roundRobinConfigs
                                 .get(APIConstants.AIAPIConstants.SUSPEND_DURATION);
 
-                        suspendTargetEndpoint(messageContext, targetEndpoint, targetModelEndpoint.getModel(),
+                        suspendTargetEndpoint(messageContext, targetModelEndpoint.getEndpointId(),
+                                targetModelEndpoint.getModel(),
                                 suspendDuration);
                     } else if (failoverConfigs != null) {
                         int currentEndpointIndex = getCurrentFailoverIndex(messageContext);
@@ -702,7 +697,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @throws IOException        If an I/O error occurs during payload modification.
      */
     private void modifyRequestPayload(String failoverModel,
-                                      LLMProviderConfiguration providerConfiguration, MessageContext messageContext) throws IOException {
+                                      LLMProviderConfiguration providerConfiguration,
+                                      MessageContext messageContext)
+            throws IOException {
 
         LLMProviderMetadata targetModelMetadata = getTargetModelMetadata(providerConfiguration);
         if (targetModelMetadata == null) {
