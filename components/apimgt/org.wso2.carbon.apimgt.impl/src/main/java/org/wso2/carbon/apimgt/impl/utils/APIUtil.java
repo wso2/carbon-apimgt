@@ -5374,11 +5374,11 @@ public final class APIUtil {
         Set<String> set = new HashSet<>();
 
         for (String element : arr1) {
-            set.add(element);
+            set.add(element.toLowerCase(Locale.ENGLISH));
         }
 
         for (String element : arr2) {
-            if (set.contains(element)) {
+            if (set.contains(element.toLowerCase(Locale.ENGLISH))) {
                 return true;
             }
         }
