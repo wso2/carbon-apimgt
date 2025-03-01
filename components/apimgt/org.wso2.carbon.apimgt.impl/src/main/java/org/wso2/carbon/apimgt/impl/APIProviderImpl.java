@@ -1314,7 +1314,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         EndpointSecurity.class);
                                 if (endpointSecurity.isEnabled() && oldEndpointSecurity.isEnabled() &&
                                         StringUtils.isBlank(endpointSecurity.getPassword())) {
-                                    endpointSecurity.setUsername(oldEndpointSecurity.getUsername());
                                     endpointSecurity.setPassword(oldEndpointSecurity.getPassword());
                                     if (StringUtils.isBlank(endpointSecurity.getType())) {
                                         ErrorHandler errorHandler = ExceptionCodes.from(
@@ -1362,7 +1361,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                                 EndpointSecurity.class);
                                 if (endpointSecurity.isEnabled() && oldEndpointSecurity.isEnabled() &&
                                         StringUtils.isBlank(endpointSecurity.getPassword())) {
-                                    endpointSecurity.setUsername(oldEndpointSecurity.getUsername());
                                     endpointSecurity.setPassword(oldEndpointSecurity.getPassword());
                                     if (StringUtils.isBlank(endpointSecurity.getType())) {
                                         ErrorHandler errorHandler = ExceptionCodes.from(
