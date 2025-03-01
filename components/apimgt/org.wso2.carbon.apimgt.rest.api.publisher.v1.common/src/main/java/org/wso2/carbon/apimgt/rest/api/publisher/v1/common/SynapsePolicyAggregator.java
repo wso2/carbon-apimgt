@@ -50,6 +50,8 @@ import java.util.Map;
 import java.util.Set;
 import javax.xml.namespace.QName;
 
+import static org.wso2.carbon.apimgt.impl.utils.APIUtil.trimTrailingSlashes;
+
 /**
  * This class used to generate Synapse Artifact.
  */
@@ -149,6 +151,7 @@ public class SynapsePolicyAggregator {
 
         Map<String, Object> caseMap = new HashMap<>();
         String uriTemplateString = template.getUriTemplate();
+        uriTemplateString = trimTrailingSlashes(uriTemplateString);
         String method = template.getHTTPVerb();
         String key = method + "_" + uriTemplateString.replaceAll("[\\W]", "\\\\$0");
 

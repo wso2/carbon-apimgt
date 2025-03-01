@@ -11469,6 +11469,20 @@ public final class APIUtil {
     }
 
     /**
+     * Removes all trailing slashes from the given URL string.
+     *
+     * @param url the URL string to process
+     * @return the URL string without trailing slashes; returns the original string if no trailing slashes are present
+     * @throws NullPointerException if the input URL is null
+     */
+    public static String trimTrailingSlashes(String url) {
+        while (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
+        return url;
+    }
+
+    /**
      * Get available tiers for organizations as a string.
      *
      * @param api API object
