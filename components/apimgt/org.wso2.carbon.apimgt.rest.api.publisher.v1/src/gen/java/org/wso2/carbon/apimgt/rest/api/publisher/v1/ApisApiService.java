@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityIn
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.IntegratedAPIResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LabelListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
@@ -148,12 +149,12 @@ public interface ApisApiService {
       public Response getGraphQLPolicyComplexityTypesOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getLabelsOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getMCPServerUsage(String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response getIntegratedAPIs(String vendor, MessageContext messageContext) throws APIManagementException;
+      public Response getIntegratedApiDefinition(String vendor, String params, MessageContext messageContext) throws APIManagementException;
       public Response getOperationPolicyForAPIByPolicyId(String apiId, String operationPolicyId, MessageContext messageContext) throws APIManagementException;
       public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit, Integer offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException;
       public Response getSequenceBackendContent(String type, String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getSequenceBackendData(String apiId, MessageContext messageContext) throws APIManagementException;
-      public Response getSolaceEventApiAsyncApiDefinition(String eventApiProductId, String planId, String eventApiId, MessageContext messageContext) throws APIManagementException;
-      public Response getSolaceEventApiProducts(MessageContext messageContext) throws APIManagementException;
       public Response getWSDLInfoOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getWSDLOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response importAPI(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite, Boolean preservePortalConfigurations, Boolean dryRun, String accept, MessageContext messageContext) throws APIManagementException;

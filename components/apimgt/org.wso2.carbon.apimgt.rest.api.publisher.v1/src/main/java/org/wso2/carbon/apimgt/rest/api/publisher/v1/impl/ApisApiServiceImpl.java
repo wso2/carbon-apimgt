@@ -110,6 +110,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -659,34 +660,25 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     @Override
-    public Response getSolaceEventApiAsyncApiDefinition(String eventApiProductId, String planId, String eventApiId,
-                                                        MessageContext messageContext) throws APIManagementException {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        SolaceConfig solaceConfig = config.getSolaceConfig();
-        if (solaceConfig != null && solaceConfig.isEnabled()) {
-            JsonObject asyncApiDefinition = SolaceV2ApiHolder.getInstance()
-                    .getEventApiAsyncApiDefinition(eventApiProductId, planId, eventApiId);
-            return Response.ok().entity(asyncApiDefinition.toString()).build();
-        }
-        return getSolaceConfigsNotEnabledResponse();
+    public Response getIntegratedAPIs(String vendor, MessageContext messageContext) throws APIManagementException {
+        return IntegratedApiUtils.getIntegratedApis(vendor);
     }
 
     @Override
-    public Response getSolaceEventApiProducts(MessageContext messageContext) throws APIManagementException {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        SolaceConfig solaceConfig = config.getSolaceConfig();
-        if (solaceConfig != null && solaceConfig.isEnabled()) {
-            SolaceEventApiProductsResponse solaceEventApiProductsResponse = SolaceV2ApiHolder.getInstance()
-                    .getEventApiProducts();
-            return Response.ok(solaceEventApiProductsResponse).build();
+    public Response getIntegratedApiDefinition(String vendor, String params, MessageContext messageContext)
+            throws APIManagementException {
+        try {
+            String decodedParams = URLDecoder.decode(params, StandardCharsets.UTF_8.name());
+            JSONParser jsonParser = new JSONParser();
+            JSONObject parameters = (JSONObject) jsonParser.parse(decodedParams);
+            return IntegratedApiUtils.getIntegratedApiDefinition(vendor, parameters);
+        } catch (ParseException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("The decoded params object is not a valid JSON").build();
+        } catch (UnsupportedEncodingException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("The encoding of the provided params object is unsupported").build();
         }
-        return getSolaceConfigsNotEnabledResponse();
-    }
-
-    private Response getSolaceConfigsNotEnabledResponse() {
-        return Response.status(Response.Status.BAD_REQUEST).entity("Solace configs are not enabled").build();
     }
 
     @Override

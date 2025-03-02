@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.solace.api.exception.SolaceApiClientException;
 import org.wso2.carbon.apimgt.solace.api.v2.model.AppRegistration;
+import org.wso2.carbon.apimgt.solace.api.v2.model.IntegratedSolaceApisResponse;
 import org.wso2.carbon.apimgt.solace.api.v2.model.SolaceEventApiProductsResponse;
 
 import java.util.ArrayList;
@@ -73,27 +74,52 @@ public class SolaceV2Apis {
     }
 
     /**
-     * Gets a list of Solace Event API Products - that contain only one Solace Event API.
+     * Gets a list of Solace Event API Products that contain only one Solace Event API.
+     * Each Solace Event API in the returned response, will be in the format of an Integrated API.
      * A Solace Event API will be represented as an API in WSO2 APIM. In order to access a Solace Event API, we need a
      * Solace Plan, which is associated via a Solace Event API Product.
      * Therefore, in order to access a Solace Event API, we consider Solace Event API Products that contain only one
      * Solace Event API.
-     * @return                          List of Solace Event API Products.
+     * @return                          List of Solace Event API Products, as Integrated APIs.
      * @throws APIManagementException   If an error occurs while getting event API products.
      */
-    public SolaceEventApiProductsResponse getEventApiProducts() throws APIManagementException {
+    public IntegratedSolaceApisResponse getEventApiProducts() throws APIManagementException {
         try {
             SolaceEventApiProductsResponse eventApiProducts = solaceV2ApimApisClient.getEventApiProducts();
-            List<SolaceEventApiProductsResponse.EventApiProduct> eventApiProductsWithSingleEventApi = new ArrayList<>();
+
+            /*
+            The response will be returned to be used as an Integrated API,
+            so only the necessary information (apiId, apiName, plans[]) will be rearranged.
+             */
+            List<IntegratedSolaceApisResponse.EventApi> integratedSolaceApis = new ArrayList<>();
+
             for (SolaceEventApiProductsResponse.EventApiProduct eventApiProduct : eventApiProducts.getData()) {
                 // We only care about Solace Event API Products - that contain only one Solace Event API
                 if (eventApiProduct.getApis().size() == 1) {
-                    eventApiProductsWithSingleEventApi.add(eventApiProduct);
+                    SolaceEventApiProductsResponse.EventApiProduct.Api eventApi = eventApiProduct.getApis().get(0);
+                    IntegratedSolaceApisResponse.EventApi integratedSolaceEventApi =
+                            new IntegratedSolaceApisResponse.EventApi();
+
+                    // API ID will be: {eventApiProductId}/{eventApiProduct.plans[0].id}/{eventApiProduct.apis[0].id}
+                    String apiId = eventApiProduct.getId() + "/" + eventApiProduct.getPlans().get(0).getId() + "/" +
+                            eventApi.getId();
+                    integratedSolaceEventApi.setApiId(apiId);
+                    integratedSolaceEventApi.setApiName(eventApi.getName() + ":" + eventApi.getVersion());
+
+                    List<String> plans = new ArrayList<>();
+                    for (SolaceEventApiProductsResponse.EventApiProduct.Plan plan : eventApiProduct.getPlans()) {
+                        plans.add(plan.getName());
+                    }
+                    integratedSolaceEventApi.setPlans(plans);
+
+                    integratedSolaceApis.add(integratedSolaceEventApi);
                 }
             }
-            SolaceEventApiProductsResponse filteredEventApiProducts = new SolaceEventApiProductsResponse();
-            filteredEventApiProducts.setData(eventApiProductsWithSingleEventApi);
-            return filteredEventApiProducts;
+
+            IntegratedSolaceApisResponse integratedSolaceApisResponse = new IntegratedSolaceApisResponse();
+            integratedSolaceApisResponse.setIntegratedSolaceEventApis(integratedSolaceApis);
+
+            return integratedSolaceApisResponse;
         } catch (SolaceApiClientException e) {
             throw new APIManagementException("Error while getting event API products", e);
         }

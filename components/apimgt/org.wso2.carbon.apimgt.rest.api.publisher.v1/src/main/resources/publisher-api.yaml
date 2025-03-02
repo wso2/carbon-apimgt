@@ -10922,47 +10922,50 @@ paths:
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             -F file=@streetlights.yml "https://127.0.0.1:9443/api/am/publisher/v4/apis/01234567-0123-0123-0123-012345678901/asyncapi"'
 
-  /apis/solace-event-api-products:
+  /apis/integrated-apis/{vendor}:
     get:
-      summary: Retrieve Solace Event API Products that contain only one Solace Event API.
+      summary: Retrieve Integrated APIs.
       description: |
-        Retrieve Solace Event API Products that contain only one Solace Event API.
-      operationId: getSolaceEventApiProducts
+        Retrieve Integrated APIs.
+      operationId: getIntegratedAPIs
       security:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
       tags:
-        - Solace
-        - Event API Products
+        - Integrated APIs
+      parameters:
+        - name: vendor
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: |
-            List of Solace Event API Products.
+            List of Integrated APIs.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SolaceEventApiProductsResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/IntegratedAPIResponse'
 
-  /apis/solace-event-api-products/{eventApiProductId}/plans/{planId}/eventApis/{eventApiId}:
+  /apis/integrated-apis/{vendor}/definition:
     get:
-      summary: Retrieve the AsyncAPI definition of the given Solace Event API, which belongs to the given Solace Event API Product, and is associated with the given plan.
+      summary: Retrieve the definition of an integrated API.
       description: |
-        Retrieve the AsyncAPI definition of the given Solace Event API, which belongs to the given Solace Event API Product, and is associated with the given plan.
-      operationId: getSolaceEventApiAsyncApiDefinition
+        Retrieve the definition of an integrated API.
+      operationId: getIntegratedApiDefinition
       parameters:
-        - name: eventApiProductId
+        - name: vendor
           in: path
           required: true
           schema:
             type: string
-        - name: planId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: eventApiId
-          in: path
+        - name: params
+          in: query
+          description: Parameters to retrieve the definition of an integrated API
           required: true
           schema:
             type: string
@@ -10971,13 +10974,11 @@ paths:
             - apim:api_create
             - apim:api_manage
       tags:
-        - Solace
-        - Event API Products
-        - Event API
+        - Integrated APIs
       responses:
         200:
           description: |
-            AsyncAPI definition of the Solace Event API
+            API definition of an integrated API
           content:
             application/json:
               schema:
@@ -14556,42 +14557,6 @@ components:
             If the provider value is not given, the user invoking the API will be used as the provider.
           example: admin
 
-    SolaceEventApiProductsResponse:
-      type: object
-      required:
-        - data
-        - meta
-      additionalProperties: false
-      properties:
-        data:
-          type: array
-          minItems: 0
-          maxItems: 999
-          items:
-            $ref: '#/components/schemas/SolaceEventApiProduct'
-
-    SolaceEventApiProduct:
-      type: object
-      required:
-        - id
-        - name
-        - applicationDomainId
-        - applicationDomainName
-        - brokerType
-        - createdTime
-        - updatedTime
-        - createdBy
-        - changedBy
-        - version
-        - state
-        - plans
-        - solaceMessagingServices
-        - approvalType
-        - attributes
-        - customAttributes
-        - apis
-        - apiParameters
-      additionalProperties: false
 
     #-----------------------------------------------------
     # The API Revision resource
@@ -15263,6 +15228,17 @@ components:
           example: Sample calculator application
         subscriptionCount:
           type: integer
+    IntegratedAPIResponse:
+      type: object
+      properties:
+        apiId:
+          type: string
+        apiName:
+          type: string
+        plans:
+          type: array
+          items:
+            type: string
     DocumentList:
       title: Document List
       type: object
