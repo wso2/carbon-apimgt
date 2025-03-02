@@ -25,15 +25,14 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SolaceConfig;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.solace.api.v2.SolaceV2ApiHolder;
 import org.wso2.carbon.context.CarbonContext;
 
@@ -58,9 +57,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
         try {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            SolaceConfig solaceConfig = config.getSolaceConfig();
+            SolaceConfig solaceConfig = APIUtil.getSolaceConfig();
             if (solaceConfig != null && solaceConfig.isEnabled()) {
                 apiMgtDAO = ApiMgtDAO.getInstance();
                 SubscriptionEvent subscriptionEvent = (SubscriptionEvent) event;
