@@ -29,11 +29,9 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SolaceConfig;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
@@ -62,9 +60,7 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
         try {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            SolaceConfig solaceConfig = config.getSolaceConfig();
+            SolaceConfig solaceConfig = APIUtil.getSolaceConfig();
             if (solaceConfig != null && solaceConfig.isEnabled()) {
                 apiMgtDAO = ApiMgtDAO.getInstance();
                 ApplicationRegistrationEvent applicationRegistrationEvent = (ApplicationRegistrationEvent) event;

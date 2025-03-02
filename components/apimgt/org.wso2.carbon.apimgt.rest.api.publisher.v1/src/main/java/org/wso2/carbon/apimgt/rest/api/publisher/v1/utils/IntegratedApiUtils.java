@@ -19,11 +19,9 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.utils;
 
 import com.google.gson.JsonObject;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.SolaceConfig;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.IntegratedAPIResponseDTO;
 import org.wso2.carbon.apimgt.solace.api.v2.SolaceV2ApiHolder;
 import org.wso2.carbon.apimgt.solace.api.v2.model.IntegratedSolaceApisResponse;
@@ -58,9 +56,7 @@ public class IntegratedApiUtils {
     }
 
     private static Response getSolaceEventApiProducts() throws APIManagementException {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        SolaceConfig solaceConfig = config.getSolaceConfig();
+        SolaceConfig solaceConfig = APIUtil.getSolaceConfig();
         if (solaceConfig != null && solaceConfig.isEnabled()) {
             IntegratedSolaceApisResponse solaceEventApiProductsResponse = SolaceV2ApiHolder.getInstance()
                     .getEventApiProducts();
@@ -118,9 +114,7 @@ public class IntegratedApiUtils {
                     .entity("Query parameter 'eventApiId' is required").build();
         }
 
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        SolaceConfig solaceConfig = config.getSolaceConfig();
+        SolaceConfig solaceConfig = APIUtil.getSolaceConfig();
         if (solaceConfig != null && solaceConfig.isEnabled()) {
             JsonObject asyncApiDefinition = SolaceV2ApiHolder.getInstance()
                     .getEventApiAsyncApiDefinition(eventApiProductId, planId, eventApiId);

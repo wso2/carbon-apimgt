@@ -30,9 +30,7 @@ import feign.slf4j.Slf4jLogger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.SolaceConfig;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.kmclient.ApacheFeignHttpClient;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.solace.api.exception.SolaceApiClientException;
@@ -53,9 +51,7 @@ public class SolaceV2Apis {
     private SolaceV2ApimApisClient solaceV2ApimApisClient;
 
     public SolaceV2Apis() {
-        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-        SolaceConfig solaceConfig = config.getSolaceConfig();
+        SolaceConfig solaceConfig = APIUtil.getSolaceConfig();
         if (solaceConfig != null && solaceConfig.isEnabled()) {
             String solaceApimApiEndpoint = solaceConfig.getSolaceApimApiEndpoint();
             String token = solaceConfig.getSolaceToken();

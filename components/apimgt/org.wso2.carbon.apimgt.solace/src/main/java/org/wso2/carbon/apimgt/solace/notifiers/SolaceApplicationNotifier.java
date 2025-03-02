@@ -20,14 +20,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SolaceConfig;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.solace.api.v2.SolaceV2ApiHolder;
 
 /**
@@ -42,9 +41,7 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
         try {
-            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
-            SolaceConfig solaceConfig = config.getSolaceConfig();
+            SolaceConfig solaceConfig = APIUtil.getSolaceConfig();
             if (solaceConfig != null && solaceConfig.isEnabled()) {
                 apiMgtDAO = ApiMgtDAO.getInstance();
                 if (APIConstants.EventType.APPLICATION_DELETE.name().equals(event.getType())) {
