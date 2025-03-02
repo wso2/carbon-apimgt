@@ -10921,6 +10921,68 @@ paths:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             -F file=@streetlights.yml "https://127.0.0.1:9443/api/am/publisher/v4/apis/01234567-0123-0123-0123-012345678901/asyncapi"'
+
+  /apis/solace-event-api-products:
+    get:
+      summary: Retrieve Solace Event API Products that contain only one Solace Event API.
+      description: |
+        Retrieve Solace Event API Products that contain only one Solace Event API.
+      operationId: getSolaceEventApiProducts
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      tags:
+        - Solace
+        - Event API Products
+      responses:
+        200:
+          description: |
+            List of Solace Event API Products.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SolaceEventApiProductsResponse'
+
+  /apis/solace-event-api-products/{eventApiProductId}/plans/{planId}/eventApis/{eventApiId}:
+    get:
+      summary: Retrieve the AsyncAPI definition of the given Solace Event API, which belongs to the given Solace Event API Product, and is associated with the given plan.
+      description: |
+        Retrieve the AsyncAPI definition of the given Solace Event API, which belongs to the given Solace Event API Product, and is associated with the given plan.
+      operationId: getSolaceEventApiAsyncApiDefinition
+      parameters:
+        - name: eventApiProductId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: eventApiId
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      tags:
+        - Solace
+        - Event API Products
+        - Event API
+      responses:
+        200:
+          description: |
+            AsyncAPI definition of the Solace Event API
+          content:
+            application/json:
+              schema:
+                type: object
+
   /apis/{apiId}/environments/{envId}/keys:
     get:
       tags:
@@ -14493,6 +14555,43 @@ components:
           description: |
             If the provider value is not given, the user invoking the API will be used as the provider.
           example: admin
+
+    SolaceEventApiProductsResponse:
+      type: object
+      required:
+        - data
+        - meta
+      additionalProperties: false
+      properties:
+        data:
+          type: array
+          minItems: 0
+          maxItems: 999
+          items:
+            $ref: '#/components/schemas/SolaceEventApiProduct'
+
+    SolaceEventApiProduct:
+      type: object
+      required:
+        - id
+        - name
+        - applicationDomainId
+        - applicationDomainName
+        - brokerType
+        - createdTime
+        - updatedTime
+        - createdBy
+        - changedBy
+        - version
+        - state
+        - plans
+        - solaceMessagingServices
+        - approvalType
+        - attributes
+        - customAttributes
+        - apis
+        - apiParameters
+      additionalProperties: false
 
     #-----------------------------------------------------
     # The API Revision resource

@@ -15,218 +15,128 @@
  */
 package org.wso2.carbon.apimgt.solace.notifiers;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.SolaceConfig;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
-import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
-import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
+import org.wso2.carbon.apimgt.solace.api.v2.SolaceV2ApiHolder;
 import org.wso2.carbon.context.CarbonContext;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 
 /**
- * This class controls the Solace Broker deployed API subscription flows
+ * Handles Solace App Registration, its credentials and Solace App requests,
+ * upon subscription to a Solace API in WSO2 API Manager DevPortal Application.
  */
 public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
     protected ApiMgtDAO apiMgtDAO;
     private static final Log log = LogFactory.getLog(SolaceSubscriptionsNotifier.class);
 
+    private static final String SOLACE_GATEWAY_VENDOR = "solace";
+    private static final String INFO_OBJECT_KEY = "info";
+    private static final String DEFAULT_APP_SOURCE_AND_OWNER = "wso2apim";
+    private static final String EVENT_API_PRODUCT_ID = "x-ep-event-api-product-id";
+    private static final String EVENT_API_PRODUCT_NAME = "x-ep-event-api-product-name";
+    private static final String EVENT_API_PRODUCT_VERSION = "x-ep-event-api-product-version";
+    private static final String APPLICATION_DOMAIN_ID = "x-ep-application-domain-id";
+
 
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
-        if (SolaceNotifierUtils.isSolaceEnvironmentDefined()) {
-            apiMgtDAO = ApiMgtDAO.getInstance();
-            process(event);
-        }
-        return true;
-    }
-
-    /**
-     * Process gateway notifier events related to Solace API subscriptions
-     *
-     * @param event related to subscription handling
-     * @throws NotifierException if error occurs when casting event
-     */
-    private void process(Event event) throws NotifierException {
-        SubscriptionEvent subscriptionEvent;
-        subscriptionEvent = (SubscriptionEvent) event;
-
-
-        if (APIConstants.EventType.SUBSCRIPTIONS_CREATE.name().equals(event.getType())) {
-            createSubscription(subscriptionEvent);
-        } else if (APIConstants.EventType.SUBSCRIPTIONS_UPDATE.name().equals(event.getType())) {
-            updateSubscription(subscriptionEvent);
-        } else if (APIConstants.EventType.SUBSCRIPTIONS_DELETE.name().equals(event.getType())) {
-            removeSubscription(subscriptionEvent);
-        }
-    }
-
-    /**
-     * Create subscriptions to Solace APIs
-     *
-     * @param event SubscriptionEvent to create Solace API subscriptions
-     * @throws NotifierException if error occurs when creating subscription for Solace APIs
-     */
-    private void createSubscription(SubscriptionEvent event) throws NotifierException {
-
-        String apiUUID = event.getApiUUID();
-        String applicationUUID = event.getApplicationUUID();
-
         try {
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
-            API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            SolaceConfig solaceConfig = config.getSolaceConfig();
+            if (solaceConfig != null && solaceConfig.isEnabled()) {
+                apiMgtDAO = ApiMgtDAO.getInstance();
+                SubscriptionEvent subscriptionEvent = (SubscriptionEvent) event;
+                String apiUUID = subscriptionEvent.getApiUUID();
+                APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
+                        getThreadLocalCarbonContext().getUsername());
+                API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
 
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
-            Application application = apiMgtDAO.getApplicationByUUID(applicationUUID);
-            Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
-            for (APIKey apiKey : consumerKeys) {
-                if (SolaceConstants.OAUTH_CLIENT_PRODUCTION.equals(apiKey.getType())) {
-                    application.addKey(apiKey);
-                }
-            }
-            // Send only the production keys to Solace broker.
-            if (application.getKeys().isEmpty()) {
-                return;
-            }
-            deployApplication(api, application);
-        } catch (APIManagementException e) {
-            throw new NotifierException("Error while creating application solace Broker " + e.getMessage());
-        }  catch (IOException e) {
-            throw new NotifierException("I/O Error while creating application solace Broker " + e.getMessage());
-        }
-    }
-
-    /**
-     * Update subscriptions related to Solace APIs
-     *
-     * @param event SubscriptionEvent to update Solace API subscriptions
-     * @throws NotifierException if error occurs when updating subscription for Solace APIs
-     */
-    private void updateSubscription(SubscriptionEvent event) throws NotifierException {
-        String apiUUID = event.getApiUUID();
-        String applicationUUID = event.getApplicationUUID();
-
-        try {
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
-            API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
-
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
-            Application application = apiMgtDAO.getApplicationByUUID(applicationUUID);
-            Set<APIKey> consumerKeys  = apiConsumer.getApplicationKeysOfApplication(application.getId());
-            for (APIKey apiKey : consumerKeys) {
-                if (SolaceConstants.OAUTH_CLIENT_PRODUCTION.equals(apiKey.getType())) {
-                    application.addKey(apiKey);
-                }
-            }
-            // Send only the production keys to Solace broker.
-            if (application.getKeys().isEmpty()) {
-                return;
-            }
-            deployApplication(api, application);
-        } catch (APIManagementException e) {
-            throw new NotifierException("Error while updating application solace Broker " + e.getMessage());
-        }  catch (IOException e) {
-            throw new NotifierException("I/O Error while updating application solace Broker " + e.getMessage());
-        }
-    }
-
-    /**
-     * Remove subscriptions from Solace APIs
-     *
-     * @param event SubscriptionEvent to remove Solace API subscriptions
-     * @throws NotifierException if error occurs when deleting subscriptions from Solace APIs
-     */
-    private void removeSubscription(SubscriptionEvent event) throws NotifierException {
-        String apiUUID = event.getApiUUID();
-        String applicationUUID = event.getApplicationUUID();
-
-        try {
-            APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                    getThreadLocalCarbonContext().getUsername());
-            API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
-            Application application = apiProvider.getApplicationByUUID(applicationUUID);
-
-            //Check whether the subscription is belongs to an API deployed in Solace
-            if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
-                // Application Deletion Event came before Subscription removal event.
-                if (application != null) {
-                    SolaceNotifierUtils.unsubscribeAPIProductFromSolaceApplication(api, application);
-                }
-            }
-        } catch (APIManagementException e) {
-            throw new NotifierException("Error while removing application solace Broker " + e.getMessage());
-        }
-    }
-
-
-    /**
-     * Deploy the application to solace Broker
-     *
-     * @param api Subscribed API of the application
-     * @param application Application which needs to be created/updated in solace broker
-     * @throws APIManagementException if error occurs when creating subscriptions from Solace APIs
-     */
-    public void deployApplication(API api, Application application) throws APIManagementException, IOException {
-        try {
-            //Check whether the subscription belong to an API deployed in Solace
-            if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayVendor())) {
-                ArrayList<String> solaceApiProducts = new ArrayList<>();
-                List<Environment> deployedSolaceEnvironments =
-                        SolaceNotifierUtils.getDeployedSolaceEnvironmentsFromRevisionDeployments(api);
-                String applicationOrganizationName = SolaceNotifierUtils.getSolaceOrganizationName
-                        (deployedSolaceEnvironments);
-                if (applicationOrganizationName != null) {
-                    boolean apiProductDeployedIntoSolace = SolaceNotifierUtils.
-                            checkApiProductAlreadyDeployedIntoSolaceEnvironments(api, deployedSolaceEnvironments);
-                    if (apiProductDeployedIntoSolace) {
-                        for (Environment environment : deployedSolaceEnvironments) {
-                            solaceApiProducts.add(SolaceNotifierUtils.generateApiProductNameForSolaceBroker
-                                    (api, environment.getName()));
-                        }
-                        SolaceNotifierUtils.deployApplicationToSolaceBroker(application, solaceApiProducts,
-                                applicationOrganizationName);
+                if (SOLACE_GATEWAY_VENDOR.equals(api.getGatewayVendor())) {
+                    if (APIConstants.EventType.SUBSCRIPTIONS_CREATE.name().equals(event.getType())) {
+                        createAccessRequest(subscriptionEvent, api, apiProvider);
+                    } else if (APIConstants.EventType.SUBSCRIPTIONS_DELETE.name().equals(event.getType())) {
+                        deleteAccessRequest(subscriptionEvent, api, apiProvider);
                     }
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.error("Cannot create solace application " + application.getName() + "with API product "
-                                + "deployed in different organizations...");
-                    }
-                    throw new APIManagementException("Cannot create solace application " + application.getName() +
-                            "with API product deployed in different organizations...");
                 }
             }
+            return true;
         } catch (APIManagementException e) {
-            if (log.isDebugEnabled()) {
-                log.error("Error while creating application solace Broker" + e.getMessage());
-            }
-            throw new APIManagementException("I/O Error while creating application solace Broker" + e.getMessage());
-        }  catch (IOException e) {
-            if (log.isDebugEnabled()) {
-                log.error("I/O Error while creating application solace Broker" + e.getMessage());
-            }
-            throw new IOException("I/O Error while creating application solace Broker" + e.getMessage());
+            throw new NotifierException("Error while processing subscription event", e);
         }
+    }
+
+    private void createAccessRequest(SubscriptionEvent subscriptionEvent, API api, APIProvider apiProvider)
+            throws APIManagementException {
+        JsonObject asyncApiDefinition = new JsonParser().parse(api.getAsyncApiDefinition()).getAsJsonObject();
+        JsonObject infoObject = asyncApiDefinition.getAsJsonObject(INFO_OBJECT_KEY);
+        String eventApiProductId = infoObject.get(EVENT_API_PRODUCT_ID).getAsString();
+        String applicationDomainId = infoObject.get(APPLICATION_DOMAIN_ID).getAsString();
+        String wso2ApimPolicyName = subscriptionEvent.getPolicyId();
+        String solacePlanId = SolaceV2ApiHolder.getInstance().getEventApiProductPlanId(eventApiProductId,
+                wso2ApimPolicyName);
+
+        if (solacePlanId != null) {
+            Application wso2ApimDevPortalApplication =
+                    apiProvider.getApplicationByUUID(subscriptionEvent.getApplicationUUID());
+            String appRegistrationId = wso2ApimDevPortalApplication.getUUID();
+            String appName = wso2ApimDevPortalApplication.getName();
+
+            /*
+             Create the app registration if it does not exist, only when a subscription is made to a Solace API,
+             because we don't want to create an app registration unnecessarily, if the dev portal app is not going to
+             be subscribed to a Solace API.
+             */
+            if (!SolaceV2ApiHolder.getInstance().isAppRegistrationExists(appRegistrationId)) {
+                SolaceV2ApiHolder.getInstance()
+                        .createAppRegistration(appRegistrationId, DEFAULT_APP_SOURCE_AND_OWNER, appName,
+                                DEFAULT_APP_SOURCE_AND_OWNER, applicationDomainId);
+
+                // Add each consumer key and consumer secret of the WSO2 APIM DevPortal app as a credential
+                for (APIKey key : wso2ApimDevPortalApplication.getKeys()) {
+                    SolaceV2ApiHolder.getInstance()
+                            .createCredentials(appRegistrationId, key.getConsumerKey(), key.getConsumerSecret());
+                }
+            }
+
+            SolaceV2ApiHolder.getInstance()
+                    .createAccessRequest(eventApiProductId, solacePlanId, appRegistrationId);
+        } else {
+            String eventApiProductName = infoObject.get(EVENT_API_PRODUCT_NAME).getAsString();
+            String eventApiProductVersion = infoObject.get(EVENT_API_PRODUCT_VERSION).getAsString();
+            throw new APIManagementException("Cannot find a Solace Plan with the name: '" + wso2ApimPolicyName +
+                    "' in the Solace Event API Product: " + eventApiProductName + ": " +
+                    eventApiProductVersion);
+        }
+    }
+
+    private void deleteAccessRequest(SubscriptionEvent subscriptionEvent, API api, APIProvider apiProvider)
+            throws APIManagementException {
+        JsonObject asyncApiDefinition = new JsonParser().parse(api.getAsyncApiDefinition()).getAsJsonObject();
+        JsonObject infoObject = asyncApiDefinition.getAsJsonObject(INFO_OBJECT_KEY);
+        String eventApiProductId = infoObject.get(EVENT_API_PRODUCT_ID).getAsString();
+
+        Application wso2ApimDevPortalApplication =
+                apiProvider.getApplicationByUUID(subscriptionEvent.getApplicationUUID());
+        String appRegistrationId = wso2ApimDevPortalApplication.getUUID();
+        SolaceV2ApiHolder.getInstance().deleteAccessRequest(appRegistrationId, eventApiProductId);
     }
 
 }

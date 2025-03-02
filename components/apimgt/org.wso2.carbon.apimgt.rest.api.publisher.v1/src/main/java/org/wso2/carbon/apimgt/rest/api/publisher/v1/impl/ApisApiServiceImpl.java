@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import org.apache.axiom.util.base64.Base64Utils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -50,6 +52,7 @@ import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.ExternalGatewayAPIValidationException;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
@@ -58,6 +61,7 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.RuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.SolaceConfig;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.RuntimeArtifactGeneratorUtil;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
@@ -67,6 +71,7 @@ import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.restapi.publisher.OperationPoliciesApiServiceImplUtils;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIMWSDLReader;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
@@ -85,6 +90,10 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParserUtil;
 import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.solace.api.v2.SolaceV2ApiHolder;
+import org.wso2.carbon.apimgt.solace.api.v2.model.SolaceEventApiProductsResponse;
+import org.wso2.carbon.base.ServerConfiguration;
+import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import software.amazon.awssdk.core.exception.SdkClientException;
@@ -293,7 +302,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
         } else {
             // Default visibility 'none'
-            apiToReturn.setVisibleOrganizations(Collections.singletonList(APIConstants.VISIBLE_ORG_NONE)); 
+            apiToReturn.setVisibleOrganizations(Collections.singletonList(APIConstants.VISIBLE_ORG_NONE));
         }
 
         return Response.ok().entity(apiToReturn).build();
@@ -647,6 +656,37 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
+    }
+
+    @Override
+    public Response getSolaceEventApiAsyncApiDefinition(String eventApiProductId, String planId, String eventApiId,
+                                                        MessageContext messageContext) throws APIManagementException {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        SolaceConfig solaceConfig = config.getSolaceConfig();
+        if (solaceConfig != null && solaceConfig.isEnabled()) {
+            JsonObject asyncApiDefinition = SolaceV2ApiHolder.getInstance()
+                    .getEventApiAsyncApiDefinition(eventApiProductId, planId, eventApiId);
+            return Response.ok().entity(asyncApiDefinition.toString()).build();
+        }
+        return getSolaceConfigsNotEnabledResponse();
+    }
+
+    @Override
+    public Response getSolaceEventApiProducts(MessageContext messageContext) throws APIManagementException {
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        SolaceConfig solaceConfig = config.getSolaceConfig();
+        if (solaceConfig != null && solaceConfig.isEnabled()) {
+            SolaceEventApiProductsResponse solaceEventApiProductsResponse = SolaceV2ApiHolder.getInstance()
+                    .getEventApiProducts();
+            return Response.ok(solaceEventApiProductsResponse).build();
+        }
+        return getSolaceConfigsNotEnabledResponse();
+    }
+
+    private Response getSolaceConfigsNotEnabledResponse() {
+        return Response.status(Response.Status.BAD_REQUEST).entity("Solace configs are not enabled").build();
     }
 
     @Override

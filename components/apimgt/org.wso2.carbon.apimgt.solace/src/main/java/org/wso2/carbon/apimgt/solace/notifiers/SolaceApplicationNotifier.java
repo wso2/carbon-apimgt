@@ -18,32 +18,20 @@ package org.wso2.carbon.apimgt.solace.notifiers;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.SolaceConfig;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.solace.SolaceAdminApis;
-import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
-import org.wso2.carbon.apimgt.solace.utils.SolaceNotifierUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.wso2.carbon.apimgt.solace.api.v2.SolaceV2ApiHolder;
 
 /**
- * This class controls the Solace Broker deployed Application deletion and update flows
+ * Handles Solace App Registration upon WSO2 API Manager DevPortal Application events.
  */
 public class SolaceApplicationNotifier extends ApplicationNotifier {
 
@@ -53,156 +41,32 @@ public class SolaceApplicationNotifier extends ApplicationNotifier {
 
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
-        if (SolaceNotifierUtils.isSolaceEnvironmentDefined()) {
-            apiMgtDAO = ApiMgtDAO.getInstance();
-            process(event);
-        }
-        return true;
-    }
-
-    /**
-     * Process Application notifier event related to Solace applications
-     *
-     * @param event related to Application handling
-     * @throws NotifierException if error occurs when casting event
-     */
-    private void process(Event event) throws NotifierException {
-        ApplicationEvent applicationEvent;
-        applicationEvent = (ApplicationEvent) event;
-
-        if (APIConstants.EventType.APPLICATION_DELETE.name().equals(event.getType())) {
-            removeSolaceApplication(applicationEvent);
-        } else if (APIConstants.EventType.APPLICATION_UPDATE.name().equals(event.getType())) {
-            renameSolaceApplication(applicationEvent);
-        }
-    }
-
-    /**
-     * Remove applications from Solace broker
-     *
-     * @param event ApplicationEvent to remove Solace applications
-     * @throws NotifierException if error occurs when removing applications from Solace broker
-     */
-    private void removeSolaceApplication(ApplicationEvent event) throws NotifierException {
-        // get list of subscribed APIs in the application
-        Subscriber subscriber = new Subscriber(event.getSubscriber());
         try {
-
-            Set<SubscribedAPI> subscriptions = apiMgtDAO.getSubscribedAPIs(subscriber, event.getApplicationName(),
-                    event.getGroupId());
-            List<SubscribedAPI> subscribedApiList = new ArrayList<>(subscriptions);
-            boolean hasSubscribedAPIDeployedInSolace = false;
-            String organizationNameOfSolaceDeployment = null;
-
-            Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-            labelOne:
-            for (SubscribedAPI api : subscribedApiList) {
-                List<APIRevisionDeployment> deployments = apiMgtDAO.getAPIRevisionDeploymentByApiUUID(api.getUUID());
-                for (APIRevisionDeployment deployment : deployments) {
-                    if (gatewayEnvironments.containsKey(deployment.getDeployment())) {
-                        if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.
-                                getDeployment()).getProvider())) {
-                            hasSubscribedAPIDeployedInSolace = true;
-                            organizationNameOfSolaceDeployment = gatewayEnvironments.get(deployment.getDeployment()).
-                                    getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION);
-                            break labelOne;
-                        }
-                    }
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                    .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+            SolaceConfig solaceConfig = config.getSolaceConfig();
+            if (solaceConfig != null && solaceConfig.isEnabled()) {
+                apiMgtDAO = ApiMgtDAO.getInstance();
+                if (APIConstants.EventType.APPLICATION_DELETE.name().equals(event.getType())) {
+                    deleteAppRegistrationIfPresent(event);
                 }
+                /*
+                Application Creation event is not handled here - it is handled along with subscription creation.
+                We don't want to create an app registration unnecessarily, if the dev portal app is not going to be
+                subscribed to a Solace API.
+                 */
             }
-
-            boolean applicationFoundInSolaceBroker = false;
-            if (hasSubscribedAPIDeployedInSolace) {
-                SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
-
-                // check existence of application in Solace Broker
-                CloseableHttpResponse response1 = solaceAdminApis.applicationGet(organizationNameOfSolaceDeployment,
-                        event.getUuid(), "default");
-                if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                    applicationFoundInSolaceBroker = true;
-
-                    if (log.isDebugEnabled()) {
-                        log.info("Found application '" + event.getApplicationName() + "' in Solace broker");
-                        log.info("Waiting until application removing workflow gets finished");
-                    }
-
-                } else if (response1.getStatusLine().getStatusCode() == HttpStatus.SC_NOT_FOUND) {
-                    throw new NotifierException("Application '" + event.getApplicationName() + "' cannot be found in " +
-                            "Solace Broker");
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.error("Error while searching for application '" + event.getApplicationName() + "'" +
-                                " in Solace Broker. : " + response1.getStatusLine().toString());
-                    }
-                    throw new NotifierException("Error while searching for application '" + event.getApplicationName() +
-                            "' in Solace Broker");
-                }
-            }
-
-            if (applicationFoundInSolaceBroker) {
-                log.info("Deleting application from Solace Broker");
-                // delete application from solace
-                SolaceAdminApis solaceAdminApis = SolaceNotifierUtils.getSolaceAdminApis();
-                CloseableHttpResponse response2 = solaceAdminApis.deleteApplication(organizationNameOfSolaceDeployment,
-                        event.getUuid());
-                if (response2.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
-                    log.info("Successfully deleted application '" + event.getApplicationName() + "' " +
-                            "in Solace Broker");
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.error("Error while deleting application " + event.getApplicationName() + " in Solace. :"
-                        + response2.getStatusLine().toString());
-                    }
-                    throw new NotifierException("Error while deleting application '" + event.getApplicationName() +
-                            "' in Solace");
-                }
-            }
+            return true;
         } catch (APIManagementException e) {
-            throw new NotifierException(e.getMessage());
+            throw new NotifierException("Error while processing application event", e);
         }
     }
 
-    /**
-     * Rename applications on the Solace broker
-     *
-     * @param event ApplicationEvent to rename Solace applications
-     * @throws NotifierException if error occurs when renaming applications on the Solace broker
-     */
-    private void renameSolaceApplication(ApplicationEvent event) throws NotifierException {
-
-        // get list of subscribed APIs in the application
-        Subscriber subscriber = new Subscriber(event.getSubscriber());
-
-        try {
-            Application application = apiMgtDAO.getApplicationByUUID(event.getUuid());
-            Set<SubscribedAPI> subscriptions = apiMgtDAO.getSubscribedAPIs(subscriber, event.getApplicationName(),
-                    event.getGroupId());
-            Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
-            boolean isContainsSolaceApis = false;
-            String organizationNameOfSolaceDeployment = null;
-            labelOne:
-            //Check whether the application needs to be updated has a Solace API subscription
-            for (SubscribedAPI api : subscriptions) {
-                List<APIRevisionDeployment> deployments = apiMgtDAO.getAPIRevisionDeploymentByApiUUID(api.
-                        getIdentifier().getUUID());
-                for (APIRevisionDeployment deployment : deployments) {
-                    if (gatewayEnvironments.containsKey(deployment.getDeployment())) {
-                        if (SolaceConstants.SOLACE_ENVIRONMENT.equalsIgnoreCase(gatewayEnvironments.get(deployment.
-                                getDeployment()).getProvider())) {
-                            isContainsSolaceApis = true;
-                            organizationNameOfSolaceDeployment = gatewayEnvironments.get(deployment.getDeployment()).
-                                    getAdditionalProperties().get(SolaceConstants.SOLACE_ENVIRONMENT_ORGANIZATION);
-                            break labelOne;
-                        }
-                    }
-                }
-            }
-            // Renaming application using Solace Admin Apis
-            if (isContainsSolaceApis) {
-                SolaceNotifierUtils.renameSolaceApplication(organizationNameOfSolaceDeployment, application);
-            }
-        } catch (APIManagementException e) {
-            throw new NotifierException(e.getMessage());
+    private void deleteAppRegistrationIfPresent(Event event) throws APIManagementException {
+        String applicationUuid = ((ApplicationEvent) event).getUuid();
+        if (SolaceV2ApiHolder.getInstance().isAppRegistrationExists(applicationUuid)) {
+            SolaceV2ApiHolder.getInstance().deleteAppRegistration(applicationUuid);
         }
     }
+
 }
