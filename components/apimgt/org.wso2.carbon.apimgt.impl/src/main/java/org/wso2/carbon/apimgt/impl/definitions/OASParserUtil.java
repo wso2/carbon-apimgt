@@ -884,6 +884,11 @@ public class OASParserUtil {
         if (os.getProperties() != null) {
             for (String propertyName : os.getProperties().keySet()) {
                 Schema propertySchema = os.getProperties().get(propertyName);
+
+                if (propertySchema.get$ref() != null) {
+                    references.add(propertySchema.get$ref());
+                }
+
                 if (propertySchema instanceof ComposedSchema) {
                     ComposedSchema cs = (ComposedSchema) propertySchema;
                     if (cs.getAllOf() != null) {
