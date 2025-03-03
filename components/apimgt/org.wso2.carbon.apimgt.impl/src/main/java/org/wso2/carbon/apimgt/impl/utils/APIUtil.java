@@ -2455,8 +2455,10 @@ public final class APIUtil {
             return authorized;
         }
 
-        if (APIConstants.Permissions.APIM_ADMIN.equals(permission)) {
-            Integer value = getValueFromCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, userNameWithoutChange);
+        if (APIConstants.Permissions.APIM_ADMIN.equals(permission) || APIConstants.Permissions.API_CREATE.equals(permission)
+                || APIConstants.Permissions.API_PUBLISH.equals(permission)) {
+            String cacheKey = userNameWithoutChange + ":" + permission;
+            Integer value = getValueFromCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, cacheKey);
             if (value != null) {
                 return value == 1;
             }
@@ -2478,9 +2480,10 @@ public final class APIUtil {
                 authorized =
                         manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange), permission,
                                 CarbonConstants.UI_PERMISSION_ACTION);
-            if (APIConstants.Permissions.APIM_ADMIN.equals(permission)) {
-                addToRolesCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, userNameWithoutChange,
-                        authorized ? 1 : 2);
+            if (APIConstants.Permissions.APIM_ADMIN.equals(permission) || APIConstants.Permissions.API_CREATE.equals(permission)
+                    || APIConstants.Permissions.API_PUBLISH.equals(permission)) {
+                String cacheKey = userNameWithoutChange + ":" + permission;
+                addToRolesCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, cacheKey, authorized ? 1 : 2);
             }
 
         } catch (UserStoreException e) {
@@ -7597,8 +7600,12 @@ public final class APIUtil {
     public static void clearRoleCache(String userName) {
 
         if (isPublisherRoleCacheEnabled) {
-            Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(
-                    APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE).remove(userName);
+            // Clear all the permissions for the user
+            Cache<String, ?> permissionCache = Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(
+                    APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE);
+            permissionCache.remove(userName + ":" + APIConstants.Permissions.APIM_ADMIN);
+            permissionCache.remove(userName + ":" + APIConstants.Permissions.API_CREATE);
+            permissionCache.remove(userName + ":" + APIConstants.Permissions.API_PUBLISH);
             Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).getCache(
                     APIConstants.API_USER_ROLE_CACHE).remove(userName);
         }
