@@ -162,6 +162,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -4780,11 +4781,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         Set<String> set = new HashSet<>();
 
         for (String element : arr1) {
-            set.add(element);
+            set.add(element.toLowerCase(Locale.ENGLISH));
         }
 
         for (String element : arr2) {
-            if (set.contains(element)) {
+            if (set.contains(element.toLowerCase(Locale.ENGLISH))) {
                 return true;
             }
         }

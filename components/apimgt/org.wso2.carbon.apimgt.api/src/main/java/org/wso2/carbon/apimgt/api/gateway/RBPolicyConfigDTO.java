@@ -25,9 +25,10 @@ import java.util.List;
  */
 public class RBPolicyConfigDTO {
 
+    private static final long DEFAULT_SUSPEND_DURATION = 0L;
     private List<ModelEndpointDTO> production;
     private List<ModelEndpointDTO> sandbox;
-    private Long suspendDuration;
+    private Long suspendDuration = DEFAULT_SUSPEND_DURATION;
 
     /**
      * Gets the production model endpoints.

@@ -211,33 +211,6 @@ rulesetContent:
         functionOptions:
           min: 1
 
-    api-tags-alphabetical:
-      description: >
-        API tags should be in alphabetical order. For instance, `["alpha", "beta", "delta"]` is correct, while `["beta", "alpha"]` is incorrect.
-
-        **Correct Example**:
-        ```json
-        {
-          "data": {
-            "tags": ["alpha", "beta", "delta"]
-          }
-        }
-        ```
-
-        **Incorrect Example**:
-        ```json
-        {
-          "data": {
-            "tags": ["delta", "beta", "alpha"]
-          }
-        }
-        ```
-      message: "API tags should be in alphabetical order."
-      severity: warn
-      given: "$.data.tags"
-      then:
-        function: alphabetical
-
     api-business-owner-email:
       description: Checks that the business owner’s email is set
       message: "Business owner email is missing or empty."
@@ -315,23 +288,22 @@ rulesetContent:
         function: truthy
 
     api-no-unlimited-throttling-policy:
-      description: API should not have an unlimited throttling policy.
+      description: "API should not have an unlimited throttling policy."
       message: "API should not have an unlimited throttling policy."
-      severity: warn
+      severity: "warn"
+      given: "$.data.apiThrottlingPolicy"
+      then:
+        function: "pattern"
+        functionOptions:
+          notMatch: "^Unlimited$"
+
+    api-resources-security-required:
+      description: Checks that security is enabled for all resources.
+      message: "Security is not enabled for all resources."
+      severity: error
       given: "$.data.operations.*"
       then:
-        field: "throttlingPolicy"
+        field: "authType"
         function: pattern
         functionOptions:
-          notMatch: 'Unlimited'
-
-  api-resources-security-required:
-    description: Checks that security is enabled for all resources.
-    message: "Security is not enabled for all resources."
-    severity: error
-    given: "$.data.operations.*"
-    then:
-      field: "authType"
-      function: pattern
-      functionOptions:
-        notMatch: 'None'
+          notMatch: 'None'

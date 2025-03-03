@@ -310,6 +310,10 @@ public class ImportUtils {
                         setOperationsToDTO(importedApiDTO, validationResponse);
                     }
                 }
+
+                // Drop any API Endpoints (if exists)
+                dropAPIEndpoints(targetApi, apiProvider);
+
                 targetApi.setOrganization(organization);
                 if (preservePortalConfigurations) {
                     APIDTO convertedOldAPI = APIMappingUtil.fromAPItoDTO(targetApi);
@@ -417,6 +421,12 @@ public class ImportUtils {
                 throw new APIComplianceException(complianceResult
                         .get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
             }
+
+            // Populate the primary endpoint IDs to the importedApi object prior to the API update call
+            String primaryProductionEndpointId = importedApiDTO.getPrimaryProductionEndpointId();
+            String primarySandboxEndpointId = importedApiDTO.getPrimarySandboxEndpointId();
+            importedApi.setPrimaryProductionEndpointId(primaryProductionEndpointId);
+            importedApi.setPrimarySandboxEndpointId(primarySandboxEndpointId);
 
             apiProvider.updateAPI(importedApi, oldAPI);
 
@@ -714,24 +724,29 @@ public class ImportUtils {
         }
     }
 
+    /**
+     * This method is used to drop any existing API endpoints of the API.
+     *
+     * @param api      API object
+     * @param provider API Provider
+     * @throws APIManagementException If an error occurs while dropping the API endpoints
+     */
+    private static void dropAPIEndpoints(API api, APIProvider provider) throws APIManagementException {
+        provider.deleteAPIPrimaryEndpointMappings(api.getUuid());
+        provider.deleteAPIEndpointsByApiUUID(api.getUuid());
+    }
+
+    /**
+     * This method is used to populate the API with endpoints.
+     *
+     * @param api                 API object
+     * @param provider            API Provider
+     * @param extractedFolderPath Extracted folder path of the API project
+     * @param organization        Organization
+     * @throws APIManagementException If an error occurs while populating the API with endpoints
+     */
     public static void populateAPIWithEndpoints(API api, APIProvider provider, String extractedFolderPath,
             String organization) throws APIManagementException {
-
-        // Delete existing endpoints
-        List<APIEndpointInfo> existingAPIEndpoints = provider.getAllAPIEndpointsByUUID(api.getUuid(), organization);
-        for (APIEndpointInfo existingAPIEndpoint : existingAPIEndpoints) {
-            try {
-                provider.deleteAPIEndpointById(existingAPIEndpoint.getEndpointUuid());
-                if (log.isDebugEnabled()) {
-                    log.debug("Deleted API Endpoint with UUID : " + existingAPIEndpoint.getEndpointUuid());
-                }
-            } catch (APIManagementException e) {
-                throw new APIManagementException(
-                        "Error while deleting API Endpoint with UUID: " + existingAPIEndpoint.getEndpointUuid(), e,
-                        ExceptionCodes.from(ExceptionCodes.ERROR_DELETING_API_ENDPOINT,
-                                existingAPIEndpoint.getEndpointUuid()));
-            }
-        }
 
         try {
             // Retrieve endpoints from artifact
@@ -746,7 +761,7 @@ public class ImportUtils {
                     for (JsonElement endpointElement : endpoints) {
                         JsonObject endpointObj = endpointElement.getAsJsonObject();
                         APIEndpointInfo apiEndpointInfo = new Gson().fromJson(endpointObj, APIEndpointInfo.class);
-                        String endpointUUID = apiEndpointInfo.getEndpointUuid();
+                        String endpointUUID = apiEndpointInfo.getId();
                         try {
                             String createdEndpointUUID = provider.addAPIEndpoint(api.getUuid(), apiEndpointInfo,
                                     organization);

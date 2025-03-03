@@ -24,15 +24,15 @@ import java.util.Map;
  * API Endpoint details.
  */
 public class APIEndpointInfo {
-    private String endpointUuid;
-    private String endpointName;
+    private String id;
+    private String name;
     private Map<String, Object> endpointConfig;
     private String deploymentStage;
 
-    public String getEndpointName() { return endpointName; }
+    public String getName() { return name; }
 
-    public void setEndpointName(String endpointName) {
-        this.endpointName = endpointName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Map<String, Object> getEndpointConfig() {
@@ -43,12 +43,12 @@ public class APIEndpointInfo {
         this.endpointConfig = endpointConfig;
     }
 
-    public String getEndpointUuid() {
-        return endpointUuid;
+    public String getId() {
+        return id;
     }
 
-    public void setEndpointUuid(String endpointUuid) {
-        this.endpointUuid = endpointUuid;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getDeploymentStage() {

@@ -1226,6 +1226,18 @@ public interface APIProvider extends APIManager {
     boolean isDocumentationExist(String uuid, String docName, String organization) throws APIManagementException;
 
     /**
+     * Checks whether the given document already exists for the given api/product
+     *
+     * @param uuid         API/Product id
+     * @param documentId         updating document id
+     * @param docOtherTypeName      Name of the other document type
+     * @param organization Identifier of the organization
+     * @return true if document already exists for the given api/product
+     * @throws APIManagementException if failed to check existence of the documentation
+     */
+    boolean isAnotherOverviewDocumentationExist(String uuid, String documentId, String docOtherTypeName, String organization) throws APIManagementException;
+
+    /**
      * Add WSDL to the api. wsdl can be provided either as a url or a resource file
      * @param apiId        ID of the API
      * @param resource     Resource
@@ -1628,6 +1640,22 @@ public interface APIProvider extends APIManager {
      */
     APIEndpointInfo updateAPIEndpoint(String apiId, APIEndpointInfo apiEndpoint, String organization)
             throws APIManagementException;
+
+    /**
+     * Delete API primary endpoint mappings by providing the API UUID
+     *
+     * @param apiId API UUID
+     * @throws APIManagementException if an error occurs while deleting the primary endpoint mappings
+     */
+    void deleteAPIPrimaryEndpointMappings(String apiId) throws APIManagementException;
+
+    /**
+     * Delete API endpoints by providing the API UUID
+     *
+     * @param apiId API UUID
+     * @throws APIManagementException if an error occurs while deleting the endpoints
+     */
+    void deleteAPIEndpointsByApiUUID(String apiId) throws APIManagementException;
 
     /**
      * Set existing operation policy mapping to the URI Templates

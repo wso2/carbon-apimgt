@@ -140,6 +140,7 @@
   "apim.throttling.jms.java_naming_factory_initial": "org.wso2.andes.jndi.PropertiesFileInitialContextFactory",
   "apim.throttling.enable_policy_deployment": true,
   "apim.throttling.enable_policy_recreation_on_startup": true,
+  "apim.throttling.sequential_failover_from_beginning": "false",
   "server.mode": "single",
   "apim.workflow.enable": "false",
   "apim.workflow.service_url": "https://localhost:9445/bpmn",

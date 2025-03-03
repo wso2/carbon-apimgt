@@ -8685,7 +8685,10 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_create
             - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8722,7 +8725,10 @@ paths:
           $ref: '#/components/responses/UnsupportedMediaType'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8762,7 +8768,10 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_create
             - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8809,7 +8818,10 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8838,7 +8850,10 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -14160,6 +14175,15 @@ components:
           description: |
             Allow subscription validation disabling for OAuth tokens
           default: true
+        designAssistantEnabled:
+          type: boolean
+          description: |
+            Specifies whether Design Assistant enabled
+          default: true
+        aiAuthTokenProvided:
+          type: boolean
+          description: Checks if the auth token is provided for AI service usage.
+          default: false
         customProperties:
           type: array
           items:

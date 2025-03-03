@@ -393,6 +393,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             }
             context.put("llmProviderId", api.getAiConfiguration().getLlmProviderId());
             context.put("deploymentStage", deploymentStage);
+            context.put("retryCount", APIUtil.getRetryAttemptsForFailoverConfigurations());
             t.merge(context, writer);
         } catch (Exception e) {
             log.error("Velocity Error", e);

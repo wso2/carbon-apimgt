@@ -161,7 +161,9 @@ public class APIAdminImpl implements APIAdmin {
         allEnvs.addAll(dynamicEnvs);
 
         for (Environment env : allEnvs) {
-            decryptGatewayConfigurationValues(env);
+            if (env.getProvider().equalsIgnoreCase(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+                maskValues(env);
+            }
         }
         return allEnvs;
     }
@@ -200,8 +202,7 @@ public class APIAdminImpl implements APIAdmin {
         validateForUniqueVhostNames(environment);
         Environment environmentToStore =  new Environment(environment);
         encryptGatewayConfigurationValues(null, environmentToStore);
-        apiMgtDAO.addEnvironment(tenantDomain, environment);
-        return environment;
+        return apiMgtDAO.addEnvironment(tenantDomain, environmentToStore);
     }
 
     @Override
@@ -217,6 +218,23 @@ public class APIAdminImpl implements APIAdmin {
         apiMgtDAO.deleteEnvironment(uuid);
     }
 
+    public Environment getEnvironmentWithoutPropertyMasking(String tenantDomain, String uuid) throws APIManagementException {
+        // priority for configured environments over dynamic environments
+        // name is the UUID of environments configured in api-manager.xml
+        Environment env = APIUtil.getReadOnlyEnvironments().get(uuid);
+        if (env == null) {
+            env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
+            if (env == null) {
+                String errorMessage = String.format("Failed to retrieve Environment with UUID %s. Environment not found",
+                        uuid);
+                throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
+                        ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid))
+                );
+            }
+        }
+        return env;
+    }
+
     @Override
     public boolean hasExistingDeployments(String tenantDomain, String uuid) throws APIManagementException {
         Environment existingEnv = getEnvironment(tenantDomain, uuid);
@@ -228,7 +246,7 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public Environment updateEnvironment(String tenantDomain, Environment environment) throws APIManagementException {
         // check if the VHost exists in the tenant domain with given UUID, throw error if not found
-        Environment existingEnv = getEnvironment(tenantDomain, environment.getUuid());
+        Environment existingEnv = getEnvironmentWithoutPropertyMasking(tenantDomain, environment.getUuid());
         if (existingEnv.isReadOnly()) {
             String errorMessage = String.format("Failed to update Environment with UUID '%s'. Environment is read only",
                     environment.getUuid());
@@ -247,6 +265,7 @@ public class APIAdminImpl implements APIAdmin {
 
         validateForUniqueVhostNames(environment);
         environment.setId(existingEnv.getId());
+        encryptGatewayConfigurationValues(existingEnv, environment);
         Environment updatedEnvironment = apiMgtDAO.updateEnvironment(environment);
         // If the update is successful without throwing an exception
         // Perform a separate task of updating gateway label names
@@ -849,7 +868,7 @@ public class APIAdminImpl implements APIAdmin {
         return keyManagerConfigurationDTO;
     }
 
-    private Environment decryptGatewayConfigurationValues(Environment environment)
+    public Environment decryptGatewayConfigurationValues(Environment environment)
             throws APIManagementException {
 
         Map<String, String> additionalProperties = environment.getAdditionalProperties();

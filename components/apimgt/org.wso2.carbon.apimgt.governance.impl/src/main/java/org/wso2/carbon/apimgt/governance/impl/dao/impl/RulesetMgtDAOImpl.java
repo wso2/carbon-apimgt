@@ -473,12 +473,12 @@ public class RulesetMgtDAOImpl implements RulesetMgtDAO {
         try (Connection connection = APIMGovernanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(sqlQuery)) {
             prepStmt.setString(1, organization);
-            prepStmt.setString(2, searchCriteria
-                    .getOrDefault(APIMGovernanceConstants.RulesetSearchAttributes.NAME, ""));
-            prepStmt.setString(3, searchCriteria
-                    .getOrDefault(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE, ""));
-            prepStmt.setString(4, searchCriteria
-                    .getOrDefault(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, ""));
+            prepStmt.setString(2, "%" + searchCriteria
+                    .getOrDefault(APIMGovernanceConstants.RulesetSearchAttributes.NAME, "") + "%");
+            prepStmt.setString(3, "%" + searchCriteria
+                    .getOrDefault(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE, "") + "%");
+            prepStmt.setString(4, "%" + searchCriteria
+                    .getOrDefault(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, "") + "%");
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
                     rulesetInfoList.add(getRulesetInfoFromResultSet(rs));

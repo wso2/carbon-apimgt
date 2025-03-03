@@ -407,6 +407,11 @@
 
     <AiConfiguration>
         <Enabled>{{apim.ai.llm_provider_events_enabled}}</Enabled>
+        <FailoverConfigurations>
+            <FailoverEndpointsLimit>{{apim.ai.failover_configurations.failover_endpoints_limit}}</FailoverEndpointsLimit>
+            <DefaultRequestTimout>{{apim.ai.failover_configurations.default_request_timeout}}</DefaultRequestTimout>
+        </FailoverConfigurations>
+        <DefaultRequestTimout>{{apim.ai.default_request_timeout}}</DefaultRequestTimout>
     </AiConfiguration>
 
     <!--
@@ -1177,6 +1182,7 @@
                 {% else %}
                 <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
                 {% endif %}
+                <SequentialFailoverFromBeginning>{{apim.throttling.sequential_failover_from_beginning}}</SequentialFailoverFromBeginning>
             </JMSConnectionParameters>
         </JMSConnectionDetails>
 
@@ -1633,6 +1639,7 @@
              {% else %}
              <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}?{% if apim.throttling.jms.ssl is defined %}ssl='{{apim.throttling.jms.ssl}}'{% endif %}'</connectionfactory.TopicConnectionFactory>
              {% endif %}
+             <SequentialFailoverFromBeginning>{{apim.throttling.sequential_failover_from_beginning}}</SequentialFailoverFromBeginning>
          </EventReceiverConfiguration>
      </EventHubConfigurations>
 

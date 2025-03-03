@@ -99,8 +99,8 @@ public enum APIMGovExceptionCodes implements ErrorHandler {
 
     INVALID_RULESET_CONTENT(990119, "Ruleset content is invalid",
             400, "Content of ruleset '%s' is invalid"),
-    INVALID_RULESET_CONTENT_DETAILED(990120, "Ruleset content is invalid",
-            400, "Content of ruleset %s is invalid: %s"),
+    INVALID_RULESET_CONTENT_DETAILED(990120, "Invalid ruleset content",
+            400, "Content of ruleset `%s` is invalid:\n %s"),
 
     // Policy related codes
     POLICY_ALREADY_EXISTS(990200, "Policy already exists.",

@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.api.dto;
 
 import com.google.gson.annotations.SerializedName;
-import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
+import org.wso2.carbon.apimgt.api.model.EndpointSecurityDTO;
 
 import java.util.List;
 
@@ -178,17 +178,17 @@ public class EndpointConfigDTO {
     public static class EndpointSecurityConfig {
 
         @SerializedName("production")
-        private EndpointSecurity production;
+        private EndpointSecurityDTO production;
 
         @SerializedName("sandbox")
-        private EndpointSecurity sandbox;
+        private EndpointSecurityDTO sandbox;
 
         /**
          * Gets the security configuration for production endpoints.
          *
          * @return the production endpoint security configuration
          */
-        public EndpointSecurity getProduction() {
+        public EndpointSecurityDTO getProduction() {
 
             return production;
         }
@@ -198,7 +198,7 @@ public class EndpointConfigDTO {
          *
          * @param production the production endpoint security configuration
          */
-        public void setProduction(EndpointSecurity production) {
+        public void setProduction(EndpointSecurityDTO production) {
 
             this.production = production;
         }
@@ -208,7 +208,7 @@ public class EndpointConfigDTO {
          *
          * @return the sandbox endpoint security configuration
          */
-        public EndpointSecurity getSandbox() {
+        public EndpointSecurityDTO getSandbox() {
 
             return sandbox;
         }
@@ -218,7 +218,7 @@ public class EndpointConfigDTO {
          *
          * @param sandbox the sandbox endpoint security configuration
          */
-        public void setSandbox(EndpointSecurity sandbox) {
+        public void setSandbox(EndpointSecurityDTO sandbox) {
 
             this.sandbox = sandbox;
         }

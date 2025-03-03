@@ -178,6 +178,7 @@ import org.wso2.carbon.apimgt.impl.dto.SubscribedApiDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionPolicyDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.dto.ai.AIAPIConfigurationsDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.DataLoadingException;
 import org.wso2.carbon.apimgt.impl.internal.APIManagerComponent;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -3659,6 +3660,81 @@ public final class APIUtil {
         }
     }
 
+    /**
+     * Retrieves the retry attempts limit for failover configurations.
+     *
+     * @return The number of retry attempts allowed for failover.
+     * @throws APIManagementException If the configuration service or failover settings are unavailable.
+     */
+    public static int getRetryAttemptsForFailoverConfigurations() throws APIManagementException {
+
+        APIManagerConfigurationService configService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+
+        if (configService == null) {
+            log.error("API Manager Configuration Service is not available.");
+            throw new APIManagementException("API Manager Configuration Service is not initialized.");
+        }
+
+        AIAPIConfigurationsDTO aiConfig = configService.getAPIManagerConfiguration().getAiApiConfigurationsDTO();
+        if (aiConfig == null || aiConfig.getFailoverConfigurations() == null) {
+            log.warn("Missing AI API Failover configurations.");
+            throw new APIManagementException("Missing required AI API Failover configurations.");
+        }
+
+        return aiConfig.getFailoverConfigurations().getFailoverEndpointsLimit();
+    }
+
+    /**
+     * Retrieves the default request timeout for AI APIs.
+     *
+     * @return The default request timeout in milliseconds.
+     * @throws APIManagementException If the configuration service or failover settings are unavailable.
+     */
+    public static long getDefaultRequestTimeoutsForAIAPIs() throws APIManagementException {
+
+        APIManagerConfigurationService configService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+
+        if (configService == null) {
+            log.error("API Manager Configuration Service is not available.");
+            throw new APIManagementException("API Manager Configuration Service is not initialized.");
+        }
+
+        AIAPIConfigurationsDTO aiConfig = configService.getAPIManagerConfiguration().getAiApiConfigurationsDTO();
+        if (aiConfig == null || aiConfig.getFailoverConfigurations() == null) {
+            log.warn("Missing AI API Failover configurations.");
+            throw new APIManagementException("Missing required AI API Failover configurations.");
+        }
+
+        return aiConfig.getDefaultRequestTimeout();
+    }
+
+    /**
+     * Retrieves the default request timeout for failover configurations.
+     *
+     * @return The default request timeout in milliseconds.
+     * @throws APIManagementException If the configuration service or failover settings are unavailable.
+     */
+    public static long getDefaultRequestTimeoutForFailoverConfigurations() throws APIManagementException {
+
+        APIManagerConfigurationService configService =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
+
+        if (configService == null) {
+            log.error("API Manager Configuration Service is not available.");
+            throw new APIManagementException("API Manager Configuration Service is not initialized.");
+        }
+
+        AIAPIConfigurationsDTO aiConfig = configService.getAPIManagerConfiguration().getAiApiConfigurationsDTO();
+        if (aiConfig == null || aiConfig.getFailoverConfigurations() == null) {
+            log.warn("Missing AI API Failover configurations.");
+            throw new APIManagementException("Missing required AI API Failover configurations.");
+        }
+
+        return aiConfig.getFailoverConfigurations().getDefaultRequestTimeout();
+    }
+
     public void setupSelfRegistration(APIManagerConfiguration config, int tenantId) throws APIManagementException {
 
         boolean enabled = Boolean.parseBoolean(config.getFirstProperty(APIConstants.SELF_SIGN_UP_ENABLED));
@@ -5298,11 +5374,11 @@ public final class APIUtil {
         Set<String> set = new HashSet<>();
 
         for (String element : arr1) {
-            set.add(element);
+            set.add(element.toLowerCase(Locale.ENGLISH));
         }
 
         for (String element : arr2) {
-            if (set.contains(element)) {
+            if (set.contains(element.toLowerCase(Locale.ENGLISH))) {
                 return true;
             }
         }
@@ -9547,10 +9623,8 @@ public final class APIUtil {
             String keyManagerUrl;
             String enableTokenEncryption =
                     apiManagerConfiguration.getFirstProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE);
-            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.AUTHSERVER_URL)) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.AUTHSERVER_URL,
-                        apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL));
-            }
+            keyManagerConfigurationDTO.addProperty(APIConstants.AUTHSERVER_URL,
+                    apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL));
             keyManagerUrl =
                     (String) keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.AUTHSERVER_URL);
             if (StringUtils.isNotEmpty(keyManagerUrl)){
@@ -9564,17 +9638,10 @@ public final class APIUtil {
                 keyManagerConfigurationDTO.addProperty(APIConstants.ENCRYPT_TOKENS_ON_PERSISTENCE,
                         Boolean.parseBoolean(enableTokenEncryption));
             }
-            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.REVOKE_URL)) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.REVOKE_URL,
-                        keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                                .concat(APIConstants.IDENTITY_REVOKE_ENDPOINT));
-            }
-            if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(APIConstants.TOKEN_URL)) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.TOKEN_URL,
-                        keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
-                                .concat(APIConstants.IDENTITY_TOKEN_ENDPOINT_CONTEXT));
-            }
-
+            keyManagerConfigurationDTO.addProperty(APIConstants.REVOKE_URL, keyManagerUrl.split("/" +
+                    APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(APIConstants.IDENTITY_REVOKE_ENDPOINT));
+            keyManagerConfigurationDTO.addProperty(APIConstants.TOKEN_URL, keyManagerUrl.split("/" +
+                    APIConstants.SERVICES_URL_RELATIVE_PATH)[0].concat(APIConstants.IDENTITY_TOKEN_ENDPOINT_CONTEXT));
             if (!keyManagerConfigurationDTO.getAdditionalProperties()
                     .containsKey(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE)) {
                 keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.AVAILABLE_GRANT_TYPE,
@@ -9599,16 +9666,10 @@ public final class APIUtil {
                     .containsKey(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION)) {
                 keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_TOKEN_GENERATION, true);
             }
-            if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                    .containsKey(APIConstants.KeyManager.TOKEN_ENDPOINT)) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.TOKEN_ENDPOINT,
-                        keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.TOKEN_URL));
-            }
-            if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                    .containsKey(APIConstants.KeyManager.REVOKE_ENDPOINT)) {
-                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.REVOKE_ENDPOINT,
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.TOKEN_ENDPOINT,
+                    keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.TOKEN_URL));
+            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.REVOKE_ENDPOINT,
                         keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.REVOKE_URL));
-            }
             if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
                     APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD)) {
                 keyManagerConfigurationDTO.addProperty(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD,
@@ -11092,9 +11153,9 @@ public final class APIUtil {
         try {
             if (tokenEndpoint != null) {
                 if (tokenGenerator == null) {
-                    tokenGenerator = new AccessTokenGenerator(tokenEndpoint, key);
+                    tokenGenerator = new AccessTokenGenerator();
                 }
-                String token = tokenGenerator.getAccessToken();
+                String token = tokenGenerator.getAccessToken(tokenEndpoint, key);
                 request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
                         APIConstants.AUTHORIZATION_BEARER + token);
             } else {
@@ -11405,6 +11466,20 @@ public final class APIUtil {
 
         return Boolean.getBoolean(
                 APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
+    }
+
+    /**
+     * Removes all trailing slashes from the given URL string.
+     *
+     * @param url the URL string to process
+     * @return the URL string without trailing slashes; returns the original string if no trailing slashes are present
+     * @throws NullPointerException if the input URL is null
+     */
+    public static String trimTrailingSlashes(String url) {
+        while (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
+        return url;
     }
 
     /**

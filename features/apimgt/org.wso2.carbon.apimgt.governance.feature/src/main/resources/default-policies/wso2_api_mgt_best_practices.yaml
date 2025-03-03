@@ -5,13 +5,13 @@
 # herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
 # You may not alter or remove any copyright or other notice from copies of this content.
 
-name : WSO2 API Best Practices
-description: This policy enforces a set of best practices recommended by WSO2 for APIs on the WSO2 API Manager. This by default includes the WSO2 API Design Guidelines and WSO2 Style Guidelines.
+name: WSO2 API Management Best Practices
+description: This policy enforces a set of best practices recommended by WSO2 for APIs on the WSO2 API Manager.
 labels:
   - GLOBAL
 governableStates:
   - API_CREATE
   - API_UPDATE
 rulesetNames:
-  - WSO2 Rest API Design Guidelines
+  - WSO2 REST API Design Guidelines
   - WSO2 API Management Guidelines
