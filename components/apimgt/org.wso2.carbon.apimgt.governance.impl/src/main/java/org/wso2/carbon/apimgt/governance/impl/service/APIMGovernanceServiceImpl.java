@@ -28,7 +28,9 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
@@ -274,4 +276,108 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
 
         complianceManager.deleteArtifact(artifactRefId, artifactType, organization);
     }
+
+    /**
+     * Get applicable rulesets for the artifact
+     *
+     * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)
+     * @param artifactType  Artifact type (ArtifactType.API)
+     * @param ruleType      Rule type (RuleType.API_DEFINITION)
+     * @param ruleCategory  Rule category (RuleCategory.SPECTRAL)
+     * @param organization  Organization
+     * @return List of Rulesets
+     * @throws APIMGovernanceException If an error occurs while getting the applicable rulesets
+     */
+    @Override
+    public List<Ruleset> getApplicableRulesetsForArtifact(String artifactRefId, ArtifactType artifactType,
+                                                          RuleType ruleType, RuleCategory ruleCategory,
+                                                          String organization) throws APIMGovernanceException {
+
+        ExtendedArtifactType extendedArtifactType = APIMGovernanceUtil
+                .getExtendedArtifactTypeForArtifact(artifactRefId, artifactType);
+
+        if (artifactRefId == null || extendedArtifactType == null) {
+            return new ArrayList<>();
+        }
+        List<String> policies = new ArrayList<>(policyManager.getOrganizationWidePolicies(organization).keySet());
+
+        // Retrieve labels and filter policies by labels
+        List<String> labels = APIMGovernanceUtil.getLabelsForArtifact(artifactRefId, artifactType);
+        for (String label : labels) {
+            policies.addAll(policyManager.getPoliciesByLabel(label, organization).keySet());
+        }
+
+        // Process each policy to retrieve applicable rulesets
+        Set<String> rulesetIds = new HashSet<>();
+        List<Ruleset> rulesets = new ArrayList<>();
+
+        for (String policyId : policies) {
+            APIMGovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId, organization);
+
+            boolean isGovernable = APIMGovernanceUtil.isArtifactGovernable(artifactRefId, artifactType,
+                    policy.getGovernableStates());
+
+            if (isGovernable) {
+                List<Ruleset> policyRulesets = policyManager.getRulesetsWithContentByPolicyId(policyId, organization);
+                for (Ruleset ruleset : policyRulesets) {
+                    if (!rulesetIds.contains(ruleset.getId()) && ruleset.getRuleType().equals(ruleType) &&
+                            ruleset.getRuleCategory().equals(ruleCategory) &&
+                            ruleset.getArtifactType().equals(extendedArtifactType)) {
+                        rulesetIds.add(ruleset.getId());
+                        rulesets.add(ruleset);
+                    }
+                }
+            }
+        }
+
+        return rulesets;
+    }
+
+    /**
+     * Get applicable rulesets by extended artifact type
+     *
+     * @param extendedArtifactType Extended artifact type (ExtendedArtifactType.REST_API)
+     * @param ruleType             Rule type (RuleType.API_DEFINITION)
+     * @param ruleCategory         Rule category (RuleCategory.SPECTRAL)
+     * @param organization         Organization
+     * @return List of Rulesets
+     * @throws APIMGovernanceException If an error occurs while getting the applicable rulesets
+     */
+    @Override
+    public List<Ruleset> getApplicableRulesetsByExtendedArtifactType(ExtendedArtifactType extendedArtifactType,
+                                                                     RuleType ruleType, RuleCategory ruleCategory,
+                                                                     String organization) throws
+            APIMGovernanceException {
+
+        if (extendedArtifactType == null) {
+            return new ArrayList<>();
+        }
+
+        List<String> policies = new ArrayList<>(policyManager.getOrganizationWidePolicies(organization).keySet());
+
+        // Process each policy to retrieve applicable rulesets
+        Set<String> rulesetIds = new HashSet<>();
+        List<Ruleset> rulesets = new ArrayList<>();
+        for (String policyId : policies) {
+            APIMGovernancePolicy policy = policyManager.getGovernancePolicyByID(policyId, organization);
+
+            // If the policy can govern API creation or update
+            if (policy.getGovernableStates().contains(APIMGovernableState.API_CREATE) ||
+                    policy.getGovernableStates().contains(APIMGovernableState.API_UPDATE)) {
+
+                List<Ruleset> policyRulesets = policyManager.getRulesetsWithContentByPolicyId(policyId, organization);
+                for (Ruleset ruleset : policyRulesets) {
+                    if (!rulesetIds.contains(ruleset.getId()) && ruleset.getRuleType().equals(ruleType) &&
+                            ruleset.getRuleCategory().equals(ruleCategory) &&
+                            ruleset.getArtifactType().equals(extendedArtifactType)) {
+                        rulesetIds.add(ruleset.getId());
+                        rulesets.add(ruleset);
+                    }
+                }
+            }
+        }
+
+        return rulesets;
+    }
+
 }

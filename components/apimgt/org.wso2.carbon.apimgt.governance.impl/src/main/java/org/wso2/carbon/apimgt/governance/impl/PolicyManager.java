@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
@@ -26,12 +28,14 @@ import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +47,7 @@ import java.util.regex.Pattern;
  */
 public class PolicyManager {
 
+    private static final Log log = LogFactory.getLog(PolicyManager.class);
     private final GovernancePolicyMgtDAO policyMgtDAO;
 
     public PolicyManager() {
@@ -237,6 +242,23 @@ public class PolicyManager {
             throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, policyId);
         }
         return policyMgtDAO.getRulesetsByPolicyId(policyId, organization);
+    }
+
+    /**
+     * Get the list of rulesets with content for a given policy
+     *
+     * @param policyId     Policy ID
+     * @param organization Organization
+     * @return List of rulesets with content
+     * @throws APIMGovernanceException If an error occurs while getting the rulesets
+     */
+    public List<Ruleset> getRulesetsWithContentByPolicyId(String policyId, String organization)
+            throws APIMGovernanceException {
+        if (policyMgtDAO.getGovernancePolicyByID(policyId, organization) == null) {
+            log.warn("Policy not found for ID: " + policyId);
+            return new ArrayList<>();
+        }
+        return policyMgtDAO.getRulesetsWithContentByPolicyId(policyId, organization);
     }
 
     /**

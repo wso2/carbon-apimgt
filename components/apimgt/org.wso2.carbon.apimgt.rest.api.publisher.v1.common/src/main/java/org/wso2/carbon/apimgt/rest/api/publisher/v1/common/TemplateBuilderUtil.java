@@ -561,8 +561,7 @@ public class TemplateBuilderUtil {
         List<SoapToRestMediationDto> soapToRestOutMediationDtoList =
                 ImportUtils.retrieveSoapToRestFlowMediations(extractedFolderPath, ImportUtils.OUT);
         List<EndpointDTO> endpointDTOList = null;
-        if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype()) && api.getPrimaryProductionEndpointId() != null
-                || api.getPrimarySandboxEndpointId() != null) {
+        if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
             endpointDTOList = ImportUtils.retrieveEndpointConfigs(extractedFolderPath);
             addEndpointsFromConfig(endpointDTOList, api);
         }
@@ -1105,7 +1104,7 @@ public class TemplateBuilderUtil {
      */
     public static List<SimplifiedEndpoint> simplifyEndpoints(List<EndpointDTO> endpoints) {
 
-        if (endpoints.isEmpty()) {
+        if (endpoints == null || endpoints.isEmpty()) {
             return new ArrayList<>();
         }
         return endpoints.stream()
