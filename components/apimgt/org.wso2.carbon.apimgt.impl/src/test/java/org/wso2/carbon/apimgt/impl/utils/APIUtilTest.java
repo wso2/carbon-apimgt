@@ -1721,6 +1721,10 @@ public class APIUtilTest {
 
         PowerMockito.mockStatic(PrivilegedCarbonContext.class);
         PowerMockito.mockStatic(CarbonContext.class);
+        CarbonContext carbonContext = Mockito.mock(CarbonContext.class);
+        PowerMockito.when(CarbonContext.getThreadLocalCarbonContext()).thenReturn(carbonContext);
+        Mockito.when(carbonContext.getTenantDomain()).thenReturn(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+        Mockito.when(carbonContext.getTenantId()).thenReturn(org.wso2.carbon.base.MultitenantConstants.SUPER_TENANT_ID);
         PrivilegedCarbonContext privilegedCarbonContext = Mockito.mock(PrivilegedCarbonContext.class);
         Mockito.when(PrivilegedCarbonContext.getThreadLocalCarbonContext()).thenReturn(privilegedCarbonContext);
 
