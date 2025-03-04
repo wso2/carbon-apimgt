@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.solace.api.v2.model.AppRegistration;
 import org.wso2.carbon.apimgt.solace.api.v2.model.SolaceEventApiProductsResponse;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -114,7 +115,8 @@ public class SolaceV2Apis {
     public JsonObject getEventApiAsyncApiDefinition(String eventApiProductId, String planId, String eventApiId)
             throws APIManagementException {
         try {
-            return solaceV2ApimApisClient.getEventApiAsyncApiDefinition(eventApiProductId, planId, eventApiId);
+            return solaceV2ApimApisClient.getEventApiAsyncApiDefinition(
+                    eventApiProductId, planId, eventApiId, Collections.singletonMap("asyncApiVersion", "2.2.0"));
         } catch (SolaceApiClientException e) {
             throw new APIManagementException("Error while getting event API async API definition", e);
         }

@@ -21,10 +21,13 @@ package org.wso2.carbon.apimgt.solace.api.v2;
 import com.google.gson.JsonObject;
 import feign.Headers;
 import feign.Param;
+import feign.QueryMap;
 import feign.RequestLine;
 import org.wso2.carbon.apimgt.solace.api.exception.SolaceApiClientException;
 import org.wso2.carbon.apimgt.solace.api.v2.model.AppRegistration;
 import org.wso2.carbon.apimgt.solace.api.v2.model.SolaceEventApiProductsResponse;
+
+import java.util.Map;
 
 /**
  * Contains methods used to interact with Solace V2 APIM APIs.
@@ -39,7 +42,8 @@ public interface SolaceV2ApimApisClient {
     @Headers("Content-Type: application/json")
     JsonObject getEventApiAsyncApiDefinition(@Param("eventApiProductId") String eventApiProductId,
                                              @Param("planId") String planId,
-                                             @Param("eventApiId") String eventApiId) throws SolaceApiClientException;
+                                             @Param("eventApiId") String eventApiId,
+                                             @QueryMap Map<String, String> queryParams) throws SolaceApiClientException;
 
     @RequestLine("GET /eventApiProducts/{eventApiProductId}/plans")
     @Headers("Content-Type: application/json")
