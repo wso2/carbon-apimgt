@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.governance.api.model.APIMGovernanceActionType;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicyList;
 import org.wso2.carbon.apimgt.governance.api.model.RuleSeverity;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.model.RulesetInfo;
 import org.wso2.carbon.apimgt.governance.impl.dao.GovernancePolicyMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImpl;
@@ -237,6 +238,22 @@ public class PolicyManager {
             throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, policyId);
         }
         return policyMgtDAO.getRulesetsByPolicyId(policyId, organization);
+    }
+
+    /**
+     * Get the list of rulesets with content for a given policy
+     *
+     * @param policyId     Policy ID
+     * @param organization Organization
+     * @return List of rulesets with content
+     * @throws APIMGovernanceException If an error occurs while getting the rulesets
+     */
+    public List<Ruleset> getRulesetsWithContentByPolicyId(String policyId, String organization)
+            throws APIMGovernanceException {
+        if (policyMgtDAO.getGovernancePolicyByID(policyId, organization) == null) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, policyId);
+        }
+        return policyMgtDAO.getRulesetsWithContentByPolicyId(policyId, organization);
     }
 
     /**

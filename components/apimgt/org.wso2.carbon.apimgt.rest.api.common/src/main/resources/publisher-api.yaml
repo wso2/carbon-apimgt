@@ -7675,6 +7675,17 @@ paths:
       description: |
         This operation can be used to get linter custom rules from tenant-config.
       operationId: getLinterCustomRules
+      parameters:
+        - name: apiId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: apiType
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         200:
           description: |
