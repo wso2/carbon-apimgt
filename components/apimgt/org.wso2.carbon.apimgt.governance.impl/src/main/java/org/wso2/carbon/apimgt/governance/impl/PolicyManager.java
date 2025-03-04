@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.governance.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovExceptionCodes;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
@@ -33,6 +35,7 @@ import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImp
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
 import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +47,7 @@ import java.util.regex.Pattern;
  */
 public class PolicyManager {
 
+    private static final Log log = LogFactory.getLog(PolicyManager.class);
     private final GovernancePolicyMgtDAO policyMgtDAO;
 
     public PolicyManager() {
@@ -251,7 +255,8 @@ public class PolicyManager {
     public List<Ruleset> getRulesetsWithContentByPolicyId(String policyId, String organization)
             throws APIMGovernanceException {
         if (policyMgtDAO.getGovernancePolicyByID(policyId, organization) == null) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes.POLICY_NOT_FOUND, policyId);
+            log.warn("Policy not found for ID: " + policyId);
+            return new ArrayList<>();
         }
         return policyMgtDAO.getRulesetsWithContentByPolicyId(policyId, organization);
     }
