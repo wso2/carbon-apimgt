@@ -872,7 +872,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                         }
                     }
 
-                    if (body.getCallbackUrl() != null && StringUtils.isNotEmpty(body.getCallbackUrl())) {
+                    if (StringUtils.isNotEmpty(body.getCallbackUrl())) {
                         jsonParamObj.put(APIConstants.JSON_CALLBACK_URL, body.getCallbackUrl());
                     }
                     
