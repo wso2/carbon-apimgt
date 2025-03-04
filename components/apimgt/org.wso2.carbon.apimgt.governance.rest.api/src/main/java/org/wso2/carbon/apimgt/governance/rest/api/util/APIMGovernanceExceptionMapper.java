@@ -24,16 +24,16 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.error.ErrorHandler;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper;
 
 import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
 
 /**
  * This is the custom exception mapper for Governance.
  */
-public class APIMGovernanceExceptionMapper implements ExceptionMapper<Throwable> {
+public class APIMGovernanceExceptionMapper extends GlobalThrowableMapper {
 
     private static final Log log = LogFactory.getLog(APIMGovernanceExceptionMapper.class);
 
@@ -88,6 +88,6 @@ public class APIMGovernanceExceptionMapper implements ExceptionMapper<Throwable>
                         .build();
             }
         }
-        return null;
+        return super.toResponse(e);
     }
 }

@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -94,8 +95,12 @@ import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.governance.api.model.RuleViolation;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
+import org.wso2.carbon.apimgt.governance.api.model.RulesetContent;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
@@ -146,6 +151,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -3699,6 +3705,83 @@ public class PublisherCommonUtils {
         } catch (APIMGovernanceException e) {
             log.info("Error occurred while deleting governance data on deletion of  " + ArtifactType.API +
                     " " + artifactId, e);
+        }
+    }
+
+    /**
+     * Get the list of rulesets applicable for the API linter.
+     *
+     * @param apiId        API ID
+     * @param apiType      API Type
+     * @param organization Organization of the logged-in user
+     * @return List of rulesets in JSON format
+     * @throws APIManagementException If an error occurs while getting the rulesets
+     */
+    public static List<String> getGovernanceRulesetsForLinter(String apiId, String apiType, String organization)
+            throws APIManagementException {
+        ObjectMapper jsonMapper = new ObjectMapper();
+        ObjectMapper yamlMapper = new YAMLMapper();
+
+        try {
+            List<Ruleset> rulesets = new ArrayList<>();
+            if (apiId != null) {
+                rulesets = apimGovernanceService.getApplicableRulesetsForArtifact(apiId, ArtifactType.API,
+                        RuleType.API_DEFINITION, RuleCategory.SPECTRAL, organization);
+            } else if (apiType != null) {
+                ExtendedArtifactType extendedArtifactType = getAPIExtendedArtifactType(apiType);
+                rulesets = apimGovernanceService.getApplicableRulesetsByExtendedArtifactType(extendedArtifactType,
+                        RuleType.API_DEFINITION, RuleCategory.SPECTRAL, organization);
+            }
+
+            List<String> rulesetJsonList = new ArrayList<>();
+            for (Ruleset ruleset : rulesets) {
+                RulesetContent rulesetContent = ruleset.getRulesetContent();
+                if (rulesetContent == null || rulesetContent.getContentType() == null) {
+                    continue;
+                }
+
+                byte[] contentBytes = rulesetContent.getContent();
+                if (contentBytes == null) {
+                    continue;
+                }
+
+                String contentStr = new String(contentBytes, StandardCharsets.UTF_8);
+                try {
+                    if (RulesetContent.ContentType.JSON.equals(rulesetContent.getContentType())) {
+                        rulesetJsonList.add(contentStr);
+                    } else if (RulesetContent.ContentType.YAML.equals(rulesetContent.getContentType())) {
+                        Object yamlObject = yamlMapper.readValue(contentStr, Object.class);
+                        rulesetJsonList.add(jsonMapper.writeValueAsString(yamlObject));
+                    }
+                } catch (Exception e) {
+                    throw new APIManagementException("Error processing ruleset content", e);
+                }
+            }
+            return rulesetJsonList;
+        } catch (APIMGovernanceException e) {
+            throw new APIManagementException("Error occurred while getting rulesets for API linter", e);
+        }
+    }
+
+    /**
+     * Get the extended artifact type for the given API type.
+     *
+     * @param apiType API Type
+     * @return ExtendedArtifactType object
+     */
+    public static ExtendedArtifactType getAPIExtendedArtifactType(String apiType) {
+        switch (apiType.toUpperCase(Locale.ENGLISH)) {
+            case "REST":
+            case "HTTP":
+                return ExtendedArtifactType.REST_API;
+            case "WS":
+            case "SSE":
+            case "WEBSUB":
+            case "WEBHOOK":
+            case "ASYNC":
+                return ExtendedArtifactType.ASYNC_API;
+            default:
+                return null;
         }
     }
 }
