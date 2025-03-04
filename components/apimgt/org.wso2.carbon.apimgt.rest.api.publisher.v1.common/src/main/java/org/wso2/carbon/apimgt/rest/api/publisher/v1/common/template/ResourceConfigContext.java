@@ -83,6 +83,7 @@ public class ResourceConfigContext extends ConfigContextDecorator {
                         String resourceKey =
                                 resource.getApiIdentifier() + ":" + resource.getUriTemplate().getUriTemplate();
                         if (resourceKey.equals(productResourceKey)) {
+                            resource.getUriTemplate().setHttpVerbs(uriTemplate.getHTTPVerb());
                             resource.getUriTemplate()
                                     .setMediationScripts(uriTemplate.getHTTPVerb(), uriTemplate.getMediationScript());
                         }
