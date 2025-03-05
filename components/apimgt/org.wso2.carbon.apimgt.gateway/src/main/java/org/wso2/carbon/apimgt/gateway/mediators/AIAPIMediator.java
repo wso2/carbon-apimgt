@@ -127,11 +127,11 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             }
 
             if (APIConstants.AIAPIConstants.TRAFFIC_FLOW_DIRECTION_IN.equals(direction)) {
-                processInboundRequest(messageContext, providerConfiguration);
+                processInboundRequest(messageContext, providerConfiguration, provider.getName());
             } else if (APIConstants.AIAPIConstants.TRAFFIC_FLOW_DIRECTION_OUT.equals(direction)) {
-                processOutboundResponse(messageContext, providerConfiguration, llmProviderService, metadataMap);
+                processOutboundResponse(messageContext, providerConfiguration, llmProviderService, metadataMap,
+                        provider.getName());
             }
-
         } catch (Exception e) {
             log.error("Error during mediation.", e);
             return false;
@@ -146,10 +146,13 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      *
      * @param messageContext        The message context of the request.
      * @param providerConfiguration The configuration of the LLM provider.
+     * @param providerName          LLM Service provider
      * @throws XMLStreamException If an error occurs while processing the XML stream.
      * @throws IOException        If an I/O error occurs.
      */
-    private void processInboundRequest(MessageContext messageContext, LLMProviderConfiguration providerConfiguration)
+    private void processInboundRequest(MessageContext messageContext,
+                                       LLMProviderConfiguration providerConfiguration,
+                                       String providerName)
             throws XMLStreamException, IOException, APIManagementException {
 
         String targetEndpoint = null;
@@ -181,7 +184,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         }
 
         if (failoverConfigMap != null && !failoverConfigMap.isEmpty()) {
-            initFailover(messageContext, providerConfiguration, failoverConfigMap);
+            initFailover(messageContext, providerConfiguration, failoverConfigMap, providerName);
         }
 
     }
@@ -192,13 +195,15 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      *
      * @param messageContext        The Synapse {@link MessageContext} containing API request details.
      * @param providerConfiguration The {@link LLMProviderConfiguration} containing provider-specific configurations.
-     * @param failoverConfigMap
+     * @param failoverConfigMap     Map of failover configs
+     * @param providerName          LLM service provider name
      * @throws XMLStreamException If an error occurs while processing the XML message.
      * @throws IOException        If an I/O error occurs during payload handling.
      */
     private void initFailover(MessageContext messageContext,
                               LLMProviderConfiguration providerConfiguration,
-                              Map<String, FailoverPolicyConfigDTO> failoverConfigMap)
+                              Map<String, FailoverPolicyConfigDTO> failoverConfigMap,
+                              String providerName)
             throws XMLStreamException, IOException, APIManagementException {
 
         org.apache.axis2.context.MessageContext axis2Ctx =
@@ -207,11 +212,18 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         RelayUtils.buildMessage(axis2Ctx);
         String requestModel = extractRequestModel(getTargetModelMetadata(providerConfiguration), axis2Ctx);
 
-        FailoverPolicyConfigDTO failoverConfig = failoverConfigMap.get(requestModel);
-        if (requestModel == null || failoverConfig == null) {
-            return;
+        FailoverPolicyConfigDTO failoverConfig;
+        boolean isProviderAzure =
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_NAME.equals(providerName);
+        if (isProviderAzure) {
+            failoverConfig = failoverConfigMap.values().iterator().next();
+        } else {
+            failoverConfig = failoverConfigMap.get(requestModel);
+            if (requestModel == null || failoverConfig == null) {
+                return;
+            }
         }
-        applyFailoverConfigs(messageContext, failoverConfig, providerConfiguration);
+        applyFailoverConfigs(messageContext, failoverConfig, providerConfiguration, !isProviderAzure);
     }
 
     /**
@@ -237,12 +249,13 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param messageContext        The API request context.
      * @param policyConfig          The failover policy configuration.
      * @param providerConfiguration The LLM provider configuration.
+     * @param modifyRequestPayload   Whether to modify request payload or not
      * @throws IOException            If request modification fails.
      * @throws APIManagementException If an API management error occurs.
      */
     private void applyFailoverConfigs(MessageContext messageContext, FailoverPolicyConfigDTO policyConfig,
-                                      LLMProviderConfiguration providerConfiguration) throws IOException,
-            APIManagementException {
+                                      LLMProviderConfiguration providerConfiguration, boolean modifyRequestPayload)
+            throws IOException, APIManagementException {
 
         FailoverPolicyDeploymentConfigDTO targetConfig = GatewayUtils.getTargetConfig(messageContext, policyConfig);
         if (targetConfig == null) {
@@ -265,7 +278,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
 
         if (isEndpointSuspended) {
             ModelEndpointDTO failoverEndpoint = failoverEndpoints.get(0);
-            modifyRequestPayload(failoverEndpoint.getModel(), providerConfiguration, messageContext);
+            if (modifyRequestPayload) {
+                modifyRequestPayload(failoverEndpoint.getModel(), providerConfiguration, messageContext);
+            }
             updateTargetEndpoint(messageContext, 1, failoverEndpoint);
         }
         preserveFailoverPropertiesInMsgCtx(messageContext, policyConfig, targetModelEndpoint, failoverEndpoints);
@@ -443,13 +458,16 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param providerConfigs    The configuration of the LLM provider.
      * @param llmProviderService The service handling LLM provider operations.
      * @param metadataMap        A map containing metadata information.
+     * @param providerName       LLM service provider
      * @throws APIManagementException If an API management error occurs.
      * @throws XMLStreamException     If an error occurs while processing the XML stream.
      * @throws IOException            If an I/O error occurs.
      */
     private void processOutboundResponse(MessageContext messageContext,
                                          LLMProviderConfiguration providerConfigs,
-                                         LLMProviderService llmProviderService, Map<String, String> metadataMap)
+                                         LLMProviderService llmProviderService,
+                                         Map<String, String> metadataMap,
+                                         String providerName)
             throws APIManagementException, XMLStreamException, IOException {
 
         String payload = extractPayloadFromContext(messageContext, providerConfigs);
@@ -497,9 +515,10 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                     APIConstants.AIAPIConstants.EXIT_ENDPOINT);
             return;
         }
-
         if (failoverConfigs != null) {
-            handleFailover(messageContext, providerConfigs, failoverConfigs);
+            boolean isProviderAzure =
+                    APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_NAME.equals(providerName);
+            handleFailover(messageContext, providerConfigs, failoverConfigs, !isProviderAzure);
             return;
         }
         messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
@@ -601,13 +620,16 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      *
      * @param messageContext        The message context containing request details.
      * @param providerConfiguration The configuration details of the LLM provider.
-     * @param failoverConfigs
+     * @param failoverConfigs       Failover Configurations
+     * @param modifyRequestPayload  Whether to modify request payload or not
      * @throws XMLStreamException If an error occurs while handling XML streams.
      * @throws IOException        If an I/O error occurs during processing.
      */
     private void handleFailover(MessageContext messageContext,
                                 LLMProviderConfiguration providerConfiguration,
-                                Map<String, Object> failoverConfigs) throws XMLStreamException, IOException {
+                                Map<String, Object> failoverConfigs,
+                                boolean modifyRequestPayload)
+            throws XMLStreamException, IOException {
 
         int currentEndpointIndex = getCurrentFailoverIndex(messageContext);
 
@@ -637,7 +659,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         ModelEndpointDTO failoverEndpoint = failoverEndpoints.get(currentEndpointIndex);
         updateJsonPayloadWithRequestPayload(messageContext,
                 (String) failoverConfigs.get(APIConstants.AIAPIConstants.REQUEST_PAYLOAD));
-        modifyRequestPayload(failoverEndpoint.getModel(), providerConfiguration, messageContext);
+        if (modifyRequestPayload) {
+            modifyRequestPayload(failoverEndpoint.getModel(), providerConfiguration, messageContext);
+        }
         updateRequestMetadata(messageContext, failoverConfigs);
 
         updateTargetEndpoint(messageContext, currentEndpointIndex + 1, failoverEndpoint);
