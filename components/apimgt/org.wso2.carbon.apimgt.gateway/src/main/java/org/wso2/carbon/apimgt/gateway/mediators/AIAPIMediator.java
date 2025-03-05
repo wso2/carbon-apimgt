@@ -277,6 +277,11 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                         GatewayUtils.getEndpointKey(targetModelEndpoint));
 
         if (isEndpointSuspended) {
+            if (failoverEndpoints.isEmpty()) {
+                messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT,
+                        APIConstants.AIAPIConstants.REJECT_ENDPOINT);
+                return;
+            }
             ModelEndpointDTO failoverEndpoint = failoverEndpoints.get(0);
             if (modifyRequestPayload) {
                 modifyRequestPayload(failoverEndpoint.getModel(), providerConfiguration, messageContext);

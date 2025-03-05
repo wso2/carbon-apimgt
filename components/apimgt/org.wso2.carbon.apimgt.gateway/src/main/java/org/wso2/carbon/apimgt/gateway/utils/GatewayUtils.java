@@ -1792,7 +1792,7 @@ public class GatewayUtils {
                                                                org.apache.synapse.MessageContext messageContext) {
 
         if (selectedEndpoints == null || selectedEndpoints.isEmpty()) {
-            return null;
+            return new ArrayList<>();
         }
 
         List<ModelEndpointDTO> activeEndpoints = new ArrayList<>();
@@ -1802,7 +1802,7 @@ public class GatewayUtils {
                 activeEndpoints.add(endpoint);
             }
         }
-        return activeEndpoints.isEmpty() ? null : activeEndpoints;
+        return activeEndpoints;
     }
 
     /**
