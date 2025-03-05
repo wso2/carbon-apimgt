@@ -294,7 +294,7 @@ public class SQLConstants {
 
     public static final String DELETE_REQ_POLICY_MAPPING_FOR_ARTIFACT =
             "DELETE FROM GOV_REQUEST_POLICY " +
-                    "WHERE REQ_ID = (" +
+                    "WHERE REQ_ID IN (" +
                     "    SELECT GR.REQ_ID " +
                     "    FROM GOV_REQUEST GR " +
                     "    JOIN GOV_ARTIFACT GA ON GR.ARTIFACT_KEY = GA.ARTIFACT_KEY " +
