@@ -1179,11 +1179,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 addDefaultPrimaryEndpoints(api, true, false);
             } else {
                 boolean isProductionEndpointFromAPIEndpointConfig = primaryProductionEndpointId != null &&
-                        primaryProductionEndpointId.endsWith(APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR +
-                                APIConstants.APIEndpoint.PRODUCTION);
+                        primaryProductionEndpointId.equals(APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID);
                 boolean isSandboxEndpointFromAPIEndpointConfig = primarySandboxEndpointId != null &&
-                        primarySandboxEndpointId.endsWith(APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR +
-                                APIConstants.APIEndpoint.SANDBOX);
+                        primarySandboxEndpointId.equals(APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID);
 
                 if (isProductionEndpointFromAPIEndpointConfig && isSandboxEndpointFromAPIEndpointConfig) {
                     addDefaultPrimaryEndpoints(api, true, true);
@@ -2233,6 +2231,32 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         }
+
+        // copy endpoints and endpoint mappings
+        List<APIEndpointInfo> existingEndpointList = getAllAPIEndpointsByUUID(existingApiId, organization);
+        addAPIEndpoints(newAPIId, existingEndpointList, organization);
+        addPrimaryEndpointMappingsToNewAPI(existingApiId, newAPIId, organization);
+
+//        String primaryProductionEndpointId = existingAPI.getPrimaryProductionEndpointId();
+//        String primarySandboxEndpointId = existingAPI.getPrimarySandboxEndpointId();
+//        boolean isPrimaryProdEndpointFromEndpointConfig = primaryProductionEndpointId != null &&
+//                primaryProductionEndpointId.equals(existingApiId +
+//                        APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.PRODUCTION);
+//        boolean isPrimarySandEndpointFromEndpointConfig = primarySandboxEndpointId != null &&
+//                primarySandboxEndpointId.equals(existingApiId +
+//                        APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.SANDBOX);
+//        if (isPrimaryProdEndpointFromEndpointConfig || isPrimarySandEndpointFromEndpointConfig) {
+//            API newAPIWithUpdatedPrimaryEndpointIds = newAPI;
+//            if (isPrimaryProdEndpointFromEndpointConfig) {
+//                newAPIWithUpdatedPrimaryEndpointIds.setPrimaryProductionEndpointId(newAPIId +
+//                        APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.PRODUCTION);
+//            }
+//            if (isPrimarySandEndpointFromEndpointConfig) {
+//                newAPIWithUpdatedPrimaryEndpointIds.setPrimarySandboxEndpointId(newAPIId +
+//                        APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.SANDBOX);
+//            }
+//            updateAPI(newAPIWithUpdatedPrimaryEndpointIds, newAPI);
+//        }
 
         // copy icon
         ResourceFile icon = getIcon(existingApiId, organization);
@@ -6047,6 +6071,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return result;
     }
 
+
     @Override
     public void setThumbnailToAPI(String apiId, ResourceFile resource, String organization) throws APIManagementException {
 
@@ -8232,6 +8257,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    public void addAPIEndpoints(String apiUUID, List<APIEndpointInfo> apiEndpointList, String organization)
+            throws APIManagementException {
+        apiMgtDAO.addAPIEndpoints(apiUUID, apiEndpointList, organization);
+    }
+
+    @Override
     public APIEndpointInfo getAPIEndpointByUUID(String apiUUID, String endpointUUID, String organization)
             throws APIManagementException {
         return apiMgtDAO.getAPIEndpoint(apiUUID, endpointUUID, organization);
@@ -8251,6 +8282,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void deleteAPIEndpointsByApiUUID(String apiId) throws APIManagementException {
         apiMgtDAO.deleteAPIEndpointsByApiUUID(apiId);
+    }
+
+    @Override
+    public void addPrimaryEndpointMappingsToNewAPI(String existingApiId, String newApiId, String organization)
+            throws APIManagementException {
+        apiMgtDAO.addPrimaryEndpointMappingsToNewAPI(existingApiId, newApiId, organization);
     }
 
     @Override
@@ -8287,11 +8324,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<String> endpointIds = apiMgtDAO.getPrimaryEndpointUUIDByAPIId(currentApiUuid);
         if (endpointIds != null && !endpointIds.isEmpty()) {
             for (String endpointId : endpointIds) {
-                if (endpointId.equals(
-                        currentApiUuid + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.PRODUCTION)) {
+                if (endpointId.equals(APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID)) {
                     api.setPrimaryProductionEndpointId(endpointId);
-                } else if (endpointId.equals(
-                        currentApiUuid + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.SANDBOX)) {
+                } else if (endpointId.equals(APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID)) {
                     api.setPrimarySandboxEndpointId(endpointId);
                 }
             }

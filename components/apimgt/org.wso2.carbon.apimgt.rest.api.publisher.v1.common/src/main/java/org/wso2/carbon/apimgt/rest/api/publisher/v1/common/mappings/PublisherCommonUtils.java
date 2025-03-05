@@ -3231,15 +3231,18 @@ public class PublisherCommonUtils {
      */
     public static APIEndpointInfo getAPIEndpointFromEndpointConfig(String apiUUID, Map<String, Object> endpointConfig,
             String environment) {
-        APIEndpointInfo apiEndpointInfo = new APIEndpointInfo();
-        apiEndpointInfo.setId(apiUUID + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + environment);
 
+        APIEndpointInfo apiEndpointInfo = new APIEndpointInfo();
+        String endpointId;
         String endpointName;
         if (Objects.equals(environment, APIConstants.APIEndpoint.PRODUCTION)) {
+            endpointId = APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID;
             endpointName = APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_NAME;
         } else {
+            endpointId = APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID;
             endpointName = APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_NAME;
         }
+        apiEndpointInfo.setId(endpointId);
         apiEndpointInfo.setName(endpointName);
         apiEndpointInfo.setDeploymentStage(environment);
         apiEndpointInfo.setEndpointConfig(endpointConfig);
@@ -3268,12 +3271,10 @@ public class PublisherCommonUtils {
             }.getType();
             Map<String, Object> endpointConfigMap = gson.fromJson(endpointConfig, type);
 
-            if (endpointUUID.equals(apiUUID + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR
-                    + APIConstants.APIEndpoint.PRODUCTION)) {
+            if (endpointUUID.equals(APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID)) {
                 apiEndpoint = getAPIEndpointFromEndpointConfig(apiUUID, endpointConfigMap,
                         APIConstants.APIEndpoint.PRODUCTION);
-            } else if (endpointUUID.equals(apiUUID + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR
-                    + APIConstants.APIEndpoint.SANDBOX)) {
+            } else if (endpointUUID.equals(APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID)) {
                 apiEndpoint = getAPIEndpointFromEndpointConfig(apiUUID, endpointConfigMap,
                         APIConstants.APIEndpoint.SANDBOX);
             } else {

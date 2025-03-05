@@ -1622,6 +1622,17 @@ public interface APIProvider extends APIManager {
             throws APIManagementException;
 
     /**
+     * Add endpoints to the provided API
+     *
+     * @param apiUUID         Unique identifier of API
+     * @param apiEndpointList List of API endpoint details
+     * @param organization    Organization name
+     * @throws APIManagementException if an error occurs while adding the endpoints
+     */
+    void addAPIEndpoints(String apiUUID, List<APIEndpointInfo> apiEndpointList, String organization)
+            throws APIManagementException;
+
+    /**
      * Delete endpoint by providing the endpoint UUID.
      *
      * @param endpointUUID Unique identifier of endpoint
@@ -1656,6 +1667,17 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if an error occurs while deleting the endpoints
      */
     void deleteAPIEndpointsByApiUUID(String apiId) throws APIManagementException;
+
+    /**
+     * Add primary endpoint mappings to new API version
+     *
+     * @param existingApiId Existing API UUID
+     * @param newApiId      New API UUID
+     * @param organization  organization
+     * @throws APIManagementException if an error occurs while adding primary endpoint mappings
+     */
+    void addPrimaryEndpointMappingsToNewAPI(String existingApiId, String newApiId, String organization)
+            throws APIManagementException;
 
     /**
      * Set existing operation policy mapping to the URI Templates

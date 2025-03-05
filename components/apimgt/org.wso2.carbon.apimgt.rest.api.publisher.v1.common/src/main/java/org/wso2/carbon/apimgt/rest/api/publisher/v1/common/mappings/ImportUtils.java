@@ -402,7 +402,7 @@ public class ImportUtils {
                     extractedAPIPolicies, currentTenantDomain);
 
             // Handle API Endpoints if endpoints file is defined
-            populateAPIWithEndpoints(importedApi, apiProvider, extractedFolderPath, organization);
+            populateAPIWithEndpoints(importedApi.getUuid(), apiProvider, extractedFolderPath, organization);
 
             // Update Custom Backend Data if endpoint type is selected to "custom_backend"
             Map endpointConf = (Map) importedApiDTO.getEndpointConfig();
@@ -739,13 +739,13 @@ public class ImportUtils {
     /**
      * This method is used to populate the API with endpoints.
      *
-     * @param api                 API object
+     * @param apiUUID             API UUID
      * @param provider            API Provider
      * @param extractedFolderPath Extracted folder path of the API project
      * @param organization        Organization
      * @throws APIManagementException If an error occurs while populating the API with endpoints
      */
-    public static void populateAPIWithEndpoints(API api, APIProvider provider, String extractedFolderPath,
+    public static void populateAPIWithEndpoints(String apiUUID, APIProvider provider, String extractedFolderPath,
             String organization) throws APIManagementException {
 
         try {
@@ -763,7 +763,7 @@ public class ImportUtils {
                         APIEndpointInfo apiEndpointInfo = new Gson().fromJson(endpointObj, APIEndpointInfo.class);
                         String endpointUUID = apiEndpointInfo.getId();
                         try {
-                            String createdEndpointUUID = provider.addAPIEndpoint(api.getUuid(), apiEndpointInfo,
+                            String createdEndpointUUID = provider.addAPIEndpoint(apiUUID, apiEndpointInfo,
                                     organization);
                             if (log.isDebugEnabled()) {
                                 log.debug("API Endpoint with UUID: " + createdEndpointUUID +
@@ -784,7 +784,7 @@ public class ImportUtils {
             throw new APIManagementException("Error while reading API endpoints from path: " + extractedFolderPath, e,
                     ExceptionCodes.ERROR_READING_API_ENDPOINTS_FILE);
         } catch (APIManagementException e) {
-            throw new APIManagementException("Error while adding API endpoints to the API", e,
+            throw new APIManagementException("Error while adding API endpoints to API: " + apiUUID, e,
                     ExceptionCodes.ERROR_ADDING_API_ENDPOINTS);
         }
     }

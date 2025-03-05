@@ -3316,7 +3316,8 @@ public final class APIConstants {
     public static class APIEndpoint {
         public static final String PRODUCTION = "PRODUCTION";
         public static final String SANDBOX = "SANDBOX";
-        public static final String PRIMARY_ENDPOINT_ID_SEPARATOR = "--";
+        public static final String DEFAULT_PROD_ENDPOINT_ID = "default_production_endpoint";
+        public static final String DEFAULT_SANDBOX_ENDPOINT_ID = "default_sandbox_endpoint";
         public static final String DEFAULT_PROD_ENDPOINT_NAME = "Default Production Endpoint";
         public static final String DEFAULT_SANDBOX_ENDPOINT_NAME = "Default Sandbox Endpoint";
         public static final String ENDPOINT_CONFIG_PRODUCTION_ENDPOINTS = "production_endpoints";
