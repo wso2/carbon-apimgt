@@ -1869,8 +1869,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 + " policy is not found.", ExceptionCodes.INVALID_OPERATION_POLICY);
                     }
 
-                    if (!policyData.getSpecification().getName().equals(policy.getPolicyName()) ||
-                            !policyData.getSpecification().getVersion().equals(policy.getPolicyVersion())) {
+                    boolean isPolicyNameMatch = policyData.getSpecification().getName().equals(policy.getPolicyName())
+                            || (policyData.getSpecification().getName()).equals(policy.getPolicyName() + "_imported");
+                    if (!isPolicyNameMatch || !policyData.getSpecification().getVersion()
+                                    .equals(policy.getPolicyVersion())) {
                         throw new APIManagementException("Applied policy " + policy.getPolicyName()
                                 + "_" + policy.getPolicyVersion() + " does not match the specification");
                     }
