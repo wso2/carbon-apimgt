@@ -123,8 +123,8 @@ public class SpectralValidationEngine implements ValidationEngine {
                 }
 
                 String severityString = (String) ruleDetails.get("severity");
-                RuleSeverity severity = RuleSeverity.fromString(severityString);
-                severity = severity == null ? RuleSeverity.WARN : severity;
+                RuleSeverity severity = severityString == null ? RuleSeverity.WARN :
+                        RuleSeverity.fromString(severityString);
 
                 ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
