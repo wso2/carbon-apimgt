@@ -24623,7 +24623,7 @@ public class ApiMgtDAO {
         } else {
             // Update API Endpoint
             try (Connection connection = APIMgtDBUtil.getConnection()) {
-                apiEndpointUpdated = updateAPIEndpoint(connection, endpointUUID, apiEndpoint, organization);
+                apiEndpointUpdated = updateAPIEndpoint(connection, apiUUID, endpointUUID, apiEndpoint, organization);
             } catch (SQLException e) {
                 handleException("Failed to update the endpoint with ID " + endpointUUID, e);
             }
@@ -24635,6 +24635,7 @@ public class ApiMgtDAO {
      * Update API endpoint with provided UUID
      *
      * @param connection   DB connection
+     * @param apiUUID      API UUID
      * @param endpointUUID Endpoint identifier
      * @param apiEndpoint  Endpoint content
      * @param organization Organization
@@ -24642,15 +24643,16 @@ public class ApiMgtDAO {
      * @throws SQLException           if an SQL error occurs while updating API endpoint
      * @throws APIManagementException if an error occurs while updating API endpoint
      */
-    private APIEndpointInfo updateAPIEndpoint(Connection connection, String endpointUUID, APIEndpointInfo apiEndpoint,
-            String organization) throws SQLException, APIManagementException {
+    private APIEndpointInfo updateAPIEndpoint(Connection connection, String apiUUID, String endpointUUID,
+            APIEndpointInfo apiEndpoint, String organization) throws SQLException, APIManagementException {
         connection.setAutoCommit(false);
         try (PreparedStatement statement = connection.prepareStatement(
                 SQLConstants.APIEndpointsSQLConstants.UPDATE_API_ENDPOINT_BY_UUID)) {
             statement.setString(1, apiEndpoint.getName());
             statement.setBinaryStream(2, fromEndpointConfigMapToBA(apiEndpoint.getEndpointConfig()));
             statement.setString(3, endpointUUID);
-            statement.setString(4, organization);
+            statement.setString(4, apiUUID);
+            statement.setString(5, organization);
             if (statement.executeUpdate() > 0) {
                 return apiEndpoint;
             }
