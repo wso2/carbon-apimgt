@@ -213,10 +213,9 @@ public class DataProcessAndPublishingAgent implements Runnable {
             }
         }
 
-        if (((Axis2MessageContext) messageContext).getAxis2MessageContext()
-                .getProperty(AI_API_RESPONSE_METADATA) != null) {
-            Map<String, String> responseMetadata = (Map<String, String>) ((Axis2MessageContext) messageContext)
-                    .getAxis2MessageContext().getProperty(AI_API_RESPONSE_METADATA);
+        if (messageContext.getProperty(AI_API_RESPONSE_METADATA) != null) {
+            Map<String, String> responseMetadata = (Map<String, String>) messageContext
+                    .getProperty(AI_API_RESPONSE_METADATA);
             if (responseMetadata != null) {
                 if (null != responseMetadata.get(LLM_PROVIDER_SERVICE_METADATA_TOTAL_TOKEN_COUNT)) {
                     totalTokens =
