@@ -507,8 +507,9 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     public void addComplianceEvalResults(String artifactRefId, ArtifactType artifactType, String policyId,
                                          Map<String, List<RuleViolation>> rulesetViolationsMap, String organization)
             throws APIMGovernanceException {
+
+        resultWrtiteDelLock.lock();
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
-            resultWrtiteDelLock.lock();
             String artifactKey = getArtifactKey(connection, artifactRefId, artifactType, organization);
             if (artifactKey == null) {
                 throw new APIMGovernanceException(APIMGovExceptionCodes.ARTIFACT_NOT_FOUND, artifactRefId);
@@ -1091,8 +1092,9 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     @Override
     public void deleteArtifact(String artifactRefId, ArtifactType artifactType, String organization)
             throws APIMGovernanceException {
+
+        resultWrtiteDelLock.lock();
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
-            resultWrtiteDelLock.lock();
             connection.setAutoCommit(false);
 
             try {
