@@ -22,6 +22,7 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
 import org.apache.synapse.ManagedLifecycle;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
@@ -48,6 +49,7 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -548,7 +550,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                                              Map<String, Object> roundRobinConfigs,
                                              Map<String, Object> failoverConfigs) {
 
-        if (statusCode >= 200 && statusCode < 300) {
+        List<Integer> allowedStatusCodes = Arrays.asList(HttpStatus.SC_BAD_REQUEST,
+                HttpStatus.SC_METHOD_NOT_ALLOWED, HttpStatus.SC_UNPROCESSABLE_ENTITY);
+        if ((statusCode >= 200 && statusCode < 300) || allowedStatusCodes.contains(statusCode)) {
             Map<String, Object> transportHeaders = (Map<String, Object>) ((Axis2MessageContext) messageContext)
                     .getAxis2MessageContext().getProperty(
                             org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
