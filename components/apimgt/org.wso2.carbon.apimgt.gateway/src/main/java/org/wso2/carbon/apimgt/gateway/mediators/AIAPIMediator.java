@@ -120,7 +120,8 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
             messageContext.setProperty(APIConstants.AIAPIConstants.AI_API_REQUEST_METADATA, metadataMap);
             try {
                 messageContext.setProperty(APIConstants.AIAPIConstants.REQUEST_TIMEOUT,
-                        APIUtil.getDefaultRequestTimeoutsForAIAPIs());
+                        APIUtil.getDefaultRequestTimeoutsForAIAPIs()
+                                * APIConstants.AIAPIConstants.MILLISECONDS_IN_SECOND);
             } catch (APIManagementException e) {
                 log.error("Error while retrieving REQUEST_TIMEOUT", e);
                 return false;
@@ -249,7 +250,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
      * @param messageContext        The API request context.
      * @param policyConfig          The failover policy configuration.
      * @param providerConfiguration The LLM provider configuration.
-     * @param modifyRequestPayload   Whether to modify request payload or not
+     * @param modifyRequestPayload  Whether to modify request payload or not
      * @throws IOException            If request modification fails.
      * @throws APIManagementException If an API management error occurs.
      */
@@ -319,7 +320,7 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                 ? policyConfig.getRequestTimeout()
                 : APIUtil.getDefaultRequestTimeoutForFailoverConfigurations();
         messageContext.setProperty(APIConstants.AIAPIConstants.REQUEST_TIMEOUT,
-                requestTimeout);
+                requestTimeout * APIConstants.AIAPIConstants.MILLISECONDS_IN_SECOND);
 
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
