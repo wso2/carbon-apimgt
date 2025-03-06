@@ -630,6 +630,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String primarySandboxEndpointId = api.getPrimarySandboxEndpointId();
             if (primarySandboxEndpointId == null && primaryProductionEndpointId == null) {
                 addDefaultPrimaryEndpoints(api, true, false);
+            } else {
+                boolean isProductionEndpointFromAPIEndpointConfig = primaryProductionEndpointId != null &&
+                        primaryProductionEndpointId.equals(APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID);
+                boolean isSandboxEndpointFromAPIEndpointConfig = primarySandboxEndpointId != null &&
+                        primarySandboxEndpointId.equals(APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID);
+                if (isProductionEndpointFromAPIEndpointConfig && isSandboxEndpointFromAPIEndpointConfig) {
+                    addDefaultPrimaryEndpoints(api, true, true);
+                } else if (isProductionEndpointFromAPIEndpointConfig) {
+                    addDefaultPrimaryEndpoints(api, true, false);
+                } else if (isSandboxEndpointFromAPIEndpointConfig) {
+                    addDefaultPrimaryEndpoints(api, false, true);
+                }
             }
         }
 
@@ -2236,27 +2248,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<APIEndpointInfo> existingEndpointList = getAllAPIEndpointsByUUID(existingApiId, organization);
         addAPIEndpoints(newAPIId, existingEndpointList, organization);
         addPrimaryEndpointMappingsToNewAPI(existingApiId, newAPIId, organization);
-
-//        String primaryProductionEndpointId = existingAPI.getPrimaryProductionEndpointId();
-//        String primarySandboxEndpointId = existingAPI.getPrimarySandboxEndpointId();
-//        boolean isPrimaryProdEndpointFromEndpointConfig = primaryProductionEndpointId != null &&
-//                primaryProductionEndpointId.equals(existingApiId +
-//                        APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.PRODUCTION);
-//        boolean isPrimarySandEndpointFromEndpointConfig = primarySandboxEndpointId != null &&
-//                primarySandboxEndpointId.equals(existingApiId +
-//                        APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.SANDBOX);
-//        if (isPrimaryProdEndpointFromEndpointConfig || isPrimarySandEndpointFromEndpointConfig) {
-//            API newAPIWithUpdatedPrimaryEndpointIds = newAPI;
-//            if (isPrimaryProdEndpointFromEndpointConfig) {
-//                newAPIWithUpdatedPrimaryEndpointIds.setPrimaryProductionEndpointId(newAPIId +
-//                        APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.PRODUCTION);
-//            }
-//            if (isPrimarySandEndpointFromEndpointConfig) {
-//                newAPIWithUpdatedPrimaryEndpointIds.setPrimarySandboxEndpointId(newAPIId +
-//                        APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.SANDBOX);
-//            }
-//            updateAPI(newAPIWithUpdatedPrimaryEndpointIds, newAPI);
-//        }
 
         // copy icon
         ResourceFile icon = getIcon(existingApiId, organization);

@@ -24881,8 +24881,10 @@ public class ApiMgtDAO {
                     addPrimaryMapping.addBatch();
                 }
 
-                addPrimaryMapping.executeBatch();
-                connection.commit();
+                if (isProductionEndpoint || isSandboxEndpoint) {
+                    addPrimaryMapping.executeBatch();
+                    connection.commit();
+                }
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Error while adding primary endpoint mappings for API : " + apiUUID, e);
