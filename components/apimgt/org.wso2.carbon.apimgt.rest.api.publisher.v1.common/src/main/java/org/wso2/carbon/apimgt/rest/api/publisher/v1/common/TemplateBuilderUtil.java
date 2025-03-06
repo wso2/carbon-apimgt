@@ -672,7 +672,7 @@ public class TemplateBuilderUtil {
 
         EndpointDTO endpoint = new EndpointDTO();
         endpoint.setEndpointConfig(endpointConfig);
-        String defaultEndpointId = stage.equals(APIConstants.APIEndpoint.PRODUCTION) ?
+        String defaultEndpointId = APIConstants.APIEndpoint.PRODUCTION.equals(stage) ?
                 APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID :
                 APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID;
         endpoint.setId(defaultEndpointId);

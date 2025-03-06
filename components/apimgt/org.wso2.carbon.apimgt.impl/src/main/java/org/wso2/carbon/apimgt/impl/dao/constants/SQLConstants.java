@@ -4750,6 +4750,15 @@ public class SQLConstants {
         public static final String GET_PRIMARY_ENDPOINT_MAPPINGS =
                 "SELECT ENDPOINT_UUID FROM AM_API_PRIMARY_EP_MAPPING WHERE API_UUID = ?";
 
+        public static final String GET_API_PRIMARY_ENDPOINT_UUIDS_BY_API_UUID =
+                "SELECT AME.ENDPOINT_UUID " +
+                        "FROM AM_API_ENDPOINTS AME INNER JOIN AM_API_PRIMARY_EP_MAPPING AMPM " +
+                        "ON (AMPM.ENDPOINT_UUID = AME.ENDPOINT_UUID AND AMPM.API_UUID = AME.API_UUID) " +
+                        "WHERE " +
+                        "AME.API_UUID = ? " +
+                        "AND AME.ORGANIZATION = ? " +
+                        "AND AME.REVISION_UUID = 'Current API'";
+
         public static final String GET_API_PRIMARY_ENDPOINT_UUID_BY_API_UUID_AND_KEY_TYPE =
                 "SELECT AME.ENDPOINT_UUID " +
                         "FROM AM_API_ENDPOINTS AME INNER JOIN AM_API_PRIMARY_EP_MAPPING AMPM " +

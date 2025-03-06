@@ -336,8 +336,8 @@ public class ApisApiServiceImpl implements ApisApiService {
 
         // Handle scenario where reserved endpoint ID (reserved to track endpoint config in API object) is tried to be
         // deleted. This is not allowed. One can delete this only by updating the API endpoint config.
-        if (endpointUuid.equals(APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID) || endpointUuid.equals(
-                APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID)) {
+        if (APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID.equals(
+                endpointUuid) || APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID.equals(endpointUuid)) {
             String errorMessage = String.format(
                     "Failed to delete API Endpoint with UUID %s. This Endpoint is read only", endpointUuid);
             throw new APIManagementException(errorMessage,
@@ -388,8 +388,8 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response updateApiEndpoint(String apiId, String endpointId, APIEndpointDTO apIEndpointDTO,
             MessageContext messageContext) throws APIManagementException {
-        if (endpointId.equals(APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID) || endpointId.equals(
-                APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID)) {
+        if (APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID.equals(
+                endpointId) || APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID.equals(endpointId)) {
             String errorMessage = String.format(
                     "Failed to update API Endpoint with UUID %s. This Endpoint is read only", endpointId);
             throw new APIManagementException(errorMessage,

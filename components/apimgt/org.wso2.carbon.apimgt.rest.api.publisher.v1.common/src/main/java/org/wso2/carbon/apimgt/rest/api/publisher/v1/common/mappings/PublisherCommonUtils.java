@@ -1027,8 +1027,8 @@ public class PublisherCommonUtils {
         if (endpointConfig != null) {
             if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
                 Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
-                if (apiEndpointDTO.getDeploymentStage()
-                        .equals(APIConstants.APIEndpoint.PRODUCTION) && endpointSecurity.get(
+                if (APIConstants.APIEndpoint.PRODUCTION.equals(
+                        apiEndpointDTO.getDeploymentStage()) && endpointSecurity.get(
                         APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
                     Map endpointSecurityProduction = (Map) endpointSecurity.get(
                             APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
@@ -1061,8 +1061,8 @@ public class PublisherCommonUtils {
                     endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
                     apiEndpointDTO.setEndpointConfig(endpointConfig);
                 }
-                if (apiEndpointDTO.getDeploymentStage()
-                        .equals(APIConstants.APIEndpoint.SANDBOX) && endpointSecurity.get(
+                if (APIConstants.APIEndpoint.SANDBOX.equals(
+                        apiEndpointDTO.getDeploymentStage()) && endpointSecurity.get(
                         APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
                     Map endpointSecuritySandbox = (Map) endpointSecurity
                             .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
@@ -3271,10 +3271,10 @@ public class PublisherCommonUtils {
             }.getType();
             Map<String, Object> endpointConfigMap = gson.fromJson(endpointConfig, type);
 
-            if (endpointUUID.equals(APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID)) {
+            if (APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID.equals(endpointUUID)) {
                 apiEndpoint = getAPIEndpointFromEndpointConfig(apiUUID, endpointConfigMap,
                         APIConstants.APIEndpoint.PRODUCTION);
-            } else if (endpointUUID.equals(APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID)) {
+            } else if (APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID.equals(endpointUUID)) {
                 apiEndpoint = getAPIEndpointFromEndpointConfig(apiUUID, endpointConfigMap,
                         APIConstants.APIEndpoint.SANDBOX);
             } else {
@@ -3305,7 +3305,7 @@ public class PublisherCommonUtils {
         if (oldEndpointConfig != null) {
             if ((oldEndpointConfig.containsKey(APIConstants.ENDPOINT_SECURITY))) {
                 Map oldEndpointSecurity = (Map) oldEndpointConfig.get(APIConstants.ENDPOINT_SECURITY);
-                if (apiEndpointDTO.getDeploymentStage().equals(APIConstants.APIEndpoint.PRODUCTION)) {
+                if (APIConstants.APIEndpoint.PRODUCTION.equals(apiEndpointDTO.getDeploymentStage())) {
                     if (oldEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
                         Map oldProductionEndpointSecurity = (Map) oldEndpointSecurity.get(
                                 APIConstants.ENDPOINT_SECURITY_PRODUCTION);
@@ -3324,7 +3324,7 @@ public class PublisherCommonUtils {
                                     APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
                         }
                     }
-                } else if (apiEndpointDTO.getDeploymentStage().equals(APIConstants.APIEndpoint.SANDBOX)) {
+                } else if (APIConstants.APIEndpoint.SANDBOX.equals(apiEndpointDTO.getDeploymentStage())) {
                     if (oldEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
                         Map oldSandboxEndpointSecurity = (Map) oldEndpointSecurity.get(
                                 APIConstants.ENDPOINT_SECURITY_SANDBOX);
@@ -3359,10 +3359,10 @@ public class PublisherCommonUtils {
 
         // extract endpoint URL
         Object endpointURLObj;
-        if (apiEndpoint.getDeploymentStage().equals(APIConstants.APIEndpoint.PRODUCTION)) {
+        if (APIConstants.APIEndpoint.PRODUCTION.equals(apiEndpoint.getDeploymentStage())) {
             endpointURLObj = apiEndpoint.getEndpointConfig()
                     .get(APIConstants.APIEndpoint.ENDPOINT_CONFIG_PRODUCTION_ENDPOINTS);
-        } else if (apiEndpoint.getDeploymentStage().equals(APIConstants.APIEndpoint.SANDBOX)) {
+        } else if (APIConstants.APIEndpoint.SANDBOX.equals(apiEndpoint.getDeploymentStage())) {
             endpointURLObj = apiEndpoint.getEndpointConfig()
                     .get(APIConstants.APIEndpoint.ENDPOINT_CONFIG_SANDBOX_ENDPOINTS);
         } else {
@@ -3408,10 +3408,10 @@ public class PublisherCommonUtils {
 
         // extract endpoint URL
         Object endpointURLObj;
-        if (apiEndpoint.getDeploymentStage().equals(APIConstants.APIEndpoint.PRODUCTION)) {
+        if (APIConstants.APIEndpoint.PRODUCTION.equals(apiEndpoint.getDeploymentStage())) {
              endpointURLObj = apiEndpoint.getEndpointConfig()
                     .get(APIConstants.APIEndpoint.ENDPOINT_CONFIG_PRODUCTION_ENDPOINTS);
-        } else if (apiEndpoint.getDeploymentStage().equals(APIConstants.APIEndpoint.SANDBOX)) {
+        } else if (APIConstants.APIEndpoint.SANDBOX.equals(apiEndpoint.getDeploymentStage())) {
             endpointURLObj = apiEndpoint.getEndpointConfig()
                     .get(APIConstants.APIEndpoint.ENDPOINT_CONFIG_SANDBOX_ENDPOINTS);
         } else {
@@ -3426,9 +3426,9 @@ public class PublisherCommonUtils {
                     ExceptionCodes.API_ENDPOINT_URL_INVALID);
         }
 
-        if (apiEndpoint.getDeploymentStage()
-                .equals(APIConstants.APIEndpoint.PRODUCTION) || apiEndpoint.getDeploymentStage()
-                .equals(APIConstants.APIEndpoint.SANDBOX)) {
+        if (APIConstants.APIEndpoint.PRODUCTION.equals(
+                apiEndpoint.getDeploymentStage()) || APIConstants.APIEndpoint.SANDBOX.equals(
+                apiEndpoint.getDeploymentStage())) {
             String apiEndpointId = apiProvider.addAPIEndpoint(apiId, apiEndpoint, organization);
             if (apiEndpointId == null) {
                 throw new APIManagementException("Error occurred while getting Endpoint of API " + apiId,
@@ -3436,8 +3436,9 @@ public class PublisherCommonUtils {
             }
             return apiEndpointId;
         } else {
-            throw new APIManagementException("Invalid deployment stage. Deployment stage should be either " +
-                    "'PRODUCTION' or 'SANDBOX'", ExceptionCodes.ERROR_ADDING_API_ENDPOINT);
+            throw new APIManagementException(
+                    "Invalid deployment stage. Deployment stage should be either " + "'PRODUCTION' or 'SANDBOX'",
+                    ExceptionCodes.ERROR_ADDING_API_ENDPOINT);
         }
     }
 

@@ -24562,29 +24562,18 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             try (PreparedStatement addPrimaryMapping = connection.prepareStatement(
                     SQLConstants.APIEndpointsSQLConstants.ADD_PRIMARY_ENDPOINT_MAPPING);
-                    PreparedStatement getPrimaryEpMappingStmt = connection.prepareStatement(
-                            SQLConstants.APIEndpointsSQLConstants.GET_API_PRIMARY_ENDPOINT_UUID_BY_API_UUID_AND_KEY_TYPE)) {
-                getPrimaryEpMappingStmt.setString(1, existingApiUUID);
-                getPrimaryEpMappingStmt.setString(2, organization);
-                getPrimaryEpMappingStmt.setString(3, APIConstants.APIEndpoint.PRODUCTION);
-                try (ResultSet resultSet = getPrimaryEpMappingStmt.executeQuery()) {
-                    if (resultSet.next()) {
+                    PreparedStatement getPrimaryEpMappingsStmt = connection.prepareStatement(
+                            SQLConstants.APIEndpointsSQLConstants.GET_API_PRIMARY_ENDPOINT_UUIDS_BY_API_UUID)) {
+                getPrimaryEpMappingsStmt.setString(1, existingApiUUID);
+                getPrimaryEpMappingsStmt.setString(2, organization);
+                try (ResultSet resultSet = getPrimaryEpMappingsStmt.executeQuery()) {
+                    while(resultSet.next()) {
                         addPrimaryMapping.setString(1, newApiUUID);
                         addPrimaryMapping.setString(2, resultSet.getString("ENDPOINT_UUID"));
                         addPrimaryMapping.addBatch();
                     }
+                    addPrimaryMapping.executeBatch();
                 }
-                getPrimaryEpMappingStmt.setString(1, existingApiUUID);
-                getPrimaryEpMappingStmt.setString(2, organization);
-                getPrimaryEpMappingStmt.setString(3, APIConstants.APIEndpoint.SANDBOX);
-                try (ResultSet resultSet = getPrimaryEpMappingStmt.executeQuery()) {
-                    if (resultSet.next()) {
-                        addPrimaryMapping.setString(1, newApiUUID);
-                        addPrimaryMapping.setString(2, resultSet.getString("ENDPOINT_UUID"));
-                        addPrimaryMapping.addBatch();
-                    }
-                }
-                addPrimaryMapping.executeBatch();
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
@@ -24717,28 +24706,31 @@ public class ApiMgtDAO {
      */
     public void addAPIEndpoints(String apiUUID, List<APIEndpointInfo> apiEndpointList, String organization)
             throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            connection.setAutoCommit(false);
-            String dbQuery = SQLConstants.APIEndpointsSQLConstants.ADD_NEW_API_ENDPOINT;
-            try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
-                for (APIEndpointInfo apiEndpoint : apiEndpointList) {
-                    statement.setString(1, apiUUID);
-                    statement.setString(2, apiEndpoint.getId());
-                    statement.setString(3, "Current API");
-                    statement.setString(4, apiEndpoint.getName());
-                    statement.setString(5, apiEndpoint.getDeploymentStage());
-                    statement.setBinaryStream(6, fromEndpointConfigMapToBA(apiEndpoint.getEndpointConfig()));
-                    statement.setString(7, organization);
-                    statement.addBatch();
+        if (!apiEndpointList.isEmpty()) {
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                connection.setAutoCommit(false);
+                String dbQuery = SQLConstants.APIEndpointsSQLConstants.ADD_NEW_API_ENDPOINT;
+                try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+                    for (APIEndpointInfo apiEndpoint : apiEndpointList) {
+                        statement.setString(1, apiUUID);
+                        statement.setString(2, apiEndpoint.getId());
+                        statement.setString(3, "Current API");
+                        statement.setString(4, apiEndpoint.getName());
+                        statement.setString(5, apiEndpoint.getDeploymentStage());
+                        statement.setBinaryStream(6,
+                                fromEndpointConfigMapToBA(apiEndpoint.getEndpointConfig()));
+                        statement.setString(7, organization);
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    handleException("Failed to add endpoints to API: " + apiUUID, e);
                 }
-                statement.executeBatch();
-                connection.commit();
             } catch (SQLException e) {
-                connection.rollback();
                 handleException("Failed to add endpoints to API: " + apiUUID, e);
             }
-        } catch (SQLException e) {
-            handleException("Failed to add endpoints to API: " + apiUUID, e);
         }
     }
 

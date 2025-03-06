@@ -631,10 +631,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (primarySandboxEndpointId == null && primaryProductionEndpointId == null) {
                 addDefaultPrimaryEndpoints(api, true, false);
             } else {
-                boolean isProductionEndpointFromAPIEndpointConfig = primaryProductionEndpointId != null &&
-                        primaryProductionEndpointId.equals(APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID);
-                boolean isSandboxEndpointFromAPIEndpointConfig = primarySandboxEndpointId != null &&
-                        primarySandboxEndpointId.equals(APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID);
+                boolean isProductionEndpointFromAPIEndpointConfig = APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID.equals(
+                        primaryProductionEndpointId);
+                boolean isSandboxEndpointFromAPIEndpointConfig = APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID.equals(
+                        primarySandboxEndpointId);
                 if (isProductionEndpointFromAPIEndpointConfig && isSandboxEndpointFromAPIEndpointConfig) {
                     addDefaultPrimaryEndpoints(api, true, true);
                 } else if (isProductionEndpointFromAPIEndpointConfig) {
@@ -1190,10 +1190,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (primarySandboxEndpointId == null && primaryProductionEndpointId == null) {
                 addDefaultPrimaryEndpoints(api, true, false);
             } else {
-                boolean isProductionEndpointFromAPIEndpointConfig = primaryProductionEndpointId != null &&
-                        primaryProductionEndpointId.equals(APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID);
-                boolean isSandboxEndpointFromAPIEndpointConfig = primarySandboxEndpointId != null &&
-                        primarySandboxEndpointId.equals(APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID);
+                boolean isProductionEndpointFromAPIEndpointConfig = APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID.equals(
+                        primaryProductionEndpointId);
+                boolean isSandboxEndpointFromAPIEndpointConfig = APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID.equals(
+                        primarySandboxEndpointId);
 
                 if (isProductionEndpointFromAPIEndpointConfig && isSandboxEndpointFromAPIEndpointConfig) {
                     addDefaultPrimaryEndpoints(api, true, true);
@@ -8315,9 +8315,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<String> endpointIds = apiMgtDAO.getPrimaryEndpointUUIDByAPIId(currentApiUuid);
         if (endpointIds != null && !endpointIds.isEmpty()) {
             for (String endpointId : endpointIds) {
-                if (endpointId.equals(APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID)) {
+                if (APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID.equals(endpointId)) {
                     api.setPrimaryProductionEndpointId(endpointId);
-                } else if (endpointId.equals(APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID)) {
+                } else if (APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID.equals(endpointId)) {
                     api.setPrimarySandboxEndpointId(endpointId);
                 }
             }
