@@ -98,7 +98,7 @@ public class WeightedRoundRobinMediator extends AbstractMediator implements Mana
 
         List<ModelEndpointDTO> activeEndpoints = GatewayUtils.filterActiveEndpoints(selectedEndpoints, messageContext);
 
-        if (activeEndpoints != null && !activeEndpoints.isEmpty()) {
+        if (!activeEndpoints.isEmpty()) {
             ModelEndpointDTO nextEndpoint = getWeightedRandomEndpoint(activeEndpoints);
             Map<String, Object> roundRobinConfigs = new HashMap<>();
             roundRobinConfigs.put(AIAPIConstants.TARGET_MODEL_ENDPOINT, nextEndpoint);
