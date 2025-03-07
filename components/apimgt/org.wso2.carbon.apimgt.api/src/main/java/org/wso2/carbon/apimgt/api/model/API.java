@@ -145,6 +145,8 @@ public class API implements Serializable {
     private String implementation = "ENDPOINT";
 
     private String monetizationCategory;
+
+    private Boolean isMarkdownOverview;
     
     private List<SOAPToRestSequence> soapToRestSequences;
 
@@ -1392,6 +1394,14 @@ public class API implements Serializable {
 
     public void setTestKey(String testKey) {
         this.testKey = testKey;
+    }
+
+    public Boolean isMarkdownOverview() {
+        return isMarkdownOverview;
+    }
+
+    public void setMarkdownOverview(Boolean isMarkdownOverview) {
+        this.isMarkdownOverview = isMarkdownOverview;
     }
 
     /**
