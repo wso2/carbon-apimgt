@@ -1211,11 +1211,11 @@ public abstract class AbstractAPIManager implements APIManager {
         Organization org = new Organization(organization);
         api.setOrganization(organization);
         // environment
-        List<Environment> environments = null;
+        String environmentString = null;
         if (api.getEnvironments() != null) {
-            environments = APIUtil.getEnvironmentsOfAPI(api);
+            environmentString = String.join(",", api.getEnvironments());
         }
-        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environments, organization, username));
+        api.setEnvironments(APIUtil.extractEnvironmentsForAPI(environmentString, organization));
         // workflow status
         APIIdentifier apiId = api.getId();
         WorkflowDTO workflow;
