@@ -119,8 +119,8 @@ public class SchemaValidator extends AbstractHandler {
         return true;
     }
 
-    private String getErrorMessage(ValidationReport.Message message){
-        if(message.getNestedMessages().isEmpty()){
+    private String getErrorMessage(ValidationReport.Message message) {
+        if (message.getNestedMessages().isEmpty()) {
             return message.getMessage();
         }
         StringBuilder combinedMessages = new StringBuilder();
