@@ -651,11 +651,11 @@ public class TemplateBuilderUtil {
             return;
         }
         if (endpointConfig.getProductionEndpoints() != null) {
-            endpointDTOList.add(createEndpointDTO(api, APIConstants.APIEndpoint.PRODUCTION,
+            endpointDTOList.add(createEndpointDTO(APIConstants.APIEndpoint.PRODUCTION,
                     AIAPIConstants.DEFAULT_PRODUCTION_ENDPOINT_NAME, endpointConfig));
         }
         if (endpointConfig.getSandboxEndpoints() != null) {
-            endpointDTOList.add(createEndpointDTO(api, APIConstants.APIEndpoint.SANDBOX,
+            endpointDTOList.add(createEndpointDTO(APIConstants.APIEndpoint.SANDBOX,
                     AIAPIConstants.DEFAULT_SANDBOX_ENDPOINT_NAME, endpointConfig));
         }
     }
@@ -663,17 +663,19 @@ public class TemplateBuilderUtil {
     /**
      * Creates an EndpointDTO object with the specified parameters.
      *
-     * @param api            The API associated with the endpoint.
      * @param stage          The deployment stage (production or sandbox).
      * @param name           The name of the endpoint.
      * @param endpointConfig The endpoint configuration.
      * @return An initialized EndpointDTO instance.
      */
-    private static EndpointDTO createEndpointDTO(API api, String stage, String name, EndpointConfigDTO endpointConfig) {
+    private static EndpointDTO createEndpointDTO(String stage, String name, EndpointConfigDTO endpointConfig) {
 
         EndpointDTO endpoint = new EndpointDTO();
         endpoint.setEndpointConfig(endpointConfig);
-        endpoint.setId(api.getUuid() + "--" + stage);
+        String defaultEndpointId = APIConstants.APIEndpoint.PRODUCTION.equals(stage) ?
+                APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID :
+                APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID;
+        endpoint.setId(defaultEndpointId);
         endpoint.setName(name);
         endpoint.setDeploymentStage(stage);
         return endpoint;

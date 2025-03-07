@@ -334,12 +334,10 @@ public class ApisApiServiceImpl implements ApisApiService {
         //validate if api exists
         CommonUtils.validateAPIExistence(apiId);
 
-        // Handle scenario where original API endpoints appearing under emdpoint config in API object is tried to be
+        // Handle scenario where reserved endpoint ID (reserved to track endpoint config in API object) is tried to be
         // deleted. This is not allowed. One can delete this only by updating the API endpoint config.
-        if (endpointUuid.equals(
-                apiId + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.PRODUCTION) ||
-                endpointUuid.equals(apiId +
-                        APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.SANDBOX)) {
+        if (APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID.equals(
+                endpointUuid) || APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID.equals(endpointUuid)) {
             String errorMessage = String.format(
                     "Failed to delete API Endpoint with UUID %s. This Endpoint is read only", endpointUuid);
             throw new APIManagementException(errorMessage,
@@ -390,14 +388,12 @@ public class ApisApiServiceImpl implements ApisApiService {
     @Override
     public Response updateApiEndpoint(String apiId, String endpointId, APIEndpointDTO apIEndpointDTO,
             MessageContext messageContext) throws APIManagementException {
-        if (endpointId.equals(
-                apiId + APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.PRODUCTION) ||
-                endpointId.equals(apiId +
-                        APIConstants.APIEndpoint.PRIMARY_ENDPOINT_ID_SEPARATOR + APIConstants.APIEndpoint.SANDBOX)) {
-            String errorMessage = String.format("Failed to update API Endpoint with UUID %s. This Endpoint is read only", endpointId);
-            throw new APIManagementException(errorMessage, ExceptionCodes.from(
-                    ExceptionCodes.ENDPOINT_READONLY, endpointId)
-            );
+        if (APIConstants.APIEndpoint.DEFAULT_PROD_ENDPOINT_ID.equals(
+                endpointId) || APIConstants.APIEndpoint.DEFAULT_SANDBOX_ENDPOINT_ID.equals(endpointId)) {
+            String errorMessage = String.format(
+                    "Failed to update API Endpoint with UUID %s. This Endpoint is read only", endpointId);
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.ENDPOINT_READONLY, endpointId));
         }
         try {
             APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId);
