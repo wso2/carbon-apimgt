@@ -1539,24 +1539,26 @@ public class TemplateBuilderUtil {
             if (endpointConfig.has(APIConstants.ENDPOINT_SECURITY)) {
                 org.json.JSONObject endpoints =
                         (org.json.JSONObject) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
-                org.json.JSONObject productionEndpointSecurity = (org.json.JSONObject)
-                        endpoints.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
-                org.json.JSONObject sandboxEndpointSecurity =
-                        (org.json.JSONObject) endpoints.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
-
-                boolean isProductionEndpointSecured = (boolean)
-                        productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
-                boolean isSandboxEndpointSecured = (boolean)
-                        sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_ENABLED);
-                //for production endpoints
-                if (isProductionEndpointSecured) {
-                    addCredentialsToList(prefix, api, gatewayAPIDTO, productionEndpointSecurity,
+                if (endpoints.has(APIConstants.ENDPOINT_SECURITY_PRODUCTION)) {
+                    org.json.JSONObject productionEndpointSecurity = (org.json.JSONObject) endpoints.get(
                             APIConstants.ENDPOINT_SECURITY_PRODUCTION);
-                }
-                if (isSandboxEndpointSecured) {
-                    addCredentialsToList(prefix, api, gatewayAPIDTO, sandboxEndpointSecurity,
-                            APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                    boolean isProductionEndpointSecured = (boolean) productionEndpointSecurity.get(
+                            APIConstants.ENDPOINT_SECURITY_ENABLED);
+                    if (isProductionEndpointSecured) {
+                        addCredentialsToList(prefix, api, gatewayAPIDTO, productionEndpointSecurity,
+                                             APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                    }
 
+                }
+                if (endpoints.has(APIConstants.ENDPOINT_SECURITY_SANDBOX)) {
+                    org.json.JSONObject sandboxEndpointSecurity = (org.json.JSONObject) endpoints.get(
+                            APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                    boolean isSandboxEndpointSecured = (boolean) sandboxEndpointSecurity.get(
+                            APIConstants.ENDPOINT_SECURITY_ENABLED);
+                    if (isSandboxEndpointSecured) {
+                        addCredentialsToList(prefix, api, gatewayAPIDTO, sandboxEndpointSecurity,
+                                             APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                    }
                 }
             } else if (APIConstants.ENDPOINT_TYPE_AWSLAMBDA
                     .equals(endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
