@@ -105,6 +105,7 @@ import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.TokenEndpointConnectionConfigType;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.Usage;
 import org.wso2.carbon.apimgt.api.model.policy.APIPolicy;
@@ -5565,6 +5566,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 populateDefaultVersion(api);
                 populatePolicyTypeInAPI(api);
                 populateAPIPrimaryEndpointsMapping(api, uuid);
+                populateEndpointSecurityDefaults(api);
                 return api;
             } else {
                 String msg = "Failed to get API. API artifact corresponding to artifactId " + uuid + " does not exist";
@@ -5583,6 +5585,85 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while retrieving the Async API definition", e,
                     ExceptionCodes.from(ExceptionCodes.ASYNCAPI_RETRIEVAL_ERROR, uuid));
         }
+    }
+
+    /**
+     * Populates default values for endpoint security settings in the given API's endpoint configuration.
+     *
+     * @param api The {@link API} object whose endpoint security defaults need to be populated.
+     * @throws ParseException If there is an error while parsing the endpoint configuration JSON.
+     */
+    private void populateEndpointSecurityDefaults(API api) throws ParseException {
+        String endpointConfig = api.getEndpointConfig();
+        if (StringUtils.isNotEmpty(endpointConfig)) {
+            JSONObject endpointConfigJson = (JSONObject) new JSONParser().parse(endpointConfig);
+            if (endpointConfigJson != null && endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY) != null) {
+                JSONObject endpointSecurityJson = (JSONObject) endpointConfigJson.get(APIConstants.ENDPOINT_SECURITY);
+                if (endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                    JSONObject productionEndpoint = (JSONObject) endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                    setDefaultTokenEndpointConnectionConfigType(productionEndpoint);
+                }
+                if (endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                    JSONObject sandboxEndpoint = (JSONObject) endpointSecurityJson.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                    setDefaultTokenEndpointConnectionConfigType(sandboxEndpoint);
+                }
+            }
+            api.setEndpointConfig(endpointConfigJson.toJSONString());
+        }
+    }
+
+    /**
+     * Sets the default token endpoint connection configuration type for the given endpoint.
+     *
+     * If the endpoint's security type is OAuth, this method ensures that the default values
+     * for connection timeout and proxy configurations types are properly assigned.
+     *
+     * @param endpoint The JSON object representing the endpoint configuration.
+     */
+    private void setDefaultTokenEndpointConnectionConfigType(JSONObject endpoint) {
+        if (endpoint.get(APIConstants.ENDPOINT_SECURITY_TYPE) != null && endpoint.get(APIConstants
+                .ENDPOINT_SECURITY_TYPE).toString().equalsIgnoreCase(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH)) {
+            // Populate default values for connection timeout and proxy configurations
+            if (endpoint.get(APIConstants.CONNECTION_TIMEOUT_CONFIG_TYPE) == null) {
+                if (isDefaultConnectionTimeout(endpoint, APIConstants.CONNECTION_TIMEOUT_DURATION)
+                        && isDefaultConnectionTimeout(endpoint, APIConstants.CONNECTION_REQUEST_TIMEOUT_DURATION)
+                        && isDefaultConnectionTimeout(endpoint, APIConstants.SOCKET_TIMEOUT_DURATION)) {
+                    // If all the connection timeouts are null or -1, use global config
+                    endpoint.put(APIConstants.CONNECTION_TIMEOUT_CONFIG_TYPE,
+                            TokenEndpointConnectionConfigType.GLOBAL.toString());
+                } else {
+                    endpoint.put(APIConstants.CONNECTION_TIMEOUT_CONFIG_TYPE,
+                            TokenEndpointConnectionConfigType.ENDPOINT_SPECIFIC.toString());
+                }
+            }
+            if (endpoint.get(APIConstants.PROXY_CONFIG_TYPE) == null) {
+                JSONObject proxyConfigs = (JSONObject) endpoint.get(APIConstants.PROXY_CONFIGS);
+                if (proxyConfigs != null && Boolean.TRUE.equals(proxyConfigs.get(APIConstants.PROXY_ENABLED))) {
+                    // If proxy configurations are enabled, use endpoint specific config
+                    endpoint.put(APIConstants.PROXY_CONFIG_TYPE, TokenEndpointConnectionConfigType
+                            .ENDPOINT_SPECIFIC.toString());
+                } else {
+                    endpoint.put(APIConstants.PROXY_CONFIG_TYPE, TokenEndpointConnectionConfigType.GLOBAL.toString());
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks if the connection timeout value for the given endpoint is set to the default value.
+     *
+     * This method checks if the value for the specified connection timeout type in the provided
+     * endpoint is either null, or equals to the default connection timeout value.
+     *
+     * @param endpoint              JSONObject representing the endpoint configuration.
+     * @param connectionTimeoutType String indicating the type of connection timeout to check.
+     * @return true if the connection timeout value is either null or set to the default value, otherwise false.
+     */
+    private boolean isDefaultConnectionTimeout(JSONObject endpoint, String connectionTimeoutType) {
+        return endpoint.get(connectionTimeoutType) == null
+                || APIConstants.CONNECTION_TIMEOUT_DEFAULT.equals(endpoint.get(connectionTimeoutType))
+                || Integer.valueOf(APIConstants.CONNECTION_TIMEOUT_DEFAULT).equals(endpoint.get(connectionTimeoutType))
+                || Long.valueOf(APIConstants.CONNECTION_TIMEOUT_DEFAULT).equals(endpoint.get(connectionTimeoutType));
     }
 
     /**
