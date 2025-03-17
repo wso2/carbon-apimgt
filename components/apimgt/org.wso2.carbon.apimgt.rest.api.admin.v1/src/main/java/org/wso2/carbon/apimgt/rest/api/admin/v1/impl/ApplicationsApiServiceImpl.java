@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.json.JSONException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIAdmin;
@@ -30,7 +31,9 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationDTO;
@@ -40,13 +43,14 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.ApplicationMappin
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
+import org.wso2.carbon.user.core.UserRealm;
+import org.wso2.carbon.user.core.UserStoreManager;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.ws.rs.core.Response;
 
@@ -61,16 +65,28 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         APIConsumer apiConsumer = null;
         try {
             apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(owner);
-            Application application = apiConsumer.getApplicationByUUID(applicationId);
+
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            boolean applicationUpdated = apiConsumer.updateApplicationOwner(owner, organization, application);
-            if (applicationUpdated) {
-                String info = "Application ID:" + applicationId + " owner has been changed to " + owner;
-                APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATIONS, info,
-                        APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
-                return Response.ok().build();
+
+            String[] newUserOrg = getUserOrg(owner, organization);
+
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            String oldUserName = application.getSubscriber().getName();
+            String oldTenantDomain = MultitenantUtils.getTenantDomain(oldUserName);
+            String[] oldUserOrg = getUserOrg(oldUserName, oldTenantDomain);
+
+            if (!isSameOrganization(oldUserOrg, newUserOrg)) {
+                RestApiUtil.handleBadRequest("New owner does not belong to the same organization as the application", log);
             } else {
-                RestApiUtil.handleInternalServerError("Error while updating application owner " + applicationId, log);
+                boolean applicationUpdated = apiConsumer.updateApplicationOwner(owner, organization, application);
+                if (applicationUpdated) {
+                    String info = "Application ID:" + applicationId + " owner has been changed to " + owner;
+                    APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATIONS, info,
+                            APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
+                    return Response.ok().build();
+                } else {
+                    RestApiUtil.handleInternalServerError("Error while updating application owner " + applicationId, log);
+                }
             }
 
         } catch (APIManagementException e) {
@@ -202,5 +218,24 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         }
         RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
         return null;
+    }
+
+    private static String[] getGroupIds(String loginInfoString) throws APIManagementException {
+        String groupingExtractorClass = APIUtil.getRESTApiGroupingExtractorImplementation();
+        return APIUtil.getGroupIdsFromExtractor(loginInfoString, groupingExtractorClass);
+    }
+
+    private boolean isSameOrganization(String[] oldUserOrg, String[] newUserOrg) {
+
+        return Arrays.stream(oldUserOrg)
+                .anyMatch(org->Arrays.asList(newUserOrg).contains(org));
+    }
+
+    private String[] getUserOrg(String user, String tenantDomain) throws APIManagementException {
+        JSONObject userConfig = new JSONObject();
+        userConfig.put("user", user);
+        userConfig.put("isSuperTenant", tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
+        String userConfigJSONString = userConfig.toJSONString();
+        return getGroupIds(userConfigJSONString);
     }
 }
