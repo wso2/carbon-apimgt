@@ -1845,6 +1845,12 @@ public class APIManagerConfiguration {
                         }
                     }
                 }
+                OMElement continueOnCustomClaimRetrievalFailureElement =
+                        omElement.getFirstChildWithName(new QName(APIConstants.CONTINUE_ON_CLAIM_RETRIEVAL_FAILURE));
+                if (continueOnCustomClaimRetrievalFailureElement != null) {
+                    jwtConfigurationDto.setContinueOnClaimRetrievalFailure(
+                            Boolean.parseBoolean(continueOnCustomClaimRetrievalFailureElement.getText()));
+                }
                 OMElement enableBase64PaddingElement = gatewayJWTConfigurationElement.getFirstChildWithName(
                         new QName(APIConstants.ENABLE_BASE64_PADDING));
                 if (enableBase64PaddingElement != null) {

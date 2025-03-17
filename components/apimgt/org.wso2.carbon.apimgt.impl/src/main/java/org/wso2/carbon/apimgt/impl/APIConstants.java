@@ -676,6 +676,7 @@ public final class APIConstants {
     public static final String VALUE = "value";
     public static final String GATEWAY_INTROSPECT_CACHE_NAME = "GatewayIntrospectCache";
     public static final String ENABLE_USER_CLAIMS_RETRIEVAL_FROM_KEY_MANAGER = "EnableUserClaimRetrievalFromKeyManager";
+    public static final String CONTINUE_ON_CLAIM_RETRIEVAL_FAILURE = "ContinueOnClaimRetrievalFailure";
 
     public static final String DELEM_COLON = ":";
     public static final String DELEM_COMMA = ",";
