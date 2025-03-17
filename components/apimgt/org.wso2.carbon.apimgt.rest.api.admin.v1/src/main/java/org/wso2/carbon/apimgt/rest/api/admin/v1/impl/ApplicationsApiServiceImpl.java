@@ -74,7 +74,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             String[] oldUserOrg = getUserOrg(oldUserName, oldTenantDomain);
 
             if (!isSameOrganization(oldUserOrg, newUserOrg)) {
-                RestApiUtil.handleBadRequest("New owner does not belong to the same organization as the application", log);
+                RestApiUtil.handleBadRequest("New owner does not belong to the same organization as the existing owner", log);
             } else {
                 boolean applicationUpdated = apiConsumer.updateApplicationOwner(owner, organization, application);
                 if (applicationUpdated) {
