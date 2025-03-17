@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.solace.api.v2.model.IntegratedSolaceApisResponse;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Contains utility methods related to Integrated APIs.
@@ -91,7 +92,7 @@ public class IntegratedApiUtils {
      * @return                          Response object
      * @throws APIManagementException   If an error occurs while getting the API definition
      */
-    public static Response getIntegratedApiDefinition(String vendor, JSONObject params)
+    public static Response getIntegratedApiDefinition(String vendor, Map<String, Object> params)
             throws APIManagementException {
         if (SOLACE.equals(vendor)) {
             return getSolaceApiDefinition(params);
@@ -99,7 +100,7 @@ public class IntegratedApiUtils {
         return getUnknownVendorResponse(vendor);
     }
 
-    private static Response getSolaceApiDefinition(JSONObject params) throws APIManagementException {
+    private static Response getSolaceApiDefinition(Map<String, Object> params) throws APIManagementException {
         // Validate required query parameters
         String eventApiProductId = params.get("eventApiProductId").toString();
         if (eventApiProductId == null) {

@@ -670,7 +670,7 @@ public class ApisApiServiceImpl implements ApisApiService {
         try {
             String decodedParams = URLDecoder.decode(params, StandardCharsets.UTF_8.name());
             JSONParser jsonParser = new JSONParser();
-            JSONObject parameters = (JSONObject) jsonParser.parse(decodedParams);
+            Map<String, Object> parameters = (Map<String, Object>) jsonParser.parse(decodedParams);
             return IntegratedApiUtils.getIntegratedApiDefinition(vendor, parameters);
         } catch (ParseException e) {
             return Response.status(Response.Status.BAD_REQUEST)
