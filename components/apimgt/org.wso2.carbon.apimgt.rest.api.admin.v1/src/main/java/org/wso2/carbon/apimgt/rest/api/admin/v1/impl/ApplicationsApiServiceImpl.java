@@ -220,11 +220,6 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         return null;
     }
 
-    private static String[] getGroupIds(String loginInfoString) throws APIManagementException {
-        String groupingExtractorClass = APIUtil.getRESTApiGroupingExtractorImplementation();
-        return APIUtil.getGroupIdsFromExtractor(loginInfoString, groupingExtractorClass);
-    }
-
     private boolean isSameOrganization(String[] oldUserOrg, String[] newUserOrg) {
 
         return Arrays.stream(oldUserOrg)
@@ -236,6 +231,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         userConfig.put("user", user);
         userConfig.put("isSuperTenant", tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
         String userConfigJSONString = userConfig.toJSONString();
-        return getGroupIds(userConfigJSONString);
+
+        String groupingExtractorClass = APIUtil.getRESTApiGroupingExtractorImplementation();
+
+        return APIUtil.getGroupIdsFromExtractor(userConfigJSONString, groupingExtractorClass);
     }
 }
