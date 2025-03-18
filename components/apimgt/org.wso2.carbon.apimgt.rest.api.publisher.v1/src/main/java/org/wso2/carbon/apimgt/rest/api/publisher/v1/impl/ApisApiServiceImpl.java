@@ -52,7 +52,6 @@ import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.ExternalGatewayAPIValidationException;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
