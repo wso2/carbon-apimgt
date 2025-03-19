@@ -10691,7 +10691,6 @@ public final class APIUtil {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getGatewayNotificationConfiguration().isEnabled();
     }
-
     /**
      * Check whether organizations are available in the system
      *
