@@ -37,6 +37,9 @@ public class SolaceEventApiProductsResponse {
         this.data = data;
     }
 
+    /**
+     * The model class for Solace Event API Product.
+     */
     public static class EventApiProduct {
         @SerializedName("createdTime")
         private long createdTime;
@@ -178,6 +181,9 @@ public class SolaceEventApiProductsResponse {
             return apiParameters;
         }
 
+        /**
+         * The model class for Solace Event API Product Plan.
+         */
         public static class Plan {
             @SerializedName("id")
             private String id;
@@ -200,6 +206,9 @@ public class SolaceEventApiProductsResponse {
                 return solaceClassOfServicePolicy;
             }
 
+            /**
+             * The model class for Solace Class of Service Policy.
+             */
             public static class SolaceClassOfServicePolicy {
                 @SerializedName("id")
                 private String id;
@@ -217,6 +226,9 @@ public class SolaceEventApiProductsResponse {
             }
         }
 
+        /**
+         * The model class for Solace Messaging Service.
+         */
         public static class SolaceMessagingService {
             @SerializedName("id")
             private String id;
@@ -261,6 +273,9 @@ public class SolaceEventApiProductsResponse {
             }
         }
 
+        /**
+         * The model class for Solace API.
+         */
         public static class Api {
             @SerializedName("id")
             private String id;

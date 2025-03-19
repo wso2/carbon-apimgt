@@ -115,6 +115,9 @@ public class AppRegistration {
         this.brokerType = brokerType;
     }
 
+    /**
+     * Model class for Solace Application Registration Credentials.
+     */
     public static class Credentials {
         @SerializedName("secret")
         private Secret secret;
@@ -150,6 +153,9 @@ public class AppRegistration {
             this.expiresAt = expiresAt;
         }
 
+        /**
+         * Model class for Solace Application Registration Credentials Secret.
+         */
         public static class Secret {
             @SerializedName("consumerKey")
             private String consumerKey;
@@ -176,6 +182,9 @@ public class AppRegistration {
         }
     }
 
+    /**
+     * Model class for Solace Application Registration AccessRequest.
+     */
     public static class AccessRequest {
         @SerializedName("accessRequestId")
         private String accessRequestId;
@@ -256,6 +265,10 @@ public class AppRegistration {
             this.eventApiProductResourceInformation = eventApiProductResourceInformation;
         }
 
+        /**
+         * Model class for Event API Product Resource Information,
+         * present in Solace Application Registration Access Request.
+         */
         public static class EventApiProductResourceInformation {
             @SerializedName("accessType")
             private String accessType;

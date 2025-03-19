@@ -38,6 +38,9 @@ public class IntegratedSolaceApisResponse {
         this.integratedSolaceEventApis = integratedSolaceEventApis;
     }
 
+    /**
+     * The model class for Solace Event API, present in Integrated API response.
+     */
     public static class EventApi {
         @SerializedName("apiId")
         private String apiId;
