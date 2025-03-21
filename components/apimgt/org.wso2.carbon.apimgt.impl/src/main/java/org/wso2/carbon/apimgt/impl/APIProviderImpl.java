@@ -1861,7 +1861,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<OperationPolicy> validatedPolicies = new ArrayList<>();
         for (OperationPolicy policy : apiPoliciesList) {
             String policyId = policy.getPolicyId();
-            policy.setPolicyName(policy.getPolicyName().replaceAll(POLICY_NAME_REGEX, ""));
             if (policyId != null) {
                 // First check the API specific operation policy list
                 OperationPolicyData policyData =
@@ -8150,7 +8149,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         return gatewayPolicyDeploymentMapForResponse;
     }
-    
+
     @Override
     public void updateSoapToRestSequences(String organization, String apiId, List<SOAPToRestSequence> sequences)
             throws APIManagementException {
@@ -8159,7 +8158,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiPersistenceInstance.updateSoapToRestSequences(org, apiId, sequences);
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while sequences to the api  " + apiId, e);
-        }        
+        }
     }
 
     @Override

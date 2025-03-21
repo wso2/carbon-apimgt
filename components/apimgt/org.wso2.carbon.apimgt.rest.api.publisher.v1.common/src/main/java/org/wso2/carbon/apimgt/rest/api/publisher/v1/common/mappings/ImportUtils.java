@@ -710,6 +710,14 @@ public class ImportUtils {
             }
         }
 
+        if (policySpec == null) {
+            // As the last option, we check whether the policy is updated with the policy file,
+            // which has a name containing no special characters in the API project.
+            policySpec = getOperationPolicySpecificationFromFile(policyDirectory,
+                    APIUtil.getOperationPolicyFileName(appliedPolicy.getPolicyName().replaceAll("[^a-zA-Z0-9]", ""),
+                            appliedPolicy.getPolicyVersion(), policyType));
+        }
+
         if (policySpec != null) {
             // if a policy specification is found, we need to validate the policy applied parameters.
             provider.validateAppliedPolicyWithSpecification(policySpec, appliedPolicy, apiType);
@@ -903,6 +911,12 @@ public class ImportUtils {
                 if (!importedPolicies.containsKey(policyFileName)) {
                     OperationPolicySpecification policySpec =
                             getOperationPolicySpecificationFromFile(policyDirectory, policyFileName);
+                    if (policySpec == null) {
+                        policySpec = getOperationPolicySpecificationFromFile(policyDirectory,
+                                APIUtil.getOperationPolicyFileName(
+                                        policy.getPolicyName().replaceAll("[^a-zA-Z0-9]", ""),
+                                        policy.getPolicyVersion(), policyType));
+                    }
                     if (policySpec != null) {
                         OperationPolicyData operationPolicyData = new OperationPolicyData();
                         operationPolicyData.setSpecification(policySpec);
