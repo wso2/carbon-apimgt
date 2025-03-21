@@ -1913,6 +1913,8 @@ public final class APIConstants {
     public static final String MSG_TIER_RET_ERROR = "Error while retrieving API tiers from registry";
     public static final String MSG_MALFORMED_XML_ERROR = "Malformed XML found in the API tier policy resource";
 
+    public static final String JWT_GENERATION_ERROR = "Error occurred while generating JWT";
+
     //Doc search related constants
 
     public static final String PUBLISHER_CLIENT = "Publisher";
