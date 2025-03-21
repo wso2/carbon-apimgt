@@ -92,6 +92,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_PRODUCTION_ENDPOINTS;
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_SANDBOX_ENDPOINTS;
@@ -107,6 +109,7 @@ public class ExportUtils {
     private static final String IN = "in";
     private static final String OUT = "out";
     private static final String SOAPTOREST = "SoapToRest";
+    private static final String POLICY_NAME_REGEX = "[^a-zA-Z0-9]";
     private static String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
 
     /**
@@ -766,6 +769,13 @@ public class ExportUtils {
                 for (OperationPolicy policy : api.getApiPolicies()) {
                     String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
                             policy.getPolicyVersion(), policy.getPolicyType());
+                    Pattern pattern = Pattern.compile(POLICY_NAME_REGEX);
+                    Matcher matcher = pattern.matcher(policy.getPolicyName());
+                    if (matcher.find()) {
+                        policyFileName = APIUtil.getOperationPolicyFileName(
+                                policy.getPolicyName().replaceAll(POLICY_NAME_REGEX, ""), policy.getPolicyVersion(),
+                                policy.getPolicyType());
+                    }
                     if (!exportedPolicies.contains(policyFileName)) {
                         OperationPolicyData policyData;
                         if (policy.getPolicyId() != null) {
