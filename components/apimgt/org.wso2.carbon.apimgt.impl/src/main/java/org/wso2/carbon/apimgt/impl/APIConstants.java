@@ -1850,6 +1850,7 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_CLIENT_ID = "clientId";
     public static final String ENDPOINT_SECURITY_CLIENT_SECRET = "clientSecret";
     public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
+    public static final String ENDPOINT_SECURITY_PROXY_PASSWORD = "proxyPassword";
     public static final String CONNECTION_TIMEOUT_CONFIG_TYPE = "connectionTimeoutConfigType";
     public static final String PROXY_CONFIG_TYPE = "proxyConfigType";
     public static final String CONNECTION_TIMEOUT_DURATION = "connectionTimeoutDuration";
