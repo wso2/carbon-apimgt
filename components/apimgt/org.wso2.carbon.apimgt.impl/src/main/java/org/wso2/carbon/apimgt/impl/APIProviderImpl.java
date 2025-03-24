@@ -1700,6 +1700,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 if (clonedPoliciesMap.containsKey(policy.getPolicyName())) {
                     policy.setPolicyId(clonedPoliciesMap.get(policy.getPolicyName()));
                     policyUpdated = true;
+                } else if (clonedPoliciesMap.containsKey(
+                        policy.getPolicyName().replaceAll(INVALID_FILENAME_CHARS_REGEX, ""))) {
+                    policy.setPolicyId(
+                            clonedPoliciesMap.get(policy.getPolicyName().replaceAll(INVALID_FILENAME_CHARS_REGEX, "")));
+                    policyUpdated = true;
                 }
             }
         }
@@ -1881,6 +1886,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                     boolean isPolicyNameMatch = policyData.getSpecification().getName().equals(policy.getPolicyName())
                             || (policyData.getSpecification().getName()).equals(policy.getPolicyName() + "_imported");
+                    if (!isPolicyNameMatch) {
+                        isPolicyNameMatch = policyData.getSpecification().getDisplayName().equals(policy.getPolicyName())
+                                || (policyData.getSpecification().getDisplayName()).equals(policy.getPolicyName() + "_imported");
+                    }
                     if (!isPolicyNameMatch || !policyData.getSpecification().getVersion()
                                     .equals(policy.getPolicyVersion())) {
                         throw new APIManagementException("Applied policy " + policy.getPolicyName()
