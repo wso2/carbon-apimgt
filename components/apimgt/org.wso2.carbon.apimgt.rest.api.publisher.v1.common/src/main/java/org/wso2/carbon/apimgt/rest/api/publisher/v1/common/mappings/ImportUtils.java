@@ -141,6 +141,7 @@ public class ImportUtils {
     public static final String OUT = "out";
     private static final Log log = LogFactory.getLog(ImportUtils.class);
     private static final String SOAPTOREST = "SoapToRest";
+    private static final String INVALID_FILENAME_CHARS_REGEX = "[\\\\/:*?\"<>|]";
 
     public static APIDTO getImportAPIDto(String extractedFolderPath, APIDTO importedApiDTO, Boolean preserveProvider,
                                          String userName) throws APIManagementException {
@@ -713,9 +714,9 @@ public class ImportUtils {
         if (policySpec == null) {
             // As the last option, we check whether the policy is updated with the policy file,
             // which has a name containing no special characters in the API project.
-            policySpec = getOperationPolicySpecificationFromFile(policyDirectory,
-                    APIUtil.getOperationPolicyFileName(appliedPolicy.getPolicyName().replaceAll("[^a-zA-Z0-9]", ""),
-                            appliedPolicy.getPolicyVersion(), policyType));
+            policySpec = getOperationPolicySpecificationFromFile(policyDirectory, APIUtil.getOperationPolicyFileName(
+                    appliedPolicy.getPolicyName().replaceAll(INVALID_FILENAME_CHARS_REGEX, ""),
+                    appliedPolicy.getPolicyVersion(), policyType));
         }
 
         if (policySpec != null) {
@@ -914,7 +915,7 @@ public class ImportUtils {
                     if (policySpec == null) {
                         policySpec = getOperationPolicySpecificationFromFile(policyDirectory,
                                 APIUtil.getOperationPolicyFileName(
-                                        policy.getPolicyName().replaceAll("[^a-zA-Z0-9]", ""),
+                                        policy.getPolicyName().replaceAll(INVALID_FILENAME_CHARS_REGEX, ""),
                                         policy.getPolicyVersion(), policyType));
                     }
                     if (policySpec != null) {

@@ -109,7 +109,7 @@ public class ExportUtils {
     private static final String IN = "in";
     private static final String OUT = "out";
     private static final String SOAPTOREST = "SoapToRest";
-    private static final String POLICY_NAME_REGEX = "[^a-zA-Z0-9]";
+    private static final String INVALID_FILENAME_CHARS_REGEX = "[\\\\/:*?\"<>|]";
     private static String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
 
     /**
@@ -769,12 +769,12 @@ public class ExportUtils {
                 for (OperationPolicy policy : api.getApiPolicies()) {
                     String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
                             policy.getPolicyVersion(), policy.getPolicyType());
-                    Pattern pattern = Pattern.compile(POLICY_NAME_REGEX);
+                    Pattern pattern = Pattern.compile(INVALID_FILENAME_CHARS_REGEX);
                     Matcher matcher = pattern.matcher(policy.getPolicyName());
                     if (matcher.find()) {
                         policyFileName = APIUtil.getOperationPolicyFileName(
-                                policy.getPolicyName().replaceAll(POLICY_NAME_REGEX, ""), policy.getPolicyVersion(),
-                                policy.getPolicyType());
+                                policy.getPolicyName().replaceAll(INVALID_FILENAME_CHARS_REGEX, ""),
+                                policy.getPolicyVersion(), policy.getPolicyType());
                     }
                     if (!exportedPolicies.contains(policyFileName)) {
                         OperationPolicyData policyData;
