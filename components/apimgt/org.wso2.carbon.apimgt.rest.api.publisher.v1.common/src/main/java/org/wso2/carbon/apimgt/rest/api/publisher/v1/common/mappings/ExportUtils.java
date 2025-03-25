@@ -109,8 +109,8 @@ public class ExportUtils {
     private static final String IN = "in";
     private static final String OUT = "out";
     private static final String SOAPTOREST = "SoapToRest";
-    private static final String INVALID_FILENAME_CHARS_REGEX = "[\\\\/:*?\"<>|]";
     private static String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
+    private static final Pattern pattern = Pattern.compile(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX);
 
     /**
      * Validate name, version and provider before exporting an API/API Product.
@@ -769,11 +769,10 @@ public class ExportUtils {
                 for (OperationPolicy policy : api.getApiPolicies()) {
                     String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
                             policy.getPolicyVersion(), policy.getPolicyType());
-                    Pattern pattern = Pattern.compile(INVALID_FILENAME_CHARS_REGEX);
                     Matcher matcher = pattern.matcher(policy.getPolicyName());
                     if (matcher.find()) {
                         policyFileName = APIUtil.getOperationPolicyFileName(
-                                policy.getPolicyName().replaceAll(INVALID_FILENAME_CHARS_REGEX, ""),
+                                policy.getPolicyName().replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""),
                                 policy.getPolicyVersion(), policy.getPolicyType());
                     }
                     if (!exportedPolicies.contains(policyFileName)) {
