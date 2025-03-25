@@ -154,7 +154,7 @@ public class OASParserUtil {
     private static final String OPENAPI_RESOURCE_KEY = "paths";
     private static final String[] UNSUPPORTED_RESOURCE_BLOCKS = new String[]{"servers"};
 
-    static class SwaggerUpdateContext {
+    public static class SwaggerUpdateContext {
         private final Paths paths = new Paths();
         private final Set<Scope> aggregatedScopes = new HashSet<>();
         private final Map<String, Set<String>> referenceObjectMap = new HashMap<>();
@@ -725,6 +725,8 @@ public class OASParserUtil {
             } else {
                 Schema schema = parameter.getSchema();
                 if (schema != null) {
+                    //Convert the schema format according to the resulting api product openapi version.
+                    convertSchema(schema);
                     String ref = schema.get$ref();
                     if (ref != null) {
                         addToReferenceObjectMap(ref, context);
@@ -758,9 +760,7 @@ public class OASParserUtil {
         if (content != null) {
             for (MediaType mediaType : content.values()) {
                 Schema schema = mediaType.getSchema();
-
                 extractReferenceFromSchema(schema, context);
-
                 Map<String, Example> examples = mediaType.getExamples();
                 if (examples != null) {
                     for (Map.Entry<String, Example> exampleEntry : examples.entrySet()) {
@@ -772,93 +772,44 @@ public class OASParserUtil {
         }
     }
 
-    private static void extractReferenceWithoutSchema(String reference, SwaggerUpdateContext context) {
-        if (reference != null) {
-            addToReferenceObjectMap(reference, context);
+    /**
+     * Extract all the references (including in nested schemas) of the given schema according to the resulting api
+     * product openapi version. This method will pick the correct schema processor according to the openapi version
+     * in the given schema object.
+     *
+     * @param schema  OpenAPI 3.x Schema object
+     * @param context SwaggerUpdateContext which holds the reference object map
+     */
+    public static void extractReferenceFromSchema(Schema<?> schema, SwaggerUpdateContext context) {
+        try {
+            if (schema == null) return;
+            SchemaProcessor processor = SchemaProcessorFactory.getProcessor(schema);
+            processor.extractReferenceFromSchema(schema, context);
+        } catch (IllegalArgumentException exception) {
+            log.error("Invalid schema spec version. Skipping extracting references.");
         }
     }
 
-    private static void extractReferenceFromSchema(Schema schema, SwaggerUpdateContext context) {
-        if (schema != null) {
-            String ref = schema.get$ref();
-            List<String> references = new ArrayList<String>();
-            if (ref == null) {
-                if (schema instanceof ArraySchema) {
-                    ArraySchema arraySchema = (ArraySchema) schema;
-                    Schema itemsSchema = arraySchema.getItems();
-                    // Process $ref items
-                    ref = itemsSchema.get$ref();
-                    if (ref == null) {
-                        // Process items in the form of Composed Schema such as allOf, oneOf, anyOf
-                        extractReferenceFromSchema(itemsSchema, context);
-                    }
-                } else if (schema instanceof ObjectSchema) {
-                    references = addSchemaOfSchema(schema, context);
-                } else if (schema instanceof MapSchema) {
-                    Schema additionalPropertiesSchema = (Schema) schema.getAdditionalProperties();
-                    extractReferenceFromSchema(additionalPropertiesSchema, context);
-                } else if (schema instanceof ComposedSchema) {
-                    if (((ComposedSchema) schema).getAllOf() != null) {
-                        for (Schema sc : ((ComposedSchema) schema).getAllOf()) {
-                            if (OBJECT_DATA_TYPE.equalsIgnoreCase(sc.getType())) {
-                                references.addAll(addSchemaOfSchema(sc, context));
-                            } else {
-                                String schemaRef = sc.get$ref();
-                                if (schemaRef != null) {
-                                    references.add(sc.get$ref());
-                                } else {
-                                    processSchemaProperties(sc, context);
-                                }
-                            }
-                        }
-                    }
-                    if (((ComposedSchema) schema).getAnyOf() != null) {
-                        for (Schema sc : ((ComposedSchema) schema).getAnyOf()) {
-                            if (OBJECT_DATA_TYPE.equalsIgnoreCase(sc.getType())) {
-                                references.addAll(addSchemaOfSchema(sc, context));
-                            } else {
-                                String schemaRef = sc.get$ref();
-                                if (schemaRef != null) {
-                                    references.add(sc.get$ref());
-                                } else {
-                                    processSchemaProperties(sc, context);
-                                }
-                            }
-                        }
-                    }
-                    if (((ComposedSchema) schema).getOneOf() != null) {
-                        for (Schema sc : ((ComposedSchema) schema).getOneOf()) {
-                            if (OBJECT_DATA_TYPE.equalsIgnoreCase(sc.getType())) {
-                                references.addAll(addSchemaOfSchema(sc, context));
-                            } else {
-                                String schemaRef = sc.get$ref();
-                                if (schemaRef != null) {
-                                    references.add(sc.get$ref());
-                                } else {
-                                    processSchemaProperties(sc, context);
-                                }
-                            }
-                        }
-                    }
-                    if (((ComposedSchema) schema).getAllOf() == null &&
-                            ((ComposedSchema) schema).getAnyOf() == null &&
-                            ((ComposedSchema) schema).getOneOf() == null) {
-                        log.error("Unidentified schema. The schema is not available in the API definition.");
-                    }
-                }
-            }
+    /**
+     * Process ArraySchema while recursively traversing through array schema items. Used for both openapi 3.1 and 3.0.
+     *
+     * @param schema  ArraySchema
+     * @param context SwaggerUpdateContext
+     */
+    protected static void processArraySchema(Schema<?> schema, SwaggerUpdateContext context) {
+        convertSchema(schema);
+        Schema<?> itemsSchema = schema.getItems();
+        String ref = itemsSchema.get$ref();
+        if (ref == null) {
+            extractReferenceFromSchema(itemsSchema, context);
+        } else {
+            OASParserUtil.addToReferenceObjectMap(ref, context);
+        }
+    }
 
-            if (ref != null) {
-                addToReferenceObjectMap(ref, context);
-            } else if (!references.isEmpty() && references.size() != 0) {
-                for (String reference : references) {
-                    if (reference != null) {
-                        addToReferenceObjectMap(reference, context);
-                    }
-                }
-            }
-
-            processSchemaProperties(schema, context);
+    private static void extractReferenceWithoutSchema(String reference, SwaggerUpdateContext context) {
+        if (reference != null) {
+            addToReferenceObjectMap(reference, context);
         }
     }
 
@@ -868,8 +819,9 @@ public class OASParserUtil {
      * @param schema  The schema object which contains the properties which needs to be processed.
      * @param context The SwaggerUpdateContext object containing the context of the API definition.
      */
-    private static void processSchemaProperties(Schema schema, SwaggerUpdateContext context) {
+    protected static void processSchemaProperties(Schema schema, SwaggerUpdateContext context) {
         // Process schema properties if present
+        convertSchema(schema);
         Map properties = schema.getProperties();
         if (properties != null) {
             for (Object propertySchema : properties.values()) {
@@ -878,44 +830,24 @@ public class OASParserUtil {
         }
     }
 
-    private static List<String> addSchemaOfSchema(Schema schema, SwaggerUpdateContext context) {
-        List<String> references = new ArrayList<String>();
-        ObjectSchema os = (ObjectSchema) schema;
-        if (os.getProperties() != null) {
-            for (String propertyName : os.getProperties().keySet()) {
-                Schema propertySchema = os.getProperties().get(propertyName);
-
-                if (propertySchema.get$ref() != null) {
-                    references.add(propertySchema.get$ref());
-                }
-
-                if (propertySchema instanceof ComposedSchema) {
-                    ComposedSchema cs = (ComposedSchema) propertySchema;
-                    if (cs.getAllOf() != null) {
-                        for (Schema sc : cs.getAllOf()) {
-                            references.add(sc.get$ref());
-                        }
-                    } else if (cs.getAnyOf() != null) {
-                        for (Schema sc : cs.getAnyOf()) {
-                            references.add(sc.get$ref());
-                        }
-                    } else if (cs.getOneOf() != null) {
-                        for (Schema sc : cs.getOneOf()) {
-                            references.add(sc.get$ref());
-                        }
-                    } else {
-                        log.error("Unidentified schema. The schema is not available in the API definition.");
-                    }
-                } else if (propertySchema instanceof ObjectSchema ||
-                        propertySchema instanceof ArraySchema) {
-                    extractReferenceFromSchema(propertySchema, context);
-                }
-            }
+    /**
+     * Convert the OpenAPI 3.x Schema<T> format accordingly to the current Schema's OpenAPI version and resulting
+     * API product OpenAPI version. This method picks the correct SchemaProcessor to do the conversion and hand over
+     * the Schema object for that.
+     *
+     * @param schema Schema
+     */
+    protected static void convertSchema(Schema<?> schema) {
+        if (schema == null) return;
+        try {
+            SchemaProcessor processor = SchemaProcessorFactory.getProcessor(schema);
+            processor.convertSchema(schema);
+        } catch (IllegalArgumentException exception) {
+            log.error("Invalid schema spec version. Skipping the conversion of the schema.");
         }
-        return references;
     }
 
-    private static void addToReferenceObjectMap(String ref, SwaggerUpdateContext context) {
+    protected static void addToReferenceObjectMap(String ref, SwaggerUpdateContext context) {
         Map<String, Set<String>> referenceObjectMap = context.getReferenceObjectMapping();
         final String category = getComponentCategory(ref);
         if (referenceObjectMap.containsKey(category)) {
@@ -924,12 +856,12 @@ public class OASParserUtil {
         }
     }
 
-    private static String getRefKey(String ref) {
+    protected static String getRefKey(String ref) {
         String[] split = ref.split("/");
         return split[split.length - 1];
     }
 
-    private static String getComponentCategory(String ref) {
+    protected static String getComponentCategory(String ref) {
         String[] remainder = ref.split(REF_PREFIX);
 
         if (remainder.length == 2) {
