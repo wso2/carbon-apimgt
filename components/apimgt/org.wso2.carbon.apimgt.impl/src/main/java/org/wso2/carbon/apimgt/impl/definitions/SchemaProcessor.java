@@ -34,7 +34,9 @@ import io.swagger.v3.oas.models.media.Schema;
 public interface SchemaProcessor {
 
     /**
-     * Extract references from a given schema object in OpenAPI 3.x version.
+     * Extract references from a given schema object in OpenAPI 3.x version. This method traverses the schema structure
+     * and extracts all references ($ref) it contains, storing them in the provided SwaggerUpdateContext. The context
+     * maintains state across multiple extraction calls, accumulating all unique references found in the API definition.
      *
      * @param schema  Schema object
      * @param context Swagger update context to hold the references
@@ -43,7 +45,9 @@ public interface SchemaProcessor {
 
     /**
      * Convert the given schema from a given OpenAPI version to API product's openAPI version. As of now, the default
-     * API Product version in 3.0.1.
+     * API Product version in 3.0.1. This method modifies the schema in-place to ensure compatibility with OpenAPI 3.0.1
+     * specification. Conversion may include transforming schema properties that are valid in newer versions but not in
+     * 3.0.1, such as converting the 'examples' array to a single 'example' value or handling the 'types' array.
      *
      * @param schema Schema object
      */
