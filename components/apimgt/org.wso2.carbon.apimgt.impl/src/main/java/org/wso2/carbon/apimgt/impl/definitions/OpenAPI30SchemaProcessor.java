@@ -125,7 +125,7 @@ public class OpenAPI30SchemaProcessor implements SchemaProcessor {
             }
         }
         if (cs.getAllOf() == null && cs.getAnyOf() == null && cs.getOneOf() == null) {
-            log.error("Unidentified schema. The schema is not available in the API definition.");
+            log.warn("Unidentified schema. The schema is not available in the API definition.");
         }
     }
 

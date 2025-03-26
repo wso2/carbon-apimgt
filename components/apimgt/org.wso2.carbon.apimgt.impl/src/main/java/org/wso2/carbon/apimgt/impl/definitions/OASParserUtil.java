@@ -799,11 +799,13 @@ public class OASParserUtil {
     protected static void processArraySchema(Schema<?> schema, SwaggerUpdateContext context) {
         convertSchema(schema);
         Schema<?> itemsSchema = schema.getItems();
-        String ref = itemsSchema.get$ref();
-        if (ref == null) {
-            extractReferenceFromSchema(itemsSchema, context);
-        } else {
-            OASParserUtil.addToReferenceObjectMap(ref, context);
+        if (itemsSchema != null) {
+            String ref = itemsSchema.get$ref();
+            if (ref == null) {
+                extractReferenceFromSchema(itemsSchema, context);
+            } else {
+                OASParserUtil.addToReferenceObjectMap(ref, context);
+            }
         }
     }
 
@@ -857,8 +859,11 @@ public class OASParserUtil {
     }
 
     protected static String getRefKey(String ref) {
-        String[] split = ref.split("/");
-        return split[split.length - 1];
+        if (StringUtils.isNotEmpty(ref)) {
+            String[] split = ref.split("/");
+            return split[split.length - 1];
+        }
+        return StringUtils.EMPTY;
     }
 
     protected static String getComponentCategory(String ref) {
