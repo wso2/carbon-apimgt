@@ -25,16 +25,17 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
-import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
-import org.wso2.carbon.apimgt.api.model.policy.QuotaPolicy;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AIAPIQuotaLimitDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.CustomRuleDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleConditionDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottleLimitDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AdvancedThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ApplicationThrottlePolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.SubscriptionThrottlePolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -43,10 +44,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -139,6 +142,92 @@ public class RestApiAdminUtils {
             throw new APIManagementException(propertyName +
                     " property value of payload cannot contain invalid characters",
                     ExceptionCodes.from(ExceptionCodes.CONTAIN_SPECIAL_CHARACTERS, propertyName));
+        }
+    }
+
+    public static void validateThrottlePolicyDefaultLimitProperty(ThrottlePolicyDTO throttlePolicyDTO)
+            throws APIManagementException {
+        ThrottleLimitDTO throttleLimitDTO;
+        if (throttlePolicyDTO instanceof AdvancedThrottlePolicyDTO) {
+            throttleLimitDTO = ((AdvancedThrottlePolicyDTO) throttlePolicyDTO).getDefaultLimit();
+            validateRequestCountLimit(throttleLimitDTO);
+            validateBandwidthLimit(throttleLimitDTO);
+        } else if (throttlePolicyDTO instanceof ApplicationThrottlePolicyDTO) {
+            throttleLimitDTO = ((ApplicationThrottlePolicyDTO) throttlePolicyDTO).getDefaultLimit();
+            validateRequestCountLimit(throttleLimitDTO);
+            validateBandwidthLimit(throttleLimitDTO);
+            if (((ApplicationThrottlePolicyDTO) throttlePolicyDTO).getBurstLimit() != null) {
+                if (((ApplicationThrottlePolicyDTO) throttlePolicyDTO).getBurstLimit().getRateLimitCount() < 0) {
+                    throw new APIManagementException("Burst Control rate limit should be a non-negative value",
+                            ExceptionCodes.from(ExceptionCodes.INVALID_QUOTA_LIMIT,
+                                    String.valueOf(throttleLimitDTO.getRequestCount().getRequestCount())));
+                }
+            }
+        } else if (throttlePolicyDTO instanceof SubscriptionThrottlePolicyDTO) {
+            throttleLimitDTO = ((SubscriptionThrottlePolicyDTO) throttlePolicyDTO).getDefaultLimit();
+            validateRequestCountLimit(throttleLimitDTO);
+            validateBandwidthLimit(throttleLimitDTO);
+            validateEventCountLimit(throttleLimitDTO);
+            validateAiQuotaLimit(throttleLimitDTO);
+            if (((SubscriptionThrottlePolicyDTO) throttlePolicyDTO).getRateLimitCount() < 0) {
+                throw new APIManagementException("Rate limit count should be a non-negative value",
+                        ExceptionCodes.from(ExceptionCodes.INVALID_QUOTA_LIMIT,
+                                String.valueOf(throttleLimitDTO.getRequestCount().getRequestCount())));
+            }
+        }
+    }
+
+    private static void validateRequestCountLimit(ThrottleLimitDTO throttleLimitDTO) throws APIManagementException {
+        if (throttleLimitDTO.getType().equals(ThrottleLimitDTO.TypeEnum.REQUESTCOUNTLIMIT)) {
+            if (throttleLimitDTO.getRequestCount().getRequestCount() < 0) {
+                throw new APIManagementException("Request count should be a non-negative value",
+                        ExceptionCodes.from(ExceptionCodes.INVALID_QUOTA_LIMIT,
+                                String.valueOf(throttleLimitDTO.getRequestCount().getRequestCount())));
+            }
+        }
+    }
+
+    private static void validateBandwidthLimit(ThrottleLimitDTO throttleLimitDTO) throws APIManagementException {
+        if (throttleLimitDTO.getType().equals(ThrottleLimitDTO.TypeEnum.BANDWIDTHLIMIT)) {
+            if (throttleLimitDTO.getBandwidth().getDataAmount() < 0) {
+                throw new APIManagementException("Bandwidth should be a non-negative value",
+                        ExceptionCodes.from(ExceptionCodes.INVALID_QUOTA_LIMIT,
+                                String.valueOf(throttleLimitDTO.getBandwidth().getDataAmount())));
+            }
+        }
+    }
+
+    private static void validateEventCountLimit(ThrottleLimitDTO throttleLimitDTO) throws APIManagementException {
+        if (throttleLimitDTO.getType().equals(ThrottleLimitDTO.TypeEnum.EVENTCOUNTLIMIT)) {
+            if (throttleLimitDTO.getEventCount().getEventCount() < 0) {
+                throw new APIManagementException("Event count should be a non-negative value",
+                        ExceptionCodes.from(ExceptionCodes.INVALID_QUOTA_LIMIT,
+                                String.valueOf(throttleLimitDTO.getEventCount().getEventCount())));
+            }
+        }
+    }
+
+    private static void validateAiQuotaLimit(ThrottleLimitDTO throttleLimitDTO) throws APIManagementException {
+        if (throttleLimitDTO.getType().equals(ThrottleLimitDTO.TypeEnum.AIAPIQUOTALIMIT)) {
+            List<String> paramNames = new ArrayList<>();
+            if (throttleLimitDTO.getAiApiQuota().getRequestCount() < 0) {
+                paramNames.add("Request Count");
+            }
+            if (throttleLimitDTO.getAiApiQuota().getTotalTokenCount() < 0) {
+                paramNames.add("Total Token Count");
+            }
+            if (throttleLimitDTO.getAiApiQuota().getPromptTokenCount() < 0) {
+                paramNames.add("Prompt Token Count");
+            }
+            if (throttleLimitDTO.getAiApiQuota().getCompletionTokenCount() < 0) {
+                paramNames.add("Complete Token Count");
+            }
+
+            if (!paramNames.isEmpty()) {
+                throw new APIManagementException("AI quota limit should be a non-negative value",
+                        ExceptionCodes.from(ExceptionCodes.INVALID_QUOTA_LIMIT,
+                                String.join(",", paramNames)));
+            }
         }
     }
 
