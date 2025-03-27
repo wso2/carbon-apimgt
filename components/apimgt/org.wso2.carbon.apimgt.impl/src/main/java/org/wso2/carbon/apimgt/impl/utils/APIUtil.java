@@ -2585,6 +2585,10 @@ public final class APIUtil {
         try {
             int tenantId =
                     ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getTenantId(tenantDomain);
+            if (tenantId == -1) {
+                throw new APIManagementException("Tenant " + tenantDomain + " not found.",
+                        ExceptionCodes.INVALID_TENANT);
+            }
             UserStoreManager manager =
                     ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
                             .getUserStoreManager();
