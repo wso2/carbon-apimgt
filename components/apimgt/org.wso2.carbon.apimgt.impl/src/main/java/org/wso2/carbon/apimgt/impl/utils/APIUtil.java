@@ -10212,9 +10212,7 @@ public final class APIUtil {
         return defaultReservedUsername;
     }
 
-    public static JSONArray getCustomProperties(String userId) throws APIManagementException {
-
-        String tenantDomain = MultitenantUtils.getTenantDomain(userId);
+    public static JSONArray getCustomProperties(String tenantDomain) throws APIManagementException {
 
         JSONArray customPropertyAttributes = null;
         JSONObject propertyConfig = getMandatoryPropertyKeysFromRegistry(tenantDomain);
@@ -11617,5 +11615,45 @@ public final class APIUtil {
                     "Error occurred while validating the API with the federated gateway: "
                             + api.getGatewayType(), e);
         }
+    }
+
+    /**
+     * This method is used to validate the mandatory custom properties of an API
+     *
+     * @param customProperties custom properties of the API
+     * @param additionalPropertiesMap additional properties to validate
+     * @return list of erroneous property names. returns an empty array if there are no errors.
+     */
+    public static List<String> validateMandatoryProperties(org.json.simple.JSONArray customProperties,
+                                                           JSONObject additionalPropertiesMap) {
+
+        List<String> errorPropertyNames = new ArrayList<>();
+
+        for (int i = 0; i < customProperties.size(); i++) {
+            JSONObject property = (JSONObject) customProperties.get(i);
+            String propertyName = (String) property.get(APIConstants.CustomPropertyAttributes.NAME);
+            boolean isRequired = (boolean) property.get(APIConstants.CustomPropertyAttributes.REQUIRED);
+            if (isRequired) {
+                String mapPropertyDisplay = (String) additionalPropertiesMap.get(propertyName + "__display");
+                String mapProperty = (String) additionalPropertiesMap.get(propertyName);
+
+                if (mapProperty == null && mapPropertyDisplay == null) {
+                    errorPropertyNames.add(propertyName);
+                    continue;
+                }
+                String propertyValue = "";
+                String propertyValueDisplay = "";
+                if (mapProperty != null) {
+                    propertyValue = mapProperty;
+                }
+                if (mapPropertyDisplay != null) {
+                    propertyValueDisplay = mapPropertyDisplay;
+                }
+                if (propertyValue.isEmpty() && propertyValueDisplay.isEmpty()) {
+                    errorPropertyNames.add(propertyName);
+                }
+            }
+        }
+        return errorPropertyNames;
     }
 }
