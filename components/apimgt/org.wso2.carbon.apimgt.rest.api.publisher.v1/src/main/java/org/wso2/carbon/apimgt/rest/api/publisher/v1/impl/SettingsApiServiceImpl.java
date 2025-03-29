@@ -56,7 +56,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             SettingsDTO settingsDTO = settingsMappingUtil.fromSettingstoDTO(isUserAvailable, organization);
             settingsDTO.setScopes(getScopeList());
             settingsDTO.setGatewayTypes(APIUtil.getGatewayTypes());
-            settingsDTO.setCustomProperties(APIUtil.getCustomProperties(username));
+            settingsDTO.setCustomProperties(APIUtil.getCustomProperties(organization));
             return Response.ok().entity(settingsDTO).build();
         } catch (APIManagementException | IOException e) {
             String errorMessage = "Error while retrieving Publisher Settings";
