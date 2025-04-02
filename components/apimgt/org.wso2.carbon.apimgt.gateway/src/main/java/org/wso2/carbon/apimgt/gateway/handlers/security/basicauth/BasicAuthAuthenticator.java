@@ -206,14 +206,14 @@ public class BasicAuthAuthenticator implements Authenticator {
                 log.debug("Basic Authentication: Username and Password authenticated");
             }
             //scope validation
+            String domainQualifiedUserName = basicAuthValidationInfoObj.getDomainQualifiedUsername();
             boolean scopesValid = false;
             try {
                 scopesValid = basicAuthCredentialValidator
-                        .validateScopes(username, openAPI, synCtx, basicAuthValidationInfoObj);
+                        .validateScopes(domainQualifiedUserName, openAPI, synCtx, basicAuthValidationInfoObj);
             } catch (APISecurityException ex) {
                 return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
             }
-            String domainQualifiedUserName = basicAuthValidationInfoObj.getDomainQualifiedUsername();
 
             if (scopesValid) {
                 if (APISecurityUtils.getAuthenticationContext(synCtx) == null) {
