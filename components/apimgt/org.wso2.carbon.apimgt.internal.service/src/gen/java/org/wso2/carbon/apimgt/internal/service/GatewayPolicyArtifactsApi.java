@@ -25,7 +25,7 @@ import javax.validation.constraints.*;
 
 @Api(description = "the gateway-policy-artifacts API")
 
-@Produces({ "application/json" })
+
 
 
 public class GatewayPolicyArtifactsApi  {
@@ -43,7 +43,7 @@ GatewayPolicyArtifactsApiService delegate = new GatewayPolicyArtifactsApiService
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "List of runtime Artifacts", response = Void.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response gatewayPolicyArtifactsGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.   Gateway policy mapping UUID ")  @QueryParam("policyMappingUuid") String policyMappingUuid,  @ApiParam(value = "**Search condition**.  type of gateway ")  @QueryParam("type") String type,  @ApiParam(value = "**Search condition**.  label associated with the policy mapping ")  @QueryParam("gatewayLabel") String gatewayLabel) throws APIManagementException{
+    public Response gatewayPolicyArtifactsGet( @NotNull  @ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.   Gateway policy mapping UUID ")  @QueryParam("policyMappingUuid") String policyMappingUuid,  @ApiParam(value = "**Search condition**.  type of gateway ")  @QueryParam("type") String type,  @ApiParam(value = "**Search condition**.  label associated with the policy mapping ")  @QueryParam("gatewayLabel") String gatewayLabel) throws APIManagementException{
         return delegate.gatewayPolicyArtifactsGet(xWSO2Tenant, policyMappingUuid, type, gatewayLabel, securityContext);
     }
 }

@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
-import java.util.List;
 import javax.validation.constraints.*;
 
 
@@ -20,25 +18,27 @@ import javax.validation.Valid;
 
 
 
-public class UUIDListDTO   {
+public class RequestCountLimitAllOfDTO   {
   
-    private List<String> uuids = new ArrayList<>();
+    private Long requestCount = null;
 
   /**
+   * Maximum number of requests allowed
    **/
-  public UUIDListDTO uuids(List<String> uuids) {
-    this.uuids = uuids;
+  public RequestCountLimitAllOfDTO requestCount(Long requestCount) {
+    this.requestCount = requestCount;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
-  @JsonProperty("uuids")
-  public List<String> getUuids() {
-    return uuids;
+  @ApiModelProperty(example = "1000", required = true, value = "Maximum number of requests allowed")
+  @JsonProperty("requestCount")
+  @NotNull
+  public Long getRequestCount() {
+    return requestCount;
   }
-  public void setUuids(List<String> uuids) {
-    this.uuids = uuids;
+  public void setRequestCount(Long requestCount) {
+    this.requestCount = requestCount;
   }
 
 
@@ -50,21 +50,21 @@ public class UUIDListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    UUIDListDTO uuIDList = (UUIDListDTO) o;
-    return Objects.equals(uuids, uuIDList.uuids);
+    RequestCountLimitAllOfDTO requestCountLimitAllOf = (RequestCountLimitAllOfDTO) o;
+    return Objects.equals(requestCount, requestCountLimitAllOf.requestCount);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuids);
+    return Objects.hash(requestCount);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class UUIDListDTO {\n");
+    sb.append("class RequestCountLimitAllOfDTO {\n");
     
-    sb.append("    uuids: ").append(toIndentedString(uuids)).append("\n");
+    sb.append("    requestCount: ").append(toIndentedString(requestCount)).append("\n");
     sb.append("}");
     return sb.toString();
   }
