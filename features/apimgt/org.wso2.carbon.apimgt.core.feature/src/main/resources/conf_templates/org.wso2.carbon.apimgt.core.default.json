@@ -59,6 +59,8 @@
   "apim.ai.api_chat_execute_resource": "/ai/api-chat/execute",
   "apim.ai.design_assistant_chat_resource": "/ai/api-design-assistant/chat",
   "apim.ai.design_assistant_gen_api_payload_resource": "/ai/api-design-assistant/generate-api-payload",
+  "apim.ai.api_mock_generate": "/ai/api-mock/generate-mocks",
+  "apim.ai.api_mock_modify_method": "/ai/api-mock/modify-method",
   "apim.api_quota_limit.enable": false,
   "apim.http_client.max_total": "100",
   "apim.http_client.default_max_per_route": "50",

@@ -563,6 +563,15 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
 
+        public static final String API_MOCK = "ApiMock";
+        public static final String API_MOCK_ENABLED = "Enabled";
+        public static final String API_MOCK_AUTH_TOKEN = "AuthToken";
+        public static final String API_MOCK_KEY = "Key";
+        public static final String API_MOCK_ENDPOINT = "Endpoint";
+        public static final String API_MOCK_TOKEN_ENDPOINT = "TokenEndpoint";
+        public static final String API_MOCK_GENERATE_RESOURCE = "GenerateResource";
+        public static final String API_MOCK_MODIFY_METHOD_RESOURCE = "ModifyMethodResource";
+
         private AI() {
 
         }
