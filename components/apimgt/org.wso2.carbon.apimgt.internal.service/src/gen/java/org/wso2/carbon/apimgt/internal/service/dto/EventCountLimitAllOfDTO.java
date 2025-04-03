@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
-import java.util.List;
 import javax.validation.constraints.*;
 
 
@@ -20,25 +18,27 @@ import javax.validation.Valid;
 
 
 
-public class UUIDListDTO   {
+public class EventCountLimitAllOfDTO   {
   
-    private List<String> uuids = new ArrayList<>();
+    private Long eventCount = null;
 
   /**
+   * Maximum number of events allowed
    **/
-  public UUIDListDTO uuids(List<String> uuids) {
-    this.uuids = uuids;
+  public EventCountLimitAllOfDTO eventCount(Long eventCount) {
+    this.eventCount = eventCount;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
-  @JsonProperty("uuids")
-  public List<String> getUuids() {
-    return uuids;
+  @ApiModelProperty(example = "3000", required = true, value = "Maximum number of events allowed")
+  @JsonProperty("eventCount")
+  @NotNull
+  public Long getEventCount() {
+    return eventCount;
   }
-  public void setUuids(List<String> uuids) {
-    this.uuids = uuids;
+  public void setEventCount(Long eventCount) {
+    this.eventCount = eventCount;
   }
 
 
@@ -50,21 +50,21 @@ public class UUIDListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    UUIDListDTO uuIDList = (UUIDListDTO) o;
-    return Objects.equals(uuids, uuIDList.uuids);
+    EventCountLimitAllOfDTO eventCountLimitAllOf = (EventCountLimitAllOfDTO) o;
+    return Objects.equals(eventCount, eventCountLimitAllOf.eventCount);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(uuids);
+    return Objects.hash(eventCount);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class UUIDListDTO {\n");
+    sb.append("class EventCountLimitAllOfDTO {\n");
     
-    sb.append("    uuids: ").append(toIndentedString(uuids)).append("\n");
+    sb.append("    eventCount: ").append(toIndentedString(eventCount)).append("\n");
     sb.append("}");
     return sb.toString();
   }

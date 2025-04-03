@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.internal.service.dto.ThrottleLimitDTO;
 import javax.validation.constraints.*;
 
 
@@ -18,21 +19,22 @@ import javax.validation.Valid;
 
 
 
-public class BurstLimitDTO   {
+public class SubscriptionPolicyAllOfDTO   {
   
     private Integer rateLimitCount = null;
     private String rateLimitTimeUnit = null;
+    private Boolean stopOnQuotaReach = null;
+    private ThrottleLimitDTO defaultLimit = null;
 
   /**
-   * Burst control request count
    **/
-  public BurstLimitDTO rateLimitCount(Integer rateLimitCount) {
+  public SubscriptionPolicyAllOfDTO rateLimitCount(Integer rateLimitCount) {
     this.rateLimitCount = rateLimitCount;
     return this;
   }
 
   
-  @ApiModelProperty(example = "10", value = "Burst control request count")
+  @ApiModelProperty(value = "")
   @JsonProperty("rateLimitCount")
   public Integer getRateLimitCount() {
     return rateLimitCount;
@@ -42,21 +44,55 @@ public class BurstLimitDTO   {
   }
 
   /**
-   * Burst control time unit
    **/
-  public BurstLimitDTO rateLimitTimeUnit(String rateLimitTimeUnit) {
+  public SubscriptionPolicyAllOfDTO rateLimitTimeUnit(String rateLimitTimeUnit) {
     this.rateLimitTimeUnit = rateLimitTimeUnit;
     return this;
   }
 
   
-  @ApiModelProperty(example = "min", value = "Burst control time unit")
+  @ApiModelProperty(value = "")
   @JsonProperty("rateLimitTimeUnit")
   public String getRateLimitTimeUnit() {
     return rateLimitTimeUnit;
   }
   public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
     this.rateLimitTimeUnit = rateLimitTimeUnit;
+  }
+
+  /**
+   **/
+  public SubscriptionPolicyAllOfDTO stopOnQuotaReach(Boolean stopOnQuotaReach) {
+    this.stopOnQuotaReach = stopOnQuotaReach;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("stopOnQuotaReach")
+  public Boolean isStopOnQuotaReach() {
+    return stopOnQuotaReach;
+  }
+  public void setStopOnQuotaReach(Boolean stopOnQuotaReach) {
+    this.stopOnQuotaReach = stopOnQuotaReach;
+  }
+
+  /**
+   **/
+  public SubscriptionPolicyAllOfDTO defaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("defaultLimit")
+  public ThrottleLimitDTO getDefaultLimit() {
+    return defaultLimit;
+  }
+  public void setDefaultLimit(ThrottleLimitDTO defaultLimit) {
+    this.defaultLimit = defaultLimit;
   }
 
 
@@ -68,23 +104,27 @@ public class BurstLimitDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    BurstLimitDTO burstLimit = (BurstLimitDTO) o;
-    return Objects.equals(rateLimitCount, burstLimit.rateLimitCount) &&
-        Objects.equals(rateLimitTimeUnit, burstLimit.rateLimitTimeUnit);
+    SubscriptionPolicyAllOfDTO subscriptionPolicyAllOf = (SubscriptionPolicyAllOfDTO) o;
+    return Objects.equals(rateLimitCount, subscriptionPolicyAllOf.rateLimitCount) &&
+        Objects.equals(rateLimitTimeUnit, subscriptionPolicyAllOf.rateLimitTimeUnit) &&
+        Objects.equals(stopOnQuotaReach, subscriptionPolicyAllOf.stopOnQuotaReach) &&
+        Objects.equals(defaultLimit, subscriptionPolicyAllOf.defaultLimit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(rateLimitCount, rateLimitTimeUnit);
+    return Objects.hash(rateLimitCount, rateLimitTimeUnit, stopOnQuotaReach, defaultLimit);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class BurstLimitDTO {\n");
+    sb.append("class SubscriptionPolicyAllOfDTO {\n");
     
     sb.append("    rateLimitCount: ").append(toIndentedString(rateLimitCount)).append("\n");
     sb.append("    rateLimitTimeUnit: ").append(toIndentedString(rateLimitTimeUnit)).append("\n");
+    sb.append("    stopOnQuotaReach: ").append(toIndentedString(stopOnQuotaReach)).append("\n");
+    sb.append("    defaultLimit: ").append(toIndentedString(defaultLimit)).append("\n");
     sb.append("}");
     return sb.toString();
   }

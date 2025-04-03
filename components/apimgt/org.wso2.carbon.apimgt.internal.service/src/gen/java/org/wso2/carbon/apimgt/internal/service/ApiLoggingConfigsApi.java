@@ -26,7 +26,7 @@ import javax.validation.constraints.*;
 
 @Api(description = "the api-logging-configs API")
 
-@Produces({ "application/json" })
+
 
 
 public class ApiLoggingConfigsApi  {

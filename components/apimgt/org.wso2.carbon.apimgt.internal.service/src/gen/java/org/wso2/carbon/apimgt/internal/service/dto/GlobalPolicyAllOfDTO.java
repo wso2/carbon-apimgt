@@ -18,43 +18,43 @@ import javax.validation.Valid;
 
 
 
-public class DeployedEnvInfoDTO   {
+public class GlobalPolicyAllOfDTO   {
   
-    private String name = null;
-    private String vhost = null;
+    private String siddhiQuery = null;
+    private String keyTemplate = null;
 
   /**
    **/
-  public DeployedEnvInfoDTO name(String name) {
-    this.name = name;
+  public GlobalPolicyAllOfDTO siddhiQuery(String siddhiQuery) {
+    this.siddhiQuery = siddhiQuery;
     return this;
   }
 
   
-  @ApiModelProperty(example = "default", value = "")
-  @JsonProperty("name")
- @Size(min=1,max=255)  public String getName() {
-    return name;
+  @ApiModelProperty(value = "")
+  @JsonProperty("siddhiQuery")
+  public String getSiddhiQuery() {
+    return siddhiQuery;
   }
-  public void setName(String name) {
-    this.name = name;
+  public void setSiddhiQuery(String siddhiQuery) {
+    this.siddhiQuery = siddhiQuery;
   }
 
   /**
    **/
-  public DeployedEnvInfoDTO vhost(String vhost) {
-    this.vhost = vhost;
+  public GlobalPolicyAllOfDTO keyTemplate(String keyTemplate) {
+    this.keyTemplate = keyTemplate;
     return this;
   }
 
   
-  @ApiModelProperty(example = "mg.wso2.com", value = "")
-  @JsonProperty("vhost")
- @Pattern(regexp="^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$") @Size(min=1,max=255)  public String getVhost() {
-    return vhost;
+  @ApiModelProperty(value = "")
+  @JsonProperty("keyTemplate")
+  public String getKeyTemplate() {
+    return keyTemplate;
   }
-  public void setVhost(String vhost) {
-    this.vhost = vhost;
+  public void setKeyTemplate(String keyTemplate) {
+    this.keyTemplate = keyTemplate;
   }
 
 
@@ -66,23 +66,23 @@ public class DeployedEnvInfoDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    DeployedEnvInfoDTO deployedEnvInfo = (DeployedEnvInfoDTO) o;
-    return Objects.equals(name, deployedEnvInfo.name) &&
-        Objects.equals(vhost, deployedEnvInfo.vhost);
+    GlobalPolicyAllOfDTO globalPolicyAllOf = (GlobalPolicyAllOfDTO) o;
+    return Objects.equals(siddhiQuery, globalPolicyAllOf.siddhiQuery) &&
+        Objects.equals(keyTemplate, globalPolicyAllOf.keyTemplate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, vhost);
+    return Objects.hash(siddhiQuery, keyTemplate);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class DeployedEnvInfoDTO {\n");
+    sb.append("class GlobalPolicyAllOfDTO {\n");
     
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    vhost: ").append(toIndentedString(vhost)).append("\n");
+    sb.append("    siddhiQuery: ").append(toIndentedString(siddhiQuery)).append("\n");
+    sb.append("    keyTemplate: ").append(toIndentedString(keyTemplate)).append("\n");
     sb.append("}");
     return sb.toString();
   }
