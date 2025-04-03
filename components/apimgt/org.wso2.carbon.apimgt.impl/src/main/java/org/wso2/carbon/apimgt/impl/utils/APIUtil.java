@@ -11620,7 +11620,7 @@ public final class APIUtil {
     /**
      * This method is used to validate the mandatory custom properties of an API
      *
-     * @param customProperties custom properties of the API
+     * @param customProperties        custom properties of the API
      * @param additionalPropertiesMap additional properties to validate
      * @return list of erroneous property names. returns an empty array if there are no errors.
      */
