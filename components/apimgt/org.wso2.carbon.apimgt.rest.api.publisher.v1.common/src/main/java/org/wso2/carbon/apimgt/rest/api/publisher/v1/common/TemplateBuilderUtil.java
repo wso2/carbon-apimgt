@@ -1517,6 +1517,25 @@ public class TemplateBuilderUtil {
                 gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(passwordDto,
                         gatewayAPIDTO.getCredentialsToBeAdd()));
             }
+            if (endpointSecurity.has(APIConstants.PROXY_CONFIGS)) {
+                org.json.JSONObject proxyConfigs = (org.json.JSONObject) endpointSecurity.get(APIConstants
+                        .PROXY_CONFIGS);
+                if (Boolean.TRUE.equals(proxyConfigs.get(APIConstants.PROXY_ENABLED))) {
+                    String proxyPassword = (String) proxyConfigs.get(APIConstants.ENDPOINT_SECURITY_PROXY_PASSWORD);
+                    CredentialDto proxyPasswordDto = new CredentialDto();
+                    if (StringUtils.isNotEmpty(prefix)) {
+                        proxyPasswordDto.setAlias(prefix.concat("--").concat(GatewayUtils
+                                .retrieveOAuthProxyPasswordAlias(api.getId().getApiName(), api.getId().getVersion(),
+                                        type)));
+                    } else {
+                        proxyPasswordDto.setAlias(GatewayUtils.retrieveOAuthProxyPasswordAlias(api.getId().getApiName(),
+                                api.getId().getVersion(), type));
+                    }
+                    proxyPasswordDto.setPassword(proxyPassword);
+                    gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(proxyPasswordDto,
+                            gatewayAPIDTO.getCredentialsToBeAdd()));
+                }
+            }
         } else if (APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.equalsIgnoreCase((String)
                 endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
             CredentialDto credentialDto = new CredentialDto();
