@@ -87,6 +87,26 @@ public interface APIMGovernanceService {
                                                   String organization) throws APIMGovernanceException;
 
     /**
+     * Evaluate compliance of the artifact synchronously
+     *
+     * @param artifactType           Artifact type (ExtendedArtifactType.REST_API)
+     * @param state                  State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
+     * @param artifactProjectContent This is a map of RuleType and String which contains the content of the artifact
+     *                               project. This is used to evaluate the compliance of the artifact.
+     *                               API_METADATA --> api.yaml content
+     *                               API_DEFINITION --> api definition content
+     *                               API_DOCUMENTATION --> api documentation content
+     *                               If no content is specified content fetched from DB
+     * @param organization           Organization
+     * @return ArtifactComplianceInfo object
+     * @throws APIMGovernanceException If an error occurs while evaluating compliance
+     */
+    ArtifactComplianceInfo evaluateComplianceGenAI(ExtendedArtifactType artifactType,
+                                                  APIMGovernableState state,
+                                                  Map<RuleType, String> artifactProjectContent,
+                                                  String organization) throws APIMGovernanceException;
+
+    /**
      * This method can be called to evaluate the compliance of the artifact without persisting the compliance data (A
      * dry run) using the provided artifact content file path and the artifact type. The artifact will be evaluated
      * against all the global policies configured in the system.

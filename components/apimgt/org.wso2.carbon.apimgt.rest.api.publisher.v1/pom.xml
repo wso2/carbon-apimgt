@@ -183,6 +183,10 @@
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.governance.api</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

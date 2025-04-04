@@ -3578,6 +3578,42 @@ public class PublisherCommonUtils {
     }
 
     /**
+     * This method is used to check governance compliance synchronously.
+     *
+     * @param state                  API state
+     * @param type                   API type
+     * @param organization           Organization of the logged-in user
+     * @param artifactProjectContent Content of the artifact project
+     * @return Map of compliance violations
+     * @throws APIManagementException If an error occurs while checking governance compliance
+     */
+    public static Map<String, String> checkGovernanceComplianceGenAI(APIMGovernableState state,
+                                                                    ExtendedArtifactType type, String organization,
+                                                                    Map<RuleType,
+                    String> artifactProjectContent) throws APIManagementException {
+        Map<String, String> responseMap = new HashMap<>(2);
+
+        try {
+//            if (apimGovernanceService.isPoliciesWithBlockingActionExist(type, state, organization)) {
+//                if (log.isDebugEnabled()) {
+//                    log.debug("Blocking policies exist for the API. Evaluating compliance synchronously.");
+//                }
+                ArtifactComplianceInfo artifactComplianceInfo = apimGovernanceService.evaluateComplianceGenAI(
+                        type, state, artifactProjectContent, organization);
+                if (artifactComplianceInfo.isBlockingNecessary()) {
+                    responseMap.put(GOVERNANCE_COMPLIANCE_KEY, "false");
+                    responseMap.put(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE,
+                            buildBadRequestResponse(artifactComplianceInfo));
+                    return responseMap;
+//                }
+            }
+        } catch (APIMGovernanceException e) {
+            log.error("Error occurred while executing governance compliance validation for API " , e);
+        }
+        return responseMap;
+    }
+
+    /**
      * Check governance compliance for the API artifact asynchronously.
      *
      * @param artifactID   API ID

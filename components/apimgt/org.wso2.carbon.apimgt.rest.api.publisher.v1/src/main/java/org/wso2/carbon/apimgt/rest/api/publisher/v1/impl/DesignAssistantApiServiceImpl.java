@@ -22,17 +22,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONObject;
+//import org.json.simple.JSONObject;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.RuleType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.DesignAssistantApiService;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DesignAssistantAPIPayloadResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DesignAssistantChatQueryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DesignAssistantChatResponseDTO;
@@ -42,6 +49,8 @@ import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import javax.ws.rs.core.Response;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DesignAssistantApiServiceImpl implements DesignAssistantApiService {
 
@@ -138,10 +147,37 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
                 } else {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
                             configDto.getAccessToken(), configDto.getChatResource(), payload.toString(), null);
-
                 }
                 ObjectMapper objectMapper = new ObjectMapper();
                 DesignAssistantChatResponseDTO responseDTO = objectMapper.readValue(response, DesignAssistantChatResponseDTO.class);
+
+                try {
+                    JSONObject jsonResponse = new JSONObject(response);
+                    if (jsonResponse.has("code")) {
+                        String extractedCode = jsonResponse.getString("code");
+                        log.info(extractedCode);
+
+                        Map<RuleType, String> apiDefinition = new HashMap<>();
+                        apiDefinition.put(RuleType.API_DEFINITION, extractedCode);
+
+                        Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceGenAI(
+                                APIMGovernableState.API_CREATE,
+                                ExtendedArtifactType.REST_API,
+                                RestApiCommonUtil.getLoggedInUserTenantDomain(),
+                                apiDefinition);
+
+                        log.info(complianceResult);
+
+                    } else {
+                        log.warn("Response does not contain 'code' key.");
+                    }
+                } catch (Exception e) {
+                    log.error("Error parsing response JSON: {}"+  e.getMessage(), e);
+                }
+
+                // send those errors back to the inceptor to regenerate spec
+                // send spec to frontend
+
                 return Response.ok(responseDTO).build();
             }
         } catch (APIManagementException | IOException e) {
