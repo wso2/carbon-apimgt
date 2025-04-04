@@ -99,7 +99,7 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                 String openApiDefinition = ImportUtils.loadSwaggerFile(extractedFolderPath);
                                 apiProduct.setDefinition(openApiDefinition);
                                 gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(apiProduct, environment,
-                                        tenantDomain, extractedFolderPath);
+                                        tenantDomain, extractedFolderPath, openApiDefinition);
                             } else {
                                 APIDTO apidto = ImportUtils.retrievedAPIDto(extractedFolderPath);
                                 API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
