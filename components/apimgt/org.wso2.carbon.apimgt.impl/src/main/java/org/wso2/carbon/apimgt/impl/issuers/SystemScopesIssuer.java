@@ -337,14 +337,21 @@ public class SystemScopesIssuer implements ScopeValidator {
             String isSAML2Enabled = System.getProperty(APIConstants.SystemScopeConstants.CHECK_ROLES_FROM_SAML_ASSERTION);
             String isRetrieveRolesFromUserStoreForScopeValidation = System
                     .getProperty(APIConstants.SystemScopeConstants.RETRIEVE_ROLES_FROM_USERSTORE_FOR_SCOPE_VALIDATION);
-            if (GrantType.SAML20_BEARER.toString().equals(grantType) && Boolean.parseBoolean(isSAML2Enabled)) {
+            if (APIConstants.OAuthConstants.TOKEN_EXCHANGE.equals(grantType)) {
+                configureForJWTGrantOrExchangeGrant(tokReqMsgCtx, true);
+                Map<ClaimMapping, String> userAttributes = authenticatedUser.getUserAttributes();
+                if (tokReqMsgCtx.getProperty(APIConstants.SystemScopeConstants.ROLE_CLAIM) != null) {
+                    userRoles = getRolesFromUserAttribute(userAttributes,
+                            tokReqMsgCtx.getProperty(APIConstants.SystemScopeConstants.ROLE_CLAIM).toString());
+                }
+            } else if (GrantType.SAML20_BEARER.toString().equals(grantType) && Boolean.parseBoolean(isSAML2Enabled)) {
                 authenticatedUser.setUserStoreDomain("FEDERATED");
                 tokReqMsgCtx.setAuthorizedUser(authenticatedUser);
                 Assertion assertion = (Assertion) tokReqMsgCtx.getProperty(APIConstants.SystemScopeConstants.SAML2_ASSERTION);
                 userRoles = getRolesFromAssertion(assertion);
             } else if (APIConstants.SystemScopeConstants.OAUTH_JWT_BEARER_GRANT_TYPE.equals(grantType) && !(Boolean
                     .parseBoolean(isRetrieveRolesFromUserStoreForScopeValidation))) {
-                configureForJWTGrant(tokReqMsgCtx);
+                configureForJWTGrantOrExchangeGrant(tokReqMsgCtx, false);
                 Map<ClaimMapping, String> userAttributes = authenticatedUser.getUserAttributes();
                 if (tokReqMsgCtx.getProperty(APIConstants.SystemScopeConstants.ROLE_CLAIM) != null) {
                     userRoles = getRolesFromUserAttribute(userAttributes,
@@ -559,13 +566,18 @@ public class SystemScopesIssuer implements ScopeValidator {
         return SystemScopeUtils.getRolesFromAssertion(assertion);
     }
 
-    protected void configureForJWTGrant(OAuthTokenReqMessageContext tokReqMsgCtx) {
+    protected void configureForJWTGrantOrExchangeGrant(OAuthTokenReqMessageContext tokReqMsgCtx,
+                                                       boolean isExchangeGrant) {
 
         SignedJWT signedJWT = null;
         JWTClaimsSet claimsSet = null;
         String[] roles = null;
         try {
-            signedJWT = getSignedJWT(tokReqMsgCtx);
+            if (isExchangeGrant) {
+                signedJWT = getSignedJWTFromSubjectToken(tokReqMsgCtx);
+            } else {
+                signedJWT = getSignedJWT(tokReqMsgCtx);
+            }
         } catch (IdentityOAuth2Exception e) {
             log.error("Couldn't retrieve signed JWT", e);
         }
@@ -648,6 +660,41 @@ public class SystemScopesIssuer implements ScopeValidator {
 
         try {
             signedJWT = SignedJWT.parse(assertion);
+            if (log.isDebugEnabled()) {
+                log.debug(signedJWT);
+            }
+        } catch (ParseException e) {
+            String errorMessage = "Error while parsing the JWT.";
+            throw new IdentityOAuth2Exception(errorMessage, e);
+        }
+        return signedJWT;
+    }
+
+    /**
+     * Method to parse the subject token and retrieve the signed JWT
+     *
+     * @param tokReqMsgCtx request
+     * @return SignedJWT object
+     * @throws IdentityOAuth2Exception exception thrown due to a parsing error
+     */
+    private SignedJWT getSignedJWTFromSubjectToken(OAuthTokenReqMessageContext tokReqMsgCtx) throws IdentityOAuth2Exception {
+
+        RequestParameter[] params = tokReqMsgCtx.getOauth2AccessTokenReqDTO().getRequestParameters();
+        String subjectToken = null;
+        SignedJWT signedJWT;
+        for (RequestParameter param : params) {
+            if (param.getKey().equals(APIConstants.OAuthConstants.SUBJECT_TOKEN)) {
+                subjectToken = param.getValue()[0];
+                break;
+            }
+        }
+        if (StringUtils.isEmpty(subjectToken)) {
+            String errorMessage = "Error while retrieving subjectToken";
+            throw new IdentityOAuth2Exception(errorMessage);
+        }
+
+        try {
+            signedJWT = SignedJWT.parse(subjectToken);
             if (log.isDebugEnabled()) {
                 log.debug(signedJWT);
             }
