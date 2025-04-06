@@ -57,6 +57,11 @@ import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -101,6 +106,8 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TY
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYPE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_APIM_DEFAULT_SECURITY;
 import static org.wso2.carbon.apimgt.impl.APIConstants.SWAGGER_APIM_RESTAPI_SECURITY;
+import static org.wso2.carbon.apimgt.impl.definitions.OASParserUtil.convertOAStoJSON;
+import static org.wso2.carbon.apimgt.impl.definitions.OASParserUtil.generateExamples;
 import static org.wso2.carbon.apimgt.impl.definitions.OASParserUtil.isValidWithPathsWithTrailingSlashes;
 
 /**
@@ -197,6 +204,56 @@ public class OAS2Parser extends APIDefinition {
                 //gets response section string depending on availability of json/xml payloads
                 String responseConditions = getResponseConditionsSection(hasJsonPayload, hasXmlPayload);
                 String finalScript = finalGenCode + responseConditions;
+                apiResourceMediationPolicyObject.setContent(finalScript);
+                apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
+                //sets script to each resource in the swagger
+                op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
+            }
+            returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
+            returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
+        }
+        return returnMap;
+    }
+
+    /**
+     * This method returns the generated examples for the given API definition
+     *
+     * @param apiDefinition API definition
+     * @return Map of generated examples
+     * @throws APIManagementException
+     */
+    @Override
+    public Map<String, Object> getGeneratedExamples(String swaggerDef) throws APIManagementException {
+        // create APIResourceMediationPolicy List = policyList
+        Swagger swagger = getSwagger(swaggerDef);
+        //return map
+        Map<String, Object> returnMap = new HashMap<>();
+        //List for APIResMedPolicyList
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
+        for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
+            String path = entry.getKey();
+            //operation map to get verb
+            Map<HttpMethod, Operation> operationMap = entry.getValue().getOperationMap();
+            List<Operation> operations = swagger.getPaths().get(path).getOperations();
+            for (int i = 0, operationsSize = operations.size(); i < operationsSize; i++) {
+                Operation op = operations.get(i);
+                //initializing apiResourceMediationPolicyObject
+                APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
+                //setting path for apiResourceMediationPolicyObject
+                apiResourceMediationPolicyObject.setPath(path);
+                Object[] operationsArray = operationMap.entrySet().toArray();
+                if (operationsArray.length > i) {
+                    Map.Entry<HttpMethod, Operation> operationEntry =
+                            (Map.Entry<HttpMethod, Operation>) operationsArray[i];
+                    apiResourceMediationPolicyObject.setVerb(String.valueOf(operationEntry.getKey()));
+                } else {
+                    throw new
+                            APIManagementException("Cannot find the HTTP method for the API Resource Mediation Policy");
+                }
+                String finalScript = op.getVendorExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT).toString();
+                if (finalScript == null) {
+                    return null;
+                }
                 apiResourceMediationPolicyObject.setContent(finalScript);
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
                 //sets script to each resource in the swagger

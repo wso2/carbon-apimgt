@@ -93,6 +93,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TYPE;
+import static org.wso2.carbon.apimgt.impl.definitions.OASParserUtil.convertOAStoJSON;
+import static org.wso2.carbon.apimgt.impl.definitions.OASParserUtil.generateExamples;
 import static org.wso2.carbon.apimgt.impl.definitions.OASParserUtil.isValidWithPathsWithTrailingSlashes;
 
 /**
@@ -251,6 +253,60 @@ public class OAS3Parser extends APIDefinition {
             checkAndSetEmptyScope(swagger);
             returnMap.put(APIConstants.SWAGGER, prettifyOAS3ToJson(swagger));
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
+        }
+        return returnMap;
+    }
+
+        /**
+     * This method returns the generated examples for the given API definition
+     *
+     * @param apiDefinition API definition
+     * @return Map of generated examples
+     * @throws APIManagementException
+     */
+    @Override
+    public Map<String, Object> getGeneratedExamples(String apiDefinition) throws APIManagementException {
+         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(apiDefinition, null, null);
+        if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
+            log.debug("Errors found when parsing OAS definition");
+        }
+        OpenAPI swagger = parseAttemptForV3.getOpenAPI();
+        // return map
+        Map<String, Object> returnMap = new HashMap<>();
+        // List for APIResMedPolicyList
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
+        for (Map.Entry<String, PathItem> entry : swagger.getPaths().entrySet()) {
+            String path = entry.getKey();
+            Map<PathItem.HttpMethod, Operation> operationMap = entry.getValue().readOperationsMap();
+            List<Operation> operations = swagger.getPaths().get(path).readOperations();
+            for (int i = 0, operationsSize = operations.size(); i < operationsSize; i++) {
+                Operation op = operations.get(i);
+                if (op.getExtensions() == null
+                        || op.getExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT) == null) {
+                    returnMap = generateExamples(apiDefinition);
+                    returnMap.put("updated", true);
+                    return returnMap;
+                }
+                // initializing apiResourceMediationPolicyObject
+                APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
+                // setting path for apiResourceMediationPolicyObject
+                apiResourceMediationPolicyObject.setPath(path);
+                Object[] operationsArray = operationMap.entrySet().toArray();
+                if (operationsArray.length > i) {
+                    Map.Entry<PathItem.HttpMethod, Operation> operationEntry = (Map.Entry<PathItem.HttpMethod, Operation>) operationsArray[i];
+                    apiResourceMediationPolicyObject.setVerb(String.valueOf(operationEntry.getKey()));
+                } else {
+                    throw new APIManagementException(
+                            "Cannot find the HTTP method for the API Resource Mediation Policy");
+                }
+                String finalScript = op.getExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT).toString();
+                apiResourceMediationPolicyObject.setContent(finalScript);
+                apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
+            }
+            returnMap.put(APIConstants.SWAGGER, convertOAStoJSON(swagger));
+            returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
+            returnMap.put("updated", false);
         }
         return returnMap;
     }

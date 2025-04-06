@@ -4045,7 +4045,9 @@ public class ApisApiServiceImpl implements ApisApiService {
         } else {
             apiDefinition = String.valueOf(OASParserUtil.generateExamples(apiDefinition).get(APIConstants.SWAGGER));
         }
-        apiProvider.saveSwaggerDefinition(originalAPI, apiDefinition, organization);
+        // if (mockConfig.getConfig().get("modify") == null) {
+        //     apiProvider.saveSwaggerDefinition(originalAPI, apiDefinition, organization);
+        // }
         return Response.ok().entity(apiDefinition).build();
     }
 

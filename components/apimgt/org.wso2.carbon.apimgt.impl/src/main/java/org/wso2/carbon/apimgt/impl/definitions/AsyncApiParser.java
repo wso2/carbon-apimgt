@@ -1589,6 +1589,11 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     @Override
+    public Map<String, Object> getGeneratedExamples(String apiDefinition) throws APIManagementException{
+        return null;
+    }
+
+    @Override
     public Set<URITemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException {
         return getURITemplates(resourceConfigsJSON, true);
     }
