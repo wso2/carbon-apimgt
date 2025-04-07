@@ -3845,16 +3845,12 @@ public class SQLConstants {
                         "APP.APPLICATION_TIER AS APPLICATION_TIER, " +
                         "SUBSCRIBER.USER_ID AS SUBSCRIBER, " +
                         "SUBSCRIBER.TENANT_ID AS TENANT_ID " +
-                        "FROM AM_WEBHOOKS_SUBSCRIPTION WH, " +
-                        "AM_API API, " +
-                        "AM_SUBSCRIPTION SUB, " +
-                        "AM_APPLICATION APP, " +
-                        "AM_SUBSCRIBER SUBSCRIBER " +
-                        "WHERE WH.EXPIRY_AT >= ? AND WH.TENANT_DOMAIN = ? " +
-                        "AND API.API_ID = SUB.API_ID " +
-                        "AND WH.APPLICATION_ID = SUB.APPLICATION_ID " +
-                        "AND API.API_UUID = WH.API_UUID " +
-                        "AND APP.SUBSCRIBER_ID = SUBSCRIBER.SUBSCRIBER_ID ";
+                        "FROM AM_WEBHOOKS_SUBSCRIPTION WH " +
+                        "JOIN AM_SUBSCRIPTION SUB ON WH.APPLICATION_ID = SUB.APPLICATION_ID " +
+                        "JOIN AM_API API ON API.API_ID = SUB.API_ID AND API.API_UUID = WH.API_UUID " +
+                        "JOIN AM_APPLICATION APP ON WH.APPLICATION_ID = APP.APPLICATION_ID " +
+                        "JOIN AM_SUBSCRIBER SUBSCRIBER ON APP.SUBSCRIBER_ID = SUBSCRIBER.SUBSCRIBER_ID " +
+                        "WHERE (WH.EXPIRY_AT >= ? OR WH.EXPIRY_AT = 0) AND WH.TENANT_DOMAIN = ? ";
 
         public static final String GET_ALL_VALID_SUBSCRIPTIONS_POSTGRE_SQL =
                 "SELECT WH.API_UUID AS API_UUID, " +
@@ -3871,16 +3867,12 @@ public class SQLConstants {
                         "APP.APPLICATION_TIER AS APPLICATION_TIER, " +
                         "SUBSCRIBER.USER_ID AS SUBSCRIBER, " +
                         "SUBSCRIBER.TENANT_ID AS TENANT_ID " +
-                        "FROM AM_WEBHOOKS_SUBSCRIPTION WH, " +
-                        "AM_API API, " +
-                        "AM_SUBSCRIPTION SUB, " +
-                        "AM_APPLICATION APP, " +
-                        "AM_SUBSCRIBER SUBSCRIBER " +
-                        "WHERE WH.EXPIRY_AT >= ? AND WH.TENANT_DOMAIN = ? " +
-                        "AND API.API_ID = SUB.API_ID " +
-                        "AND WH.APPLICATION_ID::integer = SUB.APPLICATION_ID " +
-                        "AND API.API_UUID = WH.API_UUID " +
-                        "AND APP.SUBSCRIBER_ID = SUBSCRIBER.SUBSCRIBER_ID ";
+                        "FROM AM_WEBHOOKS_SUBSCRIPTION WH " +
+                        "JOIN AM_SUBSCRIPTION SUB ON CAST(WH.APPLICATION_ID AS INTEGER) = SUB.APPLICATION_ID " +
+                        "JOIN AM_API API ON API.API_ID = SUB.API_ID AND API.API_UUID = WH.API_UUID " +
+                        "JOIN AM_APPLICATION APP ON CAST(WH.APPLICATION_ID AS INTEGER) = APP.APPLICATION_ID " +
+                        "JOIN AM_SUBSCRIBER SUBSCRIBER ON APP.SUBSCRIBER_ID = SUBSCRIBER.SUBSCRIBER_ID " +
+                        "WHERE (WH.EXPIRY_AT >= ? OR WH.EXPIRY_AT = 0) AND WH.TENANT_DOMAIN = ? ";
 
         public static final String UPDATE_DELIVERY_STATE =
                 "UPDATE AM_WEBHOOKS_SUBSCRIPTION SET DELIVERED_AT = ?, DELIVERY_STATE = ? WHERE API_UUID = ? AND " +
