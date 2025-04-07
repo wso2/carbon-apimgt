@@ -261,7 +261,7 @@ public class OAuthOpaqueAuthenticatorImpl extends AbstractOAuthAuthenticator {
         OrganizationInfo orgInfo = new OrganizationInfo();
         orgInfo.setSuperOrganization(tenantDomain);
 
-        Boolean isSuperTenant = true;
+        Boolean isSuperTenant = false;
         int tenantId = MultitenantConstants.SUPER_TENANT_ID;
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration();
