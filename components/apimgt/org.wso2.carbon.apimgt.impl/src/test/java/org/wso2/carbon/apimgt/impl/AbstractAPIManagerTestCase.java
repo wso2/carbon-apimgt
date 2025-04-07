@@ -257,6 +257,36 @@ public class AbstractAPIManagerTestCase {
 
     }
 
+    @Test
+    public void testGetMarkdownOverviewContent() throws Exception {
+        String apiId = "sample-api-id";
+        String organization = "sample-org";
+
+        AbstractAPIManager abstractAPIManager = new AbstractAPIManagerWrapper(apiPersistenceInstance);
+
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        ServiceReferenceHolder sh = Mockito.mock(ServiceReferenceHolder.class);
+        APIManagerConfigurationService amConfigService = Mockito.mock(APIManagerConfigurationService.class);
+        APIManagerConfiguration amConfig = Mockito.mock(APIManagerConfiguration.class);
+
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(sh);
+        PowerMockito.when(sh.getAPIManagerConfigurationService()).thenReturn(amConfigService);
+        PowerMockito.when(amConfigService.getAPIManagerConfiguration()).thenReturn(amConfig);
+
+        DocumentSearchResult searchResult = Mockito.mock(DocumentSearchResult.class);
+        Mockito.when(searchResult.getDocumentationList()).thenReturn(Collections.emptyList());
+        Mockito.when(apiPersistenceInstance.searchDocumentation(
+                Mockito.any(Organization.class),
+                Mockito.eq(apiId),
+                Mockito.eq(0),
+                Mockito.eq(0),
+                Mockito.eq("other:_overview"),
+                Mockito.isNull()
+        )).thenReturn(searchResult);
+
+        DocumentationContent result = abstractAPIManager.getMarkdownOverviewContent(apiId, organization);
+        Assert.assertNull(result);
+    }
 
     @Test
     public void testIsContextExist() throws APIManagementException {
