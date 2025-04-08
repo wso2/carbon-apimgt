@@ -805,9 +805,6 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
 
         try {
             API api = apiMap.get(event.getContext() + ":" + event.getVersion());
-            if (api != null) {
-                clearResourceCache(api, event.getTenantDomain());
-            }
             if (APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name().equals(event.getType())) {
                 if (api != null) {
                     removeAPI(api);
@@ -817,6 +814,9 @@ public class SubscriptionDataStoreImpl implements SubscriptionDataStore {
                 if (newAPI != null) {
                     addOrUpdateAPI(newAPI);
                 }
+            }
+            if (api != null) {
+                clearResourceCache(api, event.getTenantDomain());
             }
         } catch (DataLoadingException e) {
             log.error("Exception while loading api for " + event.getContext() + " " + event.getVersion(), e);
