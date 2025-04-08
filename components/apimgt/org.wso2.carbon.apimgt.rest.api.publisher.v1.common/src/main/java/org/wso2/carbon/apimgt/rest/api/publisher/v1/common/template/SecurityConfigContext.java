@@ -168,24 +168,28 @@ public class SecurityConfigContext extends ConfigContextDecorator {
             if (APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH
                     .equalsIgnoreCase(endpointSecurityModel.getType())) {
                 if (StringUtils.isNotEmpty(prefix)) {
-                    endpointSecurityModel.setUniqueIdentifier(prefix.concat("--")
-                            .concat(GatewayUtils.retrieveUniqueIdentifier(apiId, type)));
+                    endpointSecurityModel.setUniqueIdentifier(prefix.concat("--").concat(GatewayUtils
+                            .retrieveUniqueIdentifier(apiId, type)));
+                    endpointSecurityModel.setClientSecretAlias(prefix.concat("--").concat(GatewayUtils
+                            .retrieveOauthClientSecretAlias(apiName, version, type)));
+                    endpointSecurityModel.setPasswordAlias(prefix.concat("--").concat(GatewayUtils
+                            .retrieveOAuthPasswordAlias(apiName, version, type)));
+                    if (endpointSecurityModel.getProxyConfigs() != null && endpointSecurityModel.getProxyConfigs()
+                            .isProxyEnabled()) {
+                        endpointSecurityModel.getProxyConfigs().setProxyPasswordAlias(prefix.concat("--")
+                                .concat(GatewayUtils.retrieveOAuthProxyPasswordAlias(apiName, version, type)));
+                    }
                 } else {
                     endpointSecurityModel.setUniqueIdentifier(GatewayUtils.retrieveUniqueIdentifier(apiId, type));
-                }
-                if (StringUtils.isNotEmpty(prefix)) {
-                    endpointSecurityModel.setClientSecretAlias(prefix.concat("--")
-                            .concat(GatewayUtils.retrieveOauthClientSecretAlias(apiName, version, type)));
-                } else {
                     endpointSecurityModel.setClientSecretAlias(GatewayUtils.retrieveOauthClientSecretAlias(apiName,
                             version, type));
-                }
-                if (StringUtils.isNotEmpty(prefix)) {
-                    endpointSecurityModel.setPasswordAlias(prefix.concat("--")
-                            .concat(GatewayUtils.retrieveOAuthPasswordAlias(apiName, version, type)));
-                } else {
-                    endpointSecurityModel.setPasswordAlias(GatewayUtils.retrieveOAuthPasswordAlias(apiName,
-                            version, type));
+                    endpointSecurityModel.setPasswordAlias(GatewayUtils.retrieveOAuthPasswordAlias(apiName, version,
+                            type));
+                    if (endpointSecurityModel.getProxyConfigs() != null && endpointSecurityModel.getProxyConfigs()
+                            .isProxyEnabled()) {
+                        endpointSecurityModel.getProxyConfigs().setProxyPasswordAlias(GatewayUtils
+                                .retrieveOAuthProxyPasswordAlias(apiName, version, type));
+                    }
                 }
             }
             if (StringUtils.isNotBlank(endpointSecurityModel.getUsername())

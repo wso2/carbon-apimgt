@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 
 import java.io.Serializable;
@@ -24,6 +25,7 @@ import java.io.Serializable;
 /**
  * This Class used for Endpoint Security Related data model.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EndpointSecurityModel extends EndpointSecurity implements Serializable {
 
     private String alias;
