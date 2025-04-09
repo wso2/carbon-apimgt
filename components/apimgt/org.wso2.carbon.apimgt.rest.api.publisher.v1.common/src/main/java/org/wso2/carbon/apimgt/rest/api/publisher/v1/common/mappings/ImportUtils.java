@@ -931,6 +931,18 @@ public class ImportUtils {
                             synapseDefinition = APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
                                     policyFileName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML);
                         }
+                        // If the policy definition is still null, definition name is checked after removal of special
+                        // characters
+                        if (synapseDefinition == null) {
+                            String sanitizedPolicyName = policyFileName
+                                    .replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, "");
+                            synapseDefinition = APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                    sanitizedPolicyName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                            if (synapseDefinition == null) {
+                                synapseDefinition = APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                        sanitizedPolicyName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML);
+                            }
+                        }
                         if (synapseDefinition != null) {
                             synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
                             operationPolicyData.setSynapsePolicyDefinition(synapseDefinition);
