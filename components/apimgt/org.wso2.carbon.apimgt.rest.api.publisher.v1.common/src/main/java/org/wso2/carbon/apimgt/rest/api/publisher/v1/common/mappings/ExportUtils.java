@@ -92,8 +92,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_PRODUCTION_ENDPOINTS;
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_DATA_SANDBOX_ENDPOINTS;
@@ -110,7 +108,6 @@ public class ExportUtils {
     private static final String OUT = "out";
     private static final String SOAPTOREST = "SoapToRest";
     private static String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
-    private static final Pattern pattern = Pattern.compile(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX);
 
     /**
      * Validate name, version and provider before exporting an API/API Product.
@@ -767,14 +764,10 @@ public class ExportUtils {
 
             if (api.getApiPolicies() != null && !api.getApiPolicies().isEmpty()) {
                 for (OperationPolicy policy : api.getApiPolicies()) {
-                    String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
+                    String sanitizedPolicyName = policy.getPolicyName()
+                            .replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, "");
+                    String policyFileName = APIUtil.getOperationPolicyFileName(sanitizedPolicyName,
                             policy.getPolicyVersion(), policy.getPolicyType());
-                    Matcher matcher = pattern.matcher(policy.getPolicyName());
-                    if (matcher.find()) {
-                        policyFileName = APIUtil.getOperationPolicyFileName(
-                                policy.getPolicyName().replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""),
-                                policy.getPolicyVersion(), policy.getPolicyType());
-                    }
                     if (!exportedPolicies.contains(policyFileName)) {
                         OperationPolicyData policyData;
                         if (policy.getPolicyId() != null) {
