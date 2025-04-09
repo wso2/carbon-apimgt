@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.31.90-SNAPSHOT</version>
+        <version>9.31.95-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -54,6 +54,11 @@
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+            <version>${commons-validator.version}</version>
         </dependency>
     </dependencies>
     <reporting>
@@ -158,6 +163,7 @@
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.common:${carbon.apimgt.version}
                                 </bundleDef>
                                 <bundleDef>jakarta.validation:jakarta.validation-api</bundleDef>
+                                <bundleDef>commons-validator:commons-validator:${commons-validator.version}</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

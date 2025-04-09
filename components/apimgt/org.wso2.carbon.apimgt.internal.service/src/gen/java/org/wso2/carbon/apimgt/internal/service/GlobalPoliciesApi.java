@@ -26,7 +26,7 @@ import javax.validation.constraints.*;
 
 @Api(description = "the global-policies API")
 
-@Produces({ "application/json" })
+
 
 
 public class GlobalPoliciesApi  {
@@ -44,7 +44,7 @@ GlobalPoliciesApiService delegate = new GlobalPoliciesApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "An array of global policies in the database", response = GlobalPolicyListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response globalPoliciesGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  Global policy name ")  @QueryParam("policyName") String policyName) throws APIManagementException{
+    public Response globalPoliciesGet( @NotNull  @ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  Global policy name ")  @QueryParam("policyName") String policyName) throws APIManagementException{
         return delegate.globalPoliciesGet(xWSO2Tenant, policyName, securityContext);
     }
 }
