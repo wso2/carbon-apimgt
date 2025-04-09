@@ -192,6 +192,8 @@ return null;
     @Scope(name = "apim:api_manage", description="", value ="")
     private List<String> visibleRoles = new ArrayList<String>();
     private List<String> visibleTenants = new ArrayList<String>();
+    @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:api_manage", description="", value ="")
     private List<String> visibleOrganizations = new ArrayList<String>();
     private List<MediationPolicyDTO> mediationPolicies = new ArrayList<MediationPolicyDTO>();
     private APIOperationPoliciesDTO apiPolicies = null;
