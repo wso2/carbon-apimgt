@@ -118,6 +118,26 @@ public class ImportUtils {
     }
 
     /**
+     * Check whether a provided userId corresponds to a valid consumer of the store and subscribe if valid
+     *
+     * @param userId      Username of the Owner
+     * @param groupId     The groupId to which the target subscriber belongs to
+     * @param apiConsumer API Consumer
+     * @throws APIManagementException if an error occurs while checking the validity of user
+     */
+    public static void validateSubscriber(String userId, String groupId, APIConsumer apiConsumer)
+            throws APIManagementException {
+        Subscriber subscriber = apiConsumer.getSubscriber(userId);
+        try {
+            if (subscriber == null && !APIUtil.isPermissionCheckDisabled()) {
+                apiConsumer.addSubscriberOnly(userId, groupId);
+            }
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Provided Application Owner is Invalid", e);
+        }
+    }
+
+    /**
      * This extracts information for creating an APIKey from an OAuthApplication
      *
      * @param applicationKeyDto Application Key DTO
