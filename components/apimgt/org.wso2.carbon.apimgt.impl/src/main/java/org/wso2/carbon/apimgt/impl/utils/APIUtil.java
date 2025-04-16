@@ -10962,11 +10962,16 @@ public final class APIUtil {
 
     /**
      * Replaces wso2/apk gateway vendor type as wso2 after retrieving from db.
+     * For synapse gateway type it returns as "wso2"
+     * For other types it returns as "external"
      *
      * @param gatewayVendor Gateway vendor type
      * @return wso2 gateway vendor type
      */
     public static String handleGatewayVendorRetrieval(String gatewayVendor) {
+        if (gatewayVendor == null) {
+            return null; // Return null to handle this scenario while populating API information
+        }
         if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayVendor) ||
                 APIConstants.WSO2_GATEWAY_ENVIRONMENT.equals(gatewayVendor)) {
             return APIConstants.WSO2_GATEWAY_ENVIRONMENT;
