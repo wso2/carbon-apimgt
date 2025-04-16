@@ -630,6 +630,26 @@ public abstract class AbstractAPIManager implements APIManager {
         }
     }
 
+    public void addSubscriberOnly(String username, String groupingId)
+            throws APIManagementException {
+
+        Subscriber subscriber = new Subscriber(username);
+        subscriber.setSubscribedDate(new Date());
+        try {
+            int tenantId = getTenantManager()
+                    .getTenantId(getTenantDomain(username));
+            subscriber.setEmail(StringUtils.EMPTY);
+            subscriber.setTenantId(tenantId);
+            apiMgtDAO.addSubscriber(subscriber, groupingId);
+        } catch (APIManagementException e) {
+            String msg = "Error while adding the subscriber " + subscriber.getName();
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Error while adding the subscriber " + subscriber.getName();
+            throw new APIManagementException(msg, e);
+        }
+    }
+
     protected String getTenantDomain(String username) {
 
         return MultitenantUtils.getTenantDomain(username);
