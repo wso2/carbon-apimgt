@@ -119,8 +119,9 @@ public class SubscriberRegistrationInterceptor extends AbstractPhaseInterceptor 
                     }
                 }
             } else {
-                if (organizationId != null && APIUtil.isDefaultApplicationCreationEnabled() && !APIUtil.isDefaultApplicationCreationDisabledForTenant(
-                        MultitenantUtils.getTenantDomain(username))) {
+                if (organizationId != null && APIUtil.isDefaultApplicationCreationEnabled()
+                        && !APIUtil.isDefaultApplicationCreationDisabledForTenant(
+                                MultitenantUtils.getTenantDomain(username))) {
                     Application defaultAPP = ApplicationUtils.retrieveApplication(APIConstants.DEFAULT_APPLICATION_NAME,
                             username, groupId);
                     if (defaultAPP.getSubOrganization() == null) {
