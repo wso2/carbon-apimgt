@@ -15988,9 +15988,8 @@ public class ApiMgtDAO {
             ps.setInt(1, applicationId);
             rs = ps.executeQuery();
             while (rs.next()) {
-                String appAttribute = rs.getString("APP_ATTRIBUTE");
                 applicationAttributes.put(rs.getString("NAME"),
-                        (appAttribute != null) ? appAttribute : "");
+                        rs.getString("APP_ATTRIBUTE"));
             }
 
         } catch (SQLException e) {
