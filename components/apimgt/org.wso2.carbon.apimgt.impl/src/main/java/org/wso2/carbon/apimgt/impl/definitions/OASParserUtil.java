@@ -84,7 +84,6 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.definitions.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.mixin.License31Mixin;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
 import java.io.File;
@@ -1232,7 +1231,7 @@ public class OASParserUtil {
 
         for (String scopeName : resourceScopes) {
             if (StringUtils.isNotBlank(scopeName)) {
-                Scope scope = APIUtil.findScopeByKey(apiScopes, scopeName);
+                Scope scope = findScopeByKey(apiScopes, scopeName);
                 if (scope == null) {
                     throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
                 }
@@ -1240,6 +1239,23 @@ public class OASParserUtil {
             }
         }
         return template;
+    }
+
+    /**
+     * Find scope object in a set based on the key
+     *
+     * @param scopes - Set of scopes
+     * @param key    - Key to search with
+     * @return Scope - scope object
+     */
+    public static Scope findScopeByKey(Set<Scope> scopes, String key) {
+
+        for (Scope scope : scopes) {
+            if (scope.getKey().equals(key)) {
+                return scope;
+            }
+        }
+        return null;
     }
 
     /**
