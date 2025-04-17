@@ -29,15 +29,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.swagger.models.Path;
-import io.swagger.models.RefModel;
-import io.swagger.models.RefPath;
-import io.swagger.models.RefResponse;
-import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
-import io.swagger.models.parameters.RefParameter;
-import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Yaml;
@@ -76,8 +70,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -85,35 +77,24 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
-import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.definitions.mixin.License31Mixin;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.registry.api.Registry;
-import org.wso2.carbon.registry.api.RegistryException;
-import org.wso2.carbon.registry.api.Resource;
 
 import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -123,8 +104,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 /**
  * Provide common functions related to OAS
@@ -149,7 +128,6 @@ public class OASParserUtil {
     private static final String EXAMPLES = "examples";
 
     private static final String REF_PREFIX = "#/components/";
-    private static final String ARRAY_DATA_TYPE = "array";
     private static final String OBJECT_DATA_TYPE = "object";
     private static final String OPENAPI_RESOURCE_KEY = "paths";
     private static final String[] UNSUPPORTED_RESOURCE_BLOCKS = new String[]{"servers"};
@@ -1221,34 +1199,6 @@ public class OASParserUtil {
     }
 
     /**
-     * Creates a json string using the swagger object.
-     *
-     * @param swaggerObj swagger object
-     * @return json string using the swagger object
-     * @throws APIManagementException error while creating swagger json
-     */
-    public static String getSwaggerJsonString(Swagger swaggerObj) throws APIManagementException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-        //this is to ignore "originalRef" in schema objects
-        mapper.addMixIn(RefModel.class, IgnoreOriginalRefMixin.class);
-        mapper.addMixIn(RefProperty.class, IgnoreOriginalRefMixin.class);
-        mapper.addMixIn(RefPath.class, IgnoreOriginalRefMixin.class);
-        mapper.addMixIn(RefParameter.class, IgnoreOriginalRefMixin.class);
-        mapper.addMixIn(RefResponse.class, IgnoreOriginalRefMixin.class);
-
-        //this is to ignore "responseSchema" in response schema objects
-        mapper.addMixIn(Response.class, ResponseSchemaMixin.class);
-        try {
-            return new String(mapper.writeValueAsBytes(swaggerObj));
-        } catch (JsonProcessingException e) {
-            throw new APIManagementException("Error while generating Swagger json from model", e);
-        }
-    }
-
-    /**
      * This method validates the given OpenAPI definition by URL
      *
      * @param url               URL of the API definition
@@ -1295,98 +1245,6 @@ public class OASParserUtil {
             validationResponse.getErrorItems().add(errorHandler);
         }
         return validationResponse;
-    }
-
-    /**
-     * This method returns the timestamps for a given API
-     *
-     * @param apiIdentifier
-     * @param registry
-     * @return
-     * @throws APIManagementException
-     */
-    public static Map<String, String> getAPIOpenAPIDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry)
-            throws APIManagementException {
-        Map<String, String> timeStampMap = new HashMap<String, String>();
-        String resourcePath;
-        APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiIdentifier.getUUID());
-        if (apiRevision != null && apiRevision.getApiUUID() != null) {
-            resourcePath = APIUtil.getRevisionPath(apiRevision.getApiUUID(), apiRevision.getId());
-        } else {
-            resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
-                    apiIdentifier.getProviderName());
-        }
-        try {
-            if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
-                Resource apiDocResource = registry.get(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
-                Date lastModified = apiDocResource.getLastModified();
-                Date createdTime = apiDocResource.getCreatedTime();
-                if (lastModified != null) {
-                    timeStampMap.put("UPDATED_TIME", String.valueOf(lastModified.getTime()));
-                } else {
-                    timeStampMap.put("CREATED_TIME", String.valueOf(createdTime.getTime()));
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Resource " + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME + " not found at "
-                            + resourcePath);
-                }
-            }
-        } catch (RegistryException e) {
-            handleException(
-                    "Error while retrieving OpenAPI v2.0 or v3.0.0 updated time for " + apiIdentifier.getApiName() + '-'
-                            + apiIdentifier.getVersion(), e);
-        }
-        return timeStampMap;
-    }
-
-    /**
-     * This method returns api definition json for given api
-     *
-     * @param apiIdentifier api identifier
-     * @param registry      user registry
-     * @return api definition json as json string
-     * @throws APIManagementException
-     */
-    public static String getAPIDefinition(Identifier apiIdentifier, Registry registry) throws APIManagementException {
-        String resourcePath = "";
-
-        if (apiIdentifier instanceof APIIdentifier) {
-            APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiIdentifier.getUUID());
-            if (apiRevision != null && apiRevision.getApiUUID() != null) {
-                resourcePath = APIUtil.getRevisionPath(apiRevision.getApiUUID(), apiRevision.getId());
-            } else {
-                resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
-                        apiIdentifier.getProviderName());
-            }
-        } else if (apiIdentifier instanceof APIProductIdentifier) {
-            resourcePath =
-                    APIUtil.getAPIProductOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
-                            apiIdentifier.getProviderName());
-        }
-
-        JSONParser parser = new JSONParser();
-        String apiDocContent = null;
-        try {
-            if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
-                Resource apiDocResource = registry.get(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
-                apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
-                parser.parse(apiDocContent);
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Resource " + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME + " not found at "
-                            + resourcePath);
-                }
-            }
-        } catch (RegistryException e) {
-            handleException(
-                    "Error while retrieving OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getName() + '-'
-                            + apiIdentifier.getVersion(), e);
-        } catch (ParseException e) {
-            handleException("Error while parsing OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getName() + '-'
-                    + apiIdentifier.getVersion() + " in " + resourcePath, e);
-        }
-        return apiDocContent;
     }
 
     /**

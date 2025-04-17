@@ -83,7 +83,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -1342,34 +1341,6 @@ public class OAS3Parser extends APIDefinition {
         Map<String, Object> extensions = openAPI.getExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY)) {
             extensions.remove(APIConstants.SWAGGER_X_WSO2_SECURITY);
-        }
-    }
-
-    /**
-     * Set scopes to the openAPI extension
-     *
-     * @param openAPI     OpenAPI object
-     * @param swaggerData Swagger API data
-     */
-    private void setLegacyScopeExtensionToSwagger(OpenAPI openAPI, SwaggerData swaggerData) {
-        Set<Scope> scopes = swaggerData.getScopes();
-
-        if (scopes != null && !scopes.isEmpty()) {
-            List<Map<String, String>> xSecurityScopesArray = new ArrayList<>();
-            for (Scope scope : scopes) {
-                Map<String, String> xWso2ScopesObject = new LinkedHashMap<>();
-                xWso2ScopesObject.put(APIConstants.SWAGGER_SCOPE_KEY, scope.getKey());
-                xWso2ScopesObject.put(APIConstants.SWAGGER_NAME, scope.getName());
-                xWso2ScopesObject.put(APIConstants.SWAGGER_ROLES, scope.getRoles());
-                xWso2ScopesObject.put(APIConstants.SWAGGER_DESCRIPTION, scope.getDescription());
-                xSecurityScopesArray.add(xWso2ScopesObject);
-            }
-            Map<String, Object> xWSO2Scopes = new LinkedHashMap<>();
-            xWSO2Scopes.put(APIConstants.SWAGGER_X_WSO2_SCOPES, xSecurityScopesArray);
-            Map<String, Object> xWSO2SecurityDefinitionObject = new LinkedHashMap<>();
-            xWSO2SecurityDefinitionObject.put(APIConstants.SWAGGER_OBJECT_NAME_APIM, xWSO2Scopes);
-
-            openAPI.addExtension(APIConstants.SWAGGER_X_WSO2_SECURITY, xWSO2SecurityDefinitionObject);
         }
     }
 
