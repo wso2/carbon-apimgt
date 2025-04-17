@@ -29,15 +29,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.swagger.models.Path;
-import io.swagger.models.RefModel;
-import io.swagger.models.RefPath;
-import io.swagger.models.RefResponse;
-import io.swagger.models.Response;
 import io.swagger.models.Swagger;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
-import io.swagger.models.parameters.RefParameter;
-import io.swagger.models.properties.RefProperty;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Yaml;
@@ -76,8 +70,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -85,35 +77,22 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
-import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.definitions.APIParserConstants;
 import org.wso2.carbon.apimgt.impl.definitions.mixin.License31Mixin;
-import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.registry.api.Registry;
-import org.wso2.carbon.registry.api.RegistryException;
-import org.wso2.carbon.registry.api.Resource;
 
 import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -121,10 +100,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
 
 /**
  * Provide common functions related to OAS
@@ -149,7 +125,6 @@ public class OASParserUtil {
     private static final String EXAMPLES = "examples";
 
     private static final String REF_PREFIX = "#/components/";
-    private static final String ARRAY_DATA_TYPE = "array";
     private static final String OBJECT_DATA_TYPE = "object";
     private static final String OPENAPI_RESOURCE_KEY = "paths";
     private static final String[] UNSUPPORTED_RESOURCE_BLOCKS = new String[]{"servers"};
@@ -314,7 +289,7 @@ public class OASParserUtil {
             oAuthFlow.setScopes(scopes);
 
             Map<String, Object> extensions = new HashMap<>();
-            extensions.put(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
+            extensions.put(APIParserConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
             oAuthFlow.setExtensions(extensions);
         }
     }
@@ -945,11 +920,11 @@ public class OASParserUtil {
 
     public static File checkMasterSwagger(File archiveDirectory) throws APIManagementException {
         File masterSwagger = null;
-        if ((new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_JSON)).exists()) {
-            masterSwagger = new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_JSON);
+        if ((new File(archiveDirectory + "/" + APIParserConstants.OPENAPI_MASTER_JSON)).exists()) {
+            masterSwagger = new File(archiveDirectory + "/" + APIParserConstants.OPENAPI_MASTER_JSON);
             return masterSwagger;
-        } else if ((new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_YAML)).exists()) {
-            masterSwagger = new File(archiveDirectory + "/" + APIConstants.OPENAPI_MASTER_YAML);
+        } else if ((new File(archiveDirectory + "/" + APIParserConstants.OPENAPI_MASTER_YAML)).exists()) {
+            masterSwagger = new File(archiveDirectory + "/" + APIParserConstants.OPENAPI_MASTER_YAML);
             return masterSwagger;
         } else {
             throw new APIManagementException("Could not find a master swagger file with the name of swagger.json " +
@@ -960,41 +935,18 @@ public class OASParserUtil {
     /**
      * Extract the archive file and validates the openAPI definition
      *
-     * @param inputStream   file as input stream
-     * @param returnContent whether to return the content of the definition in the response DTO
+     * @param apiDefinitionDirectory    The directory containing the API definition files, including the master Swagger file.
+     * @param returnContent             Flag indicating whether to return the content of the definition in the response DTO
      * @return APIDefinitionValidationResponse
      * @throws APIManagementException if error occurred while parsing definition
      */
-    public static APIDefinitionValidationResponse extractAndValidateOpenAPIArchive(InputStream inputStream,
+    public static APIDefinitionValidationResponse validateAPIDefinitionFromDirectory(File apiDefinitionDirectory,
             boolean returnContent) throws APIManagementException {
-        String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator +
-                APIConstants.OPENAPI_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
-        String archivePath = path + File.separator + APIConstants.OPENAPI_ARCHIVE_ZIP_FILE;
-        String extractedLocation = APIFileUtil
-                .extractUploadedArchive(inputStream, APIConstants.OPENAPI_EXTRACTED_DIRECTORY, archivePath, path);
-        File[] listOfFiles = new File(extractedLocation).listFiles();
-        File archiveDirectory = null;
-        if (listOfFiles != null) {
-            if (listOfFiles.length > 1) {
-                throw new APIManagementException("Swagger Definitions should be placed under one root folder.");
-            }
-            for (File file: listOfFiles) {
-                if (file.isDirectory()) {
-                    archiveDirectory = file.getAbsoluteFile();
-                    break;
-                }
-            }
-        }
-        //Verify whether the zipped input is archive or file.
-        //If it is a single  swagger file without remote references it can be imported directly, without zipping.
-        if (archiveDirectory == null) {
-            throw new APIManagementException("Could not find an archive in the given ZIP file.");
-        }
-        File masterSwagger = checkMasterSwagger(archiveDirectory);
+        File masterSwagger = checkMasterSwagger(apiDefinitionDirectory);
         String content;
         try {
             InputStream masterInputStream = new FileInputStream(masterSwagger);
-            content = IOUtils.toString(masterInputStream, APIConstants.DigestAuthConstants.CHARSET);
+            content = IOUtils.toString(masterInputStream, APIParserConstants.CHARSET);
         } catch (IOException e) {
             throw new APIManagementException("Error reading master swagger file" + e);
         }
@@ -1055,7 +1007,7 @@ public class OASParserUtil {
      * @return
      */
     public static boolean isOpenAPIVersion31(OpenAPI oasDefinition) {
-        return APIConstants.OAS_V31.equalsIgnoreCase(oasDefinition.getSpecVersion().name());
+        return APIParserConstants.OAS_V31.equalsIgnoreCase(oasDefinition.getSpecVersion().name());
     }
 
     /**
@@ -1221,49 +1173,18 @@ public class OASParserUtil {
     }
 
     /**
-     * Creates a json string using the swagger object.
-     *
-     * @param swaggerObj swagger object
-     * @return json string using the swagger object
-     * @throws APIManagementException error while creating swagger json
-     */
-    public static String getSwaggerJsonString(Swagger swaggerObj) throws APIManagementException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-
-        //this is to ignore "originalRef" in schema objects
-        mapper.addMixIn(RefModel.class, IgnoreOriginalRefMixin.class);
-        mapper.addMixIn(RefProperty.class, IgnoreOriginalRefMixin.class);
-        mapper.addMixIn(RefPath.class, IgnoreOriginalRefMixin.class);
-        mapper.addMixIn(RefParameter.class, IgnoreOriginalRefMixin.class);
-        mapper.addMixIn(RefResponse.class, IgnoreOriginalRefMixin.class);
-
-        //this is to ignore "responseSchema" in response schema objects
-        mapper.addMixIn(Response.class, ResponseSchemaMixin.class);
-        try {
-            return new String(mapper.writeValueAsBytes(swaggerObj));
-        } catch (JsonProcessingException e) {
-            throw new APIManagementException("Error while generating Swagger json from model", e);
-        }
-    }
-
-    /**
      * This method validates the given OpenAPI definition by URL
      *
      * @param url               URL of the API definition
      * @param returnJsonContent whether to return the converted json form of the
      * @return APIDefinitionValidationResponse object with validation information
      */
-    public static APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, boolean returnJsonContent)
+    public static APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, HttpClient httpClient,
+                                                                             boolean returnJsonContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         try {
-            URL urlObj = new URL(url);
-            String host = urlObj.getHost();
-            HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
             HttpGet httpGet = new HttpGet(url);
-
             HttpResponse response = httpClient.execute(httpGet);
 
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
@@ -1281,7 +1202,7 @@ public class OASParserUtil {
                 if (responseStrProcessed != null) {
                     responseStr = responseStrProcessed;
                 }
-                validationResponse = validateAPIDefinition(responseStr, host, returnJsonContent);
+                validationResponse = validateAPIDefinition(responseStr, new URL(url).getHost(), returnJsonContent);
             } else {
                 validationResponse.setValid(false);
                 validationResponse.getErrorItems().add(ExceptionCodes.OPENAPI_URL_NO_200);
@@ -1298,98 +1219,6 @@ public class OASParserUtil {
     }
 
     /**
-     * This method returns the timestamps for a given API
-     *
-     * @param apiIdentifier
-     * @param registry
-     * @return
-     * @throws APIManagementException
-     */
-    public static Map<String, String> getAPIOpenAPIDefinitionTimeStamps(APIIdentifier apiIdentifier, Registry registry)
-            throws APIManagementException {
-        Map<String, String> timeStampMap = new HashMap<String, String>();
-        String resourcePath;
-        APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiIdentifier.getUUID());
-        if (apiRevision != null && apiRevision.getApiUUID() != null) {
-            resourcePath = APIUtil.getRevisionPath(apiRevision.getApiUUID(), apiRevision.getId());
-        } else {
-            resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
-                    apiIdentifier.getProviderName());
-        }
-        try {
-            if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
-                Resource apiDocResource = registry.get(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
-                Date lastModified = apiDocResource.getLastModified();
-                Date createdTime = apiDocResource.getCreatedTime();
-                if (lastModified != null) {
-                    timeStampMap.put("UPDATED_TIME", String.valueOf(lastModified.getTime()));
-                } else {
-                    timeStampMap.put("CREATED_TIME", String.valueOf(createdTime.getTime()));
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Resource " + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME + " not found at "
-                            + resourcePath);
-                }
-            }
-        } catch (RegistryException e) {
-            handleException(
-                    "Error while retrieving OpenAPI v2.0 or v3.0.0 updated time for " + apiIdentifier.getApiName() + '-'
-                            + apiIdentifier.getVersion(), e);
-        }
-        return timeStampMap;
-    }
-
-    /**
-     * This method returns api definition json for given api
-     *
-     * @param apiIdentifier api identifier
-     * @param registry      user registry
-     * @return api definition json as json string
-     * @throws APIManagementException
-     */
-    public static String getAPIDefinition(Identifier apiIdentifier, Registry registry) throws APIManagementException {
-        String resourcePath = "";
-
-        if (apiIdentifier instanceof APIIdentifier) {
-            APIRevision apiRevision = ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiIdentifier.getUUID());
-            if (apiRevision != null && apiRevision.getApiUUID() != null) {
-                resourcePath = APIUtil.getRevisionPath(apiRevision.getApiUUID(), apiRevision.getId());
-            } else {
-                resourcePath = APIUtil.getOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
-                        apiIdentifier.getProviderName());
-            }
-        } else if (apiIdentifier instanceof APIProductIdentifier) {
-            resourcePath =
-                    APIUtil.getAPIProductOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
-                            apiIdentifier.getProviderName());
-        }
-
-        JSONParser parser = new JSONParser();
-        String apiDocContent = null;
-        try {
-            if (registry.resourceExists(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME)) {
-                Resource apiDocResource = registry.get(resourcePath + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME);
-                apiDocContent = new String((byte[]) apiDocResource.getContent(), Charset.defaultCharset());
-                parser.parse(apiDocContent);
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Resource " + APIConstants.API_OAS_DEFINITION_RESOURCE_NAME + " not found at "
-                            + resourcePath);
-                }
-            }
-        } catch (RegistryException e) {
-            handleException(
-                    "Error while retrieving OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getName() + '-'
-                            + apiIdentifier.getVersion(), e);
-        } catch (ParseException e) {
-            handleException("Error while parsing OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getName() + '-'
-                    + apiIdentifier.getVersion() + " in " + resourcePath, e);
-        }
-        return apiDocContent;
-    }
-
-    /**
      * Sets the scopes to the URL template object using the given list of scopes
      *
      * @param template URL template
@@ -1402,7 +1231,7 @@ public class OASParserUtil {
 
         for (String scopeName : resourceScopes) {
             if (StringUtils.isNotBlank(scopeName)) {
-                Scope scope = APIUtil.findScopeByKey(apiScopes, scopeName);
+                Scope scope = findScopeByKey(apiScopes, scopeName);
                 if (scope == null) {
                     throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
                 }
@@ -1410,6 +1239,23 @@ public class OASParserUtil {
             }
         }
         return template;
+    }
+
+    /**
+     * Find scope object in a set based on the key
+     *
+     * @param scopes - Set of scopes
+     * @param key    - Key to search with
+     * @return Scope - scope object
+     */
+    public static Scope findScopeByKey(Set<Scope> scopes, String key) {
+
+        for (Scope scope : scopes) {
+            if (scope.getKey().equals(key)) {
+                return scope;
+            }
+        }
+        return null;
     }
 
     /**
@@ -1425,25 +1271,25 @@ public class OASParserUtil {
             return null;
         }
         JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
-        if (endpointConfig.has(APIConstants.IMPLEMENTATION_STATUS)) {
+        if (endpointConfig.has(APIParserConstants.IMPLEMENTATION_STATUS)) {
             // no need to populate if it is prototype API
             return null;
         }
         ObjectNode endpointResult;
-        String type = endpointConfig.getString(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE);
-        if (APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(type)) {
+        String type = endpointConfig.getString(APIParserConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE);
+        if (APIParserConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(type)) {
             endpointResult = objectMapper.createObjectNode();
-            endpointResult.put(APIConstants.X_WSO2_ENDPOINT_TYPE, APIConstants.ENDPOINT_TYPE_DEFAULT);
-        } else if (APIConstants.ENDPOINT_TYPE_FAILOVER.equalsIgnoreCase(type)) {
+            endpointResult.put(APIParserConstants.X_WSO2_ENDPOINT_TYPE, APIParserConstants.ENDPOINT_TYPE_DEFAULT);
+        } else if (APIParserConstants.ENDPOINT_TYPE_FAILOVER.equalsIgnoreCase(type)) {
             endpointResult = populateFailoverConfig(endpointConfig, isProduction);
-        } else if (APIConstants.ENDPOINT_TYPE_LOADBALANCE.equalsIgnoreCase(type)) {
+        } else if (APIParserConstants.ENDPOINT_TYPE_LOADBALANCE.equalsIgnoreCase(type)) {
             endpointResult = populateLoadBalanceConfig(endpointConfig, isProduction);
-        } else if (APIConstants.ENDPOINT_TYPE_HTTP.equalsIgnoreCase(type)) {
-            endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_HTTP);
-        } else if (APIConstants.ENDPOINT_TYPE_SERVICE.equalsIgnoreCase(type)) {
-            endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_SERVICE);
-        } else if (APIConstants.ENDPOINT_TYPE_ADDRESS.equalsIgnoreCase(type)) {
-            endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIConstants.ENDPOINT_TYPE_ADDRESS);
+        } else if (APIParserConstants.ENDPOINT_TYPE_HTTP.equalsIgnoreCase(type)) {
+            endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIParserConstants.ENDPOINT_TYPE_HTTP);
+        } else if (APIParserConstants.ENDPOINT_TYPE_SERVICE.equalsIgnoreCase(type)) {
+            endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIParserConstants.ENDPOINT_TYPE_SERVICE);
+        } else if (APIParserConstants.ENDPOINT_TYPE_ADDRESS.equalsIgnoreCase(type)) {
+            endpointResult = setPrimaryConfig(endpointConfig, isProduction, APIParserConstants.ENDPOINT_TYPE_ADDRESS);
         } else {
             return null;
         }
@@ -1457,16 +1303,16 @@ public class OASParserUtil {
         if (api.isEndpointSecured()) {
             ObjectNode securityConfigObj = objectMapper.createObjectNode();
             if (api.isEndpointAuthDigest()) {
-                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_TYPE,
-                        APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase());
+                securityConfigObj.put(APIParserConstants.ENDPOINT_SECURITY_TYPE,
+                        APIParserConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase());
             } else {
-                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_TYPE,
-                        APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase());
+                securityConfigObj.put(APIParserConstants.ENDPOINT_SECURITY_TYPE,
+                        APIParserConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase());
             }
             if (!StringUtils.isEmpty(api.getEndpointUTUsername())) {
-                securityConfigObj.put(APIConstants.ENDPOINT_SECURITY_USERNAME, api.getEndpointUTUsername());
+                securityConfigObj.put(APIParserConstants.ENDPOINT_SECURITY_USERNAME, api.getEndpointUTUsername());
             }
-            endpointResult.set(APIConstants.ENDPOINT_SECURITY_CONFIG, securityConfigObj);
+            endpointResult.set(APIParserConstants.ENDPOINT_SECURITY_CONFIG, securityConfigObj);
         }
     }
 
@@ -1481,37 +1327,37 @@ public class OASParserUtil {
         JSONArray endpointsURLs = null;
         JSONObject primaryEndpoints = null;
         if (isProd) {
-            if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_FAILOVERS)) {
-                endpointsURLs = endpointConfig.getJSONArray(APIConstants.ENDPOINT_PRODUCTION_FAILOVERS);
+            if (endpointConfig.has(APIParserConstants.ENDPOINT_PRODUCTION_FAILOVERS)) {
+                endpointsURLs = endpointConfig.getJSONArray(APIParserConstants.ENDPOINT_PRODUCTION_FAILOVERS);
             }
-            if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
-                primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+            if (endpointConfig.has(APIParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+                primaryEndpoints = endpointConfig.getJSONObject(APIParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
             }
         } else {
-            if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_FAILOVERS)) {
-                endpointsURLs = endpointConfig.getJSONArray(APIConstants.ENDPOINT_SANDBOX_FAILOVERS);
+            if (endpointConfig.has(APIParserConstants.ENDPOINT_SANDBOX_FAILOVERS)) {
+                endpointsURLs = endpointConfig.getJSONArray(APIParserConstants.ENDPOINT_SANDBOX_FAILOVERS);
             }
-            if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
-                primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+            if (endpointConfig.has(APIParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+                primaryEndpoints = endpointConfig.getJSONObject(APIParserConstants.ENDPOINT_SANDBOX_ENDPOINTS);
             }
         }
 
         ArrayNode endpointsArray = objectMapper.createArrayNode();
-        if (primaryEndpoints != null && primaryEndpoints.has(APIConstants.ENDPOINT_URL)) {
-            endpointsArray.add(primaryEndpoints.getString(APIConstants.ENDPOINT_URL));
+        if (primaryEndpoints != null && primaryEndpoints.has(APIParserConstants.ENDPOINT_URL)) {
+            endpointsArray.add(primaryEndpoints.getString(APIParserConstants.ENDPOINT_URL));
         }
         if (endpointsURLs != null) {
             for (int i = 0; i < endpointsURLs.length(); i++) {
                 JSONObject obj = endpointsURLs.getJSONObject(i);
-                endpointsArray.add(obj.getString(APIConstants.ENDPOINT_URL));
+                endpointsArray.add(obj.getString(APIParserConstants.ENDPOINT_URL));
             }
         }
         if (endpointsArray.size() < 1) {
             return null;
         }
         ObjectNode endpointResult = objectMapper.createObjectNode();
-        endpointResult.set(APIConstants.ENDPOINT_URLS, endpointsArray);
-        endpointResult.put(APIConstants.X_WSO2_ENDPOINT_TYPE, APIConstants.ENDPOINT_TYPE_FAILOVER);
+        endpointResult.set(APIParserConstants.ENDPOINT_URLS, endpointsArray);
+        endpointResult.put(APIParserConstants.X_WSO2_ENDPOINT_TYPE, APIParserConstants.ENDPOINT_TYPE_FAILOVER);
         return updateEndpointResult(primaryEndpoints, endpointResult);
     }
 
@@ -1525,14 +1371,14 @@ public class OASParserUtil {
             throws APIManagementException {
         JSONArray primaryProdEndpoints = new JSONArray();
         if (isProd) {
-            if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) && endpointConfig
-                    .get(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS) instanceof JSONArray) {
-                primaryProdEndpoints = endpointConfig.getJSONArray(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+            if (endpointConfig.has(APIParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS) && endpointConfig
+                    .get(APIParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS) instanceof JSONArray) {
+                primaryProdEndpoints = endpointConfig.getJSONArray(APIParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
             }
         } else {
-            if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) && endpointConfig
-                    .get(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS) instanceof JSONArray) {
-                primaryProdEndpoints = endpointConfig.getJSONArray(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+            if (endpointConfig.has(APIParserConstants.ENDPOINT_SANDBOX_ENDPOINTS) && endpointConfig
+                    .get(APIParserConstants.ENDPOINT_SANDBOX_ENDPOINTS) instanceof JSONArray) {
+                primaryProdEndpoints = endpointConfig.getJSONArray(APIParserConstants.ENDPOINT_SANDBOX_ENDPOINTS);
             }
         }
 
@@ -1540,19 +1386,19 @@ public class OASParserUtil {
         if (primaryProdEndpoints != null) {
             for (int i = 0; i < primaryProdEndpoints.length(); i++) {
                 JSONObject obj = primaryProdEndpoints.getJSONObject(i);
-                endpointsArray.add(obj.getString(APIConstants.ENDPOINT_URL));
+                endpointsArray.add(obj.getString(APIParserConstants.ENDPOINT_URL));
             }
         }
         if (endpointsArray.size() < 1) {
             return null;
         }
         ObjectNode endpointResult = objectMapper.createObjectNode();
-        endpointResult.set(APIConstants.ENDPOINT_URLS, endpointsArray);
-        endpointResult.put(APIConstants.X_WSO2_ENDPOINT_TYPE, APIConstants.ENDPOINT_TYPE_LOADBALANCE);
+        endpointResult.set(APIParserConstants.ENDPOINT_URLS, endpointsArray);
+        endpointResult.put(APIParserConstants.X_WSO2_ENDPOINT_TYPE, APIParserConstants.ENDPOINT_TYPE_LOADBALANCE);
 
         if (primaryProdEndpoints != null) {
             for (int i = 0; i < primaryProdEndpoints.length(); i++) {
-                if (primaryProdEndpoints.getJSONObject(i).has(APIConstants.ADVANCE_ENDPOINT_CONFIG)) {
+                if (primaryProdEndpoints.getJSONObject(i).has(APIParserConstants.ADVANCE_ENDPOINT_CONFIG)) {
                     return updateEndpointResult(primaryProdEndpoints.getJSONObject(i), endpointResult);
                 }
             }
@@ -1572,20 +1418,20 @@ public class OASParserUtil {
             throws APIManagementException {
         JSONObject primaryEndpoints = new JSONObject();
         if (isProd) {
-            if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
-                primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+            if (endpointConfig.has(APIParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+                primaryEndpoints = endpointConfig.getJSONObject(APIParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
             }
         } else {
-            if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
-                primaryEndpoints = endpointConfig.getJSONObject(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+            if (endpointConfig.has(APIParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+                primaryEndpoints = endpointConfig.getJSONObject(APIParserConstants.ENDPOINT_SANDBOX_ENDPOINTS);
             }
         }
-        if (primaryEndpoints != null && primaryEndpoints.has(APIConstants.ENDPOINT_URL)) {
+        if (primaryEndpoints != null && primaryEndpoints.has(APIParserConstants.ENDPOINT_URL)) {
             ArrayNode endpointsArray = objectMapper.createArrayNode();
-            endpointsArray.add(primaryEndpoints.getString(APIConstants.ENDPOINT_URL));
+            endpointsArray.add(primaryEndpoints.getString(APIParserConstants.ENDPOINT_URL));
             ObjectNode endpointResult = objectMapper.createObjectNode();
-            endpointResult.set(APIConstants.ENDPOINT_URLS, endpointsArray);
-            endpointResult.put(APIConstants.X_WSO2_ENDPOINT_TYPE, type);
+            endpointResult.set(APIParserConstants.ENDPOINT_URLS, endpointsArray);
+            endpointResult.put(APIParserConstants.X_WSO2_ENDPOINT_TYPE, type);
             return updateEndpointResult(primaryEndpoints, endpointResult);
         }
         return null;
@@ -1599,17 +1445,17 @@ public class OASParserUtil {
      */
     private static ObjectNode updateEndpointResult(JSONObject primaryEndpoints, ObjectNode endpointResult)
             throws APIManagementException {
-        if (primaryEndpoints.has(APIConstants.ADVANCE_ENDPOINT_CONFIG)) {
+        if (primaryEndpoints.has(APIParserConstants.ADVANCE_ENDPOINT_CONFIG)) {
             try {
-                endpointResult.put(APIConstants.ADVANCE_ENDPOINT_CONFIG, objectMapper
-                        .readTree(primaryEndpoints.get(APIConstants.ADVANCE_ENDPOINT_CONFIG).toString()));
+                endpointResult.put(APIParserConstants.ADVANCE_ENDPOINT_CONFIG, objectMapper
+                        .readTree(primaryEndpoints.get(APIParserConstants.ADVANCE_ENDPOINT_CONFIG).toString()));
             } catch (JsonProcessingException e) {
                 throw new APIManagementException(
                         "Error while setting the advance endpoint configs ", e);
             }
         } else {
             //When user removes existing advancedConfigurations section.Returns null if key was not an existing
-            endpointResult.remove(APIConstants.ADVANCE_ENDPOINT_CONFIG);
+            endpointResult.remove(APIParserConstants.ADVANCE_ENDPOINT_CONFIG);
         }
         return endpointResult;
     }
@@ -1623,17 +1469,17 @@ public class OASParserUtil {
         if (extensions == null) {
             return;
         }
-        extensions.remove(APIConstants.X_WSO2_CORS);
-        extensions.remove(APIConstants.X_WSO2_AUTH_HEADER);
-        extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
-        extensions.remove(APIConstants.X_THROTTLING_TIER);
-        extensions.remove(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
-        extensions.remove(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
-        extensions.remove(APIConstants.X_WSO2_BASEPATH);
-        extensions.remove(APIConstants.X_WSO2_TRANSPORTS);
-        extensions.remove(APIConstants.X_WSO2_APP_SECURITY);
-        extensions.remove(APIConstants.X_WSO2_RESPONSE_CACHE);
-        extensions.remove(APIConstants.X_WSO2_MUTUAL_SSL);
+        extensions.remove(APIParserConstants.X_WSO2_CORS);
+        extensions.remove(APIParserConstants.X_WSO2_AUTH_HEADER);
+        extensions.remove(APIParserConstants.X_WSO2_THROTTLING_TIER);
+        extensions.remove(APIParserConstants.X_THROTTLING_TIER);
+        extensions.remove(APIParserConstants.X_WSO2_PRODUCTION_ENDPOINTS);
+        extensions.remove(APIParserConstants.X_WSO2_SANDBOX_ENDPOINTS);
+        extensions.remove(APIParserConstants.X_WSO2_BASEPATH);
+        extensions.remove(APIParserConstants.X_WSO2_TRANSPORTS);
+        extensions.remove(APIParserConstants.X_WSO2_APP_SECURITY);
+        extensions.remove(APIParserConstants.X_WSO2_RESPONSE_CACHE);
+        extensions.remove(APIParserConstants.X_WSO2_MUTUAL_SSL);
     }
 
     /**
@@ -1645,11 +1491,11 @@ public class OASParserUtil {
         if (extensions == null) {
             return;
         }
-        extensions.remove(APIConstants.X_WSO2_APP_SECURITY);
-        extensions.remove(APIConstants.X_WSO2_SANDBOX_ENDPOINTS);
-        extensions.remove(APIConstants.X_WSO2_PRODUCTION_ENDPOINTS);
-        extensions.remove(APIConstants.X_WSO2_DISABLE_SECURITY);
-        extensions.remove(APIConstants.X_WSO2_THROTTLING_TIER);
+        extensions.remove(APIParserConstants.X_WSO2_APP_SECURITY);
+        extensions.remove(APIParserConstants.X_WSO2_SANDBOX_ENDPOINTS);
+        extensions.remove(APIParserConstants.X_WSO2_PRODUCTION_ENDPOINTS);
+        extensions.remove(APIParserConstants.X_WSO2_DISABLE_SECURITY);
+        extensions.remove(APIParserConstants.X_WSO2_THROTTLING_TIER);
     }
 
     /**
@@ -1661,7 +1507,7 @@ public class OASParserUtil {
     private static List<String> getAPISecurity(List<String> security) {
         List<String> apiSecurityList = new ArrayList<>();
         for (String securityType : security) {
-            if (APIConstants.APPLICATION_LEVEL_SECURITY.contains(securityType)) {
+            if (APIParserConstants.APPLICATION_LEVEL_SECURITY.contains(securityType)) {
                 apiSecurityList.add(securityType);
             }
         }
@@ -1681,11 +1527,11 @@ public class OASParserUtil {
         if (security != null) {
             List<String> securityList = Arrays.asList(security.split(","));
             appSecurityList = getAPISecurity(securityList);
-            appSecurityOptional = !securityList.contains(APIConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
+            appSecurityOptional = !securityList.contains(APIParserConstants.API_SECURITY_OAUTH_BASIC_AUTH_API_KEY_MANDATORY);
         }
         ArrayNode appSecurityTypes = objectMapper.valueToTree(appSecurityList);
-        endpointResult.set(APIConstants.WSO2_APP_SECURITY_TYPES, appSecurityTypes);
-        endpointResult.put(APIConstants.OPTIONAL, appSecurityOptional);
+        endpointResult.set(APIParserConstants.WSO2_APP_SECURITY_TYPES, appSecurityTypes);
+        endpointResult.put(APIParserConstants.OPTIONAL, appSecurityOptional);
         return endpointResult;
     }
 
@@ -1698,9 +1544,9 @@ public class OASParserUtil {
      */
     static JsonNode getResponseCacheConfig(String responseCache, int cacheTimeout) {
         ObjectNode responseCacheConfig = objectMapper.createObjectNode();
-        boolean enabled = APIConstants.ENABLED.equalsIgnoreCase(responseCache);
-        responseCacheConfig.put(APIConstants.RESPONSE_CACHING_ENABLED, enabled);
-        responseCacheConfig.put(APIConstants.RESPONSE_CACHING_TIMEOUT, cacheTimeout);
+        boolean enabled = APIParserConstants.ENABLED.equalsIgnoreCase(responseCache);
+        responseCacheConfig.put(APIParserConstants.RESPONSE_CACHING_ENABLED, enabled);
+        responseCacheConfig.put(APIParserConstants.RESPONSE_CACHING_TIMEOUT, cacheTimeout);
         return responseCacheConfig;
     }
 
@@ -1754,7 +1600,7 @@ public class OASParserUtil {
      * @throws APIManagementException throws if an error occurred
      */
     public static String getThrottleTierFromSwagger(Map<String, Object> extensions) throws APIManagementException {
-        Object throttleTier = extensions.get(APIConstants.X_WSO2_THROTTLING_TIER);
+        Object throttleTier = extensions.get(APIParserConstants.X_WSO2_THROTTLING_TIER);
         return throttleTier == null ? null : throttleTier.toString();
     }
 
@@ -1768,8 +1614,8 @@ public class OASParserUtil {
     public static String getTransportsFromSwagger(Map<String, Object> extensions) throws APIManagementException {
         String transports = null;
         ObjectMapper mapper = new ObjectMapper();
-        if (extensions.containsKey(APIConstants.X_WSO2_TRANSPORTS)) {
-            Object object = extensions.get(APIConstants.X_WSO2_TRANSPORTS).toString();
+        if (extensions.containsKey(APIParserConstants.X_WSO2_TRANSPORTS)) {
+            Object object = extensions.get(APIParserConstants.X_WSO2_TRANSPORTS).toString();
             transports = mapper.convertValue(object, String.class);
             transports = transports.replace("[", "");
             transports = transports.replace("]", "");
@@ -1786,7 +1632,7 @@ public class OASParserUtil {
      * @throws APIManagementException throws if an error occurred
      */
     public static String getMutualSSLEnabledFromSwagger(Map<String, Object> extensions) throws APIManagementException {
-        Object mutualSSl = extensions.get(APIConstants.X_WSO2_MUTUAL_SSL);
+        Object mutualSSl = extensions.get(APIParserConstants.X_WSO2_MUTUAL_SSL);
         return mutualSSl == null ? null : mutualSSl.toString();
     }
 
@@ -1808,8 +1654,8 @@ public class OASParserUtil {
                 accessControlAllowMethods);
         ObjectMapper mapper = new ObjectMapper();
 
-        if (extensions.containsKey(APIConstants.X_WSO2_CORS)) {
-            Object corsConfigObject = extensions.get(APIConstants.X_WSO2_CORS);
+        if (extensions.containsKey(APIParserConstants.X_WSO2_CORS)) {
+            Object corsConfigObject = extensions.get(APIParserConstants.X_WSO2_CORS);
             JsonNode objectNode = mapper.convertValue(corsConfigObject, JsonNode.class);
             corsConfigurationEnabled = Boolean.parseBoolean(String.valueOf(objectNode.get("corsConfigurationEnabled")));
             accessControlAllowCredentials = Boolean.parseBoolean(String.valueOf(objectNode.get("accessControlAllowCredentials")));
@@ -1835,10 +1681,10 @@ public class OASParserUtil {
     public static boolean getResponseCacheFromSwagger(Map<String, Object> extensions) throws APIManagementException {
         ObjectMapper mapper = new ObjectMapper();
         boolean responseCache = false;
-        if (extensions.containsKey(APIConstants.X_WSO2_RESPONSE_CACHE)) {
-            Object responseCacheConfig = extensions.get(APIConstants.X_WSO2_RESPONSE_CACHE);
+        if (extensions.containsKey(APIParserConstants.X_WSO2_RESPONSE_CACHE)) {
+            Object responseCacheConfig = extensions.get(APIParserConstants.X_WSO2_RESPONSE_CACHE);
             ObjectNode cacheConfigNode = mapper.convertValue(responseCacheConfig, ObjectNode.class);
-            responseCache = Boolean.parseBoolean(String.valueOf(cacheConfigNode.get(APIConstants.RESPONSE_CACHING_ENABLED)));
+            responseCache = Boolean.parseBoolean(String.valueOf(cacheConfigNode.get(APIParserConstants.RESPONSE_CACHING_ENABLED)));
         }
         return responseCache;
     }
@@ -1853,10 +1699,10 @@ public class OASParserUtil {
     public static int getCacheTimeOutFromSwagger(Map<String, Object> extensions) throws APIManagementException {
         ObjectMapper mapper = new ObjectMapper();
         int timeOut = 0;
-        if (extensions.containsKey(APIConstants.X_WSO2_RESPONSE_CACHE)) {
-            Object responseCacheConfig = extensions.get(APIConstants.X_WSO2_RESPONSE_CACHE);
+        if (extensions.containsKey(APIParserConstants.X_WSO2_RESPONSE_CACHE)) {
+            Object responseCacheConfig = extensions.get(APIParserConstants.X_WSO2_RESPONSE_CACHE);
             ObjectNode cacheConfigNode = mapper.convertValue(responseCacheConfig, ObjectNode.class);
-            timeOut = Integer.parseInt(String.valueOf(cacheConfigNode.get(APIConstants.RESPONSE_CACHING_TIMEOUT)));
+            timeOut = Integer.parseInt(String.valueOf(cacheConfigNode.get(APIParserConstants.RESPONSE_CACHING_TIMEOUT)));
         }
         return timeOut;
     }
@@ -1869,7 +1715,7 @@ public class OASParserUtil {
      * @throws APIManagementException throws if an error occurred
      */
     public static String getAuthorizationHeaderFromSwagger(Map<String, Object> extensions) throws APIManagementException {
-        Object authorizationHeader = extensions.get(APIConstants.X_WSO2_AUTH_HEADER);
+        Object authorizationHeader = extensions.get(APIParserConstants.X_WSO2_AUTH_HEADER);
         return authorizationHeader == null ? null : authorizationHeader.toString();
     }
 
@@ -1881,7 +1727,7 @@ public class OASParserUtil {
      * @throws APIManagementException throws if an error occurred
      */
     public static String getApiKeyHeaderFromSwagger(Map<String, Object> extensions) throws APIManagementException {
-        Object apiKeyHeader = extensions.get(APIConstants.X_WSO2_API_KEY_HEADER);
+        Object apiKeyHeader = extensions.get(APIParserConstants.X_WSO2_API_KEY_HEADER);
         return apiKeyHeader == null ? null : apiKeyHeader.toString();
     }
 
@@ -1894,8 +1740,8 @@ public class OASParserUtil {
      */
     public static boolean getDisableSecurity(Map<String, Object> extensions) throws APIManagementException {
         boolean disableSecurity = false;
-        if (extensions.containsKey(APIConstants.X_WSO2_DISABLE_SECURITY)) {
-            disableSecurity = Boolean.parseBoolean(String.valueOf(extensions.get(APIConstants.X_WSO2_DISABLE_SECURITY)));
+        if (extensions.containsKey(APIParserConstants.X_WSO2_DISABLE_SECURITY)) {
+            disableSecurity = Boolean.parseBoolean(String.valueOf(extensions.get(APIParserConstants.X_WSO2_DISABLE_SECURITY)));
         }
         return disableSecurity;
     }
@@ -1910,8 +1756,8 @@ public class OASParserUtil {
     public static List<String> getApplicationSecurityTypes(Map<String, Object> extensions) throws APIManagementException {
         ObjectMapper mapper = new ObjectMapper();
         List<String> appSecurityTypes = new ArrayList<>();
-        if (extensions.containsKey(APIConstants.X_WSO2_APP_SECURITY)) {
-            Object applicationSecurityTypes = extensions.get(APIConstants.X_WSO2_APP_SECURITY);
+        if (extensions.containsKey(APIParserConstants.X_WSO2_APP_SECURITY)) {
+            Object applicationSecurityTypes = extensions.get(APIParserConstants.X_WSO2_APP_SECURITY);
             ObjectNode appSecurityTypesNode = mapper.convertValue(applicationSecurityTypes, ObjectNode.class);
             appSecurityTypes = mapper.convertValue(appSecurityTypesNode.get("security-types"), ArrayList.class);
         }
@@ -1928,8 +1774,8 @@ public class OASParserUtil {
     public static boolean getAppSecurityStateFromSwagger(Map<String, Object> extensions) throws APIManagementException {
         ObjectMapper mapper = new ObjectMapper();
         boolean appSecurityState = false;
-        if (extensions.containsKey(APIConstants.X_WSO2_APP_SECURITY)) {
-            Object applicationSecurityTypes = extensions.get(APIConstants.X_WSO2_APP_SECURITY);
+        if (extensions.containsKey(APIParserConstants.X_WSO2_APP_SECURITY)) {
+            Object applicationSecurityTypes = extensions.get(APIParserConstants.X_WSO2_APP_SECURITY);
             ObjectNode appSecurityTypesNode = mapper.convertValue(applicationSecurityTypes, ObjectNode.class);
             appSecurityState = Boolean.parseBoolean(String.valueOf(appSecurityTypesNode.get("optional")));
         }
@@ -1938,44 +1784,44 @@ public class OASParserUtil {
 
     public static void copyOperationVendorExtensions(Map<String, Object> existingExtensions,
                                                      Map<String, Object> updatedVendorExtensions) {
-        if (existingExtensions.get(APIConstants.SWAGGER_X_AUTH_TYPE) != null) {
-            updatedVendorExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, existingExtensions
-                    .get(APIConstants.SWAGGER_X_AUTH_TYPE));
+        if (existingExtensions.get(APIParserConstants.SWAGGER_X_AUTH_TYPE) != null) {
+            updatedVendorExtensions.put(APIParserConstants.SWAGGER_X_AUTH_TYPE, existingExtensions
+                    .get(APIParserConstants.SWAGGER_X_AUTH_TYPE));
         }
-        if (existingExtensions.get(APIConstants.SWAGGER_X_THROTTLING_TIER) != null) {
-            updatedVendorExtensions.put(APIConstants.SWAGGER_X_THROTTLING_TIER, existingExtensions
-                    .get(APIConstants.SWAGGER_X_THROTTLING_TIER));
+        if (existingExtensions.get(APIParserConstants.SWAGGER_X_THROTTLING_TIER) != null) {
+            updatedVendorExtensions.put(APIParserConstants.SWAGGER_X_THROTTLING_TIER, existingExtensions
+                    .get(APIParserConstants.SWAGGER_X_THROTTLING_TIER));
         }
-        if (existingExtensions.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH) != null) {
-            updatedVendorExtensions.put(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH, existingExtensions
-                    .get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        if (existingExtensions.get(APIParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH) != null) {
+            updatedVendorExtensions.put(APIParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH, existingExtensions
+                    .get(APIParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
         }
-        if (existingExtensions.get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT) != null) {
-            updatedVendorExtensions.put(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, existingExtensions
-                    .get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT));
+        if (existingExtensions.get(APIParserConstants.SWAGGER_X_MEDIATION_SCRIPT) != null) {
+            updatedVendorExtensions.put(APIParserConstants.SWAGGER_X_MEDIATION_SCRIPT, existingExtensions
+                    .get(APIParserConstants.SWAGGER_X_MEDIATION_SCRIPT));
         }
-        if (existingExtensions.get(APIConstants.SWAGGER_X_WSO2_SECURITY) != null) {
-            updatedVendorExtensions.put(APIConstants.SWAGGER_X_WSO2_SECURITY, existingExtensions
-                    .get(APIConstants.SWAGGER_X_WSO2_SECURITY));
+        if (existingExtensions.get(APIParserConstants.SWAGGER_X_WSO2_SECURITY) != null) {
+            updatedVendorExtensions.put(APIParserConstants.SWAGGER_X_WSO2_SECURITY, existingExtensions
+                    .get(APIParserConstants.SWAGGER_X_WSO2_SECURITY));
         }
-        if (existingExtensions.get(APIConstants.SWAGGER_X_SCOPE) != null) {
-            updatedVendorExtensions.put(APIConstants.SWAGGER_X_SCOPE, existingExtensions
-                    .get(APIConstants.SWAGGER_X_SCOPE));
+        if (existingExtensions.get(APIParserConstants.SWAGGER_X_SCOPE) != null) {
+            updatedVendorExtensions.put(APIParserConstants.SWAGGER_X_SCOPE, existingExtensions
+                    .get(APIParserConstants.SWAGGER_X_SCOPE));
         }
-        if (existingExtensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME) != null) {
-            updatedVendorExtensions.put(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME, existingExtensions
-                    .get(APIConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
+        if (existingExtensions.get(APIParserConstants.SWAGGER_X_AMZN_RESOURCE_NAME) != null) {
+            updatedVendorExtensions.put(APIParserConstants.SWAGGER_X_AMZN_RESOURCE_NAME, existingExtensions
+                    .get(APIParserConstants.SWAGGER_X_AMZN_RESOURCE_NAME));
         }
-        if (existingExtensions.get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT) != null) {
-            updatedVendorExtensions.put(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT, existingExtensions
-                    .get(APIConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT));
+        if (existingExtensions.get(APIParserConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT) != null) {
+            updatedVendorExtensions.put(APIParserConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT, existingExtensions
+                    .get(APIParserConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT));
         }
-        if (existingExtensions.get(APIConstants.X_WSO2_APP_SECURITY) != null) {
-            updatedVendorExtensions.put(APIConstants.X_WSO2_APP_SECURITY, existingExtensions
-                    .get(APIConstants.X_WSO2_APP_SECURITY));
+        if (existingExtensions.get(APIParserConstants.X_WSO2_APP_SECURITY) != null) {
+            updatedVendorExtensions.put(APIParserConstants.X_WSO2_APP_SECURITY, existingExtensions
+                    .get(APIParserConstants.X_WSO2_APP_SECURITY));
         }
-        updatedVendorExtensions.put(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED, existingExtensions
-                .get(APIConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED));
+        updatedVendorExtensions.put(APIParserConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED, existingExtensions
+                .get(APIParserConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED));
     }
 
     /**
@@ -2051,11 +1897,11 @@ public class OASParserUtil {
             // replace the scope bindings if the scopes are not empty.
             if (SecurityScheme.Type.OAUTH2.toString().equals(securityScheme.getType().toString())) {
                 securityScheme.getFlows().getImplicit()
-                        .addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
+                        .addExtension(APIParserConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
             } else if (SecurityScheme.Type.HTTP.toString().equals(securityScheme.getType().toString()) &&
-                    APIConstants.SWAGGER_API_SECURITY_BASIC_AUTH_TYPE.equals(securityScheme.getScheme())) {
-                securityScheme.addExtension(APIConstants.SWAGGER_X_BASIC_AUTH_SCOPES, oas3Scopes);
-                securityScheme.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
+                    APIParserConstants.SWAGGER_API_SECURITY_BASIC_AUTH_TYPE.equals(securityScheme.getScheme())) {
+                securityScheme.addExtension(APIParserConstants.SWAGGER_X_BASIC_AUTH_SCOPES, oas3Scopes);
+                securityScheme.addExtension(APIParserConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
             }
         }
         if (SecurityScheme.Type.OAUTH2.toString().equals(securityScheme.getType().toString())) {
@@ -2077,15 +1923,15 @@ public class OASParserUtil {
         Set<Scope> scopes = swaggerData.getScopes();
         if (scopes != null && !scopes.isEmpty()) {
             populateScopesFromAPI(scopes, swaggerScopes, scopeBindings);
-            if (StringUtils.equals(APIConstants.DEFAULT_API_SECURITY_OAUTH2, securitySchemeDefinition.getType())) {
-                securitySchemeDefinition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
-            } else if (StringUtils.equals(APIConstants.SWAGGER_API_SECURITY_BASIC_AUTH_TYPE,
+            if (StringUtils.equals(APIParserConstants.DEFAULT_API_SECURITY_OAUTH2, securitySchemeDefinition.getType())) {
+                securitySchemeDefinition.setVendorExtension(APIParserConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
+            } else if (StringUtils.equals(APIParserConstants.SWAGGER_API_SECURITY_BASIC_AUTH_TYPE,
                     securitySchemeDefinition.getType())) {
-                securitySchemeDefinition.setVendorExtension(APIConstants.SWAGGER_X_BASIC_AUTH_SCOPES, swaggerScopes);
-                securitySchemeDefinition.setVendorExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
+                securitySchemeDefinition.setVendorExtension(APIParserConstants.SWAGGER_X_BASIC_AUTH_SCOPES, swaggerScopes);
+                securitySchemeDefinition.setVendorExtension(APIParserConstants.SWAGGER_X_SCOPES_BINDINGS, scopeBindings);
             }
         }
-        if (StringUtils.equals(APIConstants.DEFAULT_API_SECURITY_OAUTH2, securitySchemeDefinition.getType())) {
+        if (StringUtils.equals(APIParserConstants.DEFAULT_API_SECURITY_OAUTH2, securitySchemeDefinition.getType())) {
             ((OAuth2Definition) securitySchemeDefinition).setScopes(swaggerScopes);
         }
     }
@@ -2171,8 +2017,8 @@ public class OASParserUtil {
     public static void addOASBasicAuthResourceScopesFromAPI(List<String> operationScopes, List<String> apiSecurities,
                                                             Operation operation) {
 
-        if (!operationScopes.isEmpty() && apiSecurities.contains(APIConstants.API_SECURITY_BASIC_AUTH)) {
-            operation.addExtension(APIConstants.SWAGGER_X_BASIC_AUTH_RESOURCE_SCOPES, operationScopes);
+        if (!operationScopes.isEmpty() && apiSecurities.contains(APIParserConstants.API_SECURITY_BASIC_AUTH)) {
+            operation.addExtension(APIParserConstants.SWAGGER_X_BASIC_AUTH_RESOURCE_SCOPES, operationScopes);
         }
     }
 
@@ -2218,8 +2064,8 @@ public class OASParserUtil {
                                                                 List<String> apiSecurities,
                                                                 io.swagger.models.Operation operation) {
 
-        if (!operationScopes.isEmpty() && apiSecurities.contains(APIConstants.API_SECURITY_BASIC_AUTH)) {
-            operation.setVendorExtension(APIConstants.SWAGGER_X_BASIC_AUTH_RESOURCE_SCOPES, operationScopes);
+        if (!operationScopes.isEmpty() && apiSecurities.contains(APIParserConstants.API_SECURITY_BASIC_AUTH)) {
+            operation.setVendorExtension(APIParserConstants.SWAGGER_X_BASIC_AUTH_RESOURCE_SCOPES, operationScopes);
         }
     }
 
@@ -2266,32 +2112,32 @@ public class OASParserUtil {
     private static boolean validateOAS3Paths(PathItem pathItem, PathItem newPathItem, String newPath,
                                              APIDefinitionValidationResponse validationResponse) {
         if (pathItem.getGet() != null && newPathItem.getGet() != null) {
-            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.GET.name(), APIConstants.OPEN_API);
+            addError(validationResponse, newPath, APIParserConstants.SupportedHTTPVerbs.GET.name(), APIParserConstants.OPEN_API);
             return false;
         }
         if (pathItem.getPost() != null && newPathItem.getPost() != null) {
-            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.POST.name(), APIConstants.OPEN_API);
+            addError(validationResponse, newPath, APIParserConstants.SupportedHTTPVerbs.POST.name(), APIParserConstants.OPEN_API);
             return false;
         }
         if (pathItem.getPut() != null && newPathItem.getPut() != null) {
-            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.PUT.name(), APIConstants.OPEN_API);
+            addError(validationResponse, newPath, APIParserConstants.SupportedHTTPVerbs.PUT.name(), APIParserConstants.OPEN_API);
             return false;
         }
         if (pathItem.getPatch() != null && newPathItem.getPatch() != null) {
-            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.PATCH.name(), APIConstants.OPEN_API);
+            addError(validationResponse, newPath, APIParserConstants.SupportedHTTPVerbs.PATCH.name(), APIParserConstants.OPEN_API);
             return false;
         }
         if (pathItem.getDelete() != null && newPathItem.getDelete() != null) {
-            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.DELETE.name(), APIConstants.OPEN_API);
+            addError(validationResponse, newPath, APIParserConstants.SupportedHTTPVerbs.DELETE.name(), APIParserConstants.OPEN_API);
             return false;
         }
         if (pathItem.getHead() != null && newPathItem.getHead() != null) {
-            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.HEAD.name(), APIConstants.OPEN_API);
+            addError(validationResponse, newPath, APIParserConstants.SupportedHTTPVerbs.HEAD.name(), APIParserConstants.OPEN_API);
             return false;
         }
         if (pathItem.getOptions() != null && newPathItem.getOptions() != null) {
-            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.OPTIONS.name(),
-                    APIConstants.OPEN_API);
+            addError(validationResponse, newPath, APIParserConstants.SupportedHTTPVerbs.OPTIONS.name(),
+                    APIParserConstants.OPEN_API);
             return false;
         }
         return true;
@@ -2300,31 +2146,31 @@ public class OASParserUtil {
     private static boolean validateOAS2Paths(Path pathItem, Path newPathItem, String newPath,
                                              APIDefinitionValidationResponse validationResponse) {
         if (pathItem.getGet() != null && newPathItem.getGet() != null) {
-            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.GET.name(), APIConstants.SWAGGER);
+            addError(validationResponse, newPath, APIParserConstants.SupportedHTTPVerbs.GET.name(), APIParserConstants.SWAGGER);
             return false;
         }
         if (pathItem.getPost() != null && newPathItem.getPost() != null) {
-            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.POST.name(), APIConstants.SWAGGER);
+            addError(validationResponse, newPath, APIParserConstants.SupportedHTTPVerbs.POST.name(), APIParserConstants.SWAGGER);
             return false;
         }
         if (pathItem.getPut() != null && newPathItem.getPut() != null) {
-            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.PUT.name(), APIConstants.SWAGGER);
+            addError(validationResponse, newPath, APIParserConstants.SupportedHTTPVerbs.PUT.name(), APIParserConstants.SWAGGER);
             return false;
         }
         if (pathItem.getPatch() != null && newPathItem.getPatch() != null) {
-            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.PATCH.name(), APIConstants.SWAGGER);
+            addError(validationResponse, newPath, APIParserConstants.SupportedHTTPVerbs.PATCH.name(), APIParserConstants.SWAGGER);
             return false;
         }
         if (pathItem.getDelete() != null && newPathItem.getDelete() != null) {
-            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.DELETE.name(), APIConstants.SWAGGER);
+            addError(validationResponse, newPath, APIParserConstants.SupportedHTTPVerbs.DELETE.name(), APIParserConstants.SWAGGER);
             return false;
         }
         if (pathItem.getHead() != null && newPathItem.getHead() != null) {
-            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.HEAD.name(), APIConstants.SWAGGER);
+            addError(validationResponse, newPath, APIParserConstants.SupportedHTTPVerbs.HEAD.name(), APIParserConstants.SWAGGER);
             return false;
         }
         if (pathItem.getOptions() != null && newPathItem.getOptions() != null) {
-            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.OPTIONS.name(), APIConstants.SWAGGER);
+            addError(validationResponse, newPath, APIParserConstants.SupportedHTTPVerbs.OPTIONS.name(), APIParserConstants.SWAGGER);
             return false;
         }
         return true;

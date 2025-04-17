@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
+import org.apache.http.client.HttpClient;
+import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -88,7 +90,9 @@ import software.amazon.awssdk.services.sts.StsClient;
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
 import software.amazon.awssdk.services.sts.model.AssumeRoleResponse;
 import software.amazon.awssdk.services.sts.model.Credentials;
+
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -108,6 +112,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.constructEndpointConfigForService;
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.validateScopes;
@@ -639,13 +644,42 @@ public class ApisApiServiceImplUtils {
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         if (url != null) {
-            validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, returnContent);
+            try {
+                URL urlObj = new URL(url);
+                HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
+                validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, httpClient, returnContent);
+            } catch (MalformedURLException e) {
+                throw new APIManagementException("Error while processing the API definition URL", e);
+            }
         } else if (inputStream != null) {
             try {
                 if (fileName != null) {
                     if (fileName.endsWith(".zip")) {
-                        validationResponse =
-                                OASParserUtil.extractAndValidateOpenAPIArchive(inputStream, returnContent);
+                        String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator +
+                                APIConstants.OPENAPI_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
+                        String archivePath = path + File.separator + APIConstants.OPENAPI_ARCHIVE_ZIP_FILE;
+                        String extractedLocation = APIFileUtil
+                                .extractUploadedArchive(inputStream, APIConstants.OPENAPI_EXTRACTED_DIRECTORY, archivePath, path);
+                        File[] listOfFiles = new File(extractedLocation).listFiles();
+                        File archiveDirectory = null;
+                        if (listOfFiles != null) {
+                            if (listOfFiles.length > 1) {
+                                throw new APIManagementException("Swagger Definitions should be placed under one root folder.");
+                            }
+                            for (File file: listOfFiles) {
+                                if (file.isDirectory()) {
+                                    archiveDirectory = file.getAbsoluteFile();
+                                    break;
+                                }
+                            }
+                        }
+                        //Verify whether the zipped input is archive or file.
+                        //If it is a single  swagger file without remote references it can be imported directly, without zipping.
+                        if (archiveDirectory == null) {
+                            throw new APIManagementException("Could not find an archive in the given ZIP file.");
+                        }
+                        validationResponse = OASParserUtil.validateAPIDefinitionFromDirectory(archiveDirectory,
+                                returnContent);
                     } else {
                         String openAPIContent = IOUtils.toString(inputStream, CHARSET);
                         validationResponse = OASParserUtil.validateAPIDefinition(openAPIContent, returnContent);
