@@ -82,9 +82,8 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.definitions.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.mixin.License31Mixin;
-import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
@@ -102,7 +101,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -1182,15 +1180,12 @@ public class OASParserUtil {
      * @param returnJsonContent whether to return the converted json form of the
      * @return APIDefinitionValidationResponse object with validation information
      */
-    public static APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, boolean returnJsonContent)
+    public static APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, HttpClient httpClient,
+                                                                             boolean returnJsonContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         try {
-            URL urlObj = new URL(url);
-            String host = urlObj.getHost();
-            HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
             HttpGet httpGet = new HttpGet(url);
-
             HttpResponse response = httpClient.execute(httpGet);
 
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
@@ -1208,7 +1203,7 @@ public class OASParserUtil {
                 if (responseStrProcessed != null) {
                     responseStr = responseStrProcessed;
                 }
-                validationResponse = validateAPIDefinition(responseStr, host, returnJsonContent);
+                validationResponse = validateAPIDefinition(responseStr, new URL(url).getHost(), returnJsonContent);
             } else {
                 validationResponse.setValid(false);
                 validationResponse.getErrorItems().add(ExceptionCodes.OPENAPI_URL_NO_200);

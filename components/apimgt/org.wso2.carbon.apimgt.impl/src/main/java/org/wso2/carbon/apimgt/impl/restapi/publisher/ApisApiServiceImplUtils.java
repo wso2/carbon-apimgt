@@ -24,6 +24,7 @@ import io.swagger.util.Yaml;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.core.models.ParseOptions;
+import org.apache.http.client.HttpClient;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -636,7 +637,13 @@ public class ApisApiServiceImplUtils {
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         if (url != null) {
-            validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, returnContent);
+            try {
+                URL urlObj = new URL(url);
+                HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
+                validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, httpClient, returnContent);
+            } catch (MalformedURLException e) {
+                throw new APIManagementException("Error while processing the API definition URL", e);
+            }
         } else if (inputStream != null) {
             try {
                 if (fileName != null) {
