@@ -470,7 +470,14 @@ public class ServicesApiServiceImpl implements ServicesApiService {
             String schemaToBeValidated = CommonUtil.yamlToJson(definitionContent);
             validationResponse = AsyncApiParserUtil.validateAsyncAPISpecification(schemaToBeValidated, true);
         } else if (url != null) {
-            validationResponse = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(url, true);
+            try {
+                URL urlObj = new URL(url);
+                HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
+                //validate URL
+                validationResponse = AsyncApiParserUtil.validateAsyncAPISpecificationByURL(url, httpClient, true);
+            } catch (MalformedURLException e) {
+                throw new APIManagementException("Error while processing the API definition URL", e);
+            }
         }
         return validationResponse;
     }
