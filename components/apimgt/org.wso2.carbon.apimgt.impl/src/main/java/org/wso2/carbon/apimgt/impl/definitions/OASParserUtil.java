@@ -938,37 +938,14 @@ public class OASParserUtil {
     /**
      * Extract the archive file and validates the openAPI definition
      *
-     * @param inputStream   file as input stream
-     * @param returnContent whether to return the content of the definition in the response DTO
+     * @param apiDefinitionDirectory    The directory containing the API definition files, including the master Swagger file.
+     * @param returnContent             Flag indicating whether to return the content of the definition in the response DTO
      * @return APIDefinitionValidationResponse
      * @throws APIManagementException if error occurred while parsing definition
      */
-    public static APIDefinitionValidationResponse extractAndValidateOpenAPIArchive(InputStream inputStream,
+    public static APIDefinitionValidationResponse validateAPIDefinitionFromDirectory(File apiDefinitionDirectory,
             boolean returnContent) throws APIManagementException {
-        String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator +
-                APIConstants.OPENAPI_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
-        String archivePath = path + File.separator + APIConstants.OPENAPI_ARCHIVE_ZIP_FILE;
-        String extractedLocation = APIFileUtil
-                .extractUploadedArchive(inputStream, APIConstants.OPENAPI_EXTRACTED_DIRECTORY, archivePath, path);
-        File[] listOfFiles = new File(extractedLocation).listFiles();
-        File archiveDirectory = null;
-        if (listOfFiles != null) {
-            if (listOfFiles.length > 1) {
-                throw new APIManagementException("Swagger Definitions should be placed under one root folder.");
-            }
-            for (File file: listOfFiles) {
-                if (file.isDirectory()) {
-                    archiveDirectory = file.getAbsoluteFile();
-                    break;
-                }
-            }
-        }
-        //Verify whether the zipped input is archive or file.
-        //If it is a single  swagger file without remote references it can be imported directly, without zipping.
-        if (archiveDirectory == null) {
-            throw new APIManagementException("Could not find an archive in the given ZIP file.");
-        }
-        File masterSwagger = checkMasterSwagger(archiveDirectory);
+        File masterSwagger = checkMasterSwagger(apiDefinitionDirectory);
         String content;
         try {
             InputStream masterInputStream = new FileInputStream(masterSwagger);
