@@ -3476,13 +3476,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
         if (gatewayConfiguration != null) {
             api.setContext("");
-            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes,
-                    keyManagerConfigurationDTO);
         } else {
             api.setContext(getBasePath(apiTenantDomain, api.getContext()));
-            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes,
-                    keyManagerConfigurationDTO);
         }
+        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes,
+                keyManagerConfigurationDTO);
         return updatedDefinition;
     }
 
