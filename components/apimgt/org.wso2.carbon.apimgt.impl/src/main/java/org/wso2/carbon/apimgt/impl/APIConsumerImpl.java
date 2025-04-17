@@ -3460,9 +3460,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 APIAdmin apiAdmin = new APIAdminImpl();
                 keyManagerConfigurationDTO = apiAdmin.getKeyManagerConfigurationById(tenantDomain, kmId);
                 if (keyManagerConfigurationDTO == null || (StringUtils.isEmpty(kmId) && !Objects.equals(
-                        keyManagerConfigurationDTO.getType(), org.wso2.carbon.apimgt.impl.definitions.APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE))) {
+                        keyManagerConfigurationDTO.getType(), APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE))) {
                     keyManagerConfigurationDTO = apiAdmin.getKeyManagerConfigurationByName(tenantDomain,
-                            org.wso2.carbon.apimgt.impl.definitions.APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
+                            APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
                 }
             }
         } catch (APIManagementException e) {
@@ -3471,7 +3471,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                         ExceptionCodes.ERROR_RETRIEVE_KM_INFORMATION);
             } else {
                 throw new APIManagementException("Failed to retrieve key manager information "
-                        + org.wso2.carbon.apimgt.impl.definitions.APIConstants.KeyManager.DEFAULT_KEY_MANAGER, ExceptionCodes.ERROR_RETRIEVE_KM_INFORMATION);
+                        + APIConstants.KeyManager.DEFAULT_KEY_MANAGER, ExceptionCodes.ERROR_RETRIEVE_KM_INFORMATION);
             }
         }
         if (gatewayConfiguration != null) {
