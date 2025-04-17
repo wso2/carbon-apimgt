@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.common.analytics.exceptions.DataNotFoundException;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.API;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Event;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.MetaInfo;
+import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Operation;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
 
 /**
@@ -83,6 +84,7 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
         API api = provider.getApi();
         Target target = new Target();
         target.setTargetResponseCode(Constants.UNKNOWN_INT_VALUE);
+        Operation operation = provider.getOperation();
         MetaInfo metaInfo = provider.getMetaInfo();
         String userIp = provider.getEndUserIP();
         if (userIp == null) {
@@ -93,6 +95,7 @@ public class FaultyRequestDataCollector extends CommonRequestDataCollector imple
         event.setTarget(target);
         event.setProxyResponseCode(provider.getProxyResponseCode());
         event.setRequestTimestamp(offsetDateTime);
+        event.setOperation(operation);
         event.setMetaInfo(metaInfo);
         event.setUserIp(userIp);
 

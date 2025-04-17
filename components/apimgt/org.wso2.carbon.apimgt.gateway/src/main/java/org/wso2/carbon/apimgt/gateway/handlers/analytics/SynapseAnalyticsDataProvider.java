@@ -594,8 +594,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         }
     }
 
-    public int getResponseSize() {
-        int responseSize = 0;
+    public long getResponseSize() {
+        long responseSize = 0L;
         if (buildResponseMessage == null) {
             Map<String,String> configs = APIManagerConfiguration.getAnalyticsProperties();
             if (configs.containsKey(Constants.BUILD_RESPONSE_MESSAGE_CONFIG)) {
