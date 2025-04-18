@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.oas.parser;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -71,7 +71,6 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.impl.definitions.APIParserConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,8 +87,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.UUID;
 
-import static org.wso2.carbon.apimgt.impl.definitions.APIParserConstants.APPLICATION_JSON_MEDIA_TYPE;
-import static org.wso2.carbon.apimgt.impl.definitions.OASParserUtil.isValidWithPathsWithTrailingSlashes;
+import static org.wso2.carbon.apimgt.oas.parser.APIParserConstants.APPLICATION_JSON_MEDIA_TYPE;
+import static org.wso2.carbon.apimgt.oas.parser.OASParserUtil.isValidWithPathsWithTrailingSlashes;
 
 /**
  * Models API definition using OAS (OpenAPI 3.0) parser
