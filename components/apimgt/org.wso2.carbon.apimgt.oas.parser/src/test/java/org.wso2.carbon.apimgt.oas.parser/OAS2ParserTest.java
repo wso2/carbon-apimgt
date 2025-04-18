@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.oas.parser;
 
 import io.swagger.models.HttpMethod;
 import io.swagger.models.Operation;
@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -106,7 +105,7 @@ public class OAS2ParserTest extends OASTestBase {
             Path path = pathEntry.getValue();
             for (Map.Entry<HttpMethod, Operation> operationEntry : path.getOperationMap().entrySet()) {
                 Operation operation = operationEntry.getValue();
-                Assert.assertFalse(operation.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_SCOPE));
+                Assert.assertFalse(operation.getVendorExtensions().containsKey(APIParserConstants.SWAGGER_X_SCOPE));
             }
         }
 
@@ -119,9 +118,9 @@ public class OAS2ParserTest extends OASTestBase {
         Assert.assertTrue(oAuth2Definition.getScopes().containsKey("newScope"));
         Assert.assertEquals("newScopeDescription", oAuth2Definition.getScopes().get("newScope"));
 
-        Assert.assertTrue(oAuth2Definition.getVendorExtensions().containsKey(APIConstants.SWAGGER_X_SCOPES_BINDINGS));
+        Assert.assertTrue(oAuth2Definition.getVendorExtensions().containsKey(APIParserConstants.SWAGGER_X_SCOPES_BINDINGS));
         Map<String, String> scopeBinding = (Map<String, String>) oAuth2Definition.getVendorExtensions()
-                .get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+                .get(APIParserConstants.SWAGGER_X_SCOPES_BINDINGS);
         Assert.assertTrue(scopeBinding.containsKey("newScope"));
         Assert.assertEquals("admin", scopeBinding.get("newScope"));
     }
@@ -276,7 +275,7 @@ public class OAS2ParserTest extends OASTestBase {
                 String.valueOf(StandardCharsets.UTF_8));
         APIIdentifier apiIdentifier = new APIIdentifier("admin", "OldAPI", "1.0.0");
         Map<String, String> hostWithSchemes = new HashMap<>();
-        hostWithSchemes.put(APIConstants.HTTPS_PROTOCOL, "https://localhost");
+        hostWithSchemes.put(APIParserConstants.HTTPS_PROTOCOL, "https://localhost");
         API api = new API(apiIdentifier);
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,oauth2");
         api.setTransports("https");

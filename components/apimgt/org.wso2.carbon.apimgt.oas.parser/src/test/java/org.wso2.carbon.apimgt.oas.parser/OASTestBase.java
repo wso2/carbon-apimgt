@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.oas.parser;
 
 import org.json.JSONObject;
 import org.junit.Assert;
