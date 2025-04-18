@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -164,12 +165,12 @@ public abstract class APIDefinition {
      * @param api            API
      * @param oasDefinition  OAS definition
      * @param hostsWithSchemes host addresses with protocol mapping
-     * @param kmId             UUID of the Key Manager
+     * @param keyManagerConfigurationDTO configuration details of the Key Manager
      * @return updated OAS definition
      * @throws APIManagementException throws if an error occurred
      */
     public abstract String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes,
-            String kmId)
+                                                    KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException;
 
     /**
@@ -178,12 +179,13 @@ public abstract class APIDefinition {
      * @param product        APIProduct
      * @param oasDefinition  OAS definition
      * @param hostsWithSchemes host addresses with protocol mapping
-     * @param kmId             UUID of the Key Manager
+     * @param keyManagerConfigurationDTO configuration details of the Key Manager
      * @return updated OAS definition
      * @throws APIManagementException throws if an error occurred
      */
     public abstract String getOASDefinitionForStore(APIProduct product, String oasDefinition,
-            Map<String, String> hostsWithSchemes, String kmId) throws APIManagementException;
+            Map<String, String> hostsWithSchemes, KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException;
 
     /**
      * Update OAS definition for API Publisher

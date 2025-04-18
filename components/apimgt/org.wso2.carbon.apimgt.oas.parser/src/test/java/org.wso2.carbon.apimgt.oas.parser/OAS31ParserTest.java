@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.oas.parser;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -16,7 +16,6 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -25,11 +24,11 @@ import java.util.*;
 import static org.mockito.Mockito.when;
 
 public class OAS31ParserTest extends OASTestBase {
-    private OAS3Parser oas31Parser = new OAS3Parser(APIConstants.OAS_V31);
+    private OAS3Parser oas31Parser = new OAS3Parser(APIParserConstants.OAS_V31);
 
     @Test
     public void testGetURITemplates() throws Exception {
-        String relativePath = "definitions" + File.separator + "oas31" + File.separator + "oas31_scopes.json";
+        String relativePath = "oas31" + File.separator + "oas31_scopes.json";
         String oas31Definition = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
         JSONObject jsonObject = new JSONObject(oas31Definition);
 
@@ -51,7 +50,7 @@ public class OAS31ParserTest extends OASTestBase {
 
     @Test
     public void testGetScopes() throws Exception {
-        String relativePath = "definitions" + File.separator + "oas31" + File.separator + "oas31_scopes.json";
+        String relativePath = "oas31" + File.separator + "oas31_scopes.json";
         String oas3Scope = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
         Set<Scope> scopes = oas31Parser.getScopes(oas3Scope);
         Assert.assertEquals(2, scopes.size());
@@ -67,7 +66,7 @@ public class OAS31ParserTest extends OASTestBase {
 
     @Test
     public void testUpdateAPIDefinition() throws Exception {
-        String relativePath = "definitions" + File.separator + "oas31" + File.separator + "oas31Resources.json";
+        String relativePath = "oas31" + File.separator + "oas31Resources.json";
         String oas2Resources = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
 
         OASParserEvaluator evaluator = (definition -> {
@@ -84,7 +83,7 @@ public class OAS31ParserTest extends OASTestBase {
 
     @Test
     public void testUpdateAPIDefinitionWithExtensions() throws Exception {
-        String relativePath = "definitions" + File.separator + "oas31" + File.separator + "oas31Resources.json";
+        String relativePath = "oas31" + File.separator + "oas31Resources.json";
         String oas3Resources = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
 
@@ -93,7 +92,7 @@ public class OAS31ParserTest extends OASTestBase {
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(definition, null, null);
         OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
         boolean isExtensionNotFound = openAPI.getExtensions() == null || !openAPI.getExtensions()
-                .containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY);
+                .containsKey(APIParserConstants.SWAGGER_X_WSO2_SECURITY);
         Assert.assertTrue(isExtensionNotFound);
         Assert.assertEquals(2, openAPI.getPaths().size());
 
@@ -102,7 +101,7 @@ public class OAS31ParserTest extends OASTestBase {
             Map.Entry<String, PathItem> pathEntry = itr.next();
             PathItem path = pathEntry.getValue();
             for (Operation operation : path.readOperations()) {
-                Assert.assertFalse(operation.getExtensions().containsKey(APIConstants.SWAGGER_X_SCOPE));
+                Assert.assertFalse(operation.getExtensions().containsKey(APIParserConstants.SWAGGER_X_SCOPE));
             }
         }
 
@@ -116,16 +115,16 @@ public class OAS31ParserTest extends OASTestBase {
         Assert.assertTrue(implicityOauth.getScopes().containsKey("newScope"));
         Assert.assertEquals("newScopeDescription", implicityOauth.getScopes().get("newScope"));
 
-        Assert.assertTrue(implicityOauth.getExtensions().containsKey(APIConstants.SWAGGER_X_SCOPES_BINDINGS));
+        Assert.assertTrue(implicityOauth.getExtensions().containsKey(APIParserConstants.SWAGGER_X_SCOPES_BINDINGS));
         Map<String, String> scopeBinding =
-                (Map<String, String>) implicityOauth.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+                (Map<String, String>) implicityOauth.getExtensions().get(APIParserConstants.SWAGGER_X_SCOPES_BINDINGS);
         Assert.assertTrue(scopeBinding.containsKey("newScope"));
         Assert.assertEquals("admin", scopeBinding.get("newScope"));
     }
 
     @Test
     public void testGetURITemplatesOfOpenAPI300Spec() throws Exception {
-        String relativePath = "definitions" + File.separator + "oas31" + File.separator + "oas31_uri_template.json";
+        String relativePath = "oas31" + File.separator + "oas31_uri_template.json";
         String openAPISpec300 =
                 IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
         Set<URITemplate> uriTemplates = new LinkedHashSet<>();
@@ -140,7 +139,7 @@ public class OAS31ParserTest extends OASTestBase {
 
     @Test
     public void testValidateOpenAPIDefinitionWithoutLicenceIdentifier() throws Exception {
-        String relativePath = "definitions" + File.separator + "oas31" + File.separator + "oas31_with_no_licese_identifier.yaml";
+        String relativePath = "oas31" + File.separator + "oas31_with_no_licese_identifier.yaml";
         String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
         APIDefinitionValidationResponse response = oas31Parser.validateAPIDefinition(openApi, false);
         Assert.assertFalse(response.isValid());
@@ -150,7 +149,7 @@ public class OAS31ParserTest extends OASTestBase {
     @Test
     public void testOpenAPIValidatorWithValidationLevel1() throws Exception {
         String faultySwagger = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31"
+                getClass().getClassLoader().getResourceAsStream("oas31"
                         + File.separator + "openApi31_validation.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true);
@@ -169,7 +168,7 @@ public class OAS31ParserTest extends OASTestBase {
         String OPENAPI_SECURITY_SCHEMA_KEY = "default";
 
         //Read the API definition file
-        String relativePath = "definitions" + File.separator + "oas31" + File.separator
+        String relativePath = "oas31" + File.separator
                 + "oas31_client_credential_security_scheme.yaml";
         String swaggerContent = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath),
                 "UTF-8");
@@ -198,13 +197,13 @@ public class OAS31ParserTest extends OASTestBase {
         String apiSecurity = "oauth_basic_auth_api_key_mandatory,api_key,basic_auth,oauth2";
         when(api.getApiSecurity()).thenReturn(apiSecurity);
         String swagger = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31" + File.separator
+                getClass().getClassLoader().getResourceAsStream("oas31" + File.separator
                         + "publisher" + File.separator + "oas31_with_default_oauth.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         APIDefinition parser = OASParserUtil.getOASParser(swagger);
         String response = parser.getOASDefinitionForPublisher(api, swagger);
         String oasDefinitionEdited = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31" + File.separator
+                getClass().getClassLoader().getResourceAsStream("oas31" + File.separator
                         + "publisher" + File.separator + "oas31_with_default_oauth_response.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionEdited, response);
@@ -217,12 +216,12 @@ public class OAS31ParserTest extends OASTestBase {
         // Testing API with swagger generated after APIM 2.x versions with oauth security definitions and x-wso2
         // extensions. API configured with all security.
         String swagger = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31" + File.separator
+                getClass().getClassLoader().getResourceAsStream("oas31" + File.separator
                         + "devportal" + File.separator + "oas31_with_default_allsecurity.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         APIIdentifier apiIdentifier = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0");
         Map<String, String> hostWithSchemes = new HashMap<>();
-        hostWithSchemes.put(APIConstants.HTTPS_PROTOCOL, "https://localhost");
+        hostWithSchemes.put(APIParserConstants.HTTPS_PROTOCOL, "https://localhost");
         API api = new API(apiIdentifier);
         api.setTransports("https");
         api.setContext("/");
@@ -231,56 +230,56 @@ public class OAS31ParserTest extends OASTestBase {
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,api_key,basic_auth,oauth2");
         String response = oas31Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         String oasDefinitionExpected = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31" + File.separator
+                getClass().getClassLoader().getResourceAsStream("oas31" + File.separator
                         + "devportal" + File.separator + "oas31_with_default_allsecurity_response.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionExpected, response);
         // Testing API with swagger generated after APIM 2.x version, but with basic_auth and api_key security in
         // the scheme which went with as an u2 update for 4.1, then later reverted. API configured with all security.
         swagger = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31" + File.separator
+                getClass().getClassLoader().getResourceAsStream("oas31" + File.separator
                         + "publisher" + File.separator + "oas31_with_apikey_basic_oauth_security_u2.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         response = oas31Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31" + File.separator
+                getClass().getClassLoader().getResourceAsStream("oas31" + File.separator
                         + "devportal" + File.separator + "oas31_with_apikey_basic_oauth_security_u2_response.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionExpected, response);
         // Testing API with swagger generated after APIM 2.x versions with oauth security definitions and x-wso2
         // extensions. API configured with basic auth and api key.
         swagger = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31"
+                getClass().getClassLoader().getResourceAsStream("oas31"
                         + File.separator + "devportal" + File.separator + "oas31_with_basic_apisec.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,api_key,basic_auth");
         response = oas31Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31" + File.separator
+                getClass().getClassLoader().getResourceAsStream("oas31" + File.separator
                         + "devportal" + File.separator + "oas31_with_basic_apisec_response.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionExpected, response);
         // API configured with basic auth only.
         swagger = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31" + File.separator
+                getClass().getClassLoader().getResourceAsStream("oas31" + File.separator
                         + "devportal" + File.separator + "oas31_with_basic.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,basic_auth");
         response = oas31Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31" + File.separator
+                getClass().getClassLoader().getResourceAsStream("oas31" + File.separator
                         + "devportal" + File.separator + "oas31_with_basic_response.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionExpected, response);
         // API Configured with api key only.
         swagger = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31"
+                getClass().getClassLoader().getResourceAsStream("oas31"
                         + File.separator + "devportal" + File.separator + "oas31_with_apikey.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,api_key");
         response = oas31Parser.getOASDefinitionForStore(api, swagger, hostWithSchemes, null);
         oasDefinitionExpected = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31"
+                getClass().getClassLoader().getResourceAsStream("oas31"
                         + File.separator + "devportal" + File.separator + "oas31_with_apikey_response.json"),
                 String.valueOf(StandardCharsets.UTF_8));
         Assert.assertEquals(oasDefinitionExpected, response);
