@@ -56,9 +56,8 @@ public class AsyncApiParserTest {
                 "'production_endpoints':{'url':'wss://echo.websocket.org:443'}}");
         AsyncApiParser asyncApiParser = new AsyncApiParser();
         String asyncAPIDefinition = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "asyncAPI" +
-                        File.separator + "sampleWebSocket.json"),
-                "UTF-8");
+                getClass().getClassLoader().getResourceAsStream("asyncAPI" + File.separator +
+                        "sampleWebSocket.json"), "UTF-8");
         api.setAsyncApiDefinition(asyncAPIDefinition);
         String definitionForStore = asyncApiParser.getAsyncApiDefinitionForStore(api, asyncAPIDefinition, hostsWithSchemes);
         Assert.assertNotNull(definitionForStore);
@@ -85,9 +84,8 @@ public class AsyncApiParserTest {
         API api = new API(identifier);
         AsyncApiParser asyncApiParser = new AsyncApiParser();
         String asyncAPIDefinition = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "asyncAPI" +
-                        File.separator + "incorrectWebSocket.yml"),
-                "UTF-8");
+                getClass().getClassLoader().getResourceAsStream("asyncAPI" + File.separator +
+                        "incorrectWebSocket.yml"), "UTF-8");
         api.setAsyncApiDefinition(asyncAPIDefinition);
         try {
             asyncApiParser.getAsyncApiDefinitionForStore(api, asyncAPIDefinition, hostsWithSchemes);

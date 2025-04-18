@@ -44,21 +44,21 @@ public class OASParserUtilTest {
     @Test
     public void testGetOASParser() throws Exception {
         String oas3 = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "petstore_v3.yaml"),
+                getClass().getClassLoader().getResourceAsStream("petstore_v3.yaml"),
                 "UTF-8");
         APIDefinition definition = OASParserUtil.getOASParser(oas3);
         Assert.assertNotNull(definition);
         Assert.assertTrue(definition instanceof OAS3Parser);
 
         String oas2 = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "petstore_v2.yaml"),
+                getClass().getClassLoader().getResourceAsStream("petstore_v2.yaml"),
                 "UTF-8");
         definition = OASParserUtil.getOASParser(oas2);
         Assert.assertNotNull(definition);
         Assert.assertTrue(definition instanceof OAS2Parser);
 
         String oasError = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "petstore_error.json"),
+                getClass().getClassLoader().getResourceAsStream("petstore_error.json"),
                 "UTF-8");
         try {
             definition = OASParserUtil.getOASParser(oasError);
@@ -68,7 +68,7 @@ public class OASParserUtilTest {
         }
 
         String oasInvalid = IOUtils.toString(getClass().getClassLoader()
-                .getResourceAsStream("definitions" + File.separator + "petstore_invalid.yaml"), "UTF-8");
+                .getResourceAsStream("petstore_invalid.yaml"), "UTF-8");
         try {
             definition = OASParserUtil.getOASParser(oasInvalid);
             Assert.fail("Exception expected");
@@ -81,7 +81,7 @@ public class OASParserUtilTest {
     @Test
     public void testGenerateOASConfigForHTTPEndpoints() throws Exception {
         String endpoints = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "endpointsData.json"),
+                getClass().getClassLoader().getResourceAsStream("endpointsData.json"),
                 "UTF-8");
         JSONObject jsonObject = new JSONObject(endpoints);
 
@@ -192,7 +192,7 @@ public class OASParserUtilTest {
     @Test
     public void testGenerateOASConfigForSOAPEndpoints() throws Exception {
         String endpoints = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "endpointsData.json"),
+                getClass().getClassLoader().getResourceAsStream("endpointsData.json"),
                 "UTF-8");
         JSONObject jsonObject = new JSONObject(endpoints);
 
@@ -307,7 +307,7 @@ public class OASParserUtilTest {
     @Test
     public void testGenerateOASConfigForDefaultEndpoints() throws Exception {
         String endpoints = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "endpointsData.json"),
+                getClass().getClassLoader().getResourceAsStream("endpointsData.json"),
                 "UTF-8");
         JSONObject jsonObject = new JSONObject(endpoints);
 
@@ -332,7 +332,7 @@ public class OASParserUtilTest {
     @Test
     public void testGenerateOASConfigWithSecuredEndpoints() throws Exception {
         String endpoints = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "endpointsData.json"),
+                getClass().getClassLoader().getResourceAsStream("endpointsData.json"),
                 "UTF-8");
         JSONObject jsonObject = new JSONObject(endpoints);
 
@@ -441,11 +441,11 @@ public class OASParserUtilTest {
     @Test
     public void testSyncOpenAPIResourcePaths() throws Exception {
         String calculatorSwaggerString = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "calculator_scopes_v3.json"),
+                getClass().getClassLoader().getResourceAsStream("calculator_scopes_v3.json"),
                 "UTF-8");
 
         String calcSmallSwaggerString = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "calc_small_v3.json"),
+                getClass().getClassLoader().getResourceAsStream("calc_small_v3.json"),
                 "UTF-8");
 
         final String verb = "POST";
