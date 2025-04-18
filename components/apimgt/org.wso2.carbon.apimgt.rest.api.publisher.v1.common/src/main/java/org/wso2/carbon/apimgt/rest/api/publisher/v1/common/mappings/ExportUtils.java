@@ -722,9 +722,10 @@ public class ExportUtils {
                         if (!exportedPolicies.contains(policy.getPolicyName() + "_" + policy.getPolicyVersion() + "_" +
                                 policy.getPolicyType())) {
                             if (policy.getPolicyId() != null) {
-                                String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
+                                String sanitizedPolicyName = policy.getPolicyName()
+                                        .replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, "");
+                                String policyFileName = APIUtil.getOperationPolicyFileName(sanitizedPolicyName,
                                         policy.getPolicyVersion(), policy.getPolicyType());
-
                                 OperationPolicyData policyData =
                                         apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(),
                                                 currentApiUuid, tenantDomain, true);
@@ -736,7 +737,9 @@ public class ExportUtils {
                             } else {
                                 // This path is to handle migrated APIs with mediation policies attached
                                 // These are considered as API policies by default
-                                String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
+                                String sanitizedPolicyName = policy.getPolicyName()
+                                        .replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, "");
+                                String policyFileName = APIUtil.getOperationPolicyFileName(sanitizedPolicyName,
                                         policy.getPolicyVersion(), ImportExportConstants.POLICY_TYPE_API);
                                 if (APIUtil.isSequenceDefined(api.getInSequence())
                                         || APIUtil.isSequenceDefined(api.getOutSequence())
@@ -764,7 +767,9 @@ public class ExportUtils {
 
             if (api.getApiPolicies() != null && !api.getApiPolicies().isEmpty()) {
                 for (OperationPolicy policy : api.getApiPolicies()) {
-                    String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
+                    String sanitizedPolicyName = policy.getPolicyName()
+                            .replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, "");
+                    String policyFileName = APIUtil.getOperationPolicyFileName(sanitizedPolicyName,
                             policy.getPolicyVersion(), policy.getPolicyType());
                     if (!exportedPolicies.contains(policyFileName)) {
                         OperationPolicyData policyData;
