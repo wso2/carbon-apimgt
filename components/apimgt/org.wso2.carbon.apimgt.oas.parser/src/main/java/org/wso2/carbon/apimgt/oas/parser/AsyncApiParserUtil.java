@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.oas.parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;

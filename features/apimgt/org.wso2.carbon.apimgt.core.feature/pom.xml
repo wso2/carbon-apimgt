@@ -78,6 +78,10 @@
             <groupId>org.apache.httpcomponents.wso2</groupId>
             <artifactId>httpcore</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.oas.parser</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -234,6 +238,7 @@
                                 <bundleDef>io.apicurio:apicurio-data-models</bundleDef>
                                 <bundleDef>org.wso2.orbit.org.everit.json:org.everit.json.schema:${everit.version}</bundleDef>
                                 <bundleDef>org.apache.httpcomponents.wso2:httpcore</bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.oas.parser:${carbon.apimgt.version}</bundleDef>
                             </bundles>
                         </configuration>
                     </execution>

@@ -17,7 +17,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.oas.parser;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -82,8 +82,7 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.impl.definitions.APIParserConstants;
-import org.wso2.carbon.apimgt.impl.definitions.mixin.License31Mixin;
+import org.wso2.carbon.apimgt.oas.parser.mixin.License31Mixin;
 
 import java.io.IOException;
 import java.io.File;

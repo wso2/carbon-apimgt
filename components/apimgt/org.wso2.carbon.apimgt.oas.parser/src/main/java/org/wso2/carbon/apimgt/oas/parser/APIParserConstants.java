@@ -16,7 +16,7 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.oas.parser;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -81,6 +81,7 @@ public final class APIParserConstants {
     public static final String SWAGGER_RELAXED_VALIDATION = "swaggerRelaxedValidation";
     public static final String PAYLOAD_PARAM_NAME = "Payload";
     public static final String CHARSET = "UTF-8";
+    public static final String SWAGGER_PATHS = "paths";
 
     //URI Authentication Schemes
     public static final Set<String> SUPPORTED_METHODS =
