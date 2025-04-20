@@ -255,7 +255,6 @@ public class OASParserUtil {
 
     public static Map<String, Object> getGeneratedExamples(String apiDefinition) throws APIManagementException {
         SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
-
         Map<String, Object> returnMap;
         if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
             returnMap = oas3Parser.getGeneratedExamples(apiDefinition);

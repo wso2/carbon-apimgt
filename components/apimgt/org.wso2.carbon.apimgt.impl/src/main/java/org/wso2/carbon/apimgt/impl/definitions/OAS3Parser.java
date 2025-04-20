@@ -266,7 +266,8 @@ public class OAS3Parser extends APIDefinition {
      */
     @Override
     public Map<String, Object> getGeneratedExamples(String apiDefinition) throws APIManagementException {
-         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+        boolean scriptsNotGenerated = true;
+        OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(apiDefinition, null, null);
         if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
             log.debug("Errors found when parsing OAS definition");
@@ -282,12 +283,12 @@ public class OAS3Parser extends APIDefinition {
             List<Operation> operations = swagger.getPaths().get(path).readOperations();
             for (int i = 0, operationsSize = operations.size(); i < operationsSize; i++) {
                 Operation op = operations.get(i);
-                if (op.getExtensions() == null
-                        || op.getExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT) == null) {
-                    returnMap = generateExamples(apiDefinition);
-                    returnMap.put("updated", true);
-                    return returnMap;
-                }
+                // if (op.getExtensions() == null
+                //         || op.getExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT) == null) {
+                //     returnMap = generateExamples(apiDefinition);
+                //     returnMap.put("updated", true);
+                //     return returnMap;
+                // }
                 // initializing apiResourceMediationPolicyObject
                 APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
                 // setting path for apiResourceMediationPolicyObject
@@ -300,13 +301,20 @@ public class OAS3Parser extends APIDefinition {
                     throw new APIManagementException(
                             "Cannot find the HTTP method for the API Resource Mediation Policy");
                 }
-                String finalScript = op.getExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT).toString();
+                String finalScript = "";
+                if (op.getExtensions() != null && op.getExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT) != null) {
+                    finalScript = op.getExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT).toString();
+                    scriptsNotGenerated = false;
+                }
                 apiResourceMediationPolicyObject.setContent(finalScript);
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
             }
+            // if all the scripts are null, return null
+            if (scriptsNotGenerated) {
+                return null;
+            }
             returnMap.put(APIConstants.SWAGGER, convertOAStoJSON(swagger));
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
-            returnMap.put("updated", false);
         }
         return returnMap;
     }

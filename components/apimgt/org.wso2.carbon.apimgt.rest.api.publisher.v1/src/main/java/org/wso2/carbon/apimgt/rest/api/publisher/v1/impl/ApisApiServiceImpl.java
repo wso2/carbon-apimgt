@@ -2070,11 +2070,11 @@ public class ApisApiServiceImpl implements ApisApiService {
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiId, organization);
         Map<String, Object> examples = OASParserUtil.getGeneratedExamples(apiDefinition);
         List<APIResourceMediationPolicy> policies = (List<APIResourceMediationPolicy>) examples.get(APIConstants.MOCK_GEN_POLICY_LIST);
-        // if updated save swagger
-        if ((boolean) examples.get("updated")){
-            apiDefinition = String.valueOf(examples.get(APIConstants.SWAGGER));
-            apiProvider.saveSwaggerDefinition(originalAPI, apiDefinition, organization);
-        }
+//        // if updated save swagger
+//        if ((boolean) examples.get("updated")){
+//            apiDefinition = String.valueOf(examples.get(APIConstants.SWAGGER));
+//            apiProvider.saveSwaggerDefinition(originalAPI, apiDefinition, organization);
+//        }
         return Response.ok().entity(APIMappingUtil.fromMockPayloadsToListDTO(policies)).build();
     }
 

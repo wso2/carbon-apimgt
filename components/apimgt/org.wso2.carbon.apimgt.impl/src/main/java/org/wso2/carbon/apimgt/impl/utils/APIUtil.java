@@ -7753,26 +7753,34 @@ public final class APIUtil {
     }
 
     /**
-     * Removes x-mediation-scripts from swagger as they should not be provided to store consumers
+     * Removes x-mediation-scripts and x-wso2-mockDB from swagger as they should not be provided to store consumers
      *
      * @param apiSwagger swagger definition of API
-     * @return swagger which exclude x-mediation-script elements
+     * @return swagger which exclude x-mediation-script and x-wso2-mockDB elements
      */
     public static String removeXMediationScriptsFromSwagger(String apiSwagger) {
-        //removes x-mediation-script key:values
-        String mediationScriptRegex = "\"x-mediation-script\":\".*?(?<!\\\\)\"";
-        Pattern pattern = Pattern.compile("," + mediationScriptRegex);
+        // Regex to match and remove both keys with their values
+        String combinedRegex = "(\\s*,)?\\s*\"x-mediation-script\"\\s*:\\s*\".*?(?<!\\\\)\"(\\s*,)?"
+                + "|(\\s*,)?\\s*\"x-wso2-mockDB\"\\s*:\\s*\".*?(?<!\\\\)\"(\\s*,)?";
+
+        Pattern pattern = Pattern.compile(combinedRegex);
         Matcher matcher = pattern.matcher(apiSwagger);
+
+        StringBuffer result = new StringBuffer();
         while (matcher.find()) {
-            apiSwagger = apiSwagger.replace(matcher.group(), "");
+            // If the matched string ends with a comma, remove it.
+            String replacement = "";
+            matcher.appendReplacement(result, replacement);
         }
-        pattern = Pattern.compile(mediationScriptRegex + ",");
-        matcher = pattern.matcher(apiSwagger);
-        while (matcher.find()) {
-            apiSwagger = apiSwagger.replace(matcher.group(), "");
-        }
-        return apiSwagger;
+        matcher.appendTail(result);
+
+        // Post-process to remove possible trailing commas after object start or before object end
+        return result.toString()
+                .replaceAll("\\{\\s*,", "{")
+                .replaceAll(",\\s*\\}", "}")
+                .replaceAll(",\\s*,", ",");
     }
+
 
     /**
      * Removes x-wso2-request-interceptor and x-wso2-response-interceptor from swagger as they should not be provided
