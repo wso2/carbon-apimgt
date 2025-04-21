@@ -153,6 +153,156 @@
       "http"
     ]
   },
+  "equalNoOfResourcesWithoutInfoTag": {
+    "swagger": "2.0",
+    "paths": {
+      "/items": {
+        "get": {
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "parameters": [
+            {
+              "name": "op",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "consumes": [
+            "application/json"
+          ],
+          "x-auth-type": "Application & Application User",
+          "x-throttling-tier": "Unlimited",
+          "security": [
+            {
+              "default": [
+                "sample"
+              ]
+            }
+          ]
+        },
+        "post": {
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "parameters": [
+            {
+              "name": "op",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "consumes": [
+            "application/json"
+          ],
+          "x-auth-type": "Application & Application User",
+          "x-throttling-tier": "Unlimited",
+          "security": [
+            {
+              "default": [
+                "sample"
+              ]
+            }
+          ]
+        }
+      },
+      "/pets": {
+        "get": {
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "parameters": [
+            {
+              "name": "op",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "consumes": [
+            "application/json"
+          ],
+          "x-auth-type": "Application & Application User",
+          "x-throttling-tier": "Unlimited",
+          "security": [
+            {
+              "default": [
+                "sample"
+              ]
+            }
+          ]
+        },
+        "post": {
+          "responses": {
+            "200": {
+              "description": ""
+            }
+          },
+          "parameters": [
+            {
+              "name": "op",
+              "in": "path",
+              "required": true,
+              "type": "string"
+            }
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "consumes": [
+            "application/json"
+          ],
+          "x-auth-type": "Application & Application User",
+          "x-throttling-tier": "Unlimited",
+          "security": [
+            {
+              "default": [
+                "sample"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "securityDefinitions": {
+      "default": {
+        "type": "oauth2",
+        "authorizationUrl": "https://192.168.60.1:8243/authorize",
+        "flow": "implicit",
+        "scopes": {
+          "sample": "sample description",
+          "extensionScope": "extensionScope description"
+        },
+        "x-scopes-bindings": {
+          "sample": "admin",
+          "extensionScope": "admin"
+        }
+      }
+    },
+    "basePath": "/sampleContext/1.0.0",
+    "host": "192.168.60.1:8243",
+    "schemes": [
+      "https",
+      "http"
+    ]
+  },
 
   "extraResourcesInDefinition": {
     "swagger": "2.0",
