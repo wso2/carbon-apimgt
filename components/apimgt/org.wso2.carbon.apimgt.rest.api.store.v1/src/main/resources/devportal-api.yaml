@@ -6142,6 +6142,22 @@ components:
                       schema:
                         type: "string"
                         format: "string"
+            sdl:
+              type: string
+              description: GraphQL API schema definition
+              example: '
+                        schema {
+                          query: Query
+                        }
+                        type Query {
+                          hero(id: ID!): Character
+                          allHeroes: [Character]
+                        }
+                        type Character {
+                          id: ID!
+                          name: String!
+                          appearsIn: [String]
+                        }'
         response:
           type: object
           properties:
@@ -6175,8 +6191,6 @@ components:
         apiSpec:
           type: object
           title: Enriched API spec
-          required:
-            - tools
           properties:
             serviceUrl:
               type: string
@@ -6202,6 +6216,10 @@ components:
                       schema:
                         type: "string"
                         format: "string"
+            sdl:
+              type: string
+              description: Processed GraphQL API schema definition (for GraphQL APIs)
+              example: "schema { query: Query } type Query { hero(id: ID!): Character allHeroes: [Character] } type Character { id: ID! name: String! appearsIn: [String] }"
         taskStatus:
           type: string
           description: Task status (IN_PROGRESS, TERMINATED or COMPLETED)

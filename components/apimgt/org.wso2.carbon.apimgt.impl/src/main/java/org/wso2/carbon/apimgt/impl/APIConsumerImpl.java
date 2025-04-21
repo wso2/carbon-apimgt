@@ -3371,11 +3371,20 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             throws APIManagementException {
         try {
             // Generate the payload for prepare call
+            String apiType = ApiMgtDAO.getInstance().getAPITypeFromUUID(apiId);
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode openAPIDefinitionJsonNode = objectMapper.readTree(getOpenAPIDefinition(apiId, organization));
             ObjectNode payload = objectMapper.createObjectNode();
-            payload.set(APIConstants.OPEN_API, openAPIDefinitionJsonNode);
 
+            // check if the apitype is graphql
+            if (APIConstants.APITransportType.GRAPHQL.name().equalsIgnoreCase(apiType)) {
+                String graphQLSchema = getGraphqlSchemaDefinition(apiId, organization);
+                payload.put(APIConstants.GRAPHQL_SCHEMA, graphQLSchema);
+            } else if (APIConstants.APITransportType.HTTP.name().equalsIgnoreCase(apiType)) {
+                JsonNode openAPIDefinitionJsonNode = objectMapper.readTree(getOpenAPIDefinition(apiId, organization));
+                payload.set(APIConstants.OPEN_API, openAPIDefinitionJsonNode);
+            } else {
+                throw new APIManagementException("Unsupported API type for API Chat: " + apiType);
+            }
             ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration().getApiChatConfigurationDto();
             if (configDto.isKeyProvided()) {
