@@ -128,8 +128,13 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.oas.parser</artifactId>
-            <version>9.31.95-SNAPSHOT</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.validation</groupId>
+                    <artifactId>validation-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
     <build>

@@ -424,8 +424,13 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.oas.parser</artifactId>
-            <version>9.31.95-SNAPSHOT</version>
-            <scope>compile</scope>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.validation</groupId>
+                    <artifactId>validation-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
     <build>
@@ -576,6 +581,7 @@
                             org.apache.woden.*,
                             org.wso2.carbon.apimgt.keymgt.client.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.*;version="${carbon.apimgt.imp.pkg.version}",
+                            org.wso2.carbon.apimgt.oas.parser.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.model.xsd.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.persistence.*;version="${carbon.apimgt.version}",
                             !org.wso2.carbon.apimgt.api.model.xsd.*,
