@@ -224,7 +224,6 @@ public class OAS2Parser extends APIDefinition {
      */
     @Override
     public Map<String, Object> getGeneratedExamples(String swaggerDef) throws APIManagementException {
-        boolean scriptsNotGenerated = true;
         // create APIResourceMediationPolicy List = policyList
         Swagger swagger = getSwagger(swaggerDef);
         //return map
@@ -254,7 +253,6 @@ public class OAS2Parser extends APIDefinition {
                 String finalScript = "";
                 if (op.getVendorExtensions() != null && op.getVendorExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT) != null) {
                     finalScript = op.getVendorExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT).toString();
-                    scriptsNotGenerated = false;
                 }
                 apiResourceMediationPolicyObject.setContent(finalScript);
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
@@ -262,9 +260,9 @@ public class OAS2Parser extends APIDefinition {
                 op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
             }
             // if all the scripts are null, return null
-            if (scriptsNotGenerated) {
-                return null;
-            }
+            // if (scriptsNotGenerated) {
+            //     return null;
+            // }
             returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
         }
