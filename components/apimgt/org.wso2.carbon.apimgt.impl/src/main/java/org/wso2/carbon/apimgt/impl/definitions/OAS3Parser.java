@@ -310,9 +310,9 @@ public class OAS3Parser extends APIDefinition {
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
             }
             // if all the scripts are null, return null
-            if (scriptsNotGenerated) {
-                return null;
-            }
+//            if (scriptsNotGenerated) {
+//                return null;
+//            }
             returnMap.put(APIConstants.SWAGGER, convertOAStoJSON(swagger));
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
         }

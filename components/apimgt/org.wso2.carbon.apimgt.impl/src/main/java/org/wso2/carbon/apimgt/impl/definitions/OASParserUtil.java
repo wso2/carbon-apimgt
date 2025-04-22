@@ -363,7 +363,7 @@ public class OASParserUtil {
                     }
                     // if mockDB then Add it
                     if (!isModify && responseJson.has("mockDB")) {
-                        swagger.addExtension("x-wso2-mockDB", responseJson.get("mockDB").getAsString());
+                        swagger.addExtension(APIConstants.X_WSO2_MOCKDB, responseJson.get("mockDB").getAsString());
                     }
                     returnMap.put(APIConstants.SWAGGER, convertOAStoJSON(swagger));
                     returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
@@ -416,7 +416,7 @@ public class OASParserUtil {
                     }
                     // if mockDB then Add it
                     if (!isModify && responseJson.has("mockDB")) {
-                        swagger.setVendorExtension("x-wso2-mockDB", responseJson.get("mockDB").getAsString());
+                        swagger.setVendorExtension(APIConstants.X_WSO2_MOCKDB, responseJson.get("mockDB").getAsString());
                     }
                     returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
                     returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
