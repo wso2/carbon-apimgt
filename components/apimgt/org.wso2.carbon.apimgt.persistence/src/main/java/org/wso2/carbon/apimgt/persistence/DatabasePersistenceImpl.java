@@ -1,6 +1,8 @@
 package org.wso2.carbon.apimgt.persistence;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -12,11 +14,13 @@ import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.JSONMapper;
+import org.wso2.carbon.apimgt.persistence.utils.JsonUtils;
+import org.wso2.carbon.apimgt.persistence.utils.PublisherAPISearchResultComparator;
+import org.wso2.carbon.apimgt.persistence.utils.RegistrySearchUtil;
+import org.wso2.carbon.registry.core.pagination.PaginationContext;
 
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.UUID;
+import java.sql.SQLException;
+import java.util.*;
 
 public class DatabasePersistenceImpl implements APIPersistence {
     private static final Log log = LogFactory.getLog(DatabasePersistenceImpl.class);
@@ -36,12 +40,13 @@ public class DatabasePersistenceImpl implements APIPersistence {
     @Override
     public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
         API api = APIMapper.INSTANCE.toApi(publisherAPI);
+        String uuid = UUID.randomUUID().toString();
+        api.setUuid(uuid);
+
         JsonObject json = jsonMapper.mapApiToJson(api);
-        String jsonString = jsonMapper.formatJSONString(json.toString());
+        String jsonString = json.toString();
         try {
-            String uuid = UUID.randomUUID().toString();
-            api.setUuid(uuid);
-            int apiSchemaId = persistenceDAO.addAPISchema(uuid, jsonString);
+            int apiSchemaId = persistenceDAO.addAPISchema(uuid, jsonString, org);
         } catch (APIManagementException e) {
             throw new RuntimeException(e);
         }
@@ -97,7 +102,74 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset, UserContext ctx) throws APIPersistenceException {
-        return null;
+        String requestedTenantDomain = org.getName();
+
+        PublisherAPISearchResult result = null;
+
+        log.debug("Requested query for publisher search: " + searchQuery);
+
+        String modifiedQuery = RegistrySearchUtil.getPublisherSearchQuery(searchQuery, ctx);
+
+        log.debug("Modified query for publisher search: " + modifiedQuery);
+
+        result = searchPaginatedPublisherAPIs(modifiedQuery, requestedTenantDomain, start, offset);
+
+        return result;
+    }
+
+    private PublisherAPISearchResult searchPaginatedPublisherAPIs(String searchQuery, String tenantDomain, int start, int offset) {
+        int totalLength = 0;
+        PublisherAPISearchResult searchResults = new PublisherAPISearchResult();
+        List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<PublisherAPIInfo>();
+
+        try {
+            totalLength = PersistenceDAO.getInstance().getAllAPICount(tenantDomain);
+
+            List<String> results = PersistenceDAO.getInstance().searchAPISchema(searchQuery, tenantDomain);
+
+            for (String result: results) {
+                JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();
+
+                PublisherAPIInfo apiInfo = new PublisherAPIInfo();
+                apiInfo.setId(JsonUtils.safeGetAsString(jsonObject, "uuid"));
+                apiInfo.setApiName(JsonUtils.safeGetAsString(jsonObject.getAsJsonObject("id"), "apiName"));
+                apiInfo.setVersion(JsonUtils.safeGetAsString(jsonObject.getAsJsonObject("id"), "version"));
+                apiInfo.setProviderName(JsonUtils.safeGetAsString(jsonObject.getAsJsonObject("id"), "providerName"));
+                apiInfo.setContext(JsonUtils.safeGetAsString(jsonObject, "context"));
+                apiInfo.setType(JsonUtils.safeGetAsString(jsonObject, "type"));
+                apiInfo.setThumbnail(JsonUtils.safeGetAsString(jsonObject, "thumbnailUrl"));
+                apiInfo.setCreatedTime(JsonUtils.safeGetAsString(jsonObject, "createdTime"));
+                apiInfo.setUpdatedTime(jsonObject.has("lastUpdated") && !jsonObject.get("lastUpdated").isJsonNull()
+                        ? new Date(jsonObject.get("lastUpdated").getAsString())
+                        : null);
+                apiInfo.setAudience(JsonUtils.safeGetAsString(jsonObject, "audience"));
+
+                JsonArray audiencesJson = jsonObject.get("audiences").getAsJsonArray();
+                apiInfo.setAudiences(jsonMapper.jsonArrayToSet(audiencesJson));
+
+                apiInfo.setUpdatedBy(JsonUtils.safeGetAsString(jsonObject, "updatedBy"));
+                apiInfo.setGatewayVendor(JsonUtils.safeGetAsString(jsonObject, "gatewayVendor"));
+                apiInfo.setAdvertiseOnly(jsonObject.has("advertiseOnly") && !jsonObject.get("advertiseOnly").isJsonNull()
+                        && jsonObject.get("advertiseOnly").getAsBoolean());
+                apiInfo.setBusinessOwner(JsonUtils.safeGetAsString(jsonObject, "businessOwner"));
+                apiInfo.setBusinessOwnerEmail(JsonUtils.safeGetAsString(jsonObject, "businessOwnerEmail"));
+                apiInfo.setTechnicalOwner(JsonUtils.safeGetAsString(jsonObject, "technicalOwner"));
+                apiInfo.setTechnicalOwnerEmail(JsonUtils.safeGetAsString(jsonObject, "technicalOwnerEmail"));
+                apiInfo.setMonetizationStatus(jsonObject.has("monetizationStatus") && !jsonObject.get("monetizationStatus").isJsonNull()
+                        && jsonObject.get("monetizationStatus").getAsBoolean());
+
+                publisherAPIInfoList.add(apiInfo);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        publisherAPIInfoList.sort(new PublisherAPISearchResultComparator());
+        searchResults.setPublisherAPIInfoList(publisherAPIInfoList);
+        searchResults.setReturnedAPIsCount(publisherAPIInfoList.size());
+        searchResults.setTotalAPIsCount(totalLength);
+
+        return searchResults;
     }
 
     @Override
@@ -263,5 +335,10 @@ public class DatabasePersistenceImpl implements APIPersistence {
     @Override
     public AdminContentSearchResult searchContentForAdmin(String org, String searchQuery, int start, int count, int limit) throws APIPersistenceException {
         return null;
+    }
+
+    protected static int getMaxPaginationLimit() {
+
+        return Integer.MAX_VALUE;
     }
 }

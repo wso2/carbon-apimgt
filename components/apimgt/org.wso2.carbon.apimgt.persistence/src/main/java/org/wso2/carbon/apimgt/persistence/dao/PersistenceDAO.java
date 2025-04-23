@@ -5,12 +5,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.persistence.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.utils.PersistanceDBUtil;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PersistenceDAO {
     private static final Log log = LogFactory.getLog(PersistenceDAO.class);
@@ -28,7 +28,7 @@ public class PersistenceDAO {
         return INSTANCE;
     }
 
-    public int addAPISchema(String uuid, String jsonString) throws APIManagementException {
+    public int addAPISchema(String uuid, String jsonString, Organization org) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -43,6 +43,7 @@ public class PersistenceDAO {
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, jsonString);
             prepStmt.setString(2, uuid);
+            prepStmt.setString(3, org.getName());
 
             prepStmt.execute();
 
@@ -67,6 +68,67 @@ public class PersistenceDAO {
             PersistanceDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return apiSchemaId;
+    }
+
+    public List<String> searchAPISchema(String searchQuery, String tenantDomain) throws SQLException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        List<String> apiSchemas = new ArrayList<>();
+
+        String query = SQLConstants.GET_ALL_API_SCHEMA_SQL;
+
+        if (searchQuery.isEmpty()) {
+            query = SQLConstants.GET_ALL_API_SCHEMA_SQL;
+        }
+
+        try {
+            connection = PersistanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, tenantDomain);
+
+            rs = prepStmt.executeQuery();
+
+            while (rs.next()) {
+                String schemaJson = rs.getString("API_SCHEMA");
+                apiSchemas.add(schemaJson);
+            }
+
+            return apiSchemas;
+
+        } finally {
+            PersistanceDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+    }
+
+    public int getAllAPICount(String tenantDomain) throws SQLException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        int count = 0;
+
+        String query = SQLConstants.GET_ALL_API_COUNT;
+
+        try {
+            connection = PersistanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, tenantDomain);
+
+            rs = prepStmt.executeQuery();
+
+            if (rs.next()) {
+                count = rs.getInt("TOTAL_API_COUNT");
+            }
+
+        } finally {
+            PersistanceDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return count;
     }
 
     private void handleException(String msg, Throwable t) throws APIManagementException {

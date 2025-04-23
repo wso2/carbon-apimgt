@@ -1,13 +1,17 @@
 package org.wso2.carbon.apimgt.persistence.mapper;
 
+import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
+import java.lang.reflect.Type;
 
 public class JSONMapper {
     private static final Log log = LogFactory.getLog(JSONMapper.class);
@@ -15,7 +19,7 @@ public class JSONMapper {
 
     public JsonObject mapApiToJson(API api) {
         JsonObject json = new JsonObject();
-        json.addProperty("id", api.getId().toString());
+        json.add("id", getIdObject(api.getId()));
         json.addProperty("uuid", api.getUuid());
         json.addProperty("url", api.getUrl());
         json.addProperty("sandboxUrl", api.getSandboxUrl());
@@ -48,7 +52,26 @@ public class JSONMapper {
         json.addProperty("implementation", api.getImplementation());
         json.addProperty("monetizationCategory", api.getMonetizationCategory());
         json.addProperty("isEgress", api.isEgress());
+        json.addProperty("createdTime", api.getCreatedTime());
+        json.addProperty("audience", api.getAudience());
+        json.add("audiences", setToJSONArray(api.getAudiences()));
+        json.addProperty("gatewayVendor", api.getGatewayVendor());
+        json.addProperty("advertiseOnly", api.isAdvertiseOnly());
+        json.addProperty("monetizationStatus", api.getMonetizationStatus());
         return json;
+    }
+
+    private static JsonObject getIdObject(APIIdentifier apiId) {
+        JsonObject id = new JsonObject();
+        id.addProperty("providerName", apiId.getProviderName());
+        id.addProperty("apiName", apiId.getApiName());
+        id.addProperty("version", apiId.getVersion());
+        id.addProperty("tier", apiId.getTier());
+        id.addProperty("applicationId", apiId.getApplicationId());
+        id.addProperty("uuid", apiId.getUUID());
+        id.addProperty("id", apiId.getId());
+        id.addProperty("organization", apiId.getOrganization());
+        return id;
     }
 
     private static <T> JsonArray setToJSONArray(Set<T> items) {
@@ -77,5 +100,13 @@ public class JSONMapper {
         if (date == null) return null;
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return formatter.format(date);
+    }
+
+    public Set<String> jsonArrayToSet(JsonArray jsonArray) {
+        Set<String> resultSet = new HashSet<>();
+        for (JsonElement element: jsonArray) {
+            resultSet.add(element.getAsString());
+        }
+        return resultSet;
     }
 }
