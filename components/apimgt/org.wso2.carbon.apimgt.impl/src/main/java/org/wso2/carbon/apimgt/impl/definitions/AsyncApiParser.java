@@ -36,6 +36,8 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import com.google.gson.JsonObject;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -1590,6 +1592,12 @@ public class AsyncApiParser extends APIDefinition {
 
     @Override
     public Map<String, Object> getGeneratedExamples(String apiDefinition) throws APIManagementException{
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> addScriptsAndMockDB(String apiDefinition, Map<String, Object> mockConfig,
+            JsonObject scriptsToAdd) throws APIManagementException {
         return null;
     }
 

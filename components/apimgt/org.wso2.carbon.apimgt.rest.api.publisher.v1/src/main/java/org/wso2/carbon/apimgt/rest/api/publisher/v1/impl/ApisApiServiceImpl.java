@@ -2062,19 +2062,16 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response getGeneratedMockScriptsOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+    public Response getGeneratedMockScriptsOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext)
+            throws APIManagementException {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiId, organization);
         Map<String, Object> examples = OASParserUtil.getGeneratedExamples(apiDefinition);
-        List<APIResourceMediationPolicy> policies = (List<APIResourceMediationPolicy>) examples.get(APIConstants.MOCK_GEN_POLICY_LIST);
-//        // if updated save swagger
-//        if ((boolean) examples.get("updated")){
-//            apiDefinition = String.valueOf(examples.get(APIConstants.SWAGGER));
-//            apiProvider.saveSwaggerDefinition(originalAPI, apiDefinition, organization);
-//        }
+        List<APIResourceMediationPolicy> policies = (List<APIResourceMediationPolicy>) examples.get(
+                APIConstants.MOCK_GEN_POLICY_LIST);
         return Response.ok().entity(APIMappingUtil.fromMockPayloadsToListDTO(policies)).build();
     }
 
@@ -4018,8 +4015,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     /**
-     * Generates Mock response examples for Inline prototyping
-     * of a swagger
+     * Generates Mock response examples for Inline prototyping of a swagger
      *
      * @param apiId          API Id
      * @param ifNoneMatch    If-None-Match header value
@@ -4028,26 +4024,24 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response generateMockScripts(String apiId, String ifNoneMatch, GenerateMockScriptsRequestDTO mockConfig, MessageContext messageContext) throws APIManagementException {
+    public Response generateMockScripts(String apiId, String ifNoneMatch, GenerateMockScriptsRequestDTO mockConfig,
+            MessageContext messageContext) throws APIManagementException {
         APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
         if (apiIdentifierFromTable == null) {
-            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
-                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
-                    apiId));
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
         }
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
 
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiId, organization);
-        if (mockConfig.isGenerateWithAI()){
-            apiDefinition = String.valueOf(OASParserUtil.generateExamplesWithAI(apiDefinition, mockConfig.getConfig()).get(APIConstants.SWAGGER));
+        if (mockConfig.isGenerateWithAI()) {
+            apiDefinition = String.valueOf(OASParserUtil.generateExamplesWithAI(apiDefinition, mockConfig.getConfig())
+                    .get(APIConstants.SWAGGER));
         } else {
             apiDefinition = String.valueOf(OASParserUtil.generateExamples(apiDefinition).get(APIConstants.SWAGGER));
         }
-//        if (mockConfig.getConfig().get("modify") == null) {
-//            apiProvider.saveSwaggerDefinition(originalAPI, apiDefinition, organization);
-//        }
         return Response.ok().entity(apiDefinition).build();
     }
 

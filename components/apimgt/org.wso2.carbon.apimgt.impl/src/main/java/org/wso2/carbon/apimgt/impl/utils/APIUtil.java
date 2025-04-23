@@ -7760,8 +7760,7 @@ public final class APIUtil {
      */
     public static String removeXMediationScriptsFromSwagger(String apiSwagger) {
         // Regex to match and remove both keys with their values
-        String combinedRegex = "(\\s*,)?\\s*\"x-mediation-script\"\\s*:\\s*\".*?(?<!\\\\)\"(\\s*,)?"
-                + "|(\\s*,)?\\s*\"x-wso2-mockdb\"\\s*:\\s*\".*?(?<!\\\\)\"(\\s*,)?";
+        String combinedRegex = "(\\s*,)?\\s*\"x-mediation-script\"\\s*:\\s*\".*?(?<!\\\\)\"(\\s*,)?" + "|(\\s*,)?\\s*\"x-wso2-mockdb\"\\s*:\\s*\".*?(?<!\\\\)\"(\\s*,)?";
 
         Pattern pattern = Pattern.compile(combinedRegex);
         Matcher matcher = pattern.matcher(apiSwagger);
@@ -7775,10 +7774,7 @@ public final class APIUtil {
         matcher.appendTail(result);
 
         // Post-process to remove possible trailing commas after object start or before object end
-        return result.toString()
-                .replaceAll("\\{\\s*,", "{")
-                .replaceAll(",\\s*\\}", "}")
-                .replaceAll(",\\s*,", ",");
+        return result.toString().replaceAll("\\{\\s*,", "{").replaceAll(",\\s*\\}", "}").replaceAll(",\\s*,", ",");
     }
 
 

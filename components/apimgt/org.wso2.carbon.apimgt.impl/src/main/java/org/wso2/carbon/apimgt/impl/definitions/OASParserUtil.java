@@ -255,177 +255,29 @@ public class OASParserUtil {
 
     public static Map<String, Object> getGeneratedExamples(String apiDefinition) throws APIManagementException {
         SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
-        Map<String, Object> returnMap;
         if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
-            returnMap = oas3Parser.getGeneratedExamples(apiDefinition);
+            return oas3Parser.getGeneratedExamples(apiDefinition);
         } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) {
-            returnMap = oas2Parser.getGeneratedExamples(apiDefinition);
+            return oas2Parser.getGeneratedExamples(apiDefinition);
         } else {
             throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
         }
-        if (returnMap == null) {
-            return generateExamples(apiDefinition);
-        }
-        return returnMap;
     }
 
     public static Map<String, Object> generateExamplesWithAI(String apiDefinition, Map<String, Object> mockConfig)
             throws APIManagementException {
         SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
-        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                .getAPIManagerConfiguration();
-        ApiMockConfigurationDTO configDto = null;
-        if (configuration == null) {
-            log.error("API Manager configuration is not initialized.");
-        } else {
-            configDto = configuration.getApiMockConfigurationDto();
-        }
-        if (configDto.isKeyProvided() || configDto.isAuthTokenProvided()) {
-            // make payload from mockContext
-            JSONObject payload = new JSONObject();
-            payload.put("config", mockConfig);
-            payload.put("apiDefinition", apiDefinition);
+        JsonObject scriptsToAdd = invokeMockGenerationAIService(apiDefinition, mockConfig);
 
-            // check if modify method or generate mocks
-            boolean isModify = mockConfig.get("modify") != null;
-
-            // return map
-            Map<String, Object> returnMap = new HashMap<>();
-
-            // List for APIResMedPolicyList
-            List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
-
-            String response;
-            if (isModify) { // modify method
-                if (configDto.isKeyProvided()) {
-                    response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                            configDto.getKey(), configDto.getModifyMethodResource(), payload.toString(), null);
-                } else {
-                    response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
-                            configDto.getAccessToken(), configDto.getModifyMethodResource(), payload.toString(), null);
-                }
-            } else { // generate Mocks
-                if (configDto.isKeyProvided()) {
-                    response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                            configDto.getKey(), configDto.getGenerateResource(), payload.toString(), null);
-                } else {
-                    response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
-                            configDto.getAccessToken(), configDto.getGenerateResource(), payload.toString(), null);
-                }
-            }
-            System.out.println(response);
-            JsonObject responseJson = JsonParser.parseString(response).getAsJsonObject();
-
+        if (scriptsToAdd != null){
             if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) { // oas3
-                OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
-                SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(apiDefinition, null, null);
-                if (CollectionUtils.isNotEmpty(parseAttemptForV3.getMessages())) {
-                    log.debug("Errors found when parsing OAS definition");
-                }
-                OpenAPI swagger = parseAttemptForV3.getOpenAPI();
-                for (Map.Entry<String, PathItem> entry : swagger.getPaths().entrySet()) {
-                    String path = entry.getKey();
-                    Map<PathItem.HttpMethod, Operation> operationMap = entry.getValue().readOperationsMap();
-                    List<Operation> operations = swagger.getPaths().get(path).readOperations();
-                    for (int i = 0, operationsSize = operations.size(); i < operationsSize; i++) {
-                        Operation op = operations.get(i);
-                        // initializing apiResourceMediationPolicyObject
-                        APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
-                        // setting path for apiResourceMediationPolicyObject
-                        apiResourceMediationPolicyObject.setPath(path);
-                        Object[] operationsArray = operationMap.entrySet().toArray();
-                        if (operationsArray.length > i) {
-                            Map.Entry<PathItem.HttpMethod, Operation> operationEntry = (Map.Entry<PathItem.HttpMethod, Operation>) operationsArray[i];
-                            apiResourceMediationPolicyObject.setVerb(String.valueOf(operationEntry.getKey()));
-                        } else {
-                            throw new APIManagementException(
-                                    "Cannot find the HTTP method for the API Resource Mediation Policy");
-                        }
-                        String finalScript;
-                        if (isModify) {
-                            // if the given path and method
-                            Map<String, Object> modify = (Map<String, Object>) mockConfig.get("modify");
-                            if (path.equals(modify.get("path")) && apiResourceMediationPolicyObject.getVerb()
-                                    .toLowerCase().equals(modify.get("method"))) {
-                                finalScript = responseJson.get("modified_script").getAsString();
-                            } else {
-                                finalScript = op.getExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)
-                                        .toString();
-                            }
-                        } else {
-                            finalScript = responseJson.get("paths").getAsJsonObject().get(path).getAsJsonObject()
-                                    .get(apiResourceMediationPolicyObject.getVerb().toLowerCase()).getAsString();
-                        }
-                        apiResourceMediationPolicyObject.setContent(finalScript);
-                        // sets script to each resource in the swagger
-                        op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
-                        apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
-                    }
-                    // if mockDB then Add it
-                    if (!isModify && responseJson.has("mockDB")) {
-                        swagger.addExtension(APIConstants.X_WSO2_MOCKDB, responseJson.get("mockDB").getAsString());
-                    }
-                    returnMap.put(APIConstants.SWAGGER, convertOAStoJSON(swagger));
-                    returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
-                }
+                return oas3Parser.addScriptsAndMockDB(apiDefinition, mockConfig, scriptsToAdd);
             } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) { // oas2
-                SwaggerParser parser = new SwaggerParser();
-                SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(apiDefinition);
-                if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {
-                    log.debug("Errors found when parsing OAS definition");
-                }
-                Swagger swagger = parseAttemptForV2.getSwagger();
-                for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
-                    String path = entry.getKey();
-                    // operation map to get verb
-                    Map<HttpMethod, io.swagger.models.Operation> operationMap = entry.getValue().getOperationMap();
-                    List<io.swagger.models.Operation> operations = swagger.getPaths().get(path).getOperations();
-                    for (int i = 0, operationsSize = operations.size(); i < operationsSize; i++) {
-                        io.swagger.models.Operation op = operations.get(i);
-                        // initializing apiResourceMediationPolicyObject
-                        APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
-                        // setting path for apiResourceMediationPolicyObject
-                        apiResourceMediationPolicyObject.setPath(path);
-                        Object[] operationsArray = operationMap.entrySet().toArray();
-                        if (operationsArray.length > i) {
-                            Map.Entry<HttpMethod, Operation> operationEntry = (Map.Entry<HttpMethod, Operation>) operationsArray[i];
-                            apiResourceMediationPolicyObject.setVerb(String.valueOf(operationEntry.getKey()));
-                        } else {
-                            throw new APIManagementException(
-                                    "Cannot find the HTTP method for the API Resource Mediation Policy");
-                        }
-                        String finalScript;
-                        if (isModify) {
-                            // if the given path and method
-                            Map<String, Object> modify = (Map<String, Object>) mockConfig.get("modify");
-                            if (path.equals(modify.get("path")) && apiResourceMediationPolicyObject.getVerb()
-                                    .toLowerCase().equals(modify.get("method"))) {
-                                finalScript = responseJson.get("modified_script").getAsString();
-                            } else {
-                                finalScript = op.getVendorExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT)
-                                        .toString();
-                            }
-                        } else {
-                            finalScript = responseJson.get("paths").getAsJsonObject().get(path).getAsJsonObject()
-                                    .get(apiResourceMediationPolicyObject.getVerb().toLowerCase()).getAsString();
-                        }
-                        apiResourceMediationPolicyObject.setContent(finalScript);
-                        apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
-                        // sets script to each resource in the swagger
-                        op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
-                    }
-                    // if mockDB then Add it
-                    if (!isModify && responseJson.has("mockDB")) {
-                        swagger.setVendorExtension(APIConstants.X_WSO2_MOCKDB, responseJson.get("mockDB").getAsString());
-                    }
-                    returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
-                    returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
-                }
+                return oas2Parser.addScriptsAndMockDB(apiDefinition, mockConfig, scriptsToAdd);
             } else {
                 throw new APIManagementException(
                         "Cannot update destination swagger because it is not in OpenAPI format");
             }
-            return returnMap;
         } else {
             throw new APIManagementException(
                     "Error encountered while executing AI Mock generation service.");
@@ -866,6 +718,40 @@ public class OASParserUtil {
                     }
                 }
             }
+        }
+    }
+
+    private static JsonObject invokeMockGenerationAIService(String apiDefinition, Map<String, Object> mockConfig)
+            throws APIManagementException {
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        ApiMockConfigurationDTO configDto = null;
+        if (configuration == null) {
+            log.error("API Manager configuration is not initialized.");
+        } else {
+            configDto = configuration.getApiMockConfigurationDto();
+        }
+        if (configDto.isKeyProvided() || configDto.isAuthTokenProvided()) {
+            // make payload from mockContext
+            JSONObject payload = new JSONObject();
+            payload.put("config", mockConfig);
+            payload.put("apiDefinition", apiDefinition);
+
+            Map<String, Object> modify = mockConfig.get("modify") != null
+                    ? (Map<String, Object>) mockConfig.get("modify")
+                    : null;
+
+            String resource = modify != null ? configDto.getModifyMethodResource()
+                    : configDto.getGenerateResource();
+            String tokenEndPoint = configDto.isKeyProvided() ? configDto.getTokenEndpoint() : null;
+
+            String response = APIUtil.invokeAIService(configDto.getEndpoint(), tokenEndPoint,
+                    configDto.getKey(), resource, payload.toString(), null);
+            JsonObject scriptsToAdd = JsonParser.parseString(response).getAsJsonObject();
+            return scriptsToAdd;
+        } else {
+            throw new APIManagementException(
+                    "Error encountered while executing AI Mock generation service.");
         }
     }
 
