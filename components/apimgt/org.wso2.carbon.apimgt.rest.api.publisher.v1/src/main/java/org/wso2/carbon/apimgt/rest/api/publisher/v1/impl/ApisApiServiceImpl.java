@@ -4028,8 +4028,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             MessageContext messageContext) throws APIManagementException {
         APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
         if (apiIdentifierFromTable == null) {
-            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: " + apiId,
-                    ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
+                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                    apiId));
         }
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();

@@ -17,13 +17,12 @@
  */
 package org.wso2.carbon.apimgt.api;
 
+import com.google.gson.JsonObject;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-
-import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,7 +60,7 @@ public abstract class APIDefinition {
     public abstract Map<String, Object> getGeneratedExamples(String apiDefinition) throws APIManagementException;
 
     /**
-     * This method adds scripts and mock DB to swagger 
+     * This method adds scripts and mockDB to swagger 
      *
      * @param apiDefinition
      * @return

@@ -29,8 +29,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import io.swagger.models.HttpMethod;
 import io.swagger.models.Path;
 import io.swagger.models.RefModel;
 import io.swagger.models.RefPath;
@@ -68,8 +66,6 @@ import io.swagger.v3.parser.ObjectMapperFactory;
 import io.swagger.v3.parser.OpenAPIV3Parser;
 import io.swagger.v3.parser.converter.SwaggerConverter;
 import io.swagger.v3.parser.core.models.ParseOptions;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -93,7 +89,6 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -160,7 +155,7 @@ public class OASParserUtil {
     private static final String ARRAY_DATA_TYPE = "array";
     private static final String OBJECT_DATA_TYPE = "object";
     private static final String OPENAPI_RESOURCE_KEY = "paths";
-    private static final String[] UNSUPPORTED_RESOURCE_BLOCKS = new String[] { "servers" };
+    private static final String[] UNSUPPORTED_RESOURCE_BLOCKS = new String[] {"servers"};
 
     static class SwaggerUpdateContext {
         private final Paths paths = new Paths();
@@ -176,6 +171,7 @@ public class OASParserUtil {
             referenceObjectMap.put(HEADERS, new HashSet<>());
             referenceObjectMap.put(EXAMPLES, new HashSet<>());
         }
+
 
         Paths getPaths() {
             return paths;
@@ -303,8 +299,7 @@ public class OASParserUtil {
         }
     }
 
-    public static String updateAPIProductSwaggerOperations(
-            Map<API, List<APIProductResource>> apiToProductResourceMapping,
+    public static String updateAPIProductSwaggerOperations(Map<API, List<APIProductResource>> apiToProductResourceMapping,
             String destinationSwagger)
             throws APIManagementException {
         SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(destinationSwagger);
@@ -451,12 +446,9 @@ public class OASParserUtil {
     }
 
     private static void processReferenceObjectMap(SwaggerUpdateContext context) {
-        // Get a deep copy of the reference objects in order to prevent Concurrent
-        // modification exception
-        // since we may need to update the reference object mapping while iterating
-        // through it
-        Map<String, Set<String>> referenceObjectsMappingCopy = getReferenceObjectsCopy(
-                context.getReferenceObjectMapping());
+        // Get a deep copy of the reference objects in order to prevent Concurrent modification exception
+        // since we may need to update the reference object mapping while iterating through it
+        Map<String, Set<String>> referenceObjectsMappingCopy = getReferenceObjectsCopy(context.getReferenceObjectMapping());
 
         int preRefObjectCount = getReferenceObjectCount(context.getReferenceObjectMapping());
 
@@ -587,8 +579,8 @@ public class OASParserUtil {
                 Swagger srcSwagger = ((OAS2Parser) oas2Parser).getSwagger(sourceSwagger);
 
                 Set<Components> aggregatedComponents = context.getAggregatedComponents();
-                Components components = swaggerConverter.readContents(sourceSwagger, null, null).getOpenAPI()
-                        .getComponents();
+                Components components = swaggerConverter.readContents(sourceSwagger, null, null).
+                        getOpenAPI().getComponents();
 
                 if (components != null) {
                     aggregatedComponents.add(components);
@@ -682,9 +674,8 @@ public class OASParserUtil {
     /**
      * Process a given response entry of the API definition.
      *
-     * @param response The response object which needs to be processed.
-     * @param context  The SwaggerUpdateContext object containing the context of the
-     *                 API definition.
+     * @param response  The response object which needs to be processed.
+     * @param context The SwaggerUpdateContext object containing the context of the API definition.
      */
     private static void setRefOfApiResponse(ApiResponse response, SwaggerUpdateContext context) {
         if (response != null) {
@@ -759,8 +750,7 @@ public class OASParserUtil {
      * Process a given response header entry of the API definition.
      *
      * @param header  The header object which needs to be processed.
-     * @param context The SwaggerUpdateContext object containing the context of the
-     *                API definition.
+     * @param context The SwaggerUpdateContext object containing the context of the API definition.
      */
     private static void setRefOfApiResponseHeader(Header header, SwaggerUpdateContext context) {
         if (header != null) {
@@ -792,9 +782,8 @@ public class OASParserUtil {
     /**
      * Process a given parameter entry of the API definition.
      *
-     * @param parameter The parameter object which needs to be processed.
-     * @param context   The SwaggerUpdateContext object containing the context of
-     *                  the API definition.
+     * @param parameter  The parameter object which needs to be processed.
+     * @param context The SwaggerUpdateContext object containing the context of the API definition.
      */
     private static void setRefOfParameter(Parameter parameter, SwaggerUpdateContext context) {
         if (parameter != null) {
@@ -821,9 +810,8 @@ public class OASParserUtil {
     /**
      * Process a given example entry of the API definition.
      *
-     * @param example The example object which needs to be processed.
-     * @param context The SwaggerUpdateContext object containing the context of the
-     *                API definition.
+     * @param example  The example object which needs to be processed.
+     * @param context The SwaggerUpdateContext object containing the context of the API definition.
      */
     private static void setRefOfExample(Example example, SwaggerUpdateContext context) {
         if (example != null) {
@@ -945,10 +933,8 @@ public class OASParserUtil {
     /**
      * Process properties of a schema object of the API definition.
      *
-     * @param schema  The schema object which contains the properties which needs to
-     *                be processed.
-     * @param context The SwaggerUpdateContext object containing the context of the
-     *                API definition.
+     * @param schema  The schema object which contains the properties which needs to be processed.
+     * @param context The SwaggerUpdateContext object containing the context of the API definition.
      */
     private static void processSchemaProperties(Schema schema, SwaggerUpdateContext context) {
         // Process schema properties if present
@@ -1043,8 +1029,7 @@ public class OASParserUtil {
      * Extract the archive file and validates the openAPI definition
      *
      * @param inputStream   file as input stream
-     * @param returnContent whether to return the content of the definition in the
-     *                      response DTO
+     * @param returnContent whether to return the content of the definition in the response DTO
      * @return APIDefinitionValidationResponse
      * @throws APIManagementException if error occurred while parsing definition
      */
@@ -1061,16 +1046,15 @@ public class OASParserUtil {
             if (listOfFiles.length > 1) {
                 throw new APIManagementException("Swagger Definitions should be placed under one root folder.");
             }
-            for (File file : listOfFiles) {
+            for (File file: listOfFiles) {
                 if (file.isDirectory()) {
                     archiveDirectory = file.getAbsoluteFile();
                     break;
                 }
             }
         }
-        // Verify whether the zipped input is archive or file.
-        // If it is a single swagger file without remote references it can be imported
-        // directly, without zipping.
+        //Verify whether the zipped input is archive or file.
+        //If it is a single  swagger file without remote references it can be imported directly, without zipping.
         if (archiveDirectory == null) {
             throw new APIManagementException("Could not find an archive in the given ZIP file.");
         }
@@ -1115,13 +1099,12 @@ public class OASParserUtil {
     public static String convertOAStoJSON(OpenAPI oasDefinition) {
 
         String jsonString = null;
-        // Custom json mapper to parse OAS 3.1 definitions as the default parser drops
-        // mandatory licence.identifier field
+        //Custom json mapper to parse OAS 3.1 definitions as the default parser drops mandatory licence.identifier field
         if (isOpenAPIVersion31(oasDefinition)) {
             ObjectMapper mapper = Json31.mapper().copy();
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            // Custom Mixin for License object in OAS 3.1
+            //Custom Mixin for License object in OAS 3.1
             mapper.addMixIn(License.class, License31Mixin.class);
             try {
                 jsonString = mapper.writeValueAsString(oasDefinition);
@@ -1136,7 +1119,6 @@ public class OASParserUtil {
 
     /**
      * Check whether the given openAPI definition is OAS 3.1
-     * 
      * @param oasDefinition
      * @return
      */
@@ -1157,8 +1139,7 @@ public class OASParserUtil {
         String apiDefinitionProcessed = apiDefinition;
         if (!apiDefinition.trim().startsWith("{")) {
             try {
-                JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition,
-                        new SwaggerDeserializationResult());
+                JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition, new SwaggerDeserializationResult());
                 apiDefinitionProcessed = jsonNode.toString();
             } catch (IOException e) {
                 throw new APIManagementException("Error while reading API definition yaml", e);
@@ -1166,8 +1147,7 @@ public class OASParserUtil {
         }
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         try {
-            new Gson().fromJson(apiDefinitionProcessed, JsonObject.class); // Parsing the json content to validate
-                                                                           // parsing errors
+            new Gson().fromJson(apiDefinitionProcessed, JsonObject.class); // Parsing the json content to validate parsing errors
             apiDefinitionProcessed = removeUnsupportedBlocksFromResources(apiDefinitionProcessed);
             if (apiDefinitionProcessed != null) {
                 apiDefinition = apiDefinitionProcessed;
@@ -1181,19 +1161,17 @@ public class OASParserUtil {
                 }
             }
         } catch (Exception e) {
-            // catching a generic exception as there can be runtime exceptions when parsing
-            // happens
+            //catching a generic exception as there can be runtime exceptions when parsing happens
             addErrorToValidationResponse(validationResponse, e);
         }
         return validationResponse;
     }
 
     /**
-     * Add error item with the thrown error message to the provided validation
-     * response object
+     * Add error item with the thrown error message to the provided validation response object
      *
      * @param validationResponse APIDefinitionValidationResponse object
-     * @param e                  error object
+     * @param e         error object
      * @return added ErrorItem object
      */
     public static ErrorItem addErrorToValidationResponse(APIDefinitionValidationResponse validationResponse,
@@ -1207,23 +1185,23 @@ public class OASParserUtil {
         return errorItem;
     }
 
+
     /**
      * Try to validate a give openAPI definition using OpenAPI 3 parser
      *
      * @param apiDefinition     definition
-     * @param url               OpenAPI definition url
+     * @param url OpenAPI definition url
      * @param returnJsonContent whether to return definition as a json content
      * @return APIDefinitionValidationResponse
      * @throws APIManagementException if error occurred while parsing definition
      */
-    public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url,
+    public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url ,
             boolean returnJsonContent)
             throws APIManagementException {
         String apiDefinitionProcessed = apiDefinition;
         if (!apiDefinition.trim().startsWith("{")) {
             try {
-                JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition,
-                        new SwaggerDeserializationResult());
+                JsonNode jsonNode = DeserializationUtils.readYamlTree(apiDefinition, new SwaggerDeserializationResult());
                 apiDefinitionProcessed = jsonNode.toString();
             } catch (IOException e) {
                 throw new APIManagementException("Error while reading API definition yaml", e);
@@ -1233,8 +1211,8 @@ public class OASParserUtil {
         if (apiDefinitionProcessed != null) {
             apiDefinition = apiDefinitionProcessed;
         }
-        APIDefinitionValidationResponse validationResponse = oas3Parser.validateAPIDefinition(apiDefinition, url,
-                returnJsonContent);
+        APIDefinitionValidationResponse validationResponse =
+                oas3Parser.validateAPIDefinition(apiDefinition, url, returnJsonContent);
         if (!validationResponse.isValid()) {
             for (ErrorHandler handler : validationResponse.getErrorItems()) {
                 if (ExceptionCodes.INVALID_OAS3_FOUND.getErrorCode() == handler.getErrorCode()) {
@@ -1244,7 +1222,6 @@ public class OASParserUtil {
         }
         return validationResponse;
     }
-
     /**
      * Try to validate a give openAPI definition using swagger parser
      *
@@ -1255,8 +1232,8 @@ public class OASParserUtil {
      */
     private static APIDefinitionValidationResponse tryOAS2Validation(String apiDefinition, boolean returnJsonContent)
             throws APIManagementException {
-        APIDefinitionValidationResponse validationResponse = oas2Parser.validateAPIDefinition(apiDefinition,
-                returnJsonContent);
+        APIDefinitionValidationResponse validationResponse =
+                oas2Parser.validateAPIDefinition(apiDefinition, returnJsonContent);
         if (!validationResponse.isValid()) {
             for (ErrorHandler handler : validationResponse.getErrorItems()) {
                 if (ExceptionCodes.INVALID_OAS2_FOUND.getErrorCode() == handler.getErrorCode()) {
@@ -1269,11 +1246,9 @@ public class OASParserUtil {
     }
 
     /**
-     * Update the APIDefinitionValidationResponse object with success state using
-     * the values given
+     * Update the APIDefinitionValidationResponse object with success state using the values given
      *
-     * @param validationResponse    APIDefinitionValidationResponse object to be
-     *                              updated
+     * @param validationResponse    APIDefinitionValidationResponse object to be updated
      * @param originalAPIDefinition original API Definition
      * @param openAPIVersion        version of OpenAPI Spec (2.0 or 3.0.0)
      * @param title                 title of the OpenAPI Definition
@@ -1297,8 +1272,7 @@ public class OASParserUtil {
     }
 
     /**
-     * Add error item with the provided message to the provided validation response
-     * object
+     * Add error item with the provided message to the provided validation response object
      *
      * @param validationResponse APIDefinitionValidationResponse object
      * @param errMessage         error message
@@ -1326,14 +1300,14 @@ public class OASParserUtil {
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
-        // this is to ignore "originalRef" in schema objects
+        //this is to ignore "originalRef" in schema objects
         mapper.addMixIn(RefModel.class, IgnoreOriginalRefMixin.class);
         mapper.addMixIn(RefProperty.class, IgnoreOriginalRefMixin.class);
         mapper.addMixIn(RefPath.class, IgnoreOriginalRefMixin.class);
         mapper.addMixIn(RefParameter.class, IgnoreOriginalRefMixin.class);
         mapper.addMixIn(RefResponse.class, IgnoreOriginalRefMixin.class);
 
-        // this is to ignore "responseSchema" in response schema objects
+        //this is to ignore "responseSchema" in response schema objects
         mapper.addMixIn(Response.class, ResponseSchemaMixin.class);
         try {
             return new String(mapper.writeValueAsBytes(swaggerObj));
@@ -1365,8 +1339,7 @@ public class OASParserUtil {
                 String responseStrProcessed = responseStr;
                 if (!responseStr.trim().startsWith("{")) {
                     try {
-                        JsonNode jsonNode = DeserializationUtils.readYamlTree(responseStr,
-                                new SwaggerDeserializationResult());
+                        JsonNode jsonNode = DeserializationUtils.readYamlTree(responseStr, new SwaggerDeserializationResult());
                         responseStrProcessed = jsonNode.toString();
                     } catch (IOException e) {
                         throw new APIManagementException("Error while reading API definition yaml", e);
@@ -1383,8 +1356,7 @@ public class OASParserUtil {
             }
         } catch (IOException e) {
             ErrorHandler errorHandler = ExceptionCodes.OPENAPI_URL_MALFORMED;
-            // Log the error and continue since this method is only intended to validate a
-            // definition
+            //Log the error and continue since this method is only intended to validate a definition
             log.error(errorHandler.getErrorDescription(), e);
 
             validationResponse.setValid(false);
@@ -1431,8 +1403,7 @@ public class OASParserUtil {
         } catch (RegistryException e) {
             handleException(
                     "Error while retrieving OpenAPI v2.0 or v3.0.0 updated time for " + apiIdentifier.getApiName() + '-'
-                            + apiIdentifier.getVersion(),
-                    e);
+                            + apiIdentifier.getVersion(), e);
         }
         return timeStampMap;
     }
@@ -1457,8 +1428,8 @@ public class OASParserUtil {
                         apiIdentifier.getProviderName());
             }
         } else if (apiIdentifier instanceof APIProductIdentifier) {
-            resourcePath = APIUtil.getAPIProductOpenAPIDefinitionFilePath(apiIdentifier.getName(),
-                    apiIdentifier.getVersion(),
+            resourcePath =
+                    APIUtil.getAPIProductOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
                     apiIdentifier.getProviderName());
         }
 
@@ -1478,8 +1449,7 @@ public class OASParserUtil {
         } catch (RegistryException e) {
             handleException(
                     "Error while retrieving OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getName() + '-'
-                            + apiIdentifier.getVersion(),
-                    e);
+                            + apiIdentifier.getVersion(), e);
         } catch (ParseException e) {
             handleException("Error while parsing OpenAPI v2.0 or v3.0.0 Definition for " + apiIdentifier.getName() + '-'
                     + apiIdentifier.getVersion() + " in " + resourcePath, e);
@@ -1490,9 +1460,9 @@ public class OASParserUtil {
     /**
      * Sets the scopes to the URL template object using the given list of scopes
      *
-     * @param template       URL template
-     * @param resourceScopes list of scopes of the resource
-     * @param apiScopes      set of scopes defined for the API
+     * @param template URL template
+     * @param resourceScopes   list of scopes of the resource
+     * @param apiScopes set of scopes defined for the API
      * @return URL template after setting the scopes
      */
     public static URITemplate setScopesToTemplate(URITemplate template, List<String> resourceScopes,
@@ -1692,9 +1662,8 @@ public class OASParserUtil {
     /**
      * Add advance configuration to the endpointResult object
      *
-     * @param primaryEndpoints production and sandbox endpoint configuration Json
-     *                         object
-     * @param endpointResult   endpoint result ObjectNode
+     * @param primaryEndpoints production and sandbox endpoint configuration Json object
+     * @param endpointResult         endpoint result ObjectNode
      */
     private static ObjectNode updateEndpointResult(JSONObject primaryEndpoints, ObjectNode endpointResult)
             throws APIManagementException {
@@ -1707,8 +1676,7 @@ public class OASParserUtil {
                         "Error while setting the advance endpoint configs ", e);
             }
         } else {
-            // When user removes existing advancedConfigurations section.Returns null if key
-            // was not an existing
+            //When user removes existing advancedConfigurations section.Returns null if key was not an existing
             endpointResult.remove(APIConstants.ADVANCE_ENDPOINT_CONFIG);
         }
         return endpointResult;
@@ -1818,26 +1786,24 @@ public class OASParserUtil {
     }
 
     /**
-     * Preprocessing of scopes schemes to support multiple schemes other than
-     * 'default' type
+     * Preprocessing of scopes schemes to support multiple schemes other than 'default' type
      * This method will change the given definition
      *
      * @param swaggerContent String
      * @return swagger definition as String
      */
     public static String preProcess(String swaggerContent) throws APIManagementException {
-        // Load required properties from swagger to the API
+        //Load required properties from swagger to the API
         APIDefinition apiDefinition = getOASParser(swaggerContent);
-        // Inject and map mgw throttling extensions to default type
+        //Inject and map mgw throttling extensions to default type
         swaggerContent = apiDefinition.injectMgwThrottlingExtensionsToDefault(swaggerContent);
-        // Process mgw disable security extension
+        //Process mgw disable security extension
         swaggerContent = apiDefinition.processDisableSecurityExtension(swaggerContent);
         return apiDefinition.processOtherSchemeScopes(swaggerContent);
     }
 
     /**
-     * This method returns api that is attached with api extensions related to
-     * micro-gw
+     * This method returns api that is attached with api extensions related to micro-gw
      *
      * @param swaggerContent String
      * @param api            API
@@ -1899,8 +1865,7 @@ public class OASParserUtil {
      * @return CORSConfiguration object with configurations
      * @throws APIManagementException throws if an error occurred
      */
-    public static CORSConfiguration getCorsConfigFromSwagger(Map<String, Object> extensions)
-            throws APIManagementException {
+    public static CORSConfiguration getCorsConfigFromSwagger(Map<String, Object> extensions) throws APIManagementException {
         boolean corsConfigurationEnabled = false;
         boolean accessControlAllowCredentials = false;
         List<String> accessControlAllowOrigins = new ArrayList<>();
@@ -1915,14 +1880,10 @@ public class OASParserUtil {
             Object corsConfigObject = extensions.get(APIConstants.X_WSO2_CORS);
             JsonNode objectNode = mapper.convertValue(corsConfigObject, JsonNode.class);
             corsConfigurationEnabled = Boolean.parseBoolean(String.valueOf(objectNode.get("corsConfigurationEnabled")));
-            accessControlAllowCredentials = Boolean
-                    .parseBoolean(String.valueOf(objectNode.get("accessControlAllowCredentials")));
-            accessControlAllowHeaders = mapper.convertValue(objectNode.get("accessControlAllowHeaders"),
-                    ArrayList.class);
-            accessControlAllowOrigins = mapper.convertValue(objectNode.get("accessControlAllowOrigins"),
-                    ArrayList.class);
-            accessControlAllowMethods = mapper.convertValue(objectNode.get("accessControlAllowMethods"),
-                    ArrayList.class);
+            accessControlAllowCredentials = Boolean.parseBoolean(String.valueOf(objectNode.get("accessControlAllowCredentials")));
+            accessControlAllowHeaders = mapper.convertValue(objectNode.get("accessControlAllowHeaders"), ArrayList.class);
+            accessControlAllowOrigins = mapper.convertValue(objectNode.get("accessControlAllowOrigins"), ArrayList.class);
+            accessControlAllowMethods = mapper.convertValue(objectNode.get("accessControlAllowMethods"), ArrayList.class);
             corsConfig.setCorsConfigurationEnabled(corsConfigurationEnabled);
             corsConfig.setAccessControlAllowCredentials(accessControlAllowCredentials);
             corsConfig.setAccessControlAllowHeaders(accessControlAllowHeaders);
@@ -1933,8 +1894,7 @@ public class OASParserUtil {
     }
 
     /**
-     * This method returns extension of responseCache enabling check related to
-     * micro-gw
+     * This method returns extension of responseCache enabling check related to micro-gw
      *
      * @param extensions Map<String, Object>
      * @return response cache enable or disable as boolean
@@ -1946,8 +1906,7 @@ public class OASParserUtil {
         if (extensions.containsKey(APIConstants.X_WSO2_RESPONSE_CACHE)) {
             Object responseCacheConfig = extensions.get(APIConstants.X_WSO2_RESPONSE_CACHE);
             ObjectNode cacheConfigNode = mapper.convertValue(responseCacheConfig, ObjectNode.class);
-            responseCache = Boolean
-                    .parseBoolean(String.valueOf(cacheConfigNode.get(APIConstants.RESPONSE_CACHING_ENABLED)));
+            responseCache = Boolean.parseBoolean(String.valueOf(cacheConfigNode.get(APIConstants.RESPONSE_CACHING_ENABLED)));
         }
         return responseCache;
     }
@@ -1971,15 +1930,13 @@ public class OASParserUtil {
     }
 
     /**
-     * This method returns extension of custom authorization Header related to
-     * micro-gw
+     * This method returns extension of custom authorization Header related to micro-gw
      *
      * @param extensions Map<String, Object>
      * @return authorization header value as String
      * @throws APIManagementException throws if an error occurred
      */
-    public static String getAuthorizationHeaderFromSwagger(Map<String, Object> extensions)
-            throws APIManagementException {
+    public static String getAuthorizationHeaderFromSwagger(Map<String, Object> extensions) throws APIManagementException {
         Object authorizationHeader = extensions.get(APIConstants.X_WSO2_AUTH_HEADER);
         return authorizationHeader == null ? null : authorizationHeader.toString();
     }
@@ -1997,8 +1954,7 @@ public class OASParserUtil {
     }
 
     /**
-     * This method returns extension of custom authorization Header related to
-     * micro-gw
+     * This method returns extension of custom authorization Header related to micro-gw
      *
      * @param extensions Map<String, Object>
      * @return security disable or enable value as String
@@ -2007,22 +1963,19 @@ public class OASParserUtil {
     public static boolean getDisableSecurity(Map<String, Object> extensions) throws APIManagementException {
         boolean disableSecurity = false;
         if (extensions.containsKey(APIConstants.X_WSO2_DISABLE_SECURITY)) {
-            disableSecurity = Boolean
-                    .parseBoolean(String.valueOf(extensions.get(APIConstants.X_WSO2_DISABLE_SECURITY)));
+            disableSecurity = Boolean.parseBoolean(String.valueOf(extensions.get(APIConstants.X_WSO2_DISABLE_SECURITY)));
         }
         return disableSecurity;
     }
 
     /**
-     * This method returns extension of application security types related to
-     * micro-gw
+     * This method returns extension of application security types related to micro-gw
      *
      * @param extensions Map<String, Object>
      * @return application security types as String
      * @throws APIManagementException throws if an error occurred
      */
-    public static List<String> getApplicationSecurityTypes(Map<String, Object> extensions)
-            throws APIManagementException {
+    public static List<String> getApplicationSecurityTypes(Map<String, Object> extensions) throws APIManagementException {
         ObjectMapper mapper = new ObjectMapper();
         List<String> appSecurityTypes = new ArrayList<>();
         if (extensions.containsKey(APIConstants.X_WSO2_APP_SECURITY)) {
@@ -2034,8 +1987,7 @@ public class OASParserUtil {
     }
 
     /**
-     * This method returns extension of application security types state related to
-     * micro-gw
+     * This method returns extension of application security types state related to micro-gw
      *
      * @param extensions Map<String, Object>
      * @return application security state as boolean
@@ -2097,20 +2049,18 @@ public class OASParserUtil {
     /**
      * This method removes the unsupported json blocks from the given json string.
      *
-     * @param jsonString Open api specification from which unsupported blocks must
-     *                   be removed.
-     * @return String open api specification without unsupported blocks. Null value
-     *         if there is no unsupported blocks.
+     * @param jsonString Open api specification from which unsupported blocks must be removed.
+     * @return String open api specification without unsupported blocks. Null value if there is no unsupported blocks.
      */
     public static String removeUnsupportedBlocksFromResources(String jsonString) {
         JSONObject jsonObject = new JSONObject(jsonString);
         boolean definitionUpdated = false;
         if (jsonObject.has(OPENAPI_RESOURCE_KEY)) {
             JSONObject paths = jsonObject.optJSONObject(OPENAPI_RESOURCE_KEY);
-            if (paths != null) {
+            if (paths != null ) {
                 for (String unsupportedBlockKey : UNSUPPORTED_RESOURCE_BLOCKS) {
                     boolean result = removeBlocksRecursivelyFromJsonObject(unsupportedBlockKey, paths, false);
-                    definitionUpdated = definitionUpdated || result;
+                    definitionUpdated = definitionUpdated  || result;
                 }
             }
         }
@@ -2133,10 +2083,9 @@ public class OASParserUtil {
      * This method removes provided key from the json object recursively.
      *
      * @param keyToBeRemoved, Key to remove from open api spec.
-     * @param jsonObject,     Open api spec as json object.
+     * @param jsonObject, Open api spec as json object.
      */
-    private static boolean removeBlocksRecursivelyFromJsonObject(String keyToBeRemoved, JSONObject jsonObject,
-            boolean definitionUpdated) {
+    private static boolean removeBlocksRecursivelyFromJsonObject(String keyToBeRemoved, JSONObject jsonObject, boolean definitionUpdated) {
         if (jsonObject == null) {
             return definitionUpdated;
         }
@@ -2155,19 +2104,17 @@ public class OASParserUtil {
     }
 
     /**
-     * This method will set the scopes defined in the API to the security scheme in
-     * swagger3.
+     * This method will set the scopes defined in the API to the security scheme in swagger3.
      *
      * @param swaggerData    SwaggerData object which contains the API data.
-     * @param securityScheme SecurityScheme object which contains the security
-     *                       scheme.
+     * @param securityScheme SecurityScheme object which contains the security scheme.
      */
     public static void setScopesFromAPIToSecurityScheme(SwaggerData swaggerData, SecurityScheme securityScheme) {
 
         Map<String, String> scopeBindings = new LinkedHashMap<>();
         Scopes oas3Scopes = new Scopes();
         Set<Scope> scopes = swaggerData.getScopes(); // Get the scopes defined in the API.
-        if (scopes != null && !scopes.isEmpty()) { // If scopes defined, add them to the OAS definition.
+        if (scopes != null && !scopes.isEmpty()) {  // If scopes defined, add them to the OAS definition.
             populateScopesFromAPI(scopes, oas3Scopes, scopeBindings);
             // replace the scope bindings if the scopes are not empty.
             if (SecurityScheme.Type.OAUTH2.toString().equals(securityScheme.getType().toString())) {
@@ -2185,13 +2132,10 @@ public class OASParserUtil {
     }
 
     /**
-     * This method will set the scopes defined in the API to the security scheme in
-     * swagger2.
+     * This method will set the scopes defined in the API to the security scheme in swagger2.
      *
-     * @param swaggerData              SwaggerData object which contains the API
-     *                                 data.
-     * @param securitySchemeDefinition SecuritySchemeDefinition object which
-     *                                 contains the security scheme.
+     * @param swaggerData              SwaggerData object which contains the API data.
+     * @param securitySchemeDefinition SecuritySchemeDefinition object which contains the security scheme.
      */
     public static void setScopesFromAPIToSecurityScheme(SwaggerData swaggerData,
             SecuritySchemeDefinition securitySchemeDefinition) {
@@ -2233,8 +2177,7 @@ public class OASParserUtil {
      * Add security requirement to swagger2.
      *
      * @param swagger         Swagger2 object
-     * @param securityReqName SecurityRequirement name (Eg: default, basic_auth
-     *                        etc).
+     * @param securityReqName SecurityRequirement name (Eg: default, basic_auth etc).
      */
     public static void addSecurityRequirementToSwagger(Swagger swagger, String securityReqName) {
 
@@ -2249,8 +2192,7 @@ public class OASParserUtil {
      * Add security requirement to OAS definition.
      *
      * @param openAPI         OAS Definition object
-     * @param securityReqName SecurityRequirement name (Eg: default, basic_auth
-     *                        etc).
+     * @param securityReqName SecurityRequirement name (Eg: default, basic_auth etc).
      */
     public static void addSecurityRequirementToSwagger(OpenAPI openAPI, String securityReqName) {
 
@@ -2264,10 +2206,8 @@ public class OASParserUtil {
      *
      * @param operationSecurities Existing operation level security requirements
      * @param apiSecurities       Security defined for API
-     * @param securityReqName     Specific security name (Eg: basic_auth, default
-     *                            etc)
-     * @param operationScopes     Operation specific scopes for the security
-     *                            requirement
+     * @param securityReqName     Specific security name (Eg: basic_auth, default etc)
+     * @param operationScopes     Operation specific scopes for the security requirement
      */
     public static void addOASOperationSecurityReqFromAPI(List<SecurityRequirement> operationSecurities,
             List<String> apiSecurities, String securityReqName,
@@ -2281,8 +2221,8 @@ public class OASParserUtil {
                 securityRequirement.addList(securityReqName, operationScopes);
                 operationSecurities.add(securityRequirement);
             } else {
-                operationSecurities.stream()
-                        .filter(securityRequirement -> securityRequirement.containsKey(securityReqName))
+                operationSecurities.stream().filter
+                                (securityRequirement -> securityRequirement.containsKey(securityReqName))
                         .findFirst().ifPresent(securityRequirement -> securityRequirement
                                 .addList(securityReqName, operationScopes));
             }
@@ -2309,10 +2249,8 @@ public class OASParserUtil {
      *
      * @param operationSecurities Existing operation level security requirements
      * @param apiSecurities       Security defined for API
-     * @param securityReqName     Specific security name (Eg: basic_auth, default
-     *                            etc)
-     * @param operationScopes     Operation specific scopes for the security
-     *                            requirement
+     * @param securityReqName     Specific security name (Eg: basic_auth, default etc)
+     * @param operationScopes     Operation specific scopes for the security requirement
      */
     public static void addSwaggerOperationSecurityReqFromAPI(List<Map<String, List<String>>> operationSecurities,
             List<String> apiSecurities, String securityReqName,
@@ -2329,8 +2267,8 @@ public class OASParserUtil {
                 operationSecurities.add(securityRequirement);
             } else {
                 // If security already defined in the swagger definition, update the scope list.
-                operationSecurities.stream()
-                        .filter(securityRequirement -> securityRequirement.containsKey(securityReqName))
+                operationSecurities.stream().filter
+                                (securityRequirement -> securityRequirement.containsKey(securityReqName))
                         .findFirst().ifPresent(securityRequirement -> securityRequirement
                                 .put(securityReqName, operationScopes));
             }
@@ -2354,11 +2292,10 @@ public class OASParserUtil {
     }
 
     /**
-     * This method will validate the OAS definition against the resource paths with
-     * trailing slashes.
+     * This method will validate the OAS definition against the resource paths with trailing slashes.
      *
      * @param openAPI            OpenAPI object
-     * @param swagger            Swagger object
+     * @param swagger         Swagger object
      * @param validationResponse validation response
      * @return isSwaggerValid boolean
      */
@@ -2379,8 +2316,7 @@ public class OASParserUtil {
                         Object newPathItem = pathItems.get(path);
 
                         if (pathItem instanceof PathItem && newPathItem instanceof PathItem) {
-                            if (!validateOAS3Paths((PathItem) pathItem, (PathItem) newPathItem, newPath,
-                                    validationResponse)) {
+                            if (!validateOAS3Paths((PathItem) pathItem, (PathItem) newPathItem, newPath, validationResponse)) {
                                 return false;
                             }
                         } else if (pathItem instanceof Path && newPathItem instanceof Path) {

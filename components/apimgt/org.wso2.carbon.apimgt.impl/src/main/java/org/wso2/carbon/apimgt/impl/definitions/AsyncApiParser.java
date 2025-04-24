@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import com.google.gson.JsonObject;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
 import io.apicurio.datamodels.asyncapi.models.AaiDocument;
@@ -35,8 +36,6 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-
-import com.google.gson.JsonObject;
 
 import java.net.URI;
 import java.net.URISyntaxException;

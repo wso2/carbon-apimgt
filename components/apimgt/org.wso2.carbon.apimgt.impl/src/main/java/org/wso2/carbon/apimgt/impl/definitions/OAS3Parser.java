@@ -22,7 +22,6 @@ package org.wso2.carbon.apimgt.impl.definitions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.gson.JsonObject;
-
 import io.swagger.oas.inflector.examples.ExampleBuilder;
 import io.swagger.oas.inflector.examples.XmlExampleSerializer;
 import io.swagger.oas.inflector.examples.models.Example;
@@ -95,8 +94,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TYPE;
-import static org.wso2.carbon.apimgt.impl.definitions.OASParserUtil.convertOAStoJSON;
-import static org.wso2.carbon.apimgt.impl.definitions.OASParserUtil.generateExamples;
 import static org.wso2.carbon.apimgt.impl.definitions.OASParserUtil.isValidWithPathsWithTrailingSlashes;
 
 /**
@@ -160,11 +157,12 @@ public class OAS3Parser extends APIDefinition {
                 boolean respCodeInitialized = false;
                 Object[] operationsArray = operationMap.entrySet().toArray();
                 if (operationsArray.length > i) {
-                    Map.Entry<PathItem.HttpMethod, Operation> operationEntry = (Map.Entry<PathItem.HttpMethod, Operation>) operationsArray[i];
+                    Map.Entry<PathItem.HttpMethod, Operation> operationEntry = 
+                            (Map.Entry<PathItem.HttpMethod, Operation>) operationsArray[i];
                     apiResourceMediationPolicyObject.setVerb(String.valueOf(operationEntry.getKey()));
                 } else {
-                    throw new APIManagementException(
-                            "Cannot find the HTTP method for the API Resource Mediation Policy");
+                    throw new 
+                            APIManagementException("Cannot find the HTTP method for the API Resource Mediation Policy");
                 }
                 for (String responseEntry : op.getResponses().keySet()) {
                     if (!responseEntry.equals("default")) {
@@ -174,13 +172,12 @@ public class OAS3Parser extends APIDefinition {
                             minimumResponseCode = Integer.parseInt(responseEntry);
                             maximumResponseCode = Integer.parseInt(responseEntry);
                         } else {
-                            minimumResponseCode = Integer.parseInt(responseEntry.replace("X", "0"));
-                            maximumResponseCode = Integer.parseInt(responseEntry.replace("X", "9"));
+                            minimumResponseCode = Integer.parseInt(responseEntry.replace("X","0"));
+                            maximumResponseCode = Integer.parseInt(responseEntry.replace("X","9"));
                         }
 
-                        for (responseCode = minimumResponseCode; responseCode <= maximumResponseCode; responseCode++) {
-                            if ((op.getResponses().containsKey(
-                                    Integer.toString(responseCode))) && (minimumResponseCode != maximumResponseCode)) {
+                        for (responseCode = minimumResponseCode; responseCode <= maximumResponseCode; responseCode++ ) {
+                            if ((op.getResponses().keySet().contains(Integer.toString(responseCode))) && (minimumResponseCode != maximumResponseCode)) {
                                 continue;
                             }
                             responseCodes.add(responseCode);
@@ -194,8 +191,7 @@ public class OAS3Parser extends APIDefinition {
                                     Schema jsonSchema = applicationJson.getSchema();
                                     if (jsonSchema != null) {
                                         String jsonExample = getJsonExample(jsonSchema, definitions);
-                                        genCode.append(getGeneratedResponsePayloads(Integer.toString(responseCode),
-                                                jsonExample, "json", false));
+                                        genCode.append(getGeneratedResponsePayloads(Integer.toString(responseCode), jsonExample, "json", false));
                                         respCodeInitialized = true;
                                         hasJsonPayload = true;
                                     }
@@ -204,9 +200,7 @@ public class OAS3Parser extends APIDefinition {
                                     Schema xmlSchema = applicationXml.getSchema();
                                     if (xmlSchema != null) {
                                         String xmlExample = getXmlExample(xmlSchema, definitions);
-                                        genCode.append(
-                                                getGeneratedResponsePayloads(Integer.toString(responseCode), xmlExample,
-                                                        "xml", respCodeInitialized));
+                                        genCode.append(getGeneratedResponsePayloads(Integer.toString(responseCode), xmlExample, "xml", respCodeInitialized));
                                         hasXmlPayload = true;
                                     }
                                 }
@@ -225,8 +219,7 @@ public class OAS3Parser extends APIDefinition {
                                 Schema jsonSchema = applicationJson.getSchema();
                                 if (jsonSchema != null) {
                                     String jsonExample = getJsonExample(jsonSchema, definitions);
-                                    genCode.append(
-                                            getGeneratedResponsePayloads(responseEntry, jsonExample, "json", false));
+                                    genCode.append(getGeneratedResponsePayloads(responseEntry, jsonExample, "json", false));
                                     respCodeInitialized = true;
                                     hasJsonPayload = true;
                                 }
@@ -235,8 +228,7 @@ public class OAS3Parser extends APIDefinition {
                                 Schema xmlSchema = applicationXml.getSchema();
                                 if (xmlSchema != null) {
                                     String xmlExample = getXmlExample(xmlSchema, definitions);
-                                    genCode.append(getGeneratedResponsePayloads(responseEntry, xmlExample, "xml",
-                                            respCodeInitialized));
+                                    genCode.append(getGeneratedResponsePayloads(responseEntry, xmlExample, "xml", respCodeInitialized));
                                     hasXmlPayload = true;
                                 }
                             }
@@ -309,7 +301,7 @@ public class OAS3Parser extends APIDefinition {
                 apiResourceMediationPolicyObject.setContent(finalScript);
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
             }
-            returnMap.put(APIConstants.SWAGGER, convertOAStoJSON(swagger));
+            returnMap.put(APIConstants.SWAGGER, prettifyOAS3ToJson(swagger));
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
         }
         return returnMap;
@@ -378,7 +370,7 @@ public class OAS3Parser extends APIDefinition {
             if (!isModify && scriptsToAdd.has("mockDB")) {
                 swagger.addExtension(APIConstants.X_WSO2_MOCKDB, scriptsToAdd.get("mockDB").getAsString());
             }
-            returnMap.put(APIConstants.SWAGGER, convertOAStoJSON(swagger));
+            returnMap.put(APIConstants.SWAGGER, prettifyOAS3ToJson(swagger));
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
         }
         return returnMap;

@@ -16,12 +16,11 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import com.google.gson.JsonObject;
+import java.util.concurrent.ConcurrentHashMap;
 import com.google.gson.JsonParser;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-
-import java.util.concurrent.ConcurrentHashMap;
 
 public class MockDBPersistMediator extends AbstractMediator {
     private static final ConcurrentHashMap<String, String> mockDBMap = new ConcurrentHashMap<>();
