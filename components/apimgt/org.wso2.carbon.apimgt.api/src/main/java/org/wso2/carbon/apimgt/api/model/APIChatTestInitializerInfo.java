@@ -24,6 +24,7 @@ package org.wso2.carbon.apimgt.api.model;
 public class APIChatTestInitializerInfo {
     private String command = null;
     private APIChatAPISpec apiSpec = null;
+    private APIChatGraphQLSdl sdl = null;
 
     public String getCommand() {
         return command;
@@ -39,5 +40,13 @@ public class APIChatTestInitializerInfo {
 
     public void setApiSpec(APIChatAPISpec apiSpec) {
         this.apiSpec = apiSpec;
+    }
+
+    public APIChatGraphQLSdl getSdl() {
+        return sdl;
+    }
+
+    public void setSdl(APIChatGraphQLSdl sdl){
+        this.sdl = sdl;
     }
 }

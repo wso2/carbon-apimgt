@@ -28,22 +28,7 @@ import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIChatAPISpec;
-import org.wso2.carbon.apimgt.api.model.APIChatExecutionResponse;
-import org.wso2.carbon.apimgt.api.model.APIChatTestExecutionInfo;
-import org.wso2.carbon.apimgt.api.model.APIChatTestInitializerInfo;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIRating;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.Comment;
-import org.wso2.carbon.apimgt.api.model.CommentList;
-import org.wso2.carbon.apimgt.api.model.Documentation;
-import org.wso2.carbon.apimgt.api.model.DocumentationContent;
-import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
-import org.wso2.carbon.apimgt.api.model.ResourceFile;
-import org.wso2.carbon.apimgt.api.model.Tier;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
@@ -342,15 +327,20 @@ public class ApisApiServiceImpl implements ApisApiService {
                     String requestPayload; // Request payload for Choreo deployed API Chat Agent
 
                     if (isTestInitializationRequest) {
+                        boolean isGraphqlAPI = apiChatRequestDTO.getApiSpec().getSdl() != null;
                         ApiChatRequestApiSpecDTO specDTO = apiChatRequestDTO.getApiSpec();
-                        APIChatAPISpec apiSpec = new APIChatAPISpec();
-                        apiSpec.setServiceUrl(specDTO.getServiceUrl());
-                        apiSpec.setTools(specDTO.getTools());
-
                         APIChatTestInitializerInfo initializerInfo = new APIChatTestInitializerInfo();
                         initializerInfo.setCommand(apiChatRequestDTO.getCommand());
-                        initializerInfo.setApiSpec(apiSpec);
-
+                        if (isGraphqlAPI) {
+                            APIChatGraphQLSdl apiSdl = new APIChatGraphQLSdl();
+                            apiSdl.setSdl(specDTO.getSdl());
+                            initializerInfo.setSdl(apiSdl);
+                        } else {
+                            APIChatAPISpec apiSpec = new APIChatAPISpec();
+                            apiSpec.setServiceUrl(specDTO.getServiceUrl());
+                            apiSpec.setTools(specDTO.getTools());
+                            initializerInfo.setApiSpec(apiSpec);
+                        }
                         // Generate the payload for Choreo deployed API Chat Agent
                         ObjectMapper payloadMapper = new ObjectMapper();
                         requestPayload = payloadMapper.writeValueAsString(initializerInfo);
