@@ -160,7 +160,8 @@ public class RestApiAdminUtils {
                 if (((ApplicationThrottlePolicyDTO) throttlePolicyDTO).getBurstLimit().getRateLimitCount() < 0) {
                     throw new APIManagementException("Burst Control rate limit should be a non-negative value",
                             ExceptionCodes.from(ExceptionCodes.INVALID_QUOTA_LIMIT,
-                                    String.valueOf(throttleLimitDTO.getRequestCount().getRequestCount())));
+                                    String.valueOf(((ApplicationThrottlePolicyDTO) throttlePolicyDTO).getBurstLimit()
+                                            .getRateLimitCount())));
                 }
             }
         } else if (throttlePolicyDTO instanceof SubscriptionThrottlePolicyDTO) {
@@ -171,8 +172,8 @@ public class RestApiAdminUtils {
             validateAiQuotaLimit(throttleLimitDTO);
             if (((SubscriptionThrottlePolicyDTO) throttlePolicyDTO).getRateLimitCount() < 0) {
                 throw new APIManagementException("Rate limit count should be a non-negative value",
-                        ExceptionCodes.from(ExceptionCodes.INVALID_QUOTA_LIMIT,
-                                String.valueOf(throttleLimitDTO.getRequestCount().getRequestCount())));
+                        ExceptionCodes.from(ExceptionCodes.INVALID_QUOTA_LIMIT, String.valueOf(((
+                                SubscriptionThrottlePolicyDTO) throttlePolicyDTO).getRateLimitCount())));
             }
         }
     }
