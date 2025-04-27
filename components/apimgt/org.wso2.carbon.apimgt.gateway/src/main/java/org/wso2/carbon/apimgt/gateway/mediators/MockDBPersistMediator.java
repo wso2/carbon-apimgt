@@ -41,18 +41,25 @@ public class MockDBPersistMediator extends AbstractMediator {
             if (context.getProperty(MOCK_DB) == null) { // Only for request
                 if (!mockDBMap.containsKey(apiKey)) {
                     setMockDB(openAPI, apiKey);
-                    System.out.println("MockDB Initialized: " + mockDBMap.get(apiKey));
+                    if (log.isDebugEnabled()) {
+                        log.debug("MockDB Initialized: " + mockDBMap.get(apiKey));
+                    }
                 }
                 // Set the mockDB to the context
                 context.setProperty(MOCK_DB, mockDBMap.get(apiKey));
-                System.out.println("Set mockDB to context: " + mockDBMap.get(apiKey));
+                if (log.isDebugEnabled()) {
+                    log.debug("MockDB set to Context: " + mockDBMap.get(apiKey));
+                }
             } else { // Only for response
                 // Update the mockDB for the specific API
                 updateMockDB(apiKey, (String) context.getProperty(MOCK_DB));
-                System.out.println("Updated mockDB: " + mockDBMap.get(apiKey));
+                if (log.isDebugEnabled()) {
+                    log.debug("MockDB Updated: " + mockDBMap.get(apiKey));
+                }
             }
             return true; // Successful mediation
         } catch (Exception e) {
+            log.error("Error in MockDBPersistMediator: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -60,7 +67,8 @@ public class MockDBPersistMediator extends AbstractMediator {
 
     private void setMockDB(JsonObject openAPI, String apiKey) {
         if (!openAPI.has(APIConstants.X_WSO2_MOCKDB)) {
-            System.err.println("Error: x-wso2-mockdb field not found in OpenAPI");
+            log.error(
+                    "Error: x-wso2-mockdb field not found in OpenAPI for API Key: " + apiKey);
         } else {
             updateMockDB(apiKey, openAPI.get(APIConstants.X_WSO2_MOCKDB).getAsString());
         }
