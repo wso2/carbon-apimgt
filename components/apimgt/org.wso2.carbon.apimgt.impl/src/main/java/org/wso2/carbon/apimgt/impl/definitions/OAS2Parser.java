@@ -148,11 +148,11 @@ public class OAS2Parser extends APIDefinition {
                 ArrayList<Integer> responseCodes = new ArrayList<Integer>();
                 Object[] operationsArray = operationMap.entrySet().toArray();
                 if (operationsArray.length > i) {
-                    Map.Entry<HttpMethod, Operation> operationEntry = 
+                    Map.Entry<HttpMethod, Operation> operationEntry =
                             (Map.Entry<HttpMethod, Operation>) operationsArray[i];
                     apiResourceMediationPolicyObject.setVerb(String.valueOf(operationEntry.getKey()));
                 } else {
-                    throw new 
+                    throw new
                             APIManagementException("Cannot find the HTTP method for the API Resource Mediation Policy");
                 }
                 StringBuilder genCode = new StringBuilder();
