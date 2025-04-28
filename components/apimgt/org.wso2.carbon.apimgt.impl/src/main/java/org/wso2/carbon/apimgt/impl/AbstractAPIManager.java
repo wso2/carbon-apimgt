@@ -174,7 +174,7 @@ public abstract class AbstractAPIManager implements APIManager {
         apiMgtDAO.setDefaultVersion(api);
     }
     protected void populateGatewayVendor(API api) throws APIManagementException {
-        if (api.getGatewayVendor() == null) {
+        if (api.getGatewayVendor() == null || "null".equals(api.getGatewayVendor())) {
             String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(api.getUuid());
             if (gatewayVendor == null) {
                 gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;
@@ -339,13 +339,13 @@ public abstract class AbstractAPIManager implements APIManager {
                                 convertedList.add(DocumentMapper.INSTANCE.toDocumentation(docList.get(i)));
                             }
                             if (APIConstants.DOC_OWNER_VISIBILITY.equals(String.valueOf(doc.getVisibility()))) {
-                                if (APIConstants.WSO2_ANONYMOUS_USER != username
+                                if (!APIConstants.WSO2_ANONYMOUS_USER.equals(username)
                                         && !isTenantDomainNotMatching(organization)) {
                                     convertedList.add(DocumentMapper.INSTANCE.toDocumentation(docList.get(i)));
                                 }
                             }
                             if (APIConstants.DOC_SHARED_VISIBILITY.equals(String.valueOf(doc.getVisibility()))) {
-                                if (APIConstants.WSO2_ANONYMOUS_USER != username
+                                if (!APIConstants.WSO2_ANONYMOUS_USER.equals(username)
                                         && !isTenantDomainNotMatching(organization)){
                                     privateDocs.add(DocumentMapper.INSTANCE.toDocumentation(docList.get(i)));
                                 }
@@ -455,11 +455,11 @@ public abstract class AbstractAPIManager implements APIManager {
         if (APIConstants.DOC_API_BASED_VISIBILITY.equals(String.valueOf(doc.getVisibility()))) {
             validDoc = true;
         } else if (APIConstants.DOC_OWNER_VISIBILITY.equals(String.valueOf(doc.getVisibility()))) {
-            if (APIConstants.WSO2_ANONYMOUS_USER != username && !isTenantDomainNotMatching(requestedTenantDomain)) {
+            if (!APIConstants.WSO2_ANONYMOUS_USER.equals(username) && !isTenantDomainNotMatching(requestedTenantDomain)) {
                 validDoc = true;
             }
         } else if (APIConstants.DOC_SHARED_VISIBILITY.equals(String.valueOf(doc.getVisibility()))) {
-            if (APIConstants.WSO2_ANONYMOUS_USER != username && !isTenantDomainNotMatching(requestedTenantDomain)) {
+            if (!APIConstants.WSO2_ANONYMOUS_USER.equals(username) && !isTenantDomainNotMatching(requestedTenantDomain)) {
                 try {
                     if (validatePrivateScopes(username, loggedInTenantDomain)) {
                         validDoc = true;

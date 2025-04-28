@@ -56,7 +56,7 @@ return null;
     }
     private StatusEnum status = StatusEnum.CREATED;
     private String vhost = null;
-    private Boolean displayOnDevportal = null;
+    private Boolean displayOnDevportal = true;
     private java.util.Date deployedTime = null;
     private java.util.Date successDeployedTime = null;
 

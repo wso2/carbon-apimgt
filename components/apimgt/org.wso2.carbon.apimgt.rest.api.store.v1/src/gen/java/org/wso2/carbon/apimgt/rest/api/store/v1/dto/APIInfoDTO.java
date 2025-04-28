@@ -44,6 +44,8 @@ public class APIInfoDTO   {
     private String gatewayVendor = null;
     private List<APIInfoAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIInfoAdditionalPropertiesDTO>();
     private Boolean monetizedInfo = null;
+    private Boolean egress = false;
+    private String subtype = "DEFAULT";
 
   /**
    **/
@@ -375,6 +377,42 @@ public class APIInfoDTO   {
     this.monetizedInfo = monetizedInfo;
   }
 
+  /**
+   * Whether the API is Egress or not
+   **/
+  public APIInfoDTO egress(Boolean egress) {
+    this.egress = egress;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "Whether the API is Egress or not")
+  @JsonProperty("egress")
+  public Boolean isEgress() {
+    return egress;
+  }
+  public void setEgress(Boolean egress) {
+    this.egress = egress;
+  }
+
+  /**
+   * Subtype of the API.
+   **/
+  public APIInfoDTO subtype(String subtype) {
+    this.subtype = subtype;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "AIAPI", value = "Subtype of the API.")
+  @JsonProperty("subtype")
+  public String getSubtype() {
+    return subtype;
+  }
+  public void setSubtype(String subtype) {
+    this.subtype = subtype;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -403,12 +441,14 @@ public class APIInfoDTO   {
         Objects.equals(monetizationLabel, apIInfo.monetizationLabel) &&
         Objects.equals(gatewayVendor, apIInfo.gatewayVendor) &&
         Objects.equals(additionalProperties, apIInfo.additionalProperties) &&
-        Objects.equals(monetizedInfo, apIInfo.monetizedInfo);
+        Objects.equals(monetizedInfo, apIInfo.monetizedInfo) &&
+        Objects.equals(egress, apIInfo.egress) &&
+        Objects.equals(subtype, apIInfo.subtype);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, type, createdTime, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies, advertiseInfo, businessInformation, isSubscriptionAvailable, monetizationLabel, gatewayVendor, additionalProperties, monetizedInfo);
+    return Objects.hash(id, name, description, context, version, type, createdTime, provider, lifeCycleStatus, thumbnailUri, avgRating, throttlingPolicies, advertiseInfo, businessInformation, isSubscriptionAvailable, monetizationLabel, gatewayVendor, additionalProperties, monetizedInfo, egress, subtype);
   }
 
   @Override
@@ -435,6 +475,8 @@ public class APIInfoDTO   {
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("    monetizedInfo: ").append(toIndentedString(monetizedInfo)).append("\n");
+    sb.append("    egress: ").append(toIndentedString(egress)).append("\n");
+    sb.append("    subtype: ").append(toIndentedString(subtype)).append("\n");
     sb.append("}");
     return sb.toString();
   }

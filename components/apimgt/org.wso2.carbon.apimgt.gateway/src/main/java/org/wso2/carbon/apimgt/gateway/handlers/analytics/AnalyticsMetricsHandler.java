@@ -22,13 +22,16 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.AbstractExtendedSynapseHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.SynapseConstants;
+import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
+import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.handlers.DataPublisherUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.graphQL.analytics.GraphQLOperationHandler;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.AsyncAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.inbound.endpoint.protocol.websocket.InboundWebsocketConstants;
 
@@ -79,6 +82,16 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
 
     @Override
     public boolean handleResponseOutFlow(MessageContext messageContext) {
+        if (GatewayUtils.checkForFileBasedApiContexts(ApiUtils.getFullRequestPath(messageContext),
+                GatewayUtils.getTenantDomain())) {
+            return true;
+        }
+
+        Object skipPublishMetrics = messageContext.getProperty(Constants.SKIP_METRICS_PUBLISHING);
+        if (skipPublishMetrics != null && (Boolean) skipPublishMetrics) {
+            return true;
+        }
+
         if (messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
             return true;
         }
@@ -86,18 +99,17 @@ public class AnalyticsMetricsHandler extends AbstractExtendedSynapseHandler {
                 getProperty(TRANSPORT_HEADERS));
 
         AnalyticsDataProvider provider;
-        Object skipPublishMetrics = messageContext.getProperty(Constants.SKIP_DEFAULT_METRICS_PUBLISHING);
+        Object isAsyncAPI = messageContext.getProperty(Constants.IS_ASYNC_API);
         if (messageContext.getProperty(APIConstants.API_TYPE) == "GRAPHQL"){
             GraphQLOperationHandler operationInfoAnalyzer = new GraphQLOperationHandler();
             operationInfoAnalyzer.handleGraphQLOperation(messageContext);
         } else {
-            if (skipPublishMetrics != null && (Boolean) skipPublishMetrics) {
+            if (isAsyncAPI != null && (Boolean) isAsyncAPI) {
                 provider = new AsyncAnalyticsDataProvider(messageContext);
             } else {
                 provider = new SynapseAnalyticsDataProvider(messageContext,
                         ServiceReferenceHolder.getInstance().getAnalyticsCustomDataProvider());
             }
-
             GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
             try {
                 dataCollector.collectData();

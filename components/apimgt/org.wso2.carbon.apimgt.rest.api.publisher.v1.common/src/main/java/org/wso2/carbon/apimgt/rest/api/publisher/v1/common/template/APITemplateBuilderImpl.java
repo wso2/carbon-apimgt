@@ -27,14 +27,13 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.SequenceUtils;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.registry.api.RegistryException;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -225,6 +224,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
             ConfigContext configcontext = new APIConfigContext(this.api);
             configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api);
             configcontext = new TemplateUtilContext(configcontext);
+            configcontext = new SecurityConfigContext(configcontext, api);
 
             configcontext.validate();
 
@@ -389,9 +389,8 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
         if (this.velocityLogPath != null) {
             return this.velocityLogPath;
         } else {
-            APIManagerConfigurationService config =
-                    ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
-            String velocityLogPath = config.getAPIManagerConfiguration().getFirstProperty(APIConstants.VELOCITY_LOGGER);
+            String velocityLogPath = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
+                    getFirstProperty(APIConstants.VELOCITY_LOGGER);
             if (velocityLogPath != null && velocityLogPath.length() > 1) {
                 this.velocityLogPath = velocityLogPath;
             } else {

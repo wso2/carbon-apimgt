@@ -64,7 +64,7 @@ public class JWTUtilTestCase {
         String signatureAlgorithm = "SHA256withRSA";
 
         //Use SHA-256 as the certificate hashing algorithm
-        String jwt = JWTUtil.generateHeader(cert, signatureAlgorithm, true, true);
+        String jwt = JWTUtil.generateHeader(cert, signatureAlgorithm, true, true, false);
         Assert.assertNotNull(jwt);
         Assert.assertTrue(jwt.contains("kid"));
 
@@ -74,7 +74,7 @@ public class JWTUtilTestCase {
         Assert.assertTrue(jwt.contains("x5t#S256"));
 
         //Use SHA-1 as the certificate hashing algorithm
-        jwt = JWTUtil.generateHeader(cert, signatureAlgorithm, false, false);
+        jwt = JWTUtil.generateHeader(cert, signatureAlgorithm, false, false, false);
         Assert.assertNotNull(jwt);
         Assert.assertFalse(jwt.contains("kid"));
 

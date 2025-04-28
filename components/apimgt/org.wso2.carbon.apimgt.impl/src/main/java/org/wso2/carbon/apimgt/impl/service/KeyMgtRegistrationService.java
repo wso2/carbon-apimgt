@@ -29,6 +29,8 @@ import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.TokenHandlingDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -79,6 +81,11 @@ public final class KeyMgtRegistrationService {
                 keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.TOKEN_FORMAT_STRING,
                         new Gson().toJson(Arrays.asList(tokenHandlingDto)));
                 instance.addKeyManagerConfiguration(keyManagerConfigurationDTO);
+                // Populate the Resident Key Manager details and send the KM creation event
+                KeyManagerConfigurationDTO populatedKMConfigurationDTO = APIUtil.getAndSetDefaultKeyManagerConfiguration(
+                        keyManagerConfigurationDTO);
+                new KeyMgtNotificationSender()
+                        .notify(populatedKMConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD);
             }
         }
     }

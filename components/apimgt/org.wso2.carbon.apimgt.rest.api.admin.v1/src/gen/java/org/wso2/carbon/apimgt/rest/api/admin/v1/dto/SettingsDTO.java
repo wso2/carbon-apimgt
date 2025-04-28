@@ -28,6 +28,7 @@ public class SettingsDTO   {
     private Boolean isJWTEnabledForLoginTokens = false;
     private List<SettingsKeyManagerConfigurationDTO> keyManagerConfiguration = new ArrayList<SettingsKeyManagerConfigurationDTO>();
     private Boolean analyticsEnabled = null;
+    private Boolean transactionCounterEnable = null;
 
   /**
    **/
@@ -116,6 +117,24 @@ public class SettingsDTO   {
     this.analyticsEnabled = analyticsEnabled;
   }
 
+  /**
+   * To determine whether the transaction counter is enabled or not
+   **/
+  public SettingsDTO transactionCounterEnable(Boolean transactionCounterEnable) {
+    this.transactionCounterEnable = transactionCounterEnable;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "To determine whether the transaction counter is enabled or not")
+  @JsonProperty("transactionCounterEnable")
+  public Boolean isTransactionCounterEnable() {
+    return transactionCounterEnable;
+  }
+  public void setTransactionCounterEnable(Boolean transactionCounterEnable) {
+    this.transactionCounterEnable = transactionCounterEnable;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -130,12 +149,13 @@ public class SettingsDTO   {
         Objects.equals(gatewayTypes, settings.gatewayTypes) &&
         Objects.equals(isJWTEnabledForLoginTokens, settings.isJWTEnabledForLoginTokens) &&
         Objects.equals(keyManagerConfiguration, settings.keyManagerConfiguration) &&
-        Objects.equals(analyticsEnabled, settings.analyticsEnabled);
+        Objects.equals(analyticsEnabled, settings.analyticsEnabled) &&
+        Objects.equals(transactionCounterEnable, settings.transactionCounterEnable);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, keyManagerConfiguration, analyticsEnabled);
+    return Objects.hash(scopes, gatewayTypes, isJWTEnabledForLoginTokens, keyManagerConfiguration, analyticsEnabled, transactionCounterEnable);
   }
 
   @Override
@@ -148,6 +168,7 @@ public class SettingsDTO   {
     sb.append("    isJWTEnabledForLoginTokens: ").append(toIndentedString(isJWTEnabledForLoginTokens)).append("\n");
     sb.append("    keyManagerConfiguration: ").append(toIndentedString(keyManagerConfiguration)).append("\n");
     sb.append("    analyticsEnabled: ").append(toIndentedString(analyticsEnabled)).append("\n");
+    sb.append("    transactionCounterEnable: ").append(toIndentedString(transactionCounterEnable)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -34,8 +34,11 @@ import org.wso2.carbon.apimgt.cleanup.service.IdpKeyMangerPurge;
 import org.wso2.carbon.apimgt.cleanup.service.OrganizationPurgeDAO;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -53,11 +56,13 @@ public class IdpKmPurgeTest {
     private OrganizationPurgeDAO organizationPurgeDAO;
     private ApiMgtDAO apiMgtDAO;
     private APIAdminImpl amAdmin;
+    private ServiceReferenceHolder serviceReferenceHolder;
 
     @Before public void init() {
         organizationPurgeDAO = Mockito.mock(OrganizationPurgeDAO.class);
         apiMgtDAO = Mockito.mock(ApiMgtDAO.class);
         amAdmin = Mockito.mock(APIAdminImpl.class);
+        serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
     }
 
     @Test public void testOrganizationRemoval() throws APIManagementException, UserStoreException {
@@ -79,7 +84,24 @@ public class IdpKmPurgeTest {
         Mockito.doReturn(true).when(organizationPurgeDAO).keyManagerOrganizationExist(Mockito.anyString());
         Mockito.doNothing().when(amAdmin).deleteIdentityProvider("testOrg", kmConfig);
 
+        // Mock eventhub configuration
+        PowerMockito.mockStatic(ServiceReferenceHolder.class);
+        PowerMockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        ServiceReferenceHolder serviceReferenceHolder = Mockito.mock(ServiceReferenceHolder.class);
+        APIManagerConfigurationService apiManagerConfigurationService = Mockito
+                .mock(APIManagerConfigurationService.class);
+        Mockito.when(ServiceReferenceHolder.getInstance()).thenReturn(serviceReferenceHolder);
+        Mockito.when(serviceReferenceHolder.getAPIManagerConfigurationService()).
+                thenReturn(apiManagerConfigurationService);
+        APIManagerConfiguration apiManagerConfiguration = Mockito.mock(APIManagerConfiguration.class);
+        Mockito.when(apiManagerConfigurationService.getAPIManagerConfiguration()).thenReturn(apiManagerConfiguration);
+        EventHubConfigurationDto eventHubConfigurationDto = Mockito.mock(EventHubConfigurationDto.class);
+        Mockito.when(apiManagerConfiguration.getEventHubConfigurationDto()).thenReturn(eventHubConfigurationDto);
+        Mockito.when(eventHubConfigurationDto.isEnabled()).thenReturn(true);
+
         Mockito.when(APIUtil.isInternalOrganization("testOrg")).thenReturn(true);
+        Mockito.when(APIUtil.getAndSetDefaultKeyManagerConfiguration(Mockito.any()))
+                .thenReturn(new KeyManagerConfigurationDTO());
         IdpKeyMangerPurge kmPurge = new IdpKeyManagerPurgeWrapper(organizationPurgeDAO);
         LinkedHashMap<String, String> subtaskResult =  kmPurge.purge("testOrg");
 

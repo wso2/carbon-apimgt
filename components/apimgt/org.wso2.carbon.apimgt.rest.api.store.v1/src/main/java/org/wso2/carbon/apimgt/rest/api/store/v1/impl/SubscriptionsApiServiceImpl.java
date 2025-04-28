@@ -26,6 +26,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.SubscriptionBlockedException;
@@ -215,6 +216,13 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
                 return null;
             }
 
+            if (APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS.equalsIgnoreCase(body.getThrottlingPolicy())
+                    || APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS
+                    .equalsIgnoreCase(body.getThrottlingPolicy())) {
+                throw new APIManagementException("Subscribing to the API with an internal business plan is not allowed",
+                        ExceptionCodes.from(ExceptionCodes.BUSINESS_PLAN_NOT_ALLOWED, body.getThrottlingPolicy()));
+            }
+
             if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                 //application access failure occurred
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
@@ -323,6 +331,13 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             if (!RestAPIStoreUtils.isUserAccessAllowedForApplication(application)) {
                 //application access failure occurred
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+
+            if (APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS.equalsIgnoreCase(body.getRequestedThrottlingPolicy())
+                    || APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS
+                    .equalsIgnoreCase(body.getRequestedThrottlingPolicy())) {
+                throw new APIManagementException(ExceptionCodes.from(ExceptionCodes.BUSINESS_PLAN_NOT_ALLOWED,
+                        body.getRequestedThrottlingPolicy()));
             }
 
             ApiTypeWrapper apiTypeWrapper = apiConsumer.getAPIorAPIProductByUUID(body.getApiId(), organization);

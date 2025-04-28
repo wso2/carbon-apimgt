@@ -60,7 +60,7 @@ public class MutualSSLAuthenticator implements Authenticator {
     private boolean isMandatory;
 
     // <UniqueIdentifierName,Tier> -Format
-    private HashMap<String, String> certificates;
+    private Map<String, Map<String, String>> certificates;
 
     /**
      * Initialized the mutual SSL authenticator.
@@ -74,11 +74,15 @@ public class MutualSSLAuthenticator implements Authenticator {
         if (StringUtils.isNotEmpty(certificateDetails)) {
             String[] certificateParts = certificateDetails.substring(1, certificateDetails.length() - 1).split(",");
             for (String certificatePart : certificateParts) {
+                HashMap<String, String> certificateData = new HashMap<>();
                 int tierDivisionIndex = certificatePart.lastIndexOf("=");
                 if (tierDivisionIndex > 0) {
                     String uniqueIdentifier = certificatePart.substring(0, tierDivisionIndex).trim();
-                    String tier = certificatePart.substring(tierDivisionIndex + 1);
-                    certificates.put(uniqueIdentifier, tier);
+                    String tierAndKeyTypeString = certificatePart.substring(tierDivisionIndex + 1);
+                    String[] tierAndKeyType = tierAndKeyTypeString.split(APIConstants.DELEM_COLON);
+                    certificateData.put(APIConstants.CLIENT_CERTIFICATE_TIER, tierAndKeyType[0]);
+                    certificateData.put(APIConstants.CLIENT_CERTIFICATE_KEY_TYPE, tierAndKeyType[1]);
+                    certificates.put(uniqueIdentifier, certificateData);
                 }
             }
         }
@@ -177,11 +181,18 @@ public class MutualSSLAuthenticator implements Authenticator {
         String subjectDN = x509Certificate.getSubjectDN().getName();
         String uniqueIdentifier = (x509Certificate.getSerialNumber() + "_" + x509Certificate.getSubjectDN()).replaceAll(",",
                         "#").replaceAll("\"", "'").trim();
-        String tier = certificates.get(uniqueIdentifier);
+        /* Since there can be previously deleted certificates persisted in the trust store that matches with the
+        certificate object but not in the certificates list for the particular API.
+        */
+        if (certificates.get(uniqueIdentifier) == null ) {
+            handleCertificateNotAssociatedToAPIFailure(messageContext);
+        }
+        String tier = certificates.get(uniqueIdentifier).get(APIConstants.CLIENT_CERTIFICATE_TIER);
+        String keyType = certificates.get(uniqueIdentifier).get(APIConstants.CLIENT_CERTIFICATE_KEY_TYPE);
         if (StringUtils.isEmpty(tier)) {
             handleCertificateNotAssociatedToAPIFailure(messageContext);
         }
-        setAuthenticationContext(messageContext, subjectDN, uniqueIdentifier, tier);
+        setAuthenticationContext(messageContext, subjectDN, uniqueIdentifier, tier, keyType);
     }
 
     /**
@@ -195,6 +206,7 @@ public class MutualSSLAuthenticator implements Authenticator {
             throws APISecurityException, APIManagementException {
 
         String tier = null;
+        String keyType = null;
         List<X509Certificate> x509Certificates = Utils.convertCertificatesToX509Certificates(certificatesArray);
         String subjectDN = x509Certificates.get(0).getSubjectDN().getName();
         String issuerDNIdentifier = x509Certificates.get(x509Certificates.size() - 1).getIssuerDN().getName()
@@ -205,11 +217,12 @@ public class MutualSSLAuthenticator implements Authenticator {
             String subjectDNIdentifier = (x509Certificate.getSerialNumber() + "_"
                     + x509Certificate.getSubjectDN()).replaceAll(",", "#").replaceAll("\"", "'").trim();
             subjectDNIdentifiers.add(subjectDNIdentifier);
-            for (Map.Entry<String, String> entry : certificates.entrySet()) {
+            for (Map.Entry<String, Map<String, String>> entry : certificates.entrySet()) {
                 String key = entry.getKey();
                 if (StringUtils.equals(subjectDNIdentifier, key)) {
                     uniqueIdentifier = key;
-                    tier = entry.getValue();
+                    tier = entry.getValue().get(APIConstants.CLIENT_CERTIFICATE_TIER);
+                    keyType = entry.getValue().get(APIConstants.CLIENT_CERTIFICATE_KEY_TYPE);
                     break;
                 }
             }
@@ -218,36 +231,38 @@ public class MutualSSLAuthenticator implements Authenticator {
             }
         }
         if (StringUtils.isEmpty(tier)) {
-            for (Map.Entry<String, String> entry : certificates.entrySet()) {
+            for (Map.Entry<String, Map<String, String>> entry : certificates.entrySet()) {
                 String key = entry.getKey();
                 if (key.contains(issuerDNIdentifier)) {
                     uniqueIdentifier = key;
-                    tier = entry.getValue();
+                    tier = entry.getValue().get(APIConstants.CLIENT_CERTIFICATE_TIER);
+                    keyType = entry.getValue().get(APIConstants.CLIENT_CERTIFICATE_KEY_TYPE);
                 }
             }
         }
-        if (StringUtils.isEmpty(tier)) {
-            tier = getTierFromCompleteCertificateChain(x509Certificates, subjectDNIdentifiers);
+        if (StringUtils.isEmpty(tier) || StringUtils.isEmpty(keyType)) {
+            subjectDNIdentifiers = getUniqueIdentifierFromCompleteCertificateChain(x509Certificates, subjectDNIdentifiers);
+            tier = getTierFromCompleteCertificateChain(subjectDNIdentifiers);
+            keyType = getKeyTypeFromCompleteCertificateChain(subjectDNIdentifiers);
         }
-        if (StringUtils.isEmpty(tier)) {
+
+        if (StringUtils.isEmpty(tier) || StringUtils.isEmpty(keyType)) {
             handleCertificateNotAssociatedToAPIFailure(messageContext);
         }
-        setAuthenticationContext(messageContext, subjectDN, uniqueIdentifier, tier);
+        setAuthenticationContext(messageContext, subjectDN, uniqueIdentifier, tier, keyType);
     }
 
     /**
-     * Fetches tier assigned to the client certificate after making the complete certificate chain using certificates
-     * in truststore.
+     * Fetches the list of uniqueIdentifiers for complete certificate chain using certificates in truststore.
      *
-     * @param x509Certificates  Client certificate chain
+     * @param x509Certificates client certificates chain
      * @param uniqueIdentifiers Unique identifiers list for client certificate chain
-     * @return Tier
+     * @return uniqueIdentifiers
      * @throws APIManagementException
      */
-    private String getTierFromCompleteCertificateChain(List<X509Certificate> x509Certificates,
-            List<String> uniqueIdentifiers) throws APIManagementException {
+    private List<String> getUniqueIdentifierFromCompleteCertificateChain(List<X509Certificate> x509Certificates,
+                List<String> uniqueIdentifiers) throws APIManagementException {
 
-        String tier = null;
         X509Certificate certificate = x509Certificates.get(x509Certificates.size() - 1);
         String subjectDN = certificate.getSubjectDN().getName();
         String issuerDN = certificate.getIssuerDN().getName();
@@ -266,14 +281,47 @@ public class MutualSSLAuthenticator implements Authenticator {
                 isIssuerCertificateUpdated = !StringUtils.equals(subjectDN, issuerDN);
             }
         }
+        return uniqueIdentifiers;
+    }
 
+    /**
+     * Fetches tier assigned to the client certificate after making the complete certificate chain using certificates
+     * in truststore.
+     *
+     * @param uniqueIdentifiers Unique identifiers list for client certificate chain
+     * @return Tier
+     */
+    private String getTierFromCompleteCertificateChain(List<String> uniqueIdentifiers) {
+
+        String tier = null;
         for (String uniqueIdentifier : uniqueIdentifiers) {
-            tier = certificates.get(uniqueIdentifier);
+            tier = certificates.get(uniqueIdentifier) == null ? null :
+                    certificates.get(uniqueIdentifier).get(APIConstants.CLIENT_CERTIFICATE_TIER);
             if (StringUtils.isNotEmpty(tier)) {
                 break;
             }
         }
         return tier;
+    }
+
+    /**
+     * Fetches keyType assigned to the client certificate after making the complete certificate chain using certificates
+     * in truststore.
+     *
+     * @param uniqueIdentifiers Unique identifiers list for client certificate chain
+     * @return keyType
+     */
+    private String getKeyTypeFromCompleteCertificateChain(List<String> uniqueIdentifiers) {
+
+        String keyType = null;
+        for (String uniqueIdentifier : uniqueIdentifiers) {
+            keyType = certificates.get(uniqueIdentifier) == null ? null :
+                    certificates.get(uniqueIdentifier).get(APIConstants.CLIENT_CERTIFICATE_KEY_TYPE);
+            if (StringUtils.isNotEmpty(keyType)) {
+                break;
+            }
+        }
+        return keyType;
     }
 
     /**
@@ -321,7 +369,7 @@ public class MutualSSLAuthenticator implements Authenticator {
      * @param tier              Throttling policy tier
      */
     private void setAuthenticationContext(MessageContext messageContext, String subjectDN, String uniqueIdentifier,
-            String tier) {
+            String tier, String keyType) {
 
         AuthenticationContext authContext = new AuthenticationContext();
         authContext.setAuthenticated(true);
@@ -331,6 +379,7 @@ public class MutualSSLAuthenticator implements Authenticator {
             for (Rdn rdn : ldapDN.getRdns()) {
                 if (APIConstants.CERTIFICATE_COMMON_NAME.equalsIgnoreCase(rdn.getType())) {
                     authContext.setUsername((String) rdn.getValue());
+                    messageContext.setProperty(APIConstants.CERTIFICATE_COMMON_NAME, rdn.getValue());
                 }
             }
         } catch (InvalidNameException e) {
@@ -340,10 +389,14 @@ public class MutualSSLAuthenticator implements Authenticator {
         }
         authContext.setApiTier(apiLevelPolicy);
         APIIdentifier apiIdentifier = getAPIIdentifier(messageContext);
-        authContext.setKeyType(APIConstants.API_KEY_TYPE_PRODUCTION);
+        authContext.setKeyType(keyType);
         authContext.setStopOnQuotaReach(true);
         authContext.setApiKey(uniqueIdentifier + "_" + apiIdentifier.toString());
         authContext.setTier(tier);
+        authContext.setApplicationName(APIConstants.MUTUAL_SSL_AUTH_APPLICATION_NAME);
+        authContext.setSubscriber(APIConstants.MUTUAL_SSL_AUTH_APPLICATION_OWNER);
+        authContext.setApplicationId(APIConstants.MUTUAL_SSL_AUTH_APPLICATION_NAME);
+        authContext.setApplicationUUID(APIConstants.MUTUAL_SSL_AUTH_APPLICATION_NAME);
         /* For the mutual SSL based authenticated request, the resource level throttling is not considered, hence
         assigning the unlimited tier for that. */
         List<VerbInfoDTO> verbInfoList = new ArrayList<>(1);

@@ -171,7 +171,7 @@ public class ThrottleTimeBatchWindowTestCase {
         executionPlanRuntime.start();
         inputHandler.send(new Object[]{"IBM", 700f, 0});
         inputHandler.send(new Object[]{"WSO2", 60.5f, 1});
-        Thread.sleep(260000);
+        Thread.sleep(121000);
         inputHandler.send(new Object[]{"IBM", 700f, 0});
         Assert.assertEquals(3, inEventCount);
         Assert.assertTrue("Event expiry time is not valid for the current batch" , (Long) (lastCurrentEvent.getData()[3]) >= System.currentTimeMillis());

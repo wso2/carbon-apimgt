@@ -46,6 +46,27 @@ public class GatewayUtils {
         gatewayAPIDTO.setSequencesToBeRemove(addStringToList(faultSequence, gatewayAPIDTO.getSequencesToBeRemove()));
     }
 
+    public static void setCustomBackendToBeRemoved(GatewayAPIDTO gatewayAPIDTO) {
+        String sandBoxBackend = APIUtil.getCustomBackendName(gatewayAPIDTO.getApiId(),
+                APIConstants.API_KEY_TYPE_SANDBOX);
+        gatewayAPIDTO.setSequencesToBeRemove(addStringToList(sandBoxBackend, gatewayAPIDTO.getSequencesToBeRemove()));
+        String productionBackend = APIUtil.getCustomBackendName(gatewayAPIDTO.getApiId(),
+                APIConstants.API_KEY_TYPE_PRODUCTION);
+        gatewayAPIDTO.setSequencesToBeRemove(
+                addStringToList(productionBackend, gatewayAPIDTO.getSequencesToBeRemove()));
+    }
+
+    public static void setCustomBackendToBeRemoved(APIProductIdentifier apiProductIdentifier, String apiUUID,
+            GatewayAPIDTO gatewayAPIDTO) {
+        String sandBoxBackend = APIUtil.getCustomBackendName(apiProductIdentifier.getUUID().concat("-" + apiUUID),
+                APIConstants.API_KEY_TYPE_SANDBOX);
+        gatewayAPIDTO.setSequencesToBeRemove(addStringToList(sandBoxBackend, gatewayAPIDTO.getSequencesToBeRemove()));
+        String productionBackend = APIUtil.getCustomBackendName(apiProductIdentifier.getUUID().concat("-" + apiUUID),
+                APIConstants.API_KEY_TYPE_PRODUCTION);
+        gatewayAPIDTO.setSequencesToBeRemove(
+                addStringToList(productionBackend, gatewayAPIDTO.getSequencesToBeRemove()));
+    }
+
     public static String[] addStringToList(String key, String[] keys) {
 
         if (keys == null) {

@@ -132,6 +132,11 @@ public class APIProduct implements Serializable {
      * Used to set the workflow status in lifecycle state change workflow
      */
     private String workflowStatus = null;
+
+    /**
+     * Used to set the audiences values in jwt audience validation
+     */
+    private Set<String> audiences;
     private Boolean isDefaultVersion = true;
     private boolean isPublishedDefaultVersion = false;
     public APIProduct(){}
@@ -222,6 +227,24 @@ public class APIProduct implements Serializable {
             this.type = type;
         }
     }
+
+    /**
+     * To get the audiences for jwt validation
+     *
+     * @return audiences of the API
+     */
+    public Set<String> getAudiences() {
+        return audiences;
+    }
+
+    /**
+     * To set the audiences for jwt validation
+     *
+     */
+    public void setAudiences(Set<String> audiences) {
+        this.audiences = audiences;
+    }
+
     public String getBusinessOwner() {
         return businessOwner;
     }
@@ -679,5 +702,18 @@ public class APIProduct implements Serializable {
     public void setWorkflowStatus(String workflowStatus) {
 
         this.workflowStatus = workflowStatus;
+    }
+
+    /**
+     * Whether the API Product is Egress (1) or not (0)
+     */
+    private int isEgress;
+
+    public int isEgress() {
+        return isEgress;
+    }
+
+    public void setEgress(int egress) {
+        isEgress = egress;
     }
 }

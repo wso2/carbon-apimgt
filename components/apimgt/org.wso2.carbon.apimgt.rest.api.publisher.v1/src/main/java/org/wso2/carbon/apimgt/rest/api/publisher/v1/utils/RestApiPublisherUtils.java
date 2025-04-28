@@ -277,6 +277,20 @@ public class RestApiPublisherUtils {
         return fileContentType;
     }
 
+    public static File exportCustomBackendData(String seq, String seqName) throws APIManagementException {
+        try {
+            // Provided Sequence Name by the user
+            String customBackendName = seqName;
+            if (!customBackendName.contains(".xml")) {
+                customBackendName = seqName + APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML;
+            }
+            CommonUtil.writeFile(customBackendName, seq);
+            return new File(customBackendName);
+        } catch (APIImportExportException ex) {
+            throw new APIManagementException("Error when exporting Custom Backend: " + seqName, ex);
+        }
+    }
+
     public static File exportOperationPolicyData(OperationPolicyData policyData, String format)
             throws APIManagementException {
 
@@ -293,11 +307,11 @@ public class RestApiPublisherUtils {
                 if (format.equalsIgnoreCase(ExportFormat.YAML.name())) {
                     CommonUtil.writeDtoToFile(policyName, ExportFormat.YAML,
                             ImportExportConstants.TYPE_POLICY_SPECIFICATION,
-                            policyData.getSpecification(), "v4.3.0");
+                            policyData.getSpecification(), ImportExportConstants.APIM_VERSION);
                 } else if (format.equalsIgnoreCase(ExportFormat.JSON.name())) {
                     CommonUtil.writeDtoToFile(policyName, ExportFormat.JSON,
                             ImportExportConstants.TYPE_POLICY_SPECIFICATION,
-                            policyData.getSpecification(), "v4.3.0");
+                            policyData.getSpecification(), ImportExportConstants.APIM_VERSION);
                 }
             }
             if (policyData.getSynapsePolicyDefinition() != null) {
@@ -449,7 +463,7 @@ public class RestApiPublisherUtils {
          * If the resolved path does not start with the base directory path,
          * it indicates an attempt to escape the intended directory structure.
          */
-        if (!resolvedPath.startsWith(baseDirPath)) {
+        if (!resolvedPath.startsWith(baseDirPath.normalize())) {
             throw new APIManagementException("Error resolving path. The user path attempts" +
                     " to escape the base directory.");
         }

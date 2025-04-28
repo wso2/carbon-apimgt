@@ -18,12 +18,15 @@
 package org.wso2.carbon.apimgt.keymgt.model.impl;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -450,6 +453,27 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
 
     }
 
+    @Override
+    public void subscribeToAPIInternally(API api, Application app, String tenantDomain) {
+        String path  = String.format("%s?appId=%s&appUuid=%s",
+                APIConstants.SubscriptionValidationResources.SUBSCRIBE_INTERNAL, app.getId(), app.getUUID());
+        Gson gson = new Gson();
+        String apiJson = gson.toJson(api);
+        JsonObject apiJsonObject = gson.fromJson(apiJson, JsonObject.class);
+        // Remove the deployed property from the API object before sending to the internal API
+        // as this is not there in the internal DTO
+        apiJsonObject.remove("deployed");
+        String modifiedApiJson = gson.toJson(apiJsonObject);
+
+        try {
+            invokePostService(path, tenantDomain, modifiedApiJson);
+        } catch (IOException | DataLoadingException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Error while subscribing to API", e);
+            }
+        }
+    }
+
     private String invokeService(String path, String tenantDomain) throws DataLoadingException, IOException {
 
         String serviceURLStr = getEventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP);
@@ -477,6 +501,36 @@ public class SubscriptionDataLoaderImpl implements SubscriptionDataLoader {
                 log.debug("Response : " + responseString);
             }
             return responseString;
+    }
+
+    private void invokePostService(String path, String tenantDomain, String payload)
+            throws IOException, DataLoadingException {
+        String serviceURLStr = getEventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP);
+        HttpPost post = new HttpPost(serviceURLStr + path);
+        URL serviceURL = new URL(serviceURLStr + path);
+        byte[] credentials = getServiceCredentials(getEventHubConfigurationDto);
+        int servicePort = serviceURL.getPort();
+        String serviceProtocol = serviceURL.getProtocol();
+        post.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                APIConstants.AUTHORIZATION_BASIC +
+                        new String(credentials, StandardCharsets.UTF_8));
+        post.setHeader("Content-Type", "application/json");
+        if (tenantDomain != null) {
+            post.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
+        }
+        post.setEntity(new StringEntity(payload));
+
+        HttpClient httpClient = APIUtil.getHttpClient(servicePort, serviceProtocol);
+        String responseString;
+        try (CloseableHttpResponse httpResponse = APIUtil.executeHTTPRequest(post, httpClient)) {
+            responseString = EntityUtils.toString(httpResponse.getEntity(), UTF8);
+        } catch (APIManagementException e) {
+            throw new DataLoadingException("Error while invoking post service", e);
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Response : " + responseString);
+        }
     }
 
     private byte[] getServiceCredentials(EventHubConfigurationDto eventHubConfigurationDto) {

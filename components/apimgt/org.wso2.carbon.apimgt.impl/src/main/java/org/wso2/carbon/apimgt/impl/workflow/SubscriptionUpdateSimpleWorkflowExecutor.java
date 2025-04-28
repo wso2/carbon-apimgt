@@ -60,25 +60,6 @@ public class SubscriptionUpdateSimpleWorkflowExecutor extends WorkflowExecutor {
     }
 
     /**
-     * This method is responsible for updating monetization logic and returns the execute method.
-     *
-     * @param workflowDTO The WorkflowDTO which contains workflow contextual information related to the workflow
-     * @return workflow response to the caller by returning the execute() method
-     * @throws WorkflowException
-     */
-    @Override
-    public WorkflowResponse monetizeSubscription(WorkflowDTO workflowDTO, API api) throws WorkflowException {
-        // implementation is not provided in this version
-        return execute(workflowDTO);
-    }
-
-    @Override
-    public WorkflowResponse monetizeSubscription(WorkflowDTO workflowDTO, APIProduct apiProduct) throws WorkflowException {
-        // implementation is not provided in this version
-        return execute(workflowDTO);
-    }
-
-    /**
      * This method completes subscription update simple workflow and return workflow response back to the caller
      *
      * @param workflowDTO The WorkflowDTO which contains workflow contextual information related to the workflow

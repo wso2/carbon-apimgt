@@ -43,6 +43,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.SynapseConstants;
+import org.wso2.carbon.apimgt.common.gateway.constants.HealthCheckConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
@@ -58,6 +59,7 @@ import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponse
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundWebSocketProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -79,6 +81,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
     private WebSocketAnalyticsMetricsHandler metricsHandler;
     private InboundWebSocketProcessor webSocketProcessor;
     private final String API_PROPERTIES = "API_PROPERTIES";
+    private final String API_CONTEXT_URI = "API_CONTEXT_URI";
     private final String WEB_SC_API_UT = "api.ut.WS_SC";
 
     public WebsocketInboundHandler() {
@@ -129,6 +132,29 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             return;
         }
 
+        if (msg instanceof FullHttpRequest && ((FullHttpRequest) msg).headers() != null
+                && !((FullHttpRequest) msg).headers().contains(HttpHeaders.UPGRADE)
+                && HealthCheckConstants.HEALTH_CHECK_API_CONTEXT.equals(((FullHttpRequest) msg).uri())) {
+            boolean isAllApisDeployed = GatewayUtils.isAllApisDeployed();
+            if (isAllApisDeployed) {
+                FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                        HttpResponseStatus.OK);
+                httpResponse.headers().set(APIConstants.HEADER_CONTENT_TYPE, "text/plain; charset=UTF-8");
+                httpResponse.headers().set(APIConstants.HEADER_CONTENT_LENGTH,
+                        httpResponse.content().readableBytes());
+                ctx.writeAndFlush(httpResponse);
+                return;
+            } else {
+                FullHttpResponse httpResponse = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,
+                        HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                httpResponse.headers().set(APIConstants.HEADER_CONTENT_TYPE, "text/plain; charset=UTF-8");
+                httpResponse.headers().set(APIConstants.HEADER_CONTENT_LENGTH,
+                        httpResponse.content().readableBytes());
+                ctx.writeAndFlush(httpResponse);
+                return;
+            }
+        }
+
         InboundMessageContext inboundMessageContext;
         if (InboundMessageContextDataHolder.getInstance().getInboundMessageContextMap().containsKey(channelId)) {
             inboundMessageContext = InboundMessageContextDataHolder.getInstance()
@@ -161,6 +187,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                 if (!responseDTO.isError()) {
                     setApiAuthPropertiesToChannel(ctx, inboundMessageContext);
                     setApiPropertiesMapToChannel(ctx, inboundMessageContext);
+                    setApiContextUriToChannel(ctx, inboundMessageContext);
                     if (StringUtils.isNotEmpty(inboundMessageContext.getToken())) {
                         String backendJwtHeader = null;
                         JWTConfigurationDto jwtConfigurationDto = ServiceReferenceHolder.getInstance()
@@ -421,6 +448,13 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         ctx.channel().attr(AttributeKey.valueOf(API_PROPERTIES)).set(createApiPropertiesMap(inboundMessageContext));
     }
 
+    private void setApiContextUriToChannel(ChannelHandlerContext ctx, InboundMessageContext inboundMessageContext) {
+
+        Map<String, String> apiContextUriMap = new HashMap<>();
+        apiContextUriMap.put("apiContextUri", inboundMessageContext.getRequestPath());
+        ctx.channel().attr(AttributeKey.valueOf(API_CONTEXT_URI)).set(apiContextUriMap);
+    }
+
     private Map<String, Object> createApiPropertiesMap(InboundMessageContext inboundMessageContext) {
 
         Map<String, Object> apiPropertiesMap = new HashMap<>();
@@ -454,6 +488,18 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
             CorruptedWebSocketFrameException corruptedWebSocketFrameException = ((CorruptedWebSocketFrameException) cause);
             apiProperties.put(WEB_SC_API_UT, corruptedWebSocketFrameException.closeStatus().code());
         }
-        super.exceptionCaught(ctx, cause);
+
+        // Improve Websocket logging by adding API URI into log
+        Attribute<Object> apiContextUriAttributes = ctx.channel().attr(AttributeKey.valueOf(API_CONTEXT_URI));
+        HashMap apiContextUris = (HashMap) apiContextUriAttributes.get();
+        String apiContextUri = (String) apiContextUris.get("apiContextUri");
+
+        if (apiContextUri != null) {
+            Throwable newCause = new Throwable(cause.getMessage() + " For the URI: " + apiContextUri);
+            newCause.initCause(cause);
+            super.exceptionCaught(ctx, newCause);
+        } else {
+            super.exceptionCaught(ctx, cause);
+        }
     }
 }

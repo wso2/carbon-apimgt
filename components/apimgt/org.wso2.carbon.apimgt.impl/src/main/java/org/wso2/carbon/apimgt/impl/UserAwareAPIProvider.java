@@ -102,14 +102,15 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     @Override
     public int addClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String certificate, String alias,
-                                    String tierName, String organization) throws APIManagementException {
-        return super.addClientCertificate(userName, apiTypeWrapper, certificate, alias, tierName, organization);
+                                    String tierName, String keyType, String organization) throws APIManagementException {
+        return super.addClientCertificate(userName, apiTypeWrapper, certificate, alias, tierName, keyType,
+                organization);
     }
 
     @Override
-    public int deleteClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String alias)
+    public int deleteClientCertificate(String userName, ApiTypeWrapper apiTypeWrapper, String alias, String keyType)
             throws APIManagementException {
-        return super.deleteClientCertificate(userName, apiTypeWrapper, alias);
+        return super.deleteClientCertificate(userName, apiTypeWrapper, alias, keyType);
     }
 
     @Override
@@ -139,9 +140,9 @@ public class UserAwareAPIProvider extends APIProviderImpl {
     }
 
     @Override
-    public ClientCertificateDTO getClientCertificate(String alias, ApiTypeWrapper apiTypeWrapper, String organization)
-            throws APIManagementException {
-        return super.getClientCertificate(alias,apiTypeWrapper, organization);
+    public ClientCertificateDTO getClientCertificate(String alias, String keyType, ApiTypeWrapper apiTypeWrapper,
+                                                     String organization) throws APIManagementException {
+        return super.getClientCertificate(alias, keyType, apiTypeWrapper, organization);
     }
 
     @Override
@@ -156,8 +157,10 @@ public class UserAwareAPIProvider extends APIProviderImpl {
 
     @Override
     public int updateClientCertificate(String certificate, String alias, ApiTypeWrapper apiIdentifier,
-                                       String tier, int tenantId, String organization) throws APIManagementException {
-        return super.updateClientCertificate(certificate, alias, apiIdentifier, tier, tenantId, organization);
+                                       String tier, String keyType, int tenantId, String organization)
+            throws APIManagementException {
+        return super.updateClientCertificate(certificate, alias, apiIdentifier, tier, keyType,
+                tenantId, organization);
     }
 
     @Override

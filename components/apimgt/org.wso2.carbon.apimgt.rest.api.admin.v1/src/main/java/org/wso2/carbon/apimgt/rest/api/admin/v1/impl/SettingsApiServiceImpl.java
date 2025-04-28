@@ -20,6 +20,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.SettingsApiService;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -51,6 +52,7 @@ public class SettingsApiServiceImpl implements SettingsApiService {
             }
             SettingsMappingUtil settingsMappingUtil = new SettingsMappingUtil();
             SettingsDTO settingsDTO = settingsMappingUtil.fromSettingsToDTO(isUserAvailable);
+            settingsDTO.setTransactionCounterEnable(APIUtil.getTransactionCounterEnable());
             return Response.ok().entity(settingsDTO).build();
     }
 }

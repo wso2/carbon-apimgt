@@ -89,6 +89,9 @@ public class SettingsMappingUtil {
             settingsDTO.setDocVisibilityEnabled(APIUtil.isDocVisibilityLevelsEnabled());
             settingsDTO.setPortalConfigurationOnlyModeEnabled(APIUtil.isPortalConfigurationOnlyModeEnabled());
             settingsDTO.setCrossTenantSubscriptionEnabled(APIUtil.isCrossTenantSubscriptionsEnabled());
+            settingsDTO.setAllowSubscriptionValidationDisabling(
+                    APIUtil.isSubscriptionValidationDisablingAllowed(organization));
+            settingsDTO.setRetryCallWithNewOAuthTokenEnabled(APIUtil.isRetryCallWithNewOAuthTokenEnabled());
             Map<String, Environment> gatewayEnvironments = APIUtil.getReadOnlyGatewayEnvironments();
             String authorizationHeader = APIUtil.getOAuthConfiguration(loggedInUserTenantDomain,
                     APIConstants.AUTHORIZATION_HEADER);

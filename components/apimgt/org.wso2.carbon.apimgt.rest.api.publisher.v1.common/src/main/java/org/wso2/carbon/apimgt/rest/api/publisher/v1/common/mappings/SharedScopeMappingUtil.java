@@ -75,6 +75,9 @@ public class SharedScopeMappingUtil {
             usedAPIInfoDTO.setProvider(apiIdentifier.getProviderName());
             usedAPIInfoDTO.setContext(api.getContext());
 
+            String revisionName = api.getRevisionId() != 0 ? "Revision " + api.getRevisionId() : "Current API";
+            usedAPIInfoDTO.setRevisionID(revisionName);
+
             List<SharedScopeUsedAPIResourceInfoDTO> usedAPIResourceInfoDTOList = new ArrayList<>();
             for (URITemplate uriTemplate : api.getUriTemplates()) {
                 SharedScopeUsedAPIResourceInfoDTO usedAPIResourceInfoDTO = new SharedScopeUsedAPIResourceInfoDTO();

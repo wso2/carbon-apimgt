@@ -18,11 +18,14 @@
 
 package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
+import org.apache.commons.lang3.StringUtils;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyDefinition;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,12 +70,13 @@ public class OperationPoliciesApiServiceImplUtils {
      * @param definition       Policy definition
      * @param gatewayType      Policy gateway type
      */
-    public static void preparePolicyDefinition(
-            OperationPolicyData policyData, OperationPolicyDefinition policyDefinition,
-            String definition, OperationPolicyDefinition.GatewayType gatewayType) {
+    public static void preparePolicyDefinition(OperationPolicyData policyData,
+                                               OperationPolicyDefinition policyDefinition, String definition,
+                                               OperationPolicyDefinition.GatewayType gatewayType)
+            throws APIManagementException {
         policyDefinition.setContent(definition);
         policyDefinition.setGatewayType(gatewayType);
-        policyDefinition.setMd5Hash(APIUtil.getMd5OfOperationPolicyDefinition(policyDefinition));
+        policyDefinition.setMd5Hash(APIUtil.getHashOfOperationPolicyDefinition(policyDefinition));
 
         if (OperationPolicyDefinition.GatewayType.Synapse.equals(gatewayType)) {
             policyData.setSynapsePolicyDefinition(policyDefinition);
@@ -80,7 +84,7 @@ public class OperationPoliciesApiServiceImplUtils {
             policyData.setCcPolicyDefinition(policyDefinition);
         }
 
-        policyData.setMd5Hash(APIUtil.getMd5OfOperationPolicy(policyData));
+        policyData.setMd5Hash(APIUtil.getHashOfOperationPolicy(policyData));
     }
 
     /**
@@ -90,15 +94,17 @@ public class OperationPoliciesApiServiceImplUtils {
      * @return Map of query params
      */
     public static Map<String, String> getQueryParams(String query) {
+        if (query == null || StringUtils.isBlank(query)) {
+            return Collections.emptyMap();
+        }
         Map<String, String> queryParamMap = new HashMap<>();
-        String[] queryParams = query.split(" ");
-        for (String param : queryParams) {
-            String[] keyVal = param.split(":");
-            if (keyVal.length == 2) {
-                queryParamMap.put(keyVal[0], keyVal[1]);
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split(":");
+            if (keyValue.length == 2) {
+                queryParamMap.put(keyValue[0], keyValue[1]);
             }
         }
-
         return queryParamMap;
     }
 

@@ -36,7 +36,7 @@ import javax.ws.rs.core.SecurityContext;
 public interface ThrottlingApiService {
       public Response exportThrottlingPolicy(String policyId, String name, String type, MessageContext messageContext) throws APIManagementException;
       public Response importThrottlingPolicy(InputStream fileInputStream, Attachment fileDetail, Boolean overwrite, MessageContext messageContext) throws APIManagementException;
-      public Response throttlingDenyPoliciesGet(String accept, MessageContext messageContext) throws APIManagementException;
+      public Response throttlingDenyPoliciesGet(String accept, String query, MessageContext messageContext) throws APIManagementException;
       public Response throttlingDenyPoliciesPost(String contentType, BlockingConditionDTO blockingConditionDTO, MessageContext messageContext) throws APIManagementException;
       public Response throttlingDenyPolicyConditionIdDelete(String conditionId, MessageContext messageContext) throws APIManagementException;
       public Response throttlingDenyPolicyConditionIdGet(String conditionId, MessageContext messageContext) throws APIManagementException;

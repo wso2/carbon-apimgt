@@ -29,7 +29,9 @@ public class SearchResultDTO   {
     @XmlEnum(String.class)
     public enum TypeEnum {
         DOC("DOC"),
-        API("API");
+        API("API"),
+        APIPRODUCT("APIProduct"),
+        DEFINITION("DEFINITION");
         private String value;
 
         TypeEnum (String v) {

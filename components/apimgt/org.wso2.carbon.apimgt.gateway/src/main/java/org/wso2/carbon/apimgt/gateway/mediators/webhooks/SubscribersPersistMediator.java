@@ -64,7 +64,7 @@ public class SubscribersPersistMediator extends AbstractMediator {
             String mode = params.get(APIConstants.Webhooks.HUB_MODE_QUERY_PARAM);
             String secret = params.get(APIConstants.Webhooks.HUB_SECRET_QUERY_PARAM);
             String leaseSeconds = params.get(APIConstants.Webhooks.HUB_LEASE_SECONDS_QUERY_PARAM);
-            messageContext.setProperty(Constants.SKIP_DEFAULT_METRICS_PUBLISHING, true);
+            messageContext.setProperty(Constants.IS_ASYNC_API, true);
             org.apache.axis2.context.MessageContext axisCtx =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             axisCtx.setProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE, APIConstants.API_TYPE_WEBSUB);

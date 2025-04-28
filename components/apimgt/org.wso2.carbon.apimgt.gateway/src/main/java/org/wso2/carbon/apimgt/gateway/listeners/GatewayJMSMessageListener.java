@@ -25,14 +25,20 @@ import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.LLMProviderConfiguration;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
+import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
+import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
 import org.wso2.carbon.apimgt.common.jms.JMSConnectionEventListener;
 import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GatewayPolicyDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.LLMProviderManager;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -52,6 +58,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.CertificateEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.GatewayPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.GoogleAnalyticsConfigEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.LLMProviderEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ScopesEvent;
@@ -418,7 +425,83 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                     }
                 }
             }
+        } else if (EventType.LLM_PROVIDER_CREATE.toString().equals(eventType)) {
+            try {
+                LLMProviderEvent providerEvent = new Gson().fromJson(eventJson, LLMProviderEvent.class);
+                addProviderConfigurations(providerEvent, providerEvent.getTenantDomain());
+            } catch (Exception e) {
+                log.error("Error while handling LLM provider add event", e);
+            }
+        } else if (EventType.LLM_PROVIDER_DELETE.toString().equals(eventType)) {
+            try {
+                LLMProviderEvent providerEvent = new Gson().fromJson(eventJson, LLMProviderEvent.class);
+                removeProviderConfigurations(providerEvent.getId());
+            } catch (Exception e) {
+                log.error("Error while handling LLM provider delete event", e);
+            }
+        } else if (EventType.LLM_PROVIDER_UPDATE.toString().equals(eventType)) {
+            try {
+                LLMProviderEvent providerEvent = new Gson().fromJson(eventJson, LLMProviderEvent.class);
+                updateProviderConfigurations(providerEvent, providerEvent.getTenantDomain());
+            } catch (Exception e) {
+                log.error("Error while handling LLM provider update event", e);
+            }
         }
+    }
+
+    /**
+     * Adds new LLM provider configurations to the DataHolder.
+     *
+     * @param providerEvent LLMProviderEvent containing provider details.
+     * @param tenantDomain  Tenant Domain.
+     */
+    private void addProviderConfigurations(LLMProviderEvent providerEvent, String tenantDomain) {
+
+        LLMProviderInfo providerInfo = buildProviderInfo(providerEvent, tenantDomain);
+        DataHolder.getInstance().addLLMProviderConfigurations(providerInfo);
+    }
+
+    /**
+     * Updates existing LLM provider configurations in the DataHolder.
+     *
+     * @param providerEvent LLMProviderEvent containing provider details.
+     * @param tenantDomain  Tenant Domain.
+     */
+    private void updateProviderConfigurations(LLMProviderEvent providerEvent, String tenantDomain) {
+
+        LLMProviderInfo providerInfo = buildProviderInfo(providerEvent, tenantDomain);
+        DataHolder.getInstance().updateLLMProviderConfigurations(providerInfo);
+    }
+
+    /**
+     * Helper method to build LLMProviderInfo object from the event.
+     *
+     * @param providerEvent LLMProviderEvent containing provider details.
+     * @param tenantDomain  Tenant Domain.
+     * @return LLMProviderInfo object with populated configurations.
+     */
+    private LLMProviderInfo buildProviderInfo(LLMProviderEvent providerEvent, String tenantDomain) {
+
+        LLMProviderInfo providerInfo = new LLMProviderInfo();
+        providerInfo.setId(providerEvent.getId());
+        providerInfo.setName(providerEvent.getName());
+        providerInfo.setApiVersion(providerEvent.getApiVersion());
+        LLMProviderConfiguration configurations = new Gson().fromJson(providerEvent.getConfiguration(),
+                LLMProviderConfiguration.class);
+        providerInfo.setConfigurations(configurations);
+
+        return providerInfo;
+    }
+
+
+    /**
+     * Removes LLM provider configurations from the DataHolder.
+     *
+     * @param providerId LLMProvider ID.
+     */
+    private void removeProviderConfigurations(String providerId) {
+
+        DataHolder.getInstance().removeLLMProviderConfigurations(providerId);
     }
 
     private void endTenantFlow() {

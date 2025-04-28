@@ -799,6 +799,15 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_SUBSCRIPTION_POLICY, policyId, log);
             }
 
+            String existingPolicyQuotaType = existingPolicy.getDefaultQuotaPolicy().getType();
+            String dtoQuotaType = body.getDefaultLimit().getType().toString();
+            if (existingPolicyQuotaType.equals(PolicyConstants.AI_API_QUOTA_TYPE)
+                    != dtoQuotaType.equals(PolicyConstants.AI_API_QUOTA_TYPE_ENUM_VALUE)) {
+                throw new APIManagementException(
+                        "Subscription quota type can not be changed for AI Subscription policies.",
+                        ExceptionCodes.from(ExceptionCodes.SUBSCRIPTION_POLICY_UPDATE_TYPE_BAD_REQUEST));
+            }
+
             //overridden properties
             body.setPolicyId(policyId);
             body.setPolicyName(existingPolicy.getPolicyName());
@@ -1102,7 +1111,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             String userName = RestApiCommonUtil.getLoggedInUsername();
             ExportThrottlePolicyDTO exportPolicy = new ExportThrottlePolicyDTO();
             exportPolicy.type(RestApiConstants.RESOURCE_THROTTLING_POLICY);
-            exportPolicy.version("v4.3.0");
+            exportPolicy.version(ImportExportConstants.APIM_VERSION);
             type = (type == null) ? StringUtils.EMPTY : type;
             if (StringUtils.EMPTY.equals(type) || PolicyConstants.POLICY_LEVEL_APP.equals(type)) {
                 try {
@@ -1397,18 +1406,26 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
      * @return All matched block conditions to the given request
      */
     @Override
-    public Response throttlingDenyPoliciesGet(String accept, MessageContext messageContext) {
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            List<BlockConditionsDTO> blockConditions = apiProvider.getBlockConditions();
-            BlockingConditionListDTO listDTO =
-                    BlockingConditionMappingUtil.fromBlockConditionListToListDTO(blockConditions);
-            return Response.ok().entity(listDTO).build();
-        } catch (APIManagementException | ParseException e) {
-            String errorMessage = "Error while retrieving Block Conditions";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+    public Response throttlingDenyPoliciesGet(String accept, String query, MessageContext messageContext)
+            throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        List<BlockConditionsDTO> blockConditions = new ArrayList<>();
+        // If conditionType and conditionValue are provided, retrieve the block conditions list for the given values.
+        if (StringUtils.isNotEmpty(query)) {
+            Map<String, String> parametersMap = BlockingConditionMappingUtil.getQueryParams(query);
+            if (parametersMap != null && !parametersMap.isEmpty()) {
+                blockConditions = apiProvider.getLightweightBlockConditions(
+                        parametersMap.get(APIConstants.BLOCK_CONDITION_TYPE),
+                        parametersMap.get(APIConstants.BLOCK_CONDITION_VALUE));
+            } else {
+                throw new APIManagementException(ExceptionCodes.BLOCK_CONDITION_RETRIEVE_PARAMS_EXCEPTION);
+            }
+        } else {
+            blockConditions = apiProvider.getBlockConditions();
         }
-        return null;
+        BlockingConditionListDTO listDTO = BlockingConditionMappingUtil.fromBlockConditionListToListDTO(
+                blockConditions);
+        return Response.ok().entity(listDTO).build();
     }
 
     /**
@@ -1465,7 +1482,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                         + body.getConditionType() + ", " + "value: " + body.getConditionValue() + ". " + e.getMessage();
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (URISyntaxException | ParseException e) {
+        } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving Blocking Condition resource location: Condition type: "
                     + body.getConditionType() + ", " + "value: " + body.getConditionValue() + ". " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -1499,9 +1516,6 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                 String errorMessage = "Error while retrieving Block Condition. Id : " + conditionId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
-        } catch (ParseException e) {
-            String errorMessage = "Error while retrieving Blocking Conditions";
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -1568,7 +1582,7 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.DENY_POLICIES, new Gson().toJson(dto),
                     APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
             return Response.ok().entity(dto).build();
-        } catch (APIManagementException | ParseException e) {
+        } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_BLOCK_CONDITION, conditionId, e, log);
             } else {

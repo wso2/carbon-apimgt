@@ -49,6 +49,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.PostRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SequenceBackendListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.TopicListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
@@ -65,6 +66,7 @@ import javax.ws.rs.core.SecurityContext;
 
 public interface ApisApiService {
       public Response addAPIClientCertificate(String apiId, InputStream certificateInputStream, Attachment certificateDetail, String alias, String tier, MessageContext messageContext) throws APIManagementException;
+      public Response addAPIClientCertificateOfGivenKeyType(String keyType, String apiId, InputStream certificateInputStream, Attachment certificateDetail, String alias, String tier, MessageContext messageContext) throws APIManagementException;
       public Response addAPIDocument(String apiId, DocumentDTO documentDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response addAPIDocumentContent(String apiId, String documentId, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext) throws APIManagementException;
       public Response addAPIMonetization(String apiId, APIMonetizationInfoDTO apIMonetizationInfoDTO, MessageContext messageContext) throws APIManagementException;
@@ -80,6 +82,7 @@ public interface ApisApiService {
       public Response createNewAPIVersion(String newVersion, String apiId, Boolean defaultVersion, String serviceVersion, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPI(String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIClientCertificateByAlias(String alias, String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response deleteAPIClientCertificateByKeyTypeAndAlias(String keyType, String alias, String apiId, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIDocument(String apiId, String documentId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPILifecycleStatePendingTasks(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response deleteAPIRevision(String apiId, String revisionId, MessageContext messageContext) throws APIManagementException;
@@ -88,13 +91,16 @@ public interface ApisApiService {
       public Response deleteComment(String commentId, String apiId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deployAPIRevision(String apiId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO, MessageContext messageContext) throws APIManagementException;
-      public Response exportAPI(String apiId, String name, String version, String revisionNumber, String providerName, String format, Boolean preserveStatus, Boolean latestRevision, MessageContext messageContext) throws APIManagementException;
+      public Response exportAPI(String apiId, String name, String version, String revisionNumber, String providerName, String format, Boolean preserveStatus, Boolean latestRevision, String gatewayEnvironment, MessageContext messageContext) throws APIManagementException;
       public Response generateInternalAPIKey(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response generateMockScripts(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPI(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIClientCertificateByAlias(String alias, String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIClientCertificateByKeyTypeAndAlias(String keyType, String alias, String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getAPIClientCertificateContentByAlias(String apiId, String alias, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIClientCertificateContentByKeyTypeAndAlias(String apiId, String alias, String keyType, MessageContext messageContext) throws APIManagementException;
       public Response getAPIClientCertificates(String apiId, Integer limit, Integer offset, String alias, MessageContext messageContext) throws APIManagementException;
+      public Response getAPIClientCertificatesByKeyType(String keyType, String apiId, Integer limit, Integer offset, String alias, MessageContext messageContext) throws APIManagementException;
       public Response getAPIDocumentByDocumentId(String apiId, String documentId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIDocumentContentByDocumentId(String apiId, String documentId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIDocuments(String apiId, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
@@ -110,7 +116,7 @@ public interface ApisApiService {
       public Response getAPIRevisionDeployments(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getAPIRevisions(String apiId, String query, MessageContext messageContext) throws APIManagementException;
       public Response getAPISpecificOperationPolicyContentByPolicyId(String apiId, String operationPolicyId, MessageContext messageContext) throws APIManagementException;
-      public Response getAPISubscriptionPolicies(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getAPISubscriptionPolicies(String apiId, String xWSO2Tenant, String ifNoneMatch, Boolean isAiApi, MessageContext messageContext) throws APIManagementException;
       public Response getAPISwagger(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIThumbnail(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAllAPISpecificOperationPolicies(String apiId, Integer limit, Integer offset, String query, MessageContext messageContext) throws APIManagementException;
@@ -125,6 +131,8 @@ public interface ApisApiService {
       public Response getGraphQLPolicyComplexityTypesOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getOperationPolicyForAPIByPolicyId(String apiId, String operationPolicyId, MessageContext messageContext) throws APIManagementException;
       public Response getRepliesOfComment(String commentId, String apiId, String xWSO2Tenant, Integer limit, Integer offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException;
+      public Response getSequenceBackendContent(String type, String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response getSequenceBackendData(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getWSDLInfoOfAPI(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getWSDLOfAPI(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response importAPI(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider, Boolean rotateRevision, Boolean overwrite, Boolean preservePortalConfigurations, String accept, MessageContext messageContext) throws APIManagementException;
@@ -136,9 +144,12 @@ public interface ApisApiService {
       public Response publishAPIToExternalStores(String apiId, String externalStoreIds, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response reimportServiceFromCatalog(String apiId, MessageContext messageContext) throws APIManagementException;
       public Response restoreAPIRevision(String apiId, String revisionId, MessageContext messageContext) throws APIManagementException;
+      public Response sequenceBackendDelete(String type, String apiId, MessageContext messageContext) throws APIManagementException;
+      public Response sequenceBackendUpdate(String apiId, InputStream sequenceInputStream, Attachment sequenceDetail, String type, MessageContext messageContext) throws APIManagementException;
       public Response undeployAPIRevision(String apiId, String revisionId, String revisionNumber, Boolean allEnvironments, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateAPI(String apiId, APIDTO APIDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIClientCertificateByAlias(String alias, String apiId, InputStream certificateInputStream, Attachment certificateDetail, String tier, MessageContext messageContext) throws APIManagementException;
+      public Response updateAPIClientCertificateByKeyTypeAndAlias(String keyType, String alias, String apiId, InputStream certificateInputStream, Attachment certificateDetail, String tier, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIDeployment(String apiId, String deploymentId, APIRevisionDeploymentDTO apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIDocument(String apiId, String documentId, DocumentDTO documentDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response updateAPIGraphQLSchema(String apiId, String schemaDefinition, String ifMatch, MessageContext messageContext) throws APIManagementException;

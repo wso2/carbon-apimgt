@@ -21,6 +21,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyMappingRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyReGenerateResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationThrottleResetDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
@@ -56,6 +57,7 @@ public interface ApplicationsApiService {
       public Response applicationsApplicationIdOauthKeysKeyMappingIdPut(String applicationId, String keyMappingId, ApplicationKeyDTO applicationKeyDTO, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdOauthKeysKeyMappingIdRegenerateSecretPost(String applicationId, String keyMappingId, MessageContext messageContext) throws APIManagementException;
       public Response applicationsApplicationIdPut(String applicationId, ApplicationDTO applicationDTO, String ifMatch, MessageContext messageContext) throws APIManagementException;
+      public Response applicationsApplicationIdResetThrottlePolicyPost(String applicationId, ApplicationThrottleResetDTO applicationThrottleResetDTO, MessageContext messageContext) throws APIManagementException;
       public Response applicationsExportGet(String appName, String appOwner, Boolean withKeys, String format, MessageContext messageContext) throws APIManagementException;
       public Response applicationsGet(String groupId, String query, String sortBy, String sortOrder, Integer limit, Integer offset, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response applicationsImportPost(InputStream fileInputStream, Attachment fileDetail, Boolean preserveOwner, Boolean skipSubscriptions, String appOwner, Boolean skipApplicationKeys, Boolean update, MessageContext messageContext) throws APIManagementException;

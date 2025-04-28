@@ -91,6 +91,7 @@ public final class RestApiConstants {
     public static final String ALIAS_PARAM = "{alias}";
     public static final String LIMIT_PARAM = "{limit}";
     public static final String OFFSET_PARAM = "{offset}";
+    public static final String KEYTYPE_PARAM = "{keyType}";
     public static final String SORTBY_PARAM = "{sortBy}";
     public static final String SORTORDER_PARAM = "{sortOrder}";
     public static final String TYPE_PARAM = "{type}";
@@ -131,6 +132,7 @@ public final class RestApiConstants {
     public static final String RESOURCE_PATH_THROTTLING_POLICIES_GLOBAL = RESOURCE_PATH_THROTTLING_POLICIES
             + "/custom";
     public static final String RESOURCE_PATH_CATEGORY = "/categories";
+    public static final String RESOURCE_PATH_LLM_PROVIDER = "/llm-providers";
     public static final String KEY_MANAGERS = "/key-managers";
 
     // Used in XACML authentication interceptor: Deprecated
@@ -302,11 +304,11 @@ public final class RestApiConstants {
     public static final String MIGRATION_MODE = "migrationMode";
 
     public static final String CERTS_BASE_PATH = "/certificates";
-    public static final String CLIENT_CERTS_BASE_PATH = "/clientCertificates";
+    public static final String CLIENT_CERTS_BASE_PATH = "/client-certs/";
     public static final String CERTS_GET_PAGINATED_URL =
             CERTS_BASE_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + QUERY_PARAM;
     public static final String CLIENT_CERTS_GET_PAGINATED_URL =
-            CLIENT_CERTS_BASE_PATH + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + QUERY_PARAM;
+            CLIENT_CERTS_BASE_PATH + KEYTYPE_PARAM + "?limit=" + LIMIT_PARAM + "&offset=" + OFFSET_PARAM + QUERY_PARAM;
 
     public static final String IN_SEQUENCE = "in";
     public static final String OUT_SEQUENCE = "out";
