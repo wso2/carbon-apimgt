@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.importexport;
 
+import org.wso2.carbon.apimgt.impl.APIConstants;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -166,6 +168,7 @@ public final class ImportExportConstants {
     public static final String ALIAS_JSON_KEY = "alias";
 
     public static final String ENDPOINT_JSON_KEY = "endpoint";
+    public static final String KEY_TYPE_JSON_KEY = "keyType";
 
     public static final int REFER_REQUIRE_RE_SUBSCRIPTION_CHECK_ITEM = 1;
 
@@ -200,7 +203,7 @@ public final class ImportExportConstants {
 
     public static final String TYPE_POLICY_SPECIFICATION = "operation_policy_specification";
 
-    public static final String APIM_VERSION = "v4.3.0";
+    public static final String APIM_VERSION = "v4.4.0";
 
     public static final String ENDPOINT_CONFIG = "endpointConfig";
 
@@ -286,8 +289,12 @@ public final class ImportExportConstants {
     public static final String CLIENT_CERTIFICATES_DIRECTORY_PATH = File.separator + "Client-certificates";
     public static final String ENDPOINT_CERTIFICATES_META_DATA_FILE_PATH =
             ENDPOINT_CERTIFICATES_DIRECTORY_PATH + File.separator + "endpoint_certificates";
-    public static final String CLIENT_CERTIFICATES_META_DATA_FILE_PATH =
-            CLIENT_CERTIFICATES_DIRECTORY_PATH + File.separator + "client_certificates";
+    public static final String PRODUCTION_CLIENT_CERTIFICATES_META_DATA_FILE_PATH =
+            CLIENT_CERTIFICATES_DIRECTORY_PATH + File.separator + APIConstants.API_KEY_TYPE_PRODUCTION
+                    + File.separator + "client_certificates";
+    public static final String SANDBOX_CLIENT_CERTIFICATES_META_DATA_FILE_PATH =
+            CLIENT_CERTIFICATES_DIRECTORY_PATH + File.separator + APIConstants.API_KEY_TYPE_SANDBOX
+                    + File.separator + "client_certificates";
 
     //Deployment directory related constants
     public static final String DEPLOYMENT_DIRECTORY_NAME= "Deployment";
@@ -302,6 +309,7 @@ public final class ImportExportConstants {
     public static final String DISPLAY_ON_DEVPORTAL_OPTION = "displayOnDevportal";
 
     public static final String POLICIES_DIRECTORY = "Policies";
+    public static final String CUSTOM_BACKEND_DIRECTORY = "Sequence-Backend";
     public static final String SWAGGER_X_WSO2_APICTL_INIT = "x-wso2-apictl-init";
 
     public static final String EXPORT_POLICY_TYPE_YAML = "YAML";

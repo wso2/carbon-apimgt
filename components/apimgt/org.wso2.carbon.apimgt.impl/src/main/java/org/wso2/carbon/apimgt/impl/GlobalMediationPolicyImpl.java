@@ -8,6 +8,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -19,6 +20,7 @@ import org.wso2.carbon.registry.core.Registry;
 import org.wso2.carbon.registry.core.RegistryConstants;
 import org.wso2.carbon.registry.core.Resource;
 import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.exceptions.ResourceNotFoundException;
 import org.wso2.carbon.user.api.UserStoreException;
 
 import javax.xml.namespace.QName;
@@ -109,6 +111,9 @@ public class GlobalMediationPolicyImpl {
                     }
                 }
             }
+        } catch (ResourceNotFoundException e) {
+            ExceptionCodes errorHandler = ExceptionCodes.GLOBAL_MEDIATION_POLICIES_NOT_FOUND;
+            throw new APIManagementException(errorHandler);
         } catch (RegistryException e) {
             String msg = "Failed to get global mediation policies";
             throw new APIManagementException(msg, e);

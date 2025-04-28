@@ -27,6 +27,7 @@ import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.rest.RESTConstants;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
@@ -40,6 +41,7 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTDataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.jwt.SignedJWTInfo;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -333,27 +335,28 @@ public class ApiKeyAuthenticatorUtils {
     /**
      * This method is used to get the end user token for the API Key when backend JWT token generation is needed.
      *
-     * @param api                        The API object returned after validating API subscription.
+     * @param apiKeyValidationInfoDTO    The API Key validation info DTO.
      * @param jwtConfigurationDto        The JWT configuration DTO.
      * @param apiKey                     The API Key.
      * @param signedJWT                  The signed JWT.
      * @param payload                    The payload of the API Key.
      * @param tokenIdentifier            The token identifier.
+     * @param apiContext                 The API context.
+     * @param apiVersion                 The API version.
      * @param isGatewayTokenCacheEnabled Whether the gateway token cache is enabled or not.
      * @return The end user token.
      * @throws APIManagementException If an error occurs while getting Public Certificate or Signing Key.
      * @throws APISecurityException   If an error occurs while generating the backend JWT token.
      */
-    public static String getEndUserToken(net.minidev.json.JSONObject api,
+    public static String getEndUserToken(APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
                                          ExtendedJWTConfigurationDto jwtConfigurationDto, String apiKey,
                                          SignedJWT signedJWT, JWTClaimsSet payload, String tokenIdentifier,
-                                         boolean isGatewayTokenCacheEnabled) throws APIManagementException,
-            APISecurityException {
+                                         String apiContext, String apiVersion, boolean isGatewayTokenCacheEnabled
+    ) throws APIManagementException, APISecurityException {
 
         AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator = null;
         boolean jwtGenerationEnabled = false;
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(api.getAsString(APIConstants.JwtTokenConstants.
-                SUBSCRIBER_TENANT_DOMAIN));
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(apiKeyValidationInfoDTO.getSubscriberTenantDomain());
         if (jwtConfigurationDto != null) {
             apiMgtGatewayJWTGenerator = ServiceReferenceHolder.getInstance().getApiMgtGatewayJWTGenerator()
                     .get(jwtConfigurationDto.getGatewayJWTGeneratorImpl());
@@ -380,9 +383,8 @@ public class ApiKeyAuthenticatorUtils {
         if (jwtGenerationEnabled) {
             SignedJWTInfo signedJWTInfo = new SignedJWTInfo(apiKey, signedJWT, payload);
             JWTValidationInfo jwtValidationInfo = getJwtValidationInfo(signedJWTInfo);
-            JWTInfoDto jwtInfoDto = GatewayUtils.generateJWTInfoDto(api, jwtValidationInfo,
-                    api.getAsString(APIConstants.JwtTokenConstants.API_CONTEXT),
-                    api.getAsString(APIConstants.JwtTokenConstants.API_VERSION));
+            JWTInfoDto jwtInfoDto = GatewayUtils.generateJWTInfoDto(jwtValidationInfo,
+                    apiKeyValidationInfoDTO, apiContext, apiVersion);
             endUserToken = generateAndRetrieveBackendJWTToken(tokenIdentifier, jwtInfoDto, isGatewayTokenCacheEnabled,
                     apiMgtGatewayJWTGenerator);
         }

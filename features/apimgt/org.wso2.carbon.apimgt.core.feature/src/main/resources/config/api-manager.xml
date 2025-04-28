@@ -175,6 +175,8 @@
 
         <AuthToken></AuthToken>
 
+        <AnalyticsImpl></AnalyticsImpl>
+
         <!-- Event publisher implementation -->
         <!-- <ReporterClass></ReporterClass> -->
 
@@ -283,6 +285,11 @@
             <Property name="password">root</Property>
         </PersistentNotifier>
     </TokenRevocationNotifiers>
+
+    <TokenValidation>
+        <!-- Enforce validating JWT type header -->
+        <EnforceTypeHeaderValidation>false</EnforceTypeHeaderValidation>
+    </TokenValidation>
 
     <!-- Settings related to managing API access tiers. -->
     <TierManagement>

@@ -196,6 +196,41 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /subscribe-internal:
+    post:
+      summary: Subscribe to a subscription validation disabled API
+      description: |
+        This will allow creating subscriptions from applications to APIs which have
+        subscription validation disabled.
+      parameters:
+        - $ref: '#/parameters/requestedTenant'
+        - name: appId
+          in: query
+          type: integer
+          description: |
+            Application ID of the subscription
+        - name: appUuid
+          in: query
+          type: string
+          description: |
+            Application UUID
+        - name: api
+          in: body
+          description: The API object
+          schema:
+            $ref: '#/definitions/API'
+      tags:
+        - Subscription Validation
+      operationId: subscribeToAPI
+      responses:
+        201:
+          description: Subscription created successfully
+          schema:
+            $ref: '#/definitions/Subscription'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /subscription-policies:
     get:
       summary: Get all subscription throttling policies
@@ -410,7 +445,7 @@ paths:
         - name: type
           in: query
           description: |
-             type of gateway
+            type of gateway
           type: string
         - name: uuidList
           in: body
@@ -432,21 +467,21 @@ paths:
       description: |
         This will provide access to the deployment metadata in json format
       parameters:
-      - $ref: '#/parameters/requestedTenant'
-      - name: apiId
-        in: query
-        description: |
-          **Search condition**.
-            Api ID
-        type: string
-      - name: gatewayLabel
-        in: query
-        description: |
-          **Search condition**.
-           label associated with the APIs
-        type: string
+        - $ref: '#/parameters/requestedTenant'
+        - name: apiId
+          in: query
+          description: |
+            **Search condition**.
+              Api ID
+          type: string
+        - name: gatewayLabel
+          in: query
+          description: |
+            **Search condition**.
+             label associated with the APIs
+          type: string
       tags:
-      - Retrieving Runtime artifacts
+        - Retrieving Runtime artifacts
       responses:
         200:
           description: Json file of runtime metadata
@@ -642,6 +677,70 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /llm-providers:
+    get:
+      summary: Retrieve persisted LLM Providers
+      description: |
+        This retrieve the persisted LLM Providers.
+      tags:
+        - 'LLMProviders'
+      parameters:
+        - name: name
+          in: query
+          required: false
+          type: string
+        - name: apiVersion
+          in: query
+          required: false
+          type: string
+        - name: xWSO2Tenant
+          in: header
+          description: |
+            This is used to specify the tenant domain, where the resource need to be
+                        retrieved from.
+          type: string
+          required: true
+      responses:
+        200:
+          description: 'LLM providers received success'
+          schema:
+            $ref: '#/definitions/LLMProviderList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      operationId: getLLMProviders
+
+  /llm-providers/{llmProviderId}:
+    get:
+      summary: Retrieve persisted LLM Providers
+      description: |
+        This retrieve the persisted LLM Providers.
+      tags:
+        - 'LLMProviders'
+      parameters:
+        - name: llmProviderId
+          in: path
+          required: true
+          type: string
+        - name: xWSO2Tenant
+          in: header
+          description: |
+            This is used to specify the tenant domain, where the resource need to be
+                        retrieved from.
+          type: string
+          required: true
+      responses:
+        200:
+          description: 'Event Received success'
+          schema:
+            $ref: '#/definitions/LLMProviderList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+      operationId: getLLMProviderById
+
   /correlation-configs:
     get:
       summary: Retrieve persisted correlation configs data.
@@ -658,6 +757,32 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/Error'
+  #--------------------------------------------
+  # Transaction count related resources
+  #--------------------------------------------
+  /transaction-records:
+    post:
+      summary: Insert Transaction Records
+      description: Inserts a list of transaction records into the database.
+      operationId: insertTransactionRecords
+      parameters:
+        - in: body
+          name: body
+          description: A list of transaction records to be inserted
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/TransactionRecord'
+      responses:
+        '200':
+          description: Successfully inserted transaction records
+          schema:
+            type: boolean
+        '400':
+          description: Bad request. Invalid input data.
+        '500':
+          description: Internal server error. Failed to insert transaction records.
 
 ######################################################
 # Parameters - required by some of the APIs above
@@ -919,6 +1044,9 @@ definitions:
       context:
         type: string
         description: Context of the API.
+      contextTemplate:
+        type: string
+        description: Context template of the API.
       policy:
         type: string
         description: API level throttling policy.
@@ -950,6 +1078,19 @@ definitions:
         type: string
         description: Available authentication methods of the API.
         example: Oauth2,api_key
+      isSubscriptionValidationDisabled:
+        type: boolean
+        description: Whether subscription validation is disabled.
+        default: false
+        example: false
+      isEgress:
+        type: boolean
+        description: Indicates if the API is an egress API.
+        example: false
+      subtype:
+        type: string
+        description: The subtype of the API.
+        example: Default
 
   #-----------------------------------------------------
   # synapse Artifact resource
@@ -1548,6 +1689,8 @@ definitions:
         $ref: '#/definitions/BandwidthLimit'
       eventCount:
         $ref: '#/definitions/EventCountLimit'
+      aiApiQuota:
+        $ref: '#/definitions/AIAPIQuotaLimit'
 
   BurstLimit:
     title: Burst Limit object
@@ -1614,6 +1757,62 @@ definitions:
             description: Maximum number of events allowed
             format: int64
             example: 3000
+
+  #-----------------------------------------------------
+  # The Throttling AI API Quota Limit resource
+  #-----------------------------------------------------
+  AIAPIQuotaLimit:
+    title: AI Quota Limit object
+    allOf:
+      - $ref: '#/definitions/ThrottleLimitBase'
+      - required:
+          - requestCount
+        properties:
+          requestCount:
+            type: integer
+            format: int64
+            description: Maximum number of requests allowed
+            example: 1000
+          totalTokenCount:
+            type: integer
+            description: Maximum number of total tokens allowed
+            format: int64
+            example: 1000
+          promptTokenCount:
+            type: integer
+            description: Maximum number of prompt tokens allowed
+            format: int64
+            example: 300
+          completionTokenCount:
+            type: integer
+            description: Maximum number of completion tokens allowed
+            format: int64
+            example: 300
+
+  #-----------------------------------------------------
+  # LLM Provider Config List
+  #-----------------------------------------------------
+  LLMProviderList:
+    title: LLM Provider Config List
+    properties:
+      llmProviders:
+        type: array
+        items:
+          $ref: '#/definitions/LLMProvider'
+  LLMProvider:
+    title: LLM Provider
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      apiVersion:
+        type: string
+      organization:
+        type: string
+      configurations:
+        type: string
+
   #-----------------------------------------------------
   # API Logging detail list
   #-----------------------------------------------------
@@ -1677,3 +1876,25 @@ definitions:
         items:
           type: string
           example: "MessageDeliveryTaskPool"
+  #-----------------------------------------------------
+  # The Transaction Count resource
+  #-----------------------------------------------------
+  TransactionRecord:
+    type: object
+    properties:
+      id:
+        type: string
+      serverID:
+        type: string
+      serverType:
+        type: string
+      host:
+        type: string
+      count:
+        type: integer
+      recordedTime:
+        type: string
+    required:
+      - id
+      - count
+      - recordedTime

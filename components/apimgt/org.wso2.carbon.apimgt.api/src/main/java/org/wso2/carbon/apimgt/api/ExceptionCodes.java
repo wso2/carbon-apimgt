@@ -47,7 +47,8 @@ public enum ExceptionCodes implements ErrorHandler {
     APPLICATION_NOT_FOUND(900307, "Application not found", 404, "Application not found"),
     API_NOT_FOUND(900308, "API Not Found", 404, "Requested API with id '%s' not found"),
     APPLICATION_INACTIVE(900309, "Application is not active", 400, "Application is not active"),
-    SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 404, "Couldn't retrieve Subscriptions for API"),
+    SUBSCRIPTION_NOT_FOUND(900310, "Subscription not found", 404,
+            "The requested subscription with ID '%s' was not found."),
     UPDATE_STATE_CHANGE(900311, "API fields have state changes", 400, "Couldn't Update as API have changes can't be done"),
     DOCUMENT_ALREADY_EXISTS(900312, "Document already exists", 409, "Document already exists"),
     COULD_NOT_UPDATE_API(900313, "Error has occurred. Could not update the API", 500, "Error has occurred. Could not "
@@ -93,12 +94,12 @@ public enum ExceptionCodes implements ErrorHandler {
             "Cannot remove the resource paths because they are used by one or more API Products",
             409, "Cannot update API: %s:%s, due to the resources to remove are used by one or more API Products"),
     API_CATEGORY_INVALID(
-            900345, "The API category is invalid.", 400, " The API category is invalid for API: %s:%s"),
+            900345, "The API category is invalid.", 400, " The API category is invalid for API: %s"),
     INVALID_ADDITIONAL_PROPERTIES(900346, "Invalid additional properties", 400,
             "Invalid additional properties for API: %s:%s"),
     INVALID_CONTEXT(900346, "Invalid context provided", 400, "Invalid context provided for API: %s:%s"),
     INVALID_ENDPOINT_URL(900346, "Endpoint URL(s) is(are) not valid", 400, "Endpoint URL(s) is(are) not valid"),
-    USER_ROLES_CANNOT_BE_NULL(900610, "User roles cannot be found", 400, "User roles cannot be found"),
+    USER_ROLES_CANNOT_BE_NULL(900610, "Access control roles cannot be empty", 400, "Access control roles cannot be empty when visibility is restricted"),
     API_REVISION_NOT_FOUND(900347, "API Revision Not Found", 404, "Requested API Revision with id %s not found"),
     EXISTING_API_REVISION_DEPLOYMENT_FOUND(900348, "Can not delete API Revision ", 400, "Couldn't delete API revision since API revision is currently deployed to a gateway. " +
             "You need to undeploy the API Revision from the gateway before attempting deleting API Revision: %s "),
@@ -266,6 +267,7 @@ public enum ExceptionCodes implements ErrorHandler {
     ASYNCAPI_URL_NO_200(900757, "AsyncAPI specification retrieval from URL failed", 400, "Response didn't return a 200 OK status"),
 
     ERROR_READING_ASYNCAPI_SPECIFICATION(900765, "AsyncAPI specification read error", 500, "Exception occurred while reading the AsyncAPI Specification file"),
+    ERROR_RETRIEVE_KM_INFORMATION(900766, "Failed to retrieve key manager information", 500, "Couldn't get the key manager information by name or UUID"),
 
     // REST API related codes
     PARAMETER_NOT_PROVIDED(900700, "Parameter value missing", 400,
@@ -324,6 +326,7 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_TOKEN_REQUEST(900965, "Key Management Error", 400, "Invalid access token request."),
     ACCESS_TOKEN_REVOKE_FAILED(900966, "Key Management Error", 500, "Error while revoking the access token."),
     INTERNAL_ERROR(900967, "General Error", 500, "Server Error Occurred"),
+    SUBSCRIPTION_POLICY_UPDATE_TYPE_BAD_REQUEST(900974, "Bad Request", 400, "Subscription quota type can not be changed for AI Subscription policies."),
     INTERNAL_ERROR_WITH_SPECIFIC_MESSAGE(903006, "%s", 500, "Server Error Occurred"),
 
     POLICY_LEVEL_NOT_SUPPORTED(900968, "Throttle Policy level invalid", 400, "Specified Throttle policy level is not "
@@ -371,6 +374,12 @@ public enum ExceptionCodes implements ErrorHandler {
     SCOPE_VALIDATION_FAILED(900986, "Scope validation failed", 412, "Scope validation failed"),
     SHARED_SCOPE_DISPLAY_NAME_NOT_SPECIFIED(900987, "Shared Scope display name not specified", 400,
             "Shared Scope display name not specified"),
+    BLOCK_CONDITION_RETRIEVE_PARAMS_EXCEPTION(900254, "Block conditions retrieval error", 400,
+            "Provided query parameters are not valid"),
+    BLOCK_CONDITION_RETRIEVE_FAILED(900255, "Failed to get Block conditions", 500,
+            "Failed to retrieve Block conditions from the database"),
+    INVALID_BLOCK_CONDITION_VALUES(900256, "Error while retrieving Block Conditions", 500,
+            "Invalid format for condition values"),
     SCOPE_ALREADY_ASSIGNED(900988, "Scope already assigned locally by another API", 400,
             "Scope already assigned locally by another API"),
 
@@ -470,10 +479,13 @@ public enum ExceptionCodes implements ErrorHandler {
             "{apiName}#{apiVersion}#{tenantDomain}"),
     INVALID_API_NAME(900854, "Invalid API Name",400 ,"Invalid API Name"),
     ALIAS_CANNOT_BE_EMPTY(900855, "The alias cannot be empty", 400, "The alias cannot be empty"),
-
+    KEY_TYPE_CANNOT_BE_EMPTY(900856, "The key type cannot be empty", 400, "The key type cannot be empty"),
     // API import/export related codes
     ERROR_READING_META_DATA(900907, "Error while reading meta information from the definition", 400,
             "Error while reading meta information from the definition"),
+
+    ERROR_READING_CUSTOM_SEQUENCE(900908, "Error while reading Custom Sequence from the API Endpoint Configuration",
+            400, "Error while reading Custom Sequence from the API Endpoint Configuration"),
     ERROR_READING_PARAMS_FILE(900908, "Error while reading meta information from the params file", 400,
             "Error while reading meta information from the params file"),
     ERROR_FETCHING_DEFINITION_FILE(900909, "Cannot find the definition file of the project", 400,
@@ -501,6 +513,7 @@ public enum ExceptionCodes implements ErrorHandler {
     LOGGING_API_INCORRECT_LOG_LEVEL(901401, "Bad Request", 400, "Log level should be either OFF, BASIC, STANDARD or FULL"),
     LOGGING_API_MISSING_DATA(901402, "Missing data", 400, "API context or log level is missing"),
     LOGGING_API_RESOURCE_NOT_FOUND(901403, "Requested Resource Not Found", 404, "Requested API Resource Not Found"),
+    LOGGING_API_NOT_FOUND_IN_TENANT(901404, "Requested API Not Found", 404, "Requested API Not Found"),
     CORRELATION_CONFIG_BAD_REQUEST(902020, "Bad Request", 400, "Request body can not have empty elements"),
     CORRELATION_CONFIG_BAD_REQUEST_INVALID_NAME(902021, "Bad Request", 400, "Request body contains invalid correlation component name"),
     //Service Catalog related error codes
@@ -515,19 +528,24 @@ public enum ExceptionCodes implements ErrorHandler {
     INVALID_OPERATION_POLICY_SPECIFICATION(902006, "Invalid api policy specification found", 400,
             "Invalid api policy specification. %s", false),
 
-    INVALID_OPERATION_POLICY_PARAMETERS(902007, "Missing required parameters for api policy specification", 400,
-            "Required parameter(s) %s for api policy specification %s are either missing or empty"),
+    MISSING_OPERATION_POLICY_PARAMETERS(902007, "Missing required parameters for policy specification", 400,
+            "Required parameter(s) %s for policy specification %s are either missing or empty"),
     OPERATION_POLICY_NOT_ALLOWED_IN_THE_APPLIED_FLOW(902008, "API policy is not allowed in the applied flow", 400,
             "%s policy is not allowed in response flow"),
     MISSING_MANDATORY_POLICY_ATTRIBUTES(902009, "Missing mandatory api policy attribute", 400,
             "Required attributes(s) %s for api policy specification %s are either missing or empty"),
     OPERATION_POLICY_NOT_FOUND(902010, "API Policy Not Found", 404,
             "Requested api policy with id '%s' not found"),
+    CUSTOM_BACKEND_NOT_FOUND(903250, "Sequence Backend not found",
+            404, "Requested Sequence Backend of API '%s' not found"),
 
     OPERATION_POLICY_ALREADY_EXISTS(903001, "The API Policy already exists.", 409, "An Operation Policy with name '%s' and version '%s' already exists"),
 
     OPERATION_POLICY_NOT_FOUND_WITH_NAME_AND_VERSION(903004, "API Policy Not Found with given name and version", 404,
             "Requested api policy with name '%s' and version '%s not found"),
+
+    OPERATION_POLICY_NOT_FOUND_WITH_NAME(903007, "API Policy Not Found with given name", 404,
+            "Requested api policy with name '%s' not found"),
 
     OPERATION_POLICY_GATEWAY_ERROR(903008,
             "Either Synapse or Choreo Gateway Definition files or both should be present", 400,
@@ -556,8 +574,189 @@ public enum ExceptionCodes implements ErrorHandler {
     AI_SERVICE_INVALID_RESPONSE(903100, "Invalid response from AI service", 500, "Error while invoking AI service. %s", false),
     AI_SERVICE_INVALID_ACCESS_TOKEN(903101, "Invalid access token provided for AI service", 401, "Invalid access token provided for AI service"),
     AI_SERVICE_QUOTA_EXCEEDED(903102, "Quota exceeded for AI service", 429, "Quota exceeded for AI service"),
-    DOCUMENT_NAME_ILLEGAL_CHARACTERS(902016, "Document name cannot contain illegal characters", 400, "Document name contains one or more illegal characters");
+    DOCUMENT_NAME_ILLEGAL_CHARACTERS(902016, "Document name cannot contain illegal characters", 400, "Document name contains one or more illegal characters"),
 
+    // Subscriptions related
+    SUBSCRIPTION_ID_NOT_SPECIFIED(902017, "Subscription ID not specified.", 400,
+            "Subscription ID not specified."),
+    BUSINESS_PLAN_NOT_SPECIFIED(902018, "Business plan not specified.", 400,
+            "Business plan not specified."),
+    BUSINESS_PLAN_NOT_ALLOWED(902019, "The Business plan is not allowed.", 400,
+            "Business plan '%s' is not allowed for the API.", false),
+    INVALID_STATE_FOR_BUSINESS_PLAN_CHANGE(902022, "Cannot change the business plan of the subscription.",
+            409, "Cannot change the business plan of the subscription with ID '%s' as the " +
+            "subscription is in '%s' state.", false),
+    NOT_ALLOWED_TIER_FOR_SUBSCRIBER(902023, "Cannot change the business plan of the subscription.",
+            403, "Cannot change the business plan of the subscription with ID '%s' as the " +
+            "subscriber does not have permission to access the specified business plan.", false),
+
+    HTTP_METHOD_INVALID(903201,
+            "Invalid HTTP method provided for API resource", 400,
+            "The HTTP method '%s' provided for resource '%s' is invalid", false),
+
+    OPERATION_TYPE_INVALID(903202, "Invalid operation type provided for API operation", 400,
+            "The '%s' API operation type '%s' provided for operation '%s' is invalid", false),
+
+    KEYMANAGERS_VALUE_NOT_ARRAY(903203, "KeyManagers value needs to be an array", 400,
+            "Value of the KeyManagers config should be an array", false),
+
+    SCOPE_ALREADY_ASSIGNED_FOR_DIFFERENT_API(903204, "Invalid scopes provided for API", 400,
+            "Error while adding local scopes for API %s. Scope: %s already assigned locally for a different API.",
+            false),
+
+    UNSUPPORTED_TRANSPORT(903205, "Unsupported transport", 400,
+            "Unsupported transport '%s' provided for the API", false),
+
+    OAS_DEFINITION_VERSION_NOT_FOUND(903206, "Invalid OAS definition", 400,
+            "Could not determine the OAS version as the version element of the definition is not found", false),
+
+    API_NAME_PROVIDER_ORG_EMPTY(903207, "API name, provider or organization cannot be empty", 400,
+            "API name, provider or organization cannot be empty. Provided values: name: %s, provider: %s, org: %s",
+            false),
+
+    ANONYMOUS_USER_NOT_PERMITTED(903208, "Anonymous user not permitted", 401,
+            "Attempt to execute privileged operation as the anonymous user", false),
+
+    GLOBAL_MEDIATION_POLICIES_NOT_FOUND(903209, "Global mediation policies not found", 404,
+            "Global mediation policies not found", false),
+
+    ENDPOINT_URL_NOT_PROVIDED(903210, "Endpoint url not provided", 400,
+            "Url is not provided for the endpoint type %s in the endpoint config", false),
+
+    OPERATION_POLICY_NAME_VERSION_INVALID(903211, "Invalid operation policy name or version", 400,
+            "policyName and/or policyVersion provided for the applied policy %s_%s does not match the policy " +
+            "specification identified by the given policyId %s",
+            false),
+
+    INVALID_OPERATION_POLICY_PARAMS(903212, "Invalid operation policy parameters", 400,
+            "Invalid value provided for the operation policy parameter %s", false),
+
+    INVALID_ENDPOINT_SECURITY_CONFIG(903213, "Invalid endpoint security configuration", 400,
+            "Invalid values provided for %s endpoint security configuration", false),
+
+    ENDPOINT_SECURITY_TYPE_NOT_DEFINED(903214, "Endpoint security type not defined", 400,
+            "Endpoint security type not defined for the %s endpoint", false),
+
+    ADDITIONAL_PROPERTIES_CANNOT_BE_NULL(903215, "'additionalProperties' is required and should " +
+            "not be null", 400,
+            "The field 'additionalProperties' is required and should not be null"),
+
+    ADDITIONAL_PROPERTIES_PARSE_ERROR(903216, "Error while parsing 'additionalProperties'", 400,
+            "Error while parsing 'additionalProperties'", true),
+
+    ENDPOINT_SECURITY_CRYPTO_EXCEPTION(903217, "Error while encrypting the secret key of API", 500,
+            "%s"),
+
+    OPENAPI_RETRIEVAL_ERROR(903218, "Error while retrieving the OAS definition", 500,
+            "Error while retrieving the OAS definition for API with UUID %s"),
+
+    ASYNCAPI_RETRIEVAL_ERROR(903219, "Error while retrieving the Async API definition", 500,
+            "Error while retrieving the Async API definition for API with UUID %s"),
+
+    ERROR_RETRIEVING_API(903220, "Failed to get API", 500, "Failed to get API with UUID %s"),
+
+    ERROR_CHANGING_REGISTRY_LIFECYCLE_STATE(903221, "Error changing registry lifecycle state", 500,
+            "Error changing registry lifecycle state for API/API Product with UUID %s"),
+
+    UN_AUTHORIZED_TO_VIEW_MODIFY_API(903222, "User is not authorized to view or modify the api",
+            403, "User %s is not authorized to view or modify the api"),
+
+    FAILED_PUBLISHING_API_NO_ENDPOINT_SELECTED(903223, "Failed to publish service to API store. No endpoint selected",
+            400, "Failed to publish service to API store. No endpoint selected for API with UUID %s"),
+
+    FAILED_PUBLISHING_API_NO_TIERS_SELECTED(903224, "Failed to publish service to API store. No Tiers selected",
+            400, "Failed to publish service to API store. No Tiers selected for API with UUID %s"),
+
+    THIRD_PARTY_API_REVISION_CREATION_UNSUPPORTED(903225, "Creating API Revisions is not supported " +
+            "for third party APIs", 400,"Creating API Revisions is not supported for third party APIs: %s"),
+
+    THIRD_PARTY_API_REVISION_DEPLOYMENT_UNSUPPORTED(903226, "Deploying API Revisions is not supported " +
+            "for third party APIs", 400,"Deploying API Revisions is not supported for third party APIs: %s"),
+
+    RETIRED_API_REVISION_DEPLOYMENT_UNSUPPORTED(903227, "Deploying API Revisions is not supported for retired APIs",
+            400, "Deploying API Revisions is not supported for retired APIs. ApiId: %s"),
+
+    REVISION_NOT_FOUND_FOR_REVISION_NUMBER(903228, "No revision found", 404,
+            "No revision found for revision number %s"),
+
+    ERROR_PROCESSING_DIRECTORY_TO_IMPORT(903229, "Error extracting and processing the directory", 500,
+            "Error extracting and processing the directory to be imported", true),
+
+    IMPORT_ERROR_INVALID_GRAPHQL_SCHEMA(903230, "Error occurred while importing the API. Invalid " +
+            "GraphQL schema definition found", 400, "Invalid GraphQL schema definition " +
+            "found. %s"),
+
+    IMPORT_ERROR_INVALID_ASYNC_API_SCHEMA(903231, "Error occurred while importing the API. " +
+            "Invalid AsyncAPI definition found.", 400, "Invalid AsyncAPI definition found. %s"),
+
+    NO_VHOSTS_DEFINED_FOR_ENVIRONMENT(903232, "No VHosts defined for the environment", 400,
+            "No VHosts defined for the environment: %s"),
+
+    PROVIDED_GATEWAY_ENVIRONMENT_NOT_FOUND(903233, "Gateway environment not found", 400,
+            "Provided gateway environment %s is not found"),
+
+    UNSUPPORTED_AND_ALLOWED_LIFECYCLE_ACTIONS(903234, "Unsupported state change action", 400,
+            "Lifecycle state change action %s is not allowed for this API. Allowed actions are %s"),
+
+    NO_CORRESPONDING_RESOURCE_FOUND_IN_API(903235, "No corresponding resource found in API", 400,
+            "API with id %s does not have a resource %s with http method %s"),
+
+    ERROR_PARSING_MONETIZATION_PROPERTIES(903237, "Error when parsing monetization properties",
+            400, "Error when parsing monetization properties"),
+
+    API_NAME_CANNOT_BE_NULL(903238, "API name is required", 400,
+            "API name is required and cannot be null"),
+
+    API_NAME_ILLEGAL_CHARACTERS(903239, "API name contains illegal characters", 400,
+            "API name %s contains one or more illegal characters from (%s)"),
+
+    API_VERSION_CANNOT_BE_NULL(903240, "API version is required", 400,
+            "API version is required and cannot be null"),
+
+    API_VERSION_ILLEGAL_CHARACTERS(903241, "API version contains illegal characters", 400,
+            "API version %s contains one or more illegal characters from (%s)"),
+
+    UNSUPPORTED_CONTEXT(903242, "Unsupported context", 400,
+            "Unsupported context %s"),
+
+    ERROR_PARSING_ENDPOINT_CONFIG(903243, "Error when parsing endpoint configuration",
+            400, "Error when parsing endpoint configuration"),
+
+    NOT_IN_OPEN_API_FORMAT(903244, "Not in Open API format",
+            400, "The API definition is not in Open API format"),
+
+    PARAMETER_NOT_PROVIDED_FOR_DOCUMENTATION(903245, "Parameter value missing", 400,
+            "Some of the mandatory parameter values were missing. %s"),
+
+    INVALID_API_RESOURCES_FOR_API_PRODUCT(903246, "Cannot find API resources for some API Product " +
+            "resources.", 404, "Some of the resources in the API Product are not found as API resources. %s"),
+
+    INVALID_ADDITIONAL_PROPERTIES_WITH_ERROR(903247, "Invalid additional properties", 400,
+            "Invalid additional properties for API: %s:%s Error: %s"),
+
+    TIER_NAME_INVALID_WITH_TIER_INFO(903248, "The tier name is invalid.", 400,
+            "The tier name(s) %s are invalid"),
+
+    LENGTH_EXCEEDS_ERROR(903249, "Character length exceeds the allowable limit", 400, "%s"),
+
+    ROLE_OF_SCOPE_DOES_NOT_EXIST(903250, "Role does not exist", 404,
+            "Role %s does not exist"),
+
+    OPERATION_OR_RESOURCE_TYPE_OR_METHOD_NOT_DEFINED(902031,
+            "Operation type/http method is not specified for the operation/resource", 400,
+            "Operation type/http method is not specified for the operation/resource: %s", false),
+
+    FAILED_TO_RETRIEVE_WORKFLOW_BY_EXTERNAL_REFERENCE_ID(902033, "Failed to rettrieve workflow request by the " +
+            "external workflow reference", 500,
+            "Failed to retrieve workflow request by the external workflow reference"),
+    FAILED_TO_RETRIEVE_WORKFLOWS(902034, "Error while retrieving workflow requests.", 500,
+            "Error while retrieving workflow requests."),
+    WORKFLOW_PAYLOAD_MISSING(902035, "Payload is missing", 400,
+            "Payload is missing in the workflow request"),
+    WORKFLOW_STATUS_NOT_DEFINED(902036, "Workflow status not defined", 400,
+            "Workflow status is not defined"),
+    RESOURCE_URI_TEMPLATE_NOT_DEFINED(902032, "Resource URI template value not defined", 400,
+            "Resource URI template value (target) not defined", false);
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

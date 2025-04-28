@@ -45,6 +45,7 @@ import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Json31;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -95,6 +96,7 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.definitions.mixin.License31Mixin;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -227,7 +229,9 @@ public class OASParserUtil {
             return SwaggerVersion.SWAGGER;
         }
 
-        throw new APIManagementException("Invalid OAS definition provided.");
+        String errMsg = "Could not determine the OAS version as the version element of the definition is not found.";
+        ExceptionCodes errorHandler = ExceptionCodes.OAS_DEFINITION_VERSION_NOT_FOUND;
+        throw new APIManagementException(errMsg, errorHandler);
     }
 
     public static Map<String, Object> generateExamples(String apiDefinition) throws APIManagementException {
@@ -270,7 +274,8 @@ public class OASParserUtil {
         if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
             destOpenAPI = ((OAS3Parser) oas3Parser).getOpenAPI(destinationSwagger);
         } else {
-            throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
+            String errorMessage = "Cannot update destination swagger because it is not in OpenAPI format";
+            throw new APIManagementException(errorMessage, ExceptionCodes.NOT_IN_OPEN_API_FORMAT);
         }
 
         SwaggerUpdateContext context = new SwaggerUpdateContext();
@@ -649,6 +654,13 @@ public class OASParserUtil {
                     addToReferenceObjectMap(ref, context);
                 }
             }
+
+            Map<String, Header> headers = response.getHeaders();
+            if (headers != null) {
+                for (Header header : headers.values()) {
+                    setRefOfApiResponseHeader(header, context);
+                }
+            }
         }
     }
 
@@ -678,9 +690,14 @@ public class OASParserUtil {
             if (content != null) {
                 extractReferenceFromContent(content, context);
             } else {
-                String ref = header.get$ref();
-                if (ref != null) {
-                    addToReferenceObjectMap(ref, context);
+                Schema schema = header.getSchema();
+                if (schema != null) {
+                    extractReferenceFromSchema(schema, context);
+                } else {
+                    String ref = header.get$ref();
+                    if (ref != null) {
+                        addToReferenceObjectMap(ref, context);
+                    }
                 }
             }
         }
@@ -768,9 +785,15 @@ public class OASParserUtil {
             if (ref == null) {
                 if (schema instanceof ArraySchema) {
                     ArraySchema arraySchema = (ArraySchema) schema;
-                    ref = arraySchema.getItems().get$ref();
+                    Schema itemsSchema = arraySchema.getItems();
+                    // Process $ref items
+                    ref = itemsSchema.get$ref();
+                    if (ref == null) {
+                        // Process items in the form of Composed Schema such as allOf, oneOf, anyOf
+                        extractReferenceFromSchema(itemsSchema, context);
+                    }
                 } else if (schema instanceof ObjectSchema) {
-                    references = addSchemaOfSchema(schema);
+                    references = addSchemaOfSchema(schema, context);
                 } else if (schema instanceof MapSchema) {
                     Schema additionalPropertiesSchema = (Schema) schema.getAdditionalProperties();
                     extractReferenceFromSchema(additionalPropertiesSchema, context);
@@ -778,7 +801,7 @@ public class OASParserUtil {
                     if (((ComposedSchema) schema).getAllOf() != null) {
                         for (Schema sc : ((ComposedSchema) schema).getAllOf()) {
                             if (OBJECT_DATA_TYPE.equalsIgnoreCase(sc.getType())) {
-                                references.addAll(addSchemaOfSchema(sc));
+                                references.addAll(addSchemaOfSchema(sc, context));
                             } else {
                                 String schemaRef = sc.get$ref();
                                 if (schemaRef != null) {
@@ -788,10 +811,11 @@ public class OASParserUtil {
                                 }
                             }
                         }
-                    } else if (((ComposedSchema) schema).getAnyOf() != null) {
+                    }
+                    if (((ComposedSchema) schema).getAnyOf() != null) {
                         for (Schema sc : ((ComposedSchema) schema).getAnyOf()) {
                             if (OBJECT_DATA_TYPE.equalsIgnoreCase(sc.getType())) {
-                                references.addAll(addSchemaOfSchema(sc));
+                                references.addAll(addSchemaOfSchema(sc, context));
                             } else {
                                 String schemaRef = sc.get$ref();
                                 if (schemaRef != null) {
@@ -801,10 +825,11 @@ public class OASParserUtil {
                                 }
                             }
                         }
-                    } else if (((ComposedSchema) schema).getOneOf() != null) {
+                    }
+                    if (((ComposedSchema) schema).getOneOf() != null) {
                         for (Schema sc : ((ComposedSchema) schema).getOneOf()) {
                             if (OBJECT_DATA_TYPE.equalsIgnoreCase(sc.getType())) {
-                                references.addAll(addSchemaOfSchema(sc));
+                                references.addAll(addSchemaOfSchema(sc, context));
                             } else {
                                 String schemaRef = sc.get$ref();
                                 if (schemaRef != null) {
@@ -814,7 +839,10 @@ public class OASParserUtil {
                                 }
                             }
                         }
-                    } else {
+                    }
+                    if (((ComposedSchema) schema).getAllOf() == null &&
+                            ((ComposedSchema) schema).getAnyOf() == null &&
+                            ((ComposedSchema) schema).getOneOf() == null) {
                         log.error("Unidentified schema. The schema is not available in the API definition.");
                     }
                 }
@@ -850,13 +878,14 @@ public class OASParserUtil {
         }
     }
 
-    private static List<String> addSchemaOfSchema(Schema schema) {
+    private static List<String> addSchemaOfSchema(Schema schema, SwaggerUpdateContext context) {
         List<String> references = new ArrayList<String>();
         ObjectSchema os = (ObjectSchema) schema;
         if (os.getProperties() != null) {
             for (String propertyName : os.getProperties().keySet()) {
-                if (os.getProperties().get(propertyName) instanceof ComposedSchema) {
-                    ComposedSchema cs = (ComposedSchema) os.getProperties().get(propertyName);
+                Schema propertySchema = os.getProperties().get(propertyName);
+                if (propertySchema instanceof ComposedSchema) {
+                    ComposedSchema cs = (ComposedSchema) propertySchema;
                     if (cs.getAllOf() != null) {
                         for (Schema sc : cs.getAllOf()) {
                             references.add(sc.get$ref());
@@ -872,6 +901,9 @@ public class OASParserUtil {
                     } else {
                         log.error("Unidentified schema. The schema is not available in the API definition.");
                     }
+                } else if (propertySchema instanceof ObjectSchema ||
+                        propertySchema instanceof ArraySchema) {
+                    extractReferenceFromSchema(propertySchema, context);
                 }
             }
         }
@@ -996,7 +1028,7 @@ public class OASParserUtil {
         String jsonString = null;
         //Custom json mapper to parse OAS 3.1 definitions as the default parser drops mandatory licence.identifier field
         if (isOpenAPIVersion31(oasDefinition)) {
-            ObjectMapper mapper = Json.mapper().copy();
+            ObjectMapper mapper = Json31.mapper().copy();
             mapper.enable(SerializationFeature.INDENT_OUTPUT);
             mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
             //Custom Mixin for License object in OAS 3.1
@@ -2184,5 +2216,119 @@ public class OASParserUtil {
         if (!operationScopes.isEmpty() && apiSecurities.contains(APIConstants.API_SECURITY_BASIC_AUTH)) {
             operation.setVendorExtension(APIConstants.SWAGGER_X_BASIC_AUTH_RESOURCE_SCOPES, operationScopes);
         }
+    }
+
+    /**
+     * This method will validate the OAS definition against the resource paths with trailing slashes.
+     *
+     * @param openAPI            OpenAPI object
+     * @param swagger         Swagger object
+     * @param validationResponse validation response
+     * @return isSwaggerValid boolean
+     */
+    public static boolean isValidWithPathsWithTrailingSlashes(OpenAPI openAPI, Swagger swagger,
+                                                              APIDefinitionValidationResponse validationResponse) {
+        Map<String, ?> pathItems = null;
+        if (openAPI != null) {
+            pathItems = openAPI.getPaths();
+        } else if (swagger != null) {
+            pathItems = swagger.getPaths();
+        }
+        if (pathItems != null) {
+            for (String path : pathItems.keySet()) {
+                if (path.endsWith("/")) {
+                    String newPath = path.substring(0, path.length() - 1);
+                    if (pathItems.containsKey(newPath)) {
+                        Object pathItem = pathItems.get(newPath);
+                        Object newPathItem = pathItems.get(path);
+
+                        if (pathItem instanceof PathItem && newPathItem instanceof PathItem) {
+                            if (!validateOAS3Paths((PathItem) pathItem, (PathItem) newPathItem, newPath, validationResponse)) {
+                                return false;
+                            }
+                        } else if (pathItem instanceof Path && newPathItem instanceof Path) {
+                            if (!validateOAS2Paths((Path) pathItem, (Path) newPathItem, newPath, validationResponse)) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private static boolean validateOAS3Paths(PathItem pathItem, PathItem newPathItem, String newPath,
+                                             APIDefinitionValidationResponse validationResponse) {
+        if (pathItem.getGet() != null && newPathItem.getGet() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.GET.name(), APIConstants.OPEN_API);
+            return false;
+        }
+        if (pathItem.getPost() != null && newPathItem.getPost() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.POST.name(), APIConstants.OPEN_API);
+            return false;
+        }
+        if (pathItem.getPut() != null && newPathItem.getPut() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.PUT.name(), APIConstants.OPEN_API);
+            return false;
+        }
+        if (pathItem.getPatch() != null && newPathItem.getPatch() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.PATCH.name(), APIConstants.OPEN_API);
+            return false;
+        }
+        if (pathItem.getDelete() != null && newPathItem.getDelete() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.DELETE.name(), APIConstants.OPEN_API);
+            return false;
+        }
+        if (pathItem.getHead() != null && newPathItem.getHead() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.HEAD.name(), APIConstants.OPEN_API);
+            return false;
+        }
+        if (pathItem.getOptions() != null && newPathItem.getOptions() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.OPTIONS.name(),
+                    APIConstants.OPEN_API);
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean validateOAS2Paths(Path pathItem, Path newPathItem, String newPath,
+                                             APIDefinitionValidationResponse validationResponse) {
+        if (pathItem.getGet() != null && newPathItem.getGet() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.GET.name(), APIConstants.SWAGGER);
+            return false;
+        }
+        if (pathItem.getPost() != null && newPathItem.getPost() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.POST.name(), APIConstants.SWAGGER);
+            return false;
+        }
+        if (pathItem.getPut() != null && newPathItem.getPut() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.PUT.name(), APIConstants.SWAGGER);
+            return false;
+        }
+        if (pathItem.getPatch() != null && newPathItem.getPatch() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.PATCH.name(), APIConstants.SWAGGER);
+            return false;
+        }
+        if (pathItem.getDelete() != null && newPathItem.getDelete() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.DELETE.name(), APIConstants.SWAGGER);
+            return false;
+        }
+        if (pathItem.getHead() != null && newPathItem.getHead() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.HEAD.name(), APIConstants.SWAGGER);
+            return false;
+        }
+        if (pathItem.getOptions() != null && newPathItem.getOptions() != null) {
+            addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.OPTIONS.name(), APIConstants.SWAGGER);
+            return false;
+        }
+        return true;
+    }
+
+    private static void addError(APIDefinitionValidationResponse validationResponse, String path, String operation,
+                                 String definitionType) {
+        OASParserUtil.addErrorToValidationResponse(validationResponse,
+                "Multiple " + operation + " operations with the same resource path " + path +
+                        " found in the " + definitionType + " definition");
     }
 }

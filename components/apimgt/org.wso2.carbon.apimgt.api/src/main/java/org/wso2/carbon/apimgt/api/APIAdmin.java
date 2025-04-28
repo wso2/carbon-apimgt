@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.Monetization;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
 import org.wso2.carbon.apimgt.api.model.Workflow;
@@ -540,4 +541,57 @@ public interface APIAdmin  {
      * @throws APIManagementException
      */
     void deleteGlobalKeyManagerConfigurationById(String id) throws APIManagementException;
+
+    /**
+     * Adds a new LLM Provider for the given organization.
+     *
+     * @param organization the organization name to filter
+     * @param provider The LLM Provider to add.
+     * @return The added LLM Provider.
+     * @throws APIManagementException If adding fails.
+     */
+    LLMProvider addLLMProvider(String organization, LLMProvider provider) throws APIManagementException;
+
+    /**
+     * Retrieves a list of LLM providers based on the given filters.
+     *
+     * @param organization the organization name to filter
+     * @param name the provider name to filter
+     * @param apiVersion the API version to filter
+     * @param builtInSupport whether to filter
+     * @return a list of LLM providers matching the specified filters
+     * @throws APIManagementException if an error occurs while retrieving the providers
+     */
+    List<LLMProvider> getLLMProviders(String organization, String name, String apiVersion, Boolean builtInSupport) throws APIManagementException;
+
+    /**
+     * Deletes an LLM Provider by ID for the given organization.
+     *
+     * @param organization The organization name.
+     * @param provider     LLM Provider.
+     * @param builtIn      Whether the provider is built-in.
+     * @return Deleted LLM Provider UUID.
+     * @throws APIManagementException If deletion fails.
+     */
+    String deleteLLMProvider(String organization, LLMProvider provider, boolean builtIn) throws APIManagementException;
+
+    /**
+     * Updates an LLM Provider for the given organization.
+     *
+     * @param organization  The organization name.
+     * @param provider The LLM Provider with updated data.
+     * @return Updated LLM Provider.
+     * @throws APIManagementException If update fails.
+     */
+    LLMProvider updateLLMProvider(String organization, LLMProvider provider) throws APIManagementException;
+
+    /**
+     * Retrieves an LLM Provider by ID for the given organization.
+     *
+     * @param organization  The organization name.
+     * @param llmProviderId The ID of the LLM Provider.
+     * @return The LLM Provider.
+     * @throws APIManagementException If retrieval fails.
+     */
+    LLMProvider getLLMProvider(String organization, String llmProviderId) throws APIManagementException;
 }

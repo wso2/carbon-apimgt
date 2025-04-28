@@ -79,7 +79,7 @@ public final class JWTUtil {
 
     public static String generateHeader(Certificate publicCert, String signatureAlgorithm)
             throws JWTGeneratorException {
-        return generateHeader(publicCert, signatureAlgorithm, false, false);
+        return generateHeader(publicCert, signatureAlgorithm, false, false, false);
     }
 
     /**
@@ -93,7 +93,7 @@ public final class JWTUtil {
      */
 
     public static String generateHeader(Certificate publicCert, String signatureAlgorithm, boolean useKid,
-                                        boolean useSHA256Hash)
+                                        boolean useSHA256Hash, boolean encodeX5tWithoutPadding)
             throws JWTGeneratorException {
 
         /*
@@ -113,8 +113,13 @@ public final class JWTUtil {
             byte[] digestInBytes = digestValue.digest();
             String publicCertThumbprint = hexify(digestInBytes);
             String base64UrlEncodedThumbPrint;
-            base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
-                    .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
+            if (encodeX5tWithoutPadding) {
+                base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder().withoutPadding()
+                        .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
+            } else {
+                base64UrlEncodedThumbPrint = java.util.Base64.getUrlEncoder()
+                        .encodeToString(publicCertThumbprint.getBytes("UTF-8"));
+            }
 
             JSONObject jwtHeader = new JSONObject();
             jwtHeader.put("typ", "JWT");

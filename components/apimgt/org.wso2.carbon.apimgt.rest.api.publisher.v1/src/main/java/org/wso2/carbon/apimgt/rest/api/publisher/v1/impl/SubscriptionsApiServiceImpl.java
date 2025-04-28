@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.dto.UserApplicationAPIUsage;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
@@ -233,5 +234,41 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
         SubscriberInfoDTO subscriberInfoDTO = SubscriptionMappingUtil.fromSubscriberClaimsToDTO(subscriberClaims,
                 subscriberName);
         return Response.ok().entity(subscriberInfoDTO).build();
+    }
+
+    /**
+     * Updates the business plan for a given subscription.
+     *
+     * @param subscriptionId The UUID of the subscription to be changed
+     * @param businessPlan   The new business plan to be applied to the subscription
+     * @param ifMatch        The ETag value
+     * @param messageContext The message context for the current request
+     * @return 200 response with the updated subscription if the business plan is successfully changed
+     * @throws APIManagementException If subscription ID or business plan is not specified or an error occurs while
+     *                                changing the business plan
+     */
+    @Override
+    public Response changeSubscriptionBusinessPlan(String subscriptionId, String businessPlan, String ifMatch,
+                                                   MessageContext messageContext) throws APIManagementException {
+
+        if (StringUtils.isBlank(subscriptionId)) {
+            throw new APIManagementException("Subscription ID cannot be empty or null.",
+                    ExceptionCodes.SUBSCRIPTION_ID_NOT_SPECIFIED);
+        }
+
+        if (StringUtils.isBlank(businessPlan)) {
+            throw new APIManagementException("Business Plan cannot be empty or null.",
+                    ExceptionCodes.BUSINESS_PLAN_NOT_SPECIFIED);
+        }
+
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
+
+        // Update the subscription with the new business plan and retrieve the updated subscription
+        SubscribedAPI updatedSubscription = apiProvider.updateSubscriptionTier(subscriptionId, businessPlan);
+
+        // Return the updated subscription as the response
+        SubscriptionDTO subscriptionDTO = SubscriptionMappingUtil.fromSubscriptionToDTO(updatedSubscription);
+        return Response.ok().entity(subscriptionDTO).build();
     }
 }

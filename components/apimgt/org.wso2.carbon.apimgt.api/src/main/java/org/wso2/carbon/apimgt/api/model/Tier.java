@@ -47,6 +47,9 @@ public class Tier implements Serializable, Comparable<Tier>{
     private int rateLimitCount;
     private String rateLimitTimeUnit;
     private String bandwidthDataUnit;
+    private long totalTokenCount;
+    private long promptTokenCount;
+    private long completionTokenCount;
 
     public Map<String, String> getMonetizationAttributes() {
         return monetizationAttributes;
@@ -182,6 +185,31 @@ public class Tier implements Serializable, Comparable<Tier>{
     public String getBandwidthDataUnit() {
         return bandwidthDataUnit;
     }
+
+    public long getTotalTokenCount() {
+        return totalTokenCount;
+    }
+
+    public void setTotalTokenCount(long totalTokenCount) {
+        this.totalTokenCount = totalTokenCount;
+    }
+
+    public long getPromptTokenCount() {
+        return promptTokenCount;
+    }
+
+    public void setPromptTokenCount(long promptTokenCount) {
+        this.promptTokenCount = promptTokenCount;
+    }
+
+    public long getCompletionTokenCount() {
+        return completionTokenCount;
+    }
+
+    public void setCompletionTokenCount(long completionTokenCount) {
+        this.completionTokenCount = completionTokenCount;
+    }
+
 
     @Override
     public boolean equals(Object o) {

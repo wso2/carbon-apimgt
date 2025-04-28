@@ -26,11 +26,13 @@ import org.apache.http.HttpHeaders;
 import org.apache.logging.log4j.ThreadContext;
 import org.apache.synapse.AbstractSynapseHandler;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APILoggerManager;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.logging.APILogHandler;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.correlation.MethodCallsCorrelationConfigDataHolder;
 
@@ -94,6 +96,11 @@ public class LogsHandler extends AbstractSynapseHandler {
 
     public boolean handleRequestOutFlow(MessageContext messageContext) {
         if (isEnabled()) {
+            if (GatewayUtils.checkForFileBasedApiContexts(ApiUtils.getFullRequestPath(messageContext)
+                    , GatewayUtils.getTenantDomain())) {
+                return true;
+            }
+
             try {
                 Map headers = LogUtils.getTransportHeaders(messageContext);
                 String correlationIdHeader = null;

@@ -104,8 +104,8 @@ ThrottlingApiService delegate = new ThrottlingApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Deny Policies returned ", response = BlockingConditionListDTO.class),
         @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response throttlingDenyPoliciesGet( @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept) throws APIManagementException{
-        return delegate.throttlingDenyPoliciesGet(accept, securityContext);
+    public Response throttlingDenyPoliciesGet( @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept,  @ApiParam(value = "**Search condition**. You can search in attributes by using **\"conditionType:\"** modifier and **\"conditionValue:\"** modifier. Eg. The entry \"conditionType:API\" will result in a match with blocking conditions only if the conditionType is \"API\". Similarly, \"conditionValue:test/1.0.0\" will result in a match with blocking conditions only if the conditionValue is \"test/1.0.0\". When you use \"conditionType:API & conditionValue:test/1.0.0\" as a combination, it will result in a match with blocking conditions only if both the conditionType is \"API\" and the conditionValue is \"test/1.0.0\". If query attribute is provided, this returns the blocking conditions that match the specified attributes. Please note that you need to use encoded URL (URL encoding) if you are using a client which does not support URL encoding (such as curl) ")  @QueryParam("query") String query) throws APIManagementException{
+        return delegate.throttlingDenyPoliciesGet(accept, query, securityContext);
     }
 
     @POST

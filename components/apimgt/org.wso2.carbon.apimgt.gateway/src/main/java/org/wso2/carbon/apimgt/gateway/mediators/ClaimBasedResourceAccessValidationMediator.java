@@ -28,6 +28,7 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityException;
 
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -50,8 +51,6 @@ public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator
     private String accessVerificationClaimValue;
     private String accessVerificationClaimValueRegex;
     private boolean shouldAllowValidation;
-    public static final String CLAIMS_MISMATCH_ERROR_MSG = "Configured claim and claim " +
-            "sent in token do not match.";
 
     @Override
     public boolean mediate(MessageContext messageContext) {
@@ -62,41 +61,49 @@ public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator
 
         claimValueSentInToken = jwtTokenClaims.get(accessVerificationClaim);
 
-        if (StringUtils.isBlank(claimValueSentInToken)) {
-            log.error("The configured resource access validation claim is " +
-                    "not present in the token.");
-            handleFailure(HttpStatus.SC_FORBIDDEN, messageContext, String.format("Token doesn't contain the " +
-                    "claim \"%s\"", accessVerificationClaim), null);
+        try {
+            if (StringUtils.isBlank(claimValueSentInToken)) {
+                log.error("The configured resource access validation claim is " + "not present in the token.");
+                throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_INVALID,
+                                               APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_INVALID_MESSAGE,
+                                               String.format("Token doesn't contain the " + "claim \"%s\"",
+                                                             accessVerificationClaim));
+            } else {
+                if (StringUtils.isNotBlank(accessVerificationClaimValueRegex)) {
+                    log.debug("A regex is provided, hence, validating the claim values using the provided regex.");
+                    Pattern pattern = Pattern.compile(accessVerificationClaimValueRegex);
+                    Matcher configuredClaimValueMatcher = pattern.matcher(accessVerificationClaimValue);
+                    Matcher tokenSentClaimValueMatcher = pattern.matcher(claimValueSentInToken);
+
+                    if ((configuredClaimValueMatcher.matches() && tokenSentClaimValueMatcher.matches())
+                            || shouldAllowValidation) {
+                        log.debug("Claim values match or the flow is configured to allow when claims doesn't match. "
+                                          + "Hence the flow is allowed.");
+                        return true;
+                    } else {
+                        log.debug("Claim values don't match. Hence the flow is not allowed.");
+                        throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH,
+                                                       APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH_MESSAGE,
+                                                       APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH_DESCRIPTION);
+                    }
+                } else {
+                    log.debug("A regex is not provided, validating the claim values based on equality.");
+                    if ((StringUtils.equals(accessVerificationClaimValue, claimValueSentInToken))
+                            || shouldAllowValidation) {
+                        log.debug("Claim values match or the flow is configured to allow when claims doesn't match. "
+                                          + "Hence the flow is allowed.");
+                        return true;
+                    } else {
+                        log.debug("Claim values don't match. Hence the flow is not allowed.");
+                        throw new APISecurityException(APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH,
+                                                       APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH_MESSAGE,
+                                                       APISecurityConstants.API_AUTH_ACCESS_TOKEN_CLAIMS_MISMATCH_DESCRIPTION);
+                    }
+                }
+            }
+        } catch (APISecurityException e) {
+            handleAuthFailure(e.getErrorCode(), messageContext, e.getMessage(), e.getDescription());
             return false;
-        }
-
-        if (StringUtils.isNotBlank(accessVerificationClaimValueRegex)) {
-            log.debug("A regex is provided, hence, validating the claim values using the provided regex.");
-            Pattern pattern = Pattern.compile(accessVerificationClaimValueRegex);
-            Matcher configuredClaimValueMatcher = pattern.matcher(accessVerificationClaimValue);
-            Matcher tokenSentClaimValueMatcher = pattern.matcher(claimValueSentInToken);
-
-            if ((configuredClaimValueMatcher.matches() && tokenSentClaimValueMatcher.matches())
-                    || shouldAllowValidation) {
-                log.debug("Claim values match or the flow is configured to allow when claims doesn't match. " +
-                        "Hence the flow is allowed.");
-                return true;
-            } else {
-                log.debug("Claim values don't match. Hence the flow is not allowed.");
-                handleFailure(HttpStatus.SC_FORBIDDEN, messageContext, CLAIMS_MISMATCH_ERROR_MSG, null);
-                return false;
-            }
-        } else {
-            log.debug("A regex is not provided, validating the claim values based on equality.");
-            if ((StringUtils.equals(accessVerificationClaimValue, claimValueSentInToken)) || shouldAllowValidation) {
-                log.debug("Claim values match or the flow is configured to allow when claims doesn't match. " +
-                        "Hence the flow is allowed.");
-                return true;
-            } else {
-                log.debug("Claim values don't match. Hence the flow is not allowed.");
-                handleFailure(HttpStatus.SC_FORBIDDEN, messageContext, CLAIMS_MISMATCH_ERROR_MSG, null);
-                return false;
-            }
         }
     }
 
@@ -108,8 +115,8 @@ public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator
      * @param errorMessage     error message of the failure
      * @param errorDescription error description of the failure
      */
-    private void handleFailure(int errorCode, MessageContext messageContext,
-                               String errorMessage, String errorDescription) {
+    private void handleAuthFailure(int errorCode, MessageContext messageContext, String errorMessage,
+                                   String errorDescription) {
 
         messageContext.setProperty(SynapseConstants.ERROR_CODE, errorCode);
         messageContext.setProperty(SynapseConstants.ERROR_MESSAGE, errorMessage);
@@ -118,7 +125,7 @@ public class ClaimBasedResourceAccessValidationMediator extends AbstractMediator
         if (sequence != null && !sequence.mediate(messageContext)) {
             return;
         }
-        Utils.sendFault(messageContext, errorCode);
+        Utils.sendFault(messageContext, HttpStatus.SC_FORBIDDEN);
     }
 
     public void setAccessVerificationClaim(String accessVerificationClaim) {

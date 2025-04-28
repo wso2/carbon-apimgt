@@ -86,4 +86,10 @@ public class ThrottlingHandlerWrapper extends ThrottleHandler {
     protected AccessInformation getAccessInformation(ThrottleContext hardThrottleContext, String throttleKey, String productionHardLimit) throws ThrottleException {
         return accessInformation;
     }
+
+    @Override
+    protected AccessInformation getAccessInformation(ThrottleContext hardThrottleContext, String throttleKey,
+                                                     String productionHardLimit, Long tokenCount) throws ThrottleException {
+        return accessInformation;
+    }
 }

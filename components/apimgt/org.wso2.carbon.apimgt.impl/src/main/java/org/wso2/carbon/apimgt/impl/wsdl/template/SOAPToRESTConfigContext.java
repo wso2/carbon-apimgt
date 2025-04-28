@@ -35,6 +35,7 @@ class SOAPToRESTConfigContext extends ConfigContext {
     private String method;
     private String soapAction;
     private String namespace;
+    private String mediaType;
     private String resourcePath;
     private Map<String, String> mappingObj;
     private JSONArray arrayElements;
@@ -49,12 +50,13 @@ class SOAPToRESTConfigContext extends ConfigContext {
      * @param arrayElements array type parameters mapping, if exists
      */
     SOAPToRESTConfigContext(Map<String, String> mapping, String method, String soapAction, String namespace,
-            String soapNamespace, JSONArray arrayElements) {
+            String soapNamespace, String mediaType, JSONArray arrayElements) {
         this.mappingObj = mapping;
         this.method = method;
         this.soapAction = soapAction;
         this.namespace = namespace;
         this.soapNamespace = soapNamespace;
+        this.mediaType = mediaType;
         this.arrayElements = arrayElements;
         init();
     }
@@ -82,6 +84,7 @@ class SOAPToRESTConfigContext extends ConfigContext {
         context.put(SOAPToRESTConstants.Template.RESOURCE_PATH, resourcePath);
         context.put(SOAPToRESTConstants.Template.MAPPING, mappingObj);
         context.put(SOAPToRESTConstants.Template.ARRAY_ELEMENTS, arrayElements);
+        context.put(SOAPToRESTConstants.Template.MEDIA_TYPE, mediaType);
         return context;
     }
 

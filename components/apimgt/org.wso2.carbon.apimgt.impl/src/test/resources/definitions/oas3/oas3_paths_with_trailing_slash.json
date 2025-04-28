@@ -1,0 +1,37 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OpenAPI path with trailing slash",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/test": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "x-auth-type": "Application",
+        "x-throttling-tier": "Unlimited"
+      }
+    },
+    "/test/": {
+      "get": {
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "x-auth-type": "Application",
+        "x-throttling-tier": "Unlimited"
+      }
+    }
+  },
+  "components": {}
+}

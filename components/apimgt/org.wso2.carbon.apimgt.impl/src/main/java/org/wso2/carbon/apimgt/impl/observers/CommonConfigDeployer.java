@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.LLMProviderRegistrationService;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.loader.KeyManagerConfigurationDataRetriever;
@@ -120,5 +121,13 @@ public class CommonConfigDeployer extends AbstractAxis2ConfigurationContextObser
         KeyManagerConfigurationDataRetriever keyManagerConfigurationDataRetriever =
                 new KeyManagerConfigurationDataRetriever(tenantDomain);
         keyManagerConfigurationDataRetriever.startLoadKeyManagerConfigurations();
+        if (configuration.isEnableAiConfiguration()) {
+            try {
+                LLMProviderRegistrationService.registerDefaultLLMProviders(tenantDomain);
+            } catch (APIManagementException e) {
+                log.error("Error occurred during onboarding pre defined LLM Providers in tenant domain "
+                        + tenantDomain, e);
+            }
+        }
     }
 }

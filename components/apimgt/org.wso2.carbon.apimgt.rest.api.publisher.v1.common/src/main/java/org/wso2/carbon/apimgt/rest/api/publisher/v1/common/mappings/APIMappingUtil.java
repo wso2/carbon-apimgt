@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.models.AaiSecurityScheme;
 import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
@@ -37,6 +38,7 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.dto.APIEndpointValidationDTO;
+import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -47,12 +49,14 @@ import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.BackendThrottlingConfiguration;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.Mediation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.ResourcePath;
 import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -61,7 +65,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
 import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.lifecycle.CheckListItem;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
@@ -69,6 +72,7 @@ import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLValidationResponse;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -78,6 +82,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropert
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsTokenBasedThrottlingConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
@@ -92,6 +97,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APISubtypeConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
@@ -114,6 +120,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePathListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SequenceBackendDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SequenceBackendListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoDTO;
@@ -146,6 +154,8 @@ import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getDefaultWebsubSubscriptionConfiguration;
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
+import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils.buildThrottlingConfiguration;
+import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils.buildThrottlingConfigurationDTO;
 
 /**
  * This class used for mapping utility to API.
@@ -341,11 +351,15 @@ public class APIMappingUtil {
         Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = dto.getAdditionalPropertiesMap();
         if (additionalPropertiesMap != null && !additionalPropertiesMap.isEmpty()) {
             for (Map.Entry<String, APIInfoAdditionalPropertiesMapDTO> entry : additionalPropertiesMap.entrySet()) {
+                String propertyKey = null;
                 if (entry.getValue().isDisplay()) {
-                    model.addProperty(entry.getKey() + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX,
-                            entry.getValue().getValue());
+                    propertyKey = entry.getKey() + APIConstants.API_RELATED_CUSTOM_PROPERTIES_SURFIX;
                 } else {
-                    model.addProperty(entry.getKey(), entry.getValue().getValue());
+                    propertyKey = entry.getKey();
+                }
+                // If this property already added from the additional properties, avoid overriding it
+                if (propertyKey != null && !model.getAdditionalProperties().containsKey(propertyKey)) {
+                    model.addProperty(propertyKey, entry.getValue().getValue());
                 }
             }
         }
@@ -404,7 +418,9 @@ public class APIMappingUtil {
         } else if (dto.getKeyManagers() == null) {
             model.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
         } else {
-            throw new APIManagementException("KeyManagers value need to be an array");
+            String errMsg = "KeyManagers value needs to be an array";
+            ExceptionCodes errorHandler = ExceptionCodes.KEYMANAGERS_VALUE_NOT_ARRAY;
+            throw new APIManagementException(errMsg, errorHandler);
         }
 
         APIServiceInfoDTO serviceInfoDTO = dto.getServiceInfo();
@@ -441,6 +457,13 @@ public class APIMappingUtil {
         if (dto.getAudience() != null) {
             model.setAudience(dto.getAudience().toString());
         }
+        if (dto.getAudiences() != null) {
+            List<String> audiences = dto.getAudiences();
+            if (audiences.isEmpty()) {
+                audiences.add(APIConstants.ALL_AUDIENCES);
+            }
+            model.setAudiences(new HashSet<>(audiences));
+        }
         if (dto.getGatewayVendor() != null) {
             model.setGatewayVendor(dto.getGatewayVendor());
         }
@@ -453,7 +476,15 @@ public class APIMappingUtil {
             String asyncTransports = StringUtils.join(dto.getAsyncTransportProtocols(), ',');
             model.setAsyncTransportProtocols(asyncTransports);
         }
-
+        if (dto.getSubtypeConfiguration() != null && dto.getSubtypeConfiguration().getSubtype() != null
+                && APIConstants.API_SUBTYPE_AI_API.equals(dto.getSubtypeConfiguration().getSubtype())
+                && dto.getSubtypeConfiguration().getConfiguration() != null) {
+            model.setSubtype(APIConstants.API_SUBTYPE_AI_API);
+            model.setAiConfiguration(new Gson().fromJson(dto.getSubtypeConfiguration().getConfiguration().toString(),
+                    AIConfiguration.class));
+        } else {
+            model.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
+        }
         return model;
     }
 
@@ -488,6 +519,22 @@ public class APIMappingUtil {
         mockResponsePayloadInfoDTO.setVerb(model.getVerb());
         mockResponsePayloadInfoDTO.setContent(model.getContent());
         return mockResponsePayloadInfoDTO;
+    }
+
+    public static SequenceBackendListDTO fromSequenceDataToDTO(List<SequenceBackendData> list) {
+        SequenceBackendListDTO res = new SequenceBackendListDTO();
+        res.setCount(list.size());
+        List<SequenceBackendDTO> backends = new ArrayList<>();
+
+        for (SequenceBackendData backend : list) {
+            SequenceBackendDTO dto = new SequenceBackendDTO();
+            dto.sequenceId(backend.getId());
+            dto.setSequenceName(backend.getName());
+            dto.setSequenceType(backend.getType());
+            backends.add(dto);
+        }
+        res.setList(backends);
+        return res;
     }
 
     /**
@@ -675,6 +722,13 @@ public class APIMappingUtil {
             apiInfoDTO.setAudience(org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoDTO.AudienceEnum
                     .valueOf(api.getAudience()));
         }
+        if (api.getAudiences() != null) {
+            Set<String> audiences = api.getAudiences();
+            if (audiences.contains(APIConstants.ALL_AUDIENCES) && audiences.size() > 1) {
+                audiences.remove(APIConstants.ALL_AUDIENCES);
+            }
+            apiInfoDTO.setAudiences(new ArrayList<>(audiences));
+        }
         if (api.getCreatedTime() != null) {
             Date createdTime = new Date(Long.parseLong(api.getCreatedTime()));
             apiInfoDTO.setCreatedTime(String.valueOf(createdTime.getTime()));
@@ -721,6 +775,8 @@ public class APIMappingUtil {
         apiInfoDTO.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
         apiInfoDTO.setGatewayType(api.getGatewayType());
         apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
+        apiInfoDTO.setEgress(api.isEgress() == 1); // true -1, false - 0
+        apiInfoDTO.setSubtype(api.getSubtype());
         return apiInfoDTO;
     }
 
@@ -953,13 +1009,66 @@ public class APIMappingUtil {
     private static void setMaxTpsFromApiDTOToModel(APIDTO dto, API api) {
 
         APIMaxTpsDTO maxTpsDTO = dto.getMaxTps();
+        BackendThrottlingConfiguration backendThrottlingConfiguration = new BackendThrottlingConfiguration();
         if (maxTpsDTO != null) {
             if (maxTpsDTO.getProduction() != null) {
                 api.setProductionMaxTps(maxTpsDTO.getProduction().toString());
+                backendThrottlingConfiguration.setProductionMaxTps(maxTpsDTO.getProduction().toString());
+            }
+            if (maxTpsDTO.getProductionTimeUnit() != null) {
+                api.setProductionTimeUnit(getTimeUnitInMilliseconds(maxTpsDTO.getProductionTimeUnit().toString()));
+                backendThrottlingConfiguration.setProductionTimeUnit(
+                        getTimeUnitInMilliseconds(maxTpsDTO.getProductionTimeUnit().toString()));
             }
             if (maxTpsDTO.getSandbox() != null) {
                 api.setSandboxMaxTps(maxTpsDTO.getSandbox().toString());
+                backendThrottlingConfiguration.setSandboxMaxTps(maxTpsDTO.getSandbox().toString());
             }
+            if (maxTpsDTO.getSandboxTimeUnit() != null) {
+                api.setSandboxTimeUnit(getTimeUnitInMilliseconds(maxTpsDTO.getSandboxTimeUnit().toString()));
+                backendThrottlingConfiguration.setSandboxTimeUnit(
+                        getTimeUnitInMilliseconds(maxTpsDTO.getSandboxTimeUnit().toString()));
+            }
+            APIMaxTpsTokenBasedThrottlingConfigurationDTO tokenBasedThrottlingConfigurationDTO
+                    = maxTpsDTO.getTokenBasedThrottlingConfiguration();
+            if (tokenBasedThrottlingConfigurationDTO != null
+                    && tokenBasedThrottlingConfigurationDTO.isIsTokenBasedThrottlingEnabled()) {
+                backendThrottlingConfiguration.setTokenBasedThrottlingConfiguration(
+                        buildThrottlingConfiguration(tokenBasedThrottlingConfigurationDTO));
+            }
+        }
+        api.setBackendThrottlingConfiguration(backendThrottlingConfiguration);
+    }
+
+    /**
+     * Retrieves millisecond value for pre-defined time units.
+     * @param timeUnit String value of the time unit
+     * @return Millisecond value of the time unit
+     */
+    private static String getTimeUnitInMilliseconds(String timeUnit) {
+        switch(timeUnit) {
+        case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE_MS;
+        case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR_MS;
+        default:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_SECOND_MS;
+        }
+    }
+
+    /**
+     * Retrieved predefined strings for millisecond value.
+     * @param timeUnitInMillis Time in milliseconds
+     * @return  Time unit string for the given milliseconds value
+     */
+    private static String convertFromMilliseconds(String timeUnitInMillis) {
+        switch(timeUnitInMillis) {
+        case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE_MS:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE;
+        case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR_MS:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR;
+        default:
+            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_SECOND;
         }
     }
 
@@ -975,8 +1084,7 @@ public class APIMappingUtil {
     }
 
     public static APIDTO fromAPItoDTO(API model, boolean preserveCredentials,
-                                      APIProvider apiProviderParam)
-            throws APIManagementException {
+                                      APIProvider apiProviderParam) throws APIManagementException {
 
         APIProvider apiProvider;
         if (apiProviderParam != null) {
@@ -1069,7 +1177,14 @@ public class APIMappingUtil {
                                         new String(cryptoUtil.base64DecodeAndDecrypt(clientSecret)));
                             }
                         }
-
+                        if (APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equals(productionEndpointType)) {
+                            String apiKeyValue = (String) productionEndpointSecurity
+                                    .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
+                            if (StringUtils.isNotEmpty(apiKeyValue)) {
+                                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
+                                        new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
+                            }
+                        }
                         endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION,
                                 productionEndpointSecurity);
                         endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
@@ -1079,7 +1194,6 @@ public class APIMappingUtil {
                                 .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
                         String sandboxEndpointType = (String) sandboxEndpointSecurity
                                 .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
-
                         if (sandboxEndpointSecurity
                                 .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS) != null) {
                             String customParametersString = (String) sandboxEndpointSecurity
@@ -1088,7 +1202,6 @@ public class APIMappingUtil {
                             sandboxEndpointSecurity.put(
                                     APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParameters);
                         }
-
                         if (APIConstants.OAuthConstants.OAUTH.equals(sandboxEndpointType)) {
                             String clientSecret = (String) sandboxEndpointSecurity
                                     .get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET);
@@ -1098,7 +1211,14 @@ public class APIMappingUtil {
                                         new String(cryptoUtil.base64DecodeAndDecrypt(clientSecret)));
                             }
                         }
-
+                        if (APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equals(sandboxEndpointType)) {
+                            String apiKeyValue = (String) sandboxEndpointSecurity
+                                    .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
+                            if (StringUtils.isNotEmpty(apiKeyValue)) {
+                                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
+                                        new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
+                            }
+                        }
                         endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX,
                                 sandboxEndpointSecurity);
                         endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
@@ -1393,9 +1513,18 @@ public class APIMappingUtil {
             dto.setAudience(AudienceEnum.valueOf(model.getAudience()));
         }
 
+        if (model.getAudiences() != null) {
+            Set<String> audiences = model.getAudiences();
+            if (audiences.contains(APIConstants.ALL_AUDIENCES) && audiences.size() > 1) {
+                audiences.remove(APIConstants.ALL_AUDIENCES);
+            }
+            dto.setAudiences(new ArrayList<>(model.getAudiences()));
+        }
+
         String gatewayVendor = StringUtils.toRootLowerCase(model.getGatewayVendor());
         dto.setGatewayVendor(gatewayVendor);
         dto.setGatewayType(model.getGatewayType());
+        dto.setEgress(model.isEgress() == 1); //true - 1, false - 0
 
         if (model.getGatewayVendor() == null) {
             dto.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
@@ -1404,7 +1533,14 @@ public class APIMappingUtil {
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
-
+        APISubtypeConfigurationDTO subtypeConfigurationDTO = new APISubtypeConfigurationDTO();
+        subtypeConfigurationDTO.setSubtype(model.getSubtype());
+        if (model.getAiConfiguration() != null) {
+            subtypeConfigurationDTO.setSubtype(model.getSubtype());
+            subtypeConfigurationDTO.setConfiguration(new Gson().toJson(model.getAiConfiguration()));
+            dto.setSubtypeConfiguration(subtypeConfigurationDTO);
+        }
+        dto.setSubtypeConfiguration(subtypeConfigurationDTO);
         return dto;
     }
 
@@ -1567,6 +1703,24 @@ public class APIMappingUtil {
             if (!StringUtils.isBlank(api.getSandboxMaxTps())) {
                 maxTpsDTO.setSandbox(Long.parseLong(api.getSandboxMaxTps()));
             }
+            if (!StringUtils.isBlank(api.getProductionTimeUnit())) {
+                maxTpsDTO.setProductionTimeUnit(APIMaxTpsDTO.ProductionTimeUnitEnum.valueOf(
+                        convertFromMilliseconds(api.getProductionTimeUnit())));
+            }
+            if (!StringUtils.isBlank(api.getSandboxTimeUnit())) {
+                maxTpsDTO.setSandboxTimeUnit(APIMaxTpsDTO.SandboxTimeUnitEnum.valueOf(
+                        convertFromMilliseconds(api.getSandboxTimeUnit())));
+            }
+            BackendThrottlingConfiguration backendThrottlingConfiguration = api.getBackendThrottlingConfiguration();
+            if (backendThrottlingConfiguration != null
+                    && backendThrottlingConfiguration.getTokenBasedThrottlingConfiguration() != null
+                    && backendThrottlingConfiguration.getTokenBasedThrottlingConfiguration()
+                    .isTokenBasedThrottlingEnabled()) {
+                APIMaxTpsTokenBasedThrottlingConfigurationDTO throttlingConfigurationsDTO
+                        = buildThrottlingConfigurationDTO(backendThrottlingConfiguration
+                        .getTokenBasedThrottlingConfiguration());
+                maxTpsDTO.setTokenBasedThrottlingConfiguration(throttlingConfigurationsDTO);
+            }
             dto.setMaxTps(maxTpsDTO);
         } catch (NumberFormatException e) {
             //logs the error and continues as this is not a blocker
@@ -1674,6 +1828,11 @@ public class APIMappingUtil {
 
             String uriTempVal = operation.getTarget();
 
+            if (StringUtils.isEmpty(uriTempVal)) {
+                String errMsg = "Resource URI template value (target) is not specified for the operation/resource";
+                throw new APIManagementException(errMsg, ExceptionCodes.RESOURCE_URI_TEMPLATE_NOT_DEFINED);
+            }
+
             String httpVerb = operation.getVerb();
             List<String> scopeList = operation.getScopes();
             if (scopeList != null) {
@@ -1693,6 +1852,14 @@ public class APIMappingUtil {
             if (amznResourceName != null) {
                 template.setAmznResourceName(amznResourceName);
             }
+
+            if (StringUtils.isEmpty(httpVerb)) {
+                String errMsg = "Operation type/http method is not specified for the operation/resource " + uriTempVal;
+                throw new APIManagementException(errMsg,
+                        ExceptionCodes.from(ExceptionCodes.OPERATION_OR_RESOURCE_TYPE_OR_METHOD_NOT_DEFINED,
+                                uriTempVal));
+            }
+
             //Only continue for supported operations
             if (APIConstants.SUPPORTED_METHODS.contains(httpVerb.toLowerCase())
                     || (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))
@@ -1725,23 +1892,33 @@ public class APIMappingUtil {
                 }
                 uriTemplates.add(template);
             } else {
+                final String errorMessageEndClause = " operation Type  '" + httpVerb + "' provided" + " for operation" +
+                        " '" + uriTempVal + "' is invalid";
                 if (APIConstants.GRAPHQL_API.equals(model.getType())) {
-                    handleException(
-                            "The GRAPHQL operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
-                                    + "' is invalid");
+                    String errMsg = "The " + APIConstants.GRAPHQL_API + errorMessageEndClause;
+                    ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.OPERATION_TYPE_INVALID,
+                            APIConstants.GRAPHQL_API, httpVerb, uriTempVal);
+                    throw new APIManagementException(errMsg, errorHandler);
                 } else if (APIConstants.API_TYPE_WEBSUB.equals(model.getType())) {
-                    handleException("The WEBSUB operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
-                            + "' is invalid");
+                    String errMsg = "The " + APIConstants.API_TYPE_WEBSUB + errorMessageEndClause;
+                    ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.OPERATION_TYPE_INVALID,
+                            APIConstants.API_TYPE_WEBSUB, httpVerb, uriTempVal);
+                    throw new APIManagementException(errMsg, errorHandler);
                 } else if (APIConstants.API_TYPE_SSE.equals(model.getType())) {
-                    handleException("The SSE operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
-                            + "' is invalid");
+                    String errMsg = "The " + APIConstants.API_TYPE_SSE + errorMessageEndClause;
+                    ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.OPERATION_TYPE_INVALID,
+                            APIConstants.API_TYPE_SSE, httpVerb, uriTempVal);
+                    throw new APIManagementException(errMsg, errorHandler);
                 } else if (APIConstants.API_TYPE_WS.equals(model.getType())) {
-                    handleException(
-                            "The WEBSOCKET operation Type '" + httpVerb + "' provided for operation '" + uriTempVal
-                                    + "' is invalid");
+                    String errMsg = "The " + APIConstants.API_TYPE_WS + errorMessageEndClause;
+                    ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.OPERATION_TYPE_INVALID,
+                            APIConstants.API_TYPE_WS, httpVerb, uriTempVal);
+                    throw new APIManagementException(errMsg, errorHandler);
                 } else {
-                    handleException("The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal
-                            + "' is invalid");
+                    String errMsg = "The HTTP method '" + httpVerb + "' provided for resource '" + uriTempVal + "' " +
+                            "is invalid";
+                    throw new APIManagementException(errMsg,
+                            ExceptionCodes.from(ExceptionCodes.HTTP_METHOD_INVALID, httpVerb, uriTempVal));
                 }
             }
 
@@ -2108,6 +2285,7 @@ public class APIMappingUtil {
             workflowResponseDTO.setWorkflowStatus(WorkflowResponseDTO.WorkflowStatusEnum.CREATED);
         }
 
+        workflowResponseDTO.setJsonPayload(stateChangeResponse.getWorkflowResponse().getJSONPayload());
         workflowResponseDTO.setLifecycleState(lifecycleStateDTO);
         return workflowResponseDTO;
     }
@@ -2300,11 +2478,15 @@ public class APIMappingUtil {
             if (apiProduct.getApiSecurity() != null) {
                 productDto.setSecurityScheme(Arrays.asList(apiProduct.getApiSecurity().split(",")));
             }
+            if (apiProduct.getAudiences() != null) {
+                productDto.setAudiences(new ArrayList<>(apiProduct.getAudiences()));
+            }
             productDto.setBusinessOwner(apiProduct.getBusinessOwner());
             productDto.setBusinessOwnerEmail(apiProduct.getBusinessOwnerEmail());
             productDto.setTechnicalOwner(apiProduct.getTechnicalOwner());
             productDto.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
             productDto.setMonetizedInfo(apiProduct.isMonetizationEnabled());
+            productDto.setEgress(apiProduct.isEgress() == 1);
 
             list.add(productDto);
         }
@@ -2349,6 +2531,15 @@ public class APIMappingUtil {
         productDto.setIsRevision(product.isRevision());
         productDto.setRevisionedApiProductId(product.getRevisionedApiProductId());
         productDto.setRevisionId(product.getRevisionId());
+        productDto.setEgress(product.isEgress() == 1);
+
+        if (product.getAudiences() != null) {
+            Set<String> audiences = product.getAudiences();
+            if (audiences.contains(APIConstants.ALL_AUDIENCES) && audiences.size() > 1) {
+                audiences.remove(APIConstants.ALL_AUDIENCES);
+            }
+            productDto.setAudiences(new ArrayList<>(product.getAudiences()));
+        }
 
         if (APIConstants.ENABLED.equals(product.getResponseCache())) {
             productDto.setResponseCachingEnabled(Boolean.TRUE);
@@ -2612,6 +2803,14 @@ public class APIMappingUtil {
             product.setTechnicalOwnerEmail(dto.getBusinessInformation().getTechnicalOwnerEmail());
         }
 
+        if (dto.getAudiences() != null) {
+            List<String> audiences = dto.getAudiences();
+            if (audiences.isEmpty()) {
+                audiences.add(APIConstants.ALL_AUDIENCES);
+            }
+            product.setAudiences(new HashSet<>(audiences));
+        }
+
         Set<Tier> apiTiers = new HashSet<>();
         List<String> tiersFromDTO = dto.getPolicies();
 
@@ -2720,6 +2919,7 @@ public class APIMappingUtil {
         product.setApiSecurity(getSecurityScheme(dto.getSecurityScheme()));
         product.setAuthorizationHeader(dto.getAuthorizationHeader());
         product.setApiKeyHeader(dto.getApiKeyHeader());
+        product.setEgress(dto.isEgress() ? 1 : 0);
         if (product.getApiKeyHeader() == null) {
             product.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
         }
@@ -3108,6 +3308,9 @@ public class APIMappingUtil {
             if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
                 sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
             }
+            if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
+                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
+            }
         }
         if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
             JSONObject productionEndpointSecurity =
@@ -3118,6 +3321,9 @@ public class APIMappingUtil {
             }
             if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PASSWORD) != null) {
                 productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_PASSWORD, "");
+            }
+            if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
+                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
             }
         }
         return endpointSecurityElement;

@@ -40,6 +40,7 @@ public class APILoggingImpl {
     private static final String INVALID_LOGGING_PERMISSION = "Invalid logging permission";
     private static final String INCORRECT_LOGGING_PER_API_RESOURCE_REQUEST = "Resource Method and Resource Path both " +
             "should be included";
+    private static final String LOGGING_API_MISSING_DATA = "Requested API is not available";
     private static final String REQUIRED_API_RESOURCE_IS_NOT_AVAILABLE = "Requested resource is not available";
     private final ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
 
@@ -64,7 +65,13 @@ public class APILoggingImpl {
                         ExceptionCodes.from(ExceptionCodes.LOGGING_API_RESOURCE_NOT_FOUND));
             }
         } else if (resourceMethod == null && resourcePath == null) {
-            LoggingMgtDAO.getInstance().addAPILogger(tenantId, apiId, logLevel);
+            boolean isAPIExists = LoggingMgtDAO.getInstance().checkIfAPIExists(tenantId, apiId);
+            if (isAPIExists) {
+                LoggingMgtDAO.getInstance().addAPILogger(tenantId, apiId, logLevel);
+            } else {
+                throw new APIManagementException(LOGGING_API_MISSING_DATA,
+                        ExceptionCodes.from(ExceptionCodes.LOGGING_API_NOT_FOUND_IN_TENANT));
+            }
         } else {
             throw new APIManagementException(INCORRECT_LOGGING_PER_API_RESOURCE_REQUEST,
                     ExceptionCodes.from(ExceptionCodes.LOGGING_API_MISSING_DATA));

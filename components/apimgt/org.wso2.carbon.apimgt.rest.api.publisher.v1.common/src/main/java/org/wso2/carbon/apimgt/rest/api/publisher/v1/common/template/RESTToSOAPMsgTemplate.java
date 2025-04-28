@@ -23,11 +23,10 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.json.simple.JSONArray;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.template.ConfigContext;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPToRESTConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 
 import java.io.File;
 import java.io.StringWriter;
@@ -116,9 +115,8 @@ public class RESTToSOAPMsgTemplate {
         if (this.velocityLogPath != null) {
             return this.velocityLogPath;
         } else {
-            APIManagerConfigurationService config = ServiceReferenceHolder.getInstance()
-                    .getAPIManagerConfigurationService();
-            String velocityLogPath = config.getAPIManagerConfiguration().getFirstProperty(APIConstants.VELOCITY_LOGGER);
+            String velocityLogPath = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().
+                    getFirstProperty(APIConstants.VELOCITY_LOGGER);
             if (velocityLogPath != null && velocityLogPath.length() > 1) {
                 this.velocityLogPath = velocityLogPath;
             } else {

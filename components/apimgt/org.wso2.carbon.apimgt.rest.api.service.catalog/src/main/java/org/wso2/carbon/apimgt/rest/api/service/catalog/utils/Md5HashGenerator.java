@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.service.catalog.utils;
 
+import com.google.gson.Gson;
 import org.apache.commons.io.comparator.NameFileComparator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +33,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import static org.wso2.carbon.apimgt.rest.api.service.catalog.utils.ServiceEntryMappingUtil.fromFileToServiceEntry;
@@ -55,10 +57,10 @@ public class Md5HashGenerator {
      * @param path files available directory location
      * @return String
      */
-    public static HashMap<String, String> generateHash(String path) {
+    public static HashMap<String, String> generateHash(String path, String algorithm) {
 
         File dir = new File(path);
-        return validateInputParams(Objects.requireNonNull(dir.listFiles()));
+        return validateInputParams(Objects.requireNonNull(dir.listFiles()), algorithm);
     }
 
     /**
@@ -67,7 +69,7 @@ public class Md5HashGenerator {
      * @param files list of files available directory location
      * @return HashMap<String, String>
      */
-    private static HashMap<String, String> validateInputParams(File[] files) {
+    private static HashMap<String, String> validateInputParams(File[] files, String algorithm) {
 
         for (File file : files) {
             if (file.isDirectory()) {
@@ -90,7 +92,7 @@ public class Md5HashGenerator {
                         }
                     }
                     try {
-                        endpoints.put(key, calculateHash(fileArray));
+                        endpoints.put(key, calculateHash(fileArray, algorithm));
                     } catch (NoSuchAlgorithmException | IOException e) {
                         RestApiUtil.handleInternalServerError("Failed to generate MD5 Hash due to " +
                                 e.getMessage(), log);
@@ -111,52 +113,48 @@ public class Md5HashGenerator {
      * @return String
      * @throws NoSuchAlgorithmException if the given algorithm is invalid or not found in {@link MessageDigest}
      */
-    private static String calculateHash(File[] files) throws NoSuchAlgorithmException, IOException {
+    private static String calculateHash(File[] files, String algorithm) throws NoSuchAlgorithmException, IOException {
 
-        MessageDigest md5Digest = MessageDigest.getInstance("MD5");
-        return getFileChecksum(md5Digest, files[0]) + getFileChecksum(md5Digest, files[1]);
+        return getFileChecksum(files, algorithm);
     }
 
     /**
      * Method returns the hashed value for the file using MD5 hashing as default
      *
-     * @param file the updated/created time of the resource in UNIX time
-     * @return String
-     * @throws IOException if the given algorithm is invalid or not found in {@link MessageDigest}
+     * @param files the updated/created time of the resource in UNIX time
+     * @param algorithm the hashing algorithm to be used
+     * @return String the hashed value of the files
+     * @throws NoSuchAlgorithmException if the given algorithm is invalid or not found in {@link MessageDigest}
+     * @throws IOException             if the file is not found or not accessible
      */
-    private static String getFileChecksum(MessageDigest digest, File file) throws IOException {
-        FileInputStream fis = new FileInputStream(file);
+    private static String getFileChecksum(File[] files, String algorithm) throws IOException, NoSuchAlgorithmException {
 
-        byte[] byteArray = new byte[1024];
-        int bytesCount = 0;
+        MessageDigest digest = MessageDigest.getInstance(algorithm);
+        for (File file: files){
+            FileInputStream fis = new FileInputStream(file);
 
-        while ((bytesCount = fis.read(byteArray)) != -1) {
-            digest.update(byteArray, 0, bytesCount);
+            byte[] byteArray = new byte[1024];
+            int bytesCount = 0;
+
+            while ((bytesCount = fis.read(byteArray)) != -1) {
+                digest.update(byteArray, 0, bytesCount);
+            }
+            fis.close();
         }
-        fis.close();
-
         byte[] bytes = digest.digest();
-
         StringBuilder sb = new StringBuilder();
         for (byte aByte : bytes) {
             sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
         }
-        return sb.toString();
+        return hashToJson(digest.getAlgorithm(), sb.toString());
     }
 
-    static String calculateMD5Hash(byte[] content) {
-        try {
-            MessageDigest md5Digest = MessageDigest.getInstance("MD5");
-            byte[] md5Bytes = md5Digest.digest(content);
-            StringBuilder sb = new StringBuilder();
-            for (byte md5byte : md5Bytes) {
-                sb.append(Integer.toString((md5byte & 0xff) + 0x100, 16).substring(1));
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            RestApiUtil.handleInternalServerError("Error when calculating the MD5 hash", log);
-            return null;
-        }
+    private static String hashToJson(String algo, String hashValue) {
+
+        Map<String, String> hashValueMap = new HashMap<>();
+        hashValueMap.put(APIConstants.HASH, hashValue);
+        hashValueMap.put(APIConstants.DigestAuthConstants.ALGORITHM, algo);
+        return new Gson().toJson(hashValueMap);
     }
 
 }

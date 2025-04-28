@@ -52,6 +52,12 @@ public class ThrottlePolicyConstants {
 
     public static final String COLUMN_TIME_UNIT = "TIME_UNIT";
 
+    public static final String COLUMN_TOTAL_TOKEN_COUNT = "TOTAL_TOKEN_COUNT";
+
+    public static final String COLUMN_PROMPT_TOKEN_COUNT = "PROMPT_TOKEN_COUNT";
+
+    public static final String COLUMN_COMPLETION_TOKEN_COUNT = "COMPLETION_TOKEN_COUNT";
+
     public static final String COLUMN_APPLICABLE_LEVEL = "APPLICABLE_LEVEL";
 
     public static final String COLUMN_DEFAULT_QUOTA_POLICY_TYPE = "DEFAULT_QUOTA_TYPE";

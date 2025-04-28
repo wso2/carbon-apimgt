@@ -168,7 +168,7 @@ public class ServiceCatalogDAO {
                     isValid = false;
                     break;
                 }
-                if (!existingService.getMd5().equals(service.getMd5())) {
+                if (!APIUtil.verifyHashValues(existingService, service)) {
                     serviceListToUpdate.add(service);
                 }
             } else {

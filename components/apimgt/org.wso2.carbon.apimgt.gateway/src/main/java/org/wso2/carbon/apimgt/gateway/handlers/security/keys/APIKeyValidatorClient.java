@@ -76,12 +76,12 @@ public class APIKeyValidatorClient {
     }
 
     public APIKeyValidationInfoDTO validateSubscription(String context, String version, int appId,
-                                                        String tenantDomain)
+                                                        String tenantDomain, String keyType)
             throws APISecurityException {
 
         try {
             return apiKeyValidationService
-                    .validateSubscription(context, version, appId, tenantDomain);
+                    .validateSubscription(context, version, appId, tenantDomain, keyType);
         } catch (APIKeyMgtException | APIManagementException e) {
             log.error("Error while  validate subscriptions", e);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,

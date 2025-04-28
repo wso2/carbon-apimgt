@@ -278,7 +278,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             MessageContext messageContext) throws APIManagementException {
         ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().
                 getAPIManagerConfigurationService().getAPIManagerConfiguration().getApiChatConfigurationDto();
-        if (configDto.isAuthTokenProvided()) {
+        if (configDto.isAuthTokenProvided() || configDto.isKeyProvided()) {
             // Check the action
             if (apiChatAction.equals(APIConstants.AI.API_CHAT_ACTION_PREPARE)) {
                 // Determine whether the request body is valid. Request body should have a request UUID.
@@ -830,7 +830,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     @Override
     public Response apisApiIdSwaggerGet(String apiId, String environmentName,
-            String ifNoneMatch, String xWSO2Tenant, String xWSO2TenantQ, MessageContext messageContext) {
+            String ifNoneMatch, String xWSO2Tenant, String xWSO2TenantQ, String query, MessageContext messageContext) {
         try {
             String organization;
             if (StringUtils.isNotEmpty(xWSO2TenantQ) && StringUtils.isEmpty(xWSO2Tenant)) {
@@ -880,7 +880,14 @@ public class ApisApiServiceImpl implements ApisApiService {
             String apiSwagger = null;
             if (StringUtils.isNotEmpty(environmentName)) {
                 try {
-                    apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironment(api, environmentName);
+                    if (StringUtils.isNotEmpty(query)){
+                        String kmId = APIMappingUtil.getKmIdValue(query);
+                        if (StringUtils.isNotBlank(kmId)) {
+                            apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironmentByKm(api, environmentName, kmId);
+                        }
+                    } else {
+                        apiSwagger = apiConsumer.getOpenAPIDefinitionForEnvironment(api, environmentName);
+                    }
                 } catch (APIManagementException e) {
                     // handle gateway not found exception otherwise pass it
                     if (RestApiUtil.isDueToResourceNotFound(e)) {

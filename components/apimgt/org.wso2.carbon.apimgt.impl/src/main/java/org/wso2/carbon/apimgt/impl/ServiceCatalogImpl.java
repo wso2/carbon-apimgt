@@ -25,12 +25,14 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.ServiceFilterParams;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import java.util.List;
 
 public class ServiceCatalogImpl implements ServiceCatalog {
 
     private ServiceCatalogDAO catalogDAO = ServiceCatalogDAO.getInstance();
+    private static String hashingAlgorithm;
 
     @Override
     public String addService(ServiceEntry serviceEntry, int tenantId, String user) throws APIManagementException {
@@ -109,5 +111,15 @@ public class ServiceCatalogImpl implements ServiceCatalog {
     @Override
     public int getServicesCount(int tenantId, ServiceFilterParams filterParams) throws APIManagementException {
         return catalogDAO.getServicesCount(tenantId, filterParams);
+    }
+
+    public String hashingAlgorithm() {
+        if (hashingAlgorithm != null) {
+            return hashingAlgorithm;
+        }
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        hashingAlgorithm = config.getHashingAlgorithm();
+        return hashingAlgorithm;
     }
 }

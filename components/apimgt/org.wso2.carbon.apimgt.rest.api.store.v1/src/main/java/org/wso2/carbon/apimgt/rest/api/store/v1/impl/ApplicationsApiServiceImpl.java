@@ -68,6 +68,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyGenerateReques
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyMappingRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationThrottleResetDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
@@ -98,6 +99,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
@@ -487,6 +489,40 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     /**
+     * Reset Application Level Throttle Policy
+     *
+     * @param applicationId               application Identifier
+     * @param applicationThrottleResetDTO request DTO containing the username
+     * @return response with status code 200 if successful
+     */
+    @Override
+    public Response applicationsApplicationIdResetThrottlePolicyPost(String applicationId,
+            ApplicationThrottleResetDTO applicationThrottleResetDTO, MessageContext messageContext) {
+        try {
+            if (applicationThrottleResetDTO == null) {
+                RestApiUtil.handleBadRequest("Username cannot be null", log);
+            }
+
+            String user = applicationThrottleResetDTO.getUserName();
+            String userId = MultitenantUtils.getTenantAwareUsername(user);
+            String loggedInUsername = RestApiCommonUtil.getLoggedInUsername();
+            String organization = RestApiUtil.getOrganization(messageContext);
+
+            if (StringUtils.isBlank(userId)) {
+                RestApiUtil.handleBadRequest("Username cannot be empty", log);
+            }
+
+            APIConsumer apiConsumer = RestApiCommonUtil.getConsumer(loggedInUsername);
+            //send the reset request as an event to the eventhub
+            apiConsumer.resetApplicationThrottlePolicy(applicationId, userId, organization);
+            return Response.ok().build();
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error while resetting application " + applicationId, e, log);
+        }
+        return null;
+    }
+
+    /**
      * Preprocess and update the application
      *
      * @param username       Username
@@ -629,48 +665,50 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                     Application application = apiConsumer.getApplicationByUUID(applicationId);
                     org.json.JSONObject decodedBody = new org.json.JSONObject(
                                         new String(Base64.getUrlDecoder().decode(splitToken[1])));
-                    org.json.JSONObject appInfo = decodedBody.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION);
-                    if (appInfo != null && application != null) {
+                    if (application != null) {
                         if (RestAPIStoreUtils.isUserOwnerOfApplication(application)
                                 || RestAPIStoreUtils.isApplicationSharedtoUser(application)) {
-                            String appUuid = appInfo.getString(APIConstants.JwtTokenConstants.APPLICATION_UUID);
-                            if (applicationId.equals(appUuid)) {
-                                long expiryTime = Long.MAX_VALUE;
-                                org.json.JSONObject payload = new org.json.JSONObject(
-                                        new String(Base64.getUrlDecoder().decode(splitToken[1])));
-                                if (payload.has(APIConstants.JwtTokenConstants.EXPIRY_TIME)) {
-                                    expiryTime = APIUtil.getExpiryifJWT(apiKey);
+                            if (decodedBody.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION) != null) {
+                                org.json.JSONObject appInfo =
+                                        decodedBody.getJSONObject(APIConstants.JwtTokenConstants.APPLICATION);
+                                String appUuid = appInfo.getString(APIConstants.JwtTokenConstants.APPLICATION_UUID);
+                                if (applicationId.equals(appUuid)) {
+                                    long expiryTime = Long.MAX_VALUE;
+                                    org.json.JSONObject payload = new org.json.JSONObject(
+                                            new String(Base64.getUrlDecoder().decode(splitToken[1])));
+                                    if (payload.has(APIConstants.JwtTokenConstants.EXPIRY_TIME)) {
+                                        expiryTime = APIUtil.getExpiryifJWT(apiKey);
+                                    }
+                                    String tokenIdentifier = payload.getString(APIConstants.JwtTokenConstants.JWT_ID);
+                                    String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+                                    apiConsumer.revokeAPIKey(tokenIdentifier, expiryTime, tenantDomain);
+                                    return Response.ok().build();
+                                } else {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("Application uuid " + applicationId + " isn't matched with the " +
+                                                "application in the token " + appUuid + " of API Key " +
+                                                APIUtil.getMaskedToken(apiKey));
+                                    }
+                                    RestApiUtil.handleBadRequest("Validation failed for the given token ", log);
                                 }
-                                String tokenIdentifier = payload.getString(APIConstants.JwtTokenConstants.JWT_ID);
-                                String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-                                apiConsumer.revokeAPIKey(tokenIdentifier, expiryTime, tenantDomain);
-                                return Response.ok().build();
                             } else {
                                 if (log.isDebugEnabled()) {
-                                    log.debug("Application uuid " + applicationId + " isn't matched with the " +
-                                            "application in the token " + appUuid + " of API Key " +
-                                                                                    APIUtil.getMaskedToken(apiKey));
+                                    log.debug("Application is not included in the token " +
+                                            APIUtil.getMaskedToken(apiKey));
                                 }
                                 RestApiUtil.handleBadRequest("Validation failed for the given token ", log);
                             }
                         } else {
                             if (log.isDebugEnabled()) {
                                 log.debug("Logged in user " + username + " isn't the owner of the application "
-                                                                                                        + applicationId);
+                                        + applicationId);
                             }
                             RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION,
-                                                                                                      applicationId, log);
+                                    applicationId, log);
                         }
-                    } else {
+                    }else {
                         if(log.isDebugEnabled()) {
-                            if (application == null) {
-                                log.debug("Application with given id " + applicationId + " doesn't not exist ");
-                            }
-
-                            if (appInfo == null) {
-                                log.debug("Application information doesn't exist in the token "
-                                                                                    + APIUtil.getMaskedToken(apiKey));
-                            }
+                            log.debug("Application with given id " + applicationId + " doesn't not exist ");
                         }
                         RestApiUtil.handleBadRequest("Validation failed for the given token ", log);
                     }

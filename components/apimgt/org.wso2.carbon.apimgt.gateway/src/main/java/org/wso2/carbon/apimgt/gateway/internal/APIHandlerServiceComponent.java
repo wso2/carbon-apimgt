@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
 import org.wso2.carbon.apimgt.gateway.listeners.ServerStartupListener;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
@@ -164,6 +165,8 @@ public class APIHandlerServiceComponent {
         CacheProvider.createGatewayInternalKeyCache();
         CacheProvider.createGatewayInternalKeyDataCache();
         CacheProvider.createInvalidInternalKeyCache();
+
+        setTransportHttpsPort();
     }
 
     @Deactivate
@@ -268,6 +271,22 @@ public class APIHandlerServiceComponent {
             log.debug("API manager configuration service unbound from the API handlers");
         }
         ServiceReferenceHolder.getInstance().setAPIManagerConfigurationService(null);
+    }
+
+    @Reference(
+            name = "llm.provider.connector.service",
+            service = LLMProviderService.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "removeLLMProviderService")
+    protected void addLLMProviderService(LLMProviderService llmProviderService) {
+
+        ServiceReferenceHolder.getInstance().addLLMProviderService(llmProviderService.getType(), llmProviderService);
+    }
+
+    protected void removeLLMProviderService(LLMProviderService llmProviderService) {
+
+        ServiceReferenceHolder.getInstance().removeLLMProviderService(llmProviderService.getType());
     }
 
     @Reference(
@@ -524,6 +543,13 @@ public class APIHandlerServiceComponent {
             log.debug("Un-setting SynapseConfigurationService");
         }
         ServiceReferenceHolder.getInstance().setSynapseConfigurationService(null);
+    }
+
+    private void setTransportHttpsPort() {
+        ConfigurationContextService configurationContextService =
+                ServiceReferenceHolder.getInstance().getConfigurationContextService();
+        System.setProperty(APIConstants.HTTPS_TRANSPORT_PORT,
+                Integer.toString(CarbonUtils.getTransportPort(configurationContextService, APIConstants.HTTPS_PROTOCOL)));
     }
 }
 

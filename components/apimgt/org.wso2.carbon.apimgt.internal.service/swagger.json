@@ -256,6 +256,55 @@
         }
       }
     },
+    "/subscribe-internal" : {
+      "post" : {
+        "tags" : [ "Subscription Validation" ],
+        "summary" : "Subscribe to a subscription validation disabled API",
+        "description" : "This will allow creating subscriptions from applications to APIs which have\nsubscription validation disabled.\n",
+        "operationId" : "subscribeToAPI",
+        "parameters" : [ {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n  retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "appId",
+          "in" : "query",
+          "description" : "Application ID of the subscription\n",
+          "required" : false,
+          "type" : "integer"
+        }, {
+          "name" : "appUuid",
+          "in" : "query",
+          "description" : "Application UUID\n",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "api",
+          "description" : "The API object",
+          "required" : false,
+          "schema" : {
+            "$ref" : "#/definitions/API"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "Subscription created successfully",
+            "schema" : {
+              "$ref" : "#/definitions/Subscription"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/subscription-policies" : {
       "get" : {
         "tags" : [ "Subscription Validation" ],
@@ -847,6 +896,79 @@
         }
       }
     },
+    "/llm-providers" : {
+      "get" : {
+        "tags" : [ "LLMProviders" ],
+        "summary" : "Retrieve persisted LLM Providers",
+        "description" : "This retrieve the persisted LLM Providers.\n",
+        "operationId" : "getLLMProviders",
+        "parameters" : [ {
+          "name" : "name",
+          "in" : "query",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "apiVersion",
+          "in" : "query",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n            retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "LLM providers received success",
+            "schema" : {
+              "$ref" : "#/definitions/LLMProviderList"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
+    "/llm-providers/{llmProviderId}" : {
+      "get" : {
+        "tags" : [ "LLMProviders" ],
+        "summary" : "Retrieve persisted LLM Providers",
+        "description" : "This retrieve the persisted LLM Providers.\n",
+        "operationId" : "getLLMProviderById",
+        "parameters" : [ {
+          "name" : "llmProviderId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "xWSO2Tenant",
+          "in" : "header",
+          "description" : "This is used to specify the tenant domain, where the resource need to be\n            retrieved from.\n",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Event Received success",
+            "schema" : {
+              "$ref" : "#/definitions/LLMProviderList"
+            }
+          },
+          "default" : {
+            "description" : "Unexpected error",
+            "schema" : {
+              "$ref" : "#/definitions/Error"
+            }
+          }
+        }
+      }
+    },
     "/correlation-configs" : {
       "get" : {
         "tags" : [ "Logging" ],
@@ -865,6 +987,39 @@
             "schema" : {
               "$ref" : "#/definitions/Error"
             }
+          }
+        }
+      }
+    },
+    "/transaction-records" : {
+      "post" : {
+        "summary" : "Insert Transaction Records",
+        "description" : "Inserts a list of transaction records into the database.",
+        "operationId" : "insertTransactionRecords",
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "description" : "A list of transaction records to be inserted",
+          "required" : true,
+          "schema" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/definitions/TransactionRecord"
+            }
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Successfully inserted transaction records",
+            "schema" : {
+              "type" : "boolean"
+            }
+          },
+          "400" : {
+            "description" : "Bad request. Invalid input data."
+          },
+          "500" : {
+            "description" : "Internal server error. Failed to insert transaction records."
           }
         }
       }
@@ -1222,6 +1377,22 @@
           "type" : "string",
           "example" : "Oauth2,api_key",
           "description" : "Available authentication methods of the API."
+        },
+        "isSubscriptionValidationDisabled" : {
+          "type" : "boolean",
+          "example" : false,
+          "description" : "Whether subscription validation is disabled.",
+          "default" : false
+        },
+        "isEgress" : {
+          "type" : "boolean",
+          "example" : false,
+          "description" : "Indicates if the API is an egress API."
+        },
+        "subtype" : {
+          "type" : "string",
+          "example" : "Default",
+          "description" : "The subtype of the API."
         }
       }
     },
@@ -1354,8 +1525,8 @@
           "type" : "string",
           "example" : "EXCHANGED",
           "description" : "The type of the tokens to be used (exchanged or without exchanged). Accepted values are EXCHANGED, DIRECT or BOTH.",
-          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ],
-          "default" : "DIRECT"
+          "default" : "DIRECT",
+          "enum" : [ "EXCHANGED", "DIRECT", "BOTH" ]
         }
       }
     },
@@ -1920,6 +2091,9 @@
         },
         "eventCount" : {
           "$ref" : "#/definitions/EventCountLimit"
+        },
+        "aiApiQuota" : {
+          "$ref" : "#/definitions/AIAPIQuotaLimit"
         }
       },
       "title" : "Throttle Limit"
@@ -1993,6 +2167,71 @@
           }
         }
       } ]
+    },
+    "AIAPIQuotaLimit" : {
+      "title" : "AI Quota Limit object",
+      "allOf" : [ {
+        "$ref" : "#/definitions/ThrottleLimitBase"
+      }, {
+        "required" : [ "requestCount" ],
+        "properties" : {
+          "requestCount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 1000,
+            "description" : "Maximum number of requests allowed"
+          },
+          "totalTokenCount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 1000,
+            "description" : "Maximum number of total tokens allowed"
+          },
+          "promptTokenCount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 300,
+            "description" : "Maximum number of prompt tokens allowed"
+          },
+          "completionTokenCount" : {
+            "type" : "integer",
+            "format" : "int64",
+            "example" : 300,
+            "description" : "Maximum number of completion tokens allowed"
+          }
+        }
+      } ]
+    },
+    "LLMProviderList" : {
+      "properties" : {
+        "llmProviders" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/LLMProvider"
+          }
+        }
+      },
+      "title" : "LLM Provider Config List"
+    },
+    "LLMProvider" : {
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "apiVersion" : {
+          "type" : "string"
+        },
+        "organization" : {
+          "type" : "string"
+        },
+        "configurations" : {
+          "type" : "string"
+        }
+      },
+      "title" : "LLM Provider"
     },
     "APILoggingConfigList" : {
       "properties" : {
@@ -2072,6 +2311,30 @@
         }
       },
       "title" : "Properties for correlation components"
+    },
+    "TransactionRecord" : {
+      "type" : "object",
+      "required" : [ "count", "id", "recordedTime" ],
+      "properties" : {
+        "id" : {
+          "type" : "string"
+        },
+        "serverID" : {
+          "type" : "string"
+        },
+        "serverType" : {
+          "type" : "string"
+        },
+        "host" : {
+          "type" : "string"
+        },
+        "count" : {
+          "type" : "integer"
+        },
+        "recordedTime" : {
+          "type" : "string"
+        }
+      }
     }
   },
   "parameters" : {
