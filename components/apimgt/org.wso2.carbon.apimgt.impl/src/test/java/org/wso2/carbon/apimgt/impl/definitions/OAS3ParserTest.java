@@ -162,7 +162,8 @@ public class OAS3ParserTest extends OASTestBase {
         Assert.assertTrue(Objects.nonNull(swaggerString) && !swaggerString.isEmpty());
 
         Assert.assertTrue(Objects.nonNull(responseMap.get(APIConstants.MOCK_GEN_POLICY_LIST)));
-        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = (List<APIResourceMediationPolicy>) responseMap.get(APIConstants.MOCK_GEN_POLICY_LIST);
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList =
+                (List<APIResourceMediationPolicy>) responseMap.get(APIConstants.MOCK_GEN_POLICY_LIST);
         Assert.assertFalse(apiResourceMediationPolicyList.isEmpty());
 
         APIResourceMediationPolicy apiResourceMediationPolicy = apiResourceMediationPolicyList.get(0);
@@ -223,7 +224,8 @@ public class OAS3ParserTest extends OASTestBase {
         Map<String, Object> responseMap1 = oas3Parser.getGeneratedExamples(swaggerString);
         Assert.assertNotNull(responseMap1);
         Assert.assertTrue(responseMap1.containsKey(APIConstants.MOCK_GEN_POLICY_LIST));
-        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = (List<APIResourceMediationPolicy>) responseMap1.get(APIConstants.MOCK_GEN_POLICY_LIST);
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList =
+                (List<APIResourceMediationPolicy>) responseMap1.get(APIConstants.MOCK_GEN_POLICY_LIST);
         Assert.assertFalse(apiResourceMediationPolicyList.isEmpty());
         APIResourceMediationPolicy apiResourceMediationPolicy = apiResourceMediationPolicyList.get(0);
         Assert.assertEquals("/samplePath", apiResourceMediationPolicy.getPath());
@@ -283,7 +285,9 @@ public class OAS3ParserTest extends OASTestBase {
         //Test for adding scripts and mockDB Completely
         //Sample LLM Response
         String llmResponseFull = "{"
-                + "\"mockDB\": \"{\\\"mockResponses\\\":[{\\\"id\\\":200,\\\"mockResponse\\\":\\\"mockResponse200\\\"},{\\\"id\\\":404,\\\"mockResponse\\\":\\\"mockResponse404\\\"},{\\\"id\\\":\\\"4XX\\\",\\\"mockResponse\\\":\\\"mockResponse4XX\\\"}]}\","
+                + "\"mockDB\": \"{\\\"mockResponses\\\":[{\\\"id\\\":200,\\\"mockResponse\\\":\\\"mockResponse200\\\"},"
+                + "{\\\"id\\\":404,\\\"mockResponse\\\":\\\"mockResponse404\\\"},{\\\"id\\\":\\\"4XX\\\","
+                + "\\\"mockResponse\\\":\\\"mockResponse4XX\\\"}]}\","
                 + "\"paths\": {"
                 + "  \"/samplePath\": {"
                 + "    \"get\": \"var accept=mc.getProperty('AcceptHeader')||'application/json';\\n"
@@ -304,19 +308,22 @@ public class OAS3ParserTest extends OASTestBase {
         Assert.assertTrue(responseMap1.containsKey(APIConstants.SWAGGER));
         String swaggerString1 = (String) responseMap1.get(APIConstants.SWAGGER);
         Assert.assertTrue(swaggerString1.contains(APIConstants.X_WSO2_MOCKDB));
-        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = (List<APIResourceMediationPolicy>) responseMap1.get(APIConstants.MOCK_GEN_POLICY_LIST);
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList =
+                (List<APIResourceMediationPolicy>) responseMap1.get(APIConstants.MOCK_GEN_POLICY_LIST);
         Assert.assertFalse(apiResourceMediationPolicyList.isEmpty());
         APIResourceMediationPolicy apiResourceMediationPolicy = apiResourceMediationPolicyList.get(0);
         Assert.assertEquals("/samplePath", apiResourceMediationPolicy.getPath());
         String content = apiResourceMediationPolicy.getContent();
-        Assert.assertTrue(content.contains("var db=JSON.parse(mc.getProperty('mockDB')") && content.contains("mc.setProperty('HTTP_SC','200');"));
+        Assert.assertTrue(content.contains("var db=JSON.parse(mc.getProperty('mockDB')")
+                && content.contains("mc.setProperty('HTTP_SC','200');"));
 
         //Test for modifying a method
         String llmResponseModify = "{"
                 + "\"modified_script\": \"var accept=mc.getProperty('AcceptHeader')||'application/json';\\n"
                 + "if(!accept||accept=='*/*')accept='application/json';\\n"
                 + "mc.setProperty('CONTENT_TYPE',accept);\\n"
-                + "var db=JSON.parse(mc.getProperty('mockDB')||'{\\\\\\\"mockResponses\\\\\\\":[{\\\"id\\\":200,\\\"mockResponse\\\":\\\"mockResponse200ToTestIfModified\\\"}]}');\\n"
+                + "var db=JSON.parse(mc.getProperty('mockDB')||'{\\\\\\\"mockResponses\\\\\\\":[{\\\"id\\\":200,"
+                + "\\\"mockResponse\\\":\\\"mockResponse200ToTestIfModified\\\"}]}');\\n"
                 + "mc.setProperty('HTTP_SC','200');\\n"
                 + "mc.setPayloadJSON(db.mockResponses);\""
                 + "}";
@@ -325,12 +332,14 @@ public class OAS3ParserTest extends OASTestBase {
         Map<String, Object> responseMap2 = oas3Parser.addScriptsAndMockDB(swaggerString, mockConfig2, llmResponseJsonModify);
         Assert.assertNotNull(responseMap2);
         Assert.assertTrue(responseMap2.containsKey(APIConstants.MOCK_GEN_POLICY_LIST));
-        List<APIResourceMediationPolicy> apiResourceMediationPolicyList2 = (List<APIResourceMediationPolicy>) responseMap2.get(APIConstants.MOCK_GEN_POLICY_LIST);
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList2 =
+                (List<APIResourceMediationPolicy>) responseMap2.get(APIConstants.MOCK_GEN_POLICY_LIST);
         Assert.assertFalse(apiResourceMediationPolicyList2.isEmpty());
         APIResourceMediationPolicy apiResourceMediationPolicy2 = apiResourceMediationPolicyList2.get(0);
         Assert.assertEquals("/samplePath", apiResourceMediationPolicy2.getPath());
         String content2 = apiResourceMediationPolicy2.getContent();
-        Assert.assertTrue(content2.contains("mockResponse200ToTestIfModified") && content2.contains("mc.setProperty('HTTP_SC','200');"));
+        Assert.assertTrue(content2.contains("mockResponse200ToTestIfModified")
+                && content2.contains("mc.setProperty('HTTP_SC','200');"));
     }
 
     @Test
