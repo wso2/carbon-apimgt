@@ -2,7 +2,9 @@ package org.wso2.carbon.apimgt.impl.dto;
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class GatewayArtifactSynchronizerProperties {
@@ -20,6 +22,8 @@ public class GatewayArtifactSynchronizerProperties {
     private String gatewayStartup = "sync";
     private long eventWaitingTime = 1;
     private boolean onDemandLoading;
+    private boolean tenantLoading;
+    private List<String> loadingTenants = new ArrayList<>();
 
 
     public String getSaverName() {
@@ -158,5 +162,21 @@ public class GatewayArtifactSynchronizerProperties {
 
     public boolean isOnDemandLoading() {
         return onDemandLoading;
+    }
+
+    public boolean isTenantLoading() {
+        return tenantLoading;
+    }
+
+    public void setTenantLoading(boolean tenantLoading) {
+        this.tenantLoading = tenantLoading;
+    }
+
+    public List<String> getLoadingTenants() {
+        return loadingTenants;
+    }
+
+    public void setLoadingTenants(List<String> loadingTenants) {
+        this.loadingTenants = loadingTenants;
     }
 }

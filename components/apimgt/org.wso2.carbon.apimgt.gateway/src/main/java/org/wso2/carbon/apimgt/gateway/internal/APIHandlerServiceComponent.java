@@ -38,10 +38,12 @@ import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJ
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.HybridThrottleProcessor;
 import org.wso2.carbon.apimgt.gateway.RedisBaseDistributedCountManager;
+import org.wso2.carbon.apimgt.gateway.TenancyLoader;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
 import org.wso2.carbon.apimgt.gateway.listeners.ServerStartupListener;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
@@ -66,6 +68,8 @@ import org.wso2.carbon.mediation.initializer.services.SynapseConfigurationServic
 import org.wso2.carbon.mediation.security.vault.MediationSecurityAdminService;
 import org.wso2.carbon.rest.api.service.RestApiAdmin;
 import org.wso2.carbon.sequences.services.SequenceAdmin;
+import org.wso2.carbon.tenant.mgt.services.TenantMgtService;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.Axis2ConfigurationContextObserver;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.ConfigurationContextService;
@@ -107,7 +111,9 @@ public class APIHandlerServiceComponent {
         TenantServiceCreator listener = new TenantServiceCreator();
         bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
         bundleContext.registerService(ServerStartupObserver.class.getName(), new ServerStartupListener(), null);
-
+        if (GatewayUtils.isTenantLoadingEnable()) {
+            bundleContext.registerService(ServerStartupObserver.class.getName(), new TenancyLoader(), null);
+        }
         // Set APIM Gateway JWT Generator
 
         registration =
@@ -175,7 +181,7 @@ public class APIHandlerServiceComponent {
         if (log.isDebugEnabled()) {
             log.debug("API handlers component deactivated");
         }
-            clientPool.cleanup();
+        clientPool.cleanup();
         if (registration != null) {
             log.debug("Unregistering ThrottleDataService...");
             registration.unregister();
@@ -497,7 +503,7 @@ public class APIHandlerServiceComponent {
         ServiceReferenceHolder.getInstance().setKeyManagerDataService(null);
     }
 
-    private JedisPool getJedisPool(RedisConfig redisConfig){
+    private JedisPool getJedisPool(RedisConfig redisConfig) {
 
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         jedisPoolConfig.setMaxTotal(redisConfig.getMaxTotal());
@@ -550,6 +556,39 @@ public class APIHandlerServiceComponent {
                 ServiceReferenceHolder.getInstance().getConfigurationContextService();
         System.setProperty(APIConstants.HTTPS_TRANSPORT_PORT,
                 Integer.toString(CarbonUtils.getTransportPort(configurationContextService, APIConstants.HTTPS_PROTOCOL)));
+    }
+
+    @Reference(
+            name = "tenant.mgt.service",
+            service = org.wso2.carbon.tenant.mgt.services.TenantMgtService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetTenantMgtService")
+    protected void setTenantMgtService(TenantMgtService tenantMgtService) {
+        if (tenantMgtService != null && log.isDebugEnabled()) {
+            log.debug("Tenantmgt service initialized");
+        }
+        ServiceReferenceHolder.getInstance().setTenantMgtService(tenantMgtService);
+    }
+
+    protected void unsetTenantMgtService(TenantMgtService tenantMgtService) {
+        ServiceReferenceHolder.getInstance().setTenantMgtService(null);
+    }
+    @Reference(
+            name = "realm.service",
+            service = RealmService.class,
+            cardinality = ReferenceCardinality.MANDATORY,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetRealmService")
+    protected void setRealmService(RealmService realmService) {
+        if (realmService != null && log.isDebugEnabled()) {
+            log.debug("realmService service initialized");
+        }
+        ServiceReferenceHolder.getInstance().setRealmService(realmService);
+    }
+
+    protected void unsetRealmService(RealmService realmService) {
+        ServiceReferenceHolder.getInstance().setRealmService(null);
     }
 }
 

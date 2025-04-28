@@ -67,18 +67,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.namespace.QName;
@@ -226,7 +215,7 @@ public class APIManagerConfiguration {
         return loginConfiguration;
     }
 
-    private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = new GatewayArtifactSynchronizerProperties();;
+    private final GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = new GatewayArtifactSynchronizerProperties();;
 
     private JSONArray customProperties = new JSONArray();
 
@@ -1667,32 +1656,32 @@ public class APIManagerConfiguration {
                 ThrottleProperties.PolicyDeployer policyDeployerConfiguration = new
                         ThrottleProperties
                                 .PolicyDeployer();
-                if (policyDeployerConnectionElement != null) {
-                    OMElement policyDeployerConnectionEnabledElement = policyDeployerConnectionElement
-                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLED));
-                    policyDeployerConfiguration.setEnabled(JavaUtils.isTrueExplicitly
-                            (policyDeployerConnectionEnabledElement.getText()));
-                    OMElement policyDeployerServiceUrlElement = policyDeployerConnectionElement
-                            .getFirstChildWithName(new QName
-                                    (APIConstants.AdvancedThrottleConstants.SERVICE_URL));
-                    if (policyDeployerServiceUrlElement != null) {
-                        policyDeployerConfiguration.setServiceUrl(APIUtil.replaceSystemProperty
-                                (policyDeployerServiceUrlElement.getText()));
-                    }
-                    OMElement policyDeployerServiceServiceUsernameElement = policyDeployerConnectionElement
-                            .getFirstChildWithName(new QName
-                                    (APIConstants.AdvancedThrottleConstants.USERNAME));
-                    if (policyDeployerServiceServiceUsernameElement != null) {
-                        policyDeployerConfiguration.setUsername(APIUtil.replaceSystemProperty
-                                (policyDeployerServiceServiceUsernameElement.getText()));
-                    }
-                    OMElement policyDeployerServicePasswordElement = policyDeployerConnectionElement
-                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.PASSWORD));
-                    String policyDeployerServicePassword = MiscellaneousUtil.
-                            resolve(policyDeployerServicePasswordElement, secretResolver);
-                    policyDeployerConfiguration.setPassword(APIUtil.replaceSystemProperty
-                            (policyDeployerServicePassword));
+            if (policyDeployerConnectionElement != null) {
+                OMElement policyDeployerConnectionEnabledElement = policyDeployerConnectionElement.getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLED));
+                policyDeployerConfiguration.setEnabled(JavaUtils.isTrueExplicitly(policyDeployerConnectionEnabledElement.getText()));
+                OMElement policyDeployerServiceUrlElement = policyDeployerConnectionElement.getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.SERVICE_URL));
+                if (policyDeployerServiceUrlElement != null) {
+                    policyDeployerConfiguration.setServiceUrl(APIUtil.replaceSystemProperty(policyDeployerServiceUrlElement.getText()));
                 }
+                OMElement policyDeployerServiceServiceUsernameElement = policyDeployerConnectionElement.getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.USERNAME));
+                if (policyDeployerServiceServiceUsernameElement != null) {
+                    policyDeployerConfiguration.setUsername(APIUtil.replaceSystemProperty(policyDeployerServiceServiceUsernameElement.getText()));
+                }
+                OMElement policyDeployerServicePasswordElement = policyDeployerConnectionElement.getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.PASSWORD));
+                String policyDeployerServicePassword = MiscellaneousUtil.resolve(policyDeployerServicePasswordElement, secretResolver);
+                policyDeployerConfiguration.setPassword(APIUtil.replaceSystemProperty(policyDeployerServicePassword));
+                OMElement tenantLoadingOmelement = policyDeployerConnectionElement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.TNENAT_LOADING));
+                if (tenantLoadingOmelement != null) {
+                    OMElement enableTenantLoading = tenantLoadingOmelement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.TNENAT_LOADING));
+                    if (enableTenantLoading != null) {
+                        policyDeployerConfiguration.setTenantLoading(Boolean.parseBoolean(tenantLoadingOmelement.getText()));
+                    }
+                    OMElement tenants = tenantLoadingOmelement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.TENANT_LOADING_TENANTS));
+                    if (tenants != null && StringUtils.isNotEmpty(tenants.getText())) {
+                        policyDeployerConfiguration.setTenants(tenants.getText().split("\\|"));
+                    }
+                }
+            }
                 throttleProperties.setPolicyDeployer(policyDeployerConfiguration);
 
                 //Configuring Block Condition retriever configuration
@@ -2448,6 +2437,17 @@ public class APIManagerConfiguration {
                 omElement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.EnableOnDemandLoadingAPIS));
         if (enableEagerLoading != null){
             gatewayArtifactSynchronizerProperties.setOnDemandLoading(Boolean.parseBoolean(enableEagerLoading.getText()));
+        }
+        OMElement tenantLoadingOMElement = omElement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.TNENAT_LOADING));
+        if (tenantLoadingOMElement != null){
+            OMElement enableTenantLoading = tenantLoadingOMElement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.ENABLE_TENANT_LOADING));
+            if (enableTenantLoading != null){
+                gatewayArtifactSynchronizerProperties.setTenantLoading(Boolean.parseBoolean(enableTenantLoading.getText()));
+            }
+            OMElement tenantSToLoadElement  = tenantLoadingOMElement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.TENANT_LOADING_TENANTS));
+            if (tenantSToLoadElement != null && StringUtils.isNotEmpty(tenantSToLoadElement.getText())){
+                gatewayArtifactSynchronizerProperties.setLoadingTenants(Arrays.asList(tenantSToLoadElement.getText().split("\\|")));
+            }
         }
     }
 

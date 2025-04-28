@@ -1846,4 +1846,14 @@ public class GatewayUtils {
         }
         return endpoint.getEndpointId() + "_" + endpoint.getModel();
     }
+    public static boolean isTenantLoadingEnable(){
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        if (apiManagerConfiguration != null){
+            GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties();
+            if (gatewayArtifactSynchronizerProperties !=null){
+                return gatewayArtifactSynchronizerProperties.isTenantLoading();
+            }
+        }
+        return false;
+    }
 }
