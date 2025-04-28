@@ -1121,6 +1121,10 @@
             <ServiceURL>{{apim.throttling.service_url}}</ServiceURL>
             <Username>{{apim.throttling.policy_deploy.username}}</Username>
             <Password>{{apim.throttling.policy_deploy.password}}</Password>
+            <TenantLoading>
+              <Enable>{{apim.throttling.policy_deploy.tenant_loading.enable}}</Enable>
+              <Tenants>{{apim.throttling.policy_deploy.tenant_loading.tenants}}</Tenants>
+            </TenantLoading>
         </PolicyDeployer>
         <BlockCondition>
             <Enabled>{{apim.throttling.enable_blacklist_condition}}</Enabled>
@@ -1743,6 +1747,10 @@
             {% endif %}
         </FileBasedApiContexts>
         <EnableOnDemandLoadingAPIS>{{apim.sync_runtime_artifacts.gateway.enable_on_demand_loading}}</EnableOnDemandLoadingAPIS>
+        <TenantLoading>
+           <Enable>{{apim.sync_runtime_artifacts.tenant_loading.enable}}</Enable>
+           <Tenants>{{apim.sync_runtime_artifacts.tenant_loading.tenants}}</Tenants>
+        </TenantLoading>
     </SyncRuntimeArtifactsGateway>
     {% endif %}
 

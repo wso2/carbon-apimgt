@@ -683,6 +683,7 @@ public final class APIConstants {
     public static final String CHAR_ASTERIX = "*";
     public static final String CERTIFICATE_RETRIEVAL_ENDPOINT = "/endpoint-certificates";
     public static final String GA_CONFIG_RETRIEVAL_ENDPOINT = "/ga-config";
+    public static final String TENANT_INFO_ENDPOINT = "/tenant-info";
     public static final String API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION
             = "overview_websubSubscriptionConfiguration";
     public static final String WEBSUB_DEFAULT_TOPIC_NAME = "_default";
@@ -2891,7 +2892,8 @@ public final class APIConstants {
         CORRELATION_CONFIG,
         GATEWAY_POLICY,
         LLM_PROVIDER,
-        LABEL
+        LABEL,
+        TENANT
     }
 
     // Supported Event Types
@@ -2934,7 +2936,12 @@ public final class APIConstants {
         REMOVE_POLICY_MAPPING_FROM_GATEWAY,
         LABEL_CREATE,
         LABEL_UPDATE,
-        LABEL_DELETE
+        LABEL_DELETE,
+        TENANT_CREATE,
+        TENANT_UPDATE,
+        TENANT_DELETE,
+        TENANT_ACTIVATION,
+        TENANT_DEACTIVATION
     }
 
     public enum EventAction {
@@ -2972,6 +2979,9 @@ public final class APIConstants {
         public static final String FILE_BASED_API_CONTEXTS = "FileBasedApiContexts";
         public static final String FILE_BASED_API_CONTEXT = "FileBasedApiContext";
         public static final String EnableOnDemandLoadingAPIS = "EnableOnDemandLoadingAPIS";
+        public static final String TNENAT_LOADING = "TenantLoading";
+        public static final String ENABLE_TENANT_LOADING = "Enable";
+        public static final String TENANT_LOADING_TENANTS = "Tenants";
 
     }
 

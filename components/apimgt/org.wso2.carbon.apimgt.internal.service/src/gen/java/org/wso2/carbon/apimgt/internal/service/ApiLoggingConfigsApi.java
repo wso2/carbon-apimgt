@@ -44,7 +44,7 @@ ApiLoggingConfigsApiService delegate = new ApiLoggingConfigsApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Event Received success", response = APILoggingConfigListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response apiLoggingConfigsGet() throws APIManagementException{
-        return delegate.apiLoggingConfigsGet(securityContext);
+    public Response apiLoggingConfigsGet( @NotNull  @ApiParam(value = "This is used to specify the tenant domain, where the resource need to be retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.apiLoggingConfigsGet(xWSO2Tenant, securityContext);
     }
 }

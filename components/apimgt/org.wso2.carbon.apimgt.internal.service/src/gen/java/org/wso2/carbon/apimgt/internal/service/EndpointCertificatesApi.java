@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.internal.service;
 
+import org.wso2.carbon.apimgt.internal.service.dto.EndpointCertificateListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.internal.service.EndpointCertificatesApiService;
 import org.wso2.carbon.apimgt.internal.service.impl.EndpointCertificatesApiServiceImpl;
@@ -39,9 +40,9 @@ EndpointCertificatesApiService delegate = new EndpointCertificatesApiServiceImpl
     
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get all the endpoint certificates for given alias.", notes = "This will provide access to ", response = Void.class, tags={ "Retrieving Runtime artifacts" })
+    @ApiOperation(value = "Get all the endpoint certificates for given alias.", notes = "This will provide access to ", response = EndpointCertificateListDTO.class, tags={ "Retrieving Runtime artifacts" })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "List of endpoint certificates", response = Void.class),
+        @ApiResponse(code = 200, message = "List of endpoint certificates", response = EndpointCertificateListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
     public Response endpointCertificatesGet( @NotNull  @ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.   Alias ")  @QueryParam("alias") String alias) throws APIManagementException{
         return delegate.endpointCertificatesGet(xWSO2Tenant, alias, securityContext);
