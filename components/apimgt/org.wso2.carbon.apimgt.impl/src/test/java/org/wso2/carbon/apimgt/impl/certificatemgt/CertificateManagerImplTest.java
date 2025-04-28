@@ -188,6 +188,7 @@ public class CertificateManagerImplTest {
         CertificateMetadataDTO certificateMetadataDTO = new CertificateMetadataDTO();
         certificateMetadataDTO.setAlias(ALIAS);
         certificateMetadataDTO.setEndpoint(END_POINT);
+        certificateMetadataDTO.setOrganization(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         certificateMetadataDTOList.add(certificateMetadataDTO);
         Mockito.when(certificateMgtDAO.getCertificates(ALIAS, null, TENANT_ID)).thenReturn(certificateMetadataDTOList);
         ResponseCode responseCode = certificateManager.deleteCertificateFromParentNode(ALIAS, END_POINT, TENANT_ID);
@@ -204,6 +205,7 @@ public class CertificateManagerImplTest {
         CertificateMetadataDTO certificateMetadataDTO = new CertificateMetadataDTO();
         certificateMetadataDTO.setAlias(ALIAS);
         certificateMetadataDTO.setEndpoint(END_POINT);
+        certificateMetadataDTO.setOrganization(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
         certificateMetadataDTOList.add(certificateMetadataDTO);
         Mockito.when(certificateMgtDAO.getCertificates(ALIAS, null, TENANT_ID)).thenReturn(certificateMetadataDTOList);
         ResponseCode responseCode = certificateManager.deleteCertificateFromParentNode(ALIAS, END_POINT, TENANT_ID);
@@ -240,6 +242,7 @@ public class CertificateManagerImplTest {
             CertificateMetadataDTO certificateMetadataDTO = new CertificateMetadataDTO();
             certificateMetadataDTO.setEndpoint("testRemoveFromPublisherCertificateManagementException");
             certificateMetadataDTO.setCertificate(BASE64_ENCODED_CERT);
+            certificateMetadataDTO.setOrganization(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             certificateMetadataDTO.setAlias("testRemoveFromPublisherCertificateManagementException");
             List<CertificateMetadataDTO> certificateMetadataDTOList = new ArrayList<>();
             certificateMetadataDTOList.add(certificateMetadataDTO);
@@ -270,6 +273,7 @@ public class CertificateManagerImplTest {
             CertificateMetadataDTO certificateMetadataDTO = new CertificateMetadataDTO();
             certificateMetadataDTO.setEndpoint("testRemoveFromPublisherWithInternalServerErrorWhenDeleting");
             certificateMetadataDTO.setCertificate(BASE64_ENCODED_CERT);
+            certificateMetadataDTO.setOrganization(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             certificateMetadataDTO.setAlias("testRemoveFromPublisherWithInternalServerErrorWhenDeleting");
             Mockito.when(certificateMgtDAO.getCertificates("testRemoveFromPublisherWithInternalServerErrorWhenDeleting",
                     null, TENANT_ID)).thenReturn(Arrays.asList(certificateMetadataDTO));
@@ -550,6 +554,7 @@ public class CertificateManagerImplTest {
             CertificateMetadataDTO certificateMetadataDTO = new CertificateMetadataDTO();
             certificateMetadataDTO.setAlias(ALIAS + "_" + i);
             certificateMetadataDTO.setEndpoint(END_POINT + "_" + i);
+            certificateMetadataDTO.setOrganization(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             certificateMetadataDTOList.add(certificateMetadataDTO);
         }
         return certificateMetadataDTOList;

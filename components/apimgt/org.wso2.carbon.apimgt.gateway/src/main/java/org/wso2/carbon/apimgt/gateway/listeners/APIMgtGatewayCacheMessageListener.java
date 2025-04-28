@@ -29,6 +29,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.dto.ResourceCacheInvalidationDto;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.TenantUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.ArrayList;
@@ -65,7 +66,7 @@ public class APIMgtGatewayCacheMessageListener implements MessageListener {
                                 handleKeyCacheInvalidationMessage((JSONArray) jsonParser.parse(value));
                             } else if (APIConstants.GATEWAY_USERNAME_CACHE_NAME
                                     .equalsIgnoreCase(payloadData.get(APIConstants.CACHE_INVALIDATION_TYPE).asText())) {
-                                handleUserCacheInvalidationMessage((JSONArray) jsonParser.parse(value));
+                                handleUserCacheInvalidationMessage((JSONObject) jsonParser.parse(value));
                             }
                         }
                     }
@@ -82,9 +83,14 @@ public class APIMgtGatewayCacheMessageListener implements MessageListener {
         }
     }
 
-    private void handleUserCacheInvalidationMessage(JSONArray jsonValue) throws ParseException {
+    private void handleUserCacheInvalidationMessage(JSONObject jsonValue) throws ParseException {
+        JSONArray users = (JSONArray) jsonValue.get("users");
+        String organization  = (String) jsonValue.get("organization");
+        if (!TenantUtils.isTenantAvailable(organization)){
+            return;
+        }
         ServiceReferenceHolder.getInstance().getCacheInvalidationService()
-                .invalidateCachedUsernames((String[]) jsonValue.toArray(new String[0]));
+                .invalidateCachedUsernames((String[]) users.toArray(new String[0]));
     }
 
     private void handleKeyCacheInvalidationMessage(JSONArray jsonValue) throws ParseException {
@@ -95,7 +101,11 @@ public class APIMgtGatewayCacheMessageListener implements MessageListener {
     private void handleResourceCacheInvalidationMessage(JSONObject jsonValue) throws ParseException {
             String apiContext = (String) jsonValue.get("apiContext");
             String apiVersion = (String) jsonValue.get("apiVersion");
+            String organization = (String) jsonValue.get("organization");
             JSONArray resources = (JSONArray) jsonValue.get("resources");
+            if (!TenantUtils.isTenantAvailable(organization)){
+                return;
+            }
             List<ResourceCacheInvalidationDto> resourceCacheInvalidationDtoList = new ArrayList<>();
             for (Object resource : resources) {
                 JSONObject uriTemplate = (JSONObject) resource;

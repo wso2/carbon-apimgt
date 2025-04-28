@@ -30,6 +30,7 @@ import org.apache.http.util.EntityUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.TenantUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
@@ -200,9 +201,14 @@ public class EndpointCertificateDeployer {
         certificateMetadataDTOList = new Gson().fromJson(content, listType);
         synchronized (certificateManager) {
             for (CertificateMetadataDTO certificateMetadataDTO : certificateMetadataDTOList) {
-                CertificateManagerImpl.getInstance()
-                        .addAllCertificateToGateway(certificateMetadataDTO.getCertificate(),
-                                certificateMetadataDTO.getAlias(), certificateMetadataDTO.getTenantId());
+                if (TenantUtils.isTenantAvailable(certificateMetadataDTO.getOrganization())) {
+                    int tenantId = APIUtil.getTenantIdFromTenantDomain(certificateMetadataDTO.getOrganization());
+                    if (tenantId != -1) {
+                        CertificateManagerImpl.getInstance()
+                                .addAllCertificateToGateway(certificateMetadataDTO.getCertificate(),
+                                        certificateMetadataDTO.getAlias(), tenantId);
+                    }
+                }
             }
         }
     }

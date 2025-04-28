@@ -3779,7 +3779,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
             String policyContext = APIConstants.POLICY_CACHE_CONTEXT + "/t/" + apiPolicy.getTenantDomain()
                     + "/";
-            invalidateResourceCache(policyContext, null, Collections.EMPTY_SET);
+            invalidateResourceCache(policyContext, null, Collections.EMPTY_SET, apiPolicy.getTenantDomain());
             List<Integer> addedConditionGroupIds = new ArrayList<>();
             List<Integer> deletedConditionGroupIds = new ArrayList<>();
             for (Pipeline pipeline : existingPolicy.getPipelines()) {
@@ -4469,9 +4469,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     }
 
-    protected void invalidateResourceCache(String apiContext, String apiVersion,Set<URITemplate> uriTemplates) {
+    protected void invalidateResourceCache(String apiContext, String apiVersion, Set<URITemplate> uriTemplates, String organization) {
         APIAuthenticationAdminClient client = new APIAuthenticationAdminClient();
-        client.invalidateResourceCache(apiContext, apiVersion, uriTemplates);
+        client.invalidateResourceCache(apiContext, apiVersion, uriTemplates, organization);
     }
 
     /**
@@ -4848,7 +4848,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 }
             }
         }
-        invalidateResourceCache(product.getContext(), product.getId().getVersion(), Collections.EMPTY_SET);
+        invalidateResourceCache(product.getContext(), product.getId().getVersion(), Collections.EMPTY_SET, product.getTenantDomain());
 
         //todo : check whether permissions need to be updated and pass it along
         updateApiProductArtifact(product, true, true);

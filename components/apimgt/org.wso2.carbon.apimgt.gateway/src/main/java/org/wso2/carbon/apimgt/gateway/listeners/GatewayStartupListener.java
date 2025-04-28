@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.gateway.throttling.util.BlockingConditionRetriever
 import org.wso2.carbon.apimgt.gateway.throttling.util.KeyTemplateRetriever;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.InternalServiceCall;
+import org.wso2.carbon.apimgt.gateway.utils.TenantUtils;
 import org.wso2.carbon.apimgt.gateway.webhooks.WebhooksDataHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
@@ -229,7 +230,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                     new GatewayJMSMessageListener());
             copyTenantArtifacts();
             service.execute(() -> {
-                APILoggerManager.getInstance().initializeAPILoggerList();
+                APILoggerManager.getInstance().initializeAPILoggerList(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             });
             service.execute(() -> {
                 LLMProviderManager.getInstance()
@@ -244,7 +245,11 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         SubscriptionDataLoader subscriptionDataLoader = new SubscriptionDataLoaderImpl();
         List<API> apis = subscriptionDataLoader.loadAllTenantApiMetadata();
         if (apis != null && !apis.isEmpty()) {
-            apis.forEach(api -> DataHolder.getInstance().addAPIMetaData(api));
+            apis.forEach(api -> {
+                if (TenantUtils.isTenantAvailable(api.getOrganization())) {
+                    DataHolder.getInstance().addAPIMetaData(api);
+                }
+            });
         }
     }
 
@@ -489,6 +494,9 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         SubscriptionDataHolder.getInstance().initializeSubscriptionStore(tenantDomain);
         log.debug("Initialized ServerStartupListener for SubscriptionStore for the tenant domain : " + tenantDomain);
         WebhooksDataHolder.getInstance().registerTenantSubscriptionStore(tenantDomain);
+        service.execute(() -> {
+            APILoggerManager.getInstance().initializeAPILoggerList(tenantDomain);
+        });
 
         cleanDeployment(configContext.getAxisConfiguration().getRepository().getPath());
         new Thread(() -> {

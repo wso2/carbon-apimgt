@@ -27,6 +27,7 @@ public class CertificateMetadataDTO {
     private String certificate;
 
     private int tenantId;
+    private String organization;
 
     public String getCertificate() {
 
@@ -60,5 +61,13 @@ public class CertificateMetadataDTO {
 
     public void setTenantId(int tenantId) {
         this.tenantId = tenantId;
+    }
+
+    public String getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(String organization) {
+        this.organization = organization;
     }
 }
