@@ -32,7 +32,6 @@ import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
 import java.io.IOException;
 import java.net.URL;
@@ -45,15 +44,14 @@ import java.util.Map;
  */
 public class APILoggerManager {
     private static final Log log = LogFactory.getLog(APILoggerManager.class);
-    private Map<Map<String, String>, String> logProperties = new HashMap<>();
+    private final Map<Map<String, String>, String> logProperties = new HashMap<>();
     private static final APILoggerManager apiLoggerManager = new APILoggerManager();
     private final EventHubConfigurationDto eventHubConfigurationDto;
     public static final String UTF8 = "UTF-8";
 
-    public void initializeAPILoggerList() {
+    public void initializeAPILoggerList(String organization) {
         try {
-            String responseString = invokeService("/api-logging-configs",
-                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            String responseString = invokeService(organization);
             JSONObject responseJson = new JSONObject(responseString);
             JSONArray apiLogArray = responseJson.getJSONArray("apis");
             for (int i = 0; i < apiLogArray.length(); i++) {
@@ -92,7 +90,7 @@ public class APILoggerManager {
         return logProperties;
     }
 
-    public APILoggerManager() {
+    private APILoggerManager() {
         this.eventHubConfigurationDto = ServiceReferenceHolder.getInstance().getApiManagerConfigurationService()
                 .getAPIManagerConfiguration().getEventHubConfigurationDto();
     }
@@ -108,12 +106,12 @@ public class APILoggerManager {
         return Base64.encodeBase64((username + APIConstants.DELEM_COLON + pw).getBytes
                 (StandardCharsets.UTF_8));
     }
-    private String invokeService(String path, String tenantDomain) throws IOException, APIManagementException {
+    private String invokeService(String tenantDomain) throws IOException, APIManagementException {
 
         String serviceURLStr = eventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP);
-        HttpGet method = new HttpGet(serviceURLStr + path);
+        HttpGet method = new HttpGet(serviceURLStr + "/api-logging-configs");
 
-        URL serviceURL = new URL(serviceURLStr + path);
+        URL serviceURL = new URL(serviceURLStr + "/api-logging-configs");
         byte[] credentials = getServiceCredentials(eventHubConfigurationDto);
         int servicePort = serviceURL.getPort();
         String serviceProtocol = serviceURL.getProtocol();
