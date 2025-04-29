@@ -100,8 +100,8 @@ jobs:
       - name: Checkout Product-APIM
         uses: actions/checkout@v3
         with:
-          repository: wso2/product-apim
-          ref: refs/heads/master
+          repository: msm1992/product-apim
+          ref: master-APISecurityTestCase
           fetch-depth: '10'
           path: product-apim
       - name: Build product-apim with tests
@@ -165,8 +165,8 @@ jobs:
       - name: Checkout Product-APIM
         uses: actions/checkout@v3
         with:
-          repository: wso2/product-apim
-          ref: refs/heads/master
+          repository: msm1992/product-apim
+          ref: master-APISecurityTestCase
           fetch-depth: '10'
           path: product-apim
       - name: Build product-apim with tests
