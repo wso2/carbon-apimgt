@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.APIKeyMgtException;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
+import org.wso2.carbon.apimgt.keymgt.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataStore;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.apimgt.keymgt.service.TokenValidationContext;
@@ -212,14 +213,53 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         return scopesValidated;
     }
 
+    private boolean isAccessTokenExpired(long validityPeriod, long issuedTime) {
+
+        long timestampSkew =
+                ServiceReferenceHolder.getInstance().getOauthServerConfiguration().getTimeStampSkewInSeconds() * 1000;
+        long currentTime = System.currentTimeMillis();
+
+        //If the validity period is not an never expiring value
+        if (validityPeriod != Long.MAX_VALUE &&
+                // For cases where validityPeriod is closer to Long.MAX_VALUE (then issuedTime + validityPeriod would spill
+                // over and would produce a negative value)
+                (currentTime - timestampSkew) > validityPeriod) {
+            //check the validity of cached OAuth2AccessToken Response
+
+            if ((currentTime - timestampSkew) > (issuedTime + validityPeriod)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
     private AccessTokenInfo getAccessTokenInfo(TokenValidationContext validationContext)
             throws APIManagementException {
 
         Object cachedAccessTokenInfo =
                 CacheProvider.createIntrospectionCache().get(validationContext.getAccessToken());
-        if (cachedAccessTokenInfo != null) {
-            log.debug("AccessToken available in introspection Cache.");
-            return (AccessTokenInfo) cachedAccessTokenInfo;
+        AccessTokenInfo cachedAccessTokenInfoObject = null;
+
+        if (cachedAccessTokenInfo instanceof AccessTokenInfo) {
+            cachedAccessTokenInfoObject = (AccessTokenInfo) cachedAccessTokenInfo;
+
+            // Since validationInfoDTO object is not passed into isAccessTokenExpired(),
+            // validation status need to be set explicitly.
+            if (isAccessTokenExpired(cachedAccessTokenInfoObject.getValidityPeriod(),
+                    cachedAccessTokenInfoObject.getIssuedTime())) {
+
+                if (log.isDebugEnabled()) {
+                    log.debug("Invalid OAuth Token in Introspect Cache : Access Token " +
+                            APIUtil.getMaskedToken(validationContext.getAccessToken()) + " has been expired.");
+                }
+                // if token is expired  remove cache entry from introspection cache
+                CacheProvider.getGatewayIntrospectCache().remove(validationContext.getAccessToken());
+                cachedAccessTokenInfoObject.setErrorcode(APIConstants.KeyValidationStatus.API_AUTH_INVALID_CREDENTIALS);
+                cachedAccessTokenInfoObject.setTokenValid(false);
+            }
+                return cachedAccessTokenInfoObject;
         }
         String electedKeyManager = null;
         // Obtaining details about the token.
