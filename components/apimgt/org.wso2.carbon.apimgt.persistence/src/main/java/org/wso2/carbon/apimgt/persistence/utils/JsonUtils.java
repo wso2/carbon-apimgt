@@ -42,8 +42,7 @@ public class JsonUtils {
                 .replace("\\\\", "\\")
                 .replace("\\n", "")
                 .replace("\\r", "\r")
-                .replace("\\t", "\t")
-                .replaceAll("(?<!\\\\)\"([^\"]*?)\\n([^\"]*?)\"", "\"$1 $2\"");
+                .replace("\\t", "\t");
     }
 
     private static void cleanJson(JsonNode node) {
