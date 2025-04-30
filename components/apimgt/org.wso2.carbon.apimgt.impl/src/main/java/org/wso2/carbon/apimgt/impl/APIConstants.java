@@ -1704,6 +1704,7 @@ public final class APIConstants {
     public static final String OPEN_API_V3 = "3.0.x";
     public static final String OPEN_API = "openapi";
     public static final String OAS_V31 = "v31";
+    public static final String OAS_V30 = "v30";
     public static final String OPEN_API_V31_VERSION = "3.1.0";
     public static final String OPEN_API_VERSION_REGEX = "3\\.0\\.\\d{1,}";
     public static final String SWAGGER_IS_MISSING_MSG = "swagger is missing";
@@ -1732,6 +1733,11 @@ public final class APIConstants {
     public static final String SWAGGER_FILE = "file";
     public static final String SWAGGER_RESOURCE_PATH = "resourcePath";
     public static final String API_VERSION = "apiVersion";
+
+    public static final String OPENAPI_OBJECT_DATA_TYPE = "object";
+    public static final String OPENAPI_ARRAY_DATA_TYPE = "array";
+    public static final String OPENAPI_STRING_DATA_TYPE = "string";
+    public static final String OPENAPIV31_SCHEMA_TYPE_NULLABLE = "null";
 
     //swagger MG related constants
     public static final String X_WSO2_AUTH_HEADER = "x-wso2-auth-header";
