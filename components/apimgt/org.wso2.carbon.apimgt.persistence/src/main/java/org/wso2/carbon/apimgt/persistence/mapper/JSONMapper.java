@@ -6,6 +6,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Documentation;
+import org.wso2.carbon.apimgt.persistence.utils.JsonUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -58,6 +60,7 @@ public class JSONMapper {
         json.addProperty("gatewayVendor", api.getGatewayVendor());
         json.addProperty("advertiseOnly", api.isAdvertiseOnly());
         json.addProperty("monetizationStatus", api.getMonetizationStatus());
+        json.addProperty("transports", api.getTransports());
         return json;
     }
 
@@ -83,23 +86,21 @@ public class JSONMapper {
         return jsonArray;
     }
 
-    public String formatJSONString(String definition) {
-        if (definition == null) return null;
-        String formattedString = "";
-        try {
-            JsonElement jsonElement = JsonParser.parseString(definition);
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            formattedString = gson.toJson(jsonElement);
-        } catch (Exception e) {
-            log.error("Failed to parse Swagger Definition!, " + e);
-        }
-        return formattedString;
-    }
-
     private static String dateToString(Date date) {
         if (date == null) return null;
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return formatter.format(date);
+    }
+
+    private static Date stringToDate(String dateString) {
+        if (dateString == null) return null;
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            return formatter.parse(dateString);
+        } catch (Exception e) {
+            log.error("Failed to parse date string: " + dateString, e);
+            return null;
+        }
     }
 
     public Set<String> jsonArrayToSet(JsonArray jsonArray) {
@@ -108,5 +109,60 @@ public class JSONMapper {
             resultSet.add(element.getAsString());
         }
         return resultSet;
+    }
+
+//    private Set<Documentation> convertToDocumentationSet(Set<String> documentStrings) {
+//        Set<Documentation> documentationSet = new HashSet<>();
+//        for (String doc : documentStrings) {
+//            Documentation documentation = new Documentation();
+//            documentationSet.add(documentation);
+//        }
+//        return documentationSet;
+//    }
+
+    public API mapJsonStringToAPI(String jsonString) {
+        JsonObject jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
+
+        String providerName = JsonUtils.safeGetAsString(jsonObject.getAsJsonObject("id"), "providerName");
+        String apiName = JsonUtils.safeGetAsString(jsonObject.getAsJsonObject("id"), "apiName");
+        String version = JsonUtils.safeGetAsString(jsonObject.getAsJsonObject("id"), "version");
+        String uuid = JsonUtils.safeGetAsString(jsonObject, "uuid");
+
+        APIIdentifier id = new APIIdentifier(providerName, apiName, version, uuid);
+
+        API api = new API(id);
+        api.setUuid(uuid);
+        api.setUrl(JsonUtils.safeGetAsString(jsonObject, "url"));
+        api.setSandboxUrl(JsonUtils.safeGetAsString(jsonObject, "sandboxUrl"));
+        api.setWsdlUrl(JsonUtils.safeGetAsString(jsonObject, "wsdlUrl"));
+        api.setWadlUrl(JsonUtils.safeGetAsString(jsonObject, "wadlUrl"));
+        api.setSwaggerDefinition(JsonUtils.safeGetAsString(jsonObject, "swaggerDefinition"));
+        api.setGraphQLSchema(JsonUtils.safeGetAsString(jsonObject, "graphQLSchema"));
+        api.setAsyncApiDefinition(JsonUtils.safeGetAsString(jsonObject, "asyncAPIDefinition"));
+        api.setType(JsonUtils.safeGetAsString(jsonObject, "type"));
+        api.setSubtype(JsonUtils.safeGetAsString(jsonObject, "subType"));
+        api.setContext(JsonUtils.safeGetAsString(jsonObject, "context"));
+        api.setContextTemplate(JsonUtils.safeGetAsString(jsonObject, "contextTemplate"));
+        api.setThumbnailUrl(JsonUtils.safeGetAsString(jsonObject, "thumbnailUrl"));
+        api.setTags(jsonArrayToSet(jsonObject.getAsJsonArray("tags")));
+//        api.addDocuments(convertToDocumentationSet(jsonArrayToSet(jsonObject.getAsJsonArray("documents"))));
+        api.setHttpVerb(JsonUtils.safeGetAsString(jsonObject, "httpVerb"));
+        api.setLastUpdated(stringToDate(JsonUtils.safeGetAsString(jsonObject, "lastUpdated")));
+        api.setUpdatedBy(JsonUtils.safeGetAsString(jsonObject, "updatedBy"));
+        api.setOrganization(JsonUtils.safeGetAsString(jsonObject, "organization"));
+        api.setStatus(JsonUtils.safeGetAsString(jsonObject, "status"));
+        api.setTechnicalOwner(JsonUtils.safeGetAsString(jsonObject, "technicalOwner"));
+        api.setTechnicalOwnerEmail(JsonUtils.safeGetAsString(jsonObject, "technicalOwnerEmail"));
+        api.setBusinessOwner(JsonUtils.safeGetAsString(jsonObject, "businessOwner"));
+        api.setBusinessOwnerEmail(JsonUtils.safeGetAsString(jsonObject, "businessOwnerEmail"));
+        api.setVisibility(JsonUtils.safeGetAsString(jsonObject, "visibility"));
+        api.setVisibleRoles(JsonUtils.safeGetAsString(jsonObject, "visibilityRoles"));
+        api.setVisibleTenants(JsonUtils.safeGetAsString(jsonObject, "visibleTenants"));
+        api.setApiOwner(JsonUtils.safeGetAsString(jsonObject, "apiOwner"));
+        api.setRedirectURL(JsonUtils.safeGetAsString(jsonObject, "redirectUrl"));
+        api.setImplementation(JsonUtils.safeGetAsString(jsonObject, "implementation"));
+        api.setMonetizationCategory(JsonUtils.safeGetAsString(jsonObject, "monetizationCategory"));
+        api.setTransports(JsonUtils.safeGetAsString(jsonObject, "transports"));
+        return api;
     }
 }

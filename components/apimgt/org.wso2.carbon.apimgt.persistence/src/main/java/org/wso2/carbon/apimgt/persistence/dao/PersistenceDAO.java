@@ -78,8 +78,8 @@ public class PersistenceDAO {
 
         String query = SQLConstants.GET_ALL_API_SCHEMA_SQL;
 
-        if (searchQuery.isEmpty()) {
-            query = SQLConstants.GET_ALL_API_SCHEMA_SQL;
+        if (!searchQuery.isEmpty()) {
+            query = SQLConstants.SEARCH_API_SCHEMA_SQL;
         }
 
         try {
@@ -88,6 +88,10 @@ public class PersistenceDAO {
 
             prepStmt = connection.prepareStatement(query);
             prepStmt.setString(1, tenantDomain);
+
+            if (!searchQuery.isEmpty()) {
+                prepStmt.setString(2, searchQuery);
+            }
 
             rs = prepStmt.executeQuery();
 
@@ -129,6 +133,64 @@ public class PersistenceDAO {
             PersistanceDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return count;
+    }
+
+    public String getAPISchemaByUUID(String uuid, String tenantDomain) throws SQLException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        String apiSchema = null;
+
+        String query = SQLConstants.GET_API_BY_UUID_SQL;
+
+        try {
+            connection = PersistanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, tenantDomain);
+            prepStmt.setString(2, uuid);
+
+            rs = prepStmt.executeQuery();
+
+            if (rs.next()) {
+                apiSchema = rs.getString("API_SCHEMA");
+            }
+
+        } finally {
+            PersistanceDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return apiSchema;
+    }
+
+    public String getSwaggerDefinitionByUUID(String uuid, String tenantDomain) throws SQLException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+
+        String swaggerDefinition = null;
+
+        String query = SQLConstants.GET_SWAGGER_DEFINITION_BY_UUID_SQL;
+
+        try {
+            connection = PersistanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, tenantDomain);
+            prepStmt.setString(2, uuid);
+
+            rs = prepStmt.executeQuery();
+
+            if (rs.next()) {
+                swaggerDefinition = rs.getString("SWAGGER_DEFINITION");
+            }
+
+        } finally {
+            PersistanceDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return swaggerDefinition;
     }
 
     private void handleException(String msg, Throwable t) throws APIManagementException {

@@ -82,7 +82,20 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherAPI getPublisherAPI(Organization org, String apiId) throws APIPersistenceException {
-        return null;
+        String tenantDomain = org.getName();
+        PublisherAPI publisherAPI = null;
+
+        try {
+            String apiSchema = persistenceDAO.getAPISchemaByUUID(apiId, tenantDomain);
+            if (apiSchema != null) {
+                API api = jsonMapper.mapJsonStringToAPI(apiSchema);
+                publisherAPI = APIMapper.INSTANCE.toPublisherApi(api);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return publisherAPI;
     }
 
     @Override
@@ -108,11 +121,11 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
         log.debug("Requested query for publisher search: " + searchQuery);
 
-        String modifiedQuery = RegistrySearchUtil.getPublisherSearchQuery(searchQuery, ctx);
+//        String modifiedQuery = RegistrySearchUtil.getPublisherSearchQuery(searchQuery, ctx);
+//
+//        log.debug("Modified query for publisher search: " + modifiedQuery);
 
-        log.debug("Modified query for publisher search: " + modifiedQuery);
-
-        result = searchPaginatedPublisherAPIs(modifiedQuery, requestedTenantDomain, start, offset);
+        result = searchPaginatedPublisherAPIs(searchQuery, requestedTenantDomain, start, offset);
 
         return result;
     }
@@ -179,6 +192,17 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherContentSearchResult searchContentForPublisher(Organization org, String searchQuery, int start, int offset, UserContext ctx) throws APIPersistenceException {
+        PublisherContentSearchResult result = null;
+
+        try {
+            String requestedTenantDomain = org.getName();
+            int totalLength = PersistenceDAO.getInstance().getAllAPICount(requestedTenantDomain);
+
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
         return null;
     }
 
@@ -204,12 +228,19 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public void saveOASDefinition(Organization org, String apiId, String apiDefinition) throws OASPersistenceException {
-
+        log.info("Savind OAS definition");
     }
 
     @Override
     public String getOASDefinition(Organization org, String apiId) throws OASPersistenceException {
-        return "";
+        String swaggerDefinition = null;
+        try {
+            swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiId, org.getName());
+            swaggerDefinition = JsonUtils.getFormattedJsonString(swaggerDefinition);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return swaggerDefinition;
     }
 
     @Override
