@@ -29,6 +29,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.protobuf.Api;
 import io.swagger.inflector.examples.ExampleBuilder;
 import io.swagger.inflector.examples.models.Example;
 import io.swagger.inflector.processors.JsonNodeExampleSerializer;
@@ -211,7 +212,7 @@ public class OAS2Parser extends APIDefinition {
     /**
      * This method returns the generated examples for the given API definition
      *
-     * @param apiDefinition API definition
+     * @param swaggerDef API definition
      * @return Map of generated examples
      * @throws APIManagementException
      */
@@ -275,7 +276,7 @@ public class OAS2Parser extends APIDefinition {
             log.debug("Errors found when parsing OAS definition");
         }
         Swagger swagger = parseAttemptForV2.getSwagger();
-        boolean isModify = mockConfig.get("modify") != null;
+        boolean isModify = mockConfig.get(APIConstants.MOCK_MODIFY) != null;
         Map<String, Object> returnMap = new HashMap<>();
         List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
         for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
@@ -300,17 +301,17 @@ public class OAS2Parser extends APIDefinition {
                 String finalScript;
                 if (isModify) {
                     // if the given path and method
-                    Map<String, Object> modify = (Map<String, Object>) mockConfig.get("modify");
-                    if (path.equals(modify.get("path")) && apiResourceMediationPolicyObject.getVerb().toLowerCase()
-                            .equals(modify.get("method"))) {
-                        finalScript = scriptsToAdd.get("modified_script").getAsString();
+                    Map<String, Object> modify = (Map<String, Object>) mockConfig.get(APIConstants.MOCK_MODIFY);
+                    if (path.equals(modify.get(APIConstants.MOCK_PATH)) && apiResourceMediationPolicyObject.getVerb()
+                            .toLowerCase().equals(modify.get(APIConstants.MOCK_METHOD))) {
+                        finalScript = scriptsToAdd.get(APIConstants.MOCK_MODIFIED_SCRIPT).getAsString();
                     } else {
                         finalScript = op.getVendorExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT).toString();
                     }
                 } else {
-                    finalScript = scriptsToAdd.get("paths").getAsJsonObject().get(path).getAsJsonObject()
-                            .get(apiResourceMediationPolicyObject.getVerb().toLowerCase()) != null ?
-                            scriptsToAdd.get("paths").getAsJsonObject().get(path).getAsJsonObject()
+                    finalScript = scriptsToAdd.get(APIConstants.SWAGGER_PATHS).getAsJsonObject().get(path)
+                            .getAsJsonObject().get(apiResourceMediationPolicyObject.getVerb().toLowerCase()) != null ?
+                            scriptsToAdd.get(APIConstants.SWAGGER_PATHS).getAsJsonObject().get(path).getAsJsonObject()
                                     .get(apiResourceMediationPolicyObject.getVerb().toLowerCase()).getAsString() :
                             "";
                 }
@@ -320,8 +321,9 @@ public class OAS2Parser extends APIDefinition {
                 op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
             }
             // if mockDB then Add it
-            if (!isModify && scriptsToAdd.has("mockDB")) {
-                swagger.setVendorExtension(APIConstants.X_WSO2_MOCKDB, scriptsToAdd.get("mockDB").getAsString());
+            if (!isModify && scriptsToAdd.has(APIConstants.MOCK_MOCKDB)) {
+                swagger.setVendorExtension(APIConstants.X_WSO2_MOCKDB,
+                        scriptsToAdd.get(APIConstants.MOCK_MOCKDB).getAsString());
             }
             returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);

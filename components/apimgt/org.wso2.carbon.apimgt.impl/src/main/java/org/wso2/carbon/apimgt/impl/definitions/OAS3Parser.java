@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.impl.definitions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.gson.JsonObject;
+import com.google.protobuf.Api;
 import io.swagger.oas.inflector.examples.ExampleBuilder;
 import io.swagger.oas.inflector.examples.XmlExampleSerializer;
 import io.swagger.oas.inflector.examples.models.Example;
@@ -310,7 +311,7 @@ public class OAS3Parser extends APIDefinition {
     /**
      * This method adds scripts and mock DB to swagger
      *
-     * @param swaggerDef   Swagger Definition
+     * @param apiDefinition   Swagger Definition
      * @param mockConfig   Mock Configurations
      * @param scriptsToAdd JsonObject with scripts and mockDB
      * @return Swagger Json
@@ -324,7 +325,7 @@ public class OAS3Parser extends APIDefinition {
             log.debug("Errors found when parsing OAS definition");
         }
         OpenAPI swagger = parseAttemptForV3.getOpenAPI();
-        boolean isModify = mockConfig.get("modify") != null;
+        boolean isModify = mockConfig.get(APIConstants.MOCK_MODIFY) != null;
         Map<String, Object> returnMap = new HashMap<>();
         List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
         for (Map.Entry<String, PathItem> entry : swagger.getPaths().entrySet()) {
@@ -348,18 +349,19 @@ public class OAS3Parser extends APIDefinition {
                 String finalScript;
                 if (isModify) {
                     // if the given path and method
-                    Map<String, Object> modify = (Map<String, Object>) mockConfig.get("modify");
-                    if (path.equals(modify.get("path")) && apiResourceMediationPolicyObject.getVerb().toLowerCase()
-                            .equals(modify.get("method"))) {
-                        finalScript = scriptsToAdd.get("modified_script").getAsString();
+                    Map<String, Object> modify = (Map<String, Object>) mockConfig.get(APIConstants.MOCK_MODIFY);
+                    if (path.equals(modify.get(APIConstants.MOCK_PATH)) && apiResourceMediationPolicyObject.getVerb()
+                            .toLowerCase().equals(modify.get(APIConstants.MOCK_METHOD))) {
+                        finalScript = scriptsToAdd.get(APIConstants.MOCK_MODIFIED_SCRIPT).getAsString();
                     } else {
                         finalScript = op.getExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT) != null ?
                                 op.getExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT).toString() :
                                 "";
                     }
                 } else {
-                    finalScript = scriptsToAdd.get("paths").getAsJsonObject().get(path).getAsJsonObject()
-                            .get(apiResourceMediationPolicyObject.getVerb().toLowerCase()).getAsString();
+                    finalScript = scriptsToAdd.get(APIConstants.SWAGGER_PATHS).getAsJsonObject().get(path)
+                            .getAsJsonObject().get(apiResourceMediationPolicyObject.getVerb().toLowerCase())
+                            .getAsString();
                 }
                 apiResourceMediationPolicyObject.setContent(finalScript);
                 // sets script to each resource in the swagger
@@ -367,8 +369,9 @@ public class OAS3Parser extends APIDefinition {
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
             }
             // if mockDB then Add it
-            if (!isModify && scriptsToAdd.has("mockDB")) {
-                swagger.addExtension(APIConstants.X_WSO2_MOCKDB, scriptsToAdd.get("mockDB").getAsString());
+            if (!isModify && scriptsToAdd.has(APIConstants.MOCK_MOCKDB)) {
+                swagger.addExtension(APIConstants.X_WSO2_MOCKDB,
+                        scriptsToAdd.get(APIConstants.MOCK_MOCKDB).getAsString());
             }
             returnMap.put(APIConstants.SWAGGER, prettifyOAS3ToJson(swagger));
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);

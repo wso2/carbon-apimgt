@@ -2807,53 +2807,48 @@ public class APIManagerConfiguration {
         }
     }
 
-        public void setApiMockConfiguration(OMElement omElement){
-        OMElement apiMockEnableElement =
-                omElement.getFirstChildWithName(new QName(APIConstants.AI.API_MOCK_ENABLED));
+    public void setApiMockConfiguration(OMElement omElement) {
+        OMElement apiMockEnableElement = omElement.getFirstChildWithName(new QName(APIConstants.AI.API_MOCK_ENABLED));
         if (apiMockEnableElement != null) {
             apiMockConfigurationDto.setEnabled(Boolean.parseBoolean(apiMockEnableElement.getText()));
         }
         if (apiMockConfigurationDto.isEnabled()) {
-            OMElement apiMockEndpoint =
-                    omElement.getFirstChildWithName(new QName(APIConstants.AI.API_MOCK_ENDPOINT));
+            OMElement apiMockEndpoint = omElement.getFirstChildWithName(new QName(APIConstants.AI.API_MOCK_ENDPOINT));
             if (apiMockEndpoint != null) {
                 apiMockConfigurationDto.setEndpoint(apiMockEndpoint.getText());
             }
-            OMElement apiMockTokenEndpoint =
-                    omElement.getFirstChildWithName(new QName(APIConstants.AI.API_MOCK_TOKEN_ENDPOINT));
+            OMElement apiMockTokenEndpoint = omElement.getFirstChildWithName(
+                    new QName(APIConstants.AI.API_MOCK_TOKEN_ENDPOINT));
             if (apiMockTokenEndpoint != null) {
                 apiMockConfigurationDto.setTokenEndpoint(apiMockTokenEndpoint.getText());
             }
-            OMElement apiMockKey =
-                    omElement.getFirstChildWithName(new QName(APIConstants.AI.API_MOCK_KEY));
-    
+            OMElement apiMockKey = omElement.getFirstChildWithName(new QName(APIConstants.AI.API_MOCK_KEY));
+
             if (apiMockKey != null) {
                 String Key = MiscellaneousUtil.resolve(apiMockKey, secretResolver);
                 apiMockConfigurationDto.setKey(Key);
-                if (!Key.isEmpty()){
+                if (!Key.isEmpty()) {
                     apiMockConfigurationDto.setKeyProvided(true);
                 }
             }
-            OMElement apiMockToken =
-                    omElement.getFirstChildWithName(new QName("APIConstants.AI.API_MOCK_AUTH_TOKEN"));
+            OMElement apiMockToken = omElement.getFirstChildWithName(new QName("APIConstants.AI.API_MOCK_AUTH_TOKEN"));
             if (apiMockToken != null) {
                 String AccessToken = MiscellaneousUtil.resolve(apiMockToken, secretResolver);
                 apiMockConfigurationDto.setAccessToken(AccessToken);
-                if (!AccessToken.isEmpty()){
+                if (!AccessToken.isEmpty()) {
                     apiMockConfigurationDto.setAuthTokenProvided(true);
                 }
             }
-            OMElement resources =
-                    omElement.getFirstChildWithName(new QName(APIConstants.AI.RESOURCES));
-    
+            OMElement resources = omElement.getFirstChildWithName(new QName(APIConstants.AI.RESOURCES));
+
             if (resources != null) {
-                OMElement generateResource =
-                        resources.getFirstChildWithName(new QName(APIConstants.AI.API_MOCK_GENERATE_RESOURCE));
+                OMElement generateResource = resources.getFirstChildWithName(
+                        new QName(APIConstants.AI.API_MOCK_GENERATE_RESOURCE));
                 if (generateResource != null) {
                     apiMockConfigurationDto.setGenerateResource(generateResource.getText());
                 }
-                OMElement modifyMethodResource =
-                        resources.getFirstChildWithName(new QName(APIConstants.AI.API_MOCK_MODIFY_METHOD_RESOURCE));
+                OMElement modifyMethodResource = resources.getFirstChildWithName(
+                        new QName(APIConstants.AI.API_MOCK_MODIFY_METHOD_RESOURCE));
                 if (modifyMethodResource != null) {
                     apiMockConfigurationDto.setModifyMethodResource(modifyMethodResource.getText());
                 }

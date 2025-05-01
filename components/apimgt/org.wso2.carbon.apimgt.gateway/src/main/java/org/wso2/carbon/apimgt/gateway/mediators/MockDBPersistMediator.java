@@ -33,42 +33,41 @@ public class MockDBPersistMediator extends AbstractMediator {
         try {
             String openAPIString = (String) context.getProperty(OPEN_API_STRING);
             JsonObject openAPI = JsonParser.parseString(openAPIString).getAsJsonObject();
-            String apiKey = Integer.toString(
+            String dbKey = Integer.toString(
                     (context.getProperty(API_UUID) +
                             (openAPI.get(APIConstants.X_WSO2_MOCKDB) != null ?
                                     openAPI.get(APIConstants.X_WSO2_MOCKDB).getAsString() : "")).hashCode());
 
             if (context.getProperty(MOCK_DB) == null) { // Only for request
-                if (!mockDBMap.containsKey(apiKey)) {
-                    setMockDB(openAPI, apiKey);
+                if (!mockDBMap.containsKey(dbKey)) {
+                    setMockDB(openAPI, dbKey);
                     if (log.isDebugEnabled()) {
-                        log.debug("MockDB Initialized: " + mockDBMap.get(apiKey));
+                        log.debug("MockDB Initialized: " + mockDBMap.get(dbKey));
                     }
                 }
                 // Set the mockDB to the context
-                context.setProperty(MOCK_DB, mockDBMap.get(apiKey));
+                context.setProperty(MOCK_DB, mockDBMap.get(dbKey));
                 if (log.isDebugEnabled()) {
-                    log.debug("MockDB set to Context: " + mockDBMap.get(apiKey));
+                    log.debug("MockDB set to Context: " + mockDBMap.get(dbKey));
                 }
             } else { // Only for response
                 // Update the mockDB for the specific API
-                updateMockDB(apiKey, (String) context.getProperty(MOCK_DB));
+                updateMockDB(dbKey, (String) context.getProperty(MOCK_DB));
                 if (log.isDebugEnabled()) {
-                    log.debug("MockDB Updated: " + mockDBMap.get(apiKey));
+                    log.debug("MockDB Updated: " + mockDBMap.get(dbKey));
                 }
             }
             return true; // Successful mediation
         } catch (Exception e) {
             log.error("Error in MockDBPersistMediator: " + e.getMessage());
-            e.printStackTrace();
-            return false;
+            return true;
         }
     }
 
     private void setMockDB(JsonObject openAPI, String apiKey) {
         if (!openAPI.has(APIConstants.X_WSO2_MOCKDB)) {
             log.error(
-                    "Error: x-wso2-mockdb field not found in OpenAPI for API Key: " + apiKey);
+                    "x-wso2-mockdb field not found in open API definition.");
         } else {
             updateMockDB(apiKey, openAPI.get(APIConstants.X_WSO2_MOCKDB).getAsString());
         }

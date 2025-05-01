@@ -249,6 +249,13 @@ public class OASParserUtil {
         }
     }
 
+    /**
+     * This method returns the generated examples for the given API definition
+     *
+     * @param apiDefinition API definition
+     * @return Map of generated examples
+     * @throws APIManagementException
+     */
     public static Map<String, Object> getGeneratedExamples(String apiDefinition) throws APIManagementException {
         SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
         if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
@@ -260,12 +267,20 @@ public class OASParserUtil {
         }
     }
 
+    /**
+     * Uses an AI service to generate mock response examples and mediation scripts for the given API definition and mock
+     * configuration. Adds the generated scripts and mock DB entries to the OpenAPI/Swagger spec.
+     *
+     * @param apiDefinition The API definition (OpenAPI 3.0 or Swagger 2.0)
+     * @param mockConfig    Configuration options for mock generation
+     * @return A map with the updated spec and generated examples
+     * @throws APIManagementException If the spec is invalid or AI service fails
+     */
     public static Map<String, Object> generateExamplesWithAI(String apiDefinition, Map<String, Object> mockConfig)
             throws APIManagementException {
         SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
         JsonObject scriptsToAdd = invokeMockGenerationAIService(apiDefinition, mockConfig);
-
-        if (scriptsToAdd != null){
+        if (scriptsToAdd != null) {
             if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) { // oas3
                 return oas3Parser.addScriptsAndMockDB(apiDefinition, mockConfig, scriptsToAdd);
             } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) { // oas2
@@ -275,8 +290,7 @@ public class OASParserUtil {
                         "Cannot update destination swagger because it is not in OpenAPI format");
             }
         } else {
-            throw new APIManagementException(
-                    "Error encountered while executing AI Mock generation service.");
+            throw new APIManagementException("Error encountered while executing AI Mock generation service.");
         }
     }
 
@@ -712,6 +726,15 @@ public class OASParserUtil {
         }
     }
 
+    /**
+     * Calls the configured AI service to generate mediation scripts for the provided API definition and mock
+     * configuration. Uses either a direct key or an auth token based on system config to authenticate the request.
+     *
+     * @param apiDefinition The API definition as a string
+     * @param mockConfig    The mock configuration parameters
+     * @return A JsonObject containing the generated scripts and mock responses
+     * @throws APIManagementException If configuration is missing or the AI service call fails
+     */
     private static JsonObject invokeMockGenerationAIService(String apiDefinition, Map<String, Object> mockConfig)
             throws APIManagementException {
         APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
@@ -723,26 +746,22 @@ public class OASParserUtil {
             configDto = configuration.getApiMockConfigurationDto();
         }
         if (configDto.isKeyProvided() || configDto.isAuthTokenProvided()) {
-            // make payload from mockContext
+            // make payload from mockConfig and swagger
             JSONObject payload = new JSONObject();
-            payload.put("config", mockConfig);
-            payload.put("apiDefinition", apiDefinition);
-
-            Map<String, Object> modify = mockConfig.get("modify") != null
-                    ? (Map<String, Object>) mockConfig.get("modify")
-                    : null;
-
-            String resource = modify != null ? configDto.getModifyMethodResource()
-                    : configDto.getGenerateResource();
+            payload.put(APIConstants.MOCK_CONFIG, mockConfig);
+            payload.put(APIConstants.SWAGGER, apiDefinition);
+            Map<String, Object> modify = mockConfig.get(APIConstants.MOCK_MODIFY) != null ?
+                    (Map<String, Object>) mockConfig.get(APIConstants.MOCK_MODIFY) :
+                    null;
+            String resource = modify != null ? configDto.getModifyMethodResource() : configDto.getGenerateResource();
             String tokenEndPoint = configDto.isKeyProvided() ? configDto.getTokenEndpoint() : null;
-
-            String response = APIUtil.invokeAIService(configDto.getEndpoint(), tokenEndPoint,
-                    configDto.getKey(), resource, payload.toString(), null);
+            String response = APIUtil.invokeAIService(configDto.getEndpoint(), tokenEndPoint, configDto.getKey(),
+                    resource, payload.toString(), null);
             JsonObject scriptsToAdd = JsonParser.parseString(response).getAsJsonObject();
             return scriptsToAdd;
         } else {
-            throw new APIManagementException(
-                    "Error encountered while executing AI Mock generation service.");
+            log.error("AI Key or Auth token not provided");
+            throw new APIManagementException("Error encountered while executing AI Mock generation service.");
         }
     }
 

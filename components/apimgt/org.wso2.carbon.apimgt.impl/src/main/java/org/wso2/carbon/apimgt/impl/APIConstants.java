@@ -1759,7 +1759,6 @@ public final class APIConstants {
     public static final String X_WSO2_REQUEST_INTERCEPTOR = "x-wso2-request-interceptor";
     public static final String X_WSO2_RESPONSE_INTERCEPTOR = "x-wso2-response-interceptor";
     public static final String X_WSO2_ENDPOINT_TYPE = "type";
-    public static final String X_WSO2_MOCKDB = "x-wso2-mockdb";
     public static final String ADVANCE_ENDPOINT_CONFIG = "advanceEndpointConfig";
     public static final String TIMEOUT_IN_MILLIS = "timeoutInMillis";
 
@@ -1825,6 +1824,13 @@ public final class APIConstants {
 
     // mock response generation
     public static final String MOCK_GEN_POLICY_LIST = "policyList";
+    public static final String MOCK_MODIFY = "modify";
+    public static final String MOCK_PATH = "path";
+    public static final String MOCK_METHOD = "method";
+    public static final String MOCK_MOCKDB = "mockDB";
+    public static final String MOCK_MODIFIED_SCRIPT = "modified_script";
+    public static final String MOCK_CONFIG = "config";
+    public static final String X_WSO2_MOCKDB = "x-wso2-mockdb";
 
     public static final String IMPLEMENTATION_STATUS = "implementation_status";
     public static final String ENDPOINT_TYPE_DEFAULT = "default";
