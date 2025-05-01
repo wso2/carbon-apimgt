@@ -211,14 +211,15 @@ public class OAS2ParserTest extends OASTestBase {
     @Test
     public void getGeneratedExamples() throws Exception {
         String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2_uri_template.json";
-        String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath),
+                StandardCharsets.UTF_8);
         Map<String, Object> responseMap = oas2Parser.generateExample(openApi);
         String swaggerString = (String) responseMap.get(APIConstants.SWAGGER);
         Map<String, Object> responseMap1 = oas2Parser.getGeneratedExamples(swaggerString);
         Assert.assertNotNull(responseMap1);
         Assert.assertTrue(responseMap1.containsKey(APIConstants.MOCK_GEN_POLICY_LIST));
-        List<APIResourceMediationPolicy> apiResourceMediationPolicyList =
-                (List<APIResourceMediationPolicy>) responseMap1.get(APIConstants.MOCK_GEN_POLICY_LIST);
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = (List<APIResourceMediationPolicy>) responseMap1.get(
+                APIConstants.MOCK_GEN_POLICY_LIST);
         Assert.assertFalse(apiResourceMediationPolicyList.isEmpty());
         APIResourceMediationPolicy apiResourceMediationPolicy = apiResourceMediationPolicyList.get(4);
         Assert.assertEquals("/abc", apiResourceMediationPolicy.getPath());
@@ -227,9 +228,10 @@ public class OAS2ParserTest extends OASTestBase {
     }
 
     @Test
-    public void testaddScriptsAndMockDB() throws Exception {
+    public void testAddScriptsAndMockDB() throws Exception {
         String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2_uri_template.json";
-        String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath),
+                StandardCharsets.UTF_8);
         Map<String, Object> responseMap = oas2Parser.generateExample(openApi);
         String swaggerString = (String) responseMap.get(APIConstants.SWAGGER);
 
@@ -279,7 +281,6 @@ public class OAS2ParserTest extends OASTestBase {
                 + "}"
                 + "}";
 
-
         Map mockConfig1 = Map.of();
         JsonObject llmResponseJson = JsonParser.parseString(llmResponseFull).getAsJsonObject();
 
@@ -289,8 +290,8 @@ public class OAS2ParserTest extends OASTestBase {
         Assert.assertTrue(responseMap1.containsKey(APIConstants.SWAGGER));
         String swaggerString1 = (String) responseMap1.get(APIConstants.SWAGGER);
         Assert.assertTrue(swaggerString1.contains(APIConstants.X_WSO2_MOCKDB));
-        List<APIResourceMediationPolicy> apiResourceMediationPolicyList =
-                (List<APIResourceMediationPolicy>) responseMap1.get(APIConstants.MOCK_GEN_POLICY_LIST);
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = (List<APIResourceMediationPolicy>) responseMap1.get(
+                APIConstants.MOCK_GEN_POLICY_LIST);
         Assert.assertFalse(apiResourceMediationPolicyList.isEmpty());
         APIResourceMediationPolicy apiResourceMediationPolicy = apiResourceMediationPolicyList.get(4);
         Assert.assertEquals("/abc", apiResourceMediationPolicy.getPath());
@@ -309,11 +310,12 @@ public class OAS2ParserTest extends OASTestBase {
                 + "}";
         Map mockConfig2 = Map.of("modify", Map.of("path", "/abc", "method", "get"));
         JsonObject llmResponseJsonModify = JsonParser.parseString(llmResponseModify).getAsJsonObject();
-        Map<String, Object> responseMap2 = oas2Parser.addScriptsAndMockDB(swaggerString, mockConfig2, llmResponseJsonModify);
+        Map<String, Object> responseMap2 = oas2Parser.addScriptsAndMockDB(swaggerString, mockConfig2,
+                llmResponseJsonModify);
         Assert.assertNotNull(responseMap2);
         Assert.assertTrue(responseMap2.containsKey(APIConstants.MOCK_GEN_POLICY_LIST));
-        List<APIResourceMediationPolicy> apiResourceMediationPolicyList2 =
-                (List<APIResourceMediationPolicy>) responseMap2.get(APIConstants.MOCK_GEN_POLICY_LIST);
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList2 = (List<APIResourceMediationPolicy>) responseMap2.get(
+                APIConstants.MOCK_GEN_POLICY_LIST);
         Assert.assertFalse(apiResourceMediationPolicyList2.isEmpty());
         APIResourceMediationPolicy apiResourceMediationPolicy2 = apiResourceMediationPolicyList2.get(4);
         Assert.assertEquals("/abc", apiResourceMediationPolicy2.getPath());
