@@ -23,6 +23,7 @@ package org.wso2.carbon.apimgt.api.model;
  */
 public class APIChatTestExecutionInfo {
     private APIChatExecutionResponse response = null;
+    private String apiType = null;
 
     public APIChatExecutionResponse getResponse() {
         return response;
@@ -31,4 +32,8 @@ public class APIChatTestExecutionInfo {
     public void setResponse(APIChatExecutionResponse response) {
         this.response = response;
     }
+    
+    public String getApiType() { return apiType; }
+
+    public void setApiType( String apiType ) { this.apiType = apiType; }
 }

@@ -326,11 +326,23 @@ public class ApisApiServiceImpl implements ApisApiService {
                     boolean isTestExecutionRequest = apiChatRequestDTO.getResponse() != null;
                     String requestPayload; // Request payload for Choreo deployed API Chat Agent
 
+                    String apiType;
+                    try{
+                        API api = apiConsumer.getLightweightAPIByUUID(apiId, RestApiUtil.getValidatedOrganization(messageContext));
+                        apiType = api.getType();
+                    } catch (APIManagementException e) {
+                        String errorMessage = "Error while retrieving API type for API ID: " + apiId;
+                        RestApiUtil.handleInternalServerError(errorMessage, e, log);
+                        return null;
+                    }
+
+
                     if (isTestInitializationRequest) {
                         boolean isGraphqlAPI = apiChatRequestDTO.getApiSpec().getSdl() != null;
                         ApiChatRequestApiSpecDTO specDTO = apiChatRequestDTO.getApiSpec();
                         APIChatTestInitializerInfo initializerInfo = new APIChatTestInitializerInfo();
                         initializerInfo.setCommand(apiChatRequestDTO.getCommand());
+                        initializerInfo.setApiType(apiType);
                         if (isGraphqlAPI) {
                             APIChatGraphQLSdl apiSdl = new APIChatGraphQLSdl();
                             apiSdl.setSdl(specDTO.getSdl());
@@ -354,6 +366,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         responseInfo.setHeaders(responseDTO.getHeaders());
                         responseInfo.setBody(responseDTO.getBody());
                         executionInfo.setResponse(responseInfo);
+                        executionInfo.setApiType(apiType);
 
                         // Generate the payload for Choreo deployed API Chat Agent
                         ObjectMapper payloadMapper = new ObjectMapper();

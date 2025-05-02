@@ -25,6 +25,7 @@ public class APIChatTestInitializerInfo {
     private String command = null;
     private APIChatAPISpec apiSpec = null;
     private APIChatGraphQLSdl sdl = null;
+    private String apiType = null;
 
     public String getCommand() {
         return command;
@@ -49,4 +50,8 @@ public class APIChatTestInitializerInfo {
     public void setSdl(APIChatGraphQLSdl sdl){
         this.sdl = sdl;
     }
+
+    public String getApiType() { return apiType; }
+
+    public void setApiType(String apiType) { this.apiType = apiType; }
 }
