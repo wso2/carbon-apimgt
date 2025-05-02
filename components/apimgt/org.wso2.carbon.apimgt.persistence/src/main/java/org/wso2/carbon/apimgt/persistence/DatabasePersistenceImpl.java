@@ -13,11 +13,8 @@ import org.wso2.carbon.apimgt.persistence.dao.PersistenceDAO;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
-import org.wso2.carbon.apimgt.persistence.mapper.JSONMapper;
-import org.wso2.carbon.apimgt.persistence.utils.JsonUtils;
+import org.wso2.carbon.apimgt.persistence.utils.DatabasePersistenceUtil;
 import org.wso2.carbon.apimgt.persistence.utils.PublisherAPISearchResultComparator;
-import org.wso2.carbon.apimgt.persistence.utils.RegistrySearchUtil;
-import org.wso2.carbon.registry.core.pagination.PaginationContext;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -25,8 +22,7 @@ import java.util.*;
 public class DatabasePersistenceImpl implements APIPersistence {
     private static final Log log = LogFactory.getLog(DatabasePersistenceImpl.class);
     private Properties properties;
-    private PersistenceDAO persistenceDAO;
-    private JSONMapper jsonMapper = new JSONMapper();
+    private static PersistenceDAO persistenceDAO;
 
     public DatabasePersistenceImpl() {
         persistenceDAO = PersistenceDAO.getInstance();
@@ -42,8 +38,9 @@ public class DatabasePersistenceImpl implements APIPersistence {
         API api = APIMapper.INSTANCE.toApi(publisherAPI);
         String uuid = UUID.randomUUID().toString();
         api.setUuid(uuid);
+        api.setCreatedTime(String.valueOf(new Date().getTime()));
 
-        JsonObject json = jsonMapper.mapApiToJson(api);
+        JsonObject json = DatabasePersistenceUtil.mapApiToJson(api);
         String jsonString = json.toString();
         try {
             int apiSchemaId = persistenceDAO.addAPISchema(uuid, jsonString, org);
@@ -87,8 +84,9 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
         try {
             String apiSchema = persistenceDAO.getAPISchemaByUUID(apiId, tenantDomain);
+            JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(apiSchema);
             if (apiSchema != null) {
-                API api = jsonMapper.mapJsonStringToAPI(apiSchema);
+                API api = DatabasePersistenceUtil.jsonToApi(jsonObject);
                 publisherAPI = APIMapper.INSTANCE.toPublisherApi(api);
             }
         } catch (SQLException e) {
@@ -144,30 +142,30 @@ public class DatabasePersistenceImpl implements APIPersistence {
                 JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();
 
                 PublisherAPIInfo apiInfo = new PublisherAPIInfo();
-                apiInfo.setId(JsonUtils.safeGetAsString(jsonObject, "uuid"));
-                apiInfo.setApiName(JsonUtils.safeGetAsString(jsonObject.getAsJsonObject("id"), "apiName"));
-                apiInfo.setVersion(JsonUtils.safeGetAsString(jsonObject.getAsJsonObject("id"), "version"));
-                apiInfo.setProviderName(JsonUtils.safeGetAsString(jsonObject.getAsJsonObject("id"), "providerName"));
-                apiInfo.setContext(JsonUtils.safeGetAsString(jsonObject, "context"));
-                apiInfo.setType(JsonUtils.safeGetAsString(jsonObject, "type"));
-                apiInfo.setThumbnail(JsonUtils.safeGetAsString(jsonObject, "thumbnailUrl"));
-                apiInfo.setCreatedTime(JsonUtils.safeGetAsString(jsonObject, "createdTime"));
+                apiInfo.setId(DatabasePersistenceUtil.safeGetAsString(jsonObject, "uuid"));
+                apiInfo.setApiName(DatabasePersistenceUtil.safeGetAsString(jsonObject.getAsJsonObject("id"), "apiName"));
+                apiInfo.setVersion(DatabasePersistenceUtil.safeGetAsString(jsonObject.getAsJsonObject("id"), "version"));
+                apiInfo.setProviderName(DatabasePersistenceUtil.safeGetAsString(jsonObject.getAsJsonObject("id"), "providerName"));
+                apiInfo.setContext(DatabasePersistenceUtil.safeGetAsString(jsonObject, "context"));
+                apiInfo.setType(DatabasePersistenceUtil.safeGetAsString(jsonObject, "type"));
+                apiInfo.setThumbnail(DatabasePersistenceUtil.safeGetAsString(jsonObject, "thumbnailUrl"));
+                apiInfo.setCreatedTime(DatabasePersistenceUtil.safeGetAsString(jsonObject, "createdTime"));
                 apiInfo.setUpdatedTime(jsonObject.has("lastUpdated") && !jsonObject.get("lastUpdated").isJsonNull()
                         ? new Date(jsonObject.get("lastUpdated").getAsString())
                         : null);
-                apiInfo.setAudience(JsonUtils.safeGetAsString(jsonObject, "audience"));
+                apiInfo.setAudience(DatabasePersistenceUtil.safeGetAsString(jsonObject, "audience"));
 
                 JsonArray audiencesJson = jsonObject.get("audiences").getAsJsonArray();
-                apiInfo.setAudiences(jsonMapper.jsonArrayToSet(audiencesJson));
+                apiInfo.setAudiences(DatabasePersistenceUtil.jsonArrayToSet(audiencesJson));
 
-                apiInfo.setUpdatedBy(JsonUtils.safeGetAsString(jsonObject, "updatedBy"));
-                apiInfo.setGatewayVendor(JsonUtils.safeGetAsString(jsonObject, "gatewayVendor"));
+                apiInfo.setUpdatedBy(DatabasePersistenceUtil.safeGetAsString(jsonObject, "updatedBy"));
+                apiInfo.setGatewayVendor(DatabasePersistenceUtil.safeGetAsString(jsonObject, "gatewayVendor"));
                 apiInfo.setAdvertiseOnly(jsonObject.has("advertiseOnly") && !jsonObject.get("advertiseOnly").isJsonNull()
                         && jsonObject.get("advertiseOnly").getAsBoolean());
-                apiInfo.setBusinessOwner(JsonUtils.safeGetAsString(jsonObject, "businessOwner"));
-                apiInfo.setBusinessOwnerEmail(JsonUtils.safeGetAsString(jsonObject, "businessOwnerEmail"));
-                apiInfo.setTechnicalOwner(JsonUtils.safeGetAsString(jsonObject, "technicalOwner"));
-                apiInfo.setTechnicalOwnerEmail(JsonUtils.safeGetAsString(jsonObject, "technicalOwnerEmail"));
+                apiInfo.setBusinessOwner(DatabasePersistenceUtil.safeGetAsString(jsonObject, "businessOwner"));
+                apiInfo.setBusinessOwnerEmail(DatabasePersistenceUtil.safeGetAsString(jsonObject, "businessOwnerEmail"));
+                apiInfo.setTechnicalOwner(DatabasePersistenceUtil.safeGetAsString(jsonObject, "technicalOwner"));
+                apiInfo.setTechnicalOwnerEmail(DatabasePersistenceUtil.safeGetAsString(jsonObject, "technicalOwnerEmail"));
                 apiInfo.setMonetizationStatus(jsonObject.has("monetizationStatus") && !jsonObject.get("monetizationStatus").isJsonNull()
                         && jsonObject.get("monetizationStatus").getAsBoolean());
 
@@ -228,7 +226,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public void saveOASDefinition(Organization org, String apiId, String apiDefinition) throws OASPersistenceException {
-        log.info("Savind OAS definition");
+        log.info("Saving OAS definition");
     }
 
     @Override
@@ -236,7 +234,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
         String swaggerDefinition = null;
         try {
             swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiId, org.getName());
-            swaggerDefinition = JsonUtils.getFormattedJsonString(swaggerDefinition);
+            swaggerDefinition = DatabasePersistenceUtil.getFormattedJsonString(swaggerDefinition);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
