@@ -60,7 +60,7 @@ public class MockDBPersistMediator extends AbstractMediator {
             return true; // Successful mediation
         } catch (Exception e) {
             log.error("Error in MockDBPersistMediator: " + e.getMessage());
-            return true;
+            return false;
         }
     }
 
