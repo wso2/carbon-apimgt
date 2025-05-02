@@ -41,7 +41,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
         api.setCreatedTime(String.valueOf(new Date().getTime()));
 
         JsonObject json = DatabasePersistenceUtil.mapApiToJson(api);
-        String jsonString = json.toString();
+        String jsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(json);
         try {
             int apiSchemaId = persistenceDAO.addAPISchema(uuid, jsonString, org);
         } catch (APIManagementException e) {
@@ -136,7 +136,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
         try {
             totalLength = PersistenceDAO.getInstance().getAllAPICount(tenantDomain);
 
-            List<String> results = PersistenceDAO.getInstance().searchAPISchema(searchQuery, tenantDomain);
+            List<String> results = persistenceDAO.searchAPISchema(searchQuery, tenantDomain, start, offset);
 
             for (String result: results) {
                 JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();

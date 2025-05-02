@@ -70,7 +70,7 @@ public class PersistenceDAO {
         return apiSchemaId;
     }
 
-    public List<String> searchAPISchema(String searchQuery, String tenantDomain) throws SQLException {
+    public List<String> searchAPISchema(String searchQuery, String tenantDomain, int start, int offset) throws SQLException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -91,6 +91,11 @@ public class PersistenceDAO {
 
             if (!searchQuery.isEmpty()) {
                 prepStmt.setString(2, searchQuery);
+                prepStmt.setInt(3, start);
+                prepStmt.setInt(4, offset);
+            } else {
+                prepStmt.setInt(2, start);
+                prepStmt.setInt(3, offset);
             }
 
             rs = prepStmt.executeQuery();

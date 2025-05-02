@@ -103,8 +103,15 @@ public class DatabasePersistenceUtil {
         String formattedString = null;
         try {
             if (jsonString != null && jsonString.length() > 2) {
-                String jsonStringWithoutQuotes = jsonString.substring(1, jsonString.length() - 1);
-                formattedString = unescapeJson(jsonStringWithoutQuotes);
+                if (jsonString.startsWith("{") && jsonString.endsWith("}")) {
+                    formattedString = unescapeJson(jsonString);
+                } else if (jsonString.startsWith("[") && jsonString.endsWith("]")) {
+                    formattedString = unescapeJson(jsonString);
+                } else if (jsonString.startsWith("\"") && jsonString.endsWith("\"")) {
+                    // Handle JSON string with quotes
+                    String jsonStringWithoutQuotes = jsonString.substring(1, jsonString.length() - 1);
+                    formattedString = unescapeJson(jsonStringWithoutQuotes);
+                }
                 ObjectMapper mapper = new ObjectMapper();
                 JsonNode root = mapper.readTree(formattedString);
                 cleanJson(root);
@@ -114,6 +121,19 @@ public class DatabasePersistenceUtil {
             throw new RuntimeException("Failed to format JSON string", e);
         }
         return formattedString;
+    }
+
+    public static String getFormattedJsonStringToSave(JsonObject json) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        String prettyjson = gson.toJson(json);
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(prettyjson);
+            cleanJson(root);
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to format JSON string", e);
+        }
     }
 
     private static String unescapeJson(String input) {

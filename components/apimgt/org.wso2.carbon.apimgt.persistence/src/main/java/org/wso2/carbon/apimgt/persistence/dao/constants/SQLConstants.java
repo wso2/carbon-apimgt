@@ -7,11 +7,15 @@ public class SQLConstants {
 
     public static final String GET_ALL_API_SCHEMA_SQL =
             "SELECT * FROM AM_API_JSON_SCHEMA " +
-                    "WHERE TENANT_DOMAIN = ?";
+                    "WHERE TENANT_DOMAIN = ? " +
+                    "ORDER BY API_SCHEMA_ID DESC " +
+                    "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String SEARCH_API_SCHEMA_SQL =
             "SELECT * FROM AM_API_JSON_SCHEMA " +
-                    "WHERE TENANT_DOMAIN = ? AND API_SCHEMA LIKE '%?%'";
+                    "WHERE TENANT_DOMAIN = ? AND " +
+                    "LOWER(JSON_QUERY(API_SCHEMA, '$.swaggerDefinition' RETURNING CLOB)) LIKE '%LOWER(?)%' " +
+                    "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String GET_ALL_API_COUNT =
             "SELECT COUNT(*) AS TOTAL_API_COUNT FROM AM_API_JSON_SCHEMA " +
