@@ -86,6 +86,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -264,6 +265,9 @@ public class ExportUtils {
             }
             addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat,
                     organization);
+        }
+        if (apiDtoToReturn.getMediationPolicies() != null && !apiDtoToReturn.getMediationPolicies().isEmpty()) {
+            apiDtoToReturn.setMediationPolicies(Collections.emptyList());
         }
         addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier,
                 organization, currentApiUuid);
@@ -763,13 +767,41 @@ public class ExportUtils {
                     String policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
                             policy.getPolicyVersion(), policy.getPolicyType());
                     if (!exportedPolicies.contains(policyFileName)) {
-                        OperationPolicyData policyData =
-                                apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(),
-                                        currentApiUuid, tenantDomain, true);
-                        if (policyData != null) {
-                            exportPolicyData(policyFileName, policyData, archivePath, exportFormat);
-                            exportedPolicies.add(policy.getPolicyName() + "_" + policy.getPolicyVersion() + "_" +
-                                    policy.getPolicyType());
+                        OperationPolicyData policyData;
+                        if (policy.getPolicyId() != null) {
+                            policyData = apiProvider.getAPISpecificOperationPolicyByPolicyId(policy.getPolicyId(),
+                                            currentApiUuid, tenantDomain, true);
+                            if (policyData != null) {
+                                exportPolicyData(policyFileName, policyData, archivePath, exportFormat);
+                                exportedPolicies.add(policy.getPolicyName() + "_" + policy.getPolicyVersion() + "_" +
+                                        policy.getPolicyType());
+                            }
+                        } else {
+                            // This path is to handle migrated APIs with mediation policies attached
+                            // These are considered as API policies by default
+                            policyFileName = APIUtil.getOperationPolicyFileName(policy.getPolicyName(),
+                                    policy.getPolicyVersion(), ImportExportConstants.POLICY_TYPE_API);
+                            if (APIUtil.isSequenceDefined(api.getInSequence())
+                                    || APIUtil.isSequenceDefined(api.getOutSequence())
+                                    || APIUtil.isSequenceDefined(api.getFaultSequence())) {
+                                if (log.isDebugEnabled()) {
+                                    log.debug("Mediation policy " + policy.getPolicyName()
+                                            + " will be converted to an operation policy");
+                                }
+                                if (!mediationPoliciesLoaded) {
+                                    apiProvider.loadMediationPoliciesToAPI(api, tenantDomain);
+                                    mediationPoliciesLoaded = true;
+                                }
+                            }
+
+                            policyData = APIUtil.getPolicyDataForMediationFlow(api,
+                                    policy.getDirection(), tenantDomain);
+
+                            if (policyData != null) {
+                                exportPolicyData(policyFileName, policyData, archivePath, exportFormat);
+                                exportedPolicies.add(policy.getPolicyName() + "_" + policy.getPolicyVersion() + "_"
+                                        + ImportExportConstants.POLICY_TYPE_API);
+                            }
                         }
                     }
                 }

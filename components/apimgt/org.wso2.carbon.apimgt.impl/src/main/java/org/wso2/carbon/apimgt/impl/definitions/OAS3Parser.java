@@ -92,6 +92,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.UUID;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TYPE;
 import static org.wso2.carbon.apimgt.impl.definitions.OASParserUtil.isValidWithPathsWithTrailingSlashes;
@@ -845,9 +846,16 @@ public class OAS3Parser extends APIDefinition {
         updateSwaggerSecurityDefinition(openAPI, swaggerData, OPENAPI_DEFAULT_AUTHORIZATION_URL,
                 new KeyManagerConfigurationDTO());
         updateLegacyScopesFromSwagger(openAPI, swaggerData);
-        
-        openAPI.getInfo().setTitle(swaggerData.getTitle());
-        openAPI.getInfo().setVersion(swaggerData.getVersion());
+
+        if (openAPI.getInfo() != null) {
+            openAPI.getInfo().setTitle(swaggerData.getTitle());
+            openAPI.getInfo().setVersion(swaggerData.getVersion());
+        } else {
+            Info info = new Info();
+            info.setTitle(swaggerData.getTitle());
+            info.setVersion(swaggerData.getVersion());
+            openAPI.setInfo(info);
+        }
 
         if (!APIConstants.GRAPHQL_API.equals(swaggerData.getTransportType())) {
             preserveResourcePathOrderFromAPI(swaggerData, openAPI);
@@ -970,14 +978,28 @@ public class OAS3Parser extends APIDefinition {
             }
             String title = null;
             String context = null;
-            if (!StringUtils.isBlank(info.getTitle())) {
-                title = info.getTitle();
-                context = info.getTitle().replaceAll("\\s", "").toLowerCase();
+            String version = null;
+            String description = null;
+
+            // If info is null, random values for metadata will be generated only if SWAGGER_RELAXED_VALIDATION is set.
+            if (info != null) {
+                if (!StringUtils.isBlank(info.getTitle())) {
+                    title = info.getTitle();
+                    context = info.getTitle().replaceAll("\\s", "").toLowerCase();
+                }
+                version = info.getVersion();
+                description = info.getDescription();
+            } else {
+                // Generate random placeholder values to prevent null assignments and ensure downstream components receive valid response attributes.
+                title = "API-Title-" + UUID.randomUUID().toString();
+                context = title.toLowerCase();
+                version = "v1-" + UUID.randomUUID().toString().substring(0, 3);
+                description = "API-description-" + UUID.randomUUID().toString();
             }
             OASParserUtil.updateValidationResponseAsSuccess(
                     validationResponse, apiDefinition, openAPI.getOpenapi(),
-                    title, info.getVersion(), context,
-                    info.getDescription(), endpoints
+                    title, version, context,
+                    description, endpoints
             );
             validationResponse.setParser(this);
             if (returnJsonContent) {

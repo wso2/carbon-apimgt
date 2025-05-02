@@ -7603,6 +7603,7 @@ paths:
         - OAuth2Security:
             - apim:api_create
             - apim:api_manage
+            - apim:api_publish
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -11008,6 +11009,9 @@ components:
           example: []
           items:
             type: string
+          x-otherScopes:
+            - apim:api_publish
+            - apim:api_manage
         mediationPolicies:
           type: array
           example:
