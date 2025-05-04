@@ -17,30 +17,16 @@
  *
  */
 
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.impl.definitions.mixin;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSetter;
-import io.swagger.models.Model;
-import io.swagger.models.properties.Property;
 
 /**
- * Used to ignore "responseSchema" objects when generating the swagger
+ * Used to ignore "originalRef" objects when generating the swagger
  */
-public abstract class ResponseSchemaMixin {
-    public ResponseSchemaMixin() {
+public abstract class IgnoreOriginalRefMixin {
+    public IgnoreOriginalRefMixin() {
     }
 
-    @JsonIgnore
-    public abstract Property getSchema();
-
-    @JsonIgnore
-    public abstract void setSchema(Property var1);
-
-    @JsonGetter("schema")
-    public abstract Model getResponseSchema();
-
-    @JsonSetter("schema")
-    public abstract void setResponseSchema(Model var1);
+    @JsonIgnore public abstract String getOriginalRef();
 }
