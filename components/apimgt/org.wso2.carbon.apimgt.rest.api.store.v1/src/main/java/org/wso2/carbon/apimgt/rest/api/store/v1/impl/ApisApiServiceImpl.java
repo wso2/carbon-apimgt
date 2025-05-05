@@ -51,11 +51,11 @@ import org.wso2.carbon.apimgt.impl.APIClientGenerationException;
 import org.wso2.carbon.apimgt.impl.APIClientGenerationManager;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
-import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApisApiService;
+import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

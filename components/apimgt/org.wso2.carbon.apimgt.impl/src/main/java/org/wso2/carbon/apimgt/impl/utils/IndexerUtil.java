@@ -30,7 +30,7 @@ import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
+import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
 import org.wso2.carbon.registry.core.Registry;

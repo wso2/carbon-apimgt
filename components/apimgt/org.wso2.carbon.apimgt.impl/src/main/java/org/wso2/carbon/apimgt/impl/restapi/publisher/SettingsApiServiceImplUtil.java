@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.impl.restapi.publisher;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 
 import java.util.List;
 import java.util.Set;
