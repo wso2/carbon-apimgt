@@ -174,7 +174,7 @@ public class ImportUtils {
      * @throws UserStoreException     if an error occurs while checking whether the tenant domain exists
      */
     public static List<APIIdentifier> importSubscriptions(Set<ExportedSubscribedAPI> subscribedAPIs, String userId,
-                                                          Application application, Boolean update,
+                                                          Application application, Boolean update,Boolean ignoreTier,
                                                           APIConsumer apiConsumer, String organization)
             throws APIManagementException,
             UserStoreException {
@@ -273,6 +273,18 @@ public class ImportUtils {
                             // on update skip subscriptions that already exists
                             apiConsumer.addSubscription(apiTypeWrapper, userId, application);
                         }
+                    } else if (ignoreTier != null && ignoreTier && apiTypeWrapper.getStatus() != null
+                            && APIConstants.PUBLISHED.equals(apiTypeWrapper.getStatus())) {
+                        apiTypeWrapper.setTier(targetTier);
+                        // Add subscription if update flag is not specified
+                        // It will throw an error if subscriber already exists
+                        if (update == null || !update) {
+                            apiConsumer.addSubscription(apiTypeWrapper, userId, application);
+                        } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId
+                                , application.getId())) {
+                            // on update skip subscriptions that already exists
+                            apiConsumer.addSubscription(apiTypeWrapper, userId, application);
+                        }
                     } else {
                         log.error("Failed to import Subscription as API/API Product "
                                 + apiIdentifier.getName() + "-" + apiIdentifier.getVersion() + " as one or more " +
@@ -328,10 +340,10 @@ public class ImportUtils {
             }
         }
         if (!apiTypeWrapper.isAPIProduct()) {
-            log.error("Tier:" + targetTierName + " is not available for API " + api.getId().getApiName() + "-" + api
+            log.warn("Tier:" + targetTierName + " is not available for API " + api.getId().getApiName() + "-" + api
                     .getId().getVersion());
         } else {
-            log.error(
+            log.warn(
                     "Tier:" + targetTierName + " is not available for API Product " + apiProduct.getId().getName() + "-"
                             + apiProduct.getId().getVersion());
         }
