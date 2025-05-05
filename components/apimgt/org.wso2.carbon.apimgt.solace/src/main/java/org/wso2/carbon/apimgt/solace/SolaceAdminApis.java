@@ -42,9 +42,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
