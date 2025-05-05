@@ -35,7 +35,6 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -1631,7 +1630,7 @@ public class AsyncApiParser extends APIDefinition {
         if (!opScopes.isEmpty()) {
             if (opScopes.size() == 1) {
                 String firstScope = opScopes.get(0);
-                Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
+                Scope scope = APISpecParserUtil.findScopeByKey(scopes, firstScope);
                 if (scope == null) {
                     throw new APIManagementException("Scope '" + firstScope + "' not found.");
                 }
@@ -1639,7 +1638,7 @@ public class AsyncApiParser extends APIDefinition {
                 template.setScopes(scope);
             } else {
                 for (String scopeName : opScopes) {
-                    Scope scope = APIUtil.findScopeByKey(scopes, scopeName);
+                    Scope scope = APISpecParserUtil.findScopeByKey(scopes, scopeName);
                     if (scope == null) {
                         throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
                     }
