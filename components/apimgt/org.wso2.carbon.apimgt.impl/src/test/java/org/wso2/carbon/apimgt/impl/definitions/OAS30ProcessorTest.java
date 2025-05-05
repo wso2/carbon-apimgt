@@ -29,7 +29,6 @@ import io.swagger.v3.oas.models.media.StringSchema;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.wso2.carbon.apimgt.impl.definitions.APIConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,13 +50,13 @@ public class OAS30ProcessorTest {
     public void convertSchemaTest() {
         Schema<Object> schema = new Schema<>();
         schema.setExample(OASSchemaProcessorConstants.EXAMPLE);
-        schema.setType(APIConstants.OPENAPI_STRING_DATA_TYPE);
+        schema.setType(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE);
         schema.setNullable(true);
         processor.convertSchema(schema);
         Assert.assertEquals(OASSchemaProcessorConstants.EXAMPLE, schema.getExample());
         Assert.assertNull(schema.getExamples());
         Assert.assertNull(schema.getTypes());
-        Assert.assertEquals(APIConstants.OPENAPI_STRING_DATA_TYPE, schema.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE, schema.getType());
     }
 
     @Test
@@ -208,17 +207,17 @@ public class OAS30ProcessorTest {
         Schema<Object> refSchema = new Schema<>();
         refSchema.set$ref(OASSchemaProcessorConstants.REF_1);
         Schema<Object> arraySchema2 = new ArraySchema();
-        arraySchema2.setType(APIConstants.OPENAPI_ARRAY_DATA_TYPE);
+        arraySchema2.setType(APISpecParserConstants.OPENAPI_ARRAY_DATA_TYPE);
         arraySchema2.setItems(refSchema);
 
         Schema<Object> arraySchema1 = new ArraySchema();
-        arraySchema1.setType(APIConstants.OPENAPI_ARRAY_DATA_TYPE);
+        arraySchema1.setType(APISpecParserConstants.OPENAPI_ARRAY_DATA_TYPE);
         arraySchema1.setItems(arraySchema2);
 
         Schema<Object> arraySchema3 = new ArraySchema();
-        arraySchema3.setType(APIConstants.OPENAPI_ARRAY_DATA_TYPE);
+        arraySchema3.setType(APISpecParserConstants.OPENAPI_ARRAY_DATA_TYPE);
         Schema<String> intSchema = new StringSchema();
-        intSchema.setType(APIConstants.OPENAPI_STRING_DATA_TYPE);
+        intSchema.setType(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE);
         arraySchema3.setItems(intSchema);
 
         oneOfList.add(arraySchema1);
@@ -230,11 +229,11 @@ public class OAS30ProcessorTest {
     private Schema<Object> getMapSchemaWithAdditionalProperties() {
         Schema<Object> mapSchema = new MapSchema();
         mapSchema.setSpecVersion(SpecVersion.V30);
-        mapSchema.setType(APIConstants.OPENAPI_OBJECT_DATA_TYPE);
+        mapSchema.setType(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE);
 
         Schema<String> additionalPropertySchema = new StringSchema();
         additionalPropertySchema.setSpecVersion(SpecVersion.V30);
-        additionalPropertySchema.setType(APIConstants.OPENAPI_STRING_DATA_TYPE);
+        additionalPropertySchema.setType(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE);
         mapSchema.setAdditionalProperties(additionalPropertySchema);
 
         Schema<Object> refSchema = new Schema<>();
@@ -243,7 +242,7 @@ public class OAS30ProcessorTest {
 
         Schema<String> descriptionSchema = new StringSchema();
         descriptionSchema.setSpecVersion(SpecVersion.V30);
-        descriptionSchema.setType(APIConstants.OPENAPI_STRING_DATA_TYPE);
+        descriptionSchema.setType(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE);
         descriptionSchema.setNullable(true);
 
         Map<String, Schema> properties = new HashMap<>();
@@ -256,11 +255,11 @@ public class OAS30ProcessorTest {
 
     private Schema<Object> getNestedMapSchemaWithAdditionalProperties() {
         Schema<Object> parentSchema = new ObjectSchema();
-        parentSchema.setType(APIConstants.OPENAPI_OBJECT_DATA_TYPE);
+        parentSchema.setType(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE);
 
         Schema<String> descriptionSchema = new StringSchema();
         descriptionSchema.setSpecVersion(SpecVersion.V30);
-        descriptionSchema.setType(APIConstants.OPENAPI_STRING_DATA_TYPE);
+        descriptionSchema.setType(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE);
         descriptionSchema.setNullable(true);
 
         Schema<Object> refSchema = new Schema<>();
@@ -269,11 +268,11 @@ public class OAS30ProcessorTest {
 
         Schema<Object> nestedSchema = new MapSchema();
         nestedSchema.setSpecVersion(SpecVersion.V30);
-        nestedSchema.setType(APIConstants.OPENAPI_OBJECT_DATA_TYPE);
+        nestedSchema.setType(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE);
 
         Schema<Object> additionalPropertySchema = new MapSchema();
         additionalPropertySchema.setSpecVersion(SpecVersion.V30);
-        additionalPropertySchema.setType(APIConstants.OPENAPI_OBJECT_DATA_TYPE);
+        additionalPropertySchema.setType(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE);
         additionalPropertySchema.setAdditionalProperties(new Schema<>().$ref(OASSchemaProcessorConstants.REF_2));
         nestedSchema.setAdditionalProperties(additionalPropertySchema);
 
@@ -292,13 +291,13 @@ public class OAS30ProcessorTest {
 
         Schema<String> visaMastercardSchema = new StringSchema();
         visaMastercardSchema.setSpecVersion(SpecVersion.V30);
-        visaMastercardSchema.setType(APIConstants.OPENAPI_STRING_DATA_TYPE);
+        visaMastercardSchema.setType(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE);
         visaMastercardSchema.setEnum(Arrays.asList(OASSchemaProcessorConstants.EXAMPLE_CARD_TYPE_1,
                 OASSchemaProcessorConstants.EXAMPLE_CARD_TYPE_3));
 
         Schema<String> amexSchema = new StringSchema();
         amexSchema.setSpecVersion(SpecVersion.V30);
-        amexSchema.setType(APIConstants.OPENAPI_STRING_DATA_TYPE);
+        amexSchema.setType(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE);
         amexSchema.setEnum(Collections.singletonList(OASSchemaProcessorConstants.EXAMPLE_CARD_TYPE_2));
 
         Schema<Object> baseResponseSchema = new Schema<>();
@@ -329,7 +328,7 @@ public class OAS30ProcessorTest {
     private Schema<Object> getArraySchemaWithComposedRefs() {
         Schema<Object> arrayschema = new ArraySchema();
         arrayschema.setSpecVersion(SpecVersion.V30);
-        arrayschema.setType(APIConstants.OPENAPI_ARRAY_DATA_TYPE);
+        arrayschema.setType(APISpecParserConstants.OPENAPI_ARRAY_DATA_TYPE);
         Schema<Object> composedItems = new ComposedSchema();
 
         List<Schema> anyOfList = new ArrayList<>();
@@ -347,21 +346,21 @@ public class OAS30ProcessorTest {
     private Schema<Object> getNestedArraySchemaWithRef() {
         Schema<Object> nestedArrayObjectSchema = new ObjectSchema();
         nestedArrayObjectSchema.setSpecVersion(SpecVersion.V30);
-        nestedArrayObjectSchema.setType(APIConstants.OPENAPI_OBJECT_DATA_TYPE);
+        nestedArrayObjectSchema.setType(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE);
         Map<String, Schema> nestedProperties = new HashMap<>();
 
         Schema<Object> arraySchema = new ArraySchema();
         arraySchema.setSpecVersion(SpecVersion.V30);
 
-        arraySchema.setType(APIConstants.OPENAPI_ARRAY_DATA_TYPE);
+        arraySchema.setType(APISpecParserConstants.OPENAPI_ARRAY_DATA_TYPE);
         Schema<Object> objectSchema = new ObjectSchema();
         objectSchema.setSpecVersion(SpecVersion.V30);
-        objectSchema.setType(APIConstants.OPENAPI_OBJECT_DATA_TYPE);
+        objectSchema.setType(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE);
 
         Map<String, Schema> properties = new HashMap<>();
         Schema<Object> childArraySchema = new ArraySchema();
         childArraySchema.setSpecVersion(SpecVersion.V30);
-        childArraySchema.setType(APIConstants.OPENAPI_ARRAY_DATA_TYPE);
+        childArraySchema.setType(APISpecParserConstants.OPENAPI_ARRAY_DATA_TYPE);
         Schema<Object> refSchema = new ObjectSchema();
         refSchema.setSpecVersion(SpecVersion.V30);
         refSchema.set$ref(OASSchemaProcessorConstants.REF_2);
@@ -380,20 +379,20 @@ public class OAS30ProcessorTest {
         Schema<Object> arraySchema = new ArraySchema();
         arraySchema.setSpecVersion(SpecVersion.V30);
 
-        arraySchema.setType(APIConstants.OPENAPI_ARRAY_DATA_TYPE);
+        arraySchema.setType(APISpecParserConstants.OPENAPI_ARRAY_DATA_TYPE);
         Schema<Object> objectSchema = new JsonSchema();
         objectSchema.setSpecVersion(SpecVersion.V30);
-        objectSchema.setType(APIConstants.OPENAPI_OBJECT_DATA_TYPE);
+        objectSchema.setType(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE);
 
         Map<String, Schema> properties = new HashMap<>();
         Schema<String> numberSchema = new StringSchema();
         numberSchema.setSpecVersion(SpecVersion.V30);
-        numberSchema.setType(APIConstants.OPENAPI_STRING_DATA_TYPE);
+        numberSchema.setType(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE);
         properties.put(OASSchemaProcessorConstants.NUMBER, numberSchema);
 
         Schema<String> expiryDateSchema = new StringSchema();
         expiryDateSchema.setSpecVersion(SpecVersion.V30);
-        expiryDateSchema.setType(APIConstants.OPENAPI_STRING_DATA_TYPE);
+        expiryDateSchema.setType(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE);
         expiryDateSchema.setFormat(OASSchemaProcessorConstants.DATE_FORMAT);
         properties.put(OASSchemaProcessorConstants.EXPIRY_DATE, expiryDateSchema);
 
@@ -413,11 +412,11 @@ public class OAS30ProcessorTest {
 
         Schema<String> firstOneOf = new StringSchema();
         firstOneOf.setSpecVersion(SpecVersion.V30);
-        firstOneOf.setType(APIConstants.OPENAPI_STRING_DATA_TYPE);
+        firstOneOf.setType(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE);
 
         Schema<Object> secondOneOf = new ObjectSchema();
         secondOneOf.setSpecVersion(SpecVersion.V30);
-        secondOneOf.setType(APIConstants.OPENAPI_OBJECT_DATA_TYPE);
+        secondOneOf.setType(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE);
         Map<String, Schema> secondOneOfProps = new HashMap<>();
         Schema<Object> anyOfSchema = getAnyOfSchemaWithRef();
         secondOneOfProps.put(OASSchemaProcessorConstants.ANY_OF_PROPERTY, anyOfSchema);
@@ -433,19 +432,19 @@ public class OAS30ProcessorTest {
     private Schema<Object> getComplexComposedObjectSchema() {
         Schema<Object> complexSchema = new ObjectSchema();
         complexSchema.setSpecVersion(SpecVersion.V30);
-        complexSchema.setType(APIConstants.OPENAPI_OBJECT_DATA_TYPE);
+        complexSchema.setType(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE);
 
         Schema<Object> composedObjectSchema = new ComposedSchema();
         composedObjectSchema.setSpecVersion(SpecVersion.V30);
-        composedObjectSchema.setType(APIConstants.OPENAPI_OBJECT_DATA_TYPE);
+        composedObjectSchema.setType(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE);
 
         Schema<Object> firstObject = new ObjectSchema();
         firstObject.setSpecVersion(SpecVersion.V30);
-        firstObject.setType(APIConstants.OPENAPI_OBJECT_DATA_TYPE);
+        firstObject.setType(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE);
         firstObject.addProperty(OASSchemaProcessorConstants.CARD_DETAILS, new Schema()
                 .$ref(OASSchemaProcessorConstants.REF_3));
         firstObject.addProperty(OASSchemaProcessorConstants.CARD_ID,
-                new StringSchema().type(APIConstants.OPENAPI_STRING_DATA_TYPE));
+                new StringSchema().type(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE));
 
         Schema<Object> secondObject = new Schema<>();
         secondObject.setSpecVersion(SpecVersion.V30);
@@ -472,7 +471,7 @@ public class OAS30ProcessorTest {
     private Schema<String> getSimpleSchema() {
         Schema<String> stringTypeSchema = new StringSchema();
         stringTypeSchema.setSpecVersion(SpecVersion.V30);
-        stringTypeSchema.setType(APIConstants.OPENAPI_STRING_DATA_TYPE);
+        stringTypeSchema.setType(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE);
         return stringTypeSchema;
     }
 
@@ -485,11 +484,11 @@ public class OAS30ProcessorTest {
 
         Schema<Object> objectSchema = new ObjectSchema();
         objectSchema.setSpecVersion(SpecVersion.V30);
-        objectSchema.setType(APIConstants.OPENAPI_OBJECT_DATA_TYPE);
+        objectSchema.setType(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE);
 
         Schema<String> cardIdSchema = new StringSchema();
         cardIdSchema.setSpecVersion(SpecVersion.V30);
-        cardIdSchema.setType(APIConstants.OPENAPI_STRING_DATA_TYPE);
+        cardIdSchema.setType(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE);
 
         Schema<Object> cardDetailsSchema = new Schema<>();
         cardDetailsSchema.setSpecVersion(SpecVersion.V30);
@@ -516,11 +515,11 @@ public class OAS30ProcessorTest {
 
         Schema<Object> objectSchema = new ObjectSchema();
         objectSchema.setSpecVersion(SpecVersion.V30);
-        objectSchema.setType(APIConstants.OPENAPI_OBJECT_DATA_TYPE);
+        objectSchema.setType(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE);
 
         Schema<String> cardIdSchema = new StringSchema();
         cardIdSchema.setSpecVersion(SpecVersion.V30);
-        cardIdSchema.setType(APIConstants.OPENAPI_STRING_DATA_TYPE);
+        cardIdSchema.setType(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE);
 
         Schema<Object> cardDetailsSchema = new Schema<>();
         cardDetailsSchema.setSpecVersion(SpecVersion.V30);
@@ -550,11 +549,11 @@ public class OAS30ProcessorTest {
     }
 
     private void assertArraySchema(Schema<Object> arraySchema, OASParserUtil.SwaggerUpdateContext context) {
-        Assert.assertEquals(APIConstants.OPENAPI_ARRAY_DATA_TYPE, arraySchema.getType());
-        Assert.assertEquals(APIConstants.OPENAPI_OBJECT_DATA_TYPE, arraySchema.getItems().getType());
-        Assert.assertEquals(APIConstants.OPENAPI_STRING_DATA_TYPE, arraySchema.getItems().getProperties()
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_ARRAY_DATA_TYPE, arraySchema.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE, arraySchema.getItems().getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE, arraySchema.getItems().getProperties()
                 .get(OASSchemaProcessorConstants.NUMBER).getType());
-        Assert.assertEquals(APIConstants.OPENAPI_STRING_DATA_TYPE, arraySchema.getItems().getProperties()
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE, arraySchema.getItems().getProperties()
                 .get(OASSchemaProcessorConstants.EXPIRY_DATE).getType());
         Assert.assertTrue(context.getReferenceObjectMapping().get(OASSchemaProcessorConstants.SCHEMAS).contains(
                 OASParserUtil.getRefKey(OASSchemaProcessorConstants.REF_1)));

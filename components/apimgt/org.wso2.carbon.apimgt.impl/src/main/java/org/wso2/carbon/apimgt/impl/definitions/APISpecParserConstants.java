@@ -27,7 +27,7 @@ import java.util.Set;
 /**
  * This class represents the constants used in the API Specification Parser.
  */
-public final class APIConstants {
+public final class APISpecParserConstants {
     public static final String STRING = "string";
     public static final String OBJECT = "object";
     public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
@@ -154,6 +154,7 @@ public final class APIConstants {
     public static final String STOMP_TRANSPORT_PROTOCOL_NAME = "stomp";
     public static final String REDIS_TRANSPORT_PROTOCOL_NAME = "redis";
     public static final String SWAGGER_RELAXED_VALIDATION = "swaggerRelaxedValidation";
+    public static final String SWAGGER_APIM_RESTAPI_SECURITY = "OAuth2Security";
     public static final String OPENAPIV31_SCHEMA_TYPE_NULLABLE = "null";
     public static final String OPENAPI_OBJECT_DATA_TYPE = "object";
     public static final String OPENAPI_STRING_DATA_TYPE = "string";

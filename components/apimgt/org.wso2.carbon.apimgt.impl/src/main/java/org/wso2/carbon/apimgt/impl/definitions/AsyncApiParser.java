@@ -34,7 +34,6 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.impl.definitions.APIConstants;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -1602,11 +1601,11 @@ public class AsyncApiParser extends APIDefinition {
             for (Map.Entry<String, AaiChannelItem> entry : document.channels.entrySet()) {
                 Aai20ChannelItem channel = (Aai20ChannelItem) entry.getValue();
                 if (includePublish && channel.publish != null) {
-                    uriTemplates.add(buildURITemplate(entry.getKey(), APIConstants.HTTP_VERB_PUBLISH,
+                    uriTemplates.add(buildURITemplate(entry.getKey(), APISpecParserConstants.HTTP_VERB_PUBLISH,
                             (Aai20Operation) channel.publish, scopes, channel));
                 }
                 if (channel.subscribe != null) {
-                    uriTemplates.add(buildURITemplate(entry.getKey(), APIConstants.HTTP_VERB_SUBSCRIBE,
+                    uriTemplates.add(buildURITemplate(entry.getKey(), APISpecParserConstants.HTTP_VERB_SUBSCRIBE,
                             (Aai20Operation) channel.subscribe, scopes, channel));
                 }
             }
@@ -1621,7 +1620,7 @@ public class AsyncApiParser extends APIDefinition {
         template.setHttpVerbs(verb);
         template.setUriTemplate(target);
 
-        Extension authTypeExtension = channel.getExtension(APIConstants.SWAGGER_X_AUTH_TYPE);
+        Extension authTypeExtension = channel.getExtension(APISpecParserConstants.SWAGGER_X_AUTH_TYPE);
         if (authTypeExtension != null && authTypeExtension.value instanceof String) {
             template.setAuthType(authTypeExtension.value.toString());
         }
@@ -1678,7 +1677,7 @@ public class AsyncApiParser extends APIDefinition {
             Aai20SecurityScheme oauth2 = (Aai20SecurityScheme) document.components.securitySchemes.get("oauth2");
             if (oauth2 != null && oauth2.flows != null && oauth2.flows.implicit != null) {
                 Map<String, String> scopes = oauth2.flows.implicit.scopes;
-                Extension xScopesBindings = oauth2.flows.implicit.getExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+                Extension xScopesBindings = oauth2.flows.implicit.getExtension(APISpecParserConstants.SWAGGER_X_SCOPES_BINDINGS);
                 Map<String, String> scopeBindings = new HashMap<>();
                 if (xScopesBindings != null) {
                     scopeBindings = (Map<String, String>) xScopesBindings.value;
@@ -1742,7 +1741,7 @@ public class AsyncApiParser extends APIDefinition {
             /*AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
             validationErrorMessages = new ArrayList<>();
             if (asyncApiDocument.getServers().size() == 1) {
-                if (!APIConstants.WS_PROTOCOL.equalsIgnoreCase(asyncApiDocument.getServers().get(0).protocol)) {
+                if (!APISpecParserConstants.WS_PROTOCOL.equalsIgnoreCase(asyncApiDocument.getServers().get(0).protocol)) {
                     validationErrorMessages.add("#:The protocol of the server should be 'ws' for websockets");
                 }
             }
@@ -1760,8 +1759,8 @@ public class AsyncApiParser extends APIDefinition {
             //AaiDocument asyncApiDocument = (AaiDocument) Library.readDocumentFromJSONString(apiDefinition);
             /*//Checking whether it is a websocket
             validationErrorMessages = new ArrayList<>();
-            if (APIConstants.WS_PROTOCOL.equalsIgnoreCase(asyncApiDocument.getServers().get(0).protocol)) {
-                if (APIConstants.WS_PROTOCOL.equalsIgnoreCase(protocol)) {
+            if (APISpecParserConstants.WS_PROTOCOL.equalsIgnoreCase(asyncApiDocument.getServers().get(0).protocol)) {
+                if (APISpecParserConstants.WS_PROTOCOL.equalsIgnoreCase(protocol)) {
                     isWebSocket = true;
                 }
             }*/
@@ -1926,7 +1925,7 @@ public class AsyncApiParser extends APIDefinition {
 
     @Override
     public String getVendorFromExtension(String swaggerContent) {
-        return APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+        return APISpecParserConstants.WSO2_GATEWAY_ENVIRONMENT;
     }
 
     @Override
@@ -1939,20 +1938,20 @@ public class AsyncApiParser extends APIDefinition {
         aaiDocument.info = aaiDocument.createInfo();
         aaiDocument.info.title = api.getId().getName();
         aaiDocument.info.version = api.getId().getVersion();
-        if (!APIConstants.API_TYPE_WEBSUB.equals(api.getType())) {
+        if (!APISpecParserConstants.API_TYPE_WEBSUB.equals(api.getType())) {
             JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
 
-            if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+            if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
                 AaiServer prodServer = getAaiServer(api, aaiDocument, endpointConfig,
-                                                    APIConstants.GATEWAY_ENV_TYPE_PRODUCTION,
-                                                    APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
-                aaiDocument.addServer(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, prodServer);
+                                                    APISpecParserConstants.GATEWAY_ENV_TYPE_PRODUCTION,
+                                                    APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+                aaiDocument.addServer(APISpecParserConstants.GATEWAY_ENV_TYPE_PRODUCTION, prodServer);
             }
-            if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+            if (endpointConfig.has(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
                 AaiServer sandboxServer = getAaiServer(api, aaiDocument, endpointConfig,
-                                                    APIConstants.GATEWAY_ENV_TYPE_SANDBOX,
-                                                    APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
-                aaiDocument.addServer(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxServer);
+                                                    APISpecParserConstants.GATEWAY_ENV_TYPE_SANDBOX,
+                                                    APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+                aaiDocument.addServer(APISpecParserConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxServer);
             }
         }
 
@@ -1961,7 +1960,7 @@ public class AsyncApiParser extends APIDefinition {
             Aai20ChannelItem channelItem = aaiDocument.createChannelItem(uriTemplate.getUriTemplate());
             Aai20Operation subscribeOp = new Aai20Operation(channelItem,"subscribe");
             channelItem.subscribe = subscribeOp;
-            if (APIConstants.API_TYPE_WS.equals(api.getType())) {
+            if (APISpecParserConstants.API_TYPE_WS.equals(api.getType())) {
                 Aai20Operation publishOp = new Aai20Operation(channelItem,"publish");
                 channelItem.publish = publishOp;
             }
@@ -1985,7 +1984,7 @@ public class AsyncApiParser extends APIDefinition {
                                    String endpoint) {
 
         Aai20Server server = (Aai20Server) aaiDocument.createServer(serverName);
-        server.url = endpointConfig.getJSONObject(endpoint).getString(APIConstants.API_DATA_URL);
+        server.url = endpointConfig.getJSONObject(endpoint).getString(APISpecParserConstants.API_DATA_URL);
         server.protocol = api.getType().toLowerCase();
         return server;
     }
@@ -2007,16 +2006,16 @@ public class AsyncApiParser extends APIDefinition {
 
         String url = StringUtils.EMPTY;
         String[] apiTransports = transports.split(",");
-        if (ArrayUtils.contains(apiTransports, APIConstants.WSS_PROTOCOL)
-                && hostsWithSchemes.get(APIConstants.WSS_PROTOCOL) != null) {
-            url = hostsWithSchemes.get(APIConstants.WSS_PROTOCOL).trim()
-                    .replace(APIConstants.WSS_PROTOCOL_URL_PREFIX, "");
+        if (ArrayUtils.contains(apiTransports, APISpecParserConstants.WSS_PROTOCOL)
+                && hostsWithSchemes.get(APISpecParserConstants.WSS_PROTOCOL) != null) {
+            url = hostsWithSchemes.get(APISpecParserConstants.WSS_PROTOCOL).trim()
+                    .replace(APISpecParserConstants.WSS_PROTOCOL_URL_PREFIX, "");
         }
-        if (ArrayUtils.contains(apiTransports, APIConstants.WSS_PROTOCOL)
-                && hostsWithSchemes.get(APIConstants.WS_PROTOCOL) != null) {
+        if (ArrayUtils.contains(apiTransports, APISpecParserConstants.WSS_PROTOCOL)
+                && hostsWithSchemes.get(APISpecParserConstants.WS_PROTOCOL) != null) {
             if (StringUtils.isEmpty(url)) {
-                url = hostsWithSchemes.get(APIConstants.WS_PROTOCOL).trim()
-                        .replace(APIConstants.WS_PROTOCOL_URL_PREFIX, "");
+                url = hostsWithSchemes.get(APISpecParserConstants.WS_PROTOCOL).trim()
+                        .replace(APISpecParserConstants.WS_PROTOCOL_URL_PREFIX, "");
             }
         }
 
@@ -2049,8 +2048,8 @@ public class AsyncApiParser extends APIDefinition {
         }
 
         Aai20SecurityScheme oauth2SecurityScheme = new Aai20SecurityScheme(document.components,
-                APIConstants.DEFAULT_API_SECURITY_OAUTH2);
-        oauth2SecurityScheme.type = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
+                APISpecParserConstants.DEFAULT_API_SECURITY_OAUTH2);
+        oauth2SecurityScheme.type = APISpecParserConstants.DEFAULT_API_SECURITY_OAUTH2;
 
         if (oauth2SecurityScheme.flows == null) {
             oauth2SecurityScheme.flows = new Aai20OAuthFlows(oauth2SecurityScheme);
@@ -2071,26 +2070,26 @@ public class AsyncApiParser extends APIDefinition {
         oauth2SecurityScheme.flows.implicit.scopes = scopes;
 
         Extension xScopeBindings = oauth2SecurityScheme.flows.implicit.createExtension();
-        xScopeBindings.name = APIConstants.SWAGGER_X_SCOPES_BINDINGS;
+        xScopeBindings.name = APISpecParserConstants.SWAGGER_X_SCOPES_BINDINGS;
         xScopeBindings.value = scopeBindings;
-        oauth2SecurityScheme.flows.implicit.addExtension(APIConstants.SWAGGER_X_SCOPES_BINDINGS, xScopeBindings);
+        oauth2SecurityScheme.flows.implicit.addExtension(APISpecParserConstants.SWAGGER_X_SCOPES_BINDINGS, xScopeBindings);
 
-        document.components.securitySchemes.put(APIConstants.DEFAULT_API_SECURITY_OAUTH2, oauth2SecurityScheme);
+        document.components.securitySchemes.put(APISpecParserConstants.DEFAULT_API_SECURITY_OAUTH2, oauth2SecurityScheme);
         String endpointConfigString = apiToUpdate.getEndpointConfig();
         if (StringUtils.isNotEmpty(endpointConfigString)) {
             JSONObject endpointConfig = new JSONObject(endpointConfigString);
 
-            if (endpointConfig.has(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
+            if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
                 AaiServer prodServer = getAaiServer(apiToUpdate, document, endpointConfig,
-                                                    APIConstants.GATEWAY_ENV_TYPE_PRODUCTION,
-                                                    APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
-                document.addServer(APIConstants.GATEWAY_ENV_TYPE_PRODUCTION, prodServer);
+                                                    APISpecParserConstants.GATEWAY_ENV_TYPE_PRODUCTION,
+                                                    APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS);
+                document.addServer(APISpecParserConstants.GATEWAY_ENV_TYPE_PRODUCTION, prodServer);
             }
-            if (endpointConfig.has(APIConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
+            if (endpointConfig.has(APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS)) {
                 AaiServer sandboxServer = getAaiServer(apiToUpdate, document, endpointConfig,
-                                                       APIConstants.GATEWAY_ENV_TYPE_SANDBOX,
-                                                       APIConstants.ENDPOINT_SANDBOX_ENDPOINTS);
-                document.addServer(APIConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxServer);
+                                                       APISpecParserConstants.GATEWAY_ENV_TYPE_SANDBOX,
+                                                       APISpecParserConstants.ENDPOINT_SANDBOX_ENDPOINTS);
+                document.addServer(APISpecParserConstants.GATEWAY_ENV_TYPE_SANDBOX, sandboxServer);
             }
         }
         return Library.writeDocumentToJSONString(document);
@@ -2171,43 +2170,43 @@ public class AsyncApiParser extends APIDefinition {
         HashSet<String> protocolsFromBindings = new HashSet<>();
 
         if (bindings.http != null) {
-            protocolsFromBindings.add(APIConstants.HTTP_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(APISpecParserConstants.HTTP_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.ws != null) {
-            protocolsFromBindings.add(APIConstants.WS_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(APISpecParserConstants.WS_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.kafka != null) {
-            protocolsFromBindings.add(APIConstants.KAFKA_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(APISpecParserConstants.KAFKA_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.amqp != null) {
-            protocolsFromBindings.add(APIConstants.AMQP_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(APISpecParserConstants.AMQP_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.amqp1 != null) {
-            protocolsFromBindings.add(APIConstants.AMQP1_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(APISpecParserConstants.AMQP1_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.mqtt != null) {
-            protocolsFromBindings.add(APIConstants.MQTT_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(APISpecParserConstants.MQTT_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.mqtt5 != null) {
-            protocolsFromBindings.add(APIConstants.MQTT5_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(APISpecParserConstants.MQTT5_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.nats != null) {
-            protocolsFromBindings.add(APIConstants.NATS_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(APISpecParserConstants.NATS_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.jms != null) {
-            protocolsFromBindings.add(APIConstants.JMS_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(APISpecParserConstants.JMS_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.sns != null) {
-            protocolsFromBindings.add(APIConstants.SNS_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(APISpecParserConstants.SNS_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.sqs != null) {
-            protocolsFromBindings.add(APIConstants.SQS_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(APISpecParserConstants.SQS_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.stomp != null) {
-            protocolsFromBindings.add(APIConstants.STOMP_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(APISpecParserConstants.STOMP_TRANSPORT_PROTOCOL_NAME);
         }
         if (bindings.redis != null) {
-            protocolsFromBindings.add(APIConstants.REDIS_TRANSPORT_PROTOCOL_NAME);
+            protocolsFromBindings.add(APISpecParserConstants.REDIS_TRANSPORT_PROTOCOL_NAME);
         }
 
         if (bindings.hasExtraProperties()) {
@@ -2219,6 +2218,6 @@ public class AsyncApiParser extends APIDefinition {
 
     @Override
     public String getType() {
-        return APIConstants.WSO2_GATEWAY_ENVIRONMENT;
+        return APISpecParserConstants.WSO2_GATEWAY_ENVIRONMENT;
     }
 }
