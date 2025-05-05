@@ -137,7 +137,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
 
         // todo: Do a second level filtering for the incoming group ID.
         // todo: eg: use case is when there are lots of applications which is accessible to his group "g1", he wants to see
-        // todo: what are the applications shared to group "g2" among them. 
+        // todo: what are the applications shared to group "g2" among them.
         groupId = RestApiUtil.getLoggedInUserGroupId();
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -207,12 +207,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
      * @param appOwner            Target owner of the application
      * @param skipApplicationKeys Skip application keys while importing
      * @param update              Update if existing application found or import
+     * @param ignoreTier          Ignore tier and proceed with subscribed APIs
      * @param messageContext      Message Context
      * @return imported Application
      */
     @Override public Response applicationsImportPost(InputStream fileInputStream, Attachment fileDetail,
             Boolean preserveOwner, Boolean skipSubscriptions, String appOwner, Boolean skipApplicationKeys,
-            Boolean update, MessageContext messageContext) throws APIManagementException {
+            Boolean update, Boolean ignoreTier, MessageContext messageContext) throws APIManagementException {
         String ownerId;
         Application application;
 
@@ -270,7 +271,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (skipSubscriptions == null || !skipSubscriptions) {
                 skippedAPIs = ImportUtils
                         .importSubscriptions(exportedApplication.getSubscribedAPIs(), ownerId, application,
-                                update, apiConsumer, organization);
+                                update, ignoreTier, apiConsumer, organization);
             }
             Application importedApplication = apiConsumer.getApplicationById(application.getId());
             importedApplication.setOwner(ownerId);

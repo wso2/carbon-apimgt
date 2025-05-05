@@ -29,9 +29,12 @@ import org.wso2.carbon.apimgt.common.analytics.AnalyticsCommonConfiguration;
 import org.wso2.carbon.apimgt.common.analytics.Constants;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static org.wso2.carbon.apimgt.common.analytics.Constants.CHOREO_REPORTER_NAME;
 
 /**
  * Analytics event publisher for APIM.
@@ -51,6 +54,16 @@ public class AnalyticsDataPublisher {
     public static AnalyticsDataPublisher getInstance() {
 
         return instance;
+    }
+
+    private List<String> getReporterTypesOrNull(String typeConfig) {
+        if (typeConfig == null || typeConfig.isEmpty()) {
+            return null;
+        }
+        return Arrays.stream(typeConfig.replaceAll("[\\[\\]]", "").split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
     }
 
     private List<String> getReportersClassesOrNull(Map<String, String> configs) {
@@ -93,7 +106,7 @@ public class AnalyticsDataPublisher {
     public void initialize(AnalyticsCommonConfiguration commonConfig) {
         Map<String, String> configs = commonConfig.getConfigurations();
         String reporterClass = configs.get("publisher.reporter.class");
-        String reporterType = configs.get("type");
+        List<String> reporterTypes = getReporterTypesOrNull(configs.get("type"));
         List<String> reporterClasses = getReportersClassesOrNull(configs);
         try {
             List<MetricReporter> metricReporters = new ArrayList<>();
@@ -113,9 +126,21 @@ public class AnalyticsDataPublisher {
                                 " out of multiple metric reporters.", e);
                     }
                 }
-            } else if (reporterType != null && !reporterType.equals("")) {
-                metricReporter = MetricReporterFactory.getInstance().createLogMetricReporter(configs);
-                metricReporters.add(metricReporter);
+            } else if (reporterTypes != null && !reporterTypes.isEmpty()) {
+                for (String type : reporterTypes) {
+                    if (type.equals(CHOREO_REPORTER_NAME)) {
+                        String authEndpoint = configs.get(Constants.AUTH_API_URL);
+                        if (authEndpoint == null || authEndpoint.isEmpty()) {
+                            throw new MetricCreationException("Analytics Config Endpoint is not provided.");
+                        }
+                        metricReporter = MetricReporterFactory.getInstance().createMetricReporter(configs);
+                        metricReporters.add(metricReporter);
+                    } else {
+                        metricReporter = MetricReporterFactory.getInstance().createLogMetricReporter(configs);
+                        metricReporters.add(metricReporter);
+                    }
+
+                }
             } else {
                 String authEndpoint = configs.get(Constants.AUTH_API_URL);
 
