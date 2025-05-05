@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.impl.definitions;
 
 import io.swagger.v3.oas.models.media.Schema;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.definitions.APIConstants;
 
 /**
  * Factory class for creating and returning the appropriate {@link SchemaProcessor} based on the OpenAPI specification
