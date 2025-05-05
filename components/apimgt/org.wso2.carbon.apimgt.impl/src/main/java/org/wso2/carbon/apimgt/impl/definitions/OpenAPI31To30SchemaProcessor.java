@@ -21,7 +21,7 @@ package org.wso2.carbon.apimgt.impl.definitions;
 import io.swagger.v3.oas.models.media.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.definitions.APIConstants;
 
 import java.util.ArrayList;
 import java.util.List;
