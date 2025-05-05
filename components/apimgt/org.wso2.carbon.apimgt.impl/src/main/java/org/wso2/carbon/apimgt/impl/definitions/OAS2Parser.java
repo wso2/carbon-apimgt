@@ -62,7 +62,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -76,12 +75,10 @@ import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.mixin.IgnoreOriginalRefMixin;
 import org.wso2.carbon.apimgt.impl.definitions.mixin.ResponseSchemaMixin;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -836,41 +833,46 @@ public class OAS2Parser extends APIDefinition {
     /**
      * Update OAS definition for store
      *
-     * @param api            API
-     * @param oasDefinition  OAS definition
-     * @param hostsWithSchemes host addresses with protocol mapping
-     * @param kmId             UUID of the Key Manager
+     * @param api                        API
+     * @param oasDefinition              OAS definition
+     * @param hostsWithSchemes           host addresses with protocol mapping
+     * @param keyManagerConfigurationDTO configuration details of the Key Manager
      * @return OAS definition
      * @throws APIManagementException throws if an error occurred
      */
     @Override
-    public String getOASDefinitionForStore(API api, String oasDefinition,
-            Map<String, String> hostsWithSchemes, String kmId) throws APIManagementException {
+    public String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes,
+                                           KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException {
 
         Swagger swagger = getSwagger(oasDefinition);
         updateOperations(swagger);
         updateEndpoints(api, hostsWithSchemes, swagger);
-        return updateSwaggerSecurityDefinitionForStore(swagger, new SwaggerData(api), hostsWithSchemes, kmId);
+        return updateSwaggerSecurityDefinitionForStore(swagger, new SwaggerData(api), hostsWithSchemes,
+                keyManagerConfigurationDTO);
     }
 
     /**
      * Update OAS definition for store
      *
-     * @param product        APIProduct
-     * @param oasDefinition  OAS definition
-     * @param hostsWithSchemes host addresses with protocol mapping
-     * @param kmId             UUID of the Key Manager
+     * @param product                    APIProduct
+     * @param oasDefinition              OAS definition
+     * @param hostsWithSchemes           host addresses with protocol mapping
+     * @param keyManagerConfigurationDTO configuration details of the Key Manager
      * @return OAS definition
      * @throws APIManagementException throws if an error occurred
      */
     @Override
     public String getOASDefinitionForStore(APIProduct product, String oasDefinition,
-            Map<String, String> hostsWithSchemes, String kmId) throws APIManagementException {
+                                           Map<String, String> hostsWithSchemes,
+                                           KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException {
 
         Swagger swagger = getSwagger(oasDefinition);
         updateOperations(swagger);
         updateEndpoints(product, hostsWithSchemes, swagger);
-        return updateSwaggerSecurityDefinitionForStore(swagger, new SwaggerData(product), hostsWithSchemes, kmId);
+        return updateSwaggerSecurityDefinitionForStore(swagger, new SwaggerData(product), hostsWithSchemes,
+                keyManagerConfigurationDTO);
     }
 
     /**
@@ -1454,38 +1456,16 @@ public class OAS2Parser extends APIDefinition {
     /**
      * Update OAS definition with authorization endpoints
      *
-     * @param swagger           Swagger
-     * @param swaggerData       SwaggerData
-     * @param hostsWithSchemes  GW hosts with protocols
-     * @param kmId              UUID of the Key Manager
+     * @param swagger                    Swagger
+     * @param swaggerData                SwaggerData
+     * @param hostsWithSchemes           GW hosts with protocols
+     * @param keyManagerConfigurationDTO configuration details of the Key Manager
      * @return updated OAS definition
      */
     private String updateSwaggerSecurityDefinitionForStore(Swagger swagger, SwaggerData swaggerData,
-                                                           Map<String,String> hostsWithSchemes, String kmId)
+                                                           Map<String,String> hostsWithSchemes,
+                                                           KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
-
-        KeyManagerConfigurationDTO keyManagerConfigurationDTO = null;
-        try {
-            if (!StringUtils.isEmpty(kmId)) {
-                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
-                APIAdmin apiAdmin = new APIAdminImpl();
-                keyManagerConfigurationDTO = apiAdmin.getKeyManagerConfigurationById(tenantDomain, kmId);
-                if (keyManagerConfigurationDTO == null || (StringUtils.isEmpty(kmId) && !Objects.equals(
-                        keyManagerConfigurationDTO.getType(), APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE))) {
-                    keyManagerConfigurationDTO = apiAdmin.getKeyManagerConfigurationByName(tenantDomain,
-                            APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
-                }
-            }
-        } catch (APIManagementException e) {
-            if (!StringUtils.isEmpty(kmId)) {
-                throw new APIManagementException("Failed to retrieve key manager information by ID: " + kmId,
-                        ExceptionCodes.ERROR_RETRIEVE_KM_INFORMATION);
-            } else {
-                throw new APIManagementException("Failed to retrieve key manager information "
-                        + APIConstants.KeyManager.DEFAULT_KEY_MANAGER, ExceptionCodes.ERROR_RETRIEVE_KM_INFORMATION);
-            }
-        }
-
         String authUrl;
         // By Default, add the GW host with HTTPS protocol if present.
         if (hostsWithSchemes.containsKey(APIConstants.HTTPS_PROTOCOL)) {
