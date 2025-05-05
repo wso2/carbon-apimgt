@@ -27,7 +27,6 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -82,57 +81,4 @@ public class APIDefinitionFromOpenAPISpec {
         }
         return scopeList;
     }
-
-    /**
-     * Called using the jaggery api. Checks if the swagger contains valid api scopes.
-     *
-     * @param swagger Swagger definition
-     * @return true if the scope definition is valid
-     * @throws APIManagementException
-     */
-    public Boolean validateScopesFromSwagger(String swagger) throws APIManagementException {
-
-        try {
-            Set<Scope> scopes = getScopes(swagger);
-            JSONParser parser = new JSONParser();
-            JSONObject swaggerJson;
-            swaggerJson = (JSONObject) parser.parse(swagger);
-            if (swaggerJson.get("paths") != null) {
-                JSONObject paths = (JSONObject) swaggerJson.get("paths");
-                for (Object uriTempKey : paths.keySet()) {
-                    String uriTemp = (String) uriTempKey;
-                    //if url template is a custom attribute "^x-" ignore.
-                    if (uriTemp.startsWith("x-") || uriTemp.startsWith("X-")) {
-                        continue;
-                    }
-                    JSONObject path = (JSONObject) paths.get(uriTemp);
-                    // Following code check is done to handle $ref objects supported by swagger spec
-                    // See field types supported by "Path Item Object" in swagger spec.
-                    if (path.containsKey("$ref")) {
-                        continue;
-                    }
-
-                    for (Object httpVerbKey : path.keySet()) {
-                        String httpVerb = (String) httpVerbKey;
-                        JSONObject operation = (JSONObject) path.get(httpVerb);
-                        String operationScope = (String) operation.get(APIConstants.SWAGGER_X_SCOPE);
-
-                        Scope scope = APIUtil.findScopeByKey(scopes, operationScope);
-
-                        if (scope == null && operationScope != null) {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
-        } catch (APIManagementException e) {
-            handleException("Error when validating scopes", e);
-            return false;
-        } catch (ParseException e) {
-            handleException("Error when validating scopes", e);
-            return false;
-        }
-    }
-
 }
