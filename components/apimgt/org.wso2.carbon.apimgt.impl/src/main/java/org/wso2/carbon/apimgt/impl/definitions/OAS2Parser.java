@@ -56,7 +56,6 @@ import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
-import io.swagger.util.Yaml;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -808,29 +807,6 @@ public class OAS2Parser extends APIDefinition {
     }
 
     /**
-     * Remove x-wso2-examples from all the paths from the swagger.
-     *
-     * @param swaggerString Swagger as String
-     */
-    public String removeExamplesFromSwagger(String swaggerString) throws APIManagementException {
-        try {
-            SwaggerParser swaggerParser = new SwaggerParser();
-            Swagger swagger = swaggerParser.parse(swaggerString);
-            swagger.getPaths().values().forEach(path -> {
-                path.getOperations().forEach(operation -> {
-                    if (operation.getVendorExtensions().keySet().contains(APIConstants.SWAGGER_X_EXAMPLES)) {
-                        operation.getVendorExtensions().remove(APIConstants.SWAGGER_X_EXAMPLES);
-                    }
-                });
-            });
-            return Yaml.pretty().writeValueAsString(swagger);
-        } catch (JsonProcessingException e) {
-            throw new APIManagementException("Error while removing examples from OpenAPI definition", e,
-                    ExceptionCodes.ERROR_REMOVING_EXAMPLES);
-        }
-    }
-
-    /**
      * Update OAS definition for store
      *
      * @param api                        API
@@ -1120,34 +1096,6 @@ public class OAS2Parser extends APIDefinition {
         Map<String, Object> extensions = swagger.getVendorExtensions();
         if (extensions != null && extensions.containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY)) {
             extensions.remove(APIConstants.SWAGGER_X_WSO2_SECURITY);
-        }
-    }
-
-    /**
-     * Set scopes to the swagger extension
-     *
-     * @param swagger     swagger object
-     * @param swaggerData Swagger API data
-     */
-    private void setLegacyScopeExtensionToSwagger(Swagger swagger, SwaggerData swaggerData) {
-        Set<Scope> scopes = swaggerData.getScopes();
-
-        if (scopes != null && !scopes.isEmpty()) {
-            List<Map<String, String>> xSecurityScopesArray = new ArrayList<>();
-            for (Scope scope : scopes) {
-                Map<String, String> xWso2ScopesObject = new LinkedHashMap<>();
-                xWso2ScopesObject.put(APIConstants.SWAGGER_SCOPE_KEY, scope.getKey());
-                xWso2ScopesObject.put(APIConstants.SWAGGER_NAME, scope.getName());
-                xWso2ScopesObject.put(APIConstants.SWAGGER_ROLES, scope.getRoles());
-                xWso2ScopesObject.put(APIConstants.SWAGGER_DESCRIPTION, scope.getDescription());
-                xSecurityScopesArray.add(xWso2ScopesObject);
-            }
-            Map<String, Object> xWSO2Scopes = new LinkedHashMap<>();
-            xWSO2Scopes.put(APIConstants.SWAGGER_X_WSO2_SCOPES, xSecurityScopesArray);
-            Map<String, Object> xWSO2SecurityDefinitionObject = new LinkedHashMap<>();
-            xWSO2SecurityDefinitionObject.put(APIConstants.SWAGGER_OBJECT_NAME_APIM, xWSO2Scopes);
-
-            swagger.setVendorExtension(APIConstants.SWAGGER_X_WSO2_SECURITY, xWSO2SecurityDefinitionObject);
         }
     }
 
