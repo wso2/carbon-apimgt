@@ -28,6 +28,7 @@ import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -1875,14 +1876,17 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     @Override
-    public String getOASDefinitionForStore(API api, String oasDefinition,
-            Map<String, String> hostsWithSchemes, String kmId) throws APIManagementException {
+    public String getOASDefinitionForStore(API api, String oasDefinition, Map<String, String> hostsWithSchemes,
+                                           KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException {
         return null;
     }
 
     @Override
     public String getOASDefinitionForStore(APIProduct product, String oasDefinition,
-            Map<String, String> hostsWithSchemes, String kmId) throws APIManagementException {
+                                           Map<String, String> hostsWithSchemes,
+                                           KeyManagerConfigurationDTO keyManagerConfigurationDTO)
+            throws APIManagementException {
         return null;
     }
 
