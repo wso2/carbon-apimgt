@@ -31,8 +31,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.handleException;
-
 // Keep following function since it is still used in jaggery publisher portal. Can remove this class once publisher
 // portal is removed.
 @Deprecated
@@ -77,7 +75,9 @@ public class APIDefinitionFromOpenAPISpec {
                 }
             }
         } catch (ParseException e) {
-            handleException("Invalid resource configuration ", e);
+            String msg = "Invalid resource configuration ";
+            log.error(msg, e);
+            throw new APIManagementException(msg, e);
         }
         return scopeList;
     }
