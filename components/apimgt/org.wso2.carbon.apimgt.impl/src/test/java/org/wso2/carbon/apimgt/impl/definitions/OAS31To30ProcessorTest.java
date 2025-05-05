@@ -23,7 +23,7 @@ import io.swagger.v3.oas.models.media.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.definitions.APIConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
