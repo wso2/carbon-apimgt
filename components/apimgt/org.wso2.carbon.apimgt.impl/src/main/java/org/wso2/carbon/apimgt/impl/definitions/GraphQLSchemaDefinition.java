@@ -37,7 +37,6 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.CustomComplexityDetails;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlComplexityInfo;
 import org.wso2.carbon.apimgt.api.model.graphql.queryanalysis.GraphqlSchemaType;
-import org.wso2.carbon.apimgt.impl.definitions.APIConstants;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -75,9 +74,9 @@ public class GraphQLSchemaDefinition {
                     }
                 }
             } else {
-                boolean canAddOperation = (entry.getValue().getName().equalsIgnoreCase(APIConstants.GRAPHQL_QUERY) ||
-                        entry.getValue().getName().equalsIgnoreCase(APIConstants.GRAPHQL_MUTATION)
-                        || entry.getValue().getName().equalsIgnoreCase(APIConstants.GRAPHQL_SUBSCRIPTION)) &&
+                boolean canAddOperation = (entry.getValue().getName().equalsIgnoreCase(APISpecParserConstants.GRAPHQL_QUERY) ||
+                        entry.getValue().getName().equalsIgnoreCase(APISpecParserConstants.GRAPHQL_MUTATION)
+                        || entry.getValue().getName().equalsIgnoreCase(APISpecParserConstants.GRAPHQL_SUBSCRIPTION)) &&
                         (type == null || type.equals(entry.getValue().getName().toUpperCase()));
                 if (canAddOperation) {
                     addOperations(entry, entry.getKey(), operationArray);
@@ -171,13 +170,13 @@ public class GraphQLSchemaDefinition {
 
         Map<String, Object> extensions = null;
         if (openAPI != null) {
-            extensions = openAPI.getComponents().getSecuritySchemes().get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY).
+            extensions = openAPI.getComponents().getSecuritySchemes().get(APISpecParserConstants.SWAGGER_APIM_DEFAULT_SECURITY).
                     getFlows().getImplicit().getExtensions();
         }
         if (extensions != null) {
             scopeBindings = (LinkedHashMap<String, Object>) openAPI.getComponents().getSecuritySchemes().
-                    get(APIConstants.SWAGGER_APIM_DEFAULT_SECURITY).getFlows().getImplicit().getExtensions().
-                    get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+                    get(APISpecParserConstants.SWAGGER_APIM_DEFAULT_SECURITY).getFlows().getImplicit().getExtensions().
+                    get(APISpecParserConstants.SWAGGER_X_SCOPES_BINDINGS);
         }
 
         if (swaggerDef != null) {
@@ -206,7 +205,7 @@ public class GraphQLSchemaDefinition {
                             encodeToString(entry.getKey().getBytes(Charset.defaultCharset()));
                     base64EncodedURLScope = Base64.getUrlEncoder().withoutPadding().
                             encodeToString(entry.getValue().getBytes(Charset.defaultCharset()));
-                    operationScopeType = "type " + APIConstants.SCOPE_OPERATION_MAPPING + "_" +
+                    operationScopeType = "type " + APISpecParserConstants.SCOPE_OPERATION_MAPPING + "_" +
                             base64EncodedURLOperationKey + "{\n" + base64EncodedURLScope + ": String\n}\n";
                     operationScopeMappingBuilder.append(operationScopeType);
                 }
@@ -224,7 +223,7 @@ public class GraphQLSchemaDefinition {
                     List<String> scopeRoles = new ArrayList<>();
                     base64EncodedURLScopeKey = Base64.getUrlEncoder().withoutPadding().
                             encodeToString(entry.getKey().getBytes(Charset.defaultCharset()));
-                    scopeType = "type " + APIConstants.SCOPE_ROLE_MAPPING + "_" + base64EncodedURLScopeKey + "{\n";
+                    scopeType = "type " + APISpecParserConstants.SCOPE_ROLE_MAPPING + "_" + base64EncodedURLScopeKey + "{\n";
                     StringBuilder scopeRoleBuilder = new StringBuilder(scopeType);
                     roleList = entry.getValue().split(",");
 
@@ -252,7 +251,7 @@ public class GraphQLSchemaDefinition {
                             encodeToString(entry.getKey().getBytes(Charset.defaultCharset()));
                     String base64EncodedURLThrottilingTier = Base64.getUrlEncoder().withoutPadding().
                             encodeToString(entry.getValue().getBytes(Charset.defaultCharset()));
-                    operationThrottlingType = "type " + APIConstants.OPERATION_THROTTLING_MAPPING + "_" +
+                    operationThrottlingType = "type " + APISpecParserConstants.OPERATION_THROTTLING_MAPPING + "_" +
                             base64EncodedURLOperationKey + "{\n" + base64EncodedURLThrottilingTier + ": String\n}\n";
                     operationThrottlingMappingBuilder.append(operationThrottlingType);
                 }
@@ -265,12 +264,12 @@ public class GraphQLSchemaDefinition {
                 for (Map.Entry<String, String> entry : operationAuthSchemeMap.entrySet()) {
                     String base64EncodedURLOperationKey = Base64.getUrlEncoder().withoutPadding().
                             encodeToString(entry.getKey().getBytes(Charset.defaultCharset()));
-                    if (entry.getValue().equalsIgnoreCase(APIConstants.AUTH_NO_AUTHENTICATION)) {
-                        isSecurityEnabled = APIConstants.OPERATION_SECURITY_DISABLED;
+                    if (entry.getValue().equalsIgnoreCase(APISpecParserConstants.AUTH_NO_AUTHENTICATION)) {
+                        isSecurityEnabled = APISpecParserConstants.OPERATION_SECURITY_DISABLED;
                     } else {
-                        isSecurityEnabled = APIConstants.OPERATION_SECURITY_ENABLED;
+                        isSecurityEnabled = APISpecParserConstants.OPERATION_SECURITY_ENABLED;
                     }
-                    operationAuthSchemeType = "type " + APIConstants.OPERATION_AUTH_SCHEME_MAPPING + "_" +
+                    operationAuthSchemeType = "type " + APISpecParserConstants.OPERATION_AUTH_SCHEME_MAPPING + "_" +
                             base64EncodedURLOperationKey + "{\n" + isSecurityEnabled + ": String\n}\n";
                     operationAuthSchemeMappingBuilder.append(operationAuthSchemeType);
                 }
@@ -282,7 +281,7 @@ public class GraphQLSchemaDefinition {
                 JSONObject jsonPolicyDefinition = policyDefinitionToJson(graphqlComplexityInfo);
                 String base64EncodedPolicyDefinition = Base64.getUrlEncoder().withoutPadding().
                         encodeToString(jsonPolicyDefinition.toJSONString().getBytes(Charset.defaultCharset()));
-                String policyDefinition = "type " + APIConstants.GRAPHQL_ACCESS_CONTROL_POLICY + " {\n" +
+                String policyDefinition = "type " + APISpecParserConstants.GRAPHQL_ACCESS_CONTROL_POLICY + " {\n" +
                         base64EncodedPolicyDefinition + ": String\n}\n";
                 policyBuilder.append(policyDefinition);
                 schemaDefinitionBuilder.append(policyBuilder.toString());
@@ -327,7 +326,7 @@ public class GraphQLSchemaDefinition {
             customComplexityObject.put(type, fieldValueObject);
         }
 
-        policyDefinition.put(APIConstants.QUERY_ANALYSIS_COMPLEXITY, customComplexityObject);
+        policyDefinition.put(APISpecParserConstants.QUERY_ANALYSIS_COMPLEXITY, customComplexityObject);
         return policyDefinition;
     }
 }
