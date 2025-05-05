@@ -99,7 +99,6 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.definitions.mixin.IgnoreOriginalRefMixin;
 import org.wso2.carbon.apimgt.impl.definitions.mixin.ResponseSchemaMixin;
 import org.wso2.carbon.apimgt.impl.definitions.mixin.License31Mixin;
-import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
 import org.wso2.carbon.registry.api.RegistryException;
@@ -908,7 +907,7 @@ public class OASParserUtil {
         String path = System.getProperty(APIConstants.JAVA_IO_TMPDIR) + File.separator +
                 APIConstants.OPENAPI_ARCHIVES_TEMP_FOLDER + File.separator + UUID.randomUUID().toString();
         String archivePath = path + File.separator + APIConstants.OPENAPI_ARCHIVE_ZIP_FILE;
-        String extractedLocation = APIFileUtil
+        String extractedLocation = FileUtil
                 .extractUploadedArchive(inputStream, APIConstants.OPENAPI_EXTRACTED_DIRECTORY, archivePath, path);
         File[] listOfFiles = new File(extractedLocation).listFiles();
         File archiveDirectory = null;
