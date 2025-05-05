@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import io.swagger.models.Swagger;
+import io.swagger.parser.SwaggerParser;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -111,6 +113,21 @@ public class OAS3ParserTest extends OASTestBase {
                 (Map<String, String>) implicityOauth.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
         Assert.assertTrue(scopeBinding.containsKey("newScope"));
         Assert.assertEquals("admin", scopeBinding.get("newScope"));
+    }
+
+    @Test
+    public void testGenerateAPIDefinitionWithoutInfoTag() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas3" + File.separator + "oas3Resources.json";
+        String oas3Resources = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+
+        String definition = testGenerateAPIDefinitionWithoutInfoTag(oas3Parser, oas3Resources);
+        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(definition, null, null);
+        OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
+
+        Assert.assertNotNull(openAPI.getInfo());
+        Assert.assertEquals("simple", openAPI.getInfo().getTitle());
+        Assert.assertEquals("1.0.0", openAPI.getInfo().getVersion());
     }
 
     @Test
@@ -240,6 +257,23 @@ public class OAS3ParserTest extends OASTestBase {
                 response.getErrorItems().get(0).getErrorCode());
         Assert.assertEquals("Multiple GET operations with the same resource path /test found in " +
                 "the openapi definition", response.getErrorItems().get(0).getErrorDescription());
+    }
+
+    @Test
+    public void testSwaggerValidatorWithRelaxValidationEnabledAndWithoutInfoTag() throws Exception {
+        System.setProperty(APIConstants.SWAGGER_RELAXED_VALIDATION, "true");
+        String faultySwagger = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
+                        + File.separator + "openApi3_without_info_validation.json"),
+                String.valueOf(StandardCharsets.UTF_8));
+
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true);
+
+        Assert.assertTrue(response.isValid());
+        Assert.assertTrue(response.getInfo().getName().startsWith("API-Title-"));
+        Assert.assertEquals("attribute extraInfo is unexpected",
+                response.getErrorItems().get(0).getErrorDescription());
+        System.clearProperty(APIConstants.SWAGGER_RELAXED_VALIDATION);
     }
 
     @Test
