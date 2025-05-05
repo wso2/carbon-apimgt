@@ -72,7 +72,6 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -460,7 +459,7 @@ public class OAS3Parser extends APIDefinition {
                         if (opScopes.size() == 1) {
                             String firstScope = opScopes.get(0);
                             if (StringUtils.isNoneBlank(firstScope)) {
-                                Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
+                                Scope scope = APISpecParserUtil.findScopeByKey(scopes, firstScope);
                                 if (scope == null) {
                                     throw new APIManagementException("Scope '" + firstScope + "' not found.");
                                 }
@@ -475,7 +474,7 @@ public class OAS3Parser extends APIDefinition {
                         if (opScopes.size() == 1) {
                             String firstScope = opScopes.get(0);
                             if (StringUtils.isNoneBlank(firstScope)) {
-                                Scope scope = APIUtil.findScopeByKey(scopes, firstScope);
+                                Scope scope = APISpecParserUtil.findScopeByKey(scopes, firstScope);
                                 if (scope == null) {
                                     throw new APIManagementException("Scope '" + firstScope + "' not found.");
                                 }
