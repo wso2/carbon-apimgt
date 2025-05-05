@@ -26,7 +26,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.impl.definitions.APIConstants;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -53,21 +52,21 @@ public class APIDefinitionFromOpenAPISpec {
             swaggerObject = (JSONObject) parser.parse(resourceConfigsJSON);
 
             //Check whether security definitions are defined or not
-            if (swaggerObject.get(APIConstants.SWAGGER_X_WSO2_SECURITY) != null) {
-                JSONObject securityDefinitionsObjects = (JSONObject) swaggerObject.get(APIConstants.SWAGGER_X_WSO2_SECURITY);
+            if (swaggerObject.get(APISpecParserConstants.SWAGGER_X_WSO2_SECURITY) != null) {
+                JSONObject securityDefinitionsObjects = (JSONObject) swaggerObject.get(APISpecParserConstants.SWAGGER_X_WSO2_SECURITY);
 
                 for (JSONObject securityDefinition : (Iterable<JSONObject>) securityDefinitionsObjects.values()) {
                     //Read scopes from custom wso2 scopes
 
-                    if (securityDefinition.get(APIConstants.SWAGGER_X_WSO2_SCOPES) != null) {
-                        JSONArray oauthScope = (JSONArray) securityDefinition.get(APIConstants.SWAGGER_X_WSO2_SCOPES);
+                    if (securityDefinition.get(APISpecParserConstants.SWAGGER_X_WSO2_SCOPES) != null) {
+                        JSONArray oauthScope = (JSONArray) securityDefinition.get(APISpecParserConstants.SWAGGER_X_WSO2_SCOPES);
                         for (Object anOauthScope : oauthScope) {
                             Scope scope = new Scope();
                             JSONObject scopeObj = (JSONObject) anOauthScope;
-                            scope.setKey((String) scopeObj.get(APIConstants.SWAGGER_SCOPE_KEY));
-                            scope.setName((String) scopeObj.get(APIConstants.SWAGGER_NAME));
-                            scope.setDescription((String) scopeObj.get(APIConstants.SWAGGER_DESCRIPTION));
-                            scope.setRoles(scopeObj.get(APIConstants.SWAGGER_ROLES).toString());
+                            scope.setKey((String) scopeObj.get(APISpecParserConstants.SWAGGER_SCOPE_KEY));
+                            scope.setName((String) scopeObj.get(APISpecParserConstants.SWAGGER_NAME));
+                            scope.setDescription((String) scopeObj.get(APISpecParserConstants.SWAGGER_DESCRIPTION));
+                            scope.setRoles(scopeObj.get(APISpecParserConstants.SWAGGER_ROLES).toString());
 
                             scopeList.add(scope);
                         }

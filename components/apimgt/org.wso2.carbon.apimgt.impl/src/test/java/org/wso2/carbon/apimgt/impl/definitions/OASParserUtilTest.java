@@ -31,7 +31,6 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.impl.definitions.APIConstants;
 
 import java.io.File;
 import java.io.IOException;
@@ -96,8 +95,8 @@ public class OASParserUtilTest {
         api.setEndpointConfig(httpProduction);
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(1, prodNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_HTTP, prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(1, prodNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_HTTP, prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNull(sandNode);
 
@@ -105,9 +104,9 @@ public class OASParserUtilTest {
         api.setEndpointConfig(httpProductionFailover);
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(2, prodNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_FAILOVER,
-                prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(2, prodNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_FAILOVER,
+                prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNull(sandNode);
 
@@ -115,9 +114,9 @@ public class OASParserUtilTest {
         api.setEndpointConfig(httpProductionLoadbalance);
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(2, prodNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_LOADBALANCE,
-                prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(2, prodNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_LOADBALANCE,
+                prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNull(sandNode);
 
@@ -128,8 +127,8 @@ public class OASParserUtilTest {
         Assert.assertNull(prodNode);
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNotNull(sandNode);
-        Assert.assertEquals(1, sandNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_HTTP, sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(1, sandNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_HTTP, sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
 
         String httpSandboxFailover = jsonObject.getJSONObject("http_sandbox_failover").toString();
         api.setEndpointConfig(httpSandboxFailover);
@@ -137,9 +136,9 @@ public class OASParserUtilTest {
         Assert.assertNull(prodNode);
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNotNull(sandNode);
-        Assert.assertEquals(2, sandNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_FAILOVER,
-                sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(2, sandNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_FAILOVER,
+                sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
 
         String httpSandboxLoadbalance = jsonObject.getJSONObject("http_sandbox_loadbalance").toString();
         api.setEndpointConfig(httpSandboxLoadbalance);
@@ -147,47 +146,47 @@ public class OASParserUtilTest {
         Assert.assertNull(prodNode);
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNotNull(sandNode);
-        Assert.assertEquals(2, sandNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_LOADBALANCE,
-                sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(2, sandNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_LOADBALANCE,
+                sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
 
         //start http hybrid
         String httpHybrid = jsonObject.getJSONObject("http_hybrid").toString();
         api.setEndpointConfig(httpHybrid);
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(1, prodNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_HTTP, prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(1, prodNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_HTTP, prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNotNull(sandNode);
-        Assert.assertEquals(1, sandNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_HTTP, sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(1, sandNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_HTTP, sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
 
         String httpHybridFailover = jsonObject.getJSONObject("http_hybrid_failover").toString();
         api.setEndpointConfig(httpHybridFailover);
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(2, prodNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_FAILOVER,
-                prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(2, prodNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_FAILOVER,
+                prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNotNull(sandNode);
-        Assert.assertEquals(2, sandNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_FAILOVER,
-                sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(2, sandNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_FAILOVER,
+                sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
 
         String httpHybridLoadbalance = jsonObject.getJSONObject("http_hybrid_loadbalance").toString();
         api.setEndpointConfig(httpHybridLoadbalance);
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(2, prodNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_LOADBALANCE,
-                prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(2, prodNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_LOADBALANCE,
+                prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNotNull(sandNode);
-        Assert.assertEquals(2, sandNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_LOADBALANCE,
-                sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(2, sandNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_LOADBALANCE,
+                sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
     }
 
     @Test
@@ -207,9 +206,9 @@ public class OASParserUtilTest {
         api.setEndpointConfig(soapProduction);
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(1, prodNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_ADDRESS,
-                prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(1, prodNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_ADDRESS,
+                prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNull(sandNode);
 
@@ -217,9 +216,9 @@ public class OASParserUtilTest {
         api.setEndpointConfig(soapProductionFailover);
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(2, prodNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_FAILOVER,
-                prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(2, prodNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_FAILOVER,
+                prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNull(sandNode);
 
@@ -227,9 +226,9 @@ public class OASParserUtilTest {
         api.setEndpointConfig(soapProductionLoadbalance);
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(2, prodNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_LOADBALANCE,
-                prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(2, prodNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_LOADBALANCE,
+                prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNull(sandNode);
 
@@ -240,9 +239,9 @@ public class OASParserUtilTest {
         Assert.assertNull(prodNode);
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNotNull(sandNode);
-        Assert.assertEquals(1, sandNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_ADDRESS,
-                sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(1, sandNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_ADDRESS,
+                sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
 
         String soapSandboxFailover = jsonObject.getJSONObject("soap_sandbox_failover").toString();
         api.setEndpointConfig(soapSandboxFailover);
@@ -250,9 +249,9 @@ public class OASParserUtilTest {
         Assert.assertNull(prodNode);
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNotNull(sandNode);
-        Assert.assertEquals(2, sandNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_FAILOVER,
-                sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(2, sandNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_FAILOVER,
+                sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
 
         String soapSandboxLoadbalance = jsonObject.getJSONObject("soap_sandbox_loadbalance").toString();
         api.setEndpointConfig(soapSandboxLoadbalance);
@@ -260,49 +259,49 @@ public class OASParserUtilTest {
         Assert.assertNull(prodNode);
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNotNull(sandNode);
-        Assert.assertEquals(2, sandNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_LOADBALANCE,
-                sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(2, sandNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_LOADBALANCE,
+                sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
 
         //start soap hybrid
         String soapHybrid = jsonObject.getJSONObject("soap_hybrid").toString();
         api.setEndpointConfig(soapHybrid);
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(1, prodNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_ADDRESS,
-                prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(1, prodNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_ADDRESS,
+                prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNotNull(sandNode);
-        Assert.assertEquals(1, sandNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_ADDRESS,
-                sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(1, sandNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_ADDRESS,
+                sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
 
         String soapHybridFailover = jsonObject.getJSONObject("soap_hybrid_failover").toString();
         api.setEndpointConfig(soapHybridFailover);
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(2, prodNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_FAILOVER,
-                prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(2, prodNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_FAILOVER,
+                prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNotNull(sandNode);
-        Assert.assertEquals(2, sandNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_FAILOVER,
-                sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(2, sandNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_FAILOVER,
+                sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
 
         String soapHybridLoadbalance = jsonObject.getJSONObject("soap_hybrid_loadbalance").toString();
         api.setEndpointConfig(soapHybridLoadbalance);
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(2, prodNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_LOADBALANCE,
-                prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(2, prodNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_LOADBALANCE,
+                prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNotNull(sandNode);
-        Assert.assertEquals(2, sandNode.get(APIConstants.ENDPOINT_URLS).size());
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_LOADBALANCE,
-                sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(2, sandNode.get(APISpecParserConstants.ENDPOINT_URLS).size());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_LOADBALANCE,
+                sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
     }
 
     @Test
@@ -321,13 +320,13 @@ public class OASParserUtilTest {
         api.setEndpointConfig(defaultEndpoints);
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_DEFAULT,
-                prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_DEFAULT,
+                prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
 
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNotNull(sandNode);
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_DEFAULT,
-                prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_DEFAULT,
+                prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
     }
 
     @Test
@@ -353,36 +352,36 @@ public class OASParserUtilTest {
         //check default production endpoint security
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_DEFAULT,
-                prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
-        Assert.assertNotNull(prodNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG));
-        securityConfig = prodNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG);
-        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
-                securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE).asText());
-        Assert.assertEquals(endUserName, securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME).asText());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_DEFAULT,
+                prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertNotNull(prodNode.get(APISpecParserConstants.ENDPOINT_SECURITY_CONFIG));
+        securityConfig = prodNode.get(APISpecParserConstants.ENDPOINT_SECURITY_CONFIG);
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
+                securityConfig.get(APISpecParserConstants.ENDPOINT_SECURITY_TYPE).asText());
+        Assert.assertEquals(endUserName, securityConfig.get(APISpecParserConstants.ENDPOINT_SECURITY_USERNAME).asText());
 
         //check default sandbox endpoint security
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNotNull(sandNode);
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_DEFAULT,
-                sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
-        Assert.assertNotNull(sandNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG));
-        securityConfig = sandNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG);
-        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
-                securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE).asText());
-        Assert.assertEquals(endUserName, securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME).asText());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_DEFAULT,
+                sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertNotNull(sandNode.get(APISpecParserConstants.ENDPOINT_SECURITY_CONFIG));
+        securityConfig = sandNode.get(APISpecParserConstants.ENDPOINT_SECURITY_CONFIG);
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
+                securityConfig.get(APISpecParserConstants.ENDPOINT_SECURITY_TYPE).asText());
+        Assert.assertEquals(endUserName, securityConfig.get(APISpecParserConstants.ENDPOINT_SECURITY_USERNAME).asText());
 
         //check default production endpoint digest auth security
         api.setEndpointAuthDigest(true);
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_DEFAULT,
-                prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
-        Assert.assertNotNull(prodNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG));
-        securityConfig = prodNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG);
-        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase(),
-                securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE).asText());
-        Assert.assertEquals(endUserName, securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME).asText());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_DEFAULT,
+                prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertNotNull(prodNode.get(APISpecParserConstants.ENDPOINT_SECURITY_CONFIG));
+        securityConfig = prodNode.get(APISpecParserConstants.ENDPOINT_SECURITY_CONFIG);
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_SECURITY_TYPE_DIGEST.toUpperCase(),
+                securityConfig.get(APISpecParserConstants.ENDPOINT_SECURITY_TYPE).asText());
+        Assert.assertEquals(endUserName, securityConfig.get(APISpecParserConstants.ENDPOINT_SECURITY_USERNAME).asText());
 
         // --------- check http endpoints security
         String httpHybrid = jsonObject.getJSONObject("http_hybrid").toString();
@@ -393,22 +392,22 @@ public class OASParserUtilTest {
         //check http production
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_HTTP, prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
-        Assert.assertNotNull(prodNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG));
-        securityConfig = prodNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG);
-        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
-                securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE).asText());
-        Assert.assertEquals(endUserName, securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME).asText());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_HTTP, prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertNotNull(prodNode.get(APISpecParserConstants.ENDPOINT_SECURITY_CONFIG));
+        securityConfig = prodNode.get(APISpecParserConstants.ENDPOINT_SECURITY_CONFIG);
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
+                securityConfig.get(APISpecParserConstants.ENDPOINT_SECURITY_TYPE).asText());
+        Assert.assertEquals(endUserName, securityConfig.get(APISpecParserConstants.ENDPOINT_SECURITY_USERNAME).asText());
 
         //check http sandbox
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(sandNode);
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_HTTP, sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
-        Assert.assertNotNull(sandNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG));
-        securityConfig = sandNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG);
-        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
-                securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE).asText());
-        Assert.assertEquals(endUserName, securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME).asText());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_HTTP, sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertNotNull(sandNode.get(APISpecParserConstants.ENDPOINT_SECURITY_CONFIG));
+        securityConfig = sandNode.get(APISpecParserConstants.ENDPOINT_SECURITY_CONFIG);
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
+                securityConfig.get(APISpecParserConstants.ENDPOINT_SECURITY_TYPE).asText());
+        Assert.assertEquals(endUserName, securityConfig.get(APISpecParserConstants.ENDPOINT_SECURITY_USERNAME).asText());
 
         // ----------- check address endpoints security
         String soapHybrid = jsonObject.getJSONObject("soap_hybrid").toString();
@@ -419,24 +418,24 @@ public class OASParserUtilTest {
         //check address production
         prodNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(prodNode);
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_ADDRESS,
-                prodNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
-        Assert.assertNotNull(prodNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG));
-        securityConfig = prodNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG);
-        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
-                securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE).asText());
-        Assert.assertEquals(endUserName, securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME).asText());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_ADDRESS,
+                prodNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertNotNull(prodNode.get(APISpecParserConstants.ENDPOINT_SECURITY_CONFIG));
+        securityConfig = prodNode.get(APISpecParserConstants.ENDPOINT_SECURITY_CONFIG);
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
+                securityConfig.get(APISpecParserConstants.ENDPOINT_SECURITY_TYPE).asText());
+        Assert.assertEquals(endUserName, securityConfig.get(APISpecParserConstants.ENDPOINT_SECURITY_USERNAME).asText());
 
         //check address sandbox
         sandNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
         Assert.assertNotNull(sandNode);
-        Assert.assertEquals(APIConstants.ENDPOINT_TYPE_ADDRESS,
-                sandNode.get(APIConstants.X_WSO2_ENDPOINT_TYPE).asText());
-        Assert.assertNotNull(sandNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG));
-        securityConfig = sandNode.get(APIConstants.ENDPOINT_SECURITY_CONFIG);
-        Assert.assertEquals(APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
-                securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE).asText());
-        Assert.assertEquals(endUserName, securityConfig.get(APIConstants.ENDPOINT_SECURITY_USERNAME).asText());
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_ADDRESS,
+                sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
+        Assert.assertNotNull(sandNode.get(APISpecParserConstants.ENDPOINT_SECURITY_CONFIG));
+        securityConfig = sandNode.get(APISpecParserConstants.ENDPOINT_SECURITY_CONFIG);
+        Assert.assertEquals(APISpecParserConstants.ENDPOINT_SECURITY_TYPE_BASIC.toUpperCase(),
+                securityConfig.get(APISpecParserConstants.ENDPOINT_SECURITY_TYPE).asText());
+        Assert.assertEquals(endUserName, securityConfig.get(APISpecParserConstants.ENDPOINT_SECURITY_USERNAME).asText());
     }
 
     @Test
@@ -473,8 +472,8 @@ public class OASParserUtilTest {
         JSONObject calculatorSwagger = new JSONObject(calculatorSwaggerString);
         JSONObject updatedCalcSmallSwagger = new JSONObject(updatedCalcSmallSwaggerString);
 
-        JSONObject calculatorPaths = (JSONObject) calculatorSwagger.get(APIConstants.SWAGGER_PATHS);
-        JSONObject smallCalcPaths = (JSONObject) updatedCalcSmallSwagger.get(APIConstants.SWAGGER_PATHS);
+        JSONObject calculatorPaths = (JSONObject) calculatorSwagger.get(APISpecParserConstants.SWAGGER_PATHS);
+        JSONObject smallCalcPaths = (JSONObject) updatedCalcSmallSwagger.get(APISpecParserConstants.SWAGGER_PATHS);
 
         JSONObject calculatorPath = (JSONObject) calculatorPaths.get(existingPathString);
         JSONObject smallCalculatorPath = (JSONObject) smallCalcPaths.get(existingPathString);
@@ -540,14 +539,14 @@ public class OASParserUtilTest {
         JSONObject json = new JSONObject(definition);
         // check whether 'x-throttling-bandwidth' exists only in root level and it is true and not set in resource
         // level
-        Assert.assertNotNull(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " does not exist on root level",
-                json.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
-        Assert.assertTrue(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " is not true",
-                (boolean) json.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        Assert.assertNotNull(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " does not exist on root level",
+                json.get(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        Assert.assertTrue(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " is not true",
+                (boolean) json.get(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
         // check for resource level
         JSONObject pathsObj = (JSONObject) ((JSONObject) ((JSONObject) json.get("paths")).get("/users")).get("post");
-        Assert.assertFalse(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " exists on resource level",
-                pathsObj.has(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        Assert.assertFalse(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " exists on resource level",
+                pathsObj.has(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
 
         // Test 2: API level tier not set. resource level tier set. resource POST /users is set with Tier2 content-aware
         // tier
@@ -559,27 +558,27 @@ public class OASParserUtilTest {
                 apiLevelTier);
         json = new JSONObject(definition);
         // check whether 'x-throttling-bandwidth' exists in root level. it should not be there
-        Assert.assertFalse(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " exists on root level",
-                json.has(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        Assert.assertFalse(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " exists on root level",
+                json.has(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
 
         pathsObj = (JSONObject) ((JSONObject) ((JSONObject) json.get("paths")).get("/users")).get("post");
-        Assert.assertTrue(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " does not exist on resource level",
-                pathsObj.has(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
-        Assert.assertTrue(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " is not true",
-                (boolean) pathsObj.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        Assert.assertTrue(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " does not exist on resource level",
+                pathsObj.has(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        Assert.assertTrue(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " is not true",
+                (boolean) pathsObj.get(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
 
         // check for another resource which has same tier (Tier2) -> GET /resource has this property
         pathsObj = (JSONObject) ((JSONObject) ((JSONObject) json.get("paths")).get("/resource")).get("get");
-        Assert.assertTrue(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " does not exist on resource level",
-                pathsObj.has(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
-        Assert.assertTrue(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " is not true",
-                (boolean) pathsObj.get(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        Assert.assertTrue(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " does not exist on resource level",
+                pathsObj.has(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        Assert.assertTrue(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " is not true",
+                (boolean) pathsObj.get(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
 
         // check for another resource which does not have content-aware tier (Tier3) -> GET /users has this property. it
         // should not be there
         pathsObj = (JSONObject) ((JSONObject) ((JSONObject) json.get("paths")).get("/users")).get("get");
-        Assert.assertFalse(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " exists on resource level",
-                pathsObj.has(APIConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
+        Assert.assertFalse(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH + " exists on resource level",
+                pathsObj.has(APISpecParserConstants.SWAGGER_X_THROTTLING_BANDWIDTH));
 
     }
 }
