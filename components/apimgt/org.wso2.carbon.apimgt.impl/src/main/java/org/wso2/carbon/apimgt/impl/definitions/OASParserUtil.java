@@ -84,7 +84,6 @@ import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.mixin.License31Mixin;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
 import java.io.File;
@@ -1142,15 +1141,12 @@ public class OASParserUtil {
      * @param returnJsonContent whether to return the converted json form of the
      * @return APIDefinitionValidationResponse object with validation information
      */
-    public static APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, boolean returnJsonContent)
+    public static APIDefinitionValidationResponse validateAPIDefinitionByURL(String url, HttpClient httpClient,
+                                                                             boolean returnJsonContent)
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         try {
-            URL urlObj = new URL(url);
-            String host = urlObj.getHost();
-            HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
             HttpGet httpGet = new HttpGet(url);
-
             HttpResponse response = httpClient.execute(httpGet);
 
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
@@ -1168,7 +1164,7 @@ public class OASParserUtil {
                 if (responseStrProcessed != null) {
                     responseStr = responseStrProcessed;
                 }
-                validationResponse = validateAPIDefinition(responseStr, host, returnJsonContent);
+                validationResponse = validateAPIDefinition(responseStr, new URL(url).getHost(), returnJsonContent);
             } else {
                 validationResponse.setValid(false);
                 validationResponse.getErrorItems().add(ExceptionCodes.OPENAPI_URL_NO_200);
@@ -1197,7 +1193,7 @@ public class OASParserUtil {
 
         for (String scopeName : resourceScopes) {
             if (StringUtils.isNotBlank(scopeName)) {
-                Scope scope = APIUtil.findScopeByKey(apiScopes, scopeName);
+                Scope scope = APISpecParserUtil.findScopeByKey(apiScopes, scopeName);
                 if (scope == null) {
                     throw new APIManagementException("Resource Scope '" + scopeName + "' not found.");
                 }
