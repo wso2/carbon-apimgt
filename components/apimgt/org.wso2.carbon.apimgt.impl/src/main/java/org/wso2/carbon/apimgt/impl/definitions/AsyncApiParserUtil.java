@@ -9,7 +9,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.wso2.carbon.apimgt.api.*;
-import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
 import java.net.URL;
@@ -40,20 +39,17 @@ public class AsyncApiParserUtil {
     }
 
     public static APIDefinitionValidationResponse validateAsyncAPISpecificationByURL(
-            String url, boolean returnJSONContent) throws APIManagementException{
+            String url, HttpClient httpClient, boolean returnJSONContent) throws APIManagementException{
 
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
 
         try {
-            URL urlObj = new URL(url);
-            HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
             HttpGet httpGet = new HttpGet(url);
-
             HttpResponse response = httpClient.execute(httpGet);
 
             if (HttpStatus.SC_OK == response.getStatusLine().getStatusCode()) {
                 ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
-                Object obj = yamlReader.readValue(urlObj, Object.class);
+                Object obj = yamlReader.readValue(new URL(url), Object.class);
                 ObjectMapper jsonWriter = new ObjectMapper();
                 String json = jsonWriter.writeValueAsString(obj);
                 validationResponse = validateAsyncAPISpecification(json, returnJSONContent);
