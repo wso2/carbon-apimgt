@@ -57,8 +57,6 @@ import org.wso2.carbon.apimgt.common.gateway.graphql.GraphQLSchemaDefinitionUtil
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
@@ -73,6 +71,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APITemplateB
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
+import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
