@@ -1,0 +1,66 @@
+{
+  "solace": {
+    "apiTypes": [
+      "rest",
+      "soap",
+      "graphql",
+      "ws",
+      "wh",
+      "sse",
+      "ai"
+    ],
+    "gatewayFeatures": {
+      "basic": [
+        "defaultVersion",
+        "advertised"
+      ],
+      "runtime": [
+        "cors",
+        "schemaValidation",
+        "queryAnalysis",
+        "responseCaching",
+        "transportsHTTP",
+        "transportsHTTPS",
+        "transportsMutualSSL",
+        "oauth2",
+        "apikey",
+        "basicAuth",
+        "audienceValidation",
+        "backendThroughput",
+        "keyManagerConfig"
+      ],
+      "resources": [
+        "apiLevelRateLimiting",
+        "operationLevelRateLimiting",
+        "operationSecurity"
+      ],
+      "localScopes": [],
+      "policies": [],
+      "monetization": [],
+      "subscriptions": [
+        "subscriptions"
+      ],
+      "endpoints": [
+        "http",
+        "service",
+        "address",
+        "default",
+        "INLINE",
+        "dynamic",
+        "awslambda",
+        "sequence_backend",
+        "advancedConfigurations",
+        "loadBalanceAndFailoverConfigurations",
+        "endpointSecurity",
+        "typePRODUCTION",
+        "typeSANDBOX"
+      ],
+      "endpointSecurity": [
+        "basicAuth",
+        "oauth2",
+        "digest"
+      ],
+      "tryout": []
+    }
+  }
+}

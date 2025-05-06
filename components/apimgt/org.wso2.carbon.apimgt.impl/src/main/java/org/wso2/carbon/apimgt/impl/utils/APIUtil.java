@@ -3499,6 +3499,7 @@ public final class APIUtil {
         Map<String, List<String>> apiData = new HashMap<>();
         JsonObject synapseConfigJSON = null;
         JsonObject apkConfigJSON = null;
+        JsonObject solaceConfigJSON = null;
         try (InputStream synapseInputStream = APIUtil.class.getClassLoader()
                 .getResourceAsStream("gatewayFeatureCatalog/synapse-gateway-feature-catalog.json")) {
             if (synapseInputStream == null) {
@@ -3521,24 +3522,40 @@ public final class APIUtil {
             throw new APIManagementException("Error while reading APK Gateway Feature Catalog JSON", e);
         }
 
-        if (synapseConfigJSON == null || apkConfigJSON == null) {
+        try (InputStream solaceInputStream = APIUtil.class.getClassLoader()
+                .getResourceAsStream("gatewayFeatureCatalog/solace-feature-catalog.json")) {
+            if (solaceInputStream == null) {
+                throw new APIManagementException("Solace Feature Catalog JSON not found");
+            }
+            InputStreamReader reader = new InputStreamReader(solaceInputStream, StandardCharsets.UTF_8);
+            solaceConfigJSON = JsonParser.parseReader(reader).getAsJsonObject();
+        } catch (IOException e) {
+            throw new APIManagementException("Error while reading Solace Feature Catalog JSON", e);
+        }
+
+        if (synapseConfigJSON == null || apkConfigJSON == null || solaceConfigJSON == null) {
             throw new APIManagementException("Error while reading Gateway Feature Catalog JSON");
         }
 
         JsonObject synapseConfigsJSONValue = synapseConfigJSON.getAsJsonObject(APIConstants.WSO2_SYNAPSE_GATEWAY);
         JsonObject apkConfigsJSONValue = apkConfigJSON.getAsJsonObject(APIConstants.WSO2_APK_GATEWAY);
+        JsonObject solaceConfigsJSONValue = solaceConfigJSON.getAsJsonObject(APIConstants.SOLACE);
 
         JsonObject synapseJSON = synapseConfigsJSONValue.getAsJsonObject("gatewayFeatures");
         JsonObject apkJSON = apkConfigsJSONValue.getAsJsonObject("gatewayFeatures");
+        JsonObject solaceJSON = solaceConfigsJSONValue.getAsJsonObject("gatewayFeatures");
 
         Map<String, Object> synapseMap = gson.fromJson(synapseJSON, type);
         Map<String, Object> apkMap = gson.fromJson(apkJSON, type);
+        Map<String, Object> solaceMap = gson.fromJson(solaceJSON, type);
 
         gatewayConfigsMap.put(APIConstants.WSO2_SYNAPSE_GATEWAY, synapseMap);
         gatewayConfigsMap.put(APIConstants.WSO2_APK_GATEWAY, apkMap);
+        gatewayConfigsMap.put(APIConstants.SOLACE, solaceMap);
 
         JsonArray synapseApiTypes = synapseConfigsJSONValue.getAsJsonArray("apiTypes");
         JsonArray apkApiTypes = apkConfigsJSONValue.getAsJsonArray("apiTypes");
+        JsonArray solaceApiTypes = solaceConfigsJSONValue.getAsJsonArray("apiTypes");
         for (String key : APIConstants.API_TYPES) {
             apiData.put(key, new ArrayList<>());
         }

@@ -3537,6 +3537,7 @@ public final class APIConstants {
     public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
     public static final String EXTERNAL_AWS_GATEWAY = "AWS";
     public static final List<String> API_TYPES = Arrays.asList("rest", "soap", "graphql", "ws", "wh", "sse", "ai", "mcp");
+    public static final String SOLACE = "solace";
 
     public static final String PERMISSION_ALLOW = "ALLOW";
     public static final String PERMISSION_DENY = "DENY";
