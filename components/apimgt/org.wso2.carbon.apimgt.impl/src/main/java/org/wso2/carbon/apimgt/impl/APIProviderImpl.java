@@ -3374,6 +3374,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiOrApiProductId = apiMgtDAO.getAPIProductId(apiTypeWrapper.getApiProduct().getId());
                 workflowType = WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE;
             } else {
+                // validate mandatory API properties
+                if (StringUtils.equals(action, APIConstants.LC_PUBLISH_LC_STATE)) {
+                    org.json.simple.JSONArray customProperties = APIUtil.getCustomProperties(this.tenantDomain);
+                    List<String> errorProperties = APIUtil.validateMandatoryProperties(customProperties,
+                            apiTypeWrapper.getApi().getAdditionalProperties());
+
+                    if (!errorProperties.isEmpty()) {
+                        String errorString = " : " + String.join(", ", errorProperties);
+                        throw new APIManagementException(errorString, ExceptionCodes.from(ExceptionCodes
+                                .ERROR_WHILE_VALIDATING_MANDATORY_PROPERTIES));
+                    }
+                }
+
                 API api = apiTypeWrapper.getApi();
                 providerName = api.getId().getProviderName();
                 apiName = api.getId().getApiName();
