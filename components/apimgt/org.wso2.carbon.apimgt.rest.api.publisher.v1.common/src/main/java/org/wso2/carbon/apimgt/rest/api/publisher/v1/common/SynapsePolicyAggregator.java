@@ -193,11 +193,20 @@ public class SynapsePolicyAggregator {
                         policy.getPolicyVersion(), policy.getPolicyType());
                 OperationPolicySpecification policySpecification = ImportUtils
                         .getOperationPolicySpecificationFromFile(policyDirectory, policyFileName);
+                if (policySpecification == null) {
+                    policySpecification = ImportUtils.getOperationPolicySpecificationFromFile(policyDirectory,
+                            policyFileName.replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""));
+                }
                 if (policySpecification.getSupportedGateways()
                         .contains(APIConstants.OPERATION_POLICY_SUPPORTED_GATEWAY_SYNAPSE)) {
                     OperationPolicyDefinition policyDefinition =
                             APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory, policyFileName,
                                     APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                    if (policyDefinition == null) {
+                        policyDefinition = APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                policyFileName.replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""),
+                                APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                    }
                     if (policyDefinition != null) {
                         try {
                             String renderedTemplate =

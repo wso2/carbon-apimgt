@@ -1615,18 +1615,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (APIUtil.isSequenceDefined(api.getInSequence())) {
             Mediation inSequenceMediation = api.getInSequenceMediation();
             OperationPolicyData existingPolicy = getAPISpecificOperationPolicyByPolicyName(
-                    inSequenceMediation.getName(), APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null,
-                    organization, false);
+                    inSequenceMediation.getName().replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""),
+                    APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
             String inFlowPolicyId;
             if (existingPolicy == null) {
-                OperationPolicyData inSeqPolicyData =
-                        APIUtil.getPolicyDataForMediationFlow(api, APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST,
-                                organization);
+                OperationPolicyData inSeqPolicyData = APIUtil.getPolicyDataForMediationFlow(api,
+                        APIConstants.OPERATION_SEQUENCE_TYPE_REQUEST, organization);
+                inSeqPolicyData.getSpecification().setName(inSeqPolicyData.getSpecification().getName()
+                        .replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""));
                 inFlowPolicyId = addAPISpecificOperationPolicy(apiUUID, inSeqPolicyData, organization);
             } else {
                 inFlowPolicyId = existingPolicy.getPolicyId();
             }
-            clonedPoliciesMap.put(inSequenceMediation.getName(), inFlowPolicyId);
+            clonedPoliciesMap.put(
+                    inSequenceMediation.getName().replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""),
+                    inFlowPolicyId);
             api.setInSequence(null);
             api.setInSequenceMediation(null);
         }
@@ -1634,18 +1637,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (APIUtil.isSequenceDefined(api.getOutSequence())) {
             Mediation outSequenceMediation = api.getOutSequenceMediation();
             OperationPolicyData existingPolicy = getAPISpecificOperationPolicyByPolicyName(
-                    outSequenceMediation.getName(), APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null,
-                    organization, false);
+                    outSequenceMediation.getName().replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""),
+                    APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
             String outFlowPolicyId;
             if (existingPolicy == null) {
                 OperationPolicyData outSeqPolicyData =
                         APIUtil.getPolicyDataForMediationFlow(api, APIConstants.OPERATION_SEQUENCE_TYPE_RESPONSE,
                                 organization);
+                outSeqPolicyData.getSpecification().setName(outSeqPolicyData.getSpecification().getName()
+                        .replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""));
                 outFlowPolicyId = addAPISpecificOperationPolicy(apiUUID, outSeqPolicyData, organization);
             } else {
                 outFlowPolicyId = existingPolicy.getPolicyId();
             }
-            clonedPoliciesMap.put(outSequenceMediation.getName(), outFlowPolicyId);
+            clonedPoliciesMap.put(
+                    outSequenceMediation.getName().replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""),
+                    outFlowPolicyId);
             api.setOutSequence(null);
             api.setOutSequenceMediation(null);
         }
@@ -1653,19 +1660,22 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (APIUtil.isSequenceDefined(api.getFaultSequence())) {
             Mediation faultSequenceMediation = api.getFaultSequenceMediation();
             OperationPolicyData existingPolicy = getAPISpecificOperationPolicyByPolicyName(
-                    faultSequenceMediation.getName(), APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null,
-                    organization, false);
+                    faultSequenceMediation.getName().replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""),
+                    APIConstants.DEFAULT_POLICY_VERSION, api.getUuid(), null, organization, false);
             String faultFlowPolicyId;
             if (existingPolicy == null) {
-                OperationPolicyData faultSeqPolicyData =
-                        APIUtil.getPolicyDataForMediationFlow(api, APIConstants.OPERATION_SEQUENCE_TYPE_FAULT,
-                                organization);
+                OperationPolicyData faultSeqPolicyData = APIUtil.getPolicyDataForMediationFlow(api,
+                        APIConstants.OPERATION_SEQUENCE_TYPE_FAULT, organization);
+                faultSeqPolicyData.getSpecification().setName(faultSeqPolicyData.getSpecification().getName()
+                        .replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""));
                 faultFlowPolicyId = addAPISpecificOperationPolicy(apiUUID, faultSeqPolicyData, organization);
             } else {
                 faultFlowPolicyId = existingPolicy.getPolicyId();
             }
 
-            clonedPoliciesMap.put(faultSequenceMediation.getName(), faultFlowPolicyId);
+            clonedPoliciesMap.put(
+                    faultSequenceMediation.getName().replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""),
+                    faultFlowPolicyId);
             api.setFaultSequence(null);
             api.setFaultSequenceMediation(null);
         }
@@ -1690,6 +1700,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (policy.getPolicyId() == null) {
                 if (clonedPoliciesMap.containsKey(policy.getPolicyName())) {
                     policy.setPolicyId(clonedPoliciesMap.get(policy.getPolicyName()));
+                    policyUpdated = true;
+                } else if (clonedPoliciesMap.containsKey(
+                        policy.getPolicyName().replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""))) {
+                    policy.setPolicyId(clonedPoliciesMap.get(
+                            policy.getPolicyName().replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, "")));
                     policyUpdated = true;
                 }
             }
@@ -1872,6 +1887,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                     boolean isPolicyNameMatch = policyData.getSpecification().getName().equals(policy.getPolicyName())
                             || (policyData.getSpecification().getName()).equals(policy.getPolicyName() + "_imported");
+                    if (!isPolicyNameMatch) {
+                        isPolicyNameMatch = policyData.getSpecification().getDisplayName().equals(policy.getPolicyName())
+                                || (policyData.getSpecification().getDisplayName()).equals(policy.getPolicyName() + "_imported");
+                    }
                     if (!isPolicyNameMatch || !policyData.getSpecification().getVersion()
                                     .equals(policy.getPolicyVersion())) {
                         throw new APIManagementException("Applied policy " + policy.getPolicyName()
@@ -3355,6 +3374,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiOrApiProductId = apiMgtDAO.getAPIProductId(apiTypeWrapper.getApiProduct().getId());
                 workflowType = WorkflowConstants.WF_TYPE_AM_API_PRODUCT_STATE;
             } else {
+                // validate mandatory API properties
+                if (StringUtils.equals(action, APIConstants.LC_PUBLISH_LC_STATE)) {
+                    org.json.simple.JSONArray customProperties = APIUtil.getCustomProperties(this.tenantDomain);
+                    List<String> errorProperties = APIUtil.validateMandatoryProperties(customProperties,
+                            apiTypeWrapper.getApi().getAdditionalProperties());
+
+                    if (!errorProperties.isEmpty()) {
+                        String errorString = " : " + String.join(", ", errorProperties);
+                        throw new APIManagementException(errorString, ExceptionCodes.from(ExceptionCodes
+                                .ERROR_WHILE_VALIDATING_MANDATORY_PROPERTIES));
+                    }
+                }
+
                 API api = apiTypeWrapper.getApi();
                 providerName = api.getId().getProviderName();
                 apiName = api.getId().getApiName();
@@ -8223,7 +8255,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         return gatewayPolicyDeploymentMapForResponse;
     }
-    
+
     @Override
     public void updateSoapToRestSequences(String organization, String apiId, List<SOAPToRestSequence> sequences)
             throws APIManagementException {
@@ -8232,7 +8264,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiPersistenceInstance.updateSoapToRestSequences(org, apiId, sequences);
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while sequences to the api  " + apiId, e);
-        }        
+        }
     }
 
     @Override
