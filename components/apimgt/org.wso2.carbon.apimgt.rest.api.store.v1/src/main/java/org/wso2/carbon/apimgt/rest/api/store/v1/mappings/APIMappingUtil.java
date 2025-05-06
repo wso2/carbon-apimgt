@@ -291,6 +291,12 @@ public class APIMappingUtil {
         }
         dto.setInitiatedFromGateway(model.isInitiatedFromGateway());
 
+        if (model.getGatewayType() != null) {
+            dto.setGatewayType(model.getGatewayType());
+        } else {
+            dto.setGatewayType("wso2/synapse");
+        }
+
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
         }
