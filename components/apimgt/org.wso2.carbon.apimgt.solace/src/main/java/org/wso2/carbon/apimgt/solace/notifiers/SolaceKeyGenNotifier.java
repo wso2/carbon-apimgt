@@ -33,6 +33,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.Event;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.solace.api.v2.SolaceV2ApiHolder;
+import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.context.CarbonContext;
 
 import java.util.Set;
@@ -71,7 +72,7 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
         for (SubscribedAPI subscribedAPI : subscriptions) {
             String apiUUID = subscribedAPI.getAPIUUId();
             API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
-            if ("solace".equals(api.getGatewayVendor())) {
+            if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayType())) {
                 isSolaceApiSubscriptionExists = true;
                 break;
             }

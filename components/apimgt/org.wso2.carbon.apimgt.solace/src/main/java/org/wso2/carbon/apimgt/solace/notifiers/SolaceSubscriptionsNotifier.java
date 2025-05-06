@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
 import org.wso2.carbon.apimgt.impl.notifier.exceptions.NotifierException;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.solace.api.v2.SolaceV2ApiHolder;
+import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.context.CarbonContext;
 
 
@@ -45,7 +46,6 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
     protected ApiMgtDAO apiMgtDAO;
     private static final Log log = LogFactory.getLog(SolaceSubscriptionsNotifier.class);
 
-    private static final String SOLACE_GATEWAY_VENDOR = "solace";
     private static final String INFO_OBJECT_KEY = "info";
     private static final String DEFAULT_APP_SOURCE_AND_OWNER = "wso2apim";
     private static final String EVENT_API_PRODUCT_ID = "x-ep-event-api-product-id";
@@ -66,7 +66,7 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
                         getThreadLocalCarbonContext().getUsername());
                 API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
 
-                if (SOLACE_GATEWAY_VENDOR.equals(api.getGatewayVendor())) {
+                if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayType())) {
                     if (APIConstants.EventType.SUBSCRIPTIONS_CREATE.name().equals(event.getType())) {
                         createAccessRequest(subscriptionEvent, api, apiProvider);
                     } else if (APIConstants.EventType.SUBSCRIPTIONS_DELETE.name().equals(event.getType())) {
