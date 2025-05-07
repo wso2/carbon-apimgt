@@ -16,29 +16,29 @@
 package org.wso2.carbon.apimgt.gateway.mediators;
 
 import com.google.gson.JsonObject;
-import java.util.concurrent.ConcurrentHashMap;
 import com.google.gson.JsonParser;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 public class MockDBPersistMediator extends AbstractMediator {
     private static final ConcurrentHashMap<String, String> mockDBMap = new ConcurrentHashMap<>();
-    final String API_UUID = "API_UUID";
-    final String MOCK_DB = "mockDB";
-    final String OPEN_API_STRING = "OPEN_API_STRING";
 
     @Override
     public boolean mediate(MessageContext context) {
         try {
-            String openAPIString = (String) context.getProperty(OPEN_API_STRING);
+            String openAPIString = (String) context.getProperty(APIMgtGatewayConstants.OPEN_API_STRING);
             JsonObject openAPI = JsonParser.parseString(openAPIString).getAsJsonObject();
             String dbKey = Integer.toString(
-                    (context.getProperty(API_UUID) +
-                            (openAPI.get(APIConstants.X_WSO2_MOCKDB) != null ?
-                                    openAPI.get(APIConstants.X_WSO2_MOCKDB).getAsString() : "")).hashCode());
+                    (context.getProperty(APIMgtGatewayConstants.API_UUID_PROPERTY) + (openAPI.get(
+                            APIConstants.X_WSO2_MOCKDB) != null ?
+                            openAPI.get(APIConstants.X_WSO2_MOCKDB).getAsString() :
+                            "")).hashCode());
 
-            if (context.getProperty(MOCK_DB) == null) { // Only for request
+            if (context.getProperty(APIConstants.MOCK_MOCKDB) == null) { // Only for request
                 if (!mockDBMap.containsKey(dbKey)) {
                     setMockDB(openAPI, dbKey);
                     if (log.isDebugEnabled()) {
@@ -46,13 +46,13 @@ public class MockDBPersistMediator extends AbstractMediator {
                     }
                 }
                 // Set the mockDB to the context
-                context.setProperty(MOCK_DB, mockDBMap.get(dbKey));
+                context.setProperty(APIConstants.MOCK_MOCKDB, mockDBMap.get(dbKey));
                 if (log.isDebugEnabled()) {
                     log.debug("MockDB set to Context: " + mockDBMap.get(dbKey));
                 }
             } else { // Only for response
                 // Update the mockDB for the specific API
-                updateMockDB(dbKey, (String) context.getProperty(MOCK_DB));
+                updateMockDB(dbKey, (String) context.getProperty(APIConstants.MOCK_MOCKDB));
                 if (log.isDebugEnabled()) {
                     log.debug("MockDB Updated: " + mockDBMap.get(dbKey));
                 }
@@ -66,8 +66,7 @@ public class MockDBPersistMediator extends AbstractMediator {
 
     private void setMockDB(JsonObject openAPI, String apiKey) {
         if (!openAPI.has(APIConstants.X_WSO2_MOCKDB)) {
-            log.error(
-                    "x-wso2-mockdb field not found in open API definition.");
+            log.error("x-wso2-mockdb field not found in open API definition.");
         } else {
             updateMockDB(apiKey, openAPI.get(APIConstants.X_WSO2_MOCKDB).getAsString());
         }
