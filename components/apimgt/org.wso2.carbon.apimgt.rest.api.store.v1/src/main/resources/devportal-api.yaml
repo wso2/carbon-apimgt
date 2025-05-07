@@ -4880,6 +4880,9 @@ components:
         monetizationLabel:
           type: string
           example: Free
+        gatewayType:
+          type: string
+          example: solace
         gatewayVendor:
           type: string
           example: WSO2

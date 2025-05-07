@@ -1013,6 +1013,7 @@ public class APIMappingUtil {
         apiInfoDTO.setIsSubscriptionAvailable(isSubscriptionAvailable(apiTenant, subscriptionAvailability,
                 subscriptionAllowedTenants));
         apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
+        apiInfoDTO.setGatewayType(api.getGatewayType());
         apiInfoDTO.setMonetizedInfo(api.isMonetizationEnabled());
         apiInfoDTO.setEgress(api.isEgress() == 1);
         apiInfoDTO.setDisplayName(api.getDisplayName());
