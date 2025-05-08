@@ -118,6 +118,26 @@ public class ImportUtils {
     }
 
     /**
+     * Check whether a provided userId corresponds to a valid consumer of the store and subscribe if valid
+     *
+     * @param userId      Username of the Owner
+     * @param groupId     The groupId to which the target subscriber belongs to
+     * @param apiConsumer API Consumer
+     * @throws APIManagementException if an error occurs while checking the validity of user
+     */
+    public static void validateSubscriber(String userId, String groupId, APIConsumer apiConsumer)
+            throws APIManagementException {
+        Subscriber subscriber = apiConsumer.getSubscriber(userId);
+        try {
+            if (subscriber == null && !APIUtil.isPermissionCheckDisabled()) {
+                apiConsumer.addSubscriberOnly(userId, groupId);
+            }
+        } catch (APIManagementException e) {
+            throw new APIManagementException("Provided Application Owner is Invalid", e);
+        }
+    }
+
+    /**
      * This extracts information for creating an APIKey from an OAuthApplication
      *
      * @param applicationKeyDto Application Key DTO
@@ -154,7 +174,7 @@ public class ImportUtils {
      * @throws UserStoreException     if an error occurs while checking whether the tenant domain exists
      */
     public static List<APIIdentifier> importSubscriptions(Set<ExportedSubscribedAPI> subscribedAPIs, String userId,
-                                                          Application application, Boolean update,
+                                                          Application application, Boolean update,Boolean ignoreTier,
                                                           APIConsumer apiConsumer, String organization)
             throws APIManagementException,
             UserStoreException {
@@ -253,6 +273,18 @@ public class ImportUtils {
                             // on update skip subscriptions that already exists
                             apiConsumer.addSubscription(apiTypeWrapper, userId, application);
                         }
+                    } else if (ignoreTier != null && ignoreTier && apiTypeWrapper.getStatus() != null
+                            && APIConstants.PUBLISHED.equals(apiTypeWrapper.getStatus())) {
+                        apiTypeWrapper.setTier(targetTier);
+                        // Add subscription if update flag is not specified
+                        // It will throw an error if subscriber already exists
+                        if (update == null || !update) {
+                            apiConsumer.addSubscription(apiTypeWrapper, userId, application);
+                        } else if (!apiConsumer.isSubscribedToApp(subscribedAPI.getApiId(), userId
+                                , application.getId())) {
+                            // on update skip subscriptions that already exists
+                            apiConsumer.addSubscription(apiTypeWrapper, userId, application);
+                        }
                     } else {
                         log.error("Failed to import Subscription as API/API Product "
                                 + apiIdentifier.getName() + "-" + apiIdentifier.getVersion() + " as one or more " +
@@ -308,10 +340,10 @@ public class ImportUtils {
             }
         }
         if (!apiTypeWrapper.isAPIProduct()) {
-            log.error("Tier:" + targetTierName + " is not available for API " + api.getId().getApiName() + "-" + api
+            log.warn("Tier:" + targetTierName + " is not available for API " + api.getId().getApiName() + "-" + api
                     .getId().getVersion());
         } else {
-            log.error(
+            log.warn(
                     "Tier:" + targetTierName + " is not available for API Product " + apiProduct.getId().getName() + "-"
                             + apiProduct.getId().getVersion());
         }

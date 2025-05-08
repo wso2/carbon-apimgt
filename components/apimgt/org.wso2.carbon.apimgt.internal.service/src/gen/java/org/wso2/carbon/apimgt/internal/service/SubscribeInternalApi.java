@@ -27,7 +27,7 @@ import javax.validation.constraints.*;
 
 @Api(description = "the subscribe-internal API")
 
-@Produces({ "application/json" })
+
 
 
 public class SubscribeInternalApi  {
@@ -45,7 +45,7 @@ SubscribeInternalApiService delegate = new SubscribeInternalApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Subscription created successfully", response = SubscriptionDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response subscribeToAPI(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "Application ID of the subscription ")  @QueryParam("appId") Integer appId,  @ApiParam(value = "Application UUID ")  @QueryParam("appUuid") String appUuid, @ApiParam(value = "The API object" ) APIDTO api) throws APIManagementException{
+    public Response subscribeToAPI( @NotNull  @ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "Application ID of the subscription ")  @QueryParam("appId") Integer appId,  @ApiParam(value = "Application UUID ")  @QueryParam("appUuid") String appUuid, @ApiParam(value = "The API object" ) APIDTO api) throws APIManagementException{
         return delegate.subscribeToAPI(xWSO2Tenant, appId, appUuid, api, securityContext);
     }
 }

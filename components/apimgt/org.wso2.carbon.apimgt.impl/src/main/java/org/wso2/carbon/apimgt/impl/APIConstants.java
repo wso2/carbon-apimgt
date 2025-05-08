@@ -1704,6 +1704,7 @@ public final class APIConstants {
     public static final String OPEN_API_V3 = "3.0.x";
     public static final String OPEN_API = "openapi";
     public static final String OAS_V31 = "v31";
+    public static final String OAS_V30 = "v30";
     public static final String OPEN_API_V31_VERSION = "3.1.0";
     public static final String OPEN_API_VERSION_REGEX = "3\\.0\\.\\d{1,}";
     public static final String SWAGGER_IS_MISSING_MSG = "swagger is missing";
@@ -1732,6 +1733,11 @@ public final class APIConstants {
     public static final String SWAGGER_FILE = "file";
     public static final String SWAGGER_RESOURCE_PATH = "resourcePath";
     public static final String API_VERSION = "apiVersion";
+
+    public static final String OPENAPI_OBJECT_DATA_TYPE = "object";
+    public static final String OPENAPI_ARRAY_DATA_TYPE = "array";
+    public static final String OPENAPI_STRING_DATA_TYPE = "string";
+    public static final String OPENAPIV31_SCHEMA_TYPE_NULLABLE = "null";
 
     //swagger MG related constants
     public static final String X_WSO2_AUTH_HEADER = "x-wso2-auth-header";
@@ -1850,6 +1856,15 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_CLIENT_ID = "clientId";
     public static final String ENDPOINT_SECURITY_CLIENT_SECRET = "clientSecret";
     public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
+    public static final String ENDPOINT_SECURITY_PROXY_PASSWORD = "proxyPassword";
+    public static final String CONNECTION_TIMEOUT_CONFIG_TYPE = "connectionTimeoutConfigType";
+    public static final String PROXY_CONFIG_TYPE = "proxyConfigType";
+    public static final String CONNECTION_TIMEOUT_DURATION = "connectionTimeoutDuration";
+    public static final String CONNECTION_REQUEST_TIMEOUT_DURATION = "connectionRequestTimeoutDuration";
+    public static final String SOCKET_TIMEOUT_DURATION = "socketTimeoutDuration";
+    public static final String PROXY_CONFIGS = "proxyConfigs";
+    public static final String PROXY_ENABLED = "proxyEnabled";
+    public static final String CONNECTION_TIMEOUT_DEFAULT = "-1";
     public static final String ENDPOINT_SPECIFIC_CONFIG = "config";
     public static final String ENDPOINT_CONFIG_ACTION_DURATION = "actionDuration";
     public static final String ENDPOINT_TYPE_GRAPHQL = "graphql";
@@ -3223,6 +3238,7 @@ public final class APIConstants {
     public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION_XML = ".xml";
     public static final String CC_POLICY_DEFINITION_EXTENSION = ".gotmpl";
     public static final String YAML_CONTENT_TYPE = "yaml";
+    public static final String J2_CONTENT_TYPE = "j2";
     public static final String COMMON_OPERATION_POLICY_SPECIFICATIONS_LOCATION = "repository" + File.separator
             + "resources" + File.separator + "operation_policies" + File.separator + "specifications";
     public static final String COMMON_OPERATION_POLICY_DEFINITIONS_LOCATION = "repository" + File.separator
@@ -3233,6 +3249,7 @@ public final class APIConstants {
     public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_SOAPTOREST = "SOAPTOREST";
     public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_GRAPHQL = "GRAPHQL";
     public static final String DEFAULT_POLICY_VERSION = "v1";
+    public static final String POLICY_FILENAME_INVALID_CHARS_REGEX = "[\\/:*?\"<>|]";
 
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";

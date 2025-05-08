@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.31.87-SNAPSHOT</version>
+        <version>9.31.111-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -118,76 +118,54 @@
         </dependency>
     </dependencies>
     <build>
-        <pluginManagement>
             <plugins>
                 <plugin>
-                <groupId>org.wso2.maven.plugins</groupId>
-                <artifactId>swagger2cxf-maven-plugin</artifactId>
-                <version>1.0-SNAPSHOT</version>
-                <configuration>
-                <inputSpec>${project.basedir}/src/main/resources/api.yaml</inputSpec>
-                </configuration>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-war-plugin</artifactId>
+                    <artifactId>maven-clean-plugin</artifactId>
                     <configuration>
-                        <webResources>
-                            <resource>
-                                <!-- this is relative to the pom.xml directory -->
-                                <directory>src/main/webapp</directory>
-                            </resource>
-                        </webResources>
-                        <warName>internal#data#v1</warName>
+                        <filesets>
+                            <fileset>
+                                <directory>src/gen/java</directory>
+                                <includes>
+                                    <include>**/*</include>
+                                </includes>
+                                <followSymlinks>false</followSymlinks>
+                            </fileset>
+                        </filesets>
                     </configuration>
                 </plugin>
-            </plugins>
-        </pluginManagement>
-        <plugins>
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>src/gen/java</directory>
-                            <includes>
-                                <include>**/*</include>
-                            </includes>
-                            <followSymlinks>false</followSymlinks>
-                        </fileset>
-                    </filesets>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>io.swagger</groupId>
-                <artifactId>swagger-codegen-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>generate-server-stubs</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/api.yaml</inputSpec>
-                            <language>jaxrs-cxf-cdi</language>
-                            <configOptions>
-                                <apiPackage>org.wso2.carbon.apimgt.internal.service</apiPackage>
-                                <modelPackage>org.wso2.carbon.apimgt.internal.service.dto</modelPackage>
-                                <sourceFolder>src/gen/java</sourceFolder>
-                                <dateLibrary>java8</dateLibrary>
-                                <hideGenerationTimestamp>true</hideGenerationTimestamp>
-                            </configOptions>
-                            <output>.</output>
-                            <templateDirectory>
-                                ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/swagger-templates
-                            </templateDirectory>
-                            <skipOverwrite>true</skipOverwrite>
-                            <modelNameSuffix>DTO</modelNameSuffix>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+                <plugin>
+                    <groupId>org.openapitools</groupId>
+                    <artifactId>openapi-generator-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>generate-server-stubs</id>
+                            <goals>
+                                <goal>generate</goal>
+                            </goals>
+                            <configuration>
+                                <inputSpec>${project.basedir}/src/main/resources/api.yaml</inputSpec>
+                                <language>jaxrs-cxf-cdi</language>
+                                <configOptions>
+                                    <apiPackage>org.wso2.carbon.apimgt.internal.service</apiPackage>
+                                    <modelPackage>org.wso2.carbon.apimgt.internal.service.dto</modelPackage>
+                                    <sourceFolder>src/gen/java</sourceFolder>
+                                    <dateLibrary>java8</dateLibrary>
+                                    <hideGenerationTimestamp>true</hideGenerationTimestamp>
+                                    <useBeanValidation>true</useBeanValidation>
+                                    <performBeanValidation>true</performBeanValidation>
+                                </configOptions>
+                                <generateModels>true</generateModels>
+                                <modelNameSuffix>DTO</modelNameSuffix>
+                                <output>.</output>
+                                <templateDirectory>
+                                    ../org.wso2.carbon.apimgt.rest.api.util/src/main/resources/server-templates
+                                </templateDirectory>
+                                <skipOverwrite>true</skipOverwrite>
+                                <modelNameSuffix>DTO</modelNameSuffix>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
