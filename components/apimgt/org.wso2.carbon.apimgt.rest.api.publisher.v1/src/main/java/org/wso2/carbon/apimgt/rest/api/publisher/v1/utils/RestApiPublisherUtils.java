@@ -300,13 +300,14 @@ public class RestApiPublisherUtils {
 
         File exportFolder = null;
         try {
-            exportFolder = CommonUtil.createTempDirectoryFromName(policyData.getSpecification().getName()
-                    + "_" +policyData.getSpecification().getVersion());
+            String sanitizedPolicyName = policyData.getSpecification().getName()
+                    .replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, "");
+            exportFolder = CommonUtil.createTempDirectoryFromName(sanitizedPolicyName + "_" +
+                    policyData.getSpecification().getVersion());
             String exportAPIBasePath = exportFolder.toString();
-            String archivePath =
-                    exportAPIBasePath.concat(File.separator + policyData.getSpecification().getName());
+            String archivePath = exportAPIBasePath.concat(File.separator + sanitizedPolicyName);
             CommonUtil.createDirectory(archivePath);
-            String policyName = archivePath + File.separator + policyData.getSpecification().getName();
+            String policyName = archivePath + File.separator + sanitizedPolicyName;
             if (policyData.getSpecification() != null) {
                 if (format.equalsIgnoreCase(ExportFormat.YAML.name())) {
                     CommonUtil.writeDtoToFile(policyName, ExportFormat.YAML,

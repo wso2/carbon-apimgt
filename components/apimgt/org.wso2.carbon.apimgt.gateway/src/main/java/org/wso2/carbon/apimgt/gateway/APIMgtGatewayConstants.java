@@ -180,6 +180,7 @@ public class APIMgtGatewayConstants {
     public static final String OAUTH_ENDPOINT_INSTANCE = "oauth.instance";
     public static final String VALIDATED_X509_CERT = "ValidatedX509Cert";
     public static final String RESOURCE_SPAN = "API:Resource";
+    public static final String AUTO_TRANSPORT_OPERATION_CLEANUP = "autoTransportOperationCleanUp";
 
     /**
      * Web-sub related properties

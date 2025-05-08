@@ -714,7 +714,7 @@ public class TemplateBuilderUtil {
     }
 
     public static GatewayAPIDTO retrieveGatewayAPIDto(APIProduct apiProduct, Environment environment,
-                                                      String tenantDomain, String extractedFolderPath)
+            String tenantDomain, String extractedFolderPath, String apiDefinition)
             throws APIManagementException, XMLStreamException, APITemplateException {
 
         List<ClientCertificateDTO> clientCertificatesDTOListProduction =
@@ -723,12 +723,29 @@ public class TemplateBuilderUtil {
                 ImportUtils.retrieveClientCertificates(extractedFolderPath, APIConstants.API_KEY_TYPE_SANDBOX);
         Map<String, APIDTO> apidtoMap = retrieveAssociatedApis(extractedFolderPath);
         Map<String, APIDTO> associatedAPIsMap = convertAPIIdToDto(apidtoMap.values());
+        APIDefinition parser = OASParserUtil.getOASParser(apiDefinition);
+        Set<URITemplate> uriTemplates = Collections.emptySet();
+        if (parser != null) {
+            uriTemplates = parser.getURITemplates(apiDefinition);
+        }
         for (APIProductResource productResource : apiProduct.getProductResources()) {
             String apiId = productResource.getApiId();
             APIDTO apidto = associatedAPIsMap.get(apiId);
             if (apidto != null) {
                 API api = APIMappingUtil.fromDTOtoAPI(apidto, apidto.getProvider());
                 productResource.setApiIdentifier(api.getId());
+                if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
+                    for (URITemplate uriTemplate : uriTemplates) {
+                        URITemplate template = productResource.getUriTemplate();
+                        if (template.getHTTPVerb()
+                                .equalsIgnoreCase(uriTemplate.getHTTPVerb()) && template.getUriTemplate()
+                                .equals(uriTemplate.getUriTemplate())) {
+                            template.setMediationScript(uriTemplate.getMediationScript());
+                            template.setMediationScripts(uriTemplate.getHTTPVerb(), uriTemplate.getMediationScript());
+                            break;
+                        }
+                    }
+                }
                 if (api.isAdvertiseOnly()) {
                     productResource.setEndpointConfig(APIUtil.generateEndpointConfigForAdvertiseOnlyApi(api));
                 } else {
@@ -802,8 +819,9 @@ public class TemplateBuilderUtil {
             // check the endpoint type
             if (!StringUtils.isEmpty(api.getEndpointConfig())) {
                 JsonObject endpointConfObj = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
-                if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                        endpointConfObj.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())) {
+                if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(endpointConfObj.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE)
+                        .getAsString()) && !APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(
+                        api.getImplementation())) {
                     addEndpoints(api, apiTemplateBuilder, productAPIDto, null);
                 }
             } else {
@@ -1516,6 +1534,25 @@ public class TemplateBuilderUtil {
                         .get(APIConstants.ENDPOINT_SECURITY_PASSWORD));
                 gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(passwordDto,
                         gatewayAPIDTO.getCredentialsToBeAdd()));
+            }
+            if (endpointSecurity.has(APIConstants.PROXY_CONFIGS)) {
+                org.json.JSONObject proxyConfigs = (org.json.JSONObject) endpointSecurity.get(APIConstants
+                        .PROXY_CONFIGS);
+                if (Boolean.TRUE.equals(proxyConfigs.get(APIConstants.PROXY_ENABLED))) {
+                    String proxyPassword = (String) proxyConfigs.get(APIConstants.ENDPOINT_SECURITY_PROXY_PASSWORD);
+                    CredentialDto proxyPasswordDto = new CredentialDto();
+                    if (StringUtils.isNotEmpty(prefix)) {
+                        proxyPasswordDto.setAlias(prefix.concat("--").concat(GatewayUtils
+                                .retrieveOAuthProxyPasswordAlias(api.getId().getApiName(), api.getId().getVersion(),
+                                        type)));
+                    } else {
+                        proxyPasswordDto.setAlias(GatewayUtils.retrieveOAuthProxyPasswordAlias(api.getId().getApiName(),
+                                api.getId().getVersion(), type));
+                    }
+                    proxyPasswordDto.setPassword(proxyPassword);
+                    gatewayAPIDTO.setCredentialsToBeAdd(addCredentialsToList(proxyPasswordDto,
+                            gatewayAPIDTO.getCredentialsToBeAdd()));
+                }
             }
         } else if (APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.equalsIgnoreCase((String)
                 endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE))) {

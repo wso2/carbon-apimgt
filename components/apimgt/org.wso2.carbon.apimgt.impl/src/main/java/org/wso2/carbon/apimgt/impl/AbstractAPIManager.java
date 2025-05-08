@@ -605,8 +605,11 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.isApiNameWithDifferentCaseExist(apiName, tenantName, organization);
     }
 
-    public void addSubscriber(String username, String groupingId)
-            throws APIManagementException {
+    public void addSubscriber(String username, String groupingId) throws APIManagementException {
+        addSubscriber(username, groupingId, null);
+    }
+
+    public void addSubscriber(String username, String groupingId, String organization) throws APIManagementException {
 
         Subscriber subscriber = new Subscriber(username);
         subscriber.setSubscribedDate(new Date());
@@ -619,8 +622,28 @@ public abstract class AbstractAPIManager implements APIManager {
             if (APIUtil.isDefaultApplicationCreationEnabled() &&
                     !APIUtil.isDefaultApplicationCreationDisabledForTenant(getTenantDomain(username))) {
                 // Add a default application once subscriber is added
-                addDefaultApplicationForSubscriber(subscriber);
+                addDefaultApplicationForSubscriber(subscriber, organization);
             }
+        } catch (APIManagementException e) {
+            String msg = "Error while adding the subscriber " + subscriber.getName();
+            throw new APIManagementException(msg, e);
+        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+            String msg = "Error while adding the subscriber " + subscriber.getName();
+            throw new APIManagementException(msg, e);
+        }
+    }
+
+    public void addSubscriberOnly(String username, String groupingId)
+            throws APIManagementException {
+
+        Subscriber subscriber = new Subscriber(username);
+        subscriber.setSubscribedDate(new Date());
+        try {
+            int tenantId = getTenantManager()
+                    .getTenantId(getTenantDomain(username));
+            subscriber.setEmail(StringUtils.EMPTY);
+            subscriber.setTenantId(tenantId);
+            apiMgtDAO.addSubscriber(subscriber, groupingId);
         } catch (APIManagementException e) {
             String msg = "Error while adding the subscriber " + subscriber.getName();
             throw new APIManagementException(msg, e);
@@ -641,7 +664,8 @@ public abstract class AbstractAPIManager implements APIManager {
      * @param subscriber Subscriber
      * @throws APIManagementException if an error occurs while adding default application
      */
-    private void addDefaultApplicationForSubscriber(Subscriber subscriber) throws APIManagementException {
+    private void addDefaultApplicationForSubscriber(Subscriber subscriber, String organization)
+            throws APIManagementException {
 
         Application defaultApp = new Application(APIConstants.DEFAULT_APPLICATION_NAME, subscriber);
         defaultApp.setTier(APIUtil.getDefaultApplicationLevelPolicy(subscriber.getTenantId()));
@@ -650,6 +674,9 @@ public abstract class AbstractAPIManager implements APIManager {
         defaultApp.setTokenType(APIConstants.TOKEN_TYPE_JWT);
         defaultApp.setUUID(UUID.randomUUID().toString());
         defaultApp.setDescription(APIConstants.DEFAULT_APPLICATION_DESCRIPTION);
+        if (organization != null) {
+            defaultApp.setSubOrganization(organization);
+        }
         int applicationId = apiMgtDAO.addApplication(defaultApp, subscriber.getName(), tenantDomain);
 
         ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
@@ -1232,7 +1259,7 @@ public abstract class AbstractAPIManager implements APIManager {
         int internalId = apiMgtDAO.getAPIID(currentApiUuid);
         apiId.setId(internalId);
         apiMgtDAO.setServiceStatusInfoToAPI(api, internalId);
-        if (api.getGatewayVendor() == null) {
+        if (api.getGatewayVendor() == null || "null".equals(api.getGatewayVendor())) {
             String gatewayVendor = apiMgtDAO.getGatewayVendorByAPIUUID(uuid);
             if (gatewayVendor == null) {
                 gatewayVendor = APIConstants.WSO2_GATEWAY_ENVIRONMENT;

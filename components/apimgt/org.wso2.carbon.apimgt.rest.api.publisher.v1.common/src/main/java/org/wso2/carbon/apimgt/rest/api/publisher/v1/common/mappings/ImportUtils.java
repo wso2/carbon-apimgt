@@ -710,6 +710,14 @@ public class ImportUtils {
             }
         }
 
+        if (policySpec == null) {
+            // As the last option, we check whether the policy is updated with the policy file,
+            // which has a name containing no special characters in the API project.
+            policySpec = getOperationPolicySpecificationFromFile(policyDirectory, APIUtil.getOperationPolicyFileName(
+                    appliedPolicy.getPolicyName().replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""),
+                    appliedPolicy.getPolicyVersion(), policyType));
+        }
+
         if (policySpec != null) {
             // if a policy specification is found, we need to validate the policy applied parameters.
             provider.validateAppliedPolicyWithSpecification(policySpec, appliedPolicy, apiType);
@@ -903,6 +911,12 @@ public class ImportUtils {
                 if (!importedPolicies.containsKey(policyFileName)) {
                     OperationPolicySpecification policySpec =
                             getOperationPolicySpecificationFromFile(policyDirectory, policyFileName);
+                    if (policySpec == null) {
+                        policySpec = getOperationPolicySpecificationFromFile(policyDirectory,
+                                APIUtil.getOperationPolicyFileName(policy.getPolicyName()
+                                                .replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""),
+                                        policy.getPolicyVersion(), policyType));
+                    }
                     if (policySpec != null) {
                         OperationPolicyData operationPolicyData = new OperationPolicyData();
                         operationPolicyData.setSpecification(policySpec);
@@ -916,6 +930,18 @@ public class ImportUtils {
                         if (synapseDefinition == null) {
                             synapseDefinition = APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
                                     policyFileName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML);
+                        }
+                        // If the policy definition is still null, definition name is checked after removal of special
+                        // characters
+                        if (synapseDefinition == null) {
+                            String sanitizedPolicyName = policyFileName
+                                    .replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, "");
+                            synapseDefinition = APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                    sanitizedPolicyName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                            if (synapseDefinition == null) {
+                                synapseDefinition = APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                        sanitizedPolicyName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML);
+                            }
                         }
                         if (synapseDefinition != null) {
                             synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);

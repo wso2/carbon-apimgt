@@ -46,6 +46,8 @@ import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
@@ -371,6 +373,13 @@ public class InMemoryAPIDeployer {
                 DataHolder.getInstance().getApiToCertificatesMap().remove(gatewayEvent.getUuid());
                 DataHolder.getInstance().removeKeyManagerToAPIMapping(gatewayAPIDTO.getApiId());
                 DataHolder.getInstance().releaseCache(generateAPIKeyForEndpoints(gatewayAPIDTO));
+                if (isAPIResourceValidationEnabled()) {
+                    new CacheInvalidationServiceImpl().invalidateResourceCache(
+                            gatewayEvent.getContext(),
+                            gatewayEvent.getVersion(),
+                            gatewayEvent.getTenantDomain(),
+                            new ArrayList<>());
+                }
             }
     }
 
@@ -385,6 +394,22 @@ public class InMemoryAPIDeployer {
         } finally {
             MessageContext.destroyCurrentMessageContext();
         }
+    }
+
+    /**
+     * Check whether the API resource validation is enabled or not.
+     *
+     * @return true if enabled, false otherwise
+     */
+    public boolean isAPIResourceValidationEnabled() {
+        try {
+            APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+            String gatewayResourceCacheEnabled = config.getFirstProperty(APIConstants.GATEWAY_RESOURCE_CACHE_ENABLED);
+            return Boolean.parseBoolean(gatewayResourceCacheEnabled);
+        } catch (Exception e) {
+            log.error("Error occurred while reading Gateway cache configurations. Use default configurations" + e);
+        }
+        return true;
     }
 
     public void cleanDeployment(String artifactRepositoryPath) {

@@ -27,6 +27,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
@@ -94,6 +95,11 @@ public class BasicAuthCredentialValidator {
             Options options = client.getOptions();
             options.setCallTransportCleanup(true);
             options.setManageSession(true);
+            if (System.getProperty(APIMgtGatewayConstants.AUTO_TRANSPORT_OPERATION_CLEANUP) != null) {
+                options.setProperty(ServiceClient.AUTO_OPERATION_CLEANUP,
+                        Boolean.parseBoolean(
+                                System.getProperty(APIMgtGatewayConstants.AUTO_TRANSPORT_OPERATION_CLEANUP)));
+            }
             CarbonUtils.setBasicAccessSecurityHeaders(username, password, client);
         } catch (AxisFault axisFault) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage(), axisFault);
