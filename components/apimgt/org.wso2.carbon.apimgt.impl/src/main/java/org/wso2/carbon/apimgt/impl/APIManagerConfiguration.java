@@ -3425,6 +3425,11 @@ public class APIManagerConfiguration {
         return gatewayNotificationConfiguration;
     }
 
+    /**
+     * Get Solace Config
+     *
+     * @return SolaceConfig
+     */
     public SolaceConfig getSolaceConfig() {
         return solaceConfig;
     }
