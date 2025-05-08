@@ -13,6 +13,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
+import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -337,4 +338,37 @@ public class DatabasePersistenceUtil {
         }
         return null;
     }
+
+    public static PublisherAPI getAPIForSearch(JsonObject json) {
+        PublisherAPI api = new PublisherAPI();
+
+      try {
+          api.setContext(safeGetAsString(json, "context"));
+          api.setDescription(safeGetAsString(json, "description"));
+          api.setId(safeGetAsString(json.get("id").getAsJsonObject(), "uuid"));
+          api.setStatus(safeGetAsString(json, "status"));
+          api.setApiName(safeGetAsString(json.get("id").getAsJsonObject(), "apiName"));
+          api.setProviderName(safeGetAsString(json.get("id").getAsJsonObject(), "providerName"));
+          api.setVersion(safeGetAsString(json.get("id").getAsJsonObject(), "version"));
+          api.setAdvertiseOnly(getAsBoolean(safeGetAsString(json, "advertiseOnly")));
+          api.setThumbnail(safeGetAsString(json, "thumbnailUrl"));
+          api.setBusinessOwner(safeGetAsString(json, "businessOwner"));
+          api.setBusinessOwnerEmail(safeGetAsString(json, "businessOwnerEmail"));
+          api.setTechnicalOwner(safeGetAsString(json, "technicalOwner"));
+          api.setTechnicalOwnerEmail(safeGetAsString(json, "technicalOwnerEmail"));
+          api.setMonetizationStatus(getAsBoolean(safeGetAsString(json, "monetizationStatus")));
+      } catch (Exception e) {
+          throw new RuntimeException("Error while converting JSON to PublisherAPI object", e);
+      }
+
+      return api;
+    }
+
+    public static String getSearchQuery(String searchQuery) {
+        if (searchQuery != null && !searchQuery.isEmpty()) {
+            return searchQuery.split(":", 2)[1].trim();
+        }
+        return null;
+    }
+
 }

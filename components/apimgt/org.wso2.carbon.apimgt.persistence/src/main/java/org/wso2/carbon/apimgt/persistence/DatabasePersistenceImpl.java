@@ -7,6 +7,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
 import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.persistence.dao.PersistenceDAO;
@@ -15,6 +16,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.utils.DatabasePersistenceUtil;
 import org.wso2.carbon.apimgt.persistence.utils.PublisherAPISearchResultComparator;
+import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -37,7 +39,9 @@ public class DatabasePersistenceImpl implements APIPersistence {
     public PublisherAPI addAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
         API api = APIMapper.INSTANCE.toApi(publisherAPI);
         String uuid = UUID.randomUUID().toString();
+        APIIdentifier id = new APIIdentifier(api.getId().getProviderName(), api.getId().getApiName(), api.getId().getVersion(), uuid);
         api.setUuid(uuid);
+        api.setId(id);
         api.setCreatedTime(String.valueOf(new Date().getTime()));
 
         JsonObject json = DatabasePersistenceUtil.mapApiToJson(api);
@@ -119,10 +123,6 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
         log.debug("Requested query for publisher search: " + searchQuery);
 
-//        String modifiedQuery = RegistrySearchUtil.getPublisherSearchQuery(searchQuery, ctx);
-//
-//        log.debug("Modified query for publisher search: " + modifiedQuery);
-
         result = searchPaginatedPublisherAPIs(searchQuery, requestedTenantDomain, start, offset);
 
         return result;
@@ -190,18 +190,54 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherContentSearchResult searchContentForPublisher(Organization org, String searchQuery, int start, int offset, UserContext ctx) throws APIPersistenceException {
-        PublisherContentSearchResult result = null;
+        PublisherContentSearchResult searchResult = new PublisherContentSearchResult();
 
         try {
             String requestedTenantDomain = org.getName();
-            int totalLength = PersistenceDAO.getInstance().getAllAPICount(requestedTenantDomain);
+            int totalLength = 0;
+            searchQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
+            List<String> results = persistenceDAO.searchAPISchemaContent(searchQuery, requestedTenantDomain);
+            List<SearchContent> contentData = new ArrayList<>();
 
+            for (String result: results) {
+                JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();
+                String type;
 
+//                if (jsonObject.has("type") && !jsonObject.get("type").isJsonNull()) {
+//                    type = jsonObject.get("type").getAsString();
+//                } else {
+//                    type = "API";
+//                }
+
+                PublisherAPI publisherAPI = DatabasePersistenceUtil.getAPIForSearch(jsonObject);
+                PublisherSearchContent content = new PublisherSearchContent();
+                content.setContext(publisherAPI.getContext());
+                content.setDescription(publisherAPI.getDescription());
+                content.setId(publisherAPI.getId());
+                content.setName(publisherAPI.getApiName());
+                content.setProvider(
+                        DatabasePersistenceUtil.replaceEmailDomainBack(publisherAPI.getProviderName()));
+                content.setType("API");
+                content.setVersion(publisherAPI.getVersion());
+                content.setStatus(publisherAPI.getStatus());
+                content.setAdvertiseOnly(publisherAPI.isAdvertiseOnly());
+                content.setThumbnailUri(publisherAPI.getThumbnail());
+                content.setBusinessOwner(publisherAPI.getBusinessOwner());
+                content.setBusinessOwnerEmail(publisherAPI.getBusinessOwnerEmail());
+                content.setTechnicalOwner(publisherAPI.getTechnicalOwner());
+                content.setTechnicalOwnerEmail(publisherAPI.getTechnicalOwnerEmail());
+                content.setMonetizationStatus(publisherAPI.getMonetizationStatus());
+                contentData.add(content);
+            }
+            totalLength = results.size();
+            searchResult.setTotalCount(totalLength);
+            searchResult.setReturnedCount(contentData.size());
+            searchResult.setResults(contentData);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
-        return null;
+        return searchResult;
     }
 
     @Override

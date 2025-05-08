@@ -90,7 +90,7 @@ public class PersistenceDAO {
             prepStmt.setString(1, tenantDomain);
 
             if (!searchQuery.isEmpty()) {
-                prepStmt.setString(2, searchQuery);
+                prepStmt.setString(2, "%" + searchQuery.toLowerCase() + "%");
                 prepStmt.setInt(3, start);
                 prepStmt.setInt(4, offset);
             } else {
@@ -196,6 +196,36 @@ public class PersistenceDAO {
             PersistanceDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return swaggerDefinition;
+    }
+
+    public List<String> searchAPISchemaContent(String searchQuery, String tenantDomain) throws SQLException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        List<String> apiSchemas = new ArrayList<>();
+
+        String query = SQLConstants.SEARCH_API_SCHEMA_CONTENT;
+
+        try {
+            connection = PersistanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, tenantDomain);
+            prepStmt.setString(2, searchQuery.toLowerCase());
+
+            rs = prepStmt.executeQuery();
+
+            while (rs.next()) {
+                String schemaJson = rs.getString("API_SCHEMA");
+                apiSchemas.add(schemaJson);
+            }
+
+            return apiSchemas;
+
+        } finally {
+            PersistanceDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
     }
 
     private void handleException(String msg, Throwable t) throws APIManagementException {
