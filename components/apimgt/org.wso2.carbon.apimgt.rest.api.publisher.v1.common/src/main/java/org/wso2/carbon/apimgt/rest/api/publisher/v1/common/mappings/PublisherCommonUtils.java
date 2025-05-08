@@ -2406,7 +2406,7 @@ public class PublisherCommonUtils {
         GraphQLValidationResponseDTO validationResponse = new GraphQLValidationResponseDTO();
         boolean isValid = false;
         try {
-            if (url != null && !url.isEmpty()) {
+            if (url != null && StringUtils.isNotEmpty(url)) {
                 if (useIntrospection) {
                     schema = generateGraphQLSchemaFromIntrospection(url);
                 } else {
@@ -2420,7 +2420,7 @@ public class PublisherCommonUtils {
                         ExceptionCodes.UNSUPPORTED_GRAPHQL_FILE_EXTENSION);
             }
 
-            if (schema == null || schema.isEmpty()) {
+            if (schema == null || StringUtils.isEmpty(schema)) {
                 throw new APIManagementException("GraphQL Schema cannot be empty or null to validate it",
                         ExceptionCodes.GRAPHQL_SCHEMA_CANNOT_BE_NULL);
             }
@@ -2474,7 +2474,7 @@ public class PublisherCommonUtils {
             HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
             Gson gson = new Gson();
 
-            if (graphQLIntrospectionQuery == null || graphQLIntrospectionQuery.isEmpty()) {
+            if (graphQLIntrospectionQuery == null || StringUtils.isEmpty(graphQLIntrospectionQuery)) {
                 graphQLIntrospectionQuery = APIUtil.getIntrospectionQuery();
             }
             String requestBody = gson.toJson(
@@ -2541,9 +2541,9 @@ public class PublisherCommonUtils {
                     log.debug(
                             "Unable to generate GraphQL schema from url." + " URL returned response code: "
                                     + response.getStatusLine().getStatusCode());
-                    throw new APIManagementException("Error occurred while retrieving GraphQL schema from schema URL",
-                            ExceptionCodes.RETRIEVE_GRAPHQL_SCHEMA_FROM_URL_ERROR);
                 }
+                throw new APIManagementException("Error occurred while retrieving GraphQL schema from schema URL",
+                    ExceptionCodes.RETRIEVE_GRAPHQL_SCHEMA_FROM_URL_ERROR);
             }
         } catch (IOException e) {
             if (log.isDebugEnabled()) {
