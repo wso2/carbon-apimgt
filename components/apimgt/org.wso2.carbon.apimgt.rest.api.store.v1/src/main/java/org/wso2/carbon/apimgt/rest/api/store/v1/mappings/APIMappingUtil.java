@@ -496,8 +496,22 @@ public class APIMappingUtil {
 
         // Set Async protocols of API based on the gateway vendor
         if (SolaceConstants.SOLACE_ENVIRONMENT.equals(apidto.getGatewayType())) {
-            apidto.setAsyncTransportProtocols(AdditionalSubscriptionInfoMappingUtil.setEndpointURLsForApiDto(
-                    model.getApi(), organization));
+            String asyncDefinition = apidto.getApiDefinition();
+            List<String> urlsStringList = new ArrayList<>();
+            JsonObject configObject = JsonParser.parseString(asyncDefinition).getAsJsonObject();
+            JsonObject servers = configObject.getAsJsonObject("servers");
+            for (Map.Entry<String, JsonElement> entry : servers.entrySet()) {
+                JsonObject server = entry.getValue().getAsJsonObject();
+                String protocol = server.get("protocol").getAsString();
+                String url = server.get("url").getAsString();
+
+                Map<String, String> asyncProtocol = new HashMap<>();
+                asyncProtocol.put("protocol", protocol);
+                asyncProtocol.put("endPointUrl", url);
+
+                urlsStringList.add(new JSONObject(asyncProtocol).toString());
+            }
+            apidto.setAsyncTransportProtocols(urlsStringList);
         }
         return apidto;
     }
