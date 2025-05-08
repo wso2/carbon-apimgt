@@ -16,7 +16,6 @@ import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.utils.DatabasePersistenceUtil;
 import org.wso2.carbon.apimgt.persistence.utils.PublisherAPISearchResultComparator;
-import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
 
 import java.sql.SQLException;
 import java.util.*;
@@ -44,10 +43,14 @@ public class DatabasePersistenceImpl implements APIPersistence {
         api.setId(id);
         api.setCreatedTime(String.valueOf(new Date().getTime()));
 
-        JsonObject json = DatabasePersistenceUtil.mapApiToJson(api);
-        String jsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(json);
+        JsonObject apiJson = DatabasePersistenceUtil.mapApiToJson(api);
+        String apiJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(apiJson);
+
+        JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
+        String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
+
         try {
-            int apiSchemaId = persistenceDAO.addAPISchema(uuid, jsonString, org);
+            int apiSchemaId = persistenceDAO.addAPISchema(uuid, apiJsonString, orgJsonString);
         } catch (APIManagementException e) {
             throw new RuntimeException(e);
         }

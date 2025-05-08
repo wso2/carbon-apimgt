@@ -13,6 +13,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
+import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.user.api.UserStoreException;
@@ -27,6 +28,10 @@ public class DatabasePersistenceUtil {
 
     public static JsonObject mapApiToJson(API api) {
         return gson.toJsonTree(api).getAsJsonObject();
+    }
+
+    public static JsonObject mapOrgToJson(Organization org) {
+        return gson.toJsonTree(org).getAsJsonObject();
     }
 
     public static JsonObject stringTojsonObject(String jsonString) {

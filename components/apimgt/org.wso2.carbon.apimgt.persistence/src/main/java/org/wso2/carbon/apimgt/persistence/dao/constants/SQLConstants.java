@@ -1,9 +1,9 @@
 package org.wso2.carbon.apimgt.persistence.dao.constants;
 
 public class SQLConstants {
-    public static final String ADD_API_SCHEMA_SQL =
-            "INSERT INTO AM_API_JSON_SCHEMA (API_SCHEMA, API_UUID, TENANT_DOMAIN)" +
-            "VALUES (?, ?, ?)";
+    public static final String ADD_ARTIFACT_SQL =
+            "INSERT INTO AM_ARTIFACT_DATA (type, org, metadata, uuid, api_uuid) " +
+            "VALUES (?, ?, ?, ?, ?)";
 
     public static final String GET_ALL_API_SCHEMA_SQL =
             "SELECT * FROM AM_API_JSON_SCHEMA " +

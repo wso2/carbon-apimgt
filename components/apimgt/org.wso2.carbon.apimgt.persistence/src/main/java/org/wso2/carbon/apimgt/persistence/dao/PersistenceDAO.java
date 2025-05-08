@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.persistence.utils.PersistanceDBUtil;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class PersistenceDAO {
     private static final Log log = LogFactory.getLog(PersistenceDAO.class);
@@ -28,22 +29,24 @@ public class PersistenceDAO {
         return INSTANCE;
     }
 
-    public int addAPISchema(String uuid, String jsonString, Organization org) throws APIManagementException {
+    public int addAPISchema(String uuid, String metadata, String org) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         int apiSchemaId = -1;
 
-        String query = SQLConstants.ADD_API_SCHEMA_SQL;
+        String query = SQLConstants.ADD_ARTIFACT_SQL;
 
         try {
             connection = PersistanceDBUtil.getConnection();
             connection.setAutoCommit(false);
 
             prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, jsonString);
-            prepStmt.setString(2, uuid);
-            prepStmt.setString(3, org.getName());
+            prepStmt.setString(1, "API");
+            prepStmt.setString(2, org);
+            prepStmt.setString(3, metadata);
+            prepStmt.setString(4, UUID.randomUUID().toString());
+            prepStmt.setString(5, uuid);
 
             prepStmt.execute();
 
