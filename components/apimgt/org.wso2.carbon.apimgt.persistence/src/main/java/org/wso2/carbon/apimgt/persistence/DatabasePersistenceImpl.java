@@ -126,20 +126,20 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
         log.debug("Requested query for publisher search: " + searchQuery);
 
-        result = searchPaginatedPublisherAPIs(searchQuery, requestedTenantDomain, start, offset);
+        result = searchPaginatedPublisherAPIs(searchQuery, org, start, offset);
 
         return result;
     }
 
-    private PublisherAPISearchResult searchPaginatedPublisherAPIs(String searchQuery, String tenantDomain, int start, int offset) {
+    private PublisherAPISearchResult searchPaginatedPublisherAPIs(String searchQuery, Organization org, int start, int offset) {
         int totalLength = 0;
         PublisherAPISearchResult searchResults = new PublisherAPISearchResult();
         List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<PublisherAPIInfo>();
 
         try {
-            totalLength = PersistenceDAO.getInstance().getAllAPICount(tenantDomain);
+            totalLength = PersistenceDAO.getInstance().getAllAPICount(org.getName());
 
-            List<String> results = persistenceDAO.searchAPISchema(searchQuery, tenantDomain, start, offset);
+            List<String> results = persistenceDAO.searchAPISchema(searchQuery, org.getName(), start, offset);
 
             for (String result: results) {
                 JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();

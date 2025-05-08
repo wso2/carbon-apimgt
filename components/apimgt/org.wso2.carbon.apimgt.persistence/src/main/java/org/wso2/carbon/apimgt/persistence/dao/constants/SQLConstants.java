@@ -5,21 +5,24 @@ public class SQLConstants {
             "INSERT INTO AM_ARTIFACT_DATA (type, org, metadata, uuid, api_uuid) " +
             "VALUES (?, ?, ?, ?, ?)";
 
-    public static final String GET_ALL_API_SCHEMA_SQL =
-            "SELECT * FROM AM_API_JSON_SCHEMA " +
-                    "WHERE TENANT_DOMAIN = ? " +
-                    "ORDER BY API_SCHEMA_ID DESC " +
+    public static final String GET_ALL_API_ARTIFACT_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+                    "WHERE JSON_VALUE(org, '$.name') = ? " +
+                    "AND type = 'API' " +
+                    "ORDER BY ARTIFACT_ID DESC " +
                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
-    public static final String SEARCH_API_SCHEMA_SQL =
-            "SELECT * FROM AM_API_JSON_SCHEMA " +
-                    "WHERE TENANT_DOMAIN = ? AND " +
-                    "LOWER(JSON_QUERY(API_SCHEMA, '$.swaggerDefinition' RETURNING CLOB)) LIKE ? " +
+    public static final String SEARCH_API_ARTIFACT_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+                    "WHERE JSON_VALUE(org, '$.name') = ? " +
+                    "AND type = 'API' " +
+                    "AND LOWER(metadata) LIKE ? " +
                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String GET_ALL_API_COUNT =
-            "SELECT COUNT(*) AS TOTAL_API_COUNT FROM AM_API_JSON_SCHEMA " +
-                    "WHERE TENANT_DOMAIN = ?";
+            "SELECT COUNT(*) AS TOTAL_API_COUNT FROM AM_ARTIFACT_DATA " +
+                    "WHERE JSON_VALUE(org, '$.name') = ? " +
+                    "AND type = 'API'";
 
     public static final String GET_API_BY_UUID_SQL =
             "SELECT * FROM AM_API_JSON_SCHEMA " +

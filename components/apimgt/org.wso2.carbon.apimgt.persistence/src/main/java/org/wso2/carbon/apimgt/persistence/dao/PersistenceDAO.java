@@ -73,16 +73,16 @@ public class PersistenceDAO {
         return apiSchemaId;
     }
 
-    public List<String> searchAPISchema(String searchQuery, String tenantDomain, int start, int offset) throws SQLException {
+    public List<String> searchAPISchema(String searchQuery, String org, int start, int offset) throws SQLException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
         List<String> apiSchemas = new ArrayList<>();
 
-        String query = SQLConstants.GET_ALL_API_SCHEMA_SQL;
+        String query = SQLConstants.GET_ALL_API_ARTIFACT_SQL;
 
         if (!searchQuery.isEmpty()) {
-            query = SQLConstants.SEARCH_API_SCHEMA_SQL;
+            query = SQLConstants.SEARCH_API_ARTIFACT_SQL;
         }
 
         try {
@@ -90,7 +90,7 @@ public class PersistenceDAO {
             connection.setAutoCommit(false);
 
             prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, tenantDomain);
+            prepStmt.setString(1, org);
 
             if (!searchQuery.isEmpty()) {
                 prepStmt.setString(2, "%" + searchQuery.toLowerCase() + "%");
@@ -104,7 +104,7 @@ public class PersistenceDAO {
             rs = prepStmt.executeQuery();
 
             while (rs.next()) {
-                String schemaJson = rs.getString("API_SCHEMA");
+                String schemaJson = rs.getString("metadata");
                 apiSchemas.add(schemaJson);
             }
 

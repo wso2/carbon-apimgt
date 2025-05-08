@@ -27,7 +27,7 @@ public class DatabasePersistenceUtil {
     private static final Gson gson = new Gson();
 
     public static JsonObject mapApiToJson(API api) {
-        return gson.toJsonTree(api).getAsJsonObject();
+        return gson.toJsonTree(api).getAsJsonObject().remove("swaggerDefinition").getAsJsonObject();
     }
 
     public static JsonObject mapOrgToJson(Organization org) {
