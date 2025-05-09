@@ -351,8 +351,8 @@ public class ApiKeyAuthenticatorUtils {
     public static String getEndUserToken(APIKeyValidationInfoDTO apiKeyValidationInfoDTO,
                                          ExtendedJWTConfigurationDto jwtConfigurationDto, String apiKey,
                                          SignedJWT signedJWT, JWTClaimsSet payload, String tokenIdentifier,
-                                         String apiContext, String apiVersion, boolean isGatewayTokenCacheEnabled
-    ) throws APIManagementException, APISecurityException {
+                                         String apiContext, String apiVersion, boolean isGatewayTokenCacheEnabled)
+            throws APIManagementException, APISecurityException {
 
         AbstractAPIMgtGatewayJWTGenerator apiMgtGatewayJWTGenerator = null;
         boolean jwtGenerationEnabled = false;
