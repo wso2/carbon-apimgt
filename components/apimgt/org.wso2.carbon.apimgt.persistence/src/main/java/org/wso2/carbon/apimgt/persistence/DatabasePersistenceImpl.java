@@ -50,7 +50,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
         String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
 
         try {
-            int apiSchemaId = persistenceDAO.addAPISchema(uuid, apiJsonString, orgJsonString);
+            persistenceDAO.addAPISchema(uuid, apiJsonString, api.getSwaggerDefinition(), orgJsonString);
         } catch (APIManagementException e) {
             throw new RuntimeException(e);
         }

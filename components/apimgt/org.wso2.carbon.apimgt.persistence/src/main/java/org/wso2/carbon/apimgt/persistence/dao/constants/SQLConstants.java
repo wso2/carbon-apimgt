@@ -25,12 +25,14 @@ public class SQLConstants {
                     "AND type = 'API'";
 
     public static final String GET_API_BY_UUID_SQL =
-            "SELECT * FROM AM_API_JSON_SCHEMA " +
-                    "WHERE TENANT_DOMAIN = ? AND API_UUID = ?";
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+                    "WHERE API_UUID = ? " +
+                    "AND TYPE = 'API'";
 
     public static final String GET_SWAGGER_DEFINITION_BY_UUID_SQL =
-            "SELECT AM_JS.API_SCHEMA.swaggerDefinition AS SWAGGER_DEFINITION FROM AM_API_JSON_SCHEMA AM_JS " +
-                    "WHERE TENANT_DOMAIN = ? AND API_UUID = ?";
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+                    "WHERE JSON_VALUE(org, '$.name') = ? AND API_UUID = ? " +
+                    "AND TYPE = 'API_DEFINITION'";
 
     public static final String SEARCH_API_OAS_DEFINITIONS_SQL =
             "SELECT * FROM AM_API_JSON_SCHEMA " +

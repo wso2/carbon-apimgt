@@ -29,7 +29,7 @@ public class PersistenceDAO {
         return INSTANCE;
     }
 
-    public int addAPISchema(String uuid, String metadata, String org) throws APIManagementException {
+    public void addAPISchema(String uuid, String metadata, String apiDefinition, String org) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
@@ -55,8 +55,13 @@ public class PersistenceDAO {
                 apiSchemaId = rs.getInt(1);
             }
 
-            connection.commit();
+            prepStmt.setString(1, "API_DEFINITION");
+            prepStmt.setString(3, apiDefinition);
+            prepStmt.setString(4, UUID.randomUUID().toString());
 
+            prepStmt.execute();
+
+            connection.commit();
         } catch (SQLException e) {
             try {
                 if (connection != null) {
@@ -70,7 +75,6 @@ public class PersistenceDAO {
         } finally {
             PersistanceDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
-        return apiSchemaId;
     }
 
     public List<String> searchAPISchema(String searchQuery, String org, int start, int offset) throws SQLException {
@@ -157,13 +161,12 @@ public class PersistenceDAO {
             connection.setAutoCommit(false);
 
             prepStmt = connection.prepareStatement(query);
-            prepStmt.setString(1, tenantDomain);
-            prepStmt.setString(2, uuid);
+            prepStmt.setString(1, uuid);
 
             rs = prepStmt.executeQuery();
 
             if (rs.next()) {
-                apiSchema = rs.getString("API_SCHEMA");
+                apiSchema = rs.getString("metadata");
             }
 
         } finally {
@@ -192,7 +195,7 @@ public class PersistenceDAO {
             rs = prepStmt.executeQuery();
 
             if (rs.next()) {
-                swaggerDefinition = rs.getString("SWAGGER_DEFINITION");
+                swaggerDefinition = rs.getString("metadata");
             }
 
         } finally {
