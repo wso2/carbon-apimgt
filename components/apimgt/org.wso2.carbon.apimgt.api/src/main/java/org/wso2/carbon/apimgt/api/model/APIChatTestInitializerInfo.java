@@ -49,5 +49,4 @@ public class APIChatTestInitializerInfo {
     public void setSdl(APIChatGraphQLSdl sdl){
         this.sdl = sdl;
     }
-
 }
