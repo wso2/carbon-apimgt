@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.handlers;
 
+import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,6 +26,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.api.ApiUtils;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.constants.HealthCheckConstants;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
@@ -49,6 +51,12 @@ public class DefaultAPIHandler extends AbstractSynapseHandler {
         if (messageContext.getPropertyKeySet().contains(InboundWebsocketConstants.WEBSOCKET_SUBSCRIBER_PATH)) {
             return true;
         }
+
+        String url = (String) messageContext.getProperty(Constants.Configuration.TRANSPORT_IN_URL);
+        String servicePrefix = (String) messageContext.getProperty(NhttpConstants.SERVICE_PREFIX);
+        log.info("[TEST DEBUG] Transport In URL : " + url);
+        log.info("[TEST DEBUG] Service Prefix : " + servicePrefix);
+
         String path = ApiUtils.getFullRequestPath(messageContext);
         String tenantDomain = GatewayUtils.getTenantDomain();
 
