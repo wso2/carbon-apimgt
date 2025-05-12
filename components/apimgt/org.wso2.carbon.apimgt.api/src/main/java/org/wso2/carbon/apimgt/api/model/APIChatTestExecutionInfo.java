@@ -31,5 +31,4 @@ public class APIChatTestExecutionInfo {
     public void setResponse(APIChatExecutionResponse response) {
         this.response = response;
     }
-
 }
