@@ -837,11 +837,12 @@ public interface APIConsumer extends APIManager {
      * Returns the API Chat execute call response as a string
      *
      * @param apiChatRequestId Request UUID
+     * @param apiType  Request API type
      * @param requestPayload   Request payload to be used for the AI service execute call
      * @return execution response as a string
      * @throws APIManagementException if execute call failed
      */
-    String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException;
+    String invokeApiChatExecute(String apiChatRequestId, String apiType, String requestPayload) throws APIManagementException;
 
     /**
      * Returns the API Chat prepare call response as a string

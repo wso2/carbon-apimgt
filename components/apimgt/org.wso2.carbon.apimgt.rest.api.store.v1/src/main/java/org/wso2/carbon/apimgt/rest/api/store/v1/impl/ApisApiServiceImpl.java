@@ -329,12 +329,10 @@ public class ApisApiServiceImpl implements ApisApiService {
                             RestApiUtil.getValidatedOrganization(messageContext)).getType();
 
                     if (isTestInitializationRequest) {
-                        boolean isGraphqlAPI = apiChatRequestDTO.getApiSpec().getSdl() != null;
                         ApiChatRequestApiSpecDTO specDTO = apiChatRequestDTO.getApiSpec();
                         APIChatTestInitializerInfo initializerInfo = new APIChatTestInitializerInfo();
                         initializerInfo.setCommand(apiChatRequestDTO.getCommand());
-                        initializerInfo.setApiType(apiType);
-                        if (isGraphqlAPI) {
+                        if (apiType.equalsIgnoreCase(APIConstants.GRAPHQL_API)) {
                             APIChatGraphQLSdl apiSdl = new APIChatGraphQLSdl();
                             apiSdl.setSdl(specDTO.getSdl());
                             initializerInfo.setSdl(apiSdl);
@@ -358,8 +356,6 @@ public class ApisApiServiceImpl implements ApisApiService {
                         responseInfo.setBody(responseDTO.getBody());
                         executionInfo.setResponse(responseInfo);
 
-                        executionInfo.setApiType(apiType);
-
                         // Generate the payload for Choreo deployed API Chat Agent
                         ObjectMapper payloadMapper = new ObjectMapper();
                         requestPayload = payloadMapper.writeValueAsString(executionInfo);
@@ -371,7 +367,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                         return null;
                     }
 
-                    String executionResponse = apiConsumer.invokeApiChatExecute(apiChatRequestId, requestPayload);
+                    String executionResponse = apiConsumer.invokeApiChatExecute(apiChatRequestId, apiType, requestPayload);
                     ObjectMapper responseMapper = new ObjectMapper();
                     ApiChatResponseDTO responseDTO = responseMapper.readValue(executionResponse,
                             ApiChatResponseDTO.class);

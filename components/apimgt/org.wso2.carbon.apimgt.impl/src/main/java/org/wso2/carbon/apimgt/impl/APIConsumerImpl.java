@@ -153,6 +153,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -3355,15 +3357,16 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
 
     @Override
-    public String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException {
+    public String invokeApiChatExecute(String apiChatRequestId, String apiType, String requestPayload) throws APIManagementException {
         ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiChatConfigurationDto();
+        String resourceWithQueryParam = configDto.getExecuteResource() + "?apiType=" + URLEncoder.encode(apiType, StandardCharsets.UTF_8);
         if (configDto.isKeyProvided()) {
             return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
-                    configDto.getExecuteResource(), requestPayload, apiChatRequestId);
+                    resourceWithQueryParam, requestPayload, apiChatRequestId);
         }
         return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
-                configDto.getExecuteResource(), requestPayload, apiChatRequestId);
+                resourceWithQueryParam, requestPayload, apiChatRequestId);
     }
 
     @Override
@@ -3387,12 +3390,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
             ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration().getApiChatConfigurationDto();
+            String resourceWithQueryParam = configDto.getPrepareResource() + "?apiType=" + URLEncoder.encode(apiType, StandardCharsets.UTF_8);
+
             if (configDto.isKeyProvided()) {
                 return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
-                        configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
+                        resourceWithQueryParam, payload.toString(), apiChatRequestId);
             }
             return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
-                    configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
+                    resourceWithQueryParam, payload.toString(), apiChatRequestId);
         } catch (JsonProcessingException e) {
             String error = "Error while parsing OpenAPI definition of API ID: " + apiId + " to JSON";
             log.error(error, e);
