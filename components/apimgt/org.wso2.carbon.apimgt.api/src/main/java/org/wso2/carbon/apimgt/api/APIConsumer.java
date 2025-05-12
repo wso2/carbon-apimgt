@@ -837,7 +837,7 @@ public interface APIConsumer extends APIManager {
      * Returns the API Chat execute call response as a string
      *
      * @param apiChatRequestId Request UUID
-     * @param apiType  Request API type
+     * @param apiType          Type of the API being tested
      * @param requestPayload   Request payload to be used for the AI service execute call
      * @return execution response as a string
      * @throws APIManagementException if execute call failed
