@@ -3378,7 +3378,6 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             ObjectMapper objectMapper = new ObjectMapper();
             ObjectNode payload = objectMapper.createObjectNode();
 
-            // check if the apitype is graphql
             if (APIConstants.APITransportType.GRAPHQL.name().equalsIgnoreCase(apiType)) {
                 String graphQLSchema = getGraphqlSchemaDefinition(apiId, organization);
                 payload.put(APIConstants.GRAPHQL_SCHEMA, graphQLSchema);
