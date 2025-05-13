@@ -23,7 +23,7 @@ public class GatewayArtifactSynchronizerProperties {
     private long eventWaitingTime = 1;
     private boolean onDemandLoading;
     private boolean tenantLoading;
-    private List<String> loadingTenants = new ArrayList<>();
+    private LoadingTenants loadingTenants = new LoadingTenants();
 
 
     public String getSaverName() {
@@ -172,11 +172,11 @@ public class GatewayArtifactSynchronizerProperties {
         this.tenantLoading = tenantLoading;
     }
 
-    public List<String> getLoadingTenants() {
+    public LoadingTenants getLoadingTenants() {
         return loadingTenants;
     }
 
-    public void setLoadingTenants(List<String> loadingTenants) {
+    public void setLoadingTenants(LoadingTenants loadingTenants) {
         this.loadingTenants = loadingTenants;
     }
 }

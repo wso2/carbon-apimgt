@@ -21,15 +21,16 @@
 package org.wso2.carbon.apimgt.impl.utils;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.dto.LoadingTenants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.stratos.common.util.ClaimsMgtUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.Tenant;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.tenant.TenantManager;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -41,8 +42,9 @@ public class TenantUtils {
     private TenantUtils() {
     }
 
-    public static Tenant[] getAllTenants(String tenantDomain, String[] filters) throws APIManagementException {
-        TenantManager tenantManager = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager();
+    public static Tenant[] getAllTenants(String tenantDomain, LoadingTenants loadingTenants) throws APIManagementException {
+        RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
+        TenantManager tenantManager = realmService.getTenantManager();
         List<Tenant> tenants = new ArrayList<>();
         try {
             Tenant[] allTenants = tenantManager.getAllTenants();
@@ -51,21 +53,13 @@ public class TenantUtils {
                 allTenants = tenantSet.stream().filter(tenant -> tenant.getDomain().equals(tenantDomain)).toArray(Tenant[]::new);
             }
             for (Tenant tenant : allTenants) {
-                boolean contains = Arrays.asList(filters).contains("*");
-                if (contains) {
+
+                if ((loadingTenants.isIncludeAllTenants() || loadingTenants.getIncludingTenants().contains(tenant.getDomain()))&&
+                        !loadingTenants.getExcludingTenants().contains(tenant.getDomain())) {
                     Tenant resolvedTenant = tenantManager.getTenant(tenant.getId());
-                    resolvedTenant.setAdminFirstName(ClaimsMgtUtil.getFirstNamefromUserStoreManager(ServiceReferenceHolder.getInstance().getRealmService(), tenant.getId()));
-                    resolvedTenant.setAdminLastName(ClaimsMgtUtil.getLastNamefromUserStoreManager(ServiceReferenceHolder.getInstance().getRealmService(), tenant.getId()));
-                    tenants.add(tenantManager.getTenant(tenant.getId()));
-                } else {
-                    for (String filterCriteria : filters) {
-                        if (tenant.getDomain().matches(filterCriteria)) {
-                            Tenant resolvedTenant = tenantManager.getTenant(tenant.getId());
-                            resolvedTenant.setAdminFirstName(ClaimsMgtUtil.getFirstNamefromUserStoreManager(ServiceReferenceHolder.getInstance().getRealmService(), tenant.getId()));
-                            resolvedTenant.setAdminLastName(ClaimsMgtUtil.getLastNamefromUserStoreManager(ServiceReferenceHolder.getInstance().getRealmService(), tenant.getId()));
-                            tenants.add(tenantManager.getTenant(tenant.getId()));
-                        }
-                    }
+                    resolvedTenant.setAdminFirstName(ClaimsMgtUtil.getFirstNamefromUserStoreManager(realmService, tenant.getId()));
+                    resolvedTenant.setAdminLastName(ClaimsMgtUtil.getLastNamefromUserStoreManager(realmService, tenant.getId()));
+                    tenants.add(resolvedTenant);
                 }
             }
         } catch (UserStoreException e) {
