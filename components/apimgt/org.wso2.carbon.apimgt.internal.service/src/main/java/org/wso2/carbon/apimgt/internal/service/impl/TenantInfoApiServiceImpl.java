@@ -1,8 +1,11 @@
 package org.wso2.carbon.apimgt.internal.service.impl;
 
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.impl.dto.LoadingTenants;
 import org.wso2.carbon.apimgt.impl.utils.TenantUtils;
 import org.wso2.carbon.apimgt.internal.service.*;
 import org.wso2.carbon.apimgt.internal.service.dto.*;
@@ -26,20 +29,16 @@ import javax.ws.rs.core.SecurityContext;
 
 public class TenantInfoApiServiceImpl implements TenantInfoApiService {
 
-    public Response tenantInfoGet(String xWSO2Tenant, String tenants, MessageContext messageContext) throws APIManagementException {
+    public Response tenantInfoGet(String xWSO2Tenant, String filter, MessageContext messageContext)
+            throws APIManagementException {
         String tenantDomain = SubscriptionValidationDataUtil.validateTenantDomain(xWSO2Tenant, messageContext);
-        String[] filters = new String[]{"*"};
-        if (StringUtils.isNotEmpty(tenants)) {
-            byte[] decodedValue = Base64.decodeBase64(tenants.getBytes());
-            filters = new String(decodedValue).split("\\|");
-        }
-        Tenant[] allTenants = TenantUtils.getAllTenants(tenantDomain, filters);
+        Tenant[] allTenants = TenantUtils.getAllTenants(tenantDomain, constructLoadingTenantsFromFilter(filter));
         return Response.ok().entity(getTenantInfoListDTO(allTenants)).build();
     }
 
     private TenantInfoListDTO getTenantInfoListDTO(Tenant[] allTenants) {
         TenantInfoListDTO tenantInfoListDTO = new TenantInfoListDTO();
-        List<TenantInfoDTO> tenantInfoList = tenantInfoListDTO.getTenants();
+        List<TenantInfoDTO> tenantInfoList = new ArrayList<>();
         for (Tenant tenant : allTenants) {
             TenantInfoDTO tenantInfoDTO = new TenantInfoDTO();
             tenantInfoDTO.setDomain(tenant.getDomain());
@@ -55,4 +54,34 @@ public class TenantInfoApiServiceImpl implements TenantInfoApiService {
         tenantInfoListDTO.setTenants(tenantInfoList);
         return tenantInfoListDTO;
     }
+
+    private LoadingTenants constructLoadingTenantsFromFilter(String filter) {
+        LoadingTenants loadingTenants = new LoadingTenants();
+        if (StringUtils.isNotEmpty(filter)) {
+            byte[] decodedValue = Base64.decodeBase64(filter.getBytes(StandardCharsets.UTF_8));
+            filter = new String(decodedValue, StandardCharsets.UTF_8);
+            String[] filters = filter.split("&!");
+            if (filters.length >= 2) {
+                if ("*".equals(filters[0])) {
+                    loadingTenants.setIncludeAllTenants(true);
+                } else {
+                    loadingTenants.setIncludeAllTenants(false);
+                    String[] includingTenants = filters[0].split("\\|");
+                    for (String tenant : includingTenants) {
+                        loadingTenants.getIncludingTenants().add(tenant);
+                    }
+                }
+                if (filters.length == 2 && StringUtils.isNotEmpty(filters[1])) {
+                    String[] excludingTenants = filters[1].split("\\|");
+                    for (String tenant : excludingTenants) {
+                        loadingTenants.getExcludingTenants().add(tenant);
+                    }
+                }
+            }
+        } else {
+            loadingTenants.setIncludeAllTenants(true);
+        }
+        return loadingTenants;
+    }
+
 }
