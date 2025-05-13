@@ -44,7 +44,7 @@ TenantInfoApiService delegate = new TenantInfoApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "Tenant information received successfully", response = TenantInfoListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response tenantInfoGet( @NotNull  @ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "")  @QueryParam("tenants") String tenants) throws APIManagementException{
-        return delegate.tenantInfoGet(xWSO2Tenant, tenants, securityContext);
+    public Response tenantInfoGet( @NotNull  @ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "")  @QueryParam("filter") String filter) throws APIManagementException{
+        return delegate.tenantInfoGet(xWSO2Tenant, filter, securityContext);
     }
 }
