@@ -2988,7 +2988,7 @@ public final class APIConstants {
         public static final String FILE_BASED_API_CONTEXTS = "FileBasedApiContexts";
         public static final String FILE_BASED_API_CONTEXT = "FileBasedApiContext";
         public static final String EnableOnDemandLoadingAPIS = "EnableOnDemandLoadingAPIS";
-        public static final String TNENAT_LOADING = "TenantLoading";
+        public static final String TENANT_LOADING = "TenantLoading";
         public static final String ENABLE_TENANT_LOADING = "Enable";
         public static final String TENANT_LOADING_TENANTS = "Tenants";
 

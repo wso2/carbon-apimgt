@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.gateway;
 
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,7 +45,7 @@ import java.util.Map;
  */
 public class APILoggerManager {
     private static final Log log = LogFactory.getLog(APILoggerManager.class);
-    private final Map<Map<String, String>, String> logProperties = new HashMap<>();
+    private final Map<Map<String, String>, String> logProperties = new ConcurrentHashMap<>();
     private static final APILoggerManager apiLoggerManager = new APILoggerManager();
     private final EventHubConfigurationDto eventHubConfigurationDto;
     public static final String UTF8 = "UTF-8";

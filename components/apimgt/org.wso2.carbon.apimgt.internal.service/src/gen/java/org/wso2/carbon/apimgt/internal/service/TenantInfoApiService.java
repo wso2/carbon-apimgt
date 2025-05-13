@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface TenantInfoApiService {
-      public Response tenantInfoGet(String xWSO2Tenant, String tenants, MessageContext messageContext) throws APIManagementException;
+      public Response tenantInfoGet(String xWSO2Tenant, String filter, MessageContext messageContext) throws APIManagementException;
 }
