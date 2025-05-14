@@ -32,8 +32,10 @@ import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MimeTypes;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -92,7 +94,6 @@ public class RestApiPublisherUtils {
             RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, log);
         }
 
-        InputStream docInputStream = null;
         try {
             ContentDisposition contentDisposition = fileDetails.getContentDisposition();
             String filename = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
@@ -102,23 +103,25 @@ public class RestApiPublisherUtils {
                         "Couldn't find the name of the uploaded file for the document " + documentId + ". Using name '"
                                 + filename + "'");
             }
+
             //APIIdentifier apiIdentifier = APIMappingUtil
             //        .getAPIIdentifierFromUUID(apiId, tenantDomain);
 
             Path resolvedPath = resolveFilePath(docFile.getAbsolutePath(), filename);
 
             RestApiUtil.transferFile(inputStream, resolvedPath.getFileName().toString(), resolvedPath.getParent().toString());
-            docInputStream = new FileInputStream(resolvedPath.toString());
-            String mediaType = fileDetails.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
-            mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
-            PublisherCommonUtils
-                    .addDocumentationContentForFile(docInputStream, mediaType, filename, apiProvider, apiId,
-                            documentId, organization);
-            docFile.delete();
+            byte[] fileBytes = FileUtils.readFileToByteArray(new File(resolvedPath.toString()));
+            String mediaType = detectAndValidateMediaType(fileBytes, filename);
+            try (InputStream uploadStream = new ByteArrayInputStream(fileBytes)) {
+                PublisherCommonUtils.addDocumentationContentForFile(uploadStream, mediaType, filename, apiProvider,
+                        apiId, documentId, organization);
+            }
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
+        } catch (IOException e) {
+            RestApiUtil.handleInternalServerError("Error processing file upload for document: " + documentId, e, log);
         } finally {
-            IOUtils.closeQuietly(docInputStream);
+            FileUtils.deleteQuietly(docFile);
         }
     }
 
@@ -181,7 +184,6 @@ public class RestApiPublisherUtils {
             RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, log);
         }
 
-        InputStream docInputStream = null;
         try {
             ContentDisposition contentDisposition = fileDetails.getContentDisposition();
             String filename = contentDisposition.getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
@@ -197,17 +199,18 @@ public class RestApiPublisherUtils {
             Path resolvedPath = resolveFilePath(docFile.getAbsolutePath(), filename);
 
             RestApiUtil.transferFile(inputStream, resolvedPath.getFileName().toString(), resolvedPath.getParent().toString());
-            docInputStream = new FileInputStream(resolvedPath.toString());
-            String mediaType = fileDetails.getHeader(RestApiConstants.HEADER_CONTENT_TYPE);
-            mediaType = mediaType == null ? RestApiConstants.APPLICATION_OCTET_STREAM : mediaType;
-            PublisherCommonUtils
-                    .addDocumentationContentForFile(docInputStream, mediaType, filename, apiProvider, productId,
-                            documentId, organization);
-            docFile.delete();
+            byte[] fileBytes = FileUtils.readFileToByteArray(new File(resolvedPath.toString()));
+            String mediaType = detectAndValidateMediaType(fileBytes, filename);
+            try (InputStream uploadStream = new ByteArrayInputStream(fileBytes)) {
+                PublisherCommonUtils.addDocumentationContentForFile(uploadStream, mediaType, filename, apiProvider,
+                        productId, documentId, organization);
+            }
         } catch (FileNotFoundException e) {
             RestApiUtil.handleInternalServerError("Unable to read the file from path ", e, log);
+        } catch (IOException e) {
+            RestApiUtil.handleInternalServerError("Error processing file upload for document: " + documentId, e, log);
         } finally {
-            IOUtils.closeQuietly(docInputStream);
+            FileUtils.deleteQuietly(docFile);
         }
     }
 
@@ -351,6 +354,49 @@ public class RestApiPublisherUtils {
             RestApiUtil.handleInternalServerError("Unable to read the input stream", e, log);
         }
         return null;
+    }
+
+    /**
+     * Detects the MIME type of a file based on its byte content and validates whether the file extension matches the
+     * detected MIME type.
+     *
+     * @param fileBytes the byte content of the file to validate
+     * @param filename  the name of the file, used to extract the extension for validation
+     * @return the detected MIME type as a string if the extension matches the MIME type
+     * @throws APIManagementException if the fileBytes or filename is null, or if the MIME type detection or validation fails
+     */
+    public static String detectAndValidateMediaType(byte[] fileBytes, String filename) throws APIManagementException {
+        if (fileBytes == null || filename == null) {
+            throw new APIManagementException(ExceptionCodes.INVALID_MEDIA_TYPE_VALIDATION);
+        }
+
+        String detectedMimeType;
+        try (InputStream mimeDetectStream = new ByteArrayInputStream(fileBytes)) {
+            detectedMimeType = TikaConfig.getDefaultConfig().getDetector()
+                    .detect(TikaInputStream.get(mimeDetectStream), new Metadata()).toString();
+        } catch (Exception e) {
+            throw new APIManagementException("Error detecting media type", e,
+                    ExceptionCodes.INVALID_MEDIA_TYPE_VALIDATION);
+        }
+
+        int lastDot = filename.lastIndexOf('.');
+        String fileExtension = (lastDot == -1) ? "" : filename.substring(lastDot + 1).toLowerCase();
+
+        String expectedExtension = "";
+        try {
+            expectedExtension = MimeTypes.getDefaultMimeTypes().forName(detectedMimeType).getExtension()
+                    .replace(".", "");
+        } catch (Exception e) {
+            throw new APIManagementException("Error resolving expected extension", e,
+                    ExceptionCodes.INVALID_MEDIA_TYPE_VALIDATION);
+        }
+
+        if (!expectedExtension.equalsIgnoreCase(fileExtension)) {
+            throw new APIManagementException(
+                    ExceptionCodes.from(ExceptionCodes.INVALID_MEDIA_TYPE_VALIDATION, fileExtension, detectedMimeType));
+        }
+
+        return detectedMimeType;
     }
 
     /**

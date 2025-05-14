@@ -807,7 +807,9 @@ public enum ExceptionCodes implements ErrorHandler {
             "defined as a primary endpoint", 400,
             "Failed to delete API endpoint with UUID '%s' since it is defined as a primary endpoint."),
     API_ENDPOINT_URL_INVALID(902049, "Endpoint URL is invalid", 400,
-            "Endpoint URL is invalid");
+            "Endpoint URL is invalid"),
+    INVALID_MEDIA_TYPE_VALIDATION(902050, "Invalid or mismatched media type detected.", 415,
+            "File extension '%s' does not match detected MIME type '%s'");
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;
