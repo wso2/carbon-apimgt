@@ -395,6 +395,8 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
                     inboundMessageContext.getRequestHeaders().get(HttpHeaders.USER_AGENT));
             WebSocketUtils.setApiPropertyToChannel(ctx, APIConstants.API_ELECTED_RESOURCE,
                     inboundMessageContext.getMatchingResource());
+            WebSocketUtils.setApiPropertyToChannel(inboundMessageContext.getCtx(), APIConstants.API_TYPE,
+                    inboundMessageContext.getElectedAPI().getApiType());
             metricsHandler.handleHandshake(ctx);
         }
     }

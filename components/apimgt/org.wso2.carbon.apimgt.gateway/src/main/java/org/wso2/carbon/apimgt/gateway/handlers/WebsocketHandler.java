@@ -125,15 +125,15 @@ public class WebsocketHandler extends CombinedChannelDuplexHandler<WebsocketInbo
                     log.debug(channelId + " -- Websocket API request [outbound] : Sending Outbound Websocket frame." +
                             ctx.channel().toString());
                 }
-                outboundHandler().write(ctx, msg, promise);
                 if (APIUtil.isAnalyticsEnabled()) {
                     WebSocketUtils.setApiPropertyToChannel(ctx, Constants.BACKEND_END_TIME_PROPERTY,
                             System.currentTimeMillis());
                     if (msg instanceof TextWebSocketFrame) {
                         WebSocketUtils.setApiPropertyToChannel(ctx, Constants.RESPONSE_SIZE,
-                                ((TextWebSocketFrame) msg).text().length());
+                                    ((TextWebSocketFrame) msg).text().length());
                     }
                 }
+                outboundHandler().write(ctx, msg, promise);
                 // publish analytics events if analytics is enabled
                 publishSubscribeEvent(ctx);
             }

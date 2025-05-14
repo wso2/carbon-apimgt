@@ -1371,6 +1371,7 @@ public final class APIConstants {
     public static final String API_TYPE = "ApiType";
     public static final String HTTP_VERB = "HTTP_VERB";
     public static final String GRAPHQL_API = "GRAPHQL";
+    public static final String QUERY_NAME = "QUERY_NAME";
     public static final String GRAPHQL_SUBSCRIPTION_REQUEST = "isGraphqlSubscriptionRequest";
     public static final String GRAPHQL_API_OPERATION_RESOURCE = "OPERATION_RESOURCE";
     public static final String GRAPHQL_API_OPERATION_TYPE = "OPERATION_TYPE";
@@ -1394,9 +1395,19 @@ public final class APIConstants {
     public static final String OPERATION_SECURITY_DISABLED = "Disabled";
     public static final String GRAPHQL_PAYLOAD = "GRAPHQL_PAYLOAD";
     public static final String GRAPHQL_SCHEMA = "GRAPHQL_SCHEMA";
+    public static final String TYPE_DEFINITION = "TYPE_DEFINITION";
+    public static final String VARIABLE_MAP = "VARIABLE_MAP";
+    public static final String GRAPHQL_OPERATION = "GRAPHQL_OPERATION";
     public static final String GRAPHQL_ACCESS_CONTROL_POLICY = "WSO2GraphQLAccessControlPolicy";
     public static final String QUERY_ANALYSIS_COMPLEXITY = "complexity";
     public static final String GRAPHQL_ADDITIONAL_TYPE_PREFIX = "WSO2";
+    public static final String OPERATION_INFO = "OPERATION_INFO";
+    public static final String ACCESSED_FIELDS = "ACCESSED_FIELDS";
+    public static final String MUTATED_FIELDS = "MUTATED_FIELDS";
+
+    public static final String QUERY = "query";
+    public static final String MUTATION = "mutation";
+    public static final String SUBSCRIPTION = "subscription";
 
     public static final String VELOCITY_GRAPHQL_API_SUBSCRIPTION_AVAILABLE = "isSubscriptionAvailable";
     public static final String VELOCITY_API_WEBSOCKET_TOPIC_MAPPINGS = "topicMappings";
@@ -1762,7 +1773,6 @@ public final class APIConstants {
     public static final String API_SPEC_TYPE = "api_type";
     public static final String API_SPEC_NAME = "api_name";
     public static final String TENANT_DOMAIN = "tenant_domain";
-    public static final String QUERY = "query";
     public static final String HISTORY = "history";
     public static final String VERSION = "version";
     public static final String VISIBILITYROLES = "visibility_roles";
