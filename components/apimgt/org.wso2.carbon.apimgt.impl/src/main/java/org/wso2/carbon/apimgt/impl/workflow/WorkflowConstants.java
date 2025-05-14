@@ -130,16 +130,23 @@ public class WorkflowConstants {
         public static final String VARIABLE_CLIENTSECRET = "clientSecret";
         public static final String VARIABLE_SCOPE = "scope";
         public static final String VARIABLE_TOKENAPI = "tokenAPI";
-        public static final String VARIABLE_APISTATE = "apiCurrentState";
+        public static final String VARIABLE_APISTATE = "apiCurrezntState";
         public static final String VARIABLE_API_LC_ACTION = "apiLCAction";
         public static final String VARIABLE_APINAME = "apiName";
+        public static final String VARIABLE_APPLICATIONNAME = "applicationName";
+        public static final String VARIABLE_APPLICATIONID = "applicationId";
         public static final String VARIABLE_APIVERSION = "apiVersion";
         public static final String VARIABLE_APIPROVIDER = "apiProvider";
+        public static final String VARIABLE_APICONTEXT = "apiContext";
         public static final String VARIABLE_CALLBACKURL = "callbackUrl";
         public static final String VARIABLE_WFREF = "wfReference";
         public static final String VARIABLE_INVOKER = "invoker";
+        public static final String TIER_NAME = "tierName";
+        public static final String REQUESTED_TIER_NAME = "requestedTierName";
 
         public static final String API_ID = "apiId";
+        public static final String API_UUID = "apiUUID";
+        public static final String SUBSCRIBER = "subscriber";
         
         public static final String DATA = "data";
         public static final String ID = "id";

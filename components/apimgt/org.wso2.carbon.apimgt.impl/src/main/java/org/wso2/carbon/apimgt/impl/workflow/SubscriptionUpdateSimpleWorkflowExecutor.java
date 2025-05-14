@@ -24,14 +24,18 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.monetization.AbstractMonetization;
+import org.wso2.carbon.apimgt.impl.monetization.MonetizationSubscription;
 
 import java.util.List;
 
-public class SubscriptionUpdateSimpleWorkflowExecutor extends WorkflowExecutor {
+public class SubscriptionUpdateSimpleWorkflowExecutor extends SubscriptionWorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(SubscriptionUpdateSimpleWorkflowExecutor.class);
 
@@ -43,6 +47,19 @@ public class SubscriptionUpdateSimpleWorkflowExecutor extends WorkflowExecutor {
     @Override
     public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
         return null;
+    }
+
+    /**
+     * Returns an instance of MonetizationSubscription to be called within complete for adding or removing monetized subscriptions
+     *
+     * @return an instance of MonetizationSubscription
+     * @throws APIManagementException due to it calling the getMonetizationImplClass method
+     */
+    @Override
+    public MonetizationSubscription getMonetizationSubscriptionClass() throws APIManagementException {
+        AbstractMonetization monetizationImpl = (AbstractMonetization) super.getMonetizationImplClass();
+        MonetizationSubscription subscriptionImpl = monetizationImpl.getMonetizationSubscriptionClass();
+        return subscriptionImpl;
     }
 
     /**
@@ -60,25 +77,6 @@ public class SubscriptionUpdateSimpleWorkflowExecutor extends WorkflowExecutor {
     }
 
     /**
-     * This method is responsible for updating monetization logic and returns the execute method.
-     *
-     * @param workflowDTO The WorkflowDTO which contains workflow contextual information related to the workflow
-     * @return workflow response to the caller by returning the execute() method
-     * @throws WorkflowException
-     */
-    @Override
-    public WorkflowResponse monetizeSubscription(WorkflowDTO workflowDTO, API api) throws WorkflowException {
-        // implementation is not provided in this version
-        return execute(workflowDTO);
-    }
-
-    @Override
-    public WorkflowResponse monetizeSubscription(WorkflowDTO workflowDTO, APIProduct apiProduct) throws WorkflowException {
-        // implementation is not provided in this version
-        return execute(workflowDTO);
-    }
-
-    /**
      * This method completes subscription update simple workflow and return workflow response back to the caller
      *
      * @param workflowDTO The WorkflowDTO which contains workflow contextual information related to the workflow
@@ -89,10 +87,32 @@ public class SubscriptionUpdateSimpleWorkflowExecutor extends WorkflowExecutor {
     public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         SubscriptionWorkflowDTO subscriptionWorkflowDTO = (SubscriptionWorkflowDTO)workflowDTO;
+        API api = null;
+        APIProduct product = null;
         try {
             if (subscriptionWorkflowDTO.getStatus() == WorkflowStatus.APPROVED) {
                 apiMgtDAO.updateSubscriptionStatusAndTier(Integer.parseInt(subscriptionWorkflowDTO.getWorkflowReference()),
                         APIConstants.SubscriptionStatus.UNBLOCKED);
+
+                ApiTypeWrapper apiTypeWrapper = getAPIorAPIProductwithWorkflowDTO(workflowDTO);
+                Tier tier = getAPIorAPIProductTier(apiTypeWrapper, workflowDTO);
+                boolean isApiProduct = apiTypeWrapper.isAPIProduct();
+                boolean isMonetizationEnabled = false;
+                MonetizationSubscription subscriptionImpl = getMonetizationSubscriptionClass();
+                if (isApiProduct) {
+                    product = apiTypeWrapper.getApiProduct();
+                    isMonetizationEnabled = product.getMonetizationStatus();
+                    if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
+                        subscriptionImpl.monetizeSubscription(workflowDTO, product);
+                    }
+                } else {
+                    api = apiTypeWrapper.getApi();
+                    isMonetizationEnabled = api.getMonetizationStatus();
+                    if (isMonetizationEnabled && APIConstants.COMMERCIAL_TIER_PLAN.equals(tier.getTierPlan())) {
+                        subscriptionImpl.monetizeSubscription(workflowDTO, api);
+                    }
+                }
+
             } else if (subscriptionWorkflowDTO.getStatus() == WorkflowStatus.CREATED ||
                     subscriptionWorkflowDTO.getStatus() == WorkflowStatus.REGISTERED) {
                 apiMgtDAO.updateSubscriptionStatus(Integer.parseInt(subscriptionWorkflowDTO.getWorkflowReference()),
