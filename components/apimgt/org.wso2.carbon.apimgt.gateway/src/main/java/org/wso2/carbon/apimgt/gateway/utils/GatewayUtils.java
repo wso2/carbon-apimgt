@@ -1618,6 +1618,10 @@ public class GatewayUtils {
         return DataHolder.getInstance().isAllGatewayPoliciesDeployed();
     }
 
+    public static boolean isTenantsProvisioned() {
+        return DataHolder.getInstance().isTenantsProvisioned();
+    }
+
     public static List<String> getKeyManagers(org.apache.synapse.MessageContext messageContext) {
 
         API api = getAPI(messageContext);

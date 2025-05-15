@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.gateway.GatewayPolicyDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.LLMProviderManager;
+import org.wso2.carbon.apimgt.gateway.TenancyLoader;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
@@ -131,10 +132,14 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             } catch (CertificateManagementException e) {
                 log.error("Error while Backup Truststore", e);
             }
-            log.debug("Registering ServerStartupListener for SubscriptionStore for the tenant domain : " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            log.debug("Registered ServerStartupListener for SubscriptionStore for the tenant domain : " + MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
-            SubscriptionDataHolder.getInstance().initializeSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            log.debug("Registering ServerStartupListener for SubscriptionStore for the tenant domain : " +
+                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            SubscriptionDataHolder.getInstance()
+                    .registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            log.debug("Registered ServerStartupListener for SubscriptionStore for the tenant domain : " +
+                    MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            SubscriptionDataHolder.getInstance()
+                    .initializeSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             cleanDeployment(CarbonUtils.getCarbonRepository());
         } else {
             log.info("Running on migration enabled mode: Stopped at gateway startup listener completing");
@@ -150,7 +155,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         if (gatewayArtifactSynchronizerProperties.isRetrieveFromStorageEnabled()) {
             InMemoryAPIDeployer inMemoryAPIDeployer = new InMemoryAPIDeployer();
             flag = inMemoryAPIDeployer.deployAllAPIsAtGatewayStartup(
-                        gatewayArtifactSynchronizerProperties.getGatewayLabels(), tenantDomain);
+                    gatewayArtifactSynchronizerProperties.getGatewayLabels(), tenantDomain);
         }
         return flag;
     }
@@ -187,6 +192,17 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         String migrationEnabled = System.getProperty(APIConstants.MIGRATE);
         if (migrationEnabled == null) {
             new Thread(() -> {
+                // Tenant Loading
+                if (GatewayUtils.isTenantLoadingEnable()) {
+                    try {
+                        new TenancyLoader().retrieveAndLoadAllTenants();
+                        DataHolder.getInstance().setTenantsProvisioned(true);
+                    } catch (APIManagementException e) {
+                        log.error(e);
+                    }
+                } else {
+                    DataHolder.getInstance().setTenantsProvisioned(true);
+                }
 
                 try {
                     new EndpointCertificateDeployer(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)
@@ -196,7 +212,8 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                     log.error(e);
                 }
             }).start();
-            SubscriptionDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            SubscriptionDataHolder.getInstance()
+                    .registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             service.execute(() -> {
                 try {
                     retrieveAllAPIMetadata();
@@ -214,7 +231,8 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
             ServiceReferenceHolder.getInstance().addLoadedTenant(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             retrieveAndDeployArtifacts(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             retrieveBlockConditionsAndKeyTemplates();
-            WebhooksDataHolder.getInstance().registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
+            WebhooksDataHolder.getInstance()
+                    .registerTenantSubscriptionStore(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             jmsTransportHandlerForTrafficManager
                     .subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_THROTTLE_DATA, new JMSMessageListener());
             jmsTransportHandlerForEventHub.subscribeForJmsEvents(APIConstants.TopicNames.TOPIC_TOKEN_REVOCATION,
@@ -260,20 +278,21 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         try (Stream<Path> files = Files.walk(directory, 1)) {
             files.filter(entry -> !entry.equals(directory))
                     .filter(Files::isDirectory).forEach(subdirectory ->
-            {
-                try {
-                    FileUtils.copyFile(new File(synapseConfigRootPath + securedWebSocketInboundEp + ".xml"),
-                            new File(subdirectory.toAbsolutePath().toString() + File.separator +
-                                    synapseDeploymentPath + File.separator + MultiXMLConfigurationBuilder.
-                                    INBOUND_ENDPOINT_DIR + File.separator + securedWebSocketInboundEp + ".xml"));
-                    FileUtils.copyFile(new File(synapseConfigRootPath + webHookServerHTTPS + ".xml"),
-                            new File(subdirectory.toAbsolutePath().toString() + File.separator +
-                                    synapseDeploymentPath + File.separator + MultiXMLConfigurationBuilder.
-                                    INBOUND_ENDPOINT_DIR + File.separator + webHookServerHTTPS + ".xml"));
-                } catch (IOException e) {
-                    log.error("Error while copying tenant artifacts", e);
-                }
-            });
+                    {
+                        try {
+                            FileUtils.copyFile(new File(synapseConfigRootPath + securedWebSocketInboundEp + ".xml"),
+                                    new File(subdirectory.toAbsolutePath().toString() + File.separator +
+                                            synapseDeploymentPath + File.separator + MultiXMLConfigurationBuilder.
+                                            INBOUND_ENDPOINT_DIR + File.separator + securedWebSocketInboundEp + ".xml"
+                                    ));
+                            FileUtils.copyFile(new File(synapseConfigRootPath + webHookServerHTTPS + ".xml"),
+                                    new File(subdirectory.toAbsolutePath().toString() + File.separator +
+                                            synapseDeploymentPath + File.separator + MultiXMLConfigurationBuilder.
+                                            INBOUND_ENDPOINT_DIR + File.separator + webHookServerHTTPS + ".xml"));
+                        } catch (IOException e) {
+                            log.error("Error while copying tenant artifacts", e);
+                        }
+                    });
         } catch (IOException e) {
             log.error("Error while retrieving tenants root folders ", e);
         }
@@ -337,11 +356,14 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         isGatewayPoliciesDeployedInSyncMode = deployGatewayPolicyArtifactsAtStartup(tenantDomain);
         DataHolder.getInstance().setAllGatewayPoliciesDeployed(isGatewayPoliciesDeployedInSyncMode);
         if (!isGatewayPoliciesDeployedInSyncMode) {
-            log.error("Gateway policy deployment attempt : " + syncModeGatewayPolicyDeploymentCount + " was unsuccessful");
+            log.error("Gateway policy deployment attempt : " + syncModeGatewayPolicyDeploymentCount +
+                    " was unsuccessful");
             if (!(syncModeGatewayPolicyDeploymentCount > retryCount)) {
                 deployGatewayPoliciesInSyncMode(tenantDomain);
             } else {
-                log.error("Maximum retry limit exceeded. Server is starting without deploying all gateway policy artifacts");
+                log.error(
+                        "Maximum retry limit exceeded. Server is starting without deploying all gateway policy " +
+                                "artifacts");
             }
         } else {
             log.info("Gateway policy deployment attempt : " + syncModeGatewayPolicyDeploymentCount + " was successful");
@@ -457,7 +479,8 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                             // Ignore
                         }
                     } else {
-                        log.error("Unable to deploy gateway policy artifacts at gateway. Maximum retry count exceeded.");
+                        log.error(
+                                "Unable to deploy gateway policy artifacts at gateway. Maximum retry count exceeded.");
                         throw e;
                     }
                 } else {
