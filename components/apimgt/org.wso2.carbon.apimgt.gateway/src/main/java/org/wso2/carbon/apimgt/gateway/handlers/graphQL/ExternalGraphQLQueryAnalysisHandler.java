@@ -14,7 +14,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
  */
 public class ExternalGraphQLQueryAnalysisHandler extends AbstractHandler
 {
-
     private static final Log log = LogFactory.getLog(ExternalGraphQLQueryAnalysisHandler.class);
 
     @Override
