@@ -83,6 +83,7 @@ import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
@@ -3024,7 +3025,7 @@ public final class APIUtil {
     /**
      * This method is used to validate the endpoint configuration for API
      *
-     * @param endpointConfigObject Endpoint Configuratioj of the API
+     * @param endpointConfigObject Endpoint Configuration of the API
      * @param apiType API Type
      * @param apiName Name of the API
      * @throws APIManagementException Throws an error if endpoint configuration is not valid
@@ -3032,12 +3033,56 @@ public final class APIUtil {
     public static void validateAPIEndpointConfig(Object endpointConfigObject, String apiType, String apiName)
             throws APIManagementException {
         if (endpointConfigObject != null) {
-            Map endpointConfigMap = (Map) endpointConfigObject;
+            @SuppressWarnings("unchecked")
+            Map<String, Object> endpointConfigMap = (Map<String, Object>) endpointConfigObject;
             if (endpointConfigMap != null && endpointConfigMap.containsKey("endpoint_type")
                     && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
                     endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))
                     && !APIConstants.API_TYPE_HTTP.equalsIgnoreCase(apiType)) {
                 throw new APIManagementException("Invalid endpoint configuration provided for the API " + apiName);
+            }
+
+            // Validate security configurations for sandbox and production
+            if (endpointConfigMap.containsKey(APIConstants.ENDPOINT_SECURITY)) {
+                Object securityConfigObj = endpointConfigMap.get(APIConstants.ENDPOINT_SECURITY);
+                if (securityConfigObj instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Map<String, Object>> endpointSecurityMap =
+                            (Map<String, Map<String, Object>>) securityConfigObj;
+
+                    validateEndpointSecurityType(endpointSecurityMap.get(APIConstants.ENDPOINT_SECURITY_SANDBOX),
+                            APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                    validateEndpointSecurityType(endpointSecurityMap.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION),
+                            APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                }
+            }
+        }
+    }
+
+    /**
+     * Validates the endpoint security type.
+     *
+     * @param securityConfig the security configuration map
+     * @param environment    the environment key ("sandbox" or "production")
+     * @throws APIManagementException if the security type is invalid
+     */
+    private static void validateEndpointSecurityType(Map<String, Object> securityConfig, String environment)
+            throws APIManagementException {
+        if (securityConfig == null || !securityConfig.containsKey(APIConstants.ENDPOINT_SECURITY_TYPE)) {
+            return; // No security type specified, skip validation
+        }
+
+        Object typeObj = securityConfig.get(APIConstants.ENDPOINT_SECURITY_TYPE);
+        if (typeObj instanceof String) {
+            String type = (String) typeObj;
+            if (!APIConstants.ENDPOINT_SECURITY_TYPE_NONE.equalsIgnoreCase(type) &&
+                    !APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.equalsIgnoreCase(type) &&
+                    !APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.equalsIgnoreCase(type) &&
+                    !APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase(type)) {
+                ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_SECURITY_CONFIG, environment);
+                throw new APIManagementException(
+                        "Invalid endpoint security type '" + type + "' in '" + environment + "' configuration.",
+                        errorHandler);
             }
         }
     }
@@ -11007,6 +11052,7 @@ public final class APIUtil {
 
     /**
      * Generate code verifier for PKCE
+     *
      * @return code verifier
      */
     public static String generateCodeVerifier () {
