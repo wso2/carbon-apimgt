@@ -2,10 +2,9 @@ package org.wso2.carbon.apimgt.common.gateway.graphql;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.wso2.carbon.apimgt.common.gateway.dto.ExternalQueryAnalyzerResponseDTO;
 
-import org.json.JSONObject;
-import java.util.Iterator;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,7 +12,12 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
 
+/**
+ * External Query Analyzer for analyzing GraphQL queries for potential vulnerabilities.
+ * This class communicates with an external service to detect threats in GraphQL queries.
+ */
 public class ExternalQueryAnalyzer {
     private static final Log log = LogFactory.getLog(ExternalQueryAnalyzer.class);
 
@@ -43,11 +47,11 @@ public class ExternalQueryAnalyzer {
                     boolean anyVulDetected = false;
 
                     Iterator<String> keys = results.keys();
-                    while (keys.hasNext()){
+                    while (keys.hasNext()) {
                         String key = keys.next();
                         JSONObject threatObject = results.getJSONObject(key);
 
-                        if(threatObject.has("detected") && threatObject.getBoolean("detected")){
+                        if (threatObject.has("detected") && threatObject.getBoolean("detected")) {
                             externalQueryAnalyzerResponseDTO.addVulToList(threatObject.getString("threat"));
                             anyVulDetected = true;
                         }
@@ -77,7 +81,7 @@ public class ExternalQueryAnalyzer {
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setDoOutput(true);
 
-        JSONObject  jsonObject = new JSONObject();
+        JSONObject jsonObject = new JSONObject();
         jsonObject.put("query", query);
         String jsonPayload = jsonObject.toString();
 
