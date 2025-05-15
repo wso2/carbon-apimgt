@@ -53,9 +53,19 @@ public class DataHolder {
     private final Map<String, Cache<String, Long>> apiSuspendedEndpoints = new ConcurrentHashMap<>();
 
     private boolean isAllGatewayPoliciesDeployed = false;
-
+    private boolean tenantsProvisioned = false;
     private DataHolder() {
-        initializeTenantDeploymentStatusMap();
+    }
+
+    public boolean isTenantsProvisioned() {
+        return tenantsProvisioned;
+    }
+
+    public void setTenantsProvisioned(boolean tenantsProvisioned) {
+        this.tenantsProvisioned = tenantsProvisioned;
+        if (tenantsProvisioned){
+            initializeTenantDeploymentStatusMap();
+        }
     }
 
     public Map<String, List<String>> getApiToCertificatesMap() {
@@ -382,4 +392,5 @@ public class DataHolder {
 
         apiSuspendedEndpoints.remove(apiKey);
     }
+
 }
