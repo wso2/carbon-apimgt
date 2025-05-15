@@ -6,8 +6,8 @@ import io.apicurio.datamodels.asyncapi.v2.models.Aai20Document;
 import io.apicurio.datamodels.core.models.Extension;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
 import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
 
 import java.util.Map;
 
