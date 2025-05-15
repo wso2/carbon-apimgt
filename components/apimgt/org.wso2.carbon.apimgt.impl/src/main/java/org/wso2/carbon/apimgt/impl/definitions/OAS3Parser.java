@@ -313,11 +313,11 @@ public class OAS3Parser extends APIDefinition {
      *
      * @param apiDefinition   Swagger Definition
      * @param mockConfig   Mock Configurations
-     * @param scriptsToAdd JsonObject with scripts and mockDB
+     * @param scriptsToAdd JsonObject with scripts and mockDataset
      * @return Swagger Json
      */
     @Override
-    public Map<String, Object> addScriptsAndMockDB(String apiDefinition, Map<String, Object> mockConfig,
+    public Map<String, Object> addScriptsAndMockDataset(String apiDefinition, Map<String, Object> mockConfig,
             JsonObject scriptsToAdd) throws APIManagementException {
         OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(apiDefinition, null, null);
@@ -368,10 +368,10 @@ public class OAS3Parser extends APIDefinition {
                 op.addExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
             }
-            // if mockDB then Add it
-            if (!isModify && scriptsToAdd.has(APIConstants.MOCK_MOCKDB)) {
-                swagger.addExtension(APIConstants.X_WSO2_MOCKDB,
-                        scriptsToAdd.get(APIConstants.MOCK_MOCKDB).getAsString());
+            // if mockDataset then Add it
+            if (!isModify && scriptsToAdd.has(APIConstants.MOCK_DATASET)) {
+                swagger.addExtension(APIConstants.X_WSO2_MOCK_DATASET,
+                        scriptsToAdd.get(APIConstants.MOCK_DATASET).getAsString());
             }
             returnMap.put(APIConstants.SWAGGER, prettifyOAS3ToJson(swagger));
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);

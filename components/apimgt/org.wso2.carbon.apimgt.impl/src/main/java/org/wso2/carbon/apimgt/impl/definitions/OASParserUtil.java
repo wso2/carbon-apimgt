@@ -282,9 +282,9 @@ public class OASParserUtil {
         JsonObject scriptsToAdd = invokeMockGenerationAIService(apiDefinition, mockConfig);
         if (scriptsToAdd != null) {
             if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) { // oas3
-                return oas3Parser.addScriptsAndMockDB(apiDefinition, mockConfig, scriptsToAdd);
+                return oas3Parser.addScriptsAndMockDataset(apiDefinition, mockConfig, scriptsToAdd);
             } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) { // oas2
-                return oas2Parser.addScriptsAndMockDB(apiDefinition, mockConfig, scriptsToAdd);
+                return oas2Parser.addScriptsAndMockDataset(apiDefinition, mockConfig, scriptsToAdd);
             } else {
                 throw new APIManagementException(
                         "Cannot update destination swagger because it is not in OpenAPI format");

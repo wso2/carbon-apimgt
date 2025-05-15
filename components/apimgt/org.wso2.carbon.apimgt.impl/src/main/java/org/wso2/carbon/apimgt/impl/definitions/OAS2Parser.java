@@ -264,11 +264,11 @@ public class OAS2Parser extends APIDefinition {
      *
      * @param swaggerDef   Swagger Definition
      * @param mockConfig   Mock Configurations
-     * @param scriptsToAdd JsonObject with scripts and mockDB
+     * @param scriptsToAdd JsonObject with scripts and mockDataset
      * @return Swagger Json
      */
     @Override
-    public Map<String, Object> addScriptsAndMockDB(String swaggerDef, Map<String, Object> mockConfig,
+    public Map<String, Object> addScriptsAndMockDataset(String swaggerDef, Map<String, Object> mockConfig,
             JsonObject scriptsToAdd) throws APIManagementException {
         SwaggerParser parser = new SwaggerParser();
         SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(swaggerDef);
@@ -320,10 +320,10 @@ public class OAS2Parser extends APIDefinition {
                 // sets script to each resource in the swagger
                 op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
             }
-            // if mockDB then Add it
-            if (!isModify && scriptsToAdd.has(APIConstants.MOCK_MOCKDB)) {
-                swagger.setVendorExtension(APIConstants.X_WSO2_MOCKDB,
-                        scriptsToAdd.get(APIConstants.MOCK_MOCKDB).getAsString());
+            // if mockDataset then Add it
+            if (!isModify && scriptsToAdd.has(APIConstants.MOCK_DATASET)) {
+                swagger.setVendorExtension(APIConstants.X_WSO2_MOCK_DATASET,
+                        scriptsToAdd.get(APIConstants.MOCK_DATASET).getAsString());
             }
             returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);

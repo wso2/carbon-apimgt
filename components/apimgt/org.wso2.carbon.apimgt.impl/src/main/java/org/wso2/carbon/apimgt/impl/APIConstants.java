@@ -1833,10 +1833,10 @@ public final class APIConstants {
     public static final String MOCK_MODIFY = "modify";
     public static final String MOCK_PATH = "path";
     public static final String MOCK_METHOD = "method";
-    public static final String MOCK_MOCKDB = "mockDB";
+    public static final String MOCK_DATASET = "mockDataset";
     public static final String MOCK_MODIFIED_SCRIPT = "modified_script";
     public static final String MOCK_CONFIG = "config";
-    public static final String X_WSO2_MOCKDB = "x-wso2-mockdb";
+    public static final String X_WSO2_MOCK_DATASET = "x-wso2-mock-dataset";
 
     public static final String IMPLEMENTATION_STATUS = "implementation_status";
     public static final String ENDPOINT_TYPE_DEFAULT = "default";

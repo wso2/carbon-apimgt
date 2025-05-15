@@ -7762,14 +7762,14 @@ public final class APIUtil {
     }
 
     /**
-     * Removes x-mediation-scripts and x-wso2-mockdb from swagger as they should not be provided to store consumers
+     * Removes x-mediation-scripts and x-wso2-mock-dataset from swagger as they should not be provided to store consumers
      *
      * @param apiSwagger swagger definition of API
-     * @return swagger which exclude x-mediation-script and x-wso2-mockdb elements
+     * @return swagger which exclude x-mediation-script and x-wso2-mock-dataset elements
      */
-    public static String removeXMediationScriptsFromSwagger(String apiSwagger) {
+    public static String removeXMediationScriptsAndMockDatasetFromSwagger(String apiSwagger) {
         // Regex to match and remove both keys with their values
-        String combinedRegex = "(\\s*,)?\\s*\"x-mediation-script\"\\s*:\\s*\".*?(?<!\\\\)\"(\\s*,)?" + "|(\\s*,)?\\s*\"x-wso2-mockdb\"\\s*:\\s*\".*?(?<!\\\\)\"(\\s*,)?";
+        String combinedRegex = "(\\s*,)?\\s*\"x-mediation-script\"\\s*:\\s*\".*?(?<!\\\\)\"(\\s*,)?" + "|(\\s*,)?\\s*\"x-wso2-mock-dataset\"\\s*:\\s*\".*?(?<!\\\\)\"(\\s*,)?";
 
         Pattern pattern = Pattern.compile(combinedRegex);
         Matcher matcher = pattern.matcher(apiSwagger);

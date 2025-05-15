@@ -1595,7 +1595,7 @@ public class AsyncApiParser extends APIDefinition {
     }
 
     @Override
-    public Map<String, Object> addScriptsAndMockDB(String apiDefinition, Map<String, Object> mockConfig,
+    public Map<String, Object> addScriptsAndMockDataset(String apiDefinition, Map<String, Object> mockConfig,
             JsonObject scriptsToAdd) throws APIManagementException {
         return null;
     }

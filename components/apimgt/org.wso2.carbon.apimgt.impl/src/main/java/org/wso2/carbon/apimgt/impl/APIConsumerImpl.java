@@ -3351,7 +3351,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public String getOpenAPIDefinition(String apiId, String organization) throws APIManagementException {
 
         String definition = super.getOpenAPIDefinition(apiId, organization);
-        return APIUtil.removeXMediationScriptsFromSwagger(definition);
+        return APIUtil.removeXMediationScriptsAndMockDatasetFromSwagger(definition);
     }
 
     @Override

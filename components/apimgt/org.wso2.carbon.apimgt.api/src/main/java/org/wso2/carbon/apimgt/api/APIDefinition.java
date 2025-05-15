@@ -60,12 +60,12 @@ public abstract class APIDefinition {
     public abstract Map<String, Object> getGeneratedExamples(String apiDefinition) throws APIManagementException;
 
     /**
-     * This method adds scripts and mockDB to swagger 
+     * This method adds scripts and mockDataset to swagger
      *
      * @param apiDefinition
      * @return
      */
-    public abstract Map<String, Object> addScriptsAndMockDB(String apiDefinition, Map<String, Object> mockConfig, 
+    public abstract Map<String, Object> addScriptsAndMockDataset(String apiDefinition, Map<String, Object> mockConfig,
         JsonObject scriptsToAdd) throws APIManagementException;
 
     /**

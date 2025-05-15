@@ -24,8 +24,8 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-public class MockDBPersistMediator extends AbstractMediator {
-    private static final ConcurrentHashMap<String, String> mockDBMap = new ConcurrentHashMap<>();
+public class MockDatasetPersistMediator extends AbstractMediator {
+    private static final ConcurrentHashMap<String, String> mockDatasetMap = new ConcurrentHashMap<>();
 
     @Override
     public boolean mediate(MessageContext context) {
@@ -34,45 +34,45 @@ public class MockDBPersistMediator extends AbstractMediator {
             JsonObject openAPI = JsonParser.parseString(openAPIString).getAsJsonObject();
             String dbKey = Integer.toString(
                     (context.getProperty(APIMgtGatewayConstants.API_UUID_PROPERTY) + (openAPI.get(
-                            APIConstants.X_WSO2_MOCKDB) != null ?
-                            openAPI.get(APIConstants.X_WSO2_MOCKDB).getAsString() :
+                            APIConstants.X_WSO2_MOCK_DATASET) != null ?
+                            openAPI.get(APIConstants.X_WSO2_MOCK_DATASET).getAsString() :
                             "")).hashCode());
 
-            if (context.getProperty(APIConstants.MOCK_MOCKDB) == null) { // Only for request
-                if (!mockDBMap.containsKey(dbKey)) {
-                    setMockDB(openAPI, dbKey);
+            if (context.getProperty(APIConstants.MOCK_DATASET) == null) { // Only for request
+                if (!mockDatasetMap.containsKey(dbKey)) {
+                    setmockDataset(openAPI, dbKey);
                     if (log.isDebugEnabled()) {
-                        log.debug("MockDB Initialized: " + mockDBMap.get(dbKey));
+                        log.debug("mock dataset Initialized: " + mockDatasetMap.get(dbKey));
                     }
                 }
-                // Set the mockDB to the context
-                context.setProperty(APIConstants.MOCK_MOCKDB, mockDBMap.get(dbKey));
+                // Set the mockDataset to the context
+                context.setProperty(APIConstants.MOCK_DATASET, mockDatasetMap.get(dbKey));
                 if (log.isDebugEnabled()) {
-                    log.debug("MockDB set to Context: " + mockDBMap.get(dbKey));
+                    log.debug("mock dataset set to Context: " + mockDatasetMap.get(dbKey));
                 }
             } else { // Only for response
-                // Update the mockDB for the specific API
-                updateMockDB(dbKey, (String) context.getProperty(APIConstants.MOCK_MOCKDB));
+                // Update the mockDataset for the specific API
+                updatemockDataset(dbKey, (String) context.getProperty(APIConstants.MOCK_DATASET));
                 if (log.isDebugEnabled()) {
-                    log.debug("MockDB Updated: " + mockDBMap.get(dbKey));
+                    log.debug("mock dataset Updated: " + mockDatasetMap.get(dbKey));
                 }
             }
             return true; // Successful mediation
         } catch (Exception e) {
-            log.error("Error in MockDBPersistMediator: " + e.getMessage());
+            log.error("Error in mockDatasetPersistMediator: " + e.getMessage());
             return false;
         }
     }
 
-    private void setMockDB(JsonObject openAPI, String apiKey) {
-        if (!openAPI.has(APIConstants.X_WSO2_MOCKDB)) {
-            log.error("x-wso2-mockdb field not found in open API definition.");
+    private void setmockDataset(JsonObject openAPI, String apiKey) {
+        if (!openAPI.has(APIConstants.X_WSO2_MOCK_DATASET)) {
+            log.error("x-wso2-mock-dataset field not found in open API definition.");
         } else {
-            updateMockDB(apiKey, openAPI.get(APIConstants.X_WSO2_MOCKDB).getAsString());
+            updatemockDataset(apiKey, openAPI.get(APIConstants.X_WSO2_MOCK_DATASET).getAsString());
         }
     }
 
-    private void updateMockDB(String apiKey, String mockDB) {
-        mockDBMap.put(apiKey, mockDB);
+    private void updatemockDataset(String apiKey, String mockDataset) {
+        mockDatasetMap.put(apiKey, mockDataset);
     }
 }

@@ -276,17 +276,17 @@ public class OAS3ParserTest extends OASTestBase {
     }
 
     @Test
-    public void testaddScriptsAndMockDB() throws Exception {
+    public void testaddScriptsAndMockDataset() throws Exception {
         String relativePath = "definitions" + File.separator + "oas3" + File.separator + "oas3_mock_response.yaml";
         String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath),
                 StandardCharsets.UTF_8);
         Map<String, Object> responseMap = oas3Parser.generateExample(openApi);
         String swaggerString = (String) responseMap.get(APIConstants.SWAGGER);
 
-        //Test for adding scripts and mockDB Completely
+        //Test for adding scripts and mockDataset Completely
         //Sample LLM Response
         String llmResponseFull = "{"
-                + "\"mockDB\": \"{\\\"mockResponses\\\":[{\\\"id\\\":200,\\\"mockResponse\\\":\\\"mockResponse200\\\"},"
+                + "\"mockDataset\": \"{\\\"mockResponses\\\":[{\\\"id\\\":200,\\\"mockResponse\\\":\\\"mockResponse200\\\"},"
                 + "{\\\"id\\\":404,\\\"mockResponse\\\":\\\"mockResponse404\\\"},{\\\"id\\\":\\\"4XX\\\","
                 + "\\\"mockResponse\\\":\\\"mockResponse4XX\\\"}]}\","
                 + "\"paths\": {"
@@ -294,7 +294,7 @@ public class OAS3ParserTest extends OASTestBase {
                 + "    \"get\": \"var accept=mc.getProperty('AcceptHeader')||'application/json';\\n"
                 + "if(!accept||accept=='*/*')accept='application/json';\\n"
                 + "mc.setProperty('CONTENT_TYPE',accept);\\n"
-                + "var db=JSON.parse(mc.getProperty('mockDB')||'{\\\"mockResponses\\\":[]}');\\n"
+                + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\"mockResponses\\\":[]}');\\n"
                 + "mc.setProperty('HTTP_SC','200');\\n"
                 + "mc.setPayloadJSON(db.mockResponses);\""
                 + "  }"
@@ -303,19 +303,19 @@ public class OAS3ParserTest extends OASTestBase {
         Map mockConfig1 = Map.of();
         JsonObject llmResponseJson = JsonParser.parseString(llmResponseFull).getAsJsonObject();
 
-        Map<String, Object> responseMap1 = oas3Parser.addScriptsAndMockDB(swaggerString, mockConfig1, llmResponseJson);
+        Map<String, Object> responseMap1 = oas3Parser.addScriptsAndMockDataset(swaggerString, mockConfig1, llmResponseJson);
         Assert.assertNotNull(responseMap1);
         Assert.assertTrue(responseMap1.containsKey(APIConstants.MOCK_GEN_POLICY_LIST));
         Assert.assertTrue(responseMap1.containsKey(APIConstants.SWAGGER));
         String swaggerString1 = (String) responseMap1.get(APIConstants.SWAGGER);
-        Assert.assertTrue(swaggerString1.contains(APIConstants.X_WSO2_MOCKDB));
+        Assert.assertTrue(swaggerString1.contains(APIConstants.X_WSO2_MOCK_DATASET));
         List<APIResourceMediationPolicy> apiResourceMediationPolicyList = (List<APIResourceMediationPolicy>) responseMap1.get(
                 APIConstants.MOCK_GEN_POLICY_LIST);
         Assert.assertFalse(apiResourceMediationPolicyList.isEmpty());
         APIResourceMediationPolicy apiResourceMediationPolicy = apiResourceMediationPolicyList.get(0);
         Assert.assertEquals("/samplePath", apiResourceMediationPolicy.getPath());
         String content = apiResourceMediationPolicy.getContent();
-        Assert.assertTrue(content.contains("var db=JSON.parse(mc.getProperty('mockDB')") && content.contains(
+        Assert.assertTrue(content.contains("var db=JSON.parse(mc.getProperty('mockDataset')") && content.contains(
                 "mc.setProperty('HTTP_SC','200');"));
 
         //Test for modifying a method
@@ -323,14 +323,14 @@ public class OAS3ParserTest extends OASTestBase {
                 + "\"modified_script\": \"var accept=mc.getProperty('AcceptHeader')||'application/json';\\n"
                 + "if(!accept||accept=='*/*')accept='application/json';\\n"
                 + "mc.setProperty('CONTENT_TYPE',accept);\\n"
-                + "var db=JSON.parse(mc.getProperty('mockDB')||'{\\\\\\\"mockResponses\\\\\\\":[{\\\"id\\\":200,"
+                + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[{\\\"id\\\":200,"
                 + "\\\"mockResponse\\\":\\\"mockResponse200ToTestIfModified\\\"}]}');\\n"
                 + "mc.setProperty('HTTP_SC','200');\\n"
                 + "mc.setPayloadJSON(db.mockResponses);\""
                 + "}";
         Map mockConfig2 = Map.of("modify", Map.of("path", "/samplePath", "method", "get"));
         JsonObject llmResponseJsonModify = JsonParser.parseString(llmResponseModify).getAsJsonObject();
-        Map<String, Object> responseMap2 = oas3Parser.addScriptsAndMockDB(swaggerString, mockConfig2,
+        Map<String, Object> responseMap2 = oas3Parser.addScriptsAndMockDataset(swaggerString, mockConfig2,
                 llmResponseJsonModify);
         Assert.assertNotNull(responseMap2);
         Assert.assertTrue(responseMap2.containsKey(APIConstants.MOCK_GEN_POLICY_LIST));
