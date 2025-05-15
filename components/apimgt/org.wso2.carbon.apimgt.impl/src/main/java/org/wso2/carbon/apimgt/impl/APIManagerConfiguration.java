@@ -16,6 +16,18 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Stack;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -35,7 +47,17 @@ import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
-import org.wso2.carbon.apimgt.impl.dto.*;
+import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
+import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
+import org.wso2.carbon.apimgt.impl.dto.LoadingTenants;
+import org.wso2.carbon.apimgt.impl.dto.OrgAccessControl;
+import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.dto.TokenValidationDto;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.dto.ai.AIAPIConfigurationsDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
@@ -57,7 +79,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.namespace.QName;
@@ -2416,20 +2437,26 @@ public class APIManagerConfiguration {
             log.debug("Gateway artifact synchronizer Event waiting time not set.");
         }
         OMElement enableEagerLoading =
-                omElement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.EnableOnDemandLoadingAPIS));
-        if (enableEagerLoading != null){
-            gatewayArtifactSynchronizerProperties.setOnDemandLoading(Boolean.parseBoolean(enableEagerLoading.getText()));
+                omElement.getFirstChildWithName(
+                        new QName(APIConstants.GatewayArtifactSynchronizer.EnableOnDemandLoadingAPIS));
+        if (enableEagerLoading != null) {
+            gatewayArtifactSynchronizerProperties.setOnDemandLoading(
+                    Boolean.parseBoolean(enableEagerLoading.getText()));
         }
-        OMElement tenantLoadingOMElement = omElement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.TENANT_LOADING));
-        if (tenantLoadingOMElement != null){
-            OMElement enableTenantLoading = tenantLoadingOMElement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.ENABLE_TENANT_LOADING));
-            if (enableTenantLoading != null){
-                gatewayArtifactSynchronizerProperties.setTenantLoading(Boolean.parseBoolean(enableTenantLoading.getText()));
+        OMElement tenantLoadingOMElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.TENANT_LOADING));
+        if (tenantLoadingOMElement != null) {
+            OMElement enableTenantLoading = tenantLoadingOMElement.getFirstChildWithName(
+                    new QName(APIConstants.GatewayArtifactSynchronizer.ENABLE_TENANT_LOADING));
+            if (enableTenantLoading != null) {
+                gatewayArtifactSynchronizerProperties.setTenantLoading(
+                        Boolean.parseBoolean(enableTenantLoading.getText()));
             }
-            OMElement tenantSToLoadElement  = tenantLoadingOMElement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.TENANT_LOADING_TENANTS));
-            if (tenantSToLoadElement != null && StringUtils.isNotEmpty(tenantSToLoadElement.getText())){
+            OMElement tenantSToLoadElement = tenantLoadingOMElement.getFirstChildWithName(
+                    new QName(APIConstants.GatewayArtifactSynchronizer.TENANT_LOADING_TENANTS));
+            if (tenantSToLoadElement != null && StringUtils.isNotEmpty(tenantSToLoadElement.getText())) {
                 String[] tenantsToLoad = tenantSToLoadElement.getText().split(",");
-                LoadingTenants loadingTenants  = new LoadingTenants();
+                LoadingTenants loadingTenants = new LoadingTenants();
                 for (String tenant : tenantsToLoad) {
                     tenant = tenant.trim();
                     if (tenant.equals("*")) {
@@ -2443,7 +2470,7 @@ public class APIManagerConfiguration {
                         loadingTenants.getIncludingTenants().add(tenant);
                     }
                 }
-                if (loadingTenants.isIncludeAllTenants()){
+                if (loadingTenants.isIncludeAllTenants()) {
                     loadingTenants.getIncludingTenants().clear();
                 }
                 loadingTenants.getIncludingTenants().removeAll(loadingTenants.getExcludingTenants());

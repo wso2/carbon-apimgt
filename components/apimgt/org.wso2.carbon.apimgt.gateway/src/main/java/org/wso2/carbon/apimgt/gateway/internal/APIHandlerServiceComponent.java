@@ -111,9 +111,6 @@ public class APIHandlerServiceComponent {
         TenantServiceCreator listener = new TenantServiceCreator();
         bundleContext.registerService(Axis2ConfigurationContextObserver.class.getName(), listener, null);
         bundleContext.registerService(ServerStartupObserver.class.getName(), new ServerStartupListener(), null);
-        if (GatewayUtils.isTenantLoadingEnable()) {
-            bundleContext.registerService(ServerStartupObserver.class.getName(), new TenancyLoader(), null);
-        }
         // Set APIM Gateway JWT Generator
 
         registration =
