@@ -71,7 +71,7 @@ public class ApiChatRequestApiSpecDTO   {
   }
 
   
-  @ApiModelProperty(example = " schema { query: Query } type Query { hero(id: ID!): Character allHeroes: [Character] } type Character { id: ID! name: String! appearsIn: [String] }", value = "GraphQL API schema definition")
+  @ApiModelProperty(example = "schema {   query: Query }  # The query type, represents all of the entry points into our object graph type Query {   hero(id: ID!): Character   allHeroes: [Character] }  # A character from the Star Wars universe type Character {   # The unique identifier for the character   id: ID!    # The name of the character   name: String!    # The list of episodes the character appears in   appearsIn: [String] }", value = "GraphQL API schema definition")
   @JsonProperty("sdl")
   public String getSdl() {
     return sdl;
