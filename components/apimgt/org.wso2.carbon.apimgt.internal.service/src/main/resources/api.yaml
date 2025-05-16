@@ -778,7 +778,10 @@ paths:
       responses:
         '200':
           description: List of endpoint certificates
-          content: {}
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EndpointCertificateList'
         default:
           description: Unexpected error
           content:
@@ -808,7 +811,7 @@ paths:
             Created.
           content: {}
         default:
-          $ref: '#/definitions/Error'
+          $ref: '#/components/schemas/Error'
       x-codegen-request-body-name: deployedAPIRevisionDTOList
   /apis/undeployed-revision:
     post:
@@ -829,7 +832,7 @@ paths:
           description: Fetch un-deployed revision
           content: {}
         default:
-          $ref: '#/definitions/Error'
+          $ref: '#/components/schemas/Error'
       x-codegen-request-body-name: unDeployedAPIRevisionDTO
   /ga-config:
     get:
@@ -940,6 +943,15 @@ paths:
       summary: Retrieve persisted per API logging data.
       description: |
         This retrieve the persisted API logging data for API logging support.
+      parameters:
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be retrieved from.
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Event Received success
@@ -1077,6 +1089,40 @@ paths:
           description: Internal server error. Failed to insert transaction records.
           content: {}
       x-codegen-request-body-name: body
+  /tenant-info:
+    get:
+      tags:
+        - Tenant
+      summary: Retrieve tenant information
+      description: |
+        This will provide access to tenant information.
+      parameters:
+        - name: filter
+          in: query
+          schema:
+            type: string
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tenant information received successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantInfoList'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     SynapseAttributes:
@@ -2072,6 +2118,57 @@ components:
           type: integer
         recordedTime:
           type: string
+    TenantInfoList:
+      title: TenantInfoList
+      type: object
+      properties:
+        tenants:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantInfo'
+    TenantInfo:
+      title: TenantInfo
+      type: object
+      properties:
+        tenantId:
+          type: integer
+        admin:
+          type: string
+        domain:
+          type: string
+        adminFullName:
+          type: string
+        adminFirstName:
+          type: string
+        adminLastName:
+          type: string
+        email:
+          type: string
+        active:
+          type: boolean
+    EndpointCertificate:
+      title: EndpointCertificate
+      type: object
+      properties:
+        alias:
+          type: string
+        endpoint:
+          type: string
+        certificate:
+          type: string
+        tenantId:
+          type: integer
+        organization:
+          type: string
+    EndpointCertificateList:
+      title: EndpointCertificateList
+      type: object
+      properties:
+        certificates:
+          type: array
+          items:
+            $ref: '#/components/schemas/EndpointCertificate'
+
   parameters:
     requestedTenant:
       name: xWSO2Tenant

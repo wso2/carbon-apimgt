@@ -38,6 +38,7 @@
             <bean class="org.wso2.carbon.apimgt.internal.service.GatewayPolicyArtifactsApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.TransactionRecordsApi"/>
             <bean class="org.wso2.carbon.apimgt.internal.service.SubscribeInternalApi"/>
+            <bean class="org.wso2.carbon.apimgt.internal.service.TenantInfoApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

@@ -9,8 +9,8 @@ import org.apache.cxf.jaxrs.ext.multipart.Multipart;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import org.wso2.carbon.apimgt.internal.service.dto.APILoggingConfigListDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.internal.service.dto.TenantInfoListDTO;
 
 import java.util.List;
 
@@ -20,6 +20,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 
-public interface ApiLoggingConfigsApiService {
-      public Response apiLoggingConfigsGet(String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
+public interface TenantInfoApiService {
+      public Response tenantInfoGet(String xWSO2Tenant, String filter, MessageContext messageContext) throws APIManagementException;
 }
