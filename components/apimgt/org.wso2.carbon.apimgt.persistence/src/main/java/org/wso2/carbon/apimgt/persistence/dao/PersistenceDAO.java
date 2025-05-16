@@ -234,6 +234,37 @@ public class PersistenceDAO {
         }
     }
 
+    public String addAPIDocumentation(String apiUuid, String metadata, String org) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        String docId = UUID.randomUUID().toString();
+
+        String query = SQLConstants.ADD_ARTIFACT_SQL;
+
+        try {
+            connection = PersistanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, "DOCUMENTATION");
+            prepStmt.setString(2, org);
+            prepStmt.setString(3, metadata);
+            prepStmt.setString(4, docId);
+            prepStmt.setString(5, apiUuid);
+
+            prepStmt.execute();
+
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding the API documentation to the database", e);
+        } finally {
+            PersistanceDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+
+        return docId;
+    }
+
     private void handleException(String msg, Throwable t) throws APIManagementException {
 
         log.error(msg, t);

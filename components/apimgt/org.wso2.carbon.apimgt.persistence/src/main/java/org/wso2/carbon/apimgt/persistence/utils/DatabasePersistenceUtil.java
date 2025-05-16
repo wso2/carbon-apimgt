@@ -36,6 +36,10 @@ public class DatabasePersistenceUtil {
         return gson.toJsonTree(org).getAsJsonObject();
     }
 
+    public static JsonObject mapDocumentToJson(org.wso2.carbon.apimgt.persistence.dto.Documentation documentation) {
+        return gson.toJsonTree(documentation).getAsJsonObject();
+    }
+
     public static JsonObject stringTojsonObject(String jsonString) {
         return JsonParser.parseString(jsonString).getAsJsonObject();
     }

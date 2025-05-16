@@ -302,7 +302,19 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public Documentation addDocumentation(Organization org, String apiId, Documentation documentation) throws DocumentationPersistenceException {
-        return null;
+        try {
+            JsonObject docJson = DatabasePersistenceUtil.mapDocumentToJson(documentation);
+            JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
+
+            String docJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(docJson);
+            String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
+
+            String docId = persistenceDAO.addAPIDocumentation(apiId, docJsonString, orgJsonString);
+            documentation.setId(docId);
+        } catch (APIManagementException e) {
+            throw new DocumentationPersistenceException("Error while adding documentation", e);
+        }
+        return documentation;
     }
 
     @Override
