@@ -301,6 +301,76 @@ public class AMDefaultKeyManagerImplTest {
         Assert.assertEquals(APIConstants.DEFAULT_TOKEN_TYPE, tokenType);
     }
 
+    @Test
+    public void testApplicationInfoBuildWithNegativeExpiryTimes() throws Exception {
+        OAuthApplicationInfo oauthApplication = new OAuthApplicationInfo();
+        oauthApplication.setClientId("test");
+        oauthApplication.setTokenType(APIConstants.TOKEN_TYPE_OAUTH);
+
+        String customTokenType = "customTokenType";
+        ClientInfo clientInfo = new ClientInfo();
+        clientInfo.setTokenType(customTokenType);
+        clientInfo.setRefreshTokenLifeTime(-1L);
+        clientInfo.setUserAccessTokenLifeTime(-1L);
+        clientInfo.setApplicationAccessTokenLifeTime(-1L);
+        clientInfo.setIdTokenLifeTime(-1L);
+
+        Mockito.when(dcrClient.getApplication(java.util.Base64.getUrlEncoder().encodeToString(
+                oauthApplication.getClientId().getBytes(StandardCharsets.UTF_8)))).thenReturn(clientInfo);
+
+        OAuthApplicationInfo appInfo = Whitebox.invokeMethod(keyManager, "buildDTOFromClientInfo",
+                clientInfo, oauthApplication);
+        Map<String, Object> additionalProps = new HashMap<>();
+        Object additionalPropsObj = appInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
+        Assert.assertTrue(additionalPropsObj instanceof Map);
+
+        additionalProps = (Map<String, Object>) additionalPropsObj;
+        Assert.assertEquals(Integer.MAX_VALUE - 1L,
+                additionalProps.get(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME));
+        Assert.assertEquals(Integer.MAX_VALUE - 1L,
+                additionalProps.get(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME));
+        Assert.assertEquals(Integer.MAX_VALUE - 1L,
+                additionalProps.get(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME));
+        Assert.assertEquals(Integer.MAX_VALUE - 1L,
+                additionalProps.get(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME));
+    }
+
+    @Test
+    public void testApplicationInfoBuildWithPositiveExpiryTimes() throws Exception {
+        OAuthApplicationInfo oauthApplication = new OAuthApplicationInfo();
+        oauthApplication.setClientId("test");
+        oauthApplication.setTokenType(APIConstants.TOKEN_TYPE_OAUTH);
+
+        String customTokenType = "customTokenType";
+        ClientInfo clientInfo = new ClientInfo();
+        clientInfo.setTokenType(customTokenType);
+        clientInfo.setRefreshTokenLifeTime(100L);
+        clientInfo.setUserAccessTokenLifeTime(100L);
+        clientInfo.setApplicationAccessTokenLifeTime(100L);
+        clientInfo.setIdTokenLifeTime(100L);
+
+        Mockito.when(dcrClient.getApplication(java.util.Base64.getUrlEncoder().encodeToString(
+                oauthApplication.getClientId().getBytes(StandardCharsets.UTF_8)))).thenReturn(clientInfo);
+
+        OAuthApplicationInfo appInfo = Whitebox.invokeMethod(keyManager, "buildDTOFromClientInfo",
+                clientInfo, oauthApplication);
+        Map<String, Object> additionalProps = new HashMap<>();
+        Object additionalPropsObj = appInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
+        Assert.assertTrue(additionalPropsObj instanceof Map);
+
+        additionalProps = (Map<String, Object>) additionalPropsObj;
+        Assert.assertEquals(100L,
+                additionalProps.get(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME));
+        Assert.assertEquals(100L,
+                additionalProps.get(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME));
+        Assert.assertEquals(100L,
+                additionalProps.get(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME));
+        Assert.assertEquals(100L,
+                additionalProps.get(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME));
+
+
+    }
+
 //
 //    @Test
 //    public void testUpdateApplication() throws APIManagementException {

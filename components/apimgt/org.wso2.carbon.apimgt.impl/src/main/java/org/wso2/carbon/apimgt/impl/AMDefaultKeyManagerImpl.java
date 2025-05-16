@@ -237,67 +237,91 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             additionalProperties = new Gson().fromJson((String) parameter, Map.class);
         }
         if (additionalProperties.containsKey(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME)) {
-            Object expiryTimeObject =
-                    additionalProperties.get(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME);
-            if (expiryTimeObject instanceof String) {
-                if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
-                    try {
+            Object expiryTimeObject = additionalProperties.get(APIConstants.KeyManager
+                    .APPLICATION_ACCESS_TOKEN_EXPIRY_TIME);
+            try {
+                if (expiryTimeObject instanceof String) {
+                    if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
                         long expiry = Long.parseLong((String) expiryTimeObject);
                         if (expiry < 0) {
                             throw new APIManagementException("Invalid application access token expiry time given for "
                                     + oauthClientName, ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
                         }
                         clientInfo.setApplicationAccessTokenLifeTime(expiry);
-                    } catch (NumberFormatException e) {
-                        // No need to throw as its due to not a number sent.
                     }
+                } else if (expiryTimeObject instanceof Number) {
+                    long expiry = ((Number) expiryTimeObject).longValue();
+                    if (expiry < 0) {
+                        throw new APIManagementException("Invalid application access token expiry time given for "
+                                + oauthClientName, ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
+                    }
+                    clientInfo.setApplicationAccessTokenLifeTime(expiry);
                 }
+            } catch (NumberFormatException e) {
+                // No need to throw as it's due to invalid number format.
+                log.debug("Invalid application access token expiry time given for " + oauthClientName, e);
             }
         }
+
         if (additionalProperties.containsKey(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME)) {
-            Object expiryTimeObject =
-                    additionalProperties.get(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME);
-            if (expiryTimeObject instanceof String) {
-                if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
-                    try {
+            Object expiryTimeObject = additionalProperties.get(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME);
+            try {
+                if (expiryTimeObject instanceof String) {
+                    if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
                         long expiry = Long.parseLong((String) expiryTimeObject);
                         if (expiry < 0) {
                             throw new APIManagementException("Invalid user access token expiry time given for "
                                     + oauthClientName, ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
                         }
                         clientInfo.setUserAccessTokenLifeTime(expiry);
-                    } catch (NumberFormatException e) {
-                        // No need to throw as its due to not a number sent.
                     }
+                } else if (expiryTimeObject instanceof Number) {
+                    long expiry = ((Number) expiryTimeObject).longValue();
+                    if (expiry < 0) {
+                        throw new APIManagementException("Invalid user access token expiry time given for "
+                                + oauthClientName, ExceptionCodes.INVALID_APPLICATION_PROPERTIES);
+                    }
+                    clientInfo.setUserAccessTokenLifeTime(expiry);
                 }
+            } catch (NumberFormatException e) {
+                // No need to throw as it's due to a non-numeric value.
+                log.debug("Invalid user access token expiry time given for " + oauthClientName, e);
             }
         }
+
         if (additionalProperties.containsKey(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME)) {
-            Object expiryTimeObject =
-                    additionalProperties.get(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME);
-            if (expiryTimeObject instanceof String) {
-                if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
-                    try {
+            Object expiryTimeObject = additionalProperties.get(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME);
+            try {
+                if (expiryTimeObject instanceof String) {
+                    if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
                         long expiry = Long.parseLong((String) expiryTimeObject);
                         clientInfo.setRefreshTokenLifeTime(expiry);
-                    } catch (NumberFormatException e) {
-                        // No need to throw as its due to not a number sent.
                     }
+                } else if (expiryTimeObject instanceof Number) {
+                    long expiry = ((Number) expiryTimeObject).longValue();
+                    clientInfo.setRefreshTokenLifeTime(expiry);
                 }
+            } catch (NumberFormatException e) {
+                // No need to throw as it's due to a non-numeric value.
+                log.debug("Invalid refresh token expiry time given for " + oauthClientName, e);
             }
         }
+
         if (additionalProperties.containsKey(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME)) {
-            Object expiryTimeObject =
-                    additionalProperties.get(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME);
-            if (expiryTimeObject instanceof String) {
-                if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
-                    try {
+            Object expiryTimeObject = additionalProperties.get(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME);
+            try {
+                if (expiryTimeObject instanceof String) {
+                    if (!APIConstants.KeyManager.NOT_APPLICABLE_VALUE.equals(expiryTimeObject)) {
                         long expiry = Long.parseLong((String) expiryTimeObject);
                         clientInfo.setIdTokenLifeTime(expiry);
-                    } catch (NumberFormatException e) {
-                        // No need to throw as its due to not a number sent.
                     }
+                } else if (expiryTimeObject instanceof Number) {
+                    long expiry = ((Number) expiryTimeObject).longValue();
+                    clientInfo.setIdTokenLifeTime(expiry);
                 }
+            } catch (NumberFormatException e) {
+                // No need to throw as it's due to a non-numeric value.
+                log.debug("Invalid ID token expiry time given for " + oauthClientName, e);
             }
         }
 
@@ -311,6 +335,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                         clientInfo.setPkceMandatory(pkceMandatory);
                     } catch (NumberFormatException e) {
                         // No need to throw as its due to not a number sent.
+                        log.debug("Invalid PKCE mandatory value given for " + oauthClientName, e);
                     }
                 }
             }
@@ -326,6 +351,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                         clientInfo.setPkceSupportPlain(pkceSupportPlain);
                     } catch (NumberFormatException e) {
                         // No need to throw as its due to not a number sent.
+                        log.debug("Invalid PKCE support plain value given for " + oauthClientName, e);
                     }
                 }
             }
@@ -341,6 +367,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                         clientInfo.setBypassClientCredentials(bypassClientCredentials);
                     } catch (NumberFormatException e) {
                         // No need to throw as its due to not a number sent.
+                        log.debug("Invalid bypass client credentials value given for " + oauthClientName, e);
                     }
                 }
             }
@@ -690,12 +717,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         oAuthApplicationInfo.addParameter(ApplicationConstants.OAUTH_CLIENT_NAME, appResponse.getClientName());
         Map<String, Object> additionalProperties = new HashMap<>();
         additionalProperties.put(APIConstants.KeyManager.APPLICATION_ACCESS_TOKEN_EXPIRY_TIME,
-                appResponse.getApplicationAccessTokenLifeTime());
+                sanitizeExpiryTime(appResponse.getApplicationAccessTokenLifeTime()));
         additionalProperties.put(APIConstants.KeyManager.USER_ACCESS_TOKEN_EXPIRY_TIME,
-                appResponse.getUserAccessTokenLifeTime());
+                sanitizeExpiryTime(appResponse.getUserAccessTokenLifeTime()));
         additionalProperties.put(APIConstants.KeyManager.REFRESH_TOKEN_EXPIRY_TIME,
-                appResponse.getRefreshTokenLifeTime());
-        additionalProperties.put(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME, appResponse.getIdTokenLifeTime());
+                sanitizeExpiryTime(appResponse.getRefreshTokenLifeTime()));
+        additionalProperties.put(APIConstants.KeyManager.ID_TOKEN_EXPIRY_TIME,
+                sanitizeExpiryTime(appResponse.getIdTokenLifeTime()));
         additionalProperties.put(APIConstants.KeyManager.PKCE_MANDATORY, appResponse.getPkceMandatory());
         additionalProperties.put(APIConstants.KeyManager.PKCE_SUPPORT_PLAIN, appResponse.getPkceSupportPlain());
         additionalProperties.put(APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS,
@@ -703,6 +731,20 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
         oAuthApplicationInfo.addParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES, additionalProperties);
         return oAuthApplicationInfo;
+    }
+
+    /**
+     * This method is used to sanitize the expiry time values.
+     * If the value is -1, it will be set to Integer.MAX_VALUE - 1L
+     *
+     * @param expTimeValue Expiry time value
+     * @return Sanitized expiry time value
+     */
+    private Long sanitizeExpiryTime(Long expTimeValue) {
+        if (expTimeValue != null && expTimeValue == -1L) {
+            return Integer.MAX_VALUE - 1L;
+        }
+        return expTimeValue;
     }
 
     @Override
