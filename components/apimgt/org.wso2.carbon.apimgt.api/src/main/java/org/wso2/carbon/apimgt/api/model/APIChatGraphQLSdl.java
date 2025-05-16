@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -18,35 +18,14 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
-/**
- * Details related to API Chat test initialization
- */
-public class APIChatTestInitializerInfo {
-    private String command = null;
-    private APIChatAPISpec apiSpec = null;
-    private APIChatGraphQLSdl sdl = null;
+public class APIChatGraphQLSdl {
+    private String sdl;
 
-    public String getCommand() {
-        return command;
-    }
-
-    public void setCommand(String command) {
-        this.command = command;
-    }
-
-    public APIChatAPISpec getApiSpec() {
-        return apiSpec;
-    }
-
-    public void setApiSpec(APIChatAPISpec apiSpec) {
-        this.apiSpec = apiSpec;
-    }
-
-    public APIChatGraphQLSdl getSdl() {
+    public String getSdl() {
         return sdl;
     }
 
-    public void setSdl(APIChatGraphQLSdl sdl){
+    public void setSdl(String sdl) {
         this.sdl = sdl;
     }
 }

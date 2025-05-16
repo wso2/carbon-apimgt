@@ -153,6 +153,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -3355,15 +3357,16 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
 
     @Override
-    public String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException {
+    public String invokeApiChatExecute(String apiChatRequestId, String apiType, String requestPayload) throws APIManagementException {
         ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiChatConfigurationDto();
+        String resourceWithQueryParam = configDto.getExecuteResource() + "?apiType=" + URLEncoder.encode(apiType, StandardCharsets.UTF_8);
         if (configDto.isKeyProvided()) {
             return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
-                    configDto.getExecuteResource(), requestPayload, apiChatRequestId);
+                    resourceWithQueryParam, requestPayload, apiChatRequestId);
         }
         return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
-                configDto.getExecuteResource(), requestPayload, apiChatRequestId);
+                resourceWithQueryParam, requestPayload, apiChatRequestId);
     }
 
     @Override
@@ -3371,19 +3374,29 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             throws APIManagementException {
         try {
             // Generate the payload for prepare call
+            String apiType = ApiMgtDAO.getInstance().getAPITypeFromUUID(apiId);
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode openAPIDefinitionJsonNode = objectMapper.readTree(getOpenAPIDefinition(apiId, organization));
             ObjectNode payload = objectMapper.createObjectNode();
-            payload.set(APIConstants.OPEN_API, openAPIDefinitionJsonNode);
 
+            if (APIConstants.APITransportType.GRAPHQL.name().equalsIgnoreCase(apiType)) {
+                String graphQLSchema = getGraphqlSchemaDefinition(apiId, organization);
+                payload.put(APIConstants.GRAPHQL_SCHEMA, graphQLSchema);
+            } else if (APIConstants.APITransportType.HTTP.name().equalsIgnoreCase(apiType)) {
+                JsonNode openAPIDefinitionJsonNode = objectMapper.readTree(getOpenAPIDefinition(apiId, organization));
+                payload.set(APIConstants.OPEN_API, openAPIDefinitionJsonNode);
+            } else {
+                throw new APIManagementException("Unsupported API type for API Chat: " + apiType);
+            }
             ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration().getApiChatConfigurationDto();
+            String resourceWithQueryParam = configDto.getPrepareResource() + "?apiType=" + URLEncoder.encode(apiType, StandardCharsets.UTF_8);
+
             if (configDto.isKeyProvided()) {
                 return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
-                        configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
+                        resourceWithQueryParam, payload.toString(), apiChatRequestId);
             }
             return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
-                    configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
+                    resourceWithQueryParam, payload.toString(), apiChatRequestId);
         } catch (JsonProcessingException e) {
             String error = "Error while parsing OpenAPI definition of API ID: " + apiId + " to JSON";
             log.error(error, e);
