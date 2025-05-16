@@ -43,4 +43,31 @@ public class SQLConstants {
             "SELECT * FROM AM_API_JSON_SCHEMA " +
                     "WHERE TENANT_DOMAIN = ? AND " +
                     "CONTAINS(API_SCHEMA_TEXT, ?) > 0";
+
+    public static final String GET_DOCUMENTATION_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+                    "WHERE JSON_VALUE(org, '$.name') = ? " +
+                    "AND type = 'DOCUMENTATION' " +
+                    "AND UUID = ? ";
+
+    public static final String GET_ALL_DOCUMENTATION_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+                    "WHERE JSON_VALUE(org, '$.name') = ? " +
+                    "AND type = 'DOCUMENTATION' " +
+                    "AND API_UUID = ? " +
+                    "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_DOCUMENTATION_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+                    "WHERE JSON_VALUE(org, '$.name') = ? " +
+                    "AND type = 'DOCUMENTATION' " +
+                    "AND API_UUID = ? " +
+                    "AND LOWER(metadata) LIKE ? " +
+                    "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String GET_DOCUMENTATION_COUNT =
+            "SELECT COUNT(*) AS TOTAL_DOC_COUNT FROM AM_ARTIFACT_DATA " +
+                    "WHERE JSON_VALUE(org, '$.name') = ? " +
+                    "AND type = 'DOCUMENTATION' " +
+                    "AND API_UUID = ?";
 }

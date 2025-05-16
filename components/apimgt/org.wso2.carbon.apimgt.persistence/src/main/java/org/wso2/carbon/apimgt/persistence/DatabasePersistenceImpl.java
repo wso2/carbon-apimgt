@@ -324,6 +324,16 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public Documentation getDocumentation(Organization org, String apiId, String docId) throws DocumentationPersistenceException {
+        String documentation = null;
+        try {
+            documentation = persistenceDAO.getDocumentation(docId, org.getName());
+            JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(documentation);
+            if (documentation != null) {
+                return DatabasePersistenceUtil.jsonToDocument(jsonObject);
+            }
+        } catch (APIManagementException e) {
+            throw new RuntimeException(e);
+        }
         return null;
     }
 
@@ -339,7 +349,38 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public DocumentSearchResult searchDocumentation(Organization org, String apiId, int start, int offset, String searchQuery, UserContext ctx) throws DocumentationPersistenceException {
-        return null;
+        DocumentSearchResult searchResult = null;
+        int totalLength = 0;
+
+        if (offset == 0) {
+            offset = 100;
+        }
+
+        try {
+            String requestedTenantDomain = org.getName();
+            searchQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
+            List<DocumentResult> results = persistenceDAO.searchDocumentation(apiId, requestedTenantDomain, searchQuery, start, offset);
+            List<Documentation> documentationList = new ArrayList<>();
+
+            totalLength = persistenceDAO.getDocumentationCount(requestedTenantDomain, apiId);
+
+            for (DocumentResult result: results) {
+                JsonObject jsonObject = JsonParser.parseString(result.getMetadata()).getAsJsonObject();
+                jsonObject.addProperty("id", result.getUuid());
+                Documentation documentation = DatabasePersistenceUtil.jsonToDocument(jsonObject);
+                documentationList.add(documentation);
+            }
+            if (!results.isEmpty()) {
+                searchResult = new DocumentSearchResult();
+                searchResult.setReturnedDocsCount(documentationList.size());
+                searchResult.setTotalDocsCount(totalLength);
+                searchResult.setDocumentationList(documentationList);
+            }
+        } catch (APIManagementException e) {
+            throw new RuntimeException(e);
+        }
+
+        return searchResult;
     }
 
     @Override

@@ -5,6 +5,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.persistence.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentResult;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.utils.PersistanceDBUtil;
 
@@ -263,6 +264,115 @@ public class PersistenceDAO {
         }
 
         return docId;
+    }
+
+    public String getDocumentation(String docId, String org) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        String documentation = null;
+
+        String query = SQLConstants.GET_DOCUMENTATION_SQL;
+
+        try {
+            connection = PersistanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, docId);
+
+            rs = prepStmt.executeQuery();
+
+            if (rs.next()) {
+                documentation = rs.getString("metadata");
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while retrieving the API documentation from the database", e);
+        }
+        finally {
+            PersistanceDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return documentation;
+    }
+
+    public List<DocumentResult> searchDocumentation(String apiUuid, String org, String searchQuery, int start, int offset) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        List<DocumentResult> documentationList = new ArrayList<>();
+
+        String query = SQLConstants.SEARCH_DOCUMENTATION_SQL;
+
+        if (searchQuery == null || searchQuery.isEmpty()) {
+            query = SQLConstants.GET_ALL_DOCUMENTATION_SQL;
+        }
+        
+        try {
+            connection = PersistanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+
+            if (searchQuery == null || searchQuery.isEmpty()) {
+                prepStmt.setString(1, org);
+                prepStmt.setString(2, apiUuid);
+                prepStmt.setInt(3, start);
+                prepStmt.setInt(4, offset);
+            } else {
+                prepStmt.setString(1, org);
+                prepStmt.setString(2, apiUuid);
+                prepStmt.setString(3, "%" + searchQuery.toLowerCase() + "%");
+                prepStmt.setInt(4, start);
+                prepStmt.setInt(5, offset);
+            }
+
+            rs = prepStmt.executeQuery();
+
+            while (rs.next()) {
+                String metadata = rs.getString("metadata");
+                String uuid = rs.getString("uuid");
+                DocumentResult documentation = new DocumentResult(metadata, uuid);
+                documentationList.add(documentation);
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while retrieving the API documentation from the database", e);
+        } finally {
+            PersistanceDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return documentationList;
+    }
+
+    public int getDocumentationCount(String apiUuid, String org) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+        ResultSet rs = null;
+        int count = 0;
+
+        String query = SQLConstants.GET_DOCUMENTATION_COUNT;
+
+        try {
+            connection = PersistanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, apiUuid);
+
+            rs = prepStmt.executeQuery();
+
+            if (rs.next()) {
+                count = rs.getInt("TOTAL_DOC_COUNT");
+            }
+
+        } catch (SQLException e) {
+            handleException("Error while retrieving the API documentation from the database", e);
+        } finally {
+            PersistanceDBUtil.closeAllConnections(prepStmt, connection, rs);
+        }
+        return count;
     }
 
     private void handleException(String msg, Throwable t) throws APIManagementException {

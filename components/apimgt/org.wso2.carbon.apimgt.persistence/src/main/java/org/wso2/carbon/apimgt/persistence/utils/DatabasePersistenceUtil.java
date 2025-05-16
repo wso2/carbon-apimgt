@@ -13,6 +13,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
+import org.wso2.carbon.apimgt.persistence.dto.DocumentationInfo;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
@@ -373,6 +374,24 @@ public class DatabasePersistenceUtil {
       }
 
       return api;
+    }
+
+    public static org.wso2.carbon.apimgt.persistence.dto.Documentation jsonToDocument(JsonObject json) {
+        try {
+            String docName = safeGetAsString(json, "name");
+            org.wso2.carbon.apimgt.persistence.dto.DocumentationType docType = org.wso2.carbon.apimgt.persistence.dto.DocumentationType.valueOf(Objects.requireNonNull(safeGetAsString(json, "type")).toUpperCase());
+
+            org.wso2.carbon.apimgt.persistence.dto.Documentation documentation = new org.wso2.carbon.apimgt.persistence.dto.Documentation(docType, docName);
+
+            documentation.setId(safeGetAsString(json, "id"));
+            documentation.setSummary(safeGetAsString(json, "summary"));
+            documentation.setSourceType(DocumentationInfo.DocumentSourceType.valueOf(Objects.requireNonNull(safeGetAsString(json, "sourceType")).toUpperCase()));
+            documentation.setSourceUrl(safeGetAsString(json, "sourceUrl"));
+            documentation.setVisibility(org.wso2.carbon.apimgt.persistence.dto.Documentation.DocumentVisibility.valueOf(Objects.requireNonNull(safeGetAsString(json, "visibility")).toUpperCase()));
+            return documentation;
+        } catch (Exception e) {
+            throw new RuntimeException("Error while converting JSON to Documentation object", e);
+        }
     }
 
     public static String getSearchQuery(String searchQuery) {
