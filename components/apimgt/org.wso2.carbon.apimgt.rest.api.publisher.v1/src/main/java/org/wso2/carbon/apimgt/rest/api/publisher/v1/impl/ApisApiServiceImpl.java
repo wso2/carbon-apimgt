@@ -3868,30 +3868,33 @@ public class ApisApiServiceImpl implements ApisApiService {
                 additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
             }
 
-            if (schema != null && !schema.isEmpty()) {
+            if (schema != null && StringUtils.isNotEmpty(schema)) {
                 graphQLSchema = schema;
             } else if (fileInputStream != null && !StringUtils.isBlank(additionalProperties)) {
                 graphQLSchema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
             } else if (url != null) {
                 graphQLSchema = PublisherCommonUtils.retrieveGraphQLSchemaFromURL(url);
             } else {
-                Map<String, Object> endpointConfigurationMap = (Map<String, Object>) additionalPropertiesAPI.getEndpointConfig();
+                Map<String, Object> endpointConfigurationMap =
+                    (Map<String, Object>) additionalPropertiesAPI.getEndpointConfig();
                 String endpointURL = "";
                 if (endpointConfigurationMap.containsKey("production_endpoints")) {
                     Map<String, String> productionEndpoints = (Map<String, String>) endpointConfigurationMap.get(
-                            "production_endpoints");
+                        "production_endpoints");
                     endpointURL = productionEndpoints.get("url");
                 }
                 graphQLSchema = PublisherCommonUtils.generateGraphQLSchemaFromIntrospection(endpointURL);
             }
 
-            if (graphQLSchema == null || graphQLSchema.isEmpty()) {
+            if (graphQLSchema == null || StringUtils.isEmpty(graphQLSchema)) {
                 throw new APIManagementException("GraphQL Schema cannot be empty or null to validate it",
-                        ExceptionCodes.GRAPHQL_SCHEMA_CANNOT_BE_NULL);
+                    ExceptionCodes.GRAPHQL_SCHEMA_CANNOT_BE_NULL);
             }
 
-            if (!StringUtils.isBlank(additionalProperties) && !StringUtils.isBlank(graphQLSchema) && log.isDebugEnabled()) {
-                log.debug("Deseriallizing additionalProperties: " + additionalProperties + "/n"
+            if (!StringUtils.isBlank(additionalProperties) && !StringUtils.isBlank(
+                graphQLSchema) && log.isDebugEnabled()) {
+                log.debug(
+                    "Deseriallizing additionalProperties: " + additionalProperties + "/n"
                         + "importing schema: " + graphQLSchema);
             }
 
@@ -3925,7 +3928,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(e.getMessage(), e, log);
             }
             String errorMessage = "Error while adding new API : " + additionalPropertiesAPI.getProvider() + "-" +
-                    additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion() + " - " + e.getMessage();
+                    additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion() + " - "
+                    + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + additionalPropertiesAPI.getProvider() + "-"

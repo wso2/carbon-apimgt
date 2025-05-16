@@ -1456,7 +1456,8 @@ public final class APIUtil {
         String introspectionQueryFilePath = APIConstants.GRAPHQL_INTROSPECTION_QUERY_FILE;
         try (InputStream fileStream = APIUtil.class.getClassLoader().getResourceAsStream(introspectionQueryFilePath)) {
             if (fileStream == null) {
-                throw new APIManagementException("Graphql introspection query file not found: " + introspectionQueryFilePath);
+                throw new APIManagementException(
+                    "Graphql introspection query file not found: " + introspectionQueryFilePath);
             }
             return IOUtils.toString(fileStream, StandardCharsets.UTF_8);
         } catch (IOException e) {

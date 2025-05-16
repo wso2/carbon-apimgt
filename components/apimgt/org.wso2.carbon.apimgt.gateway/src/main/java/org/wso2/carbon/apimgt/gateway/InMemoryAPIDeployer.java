@@ -213,9 +213,9 @@ public class InMemoryAPIDeployer {
 
         if (!redeployChangedAPIs) {
             try {
-                boolean isJWKSApiEnabled =  ServiceReferenceHolder
-                        .getInstance().getAPIManagerConfiguration().getJwtConfigurationDto().isJWKSApiEnabled();
-                if(isJWKSApiEnabled) {
+                boolean isJWKSApiEnabled = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                    .getJwtConfigurationDto().isJWKSApiEnabled();
+                if (isJWKSApiEnabled) {
                     deployJWKSSynapseAPI(tenantDomain); // Deploy JWKS API
                 }
                 if (APIConstants.SUPER_TENANT_DOMAIN.equalsIgnoreCase(tenantDomain)) {
