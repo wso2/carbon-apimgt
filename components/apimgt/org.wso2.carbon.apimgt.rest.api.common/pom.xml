@@ -109,7 +109,11 @@
             <classifier>runtime</classifier>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.spec.parser</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
