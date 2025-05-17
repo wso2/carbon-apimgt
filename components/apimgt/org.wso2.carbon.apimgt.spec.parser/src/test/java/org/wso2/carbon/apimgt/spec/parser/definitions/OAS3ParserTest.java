@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.spec.parser.definitions;
 
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
@@ -21,7 +21,6 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -85,7 +84,7 @@ public class OAS3ParserTest extends OASTestBase {
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(definition, null, null);
         OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
         boolean isExtensionNotFound = openAPI.getExtensions() == null || !openAPI.getExtensions()
-                .containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY);
+                .containsKey(APISpecParserConstants.SWAGGER_X_WSO2_SECURITY);
         Assert.assertTrue(isExtensionNotFound);
         Assert.assertEquals(2, openAPI.getPaths().size());
 
@@ -94,7 +93,7 @@ public class OAS3ParserTest extends OASTestBase {
             Map.Entry<String, PathItem> pathEntry = itr.next();
             PathItem path = pathEntry.getValue();
             for (Operation operation : path.readOperations()) {
-                Assert.assertFalse(operation.getExtensions().containsKey(APIConstants.SWAGGER_X_SCOPE));
+                Assert.assertFalse(operation.getExtensions().containsKey(APISpecParserConstants.SWAGGER_X_SCOPE));
             }
         }
 
@@ -108,9 +107,9 @@ public class OAS3ParserTest extends OASTestBase {
         Assert.assertTrue(implicityOauth.getScopes().containsKey("newScope"));
         Assert.assertEquals("newScopeDescription", implicityOauth.getScopes().get("newScope"));
 
-        Assert.assertTrue(implicityOauth.getExtensions().containsKey(APIConstants.SWAGGER_X_SCOPES_BINDINGS));
+        Assert.assertTrue(implicityOauth.getExtensions().containsKey(APISpecParserConstants.SWAGGER_X_SCOPES_BINDINGS));
         Map<String, String> scopeBinding =
-                (Map<String, String>) implicityOauth.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+                (Map<String, String>) implicityOauth.getExtensions().get(APISpecParserConstants.SWAGGER_X_SCOPES_BINDINGS);
         Assert.assertTrue(scopeBinding.containsKey("newScope"));
         Assert.assertEquals("admin", scopeBinding.get("newScope"));
     }
@@ -171,13 +170,13 @@ public class OAS3ParserTest extends OASTestBase {
         String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
         Map<String, Object> responseMap = oas3Parser.generateExample(openApi);
         Assert.assertNotNull(responseMap);
-        Assert.assertTrue(responseMap.containsKey(APIConstants.SWAGGER) && responseMap.containsKey(APIConstants.MOCK_GEN_POLICY_LIST));
+        Assert.assertTrue(responseMap.containsKey(APISpecParserConstants.SWAGGER) && responseMap.containsKey(APISpecParserConstants.MOCK_GEN_POLICY_LIST));
 
-        String swaggerString = (String) responseMap.get(APIConstants.SWAGGER);
+        String swaggerString = (String) responseMap.get(APISpecParserConstants.SWAGGER);
         Assert.assertTrue(Objects.nonNull(swaggerString) && !swaggerString.isEmpty());
 
-        Assert.assertTrue(Objects.nonNull(responseMap.get(APIConstants.MOCK_GEN_POLICY_LIST)));
-        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = (List<APIResourceMediationPolicy>) responseMap.get(APIConstants.MOCK_GEN_POLICY_LIST);
+        Assert.assertTrue(Objects.nonNull(responseMap.get(APISpecParserConstants.MOCK_GEN_POLICY_LIST)));
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = (List<APIResourceMediationPolicy>) responseMap.get(APISpecParserConstants.MOCK_GEN_POLICY_LIST);
         Assert.assertFalse(apiResourceMediationPolicyList.isEmpty());
 
         APIResourceMediationPolicy apiResourceMediationPolicy = apiResourceMediationPolicyList.get(0);
@@ -261,7 +260,7 @@ public class OAS3ParserTest extends OASTestBase {
 
     @Test
     public void testSwaggerValidatorWithRelaxValidationEnabledAndWithoutInfoTag() throws Exception {
-        System.setProperty(APIConstants.SWAGGER_RELAXED_VALIDATION, "true");
+        System.setProperty(APISpecParserConstants.SWAGGER_RELAXED_VALIDATION, "true");
         String faultySwagger = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas3"
                         + File.separator + "openApi3_without_info_validation.json"),
@@ -273,7 +272,7 @@ public class OAS3ParserTest extends OASTestBase {
         Assert.assertTrue(response.getInfo().getName().startsWith("API-Title-"));
         Assert.assertEquals("attribute extraInfo is unexpected",
                 response.getErrorItems().get(0).getErrorDescription());
-        System.clearProperty(APIConstants.SWAGGER_RELAXED_VALIDATION);
+        System.clearProperty(APISpecParserConstants.SWAGGER_RELAXED_VALIDATION);
     }
 
     @Test
@@ -392,7 +391,7 @@ public class OAS3ParserTest extends OASTestBase {
                 String.valueOf(StandardCharsets.UTF_8));
         APIIdentifier apiIdentifier = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0");
         Map<String, String> hostWithSchemes = new HashMap<>();
-        hostWithSchemes.put(APIConstants.HTTPS_PROTOCOL, "https://localhost");
+        hostWithSchemes.put(APISpecParserConstants.HTTPS_PROTOCOL, "https://localhost");
         API api = new API(apiIdentifier);
         api.setApiSecurity("oauth_basic_auth_api_key_mandatory,oauth2"); // oauth2 security only
         api.setTransports("https");

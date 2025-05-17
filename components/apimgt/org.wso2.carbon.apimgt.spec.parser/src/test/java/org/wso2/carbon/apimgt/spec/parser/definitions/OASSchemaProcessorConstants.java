@@ -16,7 +16,7 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.spec.parser.definitions;
 
 /**
  * Constant class to hold data for SchemaProcessor interface implementation tests.
