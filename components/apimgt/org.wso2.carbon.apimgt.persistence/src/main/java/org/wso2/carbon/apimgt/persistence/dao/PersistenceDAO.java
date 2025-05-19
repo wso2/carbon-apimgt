@@ -9,6 +9,10 @@ import org.wso2.carbon.apimgt.persistence.dto.DocumentResult;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.utils.PersistanceDBUtil;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -266,11 +270,11 @@ public class PersistenceDAO {
         return docId;
     }
 
-    public String getDocumentation(String docId, String org) throws APIManagementException {
+    public DocumentResult getDocumentation(String docId, String org) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
         ResultSet rs = null;
-        String documentation = null;
+        DocumentResult documentation = null;
 
         String query = SQLConstants.GET_DOCUMENTATION_SQL;
 
@@ -285,7 +289,9 @@ public class PersistenceDAO {
             rs = prepStmt.executeQuery();
 
             if (rs.next()) {
-                documentation = rs.getString("metadata");
+                String metadata = rs.getString("metadata");
+                String uuid = rs.getString("uuid");
+                documentation = new DocumentResult(metadata, uuid);
             }
 
         } catch (SQLException e) {
@@ -373,6 +379,67 @@ public class PersistenceDAO {
             PersistanceDBUtil.closeAllConnections(prepStmt, connection, rs);
         }
         return count;
+    }
+
+    public void addDocumentationFile(String docId, String apiId, InputStream fileStream) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+
+        String query = SQLConstants.ADD_DOCUMENTATION_FILE_SQL;
+
+        try {
+            connection = PersistanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            // Read stream to byte array
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] data = new byte[8192];
+            int nRead;
+            while ((nRead = fileStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+            byte[] bytes = buffer.toByteArray();
+            int fileLength = bytes.length;
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setBinaryStream(1, byteArrayInputStream, fileLength);
+            prepStmt.setString(2, docId);
+
+            prepStmt.execute();
+
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding the API documentation file to the database", e);
+        } catch (IOException e) {
+            handleException("Error while reading the API documentation file", e);
+        }finally {
+            PersistanceDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
+    public void addDocumentationContent(String docId, String apiId, String content) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+
+        String query = SQLConstants.ADD_DOCUMENTATION_CONTENT_SQL;
+
+        try {
+            connection = PersistanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, content);
+            prepStmt.setString(2, docId);
+
+            prepStmt.execute();
+
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding the API documentation content to the database", e);
+        } finally {
+            PersistanceDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
     }
 
     private void handleException(String msg, Throwable t) throws APIManagementException {

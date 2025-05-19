@@ -70,4 +70,16 @@ public class SQLConstants {
                     "WHERE JSON_VALUE(org, '$.name') = ? " +
                     "AND type = 'DOCUMENTATION' " +
                     "AND API_UUID = ?";
+
+    public static final String ADD_DOCUMENTATION_FILE_SQL =
+            "UPDATE AM_ARTIFACT_DATA SET " +
+                    "ARTIFACT = ? " +
+                    "WHERE UUID = ? ";
+
+    public static final String ADD_DOCUMENTATION_CONTENT_SQL =
+            "UPDATE AM_ARTIFACT_DATA SET " +
+                    "METADATA = JSON_TRANSFORM( " +
+                    "METADATA, " +
+                    "SET '$.textContent' = ?) " +
+                    "WHERE UUID = ? ";
 }

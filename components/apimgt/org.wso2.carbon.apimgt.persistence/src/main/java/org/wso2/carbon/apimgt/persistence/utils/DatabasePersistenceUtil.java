@@ -20,6 +20,10 @@ import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -392,6 +396,24 @@ public class DatabasePersistenceUtil {
         } catch (Exception e) {
             throw new RuntimeException("Error while converting JSON to Documentation object", e);
         }
+    }
+
+    public static long getDocumentFileLength(InputStream inputStream) {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+        byte[] data = new byte[4096];
+        int nRead;
+        while (true) {
+            try {
+                if ((nRead = inputStream.read(data, 0, data.length)) == -1) break;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            buffer.write(data, 0, nRead);
+        }
+
+        byte[] byteArray = buffer.toByteArray();
+        return byteArray.length;
     }
 
     public static String getSearchQuery(String searchQuery) {

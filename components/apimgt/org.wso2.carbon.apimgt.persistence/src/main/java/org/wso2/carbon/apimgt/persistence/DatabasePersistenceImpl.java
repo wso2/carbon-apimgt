@@ -17,6 +17,8 @@ import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.utils.DatabasePersistenceUtil;
 import org.wso2.carbon.apimgt.persistence.utils.PublisherAPISearchResultComparator;
 
+import java.io.File;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -324,17 +326,15 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public Documentation getDocumentation(Organization org, String apiId, String docId) throws DocumentationPersistenceException {
-        String documentation = null;
+        DocumentResult documentation = null;
         try {
             documentation = persistenceDAO.getDocumentation(docId, org.getName());
-            JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(documentation);
-            if (documentation != null) {
-                return DatabasePersistenceUtil.jsonToDocument(jsonObject);
-            }
+            JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(documentation.getMetadata());
+            jsonObject.addProperty("id", documentation.getUuid());
+            return DatabasePersistenceUtil.jsonToDocument(jsonObject);
         } catch (APIManagementException e) {
             throw new RuntimeException(e);
         }
-        return null;
     }
 
     @Override
@@ -344,6 +344,17 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public DocumentContent addDocumentationContent(Organization org, String apiId, String docId, DocumentContent content) throws DocumentationPersistenceException {
+        try {
+            if (DocumentContent.ContentSourceType.FILE.equals(content.getSourceType())) {
+                InputStream inputStream = content.getResourceFile().getContent();
+                persistenceDAO.addDocumentationFile(docId, apiId, inputStream);
+            } else {
+                String contentString = content.getTextContent();
+                persistenceDAO.addDocumentationContent(docId, apiId, contentString);
+            }
+        } catch (APIManagementException e) {
+            throw new DocumentationPersistenceException("Error while adding documentation content", e);
+        }
         return null;
     }
 
