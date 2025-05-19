@@ -3385,7 +3385,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 JsonNode openAPIDefinitionJsonNode = objectMapper.readTree(getOpenAPIDefinition(apiId, organization));
                 payload.set(APIConstants.OPEN_API, openAPIDefinitionJsonNode);
             } else {
-                throw new APIManagementException("Unsupported API type for API Chat: " + apiType);
+                String errorMessage = "Unsupported API type for API Chat: " + apiType;
+                log.error(errorMessage);
+                throw new APIManagementException(errorMessage);
             }
             ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration().getApiChatConfigurationDto();
