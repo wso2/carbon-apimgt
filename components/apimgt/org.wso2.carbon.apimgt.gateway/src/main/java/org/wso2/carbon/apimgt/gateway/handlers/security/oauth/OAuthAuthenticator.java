@@ -136,7 +136,8 @@ public class OAuthAuthenticator implements Authenticator {
         config = getApiManagerConfiguration();
         removeOAuthHeadersFromOutMessage = isRemoveOAuthHeadersFromOutMessage();
         securityContextHeader = getSecurityContextHeader();
-
+        boolean includeTokenInfoInMsgCtx = Boolean.parseBoolean(
+                System.getProperty(APIMgtGatewayConstants.INCLUDE_TOKEN_INFO_IN_MSG_CTX));
         if (headers != null) {
             requestOrigin = (String) headers.get("Origin");
 
@@ -166,6 +167,9 @@ public class OAuthAuthenticator implements Authenticator {
                                         isConsumerKeyHeaderAvailable = true;
                                     } else if (isConsumerKeyHeaderAvailable) {
                                         accessToken = removeLeadingAndTrailing(elements[j].trim());
+                                        if (includeTokenInfoInMsgCtx) {
+                                            synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN, accessToken);
+                                        }
                                         consumerkeyFound = true;
                                     }
                                 }
@@ -301,6 +305,9 @@ public class OAuthAuthenticator implements Authenticator {
                     log.debug("Could not find api version");
                 }
             }
+            if (includeTokenInfoInMsgCtx) {
+                synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access Token invalid");
+            }
             return new AuthenticationResponse(false, isMandatory, true,
                     APISecurityConstants.API_AUTH_MISSING_CREDENTIALS, "Required OAuth credentials not provided");
         } else {
@@ -331,6 +338,9 @@ public class OAuthAuthenticator implements Authenticator {
                 info = getAPIKeyValidator().getKeyValidationInfo(apiContext, accessToken, apiVersion, authenticationScheme,
                         matchingResource, httpMethod, defaultVersionInvoked,keyManagerList);
             } catch (APISecurityException ex) {
+                if (includeTokenInfoInMsgCtx) {
+                    synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token invalid");
+                }
                 return new AuthenticationResponse(false, isMandatory, true, ex.getErrorCode(), ex.getMessage());
             }
             context.stop();
@@ -391,6 +401,13 @@ public class OAuthAuthenticator implements Authenticator {
         } else {
             if(log.isDebugEnabled()){
                 log.debug("User is NOT authorized to access the Resource");
+            }
+            if (includeTokenInfoInMsgCtx) {
+                if (info.isExpired()) {
+                    synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token expired");
+                } else {
+                    synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token invalid");
+                }
             }
             return new AuthenticationResponse(false, isMandatory, true, info.getValidationStatus(),
                     "Access failure for API: " + apiContext +

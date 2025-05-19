@@ -44,6 +44,8 @@ public class APIMgtGatewayConstants {
     public static final String X_FORWARDED_FOR = "X-Forwarded-For";
     public static final String REQUEST_RECEIVED_TIME = "wso2statistics.request.received.time";
     public static final String AUTHORIZATION = "Authorization";
+    public static final String ACCESS_TOKEN = "ACCESS_TOKEN";
+    public static final String ACCESS_TOKEN_INVALID_REASON = "ACCESS_TOKEN_INVALID_REASON";
     public static final String REVOKED_ACCESS_TOKEN = "RevokedAccessToken";
     public static final String DEACTIVATED_ACCESS_TOKEN = "DeactivatedAccessToken";
     public static final String SCOPES = "Scopes";
@@ -199,5 +201,7 @@ public class APIMgtGatewayConstants {
     public static final String ACCESS_GRANT_CLAIM_NAME = "grantVerificationClaim";
     public static final String ACCESS_GRANT_CLAIM_VALUE = "grantVerificationClaimValue";
     public static final String SHOULD_ALLOW_ACCESS_VALIDATION = "shouldAllowValidation";
+
+    public static final String INCLUDE_TOKEN_INFO_IN_MSG_CTX= "includeTokenInfoInMsgCtx";
 }
 
