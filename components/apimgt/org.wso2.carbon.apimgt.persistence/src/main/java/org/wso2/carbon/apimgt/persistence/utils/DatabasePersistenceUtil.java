@@ -391,6 +391,8 @@ public class DatabasePersistenceUtil {
             documentation.setSourceType(DocumentationInfo.DocumentSourceType.valueOf(Objects.requireNonNull(safeGetAsString(json, "sourceType")).toUpperCase()));
             documentation.setSourceUrl(safeGetAsString(json, "sourceUrl"));
             documentation.setVisibility(org.wso2.carbon.apimgt.persistence.dto.Documentation.DocumentVisibility.valueOf(Objects.requireNonNull(safeGetAsString(json, "visibility")).toUpperCase()));
+            documentation.setCreatedDate(stringToDate(safeGetAsString(json, "createdTime")));
+            documentation.setLastUpdated(stringToDate(safeGetAsString(json, "lastUpdatedTime")));
             return documentation;
         } catch (Exception e) {
             throw new RuntimeException("Error while converting JSON to Documentation object", e);

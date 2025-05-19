@@ -44,6 +44,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
         api.setUuid(uuid);
         api.setId(id);
         api.setCreatedTime(String.valueOf(new Date().getTime()));
+        api.setLastUpdated(new Date());
 
         JsonObject apiJson = DatabasePersistenceUtil.mapApiToJson(api);
         String apiJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(apiJson);
@@ -331,6 +332,8 @@ public class DatabasePersistenceImpl implements APIPersistence {
             documentation = persistenceDAO.getDocumentation(docId, org.getName());
             JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(documentation.getMetadata());
             jsonObject.addProperty("id", documentation.getUuid());
+            jsonObject.addProperty("createdTime", documentation.getCreatedTime());
+            jsonObject.addProperty("lastUpdatedTime", documentation.getLastUpdatedTime());
             return DatabasePersistenceUtil.jsonToDocument(jsonObject);
         } catch (APIManagementException e) {
             throw new RuntimeException(e);
@@ -393,6 +396,8 @@ public class DatabasePersistenceImpl implements APIPersistence {
             for (DocumentResult result: results) {
                 JsonObject jsonObject = JsonParser.parseString(result.getMetadata()).getAsJsonObject();
                 jsonObject.addProperty("id", result.getUuid());
+                jsonObject.addProperty("createdTime", result.getCreatedTime());
+                jsonObject.addProperty("lastUpdatedTime", result.getLastUpdatedTime());
                 Documentation documentation = DatabasePersistenceUtil.jsonToDocument(jsonObject);
                 documentationList.add(documentation);
             }

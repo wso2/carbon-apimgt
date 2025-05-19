@@ -292,7 +292,9 @@ public class PersistenceDAO {
             if (rs.next()) {
                 String metadata = rs.getString("metadata");
                 String uuid = rs.getString("uuid");
-                documentation = new DocumentResult(metadata, uuid);
+                String createdTime = rs.getString("created_time");
+                String lastUpdatedTime = rs.getString("last_modified");
+                documentation = new DocumentResult(metadata, uuid, createdTime, lastUpdatedTime);
             }
 
         } catch (SQLException e) {
@@ -340,7 +342,9 @@ public class PersistenceDAO {
             while (rs.next()) {
                 String metadata = rs.getString("metadata");
                 String uuid = rs.getString("uuid");
-                DocumentResult documentation = new DocumentResult(metadata, uuid);
+                String createdTime = rs.getString("created_time");
+                String lastUpdatedTime = rs.getString("last_modified");
+                DocumentResult documentation = new DocumentResult(metadata, uuid, apiUuid, createdTime, lastUpdatedTime);
                 documentationList.add(documentation);
             }
 

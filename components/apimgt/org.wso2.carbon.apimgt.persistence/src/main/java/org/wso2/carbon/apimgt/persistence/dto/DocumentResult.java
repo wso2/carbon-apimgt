@@ -20,6 +20,13 @@ public class DocumentResult {
         this.apiUuid = apiUuid;
     }
 
+    public DocumentResult (String metadata, String uuid, String createdTime, String lastUpdatedTime) {
+        this.metadata = metadata;
+        this.uuid = uuid;
+        this.createdTime = createdTime;
+        this.lastUpdatedTime = lastUpdatedTime;
+    }
+
     public DocumentResult (String metadata, String uuid, String apiUuid, String createdTime, String lastUpdatedTime) {
         this.metadata = metadata;
         this.uuid = uuid;
