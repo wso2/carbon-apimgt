@@ -338,21 +338,22 @@ public class ApisApiServiceImpl implements ApisApiService {
                     APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
                     String apiChatRequestId = apiChatRequestDTO.getApiChatRequestId();
                     boolean isTestInitializationRequest = !StringUtils.isEmpty(
-                            apiChatRequestDTO.getCommand()) && apiChatRequestDTO.getApiSpec() != null;
+                            apiChatRequestDTO.getCommand()) && (apiChatRequestDTO.getApiSpec() != null | apiChatRequestDTO.getSchemaDefinition() != null);
                     boolean isTestExecutionRequest = apiChatRequestDTO.getResponse() != null;
                     String requestPayload; // Request payload for Choreo deployed API Chat Agent
                     String apiType = apiConsumer.getLightweightAPIByUUID(apiId,
                             RestApiUtil.getValidatedOrganization(messageContext)).getType();
 
                     if (isTestInitializationRequest) {
-                        ApiChatRequestApiSpecDTO specDTO = apiChatRequestDTO.getApiSpec();
                         APIChatTestInitializerInfo initializerInfo = new APIChatTestInitializerInfo();
                         initializerInfo.setCommand(apiChatRequestDTO.getCommand());
                         if (apiType.equalsIgnoreCase(APIConstants.GRAPHQL_API)) {
+                            String schemaDefinition = apiChatRequestDTO.getSchemaDefinition();
                             APIChatGraphQLSdl apiSdl = new APIChatGraphQLSdl();
-                            apiSdl.setSdl(specDTO.getSdl());
-                            initializerInfo.setSdl(apiSdl);
+                            apiSdl.setSchemaDefinition(schemaDefinition);
+                            initializerInfo.setSchemaDefinition(apiSdl);
                         } else {
+                            ApiChatRequestApiSpecDTO specDTO = apiChatRequestDTO.getApiSpec();
                             APIChatAPISpec apiSpec = new APIChatAPISpec();
                             apiSpec.setServiceUrl(specDTO.getServiceUrl());
                             apiSpec.setTools(specDTO.getTools());

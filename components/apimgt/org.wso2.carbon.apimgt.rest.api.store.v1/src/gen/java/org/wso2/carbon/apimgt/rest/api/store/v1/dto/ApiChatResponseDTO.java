@@ -26,6 +26,7 @@ import javax.validation.Valid;
 public class ApiChatResponseDTO   {
   
     private EnrichedAPISpecDTO apiSpec = null;
+    private String schemaDefinition = null;
 
     @XmlType(name="TaskStatusEnum")
     @XmlEnum(String.class)
@@ -79,6 +80,24 @@ return null;
   }
   public void setApiSpec(EnrichedAPISpecDTO apiSpec) {
     this.apiSpec = apiSpec;
+  }
+
+  /**
+   * Processed GraphQL API schema definition (for GraphQL APIs)
+   **/
+  public ApiChatResponseDTO schemaDefinition(String schemaDefinition) {
+    this.schemaDefinition = schemaDefinition;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "schema { query: Query } type Query { hero(id: ID!): Character allHeroes: [Character] } type Character { id: ID! name: String! appearsIn: [String] }", value = "Processed GraphQL API schema definition (for GraphQL APIs)")
+  @JsonProperty("schemaDefinition")
+  public String getSchemaDefinition() {
+    return schemaDefinition;
+  }
+  public void setSchemaDefinition(String schemaDefinition) {
+    this.schemaDefinition = schemaDefinition;
   }
 
   /**
@@ -165,6 +184,7 @@ return null;
     }
     ApiChatResponseDTO apiChatResponse = (ApiChatResponseDTO) o;
     return Objects.equals(apiSpec, apiChatResponse.apiSpec) &&
+        Objects.equals(schemaDefinition, apiChatResponse.schemaDefinition) &&
         Objects.equals(taskStatus, apiChatResponse.taskStatus) &&
         Objects.equals(resource, apiChatResponse.resource) &&
         Objects.equals(result, apiChatResponse.result) &&
@@ -173,7 +193,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiSpec, taskStatus, resource, result, queries);
+    return Objects.hash(apiSpec, schemaDefinition, taskStatus, resource, result, queries);
   }
 
   @Override
@@ -182,6 +202,7 @@ return null;
     sb.append("class ApiChatResponseDTO {\n");
     
     sb.append("    apiSpec: ").append(toIndentedString(apiSpec)).append("\n");
+    sb.append("    schemaDefinition: ").append(toIndentedString(schemaDefinition)).append("\n");
     sb.append("    taskStatus: ").append(toIndentedString(taskStatus)).append("\n");
     sb.append("    resource: ").append(toIndentedString(resource)).append("\n");
     sb.append("    result: ").append(toIndentedString(result)).append("\n");

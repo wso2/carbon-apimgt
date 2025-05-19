@@ -24,7 +24,6 @@ public class ApiChatRequestApiSpecDTO   {
   
     private String serviceUrl = null;
     private List<Object> tools = new ArrayList<Object>();
-    private String sdl = null;
 
   /**
    * Service URL of API if any
@@ -62,24 +61,6 @@ public class ApiChatRequestApiSpecDTO   {
     this.tools = tools;
   }
 
-  /**
-   * GraphQL API schema definition
-   **/
-  public ApiChatRequestApiSpecDTO sdl(String sdl) {
-    this.sdl = sdl;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "schema {   query: Query }  # The query type, represents all of the entry points into our object graph type Query {   hero(id: ID!): Character   allHeroes: [Character] }  # A character from the Star Wars universe type Character {   # The unique identifier for the character   id: ID!    # The name of the character   name: String!    # The list of episodes the character appears in   appearsIn: [String] }", value = "GraphQL API schema definition")
-  @JsonProperty("sdl")
-  public String getSdl() {
-    return sdl;
-  }
-  public void setSdl(String sdl) {
-    this.sdl = sdl;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -91,13 +72,12 @@ public class ApiChatRequestApiSpecDTO   {
     }
     ApiChatRequestApiSpecDTO apiChatRequestApiSpec = (ApiChatRequestApiSpecDTO) o;
     return Objects.equals(serviceUrl, apiChatRequestApiSpec.serviceUrl) &&
-        Objects.equals(tools, apiChatRequestApiSpec.tools) &&
-        Objects.equals(sdl, apiChatRequestApiSpec.sdl);
+        Objects.equals(tools, apiChatRequestApiSpec.tools);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(serviceUrl, tools, sdl);
+    return Objects.hash(serviceUrl, tools);
   }
 
   @Override
@@ -107,7 +87,6 @@ public class ApiChatRequestApiSpecDTO   {
     
     sb.append("    serviceUrl: ").append(toIndentedString(serviceUrl)).append("\n");
     sb.append("    tools: ").append(toIndentedString(tools)).append("\n");
-    sb.append("    sdl: ").append(toIndentedString(sdl)).append("\n");
     sb.append("}");
     return sb.toString();
   }

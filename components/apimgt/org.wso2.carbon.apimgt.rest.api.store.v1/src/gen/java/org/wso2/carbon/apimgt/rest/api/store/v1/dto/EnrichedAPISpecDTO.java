@@ -24,7 +24,6 @@ public class EnrichedAPISpecDTO   {
   
     private String serviceUrl = null;
     private List<Object> tools = new ArrayList<Object>();
-    private String sdl = null;
 
   /**
    * Extracted service URL from the OpenAPI specification if there is any
@@ -62,24 +61,6 @@ public class EnrichedAPISpecDTO   {
     this.tools = tools;
   }
 
-  /**
-   * Processed GraphQL API schema definition (for GraphQL APIs)
-   **/
-  public EnrichedAPISpecDTO sdl(String sdl) {
-    this.sdl = sdl;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "schema { query: Query } type Query { hero(id: ID!): Character allHeroes: [Character] } type Character { id: ID! name: String! appearsIn: [String] }", value = "Processed GraphQL API schema definition (for GraphQL APIs)")
-  @JsonProperty("sdl")
-  public String getSdl() {
-    return sdl;
-  }
-  public void setSdl(String sdl) {
-    this.sdl = sdl;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -91,13 +72,12 @@ public class EnrichedAPISpecDTO   {
     }
     EnrichedAPISpecDTO enrichedAPISpec = (EnrichedAPISpecDTO) o;
     return Objects.equals(serviceUrl, enrichedAPISpec.serviceUrl) &&
-        Objects.equals(tools, enrichedAPISpec.tools) &&
-        Objects.equals(sdl, enrichedAPISpec.sdl);
+        Objects.equals(tools, enrichedAPISpec.tools);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(serviceUrl, tools, sdl);
+    return Objects.hash(serviceUrl, tools);
   }
 
   @Override
@@ -107,7 +87,6 @@ public class EnrichedAPISpecDTO   {
     
     sb.append("    serviceUrl: ").append(toIndentedString(serviceUrl)).append("\n");
     sb.append("    tools: ").append(toIndentedString(tools)).append("\n");
-    sb.append("    sdl: ").append(toIndentedString(sdl)).append("\n");
     sb.append("}");
     return sb.toString();
   }

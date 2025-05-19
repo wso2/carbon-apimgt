@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,13 +19,13 @@
 package org.wso2.carbon.apimgt.api.model;
 
 public class APIChatGraphQLSdl {
-    private String sdl;
+    private String schemaDefinition;
 
-    public String getSdl() {
-        return sdl;
+    public String getSchemaDefinition() {
+        return schemaDefinition;
     }
 
-    public void setSdl(String sdl) {
-        this.sdl = sdl;
+    public void setSchemaDefinition(String schemaDefinition) {
+        this.schemaDefinition = schemaDefinition;
     }
 }
