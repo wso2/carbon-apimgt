@@ -339,15 +339,30 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public DocumentContent getDocumentationContent(Organization org, String apiId, String docId) throws DocumentationPersistenceException {
-        return null;
+        DocumentContent documentContent = null;
+        try {
+            String documentationString = persistenceDAO.getDocumentationContent(docId);
+            JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(documentationString);
+            documentContent = DatabasePersistenceUtil.jsonToDocumentationContent(jsonObject);
+
+            if (documentContent.getSourceType().equals(DocumentContent.ContentSourceType.FILE)) {
+                InputStream content = persistenceDAO.getDocumentationFileContent(docId);
+                ResourceFile resourceFile = new ResourceFile(content, documentContent.getResourceFile().getContentType());
+                resourceFile.setName(documentContent.getResourceFile().getName());
+                documentContent.setResourceFile(resourceFile);
+            }
+        } catch (APIManagementException e) {
+            throw new RuntimeException(e);
+        }
+
+        return documentContent;
     }
 
     @Override
     public DocumentContent addDocumentationContent(Organization org, String apiId, String docId, DocumentContent content) throws DocumentationPersistenceException {
         try {
             if (DocumentContent.ContentSourceType.FILE.equals(content.getSourceType())) {
-                InputStream inputStream = content.getResourceFile().getContent();
-                persistenceDAO.addDocumentationFile(docId, apiId, inputStream);
+                persistenceDAO.addDocumentationFile(docId, apiId, content.getResourceFile());
             } else {
                 String contentString = content.getTextContent();
                 persistenceDAO.addDocumentationContent(docId, apiId, contentString);

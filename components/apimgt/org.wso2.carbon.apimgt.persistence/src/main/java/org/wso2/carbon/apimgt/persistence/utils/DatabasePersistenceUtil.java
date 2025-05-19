@@ -12,10 +12,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
-import org.wso2.carbon.apimgt.persistence.dto.DocumentationInfo;
-import org.wso2.carbon.apimgt.persistence.dto.Organization;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPI;
+import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
@@ -396,6 +395,25 @@ public class DatabasePersistenceUtil {
         } catch (Exception e) {
             throw new RuntimeException("Error while converting JSON to Documentation object", e);
         }
+    }
+
+    public static DocumentContent jsonToDocumentationContent(JsonObject json) {
+        DocumentContent documentContent = new DocumentContent();
+        try {
+           documentContent.setTextContent(safeGetAsString(json, "textContent"));
+           documentContent.setSourceType(DocumentContent.ContentSourceType.valueOf(Objects.requireNonNull(safeGetAsString(json, "sourceType")).toUpperCase()));
+
+           if (documentContent.getSourceType().equals(DocumentContent.ContentSourceType.FILE)) {
+               String fileType = safeGetAsString(json, "fileType");
+               String fileName = safeGetAsString(json, "fileName");
+               org.wso2.carbon.apimgt.persistence.dto.ResourceFile resourceFile = new org.wso2.carbon.apimgt.persistence.dto.ResourceFile(null, fileType);
+               resourceFile.setName(fileName);
+               documentContent.setResourceFile(resourceFile);
+           }
+        } catch (Exception e) {
+            throw new RuntimeException("Error while converting JSON to DocumentationContent object", e);
+        }
+        return documentContent;
     }
 
     public static long getDocumentFileLength(InputStream inputStream) {

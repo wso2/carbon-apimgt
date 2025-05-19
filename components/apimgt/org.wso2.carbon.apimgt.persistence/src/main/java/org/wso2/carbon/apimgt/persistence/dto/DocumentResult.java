@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.persistence.dto;
 
+import java.io.InputStream;
+
 public class DocumentResult {
     private String metadata;
     private String uuid;

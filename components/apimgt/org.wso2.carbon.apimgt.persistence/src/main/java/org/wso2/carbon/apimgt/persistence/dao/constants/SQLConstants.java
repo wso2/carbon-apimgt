@@ -76,10 +76,26 @@ public class SQLConstants {
                     "ARTIFACT = ? " +
                     "WHERE UUID = ? ";
 
+    public static final String ADD_METADATA_FOR_FILE_SQL =
+            "UPDATE AM_ARTIFACT_DATA SET " +
+                    "METADATA = JSON_TRANSFORM( " +
+                    "METADATA, " +
+                    "SET '$.fileType' = ?, " +
+                    "SET '$.fileName' = ?) " +
+                    "WHERE UUID = ? ";
+
     public static final String ADD_DOCUMENTATION_CONTENT_SQL =
             "UPDATE AM_ARTIFACT_DATA SET " +
                     "METADATA = JSON_TRANSFORM( " +
                     "METADATA, " +
                     "SET '$.textContent' = ?) " +
+                    "WHERE UUID = ? ";
+
+    public static final String GET_DOCUMENTATION_CONTENT_SQL =
+            "SELECT metadata FROM AM_ARTIFACT_DATA " +
+                    "WHERE UUID = ? ";
+
+    public static final String GET_DOCUMENTATION_FILE_SQL =
+            "SELECT artifact FROM AM_ARTIFACT_DATA " +
                     "WHERE UUID = ? ";
 }
