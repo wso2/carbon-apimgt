@@ -12779,6 +12779,7 @@ components:
     GenerateMockScriptsRequest:
       title: Generate Mock Payload
       type: object
+      default : {}
       properties:
         generateWithAI:
           type: boolean
@@ -12786,6 +12787,12 @@ components:
             Generate mock payload with AI
           example: true
           default: false
+        updateSwagger:
+          type: boolean
+          description: |
+            Whether to update the Swagger definition with the generated mock responses.
+          example: true
+          default: true
         config:
           type: object
           description: |

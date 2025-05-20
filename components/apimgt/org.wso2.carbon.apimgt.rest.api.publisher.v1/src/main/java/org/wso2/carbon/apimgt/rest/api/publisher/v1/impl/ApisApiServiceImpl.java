@@ -4028,9 +4028,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             MessageContext messageContext) throws APIManagementException {
         APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
         if (apiIdentifierFromTable == null) {
-            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
-                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
-                    apiId));
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
         }
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -4042,6 +4041,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                     .get(APIConstants.SWAGGER));
         } else {
             apiDefinition = String.valueOf(OASParserUtil.generateExamples(apiDefinition).get(APIConstants.SWAGGER));
+        }
+        if (mockConfig.isUpdateSwagger()) {
+            apiProvider.saveSwaggerDefinition(originalAPI, apiDefinition, organization);
         }
         return Response.ok().entity(apiDefinition).build();
     }

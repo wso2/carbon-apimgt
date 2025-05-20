@@ -24,6 +24,7 @@ import javax.validation.Valid;
 public class GenerateMockScriptsRequestDTO   {
   
     private Boolean generateWithAI = false;
+    private Boolean updateSwagger = true;
     private Map<String, Object> config = new HashMap<String, Object>();
 
   /**
@@ -42,6 +43,24 @@ public class GenerateMockScriptsRequestDTO   {
   }
   public void setGenerateWithAI(Boolean generateWithAI) {
     this.generateWithAI = generateWithAI;
+  }
+
+  /**
+   * Whether to update the Swagger definition with the generated mock responses. 
+   **/
+  public GenerateMockScriptsRequestDTO updateSwagger(Boolean updateSwagger) {
+    this.updateSwagger = updateSwagger;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "true", value = "Whether to update the Swagger definition with the generated mock responses. ")
+  @JsonProperty("updateSwagger")
+  public Boolean isUpdateSwagger() {
+    return updateSwagger;
+  }
+  public void setUpdateSwagger(Boolean updateSwagger) {
+    this.updateSwagger = updateSwagger;
   }
 
   /**
@@ -73,12 +92,13 @@ public class GenerateMockScriptsRequestDTO   {
     }
     GenerateMockScriptsRequestDTO generateMockScriptsRequest = (GenerateMockScriptsRequestDTO) o;
     return Objects.equals(generateWithAI, generateMockScriptsRequest.generateWithAI) &&
+        Objects.equals(updateSwagger, generateMockScriptsRequest.updateSwagger) &&
         Objects.equals(config, generateMockScriptsRequest.config);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(generateWithAI, config);
+    return Objects.hash(generateWithAI, updateSwagger, config);
   }
 
   @Override
@@ -87,6 +107,7 @@ public class GenerateMockScriptsRequestDTO   {
     sb.append("class GenerateMockScriptsRequestDTO {\n");
     
     sb.append("    generateWithAI: ").append(toIndentedString(generateWithAI)).append("\n");
+    sb.append("    updateSwagger: ").append(toIndentedString(updateSwagger)).append("\n");
     sb.append("    config: ").append(toIndentedString(config)).append("\n");
     sb.append("}");
     return sb.toString();
