@@ -38,7 +38,7 @@ import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.context.CarbonContext;
 
 /**
- * Handles Solace App Registration, its credentials and Solace App requests, 
+ * Handles Solace App Registration, its credentials and Solace App requests,
  * upon subscription to a Solace API in WSO2 API Manager DevPortal Application.
  */
 public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
