@@ -19,8 +19,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -37,10 +37,9 @@ import org.wso2.carbon.apimgt.solace.api.v2.SolaceV2ApiHolder;
 import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.context.CarbonContext;
 
-
 /**
- * Handles Solace App Registration, its credentials and Solace App requests,
- * upon subscription to a Solace API in WSO2 API Manager DevPortal Application.
+ * Handles Solace App Registration, its credentials and Solace App requests, upon subscription to a Solace API in WSO2
+ * API Manager DevPortal Application.
  */
 public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
     protected ApiMgtDAO apiMgtDAO;
@@ -53,7 +52,6 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
     private static final String EVENT_API_PRODUCT_VERSION = "x-ep-event-api-product-version";
     private static final String APPLICATION_DOMAIN_ID = "x-ep-application-domain-id";
 
-
     @Override
     public boolean publishEvent(Event event) throws NotifierException {
         try {
@@ -62,15 +60,18 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
                 apiMgtDAO = ApiMgtDAO.getInstance();
                 SubscriptionEvent subscriptionEvent = (SubscriptionEvent) event;
                 String apiUUID = subscriptionEvent.getApiUUID();
-                APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                        getThreadLocalCarbonContext().getUsername());
-                API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
+                String organization = apiMgtDAO.getOrganizationByAPIUUID(apiUUID);
+                APIConsumer apiConsumer = APIManagerFactory.getInstance()
+                        .getAPIConsumer(CarbonContext.getThreadLocalCarbonContext().getUsername());
+                API api = apiConsumer.getAPIorAPIProductByUUID(apiUUID, organization)
+                        .getApi();
+                String asyncApiDefinition = apiConsumer.getAsyncAPIDefinition(apiUUID, organization);
 
                 if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayType())) {
                     if (APIConstants.EventType.SUBSCRIPTIONS_CREATE.name().equals(event.getType())) {
-                        createAccessRequest(subscriptionEvent, api, apiProvider);
+                        createAccessRequest(subscriptionEvent, asyncApiDefinition, apiConsumer);
                     } else if (APIConstants.EventType.SUBSCRIPTIONS_DELETE.name().equals(event.getType())) {
-                        deleteAccessRequest(subscriptionEvent, api, apiProvider);
+                        deleteAccessRequest(subscriptionEvent, asyncApiDefinition, apiConsumer);
                     }
                 }
             }
@@ -80,19 +81,19 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
         }
     }
 
-    private void createAccessRequest(SubscriptionEvent subscriptionEvent, API api, APIProvider apiProvider)
-            throws APIManagementException {
-        JsonObject asyncApiDefinition = new JsonParser().parse(api.getAsyncApiDefinition()).getAsJsonObject();
+    private void createAccessRequest(SubscriptionEvent subscriptionEvent, String asyncApiDefinitionString,
+            APIConsumer apiConsumer) throws APIManagementException {
+        JsonObject asyncApiDefinition = new JsonParser().parse(asyncApiDefinitionString).getAsJsonObject();
         JsonObject infoObject = asyncApiDefinition.getAsJsonObject(INFO_OBJECT_KEY);
         String eventApiProductId = infoObject.get(EVENT_API_PRODUCT_ID).getAsString();
         String applicationDomainId = infoObject.get(APPLICATION_DOMAIN_ID).getAsString();
         String wso2ApimPolicyName = subscriptionEvent.getPolicyId();
-        String solacePlanId = SolaceV2ApiHolder.getInstance().getEventApiProductPlanId(eventApiProductId,
-                wso2ApimPolicyName);
+        String solacePlanId = SolaceV2ApiHolder.getInstance()
+                .getEventApiProductPlanId(eventApiProductId, wso2ApimPolicyName);
 
         if (solacePlanId != null) {
-            Application wso2ApimDevPortalApplication =
-                    apiProvider.getApplicationByUUID(subscriptionEvent.getApplicationUUID());
+            Application wso2ApimDevPortalApplication = apiConsumer.getApplicationByUUID(
+                    subscriptionEvent.getApplicationUUID());
             String appRegistrationId = wso2ApimDevPortalApplication.getUUID();
             String appName = wso2ApimDevPortalApplication.getName();
 
@@ -113,25 +114,24 @@ public class SolaceSubscriptionsNotifier extends SubscriptionsNotifier {
                 }
             }
 
-            SolaceV2ApiHolder.getInstance()
-                    .createAccessRequest(eventApiProductId, solacePlanId, appRegistrationId);
+            SolaceV2ApiHolder.getInstance().createAccessRequest(eventApiProductId, solacePlanId, appRegistrationId);
         } else {
             String eventApiProductName = infoObject.get(EVENT_API_PRODUCT_NAME).getAsString();
             String eventApiProductVersion = infoObject.get(EVENT_API_PRODUCT_VERSION).getAsString();
             throw new APIManagementException("Cannot find a Solace Plan with the name: '" + wso2ApimPolicyName +
-                    "' in the Solace Event API Product: " + eventApiProductName + ": " +
-                    eventApiProductVersion);
+                            "' in the Solace Event API Product: " + eventApiProductName + ": " +
+                            eventApiProductVersion);
         }
     }
 
-    private void deleteAccessRequest(SubscriptionEvent subscriptionEvent, API api, APIProvider apiProvider)
-            throws APIManagementException {
-        JsonObject asyncApiDefinition = new JsonParser().parse(api.getAsyncApiDefinition()).getAsJsonObject();
+    private void deleteAccessRequest(SubscriptionEvent subscriptionEvent, String asyncApiDefinitionString,
+            APIConsumer apiConsumer) throws APIManagementException {
+        JsonObject asyncApiDefinition = new JsonParser().parse(asyncApiDefinitionString).getAsJsonObject();
         JsonObject infoObject = asyncApiDefinition.getAsJsonObject(INFO_OBJECT_KEY);
         String eventApiProductId = infoObject.get(EVENT_API_PRODUCT_ID).getAsString();
 
-        Application wso2ApimDevPortalApplication =
-                apiProvider.getApplicationByUUID(subscriptionEvent.getApplicationUUID());
+        Application wso2ApimDevPortalApplication = apiConsumer.getApplicationByUUID(
+                subscriptionEvent.getApplicationUUID());
         String appRegistrationId = wso2ApimDevPortalApplication.getUUID();
         SolaceV2ApiHolder.getInstance().deleteAccessRequest(appRegistrationId, eventApiProductId);
     }

@@ -19,7 +19,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIKey;
 import org.wso2.carbon.apimgt.api.model.Application;
@@ -64,14 +63,15 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
     private void processKeyGenerationEvent(ApplicationRegistrationEvent applicationRegistrationEvent)
             throws APIManagementException {
         Application application = apiMgtDAO.getApplicationByUUID(applicationRegistrationEvent.getApplicationUUID());
+        APIConsumer apiConsumer = APIManagerFactory.getInstance()
+                .getAPIConsumer(CarbonContext.getThreadLocalCarbonContext().getUsername());
         Set<SubscribedAPI> subscriptions = apiMgtDAO.getSubscribedAPIsByApplication(application);
-        APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
-                getThreadLocalCarbonContext().getUsername());
 
         boolean isSolaceApiSubscriptionExists = false;
         for (SubscribedAPI subscribedAPI : subscriptions) {
             String apiUUID = subscribedAPI.getAPIUUId();
-            API api = apiProvider.getAPIbyUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID));
+            API api = apiConsumer.getAPIorAPIProductByUUID(apiUUID, apiMgtDAO.getOrganizationByAPIUUID(apiUUID))
+                    .getApi();
             if (SolaceConstants.SOLACE_ENVIRONMENT.equals(api.getGatewayType())) {
                 isSolaceApiSubscriptionExists = true;
                 break;
@@ -79,8 +79,6 @@ public class SolaceKeyGenNotifier extends ApplicationRegistrationNotifier {
         }
 
         if (isSolaceApiSubscriptionExists) {
-            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(
-                    CarbonContext.getThreadLocalCarbonContext().getUsername());
             Set<APIKey> keys = apiConsumer.getApplicationKeysOfApplication(application.getId());
             for (APIKey key : keys) {
                 SolaceV2ApiHolder.getInstance()
