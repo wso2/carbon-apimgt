@@ -52,8 +52,9 @@ public class EnrichedAPISpecDTO   {
   }
 
   
-  @ApiModelProperty(value = "Extracted Http tools from the OpenAPI specification")
+  @ApiModelProperty(required = true, value = "Extracted Http tools from the OpenAPI specification")
   @JsonProperty("tools")
+  @NotNull
   public List<Object> getTools() {
     return tools;
   }
