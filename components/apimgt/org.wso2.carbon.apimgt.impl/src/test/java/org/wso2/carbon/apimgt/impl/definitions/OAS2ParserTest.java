@@ -51,6 +51,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.List;
+import java.util.Objects;
 
 import static org.mockito.Mockito.when;
 
@@ -188,6 +189,40 @@ public class OAS2ParserTest extends OASTestBase {
     }
 
     @Test
+    public void testOpenAPIValidatorWithMultiplePathsHavingSameNameWithAndWithoutTrailingSlash() throws Exception {
+        String faultySwagger = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2"
+                        + File.separator + "oas2_paths_with_trailing_slash.json"),
+                "UTF-8");
+
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true);
+        Assert.assertFalse(response.isValid());
+        Assert.assertEquals(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorCode(),
+                response.getErrorItems().get(0).getErrorCode());
+        Assert.assertEquals("Multiple GET operations with the same resource path /test found in " +
+                "the swagger definition", response.getErrorItems().get(0).getErrorDescription());
+    }
+
+    @Test
+    public void testGenerateExample() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2_uri_template.json";
+        String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        Map<String, Object> responseMap = oas2Parser.generateExample(openApi);
+        Assert.assertNotNull(responseMap);
+        Assert.assertTrue(responseMap.containsKey(APIConstants.SWAGGER) && responseMap.containsKey(APIConstants.MOCK_GEN_POLICY_LIST));
+        String swaggerString = (String) responseMap.get(APIConstants.SWAGGER);
+        Assert.assertTrue(Objects.nonNull(swaggerString) && !swaggerString.isEmpty());
+        Assert.assertTrue(Objects.nonNull(responseMap.get(APIConstants.MOCK_GEN_POLICY_LIST)));
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList =
+                (List<APIResourceMediationPolicy>) responseMap.get(APIConstants.MOCK_GEN_POLICY_LIST);
+        Assert.assertFalse(apiResourceMediationPolicyList.isEmpty());
+        APIResourceMediationPolicy apiResourceMediationPolicy = apiResourceMediationPolicyList.get(4);
+        Assert.assertEquals("/abc", apiResourceMediationPolicy.getPath());
+        String content = apiResourceMediationPolicy.getContent();
+        Assert.assertTrue(content.contains("responses[200][\"application/json\"] = \"\";"));
+    }
+
+    @Test
     public void getGeneratedExamples() throws Exception {
         String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2_uri_template.json";
         String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath),
@@ -216,8 +251,49 @@ public class OAS2ParserTest extends OASTestBase {
 
         //Test for adding scripts and mockDataset Completely
         //Sample LLM Response
-        String llmResponseFull = "{" + "\"mockDataset\": \"{\\\"mockResponses\\\":[" + "{\\\"id\\\":200,\\\"mockResponse\\\":\\\"mockResponse200\\\"}," + "{\\\"id\\\":404,\\\"mockResponse\\\":\\\"mockResponse404\\\"}," + "{\\\"id\\\":\\\"4XX\\\",\\\"mockResponse\\\":\\\"mockResponse4XX\\\"}" + "]}\"," + "\"paths\": {" + "  \"/*\": {" + "    \"get\": \"var a=mc.getProperty('AcceptHeader')||'application/json';\\n" + "if(!a||a=='*/*')a='application/json';\\n" + "mc.setProperty('CONTENT_TYPE',a);\\n" + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[]}');\\n" + "mc.setProperty('HTTP_SC','200');\\n" + "mc.setPayloadJSON(db.mockResponses);\"," + "    \"post\": \"var a=mc.getProperty('AcceptHeader')||'application/json';\\n" + "if(!a||a=='*/*')a='application/json';\\n" + "mc.setProperty('CONTENT_TYPE',a);\\n" + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[]}');\\n" + "mc.setProperty('HTTP_SC','200');\\n" + "mc.setPayloadJSON(db.mockResponses);\"," + "    \"put\": \"var a=mc.getProperty('AcceptHeader')||'application/json';\\n" + "if(!a||a=='*/*')a='application/json';\\n" + "mc.setProperty('CONTENT_TYPE',a);\\n" + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[]}');\\n" + "mc.setProperty('HTTP_SC','200');\\n" + "mc.setPayloadJSON(db.mockResponses);\"," + "    \"delete\": \"var a=mc.getProperty('AcceptHeader')||'application/json';\\n" + "if(!a||a=='*/*')a='application/json';\\n" + "mc.setProperty('CONTENT_TYPE',a);\\n" + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[]}');\\n" + "mc.setProperty('HTTP_SC','200');\\n" + "mc.setPayloadJSON(db.mockResponses);\"" + "  }," + "  \"/abc\": {" + "    \"get\": \"var a=mc.getProperty('AcceptHeader')||'application/json';\\n" + "if(!a||a=='*/*')a='application/json';\\n" + "mc.setProperty('CONTENT_TYPE',a);\\n" + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[]}');\\n" + "mc.setProperty('HTTP_SC','200');\\n" + "mc.setPayloadJSON(db.mockResponses);\"" + "  }" + "}" + "}";
-
+        String llmResponseFull = "{"
+                + "\"mockDataset\": \"{\\\"mockResponses\\\":["
+                + "{\\\"id\\\":200,\\\"mockResponse\\\":\\\"mockResponse200\\\"},"
+                + "{\\\"id\\\":404,\\\"mockResponse\\\":\\\"mockResponse404\\\"},"
+                + "{\\\"id\\\":\\\"4XX\\\",\\\"mockResponse\\\":\\\"mockResponse4XX\\\"}"
+                + "]}\","
+                + "\"paths\": {"
+                + "  \"/*\": {"
+                + "    \"get\": \"var a=mc.getProperty('AcceptHeader')||'application/json';\\n"
+                + "if(!a||a=='*/*')a='application/json';\\n"
+                + "mc.setProperty('CONTENT_TYPE',a);\\n"
+                + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[]}');\\n"
+                + "mc.setProperty('HTTP_SC','200');\\n"
+                + "mc.setPayloadJSON(db.mockResponses);\","
+                + "    \"post\": \"var a=mc.getProperty('AcceptHeader')||'application/json';\\n"
+                + "if(!a||a=='*/*')a='application/json';\\n"
+                + "mc.setProperty('CONTENT_TYPE',a);\\n"
+                + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[]}');\\n"
+                + "mc.setProperty('HTTP_SC','200');\\n"
+                + "mc.setPayloadJSON(db.mockResponses);\","
+                + "    \"put\": \"var a=mc.getProperty('AcceptHeader')||'application/json';\\n"
+                + "if(!a||a=='*/*')a='application/json';\\n"
+                + "mc.setProperty('CONTENT_TYPE',a);\\n"
+                + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[]}');\\n"
+                + "mc.setProperty('HTTP_SC','200');\\n"
+                + "mc.setPayloadJSON(db.mockResponses);\","
+                + "    \"delete\": \"var a=mc.getProperty('AcceptHeader')||'application/json';\\n"
+                + "if(!a||a=='*/*')a='application/json';\\n"
+                + "mc.setProperty('CONTENT_TYPE',a);\\n"
+                + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[]}');\\n"
+                + "mc.setProperty('HTTP_SC','200');\\n"
+                + "mc.setPayloadJSON(db.mockResponses);\""
+                + "  },"
+                + "  \"/abc\": {"
+                + "    \"get\": \"var a=mc.getProperty('AcceptHeader')||'application/json';\\n"
+                + "if(!a||a=='*/*')a='application/json';\\n"
+                + "mc.setProperty('CONTENT_TYPE',a);\\n"
+                + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[]}');\\n"
+                + "mc.setProperty('HTTP_SC','200');\\n"
+                + "mc.setPayloadJSON(db.mockResponses);\""
+                + "  }"
+                + "}"
+                + "}";
         Map mockConfig1 = Map.of();
         JsonObject llmResponseJson = JsonParser.parseString(llmResponseFull).getAsJsonObject();
 
@@ -237,7 +313,15 @@ public class OAS2ParserTest extends OASTestBase {
         Assert.assertTrue(content.contains("var db=JSON.parse(mc.getProperty('mockDataset')"));
 
         //Test for modifying a method
-        String llmResponseModify = "{" + "\"modified_script\": \"var accept=mc.getProperty('AcceptHeader')||'application/json';\\n" + "if(!accept||accept=='*/*')accept='application/json';\\n" + "mc.setProperty('CONTENT_TYPE',accept);\\n" + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":" + "[{\\\"id\\\":200,\\\"mockResponse\\\":\\\"mockResponse200ToTestIfModified\\\"}]}');\\n" + "mc.setProperty('HTTP_SC','200');\\n" + "mc.setPayloadJSON(db.mockResponses);\"" + "}";
+        String llmResponseModify = "{"
+                + "\"modified_script\": \"var accept=mc.getProperty('AcceptHeader')||'application/json';\\n"
+                + "if(!accept||accept=='*/*')accept='application/json';\\n"
+                + "mc.setProperty('CONTENT_TYPE',accept);\\n"
+                + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":"
+                + "[{\\\"id\\\":200,\\\"mockResponse\\\":\\\"mockResponse200ToTestIfModified\\\"}]}');\\n"
+                + "mc.setProperty('HTTP_SC','200');\\n"
+                + "mc.setPayloadJSON(db.mockResponses);\""
+                + "}";
         Map mockConfig2 = Map.of("modify", Map.of("path", "/abc", "method", "get"));
         JsonObject llmResponseJsonModify = JsonParser.parseString(llmResponseModify).getAsJsonObject();
         Map<String, Object> responseMap2 = oas2Parser.addScriptsAndMockDataset(swaggerString, mockConfig2,
@@ -251,21 +335,6 @@ public class OAS2ParserTest extends OASTestBase {
         Assert.assertEquals("/abc", apiResourceMediationPolicy2.getPath());
         String content2 = apiResourceMediationPolicy2.getContent();
         Assert.assertTrue(content2.contains("mockResponse200ToTestIfModified"));
-    }
-
-    @Test
-    public void testOpenAPIValidatorWithMultiplePathsHavingSameNameWithAndWithoutTrailingSlash() throws Exception {
-        String faultySwagger = IOUtils.toString(
-                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2"
-                        + File.separator + "oas2_paths_with_trailing_slash.json"),
-                "UTF-8");
-
-        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true);
-        Assert.assertFalse(response.isValid());
-        Assert.assertEquals(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorCode(),
-                response.getErrorItems().get(0).getErrorCode());
-        Assert.assertEquals("Multiple GET operations with the same resource path /test found in " +
-                "the swagger definition", response.getErrorItems().get(0).getErrorDescription());
     }
 
     @Test
