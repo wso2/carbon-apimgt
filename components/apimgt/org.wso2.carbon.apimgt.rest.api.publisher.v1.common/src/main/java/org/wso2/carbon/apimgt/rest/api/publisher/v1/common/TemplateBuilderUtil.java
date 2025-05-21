@@ -278,6 +278,9 @@ public class TemplateBuilderUtil {
         if (APIConstants.GRAPHQL_API.equals(api.getType())) {
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.graphQL.GraphQLQueryAnalysisHandler",
                     Collections.emptyMap());
+            vtb.addHandler(
+                    "org.wso2.carbon.apimgt.gateway.handlers.graphQL.ExternalGraphQLQueryAnalysisHandler",
+                    Collections.emptyMap());
         }
 
         if (!APIUtil.isStreamingApi(api)) {
