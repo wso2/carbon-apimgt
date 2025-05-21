@@ -29,6 +29,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -3360,13 +3361,22 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     public String invokeApiChatExecute(String apiChatRequestId, String apiType, String requestPayload) throws APIManagementException {
         ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiChatConfigurationDto();
-        String resourceWithQueryParam = configDto.getExecuteResource() + "?apiType=" + URLEncoder.encode(apiType, StandardCharsets.UTF_8);
-        if (configDto.isKeyProvided()) {
-            return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
+        try {
+            org.apache.http.client.utils.URIBuilder uriBuilder = new org.apache.http.client.utils.URIBuilder(configDto.getExecuteResource());
+            uriBuilder.addParameter("apiType", apiType);
+            String resourceWithQueryParam = uriBuilder.build().toString();
+            
+            if (configDto.isKeyProvided()) {
+                return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
+                        resourceWithQueryParam, requestPayload, apiChatRequestId);
+            }
+            return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
                     resourceWithQueryParam, requestPayload, apiChatRequestId);
+        } catch (java.net.URISyntaxException e) {
+            String errorMessage = "Error constructing URI for API Chat execute resource: " + e.getMessage();
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         }
-        return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
-                resourceWithQueryParam, requestPayload, apiChatRequestId);
     }
 
     @Override
@@ -3385,13 +3395,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 JsonNode openAPIDefinitionJsonNode = objectMapper.readTree(getOpenAPIDefinition(apiId, organization));
                 payload.set(APIConstants.OPEN_API, openAPIDefinitionJsonNode);
             } else {
-                String errorMessage = "Unsupported API type for API Chat: " + apiType;
-                log.error(errorMessage);
-                throw new APIManagementException(errorMessage);
+                throw new APIManagementException("Unsupported API type for API Chat: " + apiType);
             }
             ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration().getApiChatConfigurationDto();
-            String resourceWithQueryParam = configDto.getPrepareResource() + "?apiType=" + URLEncoder.encode(apiType, StandardCharsets.UTF_8);
+
+            org.apache.http.client.utils.URIBuilder uriBuilder = new org.apache.http.client.utils.URIBuilder(configDto.getPrepareResource());
+            uriBuilder.addParameter("apiType", apiType);
+            String resourceWithQueryParam = uriBuilder.build().toString();
 
             if (configDto.isKeyProvided()) {
                 return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
@@ -3403,6 +3414,10 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             String error = "Error while parsing OpenAPI definition of API ID: " + apiId + " to JSON";
             log.error(error, e);
             throw new APIManagementException(error, e);
+        } catch (java.net.URISyntaxException e) {
+            String errorMessage = "Error constructing URI for API Chat prepare resource: " + e.getMessage();
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         }
     }
 
