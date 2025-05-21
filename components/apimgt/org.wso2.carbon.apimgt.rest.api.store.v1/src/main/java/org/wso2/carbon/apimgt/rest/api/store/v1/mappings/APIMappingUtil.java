@@ -73,6 +73,8 @@ import org.wso2.carbon.apimgt.solace.utils.SolaceConstants;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -560,7 +562,26 @@ public class APIMappingUtil {
             if (!StringUtils.contains(customGatewayUrl, "://")) {
                 customGatewayUrl = APIConstants.HTTPS_PROTOCOL_URL_PREFIX + customGatewayUrl;
             }
+            URL customUrl;
+            try {
+                customUrl = new URL(customGatewayUrl);
+            } catch (MalformedURLException e) {
+                throw new APIManagementException("Error occurred while parsing the custom gateway URL", e);
+            }
             vHost = VHost.fromEndpointUrls(new String[]{customGatewayUrl});
+            // Set HTTP port and context if HTTP transport is enabled
+            if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
+                String protocol = customUrl.getProtocol();
+                int port = customUrl.getPort();
+
+                if (APIConstants.HTTP_PROTOCOL.equals(protocol)) {
+                    vHost.setHttpPort(port < 0 ? VHost.DEFAULT_HTTP_PORT : port);
+                } else {
+                    vHost.setHttpPort(VHost.DEFAULT_HTTP_PORT);
+                }
+
+                vHost.setHttpContext(customUrl.getPath());
+            }
             context = context.replace("/t/" + tenantDomain, "");
         }
 

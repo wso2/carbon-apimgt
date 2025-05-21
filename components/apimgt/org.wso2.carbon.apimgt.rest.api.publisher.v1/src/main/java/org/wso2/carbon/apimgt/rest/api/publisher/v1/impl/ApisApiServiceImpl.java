@@ -975,7 +975,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
 
             // validate custom properties
-            org.json.simple.JSONArray customProperties = APIUtil.getCustomProperties(username);
+            org.json.simple.JSONArray customProperties = APIUtil.getCustomProperties(organization);
             List<String> errorProperties = PublisherCommonUtils.validateMandatoryProperties(customProperties, body);
             if (!errorProperties.isEmpty()) {
                 String errorString = " : " + String.join(", ", errorProperties);
@@ -1727,8 +1727,8 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @return updated document as DTO
      */
     @Override
-    public Response addAPIDocumentContent(String apiId, String documentId, String ifMatch,
-                                          InputStream inputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext) {
+    public Response addAPIDocumentContent(String apiId, String documentId, String ifMatch, InputStream inputStream,
+            Attachment fileDetail, String inlineContent, MessageContext messageContext) throws APIManagementException {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -1787,6 +1787,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while adding content to the document: " + documentId + " of API "
                                 + apiId, e, log);
+            } else if (e.getErrorHandler() != ExceptionCodes.INTERNAL_ERROR) {
+                throw e;
             } else {
                 RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, e, log);
             }
@@ -3868,30 +3870,33 @@ public class ApisApiServiceImpl implements ApisApiService {
                 additionalPropertiesAPI = new ObjectMapper().readValue(additionalProperties, APIDTO.class);
             }
 
-            if (schema != null && !schema.isEmpty()) {
+            if (schema != null && StringUtils.isNotEmpty(schema)) {
                 graphQLSchema = schema;
             } else if (fileInputStream != null && !StringUtils.isBlank(additionalProperties)) {
                 graphQLSchema = IOUtils.toString(fileInputStream, RestApiConstants.CHARSET);
             } else if (url != null) {
                 graphQLSchema = PublisherCommonUtils.retrieveGraphQLSchemaFromURL(url);
             } else {
-                Map<String, Object> endpointConfigurationMap = (Map<String, Object>) additionalPropertiesAPI.getEndpointConfig();
+                Map<String, Object> endpointConfigurationMap =
+                    (Map<String, Object>) additionalPropertiesAPI.getEndpointConfig();
                 String endpointURL = "";
                 if (endpointConfigurationMap.containsKey("production_endpoints")) {
                     Map<String, String> productionEndpoints = (Map<String, String>) endpointConfigurationMap.get(
-                            "production_endpoints");
+                        "production_endpoints");
                     endpointURL = productionEndpoints.get("url");
                 }
                 graphQLSchema = PublisherCommonUtils.generateGraphQLSchemaFromIntrospection(endpointURL);
             }
 
-            if (graphQLSchema == null || graphQLSchema.isEmpty()) {
+            if (graphQLSchema == null || StringUtils.isEmpty(graphQLSchema)) {
                 throw new APIManagementException("GraphQL Schema cannot be empty or null to validate it",
-                        ExceptionCodes.GRAPHQL_SCHEMA_CANNOT_BE_NULL);
+                    ExceptionCodes.GRAPHQL_SCHEMA_CANNOT_BE_NULL);
             }
 
-            if (!StringUtils.isBlank(additionalProperties) && !StringUtils.isBlank(graphQLSchema) && log.isDebugEnabled()) {
-                log.debug("Deseriallizing additionalProperties: " + additionalProperties + "/n"
+            if (!StringUtils.isBlank(additionalProperties) && !StringUtils.isBlank(
+                graphQLSchema) && log.isDebugEnabled()) {
+                log.debug(
+                    "Deseriallizing additionalProperties: " + additionalProperties + "/n"
                         + "importing schema: " + graphQLSchema);
             }
 
@@ -3925,7 +3930,8 @@ public class ApisApiServiceImpl implements ApisApiService {
                 RestApiUtil.handleBadRequest(e.getMessage(), e, log);
             }
             String errorMessage = "Error while adding new API : " + additionalPropertiesAPI.getProvider() + "-" +
-                    additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion() + " - " + e.getMessage();
+                    additionalPropertiesAPI.getName() + "-" + additionalPropertiesAPI.getVersion() + " - "
+                    + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + additionalPropertiesAPI.getProvider() + "-"

@@ -124,6 +124,21 @@ public class OAS31ParserTest extends OASTestBase {
     }
 
     @Test
+    public void testGenerateAPIDefinitionWithoutInfoTag() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas31" + File.separator + "oas31Resources.json";
+        String oas3Resources = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        OpenAPIV3Parser openAPIV3Parser = new OpenAPIV3Parser();
+
+        String definition = testGenerateAPIDefinitionWithoutInfoTag(oas31Parser, oas3Resources);
+        SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(definition, null, null);
+        OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
+
+        Assert.assertNotNull(openAPI.getInfo());
+        Assert.assertEquals("simple", openAPI.getInfo().getTitle());
+        Assert.assertEquals("1.0.0", openAPI.getInfo().getVersion());
+    }
+
+    @Test
     public void testGetURITemplatesOfOpenAPI300Spec() throws Exception {
         String relativePath = "definitions" + File.separator + "oas31" + File.separator + "oas31_uri_template.json";
         String openAPISpec300 =
@@ -210,6 +225,22 @@ public class OAS31ParserTest extends OASTestBase {
         Assert.assertEquals(oasDefinitionEdited, response);
     }
 
+    @Test
+    public void testSwaggerValidatorWithRelaxValidationEnabledAndWithoutInfoTag() throws Exception {
+        System.setProperty(APIConstants.SWAGGER_RELAXED_VALIDATION, "true");
+        String faultySwagger = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31"
+                        + File.separator + "openApi31_without_info_validation.json"),
+                String.valueOf(StandardCharsets.UTF_8));
+
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(faultySwagger, true);
+
+        Assert.assertTrue(response.isValid());
+        Assert.assertTrue(response.getInfo().getName().startsWith("API-Title-"));
+        Assert.assertEquals("attribute extraInfo is unexpected",
+                response.getErrorItems().get(0).getErrorDescription());
+        System.clearProperty(APIConstants.SWAGGER_RELAXED_VALIDATION);
+    }
 
     @Test
     public void testGetOASSecurityDefinitionForStore() throws  Exception {

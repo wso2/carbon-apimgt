@@ -3599,10 +3599,21 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         String organization = api.getOrganization();
         if (!domains.isEmpty()) {
             String customUrl = domains.get(APIConstants.CUSTOM_URL);
-            if (customUrl.startsWith(APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
-                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, customUrl);
-            } else {
-                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, customUrl);
+            if (customUrl != null) {
+                boolean isHttp = customUrl.startsWith(APIConstants.HTTP_PROTOCOL_URL_PREFIX);
+                boolean isHttps = customUrl.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX);
+
+                if (!isHttp && !isHttps) {
+                    hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, customUrl);
+                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, customUrl);
+                } else {
+                    if (isHttp) {
+                        hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, customUrl);
+                    }
+                    if (isHttps) {
+                        hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, customUrl);
+                    }
+                }
             }
         } else {
             Map<String, Environment> allEnvironments = APIUtil.getEnvironments(organization);

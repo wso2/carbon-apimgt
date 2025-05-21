@@ -1856,6 +1856,7 @@ public final class APIConstants {
     public static final String ENDPOINT_URLS = "urls";
     public static final String ENDPOINT_URL = "url";
     public static final String ENDPOINT_SECURITY_TYPE = "type";
+    public static final String ENDPOINT_SECURITY_TYPE_NONE = "none";
     public static final String ENDPOINT_SECURITY_TYPE_BASIC = "basic";
     public static final String ENDPOINT_SECURITY_TYPE_DIGEST = "digest";
     public static final String ENDPOINT_SECURITY_TYPE_OAUTH = "oauth";
@@ -3265,6 +3266,7 @@ public final class APIConstants {
     public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_SOAPTOREST = "SOAPTOREST";
     public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_GRAPHQL = "GRAPHQL";
     public static final String DEFAULT_POLICY_VERSION = "v1";
+    public static final String POLICY_FILENAME_INVALID_CHARS_REGEX = "[\\/:*?\"<>|]";
 
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";

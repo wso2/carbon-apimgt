@@ -132,6 +132,20 @@ public class OAS2ParserTest extends OASTestBase {
     }
 
     @Test
+    public void testGenerateAPIDefinitionWithoutInfoTag() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2Resources.json";
+        String oas2Resources = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        SwaggerParser swaggerParser = new SwaggerParser();
+
+        String definition = testGenerateAPIDefinitionWithoutInfoTag(oas2Parser, oas2Resources);
+        Swagger swaggerObj = swaggerParser.parse(definition);
+
+        Assert.assertNotNull(swaggerObj.getInfo());
+        Assert.assertEquals("simple", swaggerObj.getInfo().getTitle());
+        Assert.assertEquals("1.0.0", swaggerObj.getInfo().getVersion());
+    }
+
+    @Test
     public void testGetURITemplatesOfOpenAPI20Spec() throws Exception {
         String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2_uri_template.json";
         String swagger = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
@@ -190,6 +204,7 @@ public class OAS2ParserTest extends OASTestBase {
     }
 
     @Test
+
     public void testGenerateExample() throws Exception {
         String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2_uri_template.json";
         String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
@@ -321,6 +336,20 @@ public class OAS2ParserTest extends OASTestBase {
         Assert.assertEquals("/abc", apiResourceMediationPolicy2.getPath());
         String content2 = apiResourceMediationPolicy2.getContent();
         Assert.assertTrue(content2.contains("mockResponse200ToTestIfModified"));
+
+    public void testSwaggerValidatorWithRelaxValidationEnabledAndWithoutInfoTag() throws Exception {
+        System.setProperty(APIConstants.SWAGGER_RELAXED_VALIDATION, "true");
+        String withoutInfoTagSwagger = IOUtils.toString(
+                getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2"
+                + File.separator + "oas2_without_info_swagger.json"),
+                "UTF-8");
+        APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(withoutInfoTagSwagger, true);
+        Assert.assertTrue(response.isValid());
+        Assert.assertTrue(response.getInfo().getName().startsWith("API-Title-"));
+        Assert.assertEquals("attribute info is missing",
+                response.getErrorItems().get(0).getErrorDescription());
+        System.clearProperty(APIConstants.SWAGGER_RELAXED_VALIDATION);
+
     }
 
     @Test
