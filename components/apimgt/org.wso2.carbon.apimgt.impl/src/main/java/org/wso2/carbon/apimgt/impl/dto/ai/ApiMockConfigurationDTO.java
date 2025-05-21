@@ -27,8 +27,8 @@ public class ApiMockConfigurationDTO {
     private String key;
     private String endpoint;
     private String tokenEndpoint;
-    private String generateResource;
-    private String modifyMethodResource;
+    private String generateMockScriptsResource;
+    private String modifyResourceScriptResource;
     private boolean isEnabled;
     private boolean isAuthTokenProvided;
     private boolean isKeyProvided;
@@ -65,20 +65,20 @@ public class ApiMockConfigurationDTO {
         this.tokenEndpoint = tokenEndpoint;
     }
 
-    public String getGenerateResource() {
-        return generateResource;
+    public String getGenerateMockScriptsResource() {
+        return generateMockScriptsResource;
     }
 
-    public void setGenerateResource(String generateResource) {
-        this.generateResource = generateResource;
+    public void setGenerateMockScriptsResource(String generateMockScriptsResource) {
+        this.generateMockScriptsResource = generateMockScriptsResource;
     }
 
-    public String getModifyMethodResource() {
-        return modifyMethodResource;
+    public String getModifyResourceScriptResource() {
+        return modifyResourceScriptResource;
     }
 
-    public void setModifyMethodResource(String modifyMethodResource) {
-        this.modifyMethodResource = modifyMethodResource;
+    public void setModifyResourceScriptResource(String modifyResourceScriptResource) {
+        this.modifyResourceScriptResource = modifyResourceScriptResource;
     }
 
     public boolean isEnabled() {

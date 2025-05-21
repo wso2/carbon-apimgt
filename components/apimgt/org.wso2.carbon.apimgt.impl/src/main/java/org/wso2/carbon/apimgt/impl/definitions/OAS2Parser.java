@@ -214,7 +214,7 @@ public class OAS2Parser extends APIDefinition {
      *
      * @param swaggerDef API definition
      * @return Map of generated examples
-     * @throws APIManagementException
+     * @throws APIManagementException if error occurred while parsing definition
      */
     @Override
     public Map<String, Object> getGeneratedExamples(String swaggerDef) throws APIManagementException {

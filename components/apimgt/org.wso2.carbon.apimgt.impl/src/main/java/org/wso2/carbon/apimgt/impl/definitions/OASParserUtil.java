@@ -254,7 +254,7 @@ public class OASParserUtil {
      *
      * @param apiDefinition API definition
      * @return Map of generated examples
-     * @throws APIManagementException
+     * @throws APIManagementException if error occurred while parsing definition
      */
     public static Map<String, Object> getGeneratedExamples(String apiDefinition) throws APIManagementException {
         SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
@@ -733,7 +733,7 @@ public class OASParserUtil {
      * @param apiDefinition The API definition as a string
      * @param mockConfig    The mock configuration parameters
      * @return A JsonObject containing the generated scripts and mock responses
-     * @throws APIManagementException If configuration is missing or the AI service call fails
+     * @throws APIManagementException If the configuration is missing or the AI service call fails
      */
     private static JsonObject invokeMockGenerationAIService(String apiDefinition, Map<String, Object> mockConfig)
             throws APIManagementException {
@@ -753,7 +753,7 @@ public class OASParserUtil {
             Map<String, Object> modify = mockConfig.get(APIConstants.MOCK_MODIFY) != null ?
                     (Map<String, Object>) mockConfig.get(APIConstants.MOCK_MODIFY) :
                     null;
-            String resource = modify != null ? configDto.getModifyMethodResource() : configDto.getGenerateResource();
+            String resource = modify != null ? configDto.getModifyResourceScriptResource() : configDto.getGenerateMockScriptsResource();
             String tokenEndPoint = configDto.isKeyProvided() ? configDto.getTokenEndpoint() : null;
             String response = APIUtil.invokeAIService(configDto.getEndpoint(), tokenEndPoint, configDto.getKey(),
                     resource, payload.toString(), null);

@@ -2842,15 +2842,15 @@ public class APIManagerConfiguration {
             OMElement resources = omElement.getFirstChildWithName(new QName(APIConstants.AI.RESOURCES));
 
             if (resources != null) {
-                OMElement generateResource = resources.getFirstChildWithName(
+                OMElement generateMockScriptsResource = resources.getFirstChildWithName(
                         new QName(APIConstants.AI.API_MOCK_GENERATE_RESOURCE));
-                if (generateResource != null) {
-                    apiMockConfigurationDto.setGenerateResource(generateResource.getText());
+                if (generateMockScriptsResource != null) {
+                    apiMockConfigurationDto.setGenerateMockScriptsResource(generateMockScriptsResource.getText());
                 }
-                OMElement modifyMethodResource = resources.getFirstChildWithName(
+                OMElement modifyResourceScriptResource = resources.getFirstChildWithName(
                         new QName(APIConstants.AI.API_MOCK_MODIFY_METHOD_RESOURCE));
-                if (modifyMethodResource != null) {
-                    apiMockConfigurationDto.setModifyMethodResource(modifyMethodResource.getText());
+                if (modifyResourceScriptResource != null) {
+                    apiMockConfigurationDto.setModifyResourceScriptResource(modifyResourceScriptResource.getText());
                 }
             }
         }

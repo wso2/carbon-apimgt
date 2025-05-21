@@ -262,7 +262,7 @@ public class OAS3Parser extends APIDefinition {
      *
      * @param apiDefinition API definition
      * @return Map of generated examples
-     * @throws APIManagementException
+     * @throws APIManagementException if error occurred while parsing definition
      */
     @Override
     public Map<String, Object> getGeneratedExamples(String apiDefinition) throws APIManagementException {
