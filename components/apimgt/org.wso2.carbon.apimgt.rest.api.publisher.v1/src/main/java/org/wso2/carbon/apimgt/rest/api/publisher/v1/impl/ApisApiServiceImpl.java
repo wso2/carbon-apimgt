@@ -4030,7 +4030,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response generateMockScripts(String apiId, String ifNoneMatch, GenerateMockScriptsRequestDTO mockConfig,
+    public Response generateMockScripts(String apiId, String ifNoneMatch, Boolean isUpdateSwagger,
             MessageContext messageContext) throws APIManagementException {
         APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
         if (apiIdentifierFromTable == null) {
@@ -4042,13 +4042,56 @@ public class ApisApiServiceImpl implements ApisApiService {
         API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
 
         String apiDefinition = apiProvider.getOpenAPIDefinition(apiId, organization);
-        if (mockConfig.isGenerateWithAI()) {
-            apiDefinition = String.valueOf(OASParserUtil.generateExamplesWithAI(apiDefinition, mockConfig.getConfig())
-                    .get(APIConstants.SWAGGER));
-        } else {
-            apiDefinition = String.valueOf(OASParserUtil.generateExamples(apiDefinition).get(APIConstants.SWAGGER));
+        apiDefinition = String.valueOf(OASParserUtil.generateExamples(apiDefinition).get(APIConstants.SWAGGER));
+
+        if (isUpdateSwagger) {
+            apiProvider.saveSwaggerDefinition(originalAPI, apiDefinition, organization);
         }
-        if (mockConfig.isUpdateSwagger()) {
+        return Response.ok().entity(apiDefinition).build();
+    }
+
+    /**
+     * Generates Mock response examples for Inline prototyping of a swagger using AI
+     *
+     * @param apiId          API Id
+     * @param ifNoneMatch    If-None-Match header value
+     * @param messageContext message context
+     * @return apiDefinition
+     * @throws APIManagementException
+     */
+    @Override
+    public Response generateAIMockScripts(String apiId, String ifNoneMatch, Boolean isUpdateSwagger,
+            GenerateAIMockScriptsRequestDTO generateAIMockScriptsRequest, MessageContext messageContext)
+            throws APIManagementException {
+        APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+        if (apiIdentifierFromTable == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+        }
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
+
+        String apiDefinition = apiProvider.getOpenAPIDefinition(apiId, organization);
+        Map<String, Object> mockConfig = new HashMap<>();
+
+        if (generateAIMockScriptsRequest.getInstructions() != null) {
+            mockConfig.put(APIConstants.MOCK_GENERATE_INSTRUCTIONS, generateAIMockScriptsRequest.getInstructions());
+        }
+        if (generateAIMockScriptsRequest.isUsePreviousScripts() != null) {
+            mockConfig.put(APIConstants.MOCK_IS_USE_PREVIOUS_SCRIPTS,
+                    generateAIMockScriptsRequest.isUsePreviousScripts());
+        }
+        if (generateAIMockScriptsRequest.getScript() != null) {
+            mockConfig.put(APIConstants.MOCK_MODIFY_SCRIPT, generateAIMockScriptsRequest.getScript());
+        }
+        if (generateAIMockScriptsRequest.getModify() != null && !generateAIMockScriptsRequest.getModify().isEmpty()) {
+            mockConfig.put(APIConstants.MOCK_MODIFY, generateAIMockScriptsRequest.getModify());
+        }
+
+        apiDefinition = String.valueOf(
+                OASParserUtil.generateExamplesWithAI(apiDefinition, mockConfig).get(APIConstants.SWAGGER));
+        if (isUpdateSwagger) {
             apiProvider.saveSwaggerDefinition(originalAPI, apiDefinition, organization);
         }
         return Response.ok().entity(apiDefinition).build();

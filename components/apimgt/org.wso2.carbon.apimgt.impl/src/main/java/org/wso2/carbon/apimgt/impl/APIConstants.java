@@ -1836,6 +1836,9 @@ public final class APIConstants {
     public static final String MOCK_DATASET = "mockDataset";
     public static final String MOCK_MODIFIED_SCRIPT = "modified_script";
     public static final String MOCK_CONFIG = "config";
+    public static final String MOCK_GENERATE_INSTRUCTIONS = "instructions";
+    public static final String MOCK_MODIFY_SCRIPT = "script";
+    public static final String MOCK_IS_USE_PREVIOUS_SCRIPTS = "isUsePreviousScripts";
     public static final String X_WSO2_MOCK_DATASET = "x-wso2-mock-dataset";
 
     public static final String IMPLEMENTATION_STATUS = "implementation_status";
