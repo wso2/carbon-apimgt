@@ -3391,11 +3391,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             if (APIConstants.APITransportType.GRAPHQL.name().equalsIgnoreCase(apiType)) {
                 String graphQLSchema = getGraphqlSchemaDefinition(apiId, organization);
                 payload.put(APIConstants.GRAPHQL_SCHEMA, graphQLSchema);
-            } else if (APIConstants.APITransportType.HTTP.name().equalsIgnoreCase(apiType)) {
+            } else {
                 JsonNode openAPIDefinitionJsonNode = objectMapper.readTree(getOpenAPIDefinition(apiId, organization));
                 payload.set(APIConstants.OPEN_API, openAPIDefinitionJsonNode);
-            } else {
-                throw new APIManagementException("Unsupported API type for API Chat: " + apiType);
             }
             ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration().getApiChatConfigurationDto();
