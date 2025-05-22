@@ -3509,28 +3509,15 @@ public final class APIUtil {
 
         Map<String, GatewayAgentConfiguration> externalGatewayConnectorConfigurationMap =
                 ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
+
+        // Process OOTB supported external gateway types first to ensure correct order in publisher UI
+        if (externalGatewayConnectorConfigurationMap.containsKey("AWS")) {
+            processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, externalGatewayConnectorConfigurationMap.get("AWS"));
+            externalGatewayConnectorConfigurationMap.remove("AWS");
+        }
+
         externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
-            GatewayPortalConfiguration config = null;
-            try {
-                config = gatewayConfiguration.getGatewayFeatureCatalog();
-            } catch (APIManagementException e) {
-                throw new RuntimeException(e);
-            }
-
-            if (config != null) {
-
-                LinkedTreeMap<String, Object> supportedFeaturesMap = new Gson().fromJson(
-                        (JsonObject)config.getSupportedFeatures(), LinkedTreeMap.class);
-                gatewayConfigsMap.put(config.getGatewayType(), supportedFeaturesMap);
-
-                List<String> types = config.getSupportedAPITypes();
-                for (int i = 0; i < types.size(); i++) {
-                    String apiType = types.get(i);
-                    if (apiData.containsKey(apiType)) {
-                        apiData.get(apiType).add(config.getGatewayType());
-                    }
-                }
-            }
+            processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, gatewayConfiguration);
         });
 
         GatewayFeatureCatalog gatewayFeatureCatalog = new GatewayFeatureCatalog();
@@ -3538,6 +3525,32 @@ public final class APIUtil {
         gatewayFeatureCatalog.setGatewayFeatures(gatewayConfigsMap);
 
         return gatewayFeatureCatalog;
+    }
+
+    private static void processExternalGatewayFeatureCatalogs(Map<String, Object> gatewayConfigsMap,
+        Map<String, List<String>> apiData, GatewayAgentConfiguration gatewayConfiguration) {
+
+        GatewayPortalConfiguration config = null;
+        try {
+            config = gatewayConfiguration.getGatewayFeatureCatalog();
+        } catch (APIManagementException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (config != null) {
+
+            LinkedTreeMap<String, Object> supportedFeaturesMap = new Gson().fromJson(
+                    (JsonObject)config.getSupportedFeatures(), LinkedTreeMap.class);
+            gatewayConfigsMap.put(config.getGatewayType(), supportedFeaturesMap);
+
+            List<String> types = config.getSupportedAPITypes();
+            for (int i = 0; i < types.size(); i++) {
+                String apiType = types.get(i);
+                if (apiData.containsKey(apiType)) {
+                    apiData.get(apiType).add(config.getGatewayType());
+                }
+            }
+        }
     }
 
     /**
