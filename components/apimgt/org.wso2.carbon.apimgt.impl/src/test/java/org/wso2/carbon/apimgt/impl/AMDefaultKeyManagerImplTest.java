@@ -320,7 +320,7 @@ public class AMDefaultKeyManagerImplTest {
 
         OAuthApplicationInfo appInfo = Whitebox.invokeMethod(keyManager, "buildDTOFromClientInfo",
                 clientInfo, oauthApplication);
-        Map<String, Object> additionalProps = new HashMap<>();
+        Map<String, Object> additionalProps;
         Object additionalPropsObj = appInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
         Assert.assertTrue(additionalPropsObj instanceof Map);
 
@@ -354,7 +354,7 @@ public class AMDefaultKeyManagerImplTest {
 
         OAuthApplicationInfo appInfo = Whitebox.invokeMethod(keyManager, "buildDTOFromClientInfo",
                 clientInfo, oauthApplication);
-        Map<String, Object> additionalProps = new HashMap<>();
+        Map<String, Object> additionalProps;
         Object additionalPropsObj = appInfo.getParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES);
         Assert.assertTrue(additionalPropsObj instanceof Map);
 

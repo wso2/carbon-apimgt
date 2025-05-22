@@ -736,12 +736,13 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     /**
      * This method is used to sanitize the expiry time values.
      * If the value is -1, it will be set to Integer.MAX_VALUE - 1L
+     * If the input value is null, the method will return null.
      *
      * @param expTimeValue Expiry time value
      * @return Sanitized expiry time value
      */
     private Long sanitizeExpiryTime(Long expTimeValue) {
-        if (expTimeValue != null && expTimeValue == -1L) {
+        if (Long.valueOf(-1L).equals(expTimeValue)) {
             return Integer.MAX_VALUE - 1L;
         }
         return expTimeValue;
