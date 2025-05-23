@@ -44,11 +44,7 @@ import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Arrays;
+import java.util.*;
 
 import javax.ws.rs.core.Response;
 
@@ -63,9 +59,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         APIConsumer apiConsumer = null;
         try {
             apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(owner);
-
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-
             String[] newUserOrg = getUserOrg(owner, organization);
 
             Application application = apiConsumer.getApplicationByUUID(applicationId);
@@ -219,9 +213,9 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     private boolean isSameOrganization(String[] oldUserOrg, String[] newUserOrg) {
-
+        Set<String> newUserOrgSet = new HashSet<>(Arrays.asList(newUserOrg));
         return Arrays.stream(oldUserOrg)
-                .anyMatch(org->Arrays.asList(newUserOrg).contains(org));
+                .anyMatch(newUserOrgSet::contains);
     }
 
     private String[] getUserOrg(String user, String tenantDomain) throws APIManagementException {
