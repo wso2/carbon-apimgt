@@ -98,4 +98,11 @@ public class SQLConstants {
     public static final String GET_DOCUMENTATION_FILE_SQL =
             "SELECT artifact FROM AM_ARTIFACT_DATA " +
                     "WHERE UUID = ? ";
+    public static final String DELETE_DOCUMENTATION_SQL =
+            "DELETE FROM AM_ARTIFACT_DATA " +
+                    "WHERE type = 'DOCUMENTATION' " +
+                    "AND UUID = ? ";
+
+
+
 }

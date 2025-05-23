@@ -514,6 +514,29 @@ public class PersistenceDAO {
         return content;
     }
 
+    public void deleteDocumentation(String docId) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+
+        String query = SQLConstants.DELETE_DOCUMENTATION_SQL;
+
+        try {
+            connection = PersistanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, docId);
+
+            prepStmt.execute();
+
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while deleting the API documentation from the database", e);
+        } finally {
+            PersistanceDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
     private void handleException(String msg, Throwable t) throws APIManagementException {
 
         log.error(msg, t);

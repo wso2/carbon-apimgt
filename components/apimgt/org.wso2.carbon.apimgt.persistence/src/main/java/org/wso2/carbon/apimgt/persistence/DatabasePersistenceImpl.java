@@ -416,6 +416,11 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public void deleteDocumentation(Organization org, String apiId, String docId) throws DocumentationPersistenceException {
+        try {
+            persistenceDAO.deleteDocumentation(docId);
+        } catch (APIManagementException e) {
+            throw new DocumentationPersistenceException("Error while deleting documentation", e);
+        }
 
     }
 
