@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -155,6 +156,8 @@ public class JWTGenerator extends AbstractJWTGenerator {
 
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        ExtendedJWTConfigurationDto jwtConfigurationDto = apiManagerConfiguration.getJwtConfigurationDto();
+        boolean isBindFederatedUserClaims = jwtConfigurationDto.isBindFederatedUserClaims();
         if (apiManagerConfiguration.isJWTClaimCacheEnabled()) {
             String cacheKey = username.concat("_").concat(String.valueOf(tenantId));
             Object claims = CacheProvider.getJWTClaimCache().get(cacheKey);
@@ -168,7 +171,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
                         return (Map<String, String>) claims;
                     }
                     Map<String, String> claimsFromKeyManager = getClaimsFromKeyManager(username, accessToken,
-                            tenantId, dialectURI, keyManager);
+                            tenantId, dialectURI, keyManager, isBindFederatedUserClaims);
                     if (claimsFromKeyManager != null) {
                         CacheProvider.getJWTClaimCache().put(cacheKey, claimsFromKeyManager);
                         return claimsFromKeyManager;
@@ -177,14 +180,15 @@ public class JWTGenerator extends AbstractJWTGenerator {
             }
         } else {
             Map<String, String> tempClaims = getClaimsFromKeyManager(username, accessToken, tenantId, dialectURI,
-                    keyManager);
+                    keyManager, isBindFederatedUserClaims);
             if (tempClaims != null) return tempClaims;
         }
         return new HashMap<>();
     }
 
     private Map<String, String> getClaimsFromKeyManager(String username, String accessToken, int tenantId,
-                                                               String dialectURI, String keyManager) throws APIManagementException {
+                                                        String dialectURI, String keyManager,
+                                                        boolean isBindFederatedUserClaims) throws APIManagementException {
 
         Map<String, Object> properties = new HashMap<>();
         if (accessToken != null) {
@@ -192,6 +196,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
         }
         if (!StringUtils.isEmpty(dialectURI)) {
             properties.put(APIConstants.KeyManager.CLAIM_DIALECT, dialectURI);
+            properties.put(APIConstants.KeyManager.BINDING_FEDERATED_USER_CLAIMS, isBindFederatedUserClaims);
             KeyManager keymanager = KeyManagerHolder
                     .getKeyManagerInstance(APIUtil.getTenantDomainFromTenantId(tenantId), keyManager);
             if (keymanager != null) {
