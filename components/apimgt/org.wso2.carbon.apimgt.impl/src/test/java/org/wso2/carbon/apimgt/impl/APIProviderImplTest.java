@@ -545,6 +545,7 @@ public class APIProviderImplTest {
         PowerMockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userRealm);
         PowerMockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
         PowerMockito.when(userStoreManager.isExistingUser("admin")).thenReturn(true);
+        PowerMockito.when(MultitenantUtils.getTenantAwareUsername("admin")).thenReturn("admin");
 
         SortedMap<String, String> claimValues = new TreeMap<String, String>();
         claimValues.put("claim1", "http://wso2.org/claim1");

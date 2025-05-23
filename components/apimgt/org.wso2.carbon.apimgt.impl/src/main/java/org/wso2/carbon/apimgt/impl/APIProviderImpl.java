@@ -1745,7 +1745,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             tenantId = getTenantId(tenantDomain);
             UserStoreManager userStoreManager = ServiceReferenceHolder.getInstance().getRealmService().
                     getTenantUserRealm(tenantId).getUserStoreManager();
-            if (userStoreManager.isExistingUser(subscriber)) {
+            if (userStoreManager.isExistingUser(MultitenantUtils.getTenantAwareUsername(subscriber))) {
                 subscriberClaims = APIUtil.getClaims(subscriber, tenantId, ClaimsRetriever.DEFAULT_DIALECT_URI);
                 APIManagerConfiguration configuration = getAPIManagerConfiguration();
                 configuredClaims = configuration.getFirstProperty(APIConstants.API_PUBLISHER_SUBSCRIBER_CLAIMS);
