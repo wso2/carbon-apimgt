@@ -562,6 +562,7 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_TOKEN_ENDPOINT = "TokenEndpoint";
         public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
+        public static final String DESIGN_ASSISTANT_REGENERATE_SPEC_RESOURCE = "RegenerateSpecResource";
 
         private AI() {
 

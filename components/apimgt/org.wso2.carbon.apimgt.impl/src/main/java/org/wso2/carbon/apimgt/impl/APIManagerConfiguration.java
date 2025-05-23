@@ -2795,6 +2795,11 @@ public class APIManagerConfiguration {
             if (designAssistantGenApiPayloadResource != null) {
                 designAssistantConfigurationDto.setGenApiPayloadResource(designAssistantGenApiPayloadResource.getText());
             }
+            OMElement designAssistantRegenerateSpecResource =
+                    resources.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_REGENERATE_SPEC_RESOURCE));
+            if (designAssistantRegenerateSpecResource != null) {
+                designAssistantConfigurationDto.setRegenerateSpecResource(designAssistantRegenerateSpecResource.getText());
+            }
         }
     }
 

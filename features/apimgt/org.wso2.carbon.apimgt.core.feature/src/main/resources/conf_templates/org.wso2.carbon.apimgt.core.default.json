@@ -59,6 +59,7 @@
   "apim.ai.api_chat_execute_resource": "/ai/api-chat/execute",
   "apim.ai.design_assistant_chat_resource": "/ai/api-design-assistant/chat",
   "apim.ai.design_assistant_gen_api_payload_resource": "/ai/api-design-assistant/generate-api-payload",
+  "apim.ai.design_assistant_regenerate_spec_resource": "/ai/api-design-assistant/regenerate-spec",
   "apim.api_quota_limit.enable": false,
   "apim.http_client.max_total": "100",
   "apim.http_client.default_max_per_route": "50",
