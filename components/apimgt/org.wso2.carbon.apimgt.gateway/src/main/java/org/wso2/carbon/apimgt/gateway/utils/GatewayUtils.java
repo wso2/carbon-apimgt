@@ -1618,6 +1618,10 @@ public class GatewayUtils {
         return DataHolder.getInstance().isAllGatewayPoliciesDeployed();
     }
 
+    public static boolean isTenantsProvisioned() {
+        return DataHolder.getInstance().isTenantsProvisioned();
+    }
+
     public static List<String> getKeyManagers(org.apache.synapse.MessageContext messageContext) {
 
         API api = getAPI(messageContext);
@@ -1845,5 +1849,15 @@ public class GatewayUtils {
             throw new IllegalArgumentException("Endpoint model cannot be null or empty");
         }
         return endpoint.getEndpointId() + "_" + endpoint.getModel();
+    }
+    public static boolean isTenantLoadingEnable(){
+        APIManagerConfiguration apiManagerConfiguration = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration();
+        if (apiManagerConfiguration != null){
+            GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = apiManagerConfiguration.getGatewayArtifactSynchronizerProperties();
+            if (gatewayArtifactSynchronizerProperties !=null){
+                return gatewayArtifactSynchronizerProperties.isTenantLoading();
+            }
+        }
+        return false;
     }
 }

@@ -22,6 +22,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.GlobalPolicyEvent;
@@ -47,6 +48,7 @@ import org.wso2.carbon.event.processor.core.exception.ExecutionPlanConfiguration
 import org.wso2.carbon.event.processor.core.exception.ExecutionPlanDependencyValidationException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +68,9 @@ public class PolicyUtil {
      * @param policyEvent policy event object which was triggered
      */
     public static void deployPolicy(Policy policy, PolicyEvent policyEvent) {
-
+        if (!isTenantAvailable(policy.getTenantDomain())) {
+            return;
+        }
         EventProcessorService eventProcessorService =
                 ServiceReferenceHolder.getInstance().getEventProcessorService();
         ThrottlePolicyTemplateBuilder policyTemplateBuilder = new ThrottlePolicyTemplateBuilder();
@@ -317,5 +321,26 @@ public class PolicyUtil {
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
+    }
+
+    public static boolean isTenantAvailable(String tenantDomain) {
+        APIManagerConfiguration apimConfiguration = ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+        if (apimConfiguration != null && apimConfiguration.getThrottleProperties() != null
+                && apimConfiguration.getThrottleProperties().getPolicyDeployer() != null) {
+            ThrottleProperties throttleProperties = apimConfiguration.getThrottleProperties();
+            ThrottleProperties.PolicyDeployer policyDeployer = throttleProperties.getPolicyDeployer();
+            if (policyDeployer.isTenantLoading()) {
+                if (Arrays.asList(policyDeployer.getTenants()).contains("*")) {
+                    return true;
+                }
+                for (String tenant : policyDeployer.getTenants()) {
+                    if (tenantDomain.matches(tenant)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+        return true;
     }
 }
