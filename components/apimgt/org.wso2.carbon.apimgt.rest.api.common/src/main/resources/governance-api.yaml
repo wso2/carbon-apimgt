@@ -779,6 +779,54 @@ paths:
       security:
         - OAuth2Security:
             - apim:gov_result_read
+  /artifact-compliance/api/rule-violation-results:
+    post:
+      summary: Retrieve rule violation results for a specific API
+      description: Retrieves the rule violation results after checking if the API complies with governance rulesets.
+      operationId: getRuleViolationResultsByAPI
+      tags:
+        - Artifact Compliance
+      requestBody:
+        required: true
+        description: Input for API compliance with governance rulesets.
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ComplianceEvalInput'
+      responses:
+        "200":
+          description: Successful response with governance rule violation results for specified API.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RulesetValidationResult'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - OAuth2Security:
+            - apim:gov_result_read
   /policy-adherence:
     get:
       summary: Retrieve adherence status for all policies
@@ -1612,6 +1660,40 @@ components:
           type: string
           description: Owner of the artifact.
           example: "admin"
+    ComplianceEvalInput:
+      type: object
+      properties:
+        artifactType:
+          type: string
+          description: The type of artifact that the ruleset validates.
+          enum:
+            - REST_API
+            - ASYNC_API
+          example: REST_API
+        governableStates:
+          type: array
+          description: List of states at which the governance policy should be enforced.
+          items:
+            type: string
+            description: The state at which an governance policy should be enforced.
+            enum:
+              - API_CREATE
+              - API_UPDATE
+              - API_DEPLOY
+              - API_PUBLISH
+            example: "API_DEPLOY"
+            x-enum-varnames:
+              - API_CREATE
+              - API_UPDATE
+              - API_DEPLOY
+              - API_PUBLISH
+        apiSchema:
+          type: string
+          format: binary
+          description: ZIP or TXT file containing the API definition to validate
+        label:
+          type: string
+          example: Finance
   securitySchemes:
     OAuth2Security:
       type: oauth2

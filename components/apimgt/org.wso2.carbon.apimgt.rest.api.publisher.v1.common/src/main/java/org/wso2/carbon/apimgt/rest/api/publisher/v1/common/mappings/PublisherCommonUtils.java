@@ -3584,33 +3584,20 @@ public class PublisherCommonUtils {
      * @param type                   API type
      * @param organization           Organization of the logged-in user
      * @param artifactProjectContent Content of the artifact project
-     * @return Map of compliance violations
+     * @return ArtifactComplianceInfo of compliance violations
      * @throws APIManagementException If an error occurs while checking governance compliance
      */
-    public static Map<String, String> checkGovernanceComplianceGenAI(APIMGovernableState state,
-                                                                    ExtendedArtifactType type, String organization,
-                                                                    Map<RuleType,
-                    String> artifactProjectContent) throws APIManagementException {
-        Map<String, String> responseMap = new HashMap<>(2);
-
+    public static ArtifactComplianceInfo checkGovernanceComplianceGenAI(APIMGovernableState state,
+                                                                     ExtendedArtifactType type, String organization,
+                                                                     Map<RuleType, String> artifactProjectContent) throws APIManagementException {
         try {
-//            if (apimGovernanceService.isPoliciesWithBlockingActionExist(type, state, organization)) {
-//                if (log.isDebugEnabled()) {
-//                    log.debug("Blocking policies exist for the API. Evaluating compliance synchronously.");
-//                }
-                ArtifactComplianceInfo artifactComplianceInfo = apimGovernanceService.evaluateComplianceGenAI(
-                        type, state, artifactProjectContent, organization);
-                if (artifactComplianceInfo.isBlockingNecessary()) {
-                    responseMap.put(GOVERNANCE_COMPLIANCE_KEY, "false");
-                    responseMap.put(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE,
-                            buildBadRequestResponse(artifactComplianceInfo));
-                    return responseMap;
-//                }
-            }
+            return apimGovernanceService.evaluateComplianceGenAI(
+                    type, state, artifactProjectContent, organization);
+
         } catch (APIMGovernanceException e) {
             log.error("Error occurred while executing governance compliance validation for API " , e);
+            return new ArtifactComplianceInfo(); // Return an empty object to prevent downstream NullPointerExceptions
         }
-        return responseMap;
     }
 
     /**
