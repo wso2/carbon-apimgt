@@ -133,17 +133,19 @@ public abstract class AbstractKeyValidationHandler implements KeyValidationHandl
     @Override
     public boolean generateConsumerToken(TokenValidationContext validationContext) throws APIKeyMgtException {
 
-
+        String jwt = null;
         try {
-            String jwt = getCachedJWTToken(validationContext);
-            validationContext.getValidationInfoDTO().setEndUserToken(jwt);
-            return true;
-
+            jwt = getCachedJWTToken(validationContext);
         } catch (APIManagementException e) {
-            log.error("Error occurred while generating JWT. ", e);
+            if (!(ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                    .getJwtConfigurationDto().isContinueOnClaimRetrievalFailure())) {
+                throw new APIKeyMgtException(APIConstants.JWT_GENERATION_ERROR, e);
+            } else {
+                log.error("Error occurred while generating JWT. ", e);
+            }
         }
-
-        return false;
+        validationContext.getValidationInfoDTO().setEndUserToken(jwt);
+        return true;
     }
 
     private String getCachedJWTToken(TokenValidationContext validationContext) throws APIManagementException {

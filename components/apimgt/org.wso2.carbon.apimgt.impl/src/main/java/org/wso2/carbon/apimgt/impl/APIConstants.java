@@ -676,6 +676,7 @@ public final class APIConstants {
     public static final String VALUE = "value";
     public static final String GATEWAY_INTROSPECT_CACHE_NAME = "GatewayIntrospectCache";
     public static final String ENABLE_USER_CLAIMS_RETRIEVAL_FROM_KEY_MANAGER = "EnableUserClaimRetrievalFromKeyManager";
+    public static final String CONTINUE_ON_CLAIM_RETRIEVAL_FAILURE = "ContinueOnClaimRetrievalFailure";
 
     public static final String DELEM_COLON = ":";
     public static final String DELEM_COMMA = ",";
@@ -1927,6 +1928,8 @@ public final class APIConstants {
     public static final String MSG_JSON_PARSE_ERROR = "Unable to parse endpoint config JSON";
     public static final String MSG_TIER_RET_ERROR = "Error while retrieving API tiers from registry";
     public static final String MSG_MALFORMED_XML_ERROR = "Malformed XML found in the API tier policy resource";
+
+    public static final String JWT_GENERATION_ERROR = "Error occurred while generating JWT";
 
     //Doc search related constants
 
