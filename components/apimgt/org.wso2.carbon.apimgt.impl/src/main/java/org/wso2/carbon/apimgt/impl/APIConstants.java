@@ -563,6 +563,15 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
 
+        public static final String API_MOCK = "ApiMock";
+        public static final String API_MOCK_ENABLED = "Enabled";
+        public static final String API_MOCK_AUTH_TOKEN = "AuthToken";
+        public static final String API_MOCK_KEY = "Key";
+        public static final String API_MOCK_ENDPOINT = "Endpoint";
+        public static final String API_MOCK_TOKEN_ENDPOINT = "TokenEndpoint";
+        public static final String API_MOCK_GENERATE_RESOURCE = "GenerateResource";
+        public static final String API_MOCK_MODIFY_METHOD_RESOURCE = "ModifyMethodResource";
+
         private AI() {
 
         }
@@ -1821,6 +1830,16 @@ public final class APIConstants {
 
     // mock response generation
     public static final String MOCK_GEN_POLICY_LIST = "policyList";
+    public static final String MOCK_MODIFY = "modify";
+    public static final String MOCK_PATH = "path";
+    public static final String MOCK_METHOD = "method";
+    public static final String MOCK_DATASET = "mockDataset";
+    public static final String MOCK_MODIFIED_SCRIPT = "modified_script";
+    public static final String MOCK_CONFIG = "config";
+    public static final String MOCK_GENERATE_INSTRUCTIONS = "instructions";
+    public static final String MOCK_MODIFY_SCRIPT = "script";
+    public static final String MOCK_IS_USE_PREVIOUS_SCRIPTS = "isUsePreviousScripts";
+    public static final String X_WSO2_MOCK_DATASET = "x-wso2-mock-dataset";
 
     public static final String IMPLEMENTATION_STATUS = "implementation_status";
     public static final String ENDPOINT_TYPE_DEFAULT = "default";

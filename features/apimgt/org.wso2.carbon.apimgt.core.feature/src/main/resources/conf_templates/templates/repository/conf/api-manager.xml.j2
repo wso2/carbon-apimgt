@@ -464,6 +464,24 @@
         </Resources>
     </DesignAssistant>
 
+    <ApiMock>
+         <!-- Enable AI API Mocking for API Manager -->
+        <Enabled>{{apim.ai.enable}}</Enabled>
+
+        <AuthToken>{{apim.ai.token}}</AuthToken>
+
+        <Key>{{apim.ai.key}}</Key>
+
+        <Endpoint>{{apim.ai.endpoint}}</Endpoint>
+
+        <TokenEndpoint>{{apim.ai.token_endpoint}}</TokenEndpoint>
+
+        <Resources>
+            <GenerateResource>{{apim.ai.api_mock_generate_mock_scripts}}</GenerateResource>
+            <ModifyMethodResource>{{apim.ai.api_mock_modify_resource_script}}</ModifyMethodResource>
+        </Resources>
+    </ApiMock>
+
     <!--
         API key validator configuration used by API key manager (IS), API Developer Portal and API gateway.
         API gateway uses it to validate and authenticate users against the provided API keys.

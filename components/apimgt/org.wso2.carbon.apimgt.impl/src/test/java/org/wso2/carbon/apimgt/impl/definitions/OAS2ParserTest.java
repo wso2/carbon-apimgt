@@ -19,6 +19,8 @@
 
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.swagger.models.HttpMethod;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
@@ -31,6 +33,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
+import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -47,6 +50,8 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
+import java.util.Objects;
 
 import static org.mockito.Mockito.when;
 
@@ -199,11 +204,145 @@ public class OAS2ParserTest extends OASTestBase {
     }
 
     @Test
+    public void testGenerateExample() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2_uri_template.json";
+        String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath), "UTF-8");
+        Map<String, Object> responseMap = oas2Parser.generateExample(openApi);
+        Assert.assertNotNull(responseMap);
+        Assert.assertTrue(responseMap.containsKey(APIConstants.SWAGGER) && responseMap.containsKey(APIConstants.MOCK_GEN_POLICY_LIST));
+        String swaggerString = (String) responseMap.get(APIConstants.SWAGGER);
+        Assert.assertTrue(Objects.nonNull(swaggerString) && !swaggerString.isEmpty());
+        Assert.assertTrue(Objects.nonNull(responseMap.get(APIConstants.MOCK_GEN_POLICY_LIST)));
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList =
+                (List<APIResourceMediationPolicy>) responseMap.get(APIConstants.MOCK_GEN_POLICY_LIST);
+        Assert.assertFalse(apiResourceMediationPolicyList.isEmpty());
+        APIResourceMediationPolicy apiResourceMediationPolicy = apiResourceMediationPolicyList.get(4);
+        Assert.assertEquals("/abc", apiResourceMediationPolicy.getPath());
+        String content = apiResourceMediationPolicy.getContent();
+        Assert.assertTrue(content.contains("responses[200][\"application/json\"] = \"\";"));
+    }
+
+    @Test
+    public void getGeneratedExamples() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2_uri_template.json";
+        String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath),
+                StandardCharsets.UTF_8);
+        Map<String, Object> responseMap = oas2Parser.generateExample(openApi);
+        String swaggerString = (String) responseMap.get(APIConstants.SWAGGER);
+        Map<String, Object> responseMap1 = oas2Parser.getGeneratedExamples(swaggerString);
+        Assert.assertNotNull(responseMap1);
+        Assert.assertTrue(responseMap1.containsKey(APIConstants.MOCK_GEN_POLICY_LIST));
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = (List<APIResourceMediationPolicy>) responseMap1.get(
+                APIConstants.MOCK_GEN_POLICY_LIST);
+        Assert.assertFalse(apiResourceMediationPolicyList.isEmpty());
+        APIResourceMediationPolicy apiResourceMediationPolicy = apiResourceMediationPolicyList.get(4);
+        Assert.assertEquals("/abc", apiResourceMediationPolicy.getPath());
+        String content = apiResourceMediationPolicy.getContent();
+        Assert.assertTrue(content.contains("responses[200][\"application/json\"] = \"\";"));
+    }
+
+    @Test
+    public void testAddScriptsAndMockDataset() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas2" + File.separator + "oas2_uri_template.json";
+        String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath),
+                StandardCharsets.UTF_8);
+        Map<String, Object> responseMap = oas2Parser.generateExample(openApi);
+        String swaggerString = (String) responseMap.get(APIConstants.SWAGGER);
+
+        //Test for adding scripts and mockDataset Completely
+        //Sample LLM Response
+        String llmResponseFull = "{"
+                + "\"mockDataset\": \"{\\\"mockResponses\\\":["
+                + "{\\\"id\\\":200,\\\"mockResponse\\\":\\\"mockResponse200\\\"},"
+                + "{\\\"id\\\":404,\\\"mockResponse\\\":\\\"mockResponse404\\\"},"
+                + "{\\\"id\\\":\\\"4XX\\\",\\\"mockResponse\\\":\\\"mockResponse4XX\\\"}"
+                + "]}\","
+                + "\"paths\": {"
+                + "  \"/*\": {"
+                + "    \"get\": \"var a=mc.getProperty('AcceptHeader')||'application/json';\\n"
+                + "if(!a||a=='*/*')a='application/json';\\n"
+                + "mc.setProperty('CONTENT_TYPE',a);\\n"
+                + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[]}');\\n"
+                + "mc.setProperty('HTTP_SC','200');\\n"
+                + "mc.setPayloadJSON(db.mockResponses);\","
+                + "    \"post\": \"var a=mc.getProperty('AcceptHeader')||'application/json';\\n"
+                + "if(!a||a=='*/*')a='application/json';\\n"
+                + "mc.setProperty('CONTENT_TYPE',a);\\n"
+                + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[]}');\\n"
+                + "mc.setProperty('HTTP_SC','200');\\n"
+                + "mc.setPayloadJSON(db.mockResponses);\","
+                + "    \"put\": \"var a=mc.getProperty('AcceptHeader')||'application/json';\\n"
+                + "if(!a||a=='*/*')a='application/json';\\n"
+                + "mc.setProperty('CONTENT_TYPE',a);\\n"
+                + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[]}');\\n"
+                + "mc.setProperty('HTTP_SC','200');\\n"
+                + "mc.setPayloadJSON(db.mockResponses);\","
+                + "    \"delete\": \"var a=mc.getProperty('AcceptHeader')||'application/json';\\n"
+                + "if(!a||a=='*/*')a='application/json';\\n"
+                + "mc.setProperty('CONTENT_TYPE',a);\\n"
+                + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[]}');\\n"
+                + "mc.setProperty('HTTP_SC','200');\\n"
+                + "mc.setPayloadJSON(db.mockResponses);\""
+                + "  },"
+                + "  \"/abc\": {"
+                + "    \"get\": \"var a=mc.getProperty('AcceptHeader')||'application/json';\\n"
+                + "if(!a||a=='*/*')a='application/json';\\n"
+                + "mc.setProperty('CONTENT_TYPE',a);\\n"
+                + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[]}');\\n"
+                + "mc.setProperty('HTTP_SC','200');\\n"
+                + "mc.setPayloadJSON(db.mockResponses);\""
+                + "  }"
+                + "}"
+                + "}";
+        Map mockConfig1 = Map.of();
+        JsonObject llmResponseJson = JsonParser.parseString(llmResponseFull).getAsJsonObject();
+
+        Map<String, Object> responseMap1 = oas2Parser.addScriptsAndMockDataset(swaggerString, mockConfig1,
+                llmResponseJson);
+        Assert.assertNotNull(responseMap1);
+        Assert.assertTrue(responseMap1.containsKey(APIConstants.MOCK_GEN_POLICY_LIST));
+        Assert.assertTrue(responseMap1.containsKey(APIConstants.SWAGGER));
+        String swaggerString1 = (String) responseMap1.get(APIConstants.SWAGGER);
+        Assert.assertTrue(swaggerString1.contains(APIConstants.X_WSO2_MOCK_DATASET));
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = (List<APIResourceMediationPolicy>) responseMap1.get(
+                APIConstants.MOCK_GEN_POLICY_LIST);
+        Assert.assertFalse(apiResourceMediationPolicyList.isEmpty());
+        APIResourceMediationPolicy apiResourceMediationPolicy = apiResourceMediationPolicyList.get(4);
+        Assert.assertEquals("/abc", apiResourceMediationPolicy.getPath());
+        String content = apiResourceMediationPolicy.getContent();
+        Assert.assertTrue(content.contains("var db=JSON.parse(mc.getProperty('mockDataset')"));
+
+        //Test for modifying a method
+        String llmResponseModify = "{"
+                + "\"modified_script\": \"var accept=mc.getProperty('AcceptHeader')||'application/json';\\n"
+                + "if(!accept||accept=='*/*')accept='application/json';\\n"
+                + "mc.setProperty('CONTENT_TYPE',accept);\\n"
+                + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":"
+                + "[{\\\"id\\\":200,\\\"mockResponse\\\":\\\"mockResponse200ToTestIfModified\\\"}]}');\\n"
+                + "mc.setProperty('HTTP_SC','200');\\n"
+                + "mc.setPayloadJSON(db.mockResponses);\""
+                + "}";
+        Map mockConfig2 = Map.of("modify", Map.of("path", "/abc", "method", "get"));
+        JsonObject llmResponseJsonModify = JsonParser.parseString(llmResponseModify).getAsJsonObject();
+        Map<String, Object> responseMap2 = oas2Parser.addScriptsAndMockDataset(swaggerString, mockConfig2,
+                llmResponseJsonModify);
+        Assert.assertNotNull(responseMap2);
+        Assert.assertTrue(responseMap2.containsKey(APIConstants.MOCK_GEN_POLICY_LIST));
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList2 = (List<APIResourceMediationPolicy>) responseMap2.get(
+                APIConstants.MOCK_GEN_POLICY_LIST);
+        Assert.assertFalse(apiResourceMediationPolicyList2.isEmpty());
+        APIResourceMediationPolicy apiResourceMediationPolicy2 = apiResourceMediationPolicyList2.get(4);
+        Assert.assertEquals("/abc", apiResourceMediationPolicy2.getPath());
+        String content2 = apiResourceMediationPolicy2.getContent();
+        Assert.assertTrue(content2.contains("mockResponse200ToTestIfModified"));
+    }
+
+    @Test
     public void testSwaggerValidatorWithRelaxValidationEnabledAndWithoutInfoTag() throws Exception {
         System.setProperty(APIConstants.SWAGGER_RELAXED_VALIDATION, "true");
         String withoutInfoTagSwagger = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas2"
-                + File.separator + "oas2_without_info_swagger.json"),
+                        + File.separator + "oas2_without_info_swagger.json"),
                 "UTF-8");
         APIDefinitionValidationResponse response = OASParserUtil.validateAPIDefinition(withoutInfoTagSwagger, true);
         Assert.assertTrue(response.isValid());

@@ -219,6 +219,23 @@
 
     </DesignAssistant>
 
+        <!--
+        Configurations relevant to AI-assisted API mocking feature.
+        This enables the AI-assisted API mocking feature which leverages AI for generating mock scripts
+        within Publisher Portal.
+    -->
+    <APIMock>
+        <!-- Enable AI-assisted API mocking for API Manager -->
+        <Enabled>true</Enabled>
+        <AuthToken></AuthToken>
+        <Endpoint>http://localhost:9090</Endpoint>
+        <Resources>
+            <GenerateResource>/generate-mock-scripts</GenerateResource>
+            <ModifyMethodResource>/modify-resource-script</ModifyMethodResource>
+        </Resources>
+
+    </APIMock>
+
     <!--
         API key validator configuration used by API key manager (IS), API store and API gateway.
         API gateway uses it to validate and authenticate users against the provided API keys.

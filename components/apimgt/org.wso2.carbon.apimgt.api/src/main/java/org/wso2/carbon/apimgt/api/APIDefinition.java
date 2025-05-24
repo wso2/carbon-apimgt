@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.api;
 
+import com.google.gson.JsonObject;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -49,6 +50,23 @@ public abstract class APIDefinition {
      * @return
      */
     public abstract Map<String, Object> generateExample(String apiDefinition) throws APIManagementException;
+
+     /**
+     * This method gets generated Mock/Sample payloads for API prototyping
+     *
+     * @param apiDefinition
+     * @return
+     */
+    public abstract Map<String, Object> getGeneratedExamples(String apiDefinition) throws APIManagementException;
+
+    /**
+     * This method adds scripts and mockDataset to swagger
+     *
+     * @param apiDefinition
+     * @return
+     */
+    public abstract Map<String, Object> addScriptsAndMockDataset(String apiDefinition, Map<String, Object> mockConfig,
+        JsonObject scriptsToAdd) throws APIManagementException;
 
     /**
      * This method extracts the URI templates from the API definition

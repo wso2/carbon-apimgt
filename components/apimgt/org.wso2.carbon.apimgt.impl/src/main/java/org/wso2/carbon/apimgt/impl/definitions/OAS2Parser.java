@@ -186,7 +186,7 @@ public class OAS2Parser extends APIDefinition {
                         String schemaExample = getSchemaExample(model, definitions, new HashSet<String>());
                         genCode.append(getGeneratedResponsePayloads(responseEntry, schemaExample, "json", respCodeInitialized));
                         hasJsonPayload = true;
-                    } else if (op.getResponses().get(responseEntry).getExamples() == null
+                    } else if (op.getResponses().get(responseEntry).getExamples() == null 
                             && op.getResponses().get(responseEntry).getResponseSchema() == null) {
                         setDefaultGeneratedResponse(genCode, responseEntry);
                         hasJsonPayload = true;
@@ -202,6 +202,128 @@ public class OAS2Parser extends APIDefinition {
                 apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
                 //sets script to each resource in the swagger
                 op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
+            }
+            returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
+            returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
+        }
+        return returnMap;
+    }
+
+    /**
+     * This method returns the generated examples for the given API definition
+     *
+     * @param swaggerDef API definition
+     * @return Map of generated examples
+     * @throws APIManagementException if error occurred while parsing definition
+     */
+    @Override
+    public Map<String, Object> getGeneratedExamples(String swaggerDef) throws APIManagementException {
+        // create APIResourceMediationPolicy List = policyList
+        Swagger swagger = getSwagger(swaggerDef);
+        //return map
+        Map<String, Object> returnMap = new HashMap<>();
+        //List for APIResMedPolicyList
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
+        for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
+            String path = entry.getKey();
+            //operation map to get verb
+            Map<HttpMethod, Operation> operationMap = entry.getValue().getOperationMap();
+            List<Operation> operations = swagger.getPaths().get(path).getOperations();
+            for (int i = 0, operationsSize = operations.size(); i < operationsSize; i++) {
+                Operation op = operations.get(i);
+                //initializing apiResourceMediationPolicyObject
+                APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
+                //setting path for apiResourceMediationPolicyObject
+                apiResourceMediationPolicyObject.setPath(path);
+                Object[] operationsArray = operationMap.entrySet().toArray();
+                if (operationsArray.length > i) {
+                    Map.Entry<HttpMethod, Operation> operationEntry = (Map.Entry<HttpMethod, Operation>) operationsArray[i];
+                    apiResourceMediationPolicyObject.setVerb(String.valueOf(operationEntry.getKey()));
+                } else {
+                    throw new APIManagementException(
+                            "Cannot find the HTTP method for the API Resource Mediation Policy");
+                }
+                String finalScript = "";
+                if (op.getVendorExtensions() != null && op.getVendorExtensions()
+                        .get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT) != null) {
+                    finalScript = op.getVendorExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT).toString();
+                }
+                apiResourceMediationPolicyObject.setContent(finalScript);
+                apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
+                //sets script to each resource in the swagger
+                op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
+            }
+            returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
+            returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);
+        }
+        return returnMap;
+    }
+
+    /**
+     * This method adds scripts and mock DB to swagger
+     *
+     * @param swaggerDef   Swagger Definition
+     * @param mockConfig   Mock Configurations
+     * @param scriptsToAdd JsonObject with scripts and mockDataset
+     * @return Swagger Json
+     */
+    @Override
+    public Map<String, Object> addScriptsAndMockDataset(String swaggerDef, Map<String, Object> mockConfig,
+            JsonObject scriptsToAdd) throws APIManagementException {
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(swaggerDef);
+        if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {
+            log.debug("Errors found when parsing OAS definition");
+        }
+        Swagger swagger = parseAttemptForV2.getSwagger();
+        boolean isModify = mockConfig.get(APIConstants.MOCK_MODIFY) != null;
+        Map<String, Object> returnMap = new HashMap<>();
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = new ArrayList<>();
+        for (Map.Entry<String, Path> entry : swagger.getPaths().entrySet()) {
+            String path = entry.getKey();
+            // operation map to get verb
+            Map<HttpMethod, io.swagger.models.Operation> operationMap = entry.getValue().getOperationMap();
+            List<io.swagger.models.Operation> operations = swagger.getPaths().get(path).getOperations();
+            for (int i = 0, operationsSize = operations.size(); i < operationsSize; i++) {
+                io.swagger.models.Operation op = operations.get(i);
+                // initializing apiResourceMediationPolicyObject
+                APIResourceMediationPolicy apiResourceMediationPolicyObject = new APIResourceMediationPolicy();
+                // setting path for apiResourceMediationPolicyObject
+                apiResourceMediationPolicyObject.setPath(path);
+                Object[] operationsArray = operationMap.entrySet().toArray();
+                if (operationsArray.length > i) {
+                    Map.Entry<HttpMethod, Operation> operationEntry = (Map.Entry<HttpMethod, Operation>) operationsArray[i];
+                    apiResourceMediationPolicyObject.setVerb(String.valueOf(operationEntry.getKey()));
+                } else {
+                    throw new APIManagementException(
+                            "Cannot find the HTTP method for the API Resource Mediation Policy");
+                }
+                String finalScript;
+                if (isModify) {
+                    // if the given path and method
+                    Map<String, Object> modify = (Map<String, Object>) mockConfig.get(APIConstants.MOCK_MODIFY);
+                    if (path.equals(modify.get(APIConstants.MOCK_PATH)) && apiResourceMediationPolicyObject.getVerb()
+                            .toLowerCase().equals(modify.get(APIConstants.MOCK_METHOD))) {
+                        finalScript = scriptsToAdd.get(APIConstants.MOCK_MODIFIED_SCRIPT).getAsString();
+                    } else {
+                        finalScript = op.getVendorExtensions().get(APIConstants.SWAGGER_X_MEDIATION_SCRIPT).toString();
+                    }
+                } else {
+                    finalScript = scriptsToAdd.get(APIConstants.SWAGGER_PATHS).getAsJsonObject().get(path)
+                            .getAsJsonObject().get(apiResourceMediationPolicyObject.getVerb().toLowerCase()) != null ?
+                            scriptsToAdd.get(APIConstants.SWAGGER_PATHS).getAsJsonObject().get(path).getAsJsonObject()
+                                    .get(apiResourceMediationPolicyObject.getVerb().toLowerCase()).getAsString() :
+                            "";
+                }
+                apiResourceMediationPolicyObject.setContent(finalScript);
+                apiResourceMediationPolicyList.add(apiResourceMediationPolicyObject);
+                // sets script to each resource in the swagger
+                op.setVendorExtension(APIConstants.SWAGGER_X_MEDIATION_SCRIPT, finalScript);
+            }
+            // if mockDataset then Add it
+            if (!isModify && scriptsToAdd.has(APIConstants.MOCK_DATASET)) {
+                swagger.setVendorExtension(APIConstants.X_WSO2_MOCK_DATASET,
+                        scriptsToAdd.get(APIConstants.MOCK_DATASET).getAsString());
             }
             returnMap.put(APIConstants.SWAGGER, Json.pretty(swagger));
             returnMap.put(APIConstants.MOCK_GEN_POLICY_LIST, apiResourceMediationPolicyList);

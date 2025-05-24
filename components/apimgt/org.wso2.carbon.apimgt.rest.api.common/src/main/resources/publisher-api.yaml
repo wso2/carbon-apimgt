@@ -938,6 +938,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/apiId'
         - $ref: '#/components/parameters/If-None-Match'
+        - $ref: '#/components/parameters/updateSwagger'
       responses:
         200:
           description: |
@@ -982,6 +983,63 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/generate-mock-scripts"'
+
+  /apis/{apiId}/generate-ai-mock-scripts:
+    post:
+      tags:
+        - APIs
+      summary: Generate Mock Response Payloads
+      description: |
+        This operation can be used to generate mock responses using AI from the swagger definition of an API.
+      operationId: generateAIMockScripts
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/If-None-Match'
+        - $ref: '#/components/parameters/updateSwagger'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateAIMockScriptsRequest'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested swagger document of the API is returned with example responses
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modifed the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: string
+                example: ""
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v4/apis/7a2298c4-c905-403f-8fac-38c73301631f/generate-mock-scripts"'
 
   /apis/{apiId}/generated-mock-scripts:
     get:
@@ -12771,6 +12829,56 @@ components:
             $ref: '#/components/schemas/APIEndpoint'
         pagination:
           $ref: '#/components/schemas/Pagination'
+    GenerateAIMockScriptsRequest:
+      title: Generate Mock Payload
+      type: object
+      properties:
+        instructions:
+          type: string
+          description: |
+            General instructions for generating mock scripts.
+          example: "Make all the responses upper case."
+        script:
+          type: string
+          description: |
+            The script content. Optional and used only when sending custom scripts.
+          default: 'No Script.'
+          example: >
+            mc.setProperty('CONTENT_TYPE', 'application/json');
+            var response = [{ id: 1, name: 'Doggo' }];
+            mc.setPayloadJSON(response);
+            mc.setProperty('HTTP_SC', '200');
+        modify:
+          type: object
+          description: |
+            Config to generate mock scripts and DB properties.
+            Required when generating new mock scripts.
+          properties:
+            path:
+              type: string
+              description: The endpoint path (e.g., /api/user)
+              example: "/api/pets"
+            method:
+              type: string
+              description: HTTP method (e.g., GET, POST)
+              example: "GET"
+            isDefaultScript:
+              type: boolean
+              description: Indicates whether to use the default script
+              default: true
+              example: false
+          required:
+            - path
+            - method
+            - isDefaultScript
+          additionalProperties: true
+        usePreviousScripts:
+          type: boolean
+          description: |
+            Set to true to use previously saved scripts instead of generating new ones.
+          default: false
+          example: false
+      required: []
     LLMProviderResponse:
       title: LLMProviderResponse
       type: object
@@ -15274,6 +15382,14 @@ components:
         Validator for conditional requests; based on ETag.
       schema:
         type: string
+    updateSwagger:
+      name: updateSwagger
+      in: query
+      description: |
+        Whether to update the Swagger definition with the generated mock responses.
+      schema:
+        type: boolean
+        default: true
     scopeName:
       name: scopeId
       in: path

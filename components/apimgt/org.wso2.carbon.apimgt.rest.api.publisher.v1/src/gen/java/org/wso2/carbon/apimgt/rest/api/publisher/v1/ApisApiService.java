@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import java.io.File;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.FileInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GenerateAIMockScriptsRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLSchemaTypeListDTO;
@@ -103,8 +104,9 @@ public interface ApisApiService {
       public Response detachLabelsFromAPI(String apiId, RequestLabelListDTO requestLabelListDTO, MessageContext messageContext) throws APIManagementException;
       public Response editCommentOfAPI(String commentId, String apiId, PatchRequestBodyDTO patchRequestBodyDTO, MessageContext messageContext) throws APIManagementException;
       public Response exportAPI(String apiId, String name, String version, String revisionNumber, String providerName, String format, Boolean preserveStatus, Boolean latestRevision, String gatewayEnvironment, MessageContext messageContext) throws APIManagementException;
+      public Response generateAIMockScripts(String apiId, String ifNoneMatch, Boolean updateSwagger, GenerateAIMockScriptsRequestDTO generateAIMockScriptsRequestDTO, MessageContext messageContext) throws APIManagementException;
       public Response generateInternalAPIKey(String apiId, MessageContext messageContext) throws APIManagementException;
-      public Response generateMockScripts(String apiId, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response generateMockScripts(String apiId, String ifNoneMatch, Boolean updateSwagger, MessageContext messageContext) throws APIManagementException;
       public Response getAPI(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getAPIClientCertificateByAlias(String alias, String apiId, MessageContext messageContext) throws APIManagementException;
       public Response getAPIClientCertificateByKeyTypeAndAlias(String keyType, String alias, String apiId, MessageContext messageContext) throws APIManagementException;

@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import com.google.gson.JsonObject;
 import io.apicurio.datamodels.Library;
 import io.apicurio.datamodels.asyncapi.models.AaiChannelItem;
 import io.apicurio.datamodels.asyncapi.models.AaiDocument;
@@ -1585,6 +1586,17 @@ public class AsyncApiParser extends APIDefinition {
 
     @Override
     public Map<String, Object> generateExample(String apiDefinition) throws APIManagementException{
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> getGeneratedExamples(String apiDefinition) throws APIManagementException{
+        return null;
+    }
+
+    @Override
+    public Map<String, Object> addScriptsAndMockDataset(String apiDefinition, Map<String, Object> mockConfig,
+            JsonObject scriptsToAdd) throws APIManagementException {
         return null;
     }
 

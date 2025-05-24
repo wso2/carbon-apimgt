@@ -1,5 +1,7 @@
 package org.wso2.carbon.apimgt.impl.definitions;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -177,7 +179,8 @@ public class OAS3ParserTest extends OASTestBase {
         Assert.assertTrue(Objects.nonNull(swaggerString) && !swaggerString.isEmpty());
 
         Assert.assertTrue(Objects.nonNull(responseMap.get(APIConstants.MOCK_GEN_POLICY_LIST)));
-        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = (List<APIResourceMediationPolicy>) responseMap.get(APIConstants.MOCK_GEN_POLICY_LIST);
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList =
+                (List<APIResourceMediationPolicy>) responseMap.get(APIConstants.MOCK_GEN_POLICY_LIST);
         Assert.assertFalse(apiResourceMediationPolicyList.isEmpty());
 
         APIResourceMediationPolicy apiResourceMediationPolicy = apiResourceMediationPolicyList.get(0);
@@ -228,6 +231,136 @@ public class OAS3ParserTest extends OASTestBase {
             }
         }
     }
+
+    @Test
+    public void getGeneratedExamples() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas3" + File.separator + "oas3_mock_response.yaml";
+        String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath),
+                StandardCharsets.UTF_8);
+        Map<String, Object> responseMap = oas3Parser.generateExample(openApi);
+        String swaggerString = (String) responseMap.get(APIConstants.SWAGGER);
+        Map<String, Object> responseMap1 = oas3Parser.getGeneratedExamples(swaggerString);
+        Assert.assertNotNull(responseMap1);
+        Assert.assertTrue(responseMap1.containsKey(APIConstants.MOCK_GEN_POLICY_LIST));
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = (List<APIResourceMediationPolicy>) responseMap1.get(
+                APIConstants.MOCK_GEN_POLICY_LIST);
+        Assert.assertFalse(apiResourceMediationPolicyList.isEmpty());
+        APIResourceMediationPolicy apiResourceMediationPolicy = apiResourceMediationPolicyList.get(0);
+        Assert.assertEquals("/samplePath", apiResourceMediationPolicy.getPath());
+        String content = apiResourceMediationPolicy.getContent();
+        String expectedGeneratedCode200 = "if (!responses[200]) {\n"
+                + " responses [200] = [];\n"
+                + "}\n"
+                + "responses[200][\"application/json\"] = [ {\n"
+                + "  \"id\" : 200,\n"
+                + "  \"mockResponse\" : \"mockResponse200\"\n"
+                + "} ];";
+        String expectedGeneratedCode4XX = "if (!responses[%1$d]) {\n"
+                + " responses [%1$d] = [];\n"
+                + "}\n"
+                + "responses[%1$d][\"application/json\"] = [ {\n"
+                + "  \"id\" : \"4XX\",\n"
+                + "  \"mockResponse\" : \"mockResponse4XX\"\n"
+                + "} ];\n";
+        String expectedGeneratedCode404 = "if (!responses[404]) {\n"
+                + " responses [404] = [];\n"
+                + "}\n"
+                + "responses[404][\"application/json\"] = [ {\n"
+                + "  \"id\" : 404,\n"
+                + "  \"mockResponse\" : \"mockResponse404\"\n"
+                + "} ];";
+        String expectedGeneratedCode501= "responses[501] = [];\n"
+                + "responses[501][\"application/json\"] = {\n"
+                + "\"code\" : 501,\n"
+                + "\"description\" : \"Not Implemented\"}";
+
+        String expectedGeneratedCodeDefault = "responses[500][\"application/json\"] = \"\";\n"
+                + "responses[500][\"application/xml\"] = \"\";";
+
+        Assert.assertTrue(content.contains(expectedGeneratedCode200));
+        Assert.assertTrue(content.contains(expectedGeneratedCode404));
+        Assert.assertTrue(content.contains(expectedGeneratedCode501));
+        Assert.assertTrue(content.contains(expectedGeneratedCodeDefault));
+
+        for (int responseCode = 400; responseCode < 500; responseCode++) {
+            String expectedGeneratedCode = String.format(expectedGeneratedCode4XX, responseCode);
+            if (responseCode == 404) {
+                Assert.assertFalse(content.contains(expectedGeneratedCode));
+            } else {
+                Assert.assertTrue(content.contains(expectedGeneratedCode));
+            }
+        }
+    }
+
+    @Test
+    public void testaddScriptsAndMockDataset() throws Exception {
+        String relativePath = "definitions" + File.separator + "oas3" + File.separator + "oas3_mock_response.yaml";
+        String openApi = IOUtils.toString(getClass().getClassLoader().getResourceAsStream(relativePath),
+                StandardCharsets.UTF_8);
+        Map<String, Object> responseMap = oas3Parser.generateExample(openApi);
+        String swaggerString = (String) responseMap.get(APIConstants.SWAGGER);
+
+        //Test for adding scripts and mockDataset Completely
+        //Sample LLM Response
+        String llmResponseFull = "{"
+                + "\"mockDataset\": \"{\\\"mockResponses\\\":[{\\\"id\\\":200,\\\"mockResponse\\\":\\\"mockResponse200\\\"},"
+                + "{\\\"id\\\":404,\\\"mockResponse\\\":\\\"mockResponse404\\\"},{\\\"id\\\":\\\"4XX\\\","
+                + "\\\"mockResponse\\\":\\\"mockResponse4XX\\\"}]}\","
+                + "\"paths\": {"
+                + "  \"/samplePath\": {"
+                + "    \"get\": \"var accept=mc.getProperty('AcceptHeader')||'application/json';\\n"
+                + "if(!accept||accept=='*/*')accept='application/json';\\n"
+                + "mc.setProperty('CONTENT_TYPE',accept);\\n"
+                + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\"mockResponses\\\":[]}');\\n"
+                + "mc.setProperty('HTTP_SC','200');\\n"
+                + "mc.setPayloadJSON(db.mockResponses);\""
+                + "  }"
+                + "}"
+                + "}";
+        Map mockConfig1 = Map.of();
+        JsonObject llmResponseJson = JsonParser.parseString(llmResponseFull).getAsJsonObject();
+
+        Map<String, Object> responseMap1 = oas3Parser.addScriptsAndMockDataset(swaggerString, mockConfig1, llmResponseJson);
+        Assert.assertNotNull(responseMap1);
+        Assert.assertTrue(responseMap1.containsKey(APIConstants.MOCK_GEN_POLICY_LIST));
+        Assert.assertTrue(responseMap1.containsKey(APIConstants.SWAGGER));
+        String swaggerString1 = (String) responseMap1.get(APIConstants.SWAGGER);
+        Assert.assertTrue(swaggerString1.contains(APIConstants.X_WSO2_MOCK_DATASET));
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList = (List<APIResourceMediationPolicy>) responseMap1.get(
+                APIConstants.MOCK_GEN_POLICY_LIST);
+        Assert.assertFalse(apiResourceMediationPolicyList.isEmpty());
+        APIResourceMediationPolicy apiResourceMediationPolicy = apiResourceMediationPolicyList.get(0);
+        Assert.assertEquals("/samplePath", apiResourceMediationPolicy.getPath());
+        String content = apiResourceMediationPolicy.getContent();
+        Assert.assertTrue(content.contains("var db=JSON.parse(mc.getProperty('mockDataset')") && content.contains(
+                "mc.setProperty('HTTP_SC','200');"));
+
+        //Test for modifying a method
+        String llmResponseModify = "{"
+                + "\"modified_script\": \"var accept=mc.getProperty('AcceptHeader')||'application/json';\\n"
+                + "if(!accept||accept=='*/*')accept='application/json';\\n"
+                + "mc.setProperty('CONTENT_TYPE',accept);\\n"
+                + "var db=JSON.parse(mc.getProperty('mockDataset')||'{\\\\\\\"mockResponses\\\\\\\":[{\\\"id\\\":200,"
+                + "\\\"mockResponse\\\":\\\"mockResponse200ToTestIfModified\\\"}]}');\\n"
+                + "mc.setProperty('HTTP_SC','200');\\n"
+                + "mc.setPayloadJSON(db.mockResponses);\""
+                + "}";
+        Map mockConfig2 = Map.of("modify", Map.of("path", "/samplePath", "method", "get"));
+        JsonObject llmResponseJsonModify = JsonParser.parseString(llmResponseModify).getAsJsonObject();
+        Map<String, Object> responseMap2 = oas3Parser.addScriptsAndMockDataset(swaggerString, mockConfig2,
+                llmResponseJsonModify);
+        Assert.assertNotNull(responseMap2);
+        Assert.assertTrue(responseMap2.containsKey(APIConstants.MOCK_GEN_POLICY_LIST));
+        List<APIResourceMediationPolicy> apiResourceMediationPolicyList2 = (List<APIResourceMediationPolicy>) responseMap2.get(
+                APIConstants.MOCK_GEN_POLICY_LIST);
+        Assert.assertFalse(apiResourceMediationPolicyList2.isEmpty());
+        APIResourceMediationPolicy apiResourceMediationPolicy2 = apiResourceMediationPolicyList2.get(0);
+        Assert.assertEquals("/samplePath", apiResourceMediationPolicy2.getPath());
+        String content2 = apiResourceMediationPolicy2.getContent();
+        Assert.assertTrue(content2.contains("mockResponse200ToTestIfModified") && content2.contains(
+                "mc.setProperty('HTTP_SC','200');"));
+    }
+
     @Test
     public void testOpenAPIValidatorWithValidationLevel1() throws Exception {
         String faultySwagger = IOUtils.toString(

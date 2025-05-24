@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import io.swagger.models.Path;
 import io.swagger.models.RefModel;
 import io.swagger.models.RefPath;
@@ -95,9 +96,11 @@ import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.definitions.mixin.License31Mixin;
+import org.wso2.carbon.apimgt.impl.dto.ai.ApiMockConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIFileUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.registry.api.Registry;
@@ -152,7 +155,7 @@ public class OASParserUtil {
     private static final String ARRAY_DATA_TYPE = "array";
     private static final String OBJECT_DATA_TYPE = "object";
     private static final String OPENAPI_RESOURCE_KEY = "paths";
-    private static final String[] UNSUPPORTED_RESOURCE_BLOCKS = new String[]{"servers"};
+    private static final String[] UNSUPPORTED_RESOURCE_BLOCKS = new String[] {"servers"};
 
     public static class SwaggerUpdateContext {
         private final Paths paths = new Paths();
@@ -246,8 +249,53 @@ public class OASParserUtil {
         }
     }
 
+    /**
+     * This method returns the generated examples for the given API definition
+     *
+     * @param apiDefinition API definition
+     * @return Map of generated examples
+     * @throws APIManagementException if error occurred while parsing definition
+     */
+    public static Map<String, Object> getGeneratedExamples(String apiDefinition) throws APIManagementException {
+        SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
+        if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) {
+            return oas3Parser.getGeneratedExamples(apiDefinition);
+        } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) {
+            return oas2Parser.getGeneratedExamples(apiDefinition);
+        } else {
+            throw new APIManagementException("Cannot update destination swagger because it is not in OpenAPI format");
+        }
+    }
+
+    /**
+     * Uses an AI service to generate mock response examples and mediation scripts for the given API definition and mock
+     * configuration. Adds the generated scripts and mock DB entries to the OpenAPI/Swagger spec.
+     *
+     * @param apiDefinition The API definition (OpenAPI 3.0 or Swagger 2.0)
+     * @param mockConfig    Configuration options for mock generation
+     * @return A map with the updated spec and generated examples
+     * @throws APIManagementException If the spec is invalid or AI service fails
+     */
+    public static Map<String, Object> generateExamplesWithAI(String apiDefinition, Map<String, Object> mockConfig)
+            throws APIManagementException {
+        SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(apiDefinition);
+        JsonObject scriptsToAdd = invokeMockGenerationAIService(apiDefinition, mockConfig);
+        if (scriptsToAdd != null) {
+            if (destinationSwaggerVersion == SwaggerVersion.OPEN_API) { // oas3
+                return oas3Parser.addScriptsAndMockDataset(apiDefinition, mockConfig, scriptsToAdd);
+            } else if (destinationSwaggerVersion == SwaggerVersion.SWAGGER) { // oas2
+                return oas2Parser.addScriptsAndMockDataset(apiDefinition, mockConfig, scriptsToAdd);
+            } else {
+                throw new APIManagementException(
+                        "Cannot update destination swagger because it is not in OpenAPI format");
+            }
+        } else {
+            throw new APIManagementException("Error encountered while executing AI Mock generation service.");
+        }
+    }
+
     public static String getOASDefinitionWithTierContentAwareProperty(String apiDefinition,
-                                                                      List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException {
+            List<String> contentAwareTiersList, String apiLevelTier) throws APIManagementException {
         if (contentAwareTiersList == null || contentAwareTiersList.isEmpty()) {
             // no modifications if the list is empty
             return apiDefinition;
@@ -266,7 +314,7 @@ public class OASParserUtil {
     }
 
     public static String updateAPIProductSwaggerOperations(Map<API, List<APIProductResource>> apiToProductResourceMapping,
-                                                           String destinationSwagger)
+            String destinationSwagger)
             throws APIManagementException {
         SwaggerVersion destinationSwaggerVersion = getSwaggerVersion(destinationSwagger);
         OpenAPI destOpenAPI;
@@ -515,7 +563,7 @@ public class OASParserUtil {
     }
 
     private static void extractRelevantSourceData(Map<API, List<APIProductResource>> apiToProductResourceMapping,
-                                                  SwaggerUpdateContext context) throws APIManagementException {
+            SwaggerUpdateContext context) throws APIManagementException {
         // Extract Paths that exist in the destination swagger from the source swagger
         for (Map.Entry<API, List<APIProductResource>> mappingEntry : apiToProductResourceMapping.entrySet()) {
             String sourceSwagger = mappingEntry.getKey().getSwaggerDefinition();
@@ -566,7 +614,7 @@ public class OASParserUtil {
     }
 
     private static void readPathsAndScopes(PathItem srcPathItem, URITemplate uriTemplate,
-                                           final Set<Scope> allScopes, SwaggerUpdateContext context) {
+            final Set<Scope> allScopes, SwaggerUpdateContext context) {
         Map<PathItem.HttpMethod, Operation> srcOperations = srcPathItem.readOperationsMap();
 
         PathItem.HttpMethod httpMethod = PathItem.HttpMethod.valueOf(uriTemplate.getHTTPVerb().toUpperCase());
@@ -675,6 +723,45 @@ public class OASParserUtil {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Calls the configured AI service to generate mediation scripts for the provided API definition and mock
+     * configuration. Uses either a direct key or an auth token based on system config to authenticate the request.
+     *
+     * @param apiDefinition The API definition as a string
+     * @param mockConfig    The mock configuration parameters
+     * @return A JsonObject containing the generated scripts and mock responses
+     * @throws APIManagementException If the configuration is missing or the AI service call fails
+     */
+    private static JsonObject invokeMockGenerationAIService(String apiDefinition, Map<String, Object> mockConfig)
+            throws APIManagementException {
+        APIManagerConfiguration configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+        ApiMockConfigurationDTO configDto = null;
+        if (configuration == null) {
+            log.error("API Manager configuration is not initialized.");
+        } else {
+            configDto = configuration.getApiMockConfigurationDto();
+        }
+        if (configDto.isKeyProvided() || configDto.isAuthTokenProvided()) {
+            // make payload from mockConfig and swagger
+            JSONObject payload = new JSONObject();
+            payload.put(APIConstants.MOCK_CONFIG, mockConfig);
+            payload.put(APIConstants.SWAGGER, apiDefinition);
+            Map<String, Object> modify = mockConfig.get(APIConstants.MOCK_MODIFY) != null ?
+                    (Map<String, Object>) mockConfig.get(APIConstants.MOCK_MODIFY) :
+                    null;
+            String resource = modify != null ? configDto.getModifyResourceScriptResource() : configDto.getGenerateMockScriptsResource();
+            String tokenEndPoint = configDto.isKeyProvided() ? configDto.getTokenEndpoint() : null;
+            String response = APIUtil.invokeAIService(configDto.getEndpoint(), tokenEndPoint, configDto.getKey(),
+                    resource, payload.toString(), null);
+            JsonObject scriptsToAdd = JsonParser.parseString(response).getAsJsonObject();
+            return scriptsToAdd;
+        } else {
+            log.error("AI Key or Auth token not provided");
+            throw new APIManagementException("Error encountered while executing AI Mock generation service.");
         }
     }
 
@@ -1044,7 +1131,7 @@ public class OASParserUtil {
      * @return added ErrorItem object
      */
     public static ErrorItem addErrorToValidationResponse(APIDefinitionValidationResponse validationResponse,
-                                                         Exception e) {
+            Exception e) {
         validationResponse.setValid(false);
         ErrorItem errorItem = new ErrorItem();
         errorItem.setErrorCode(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorCode());
@@ -1065,7 +1152,7 @@ public class OASParserUtil {
      * @throws APIManagementException if error occurred while parsing definition
      */
     public static APIDefinitionValidationResponse validateAPIDefinition(String apiDefinition, String url ,
-                                                                        boolean returnJsonContent)
+            boolean returnJsonContent)
             throws APIManagementException {
         String apiDefinitionProcessed = apiDefinition;
         if (!apiDefinition.trim().startsWith("{")) {
@@ -1126,8 +1213,8 @@ public class OASParserUtil {
      * @param description           description of the OpenAPI Definition
      */
     public static void updateValidationResponseAsSuccess(APIDefinitionValidationResponse validationResponse,
-                                                         String originalAPIDefinition, String openAPIVersion, String title, String version, String context,
-                                                         String description, List<String> endpoints) {
+            String originalAPIDefinition, String openAPIVersion, String title, String version, String context,
+            String description, List<String> endpoints) {
         validationResponse.setValid(true);
         validationResponse.setContent(originalAPIDefinition);
         APIDefinitionValidationResponse.Info info = new APIDefinitionValidationResponse.Info();
@@ -1148,7 +1235,7 @@ public class OASParserUtil {
      * @return added ErrorItem object
      */
     public static ErrorItem addErrorToValidationResponse(APIDefinitionValidationResponse validationResponse,
-                                                         String errMessage) {
+            String errMessage) {
         ErrorItem errorItem = new ErrorItem();
         errorItem.setErrorCode(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorCode());
         errorItem.setMessage(ExceptionCodes.OPENAPI_PARSE_EXCEPTION.getErrorMessage());
@@ -1299,7 +1386,7 @@ public class OASParserUtil {
         } else if (apiIdentifier instanceof APIProductIdentifier) {
             resourcePath =
                     APIUtil.getAPIProductOpenAPIDefinitionFilePath(apiIdentifier.getName(), apiIdentifier.getVersion(),
-                            apiIdentifier.getProviderName());
+                    apiIdentifier.getProviderName());
         }
 
         JSONParser parser = new JSONParser();
@@ -1335,7 +1422,7 @@ public class OASParserUtil {
      * @return URL template after setting the scopes
      */
     public static URITemplate setScopesToTemplate(URITemplate template, List<String> resourceScopes,
-                                                  Set<Scope> apiScopes) throws APIManagementException {
+            Set<Scope> apiScopes) throws APIManagementException {
 
         for (String scopeName : resourceScopes) {
             if (StringUtils.isNotBlank(scopeName)) {
@@ -1874,7 +1961,7 @@ public class OASParserUtil {
     }
 
     public static void copyOperationVendorExtensions(Map<String, Object> existingExtensions,
-                                                     Map<String, Object> updatedVendorExtensions) {
+            Map<String, Object> updatedVendorExtensions) {
         if (existingExtensions.get(APIConstants.SWAGGER_X_AUTH_TYPE) != null) {
             updatedVendorExtensions.put(APIConstants.SWAGGER_X_AUTH_TYPE, existingExtensions
                     .get(APIConstants.SWAGGER_X_AUTH_TYPE));
@@ -2007,7 +2094,7 @@ public class OASParserUtil {
      * @param securitySchemeDefinition SecuritySchemeDefinition object which contains the security scheme.
      */
     public static void setScopesFromAPIToSecurityScheme(SwaggerData swaggerData,
-                                                        SecuritySchemeDefinition securitySchemeDefinition) {
+            SecuritySchemeDefinition securitySchemeDefinition) {
 
         Map<String, String> swaggerScopes = new LinkedHashMap<>();
         Map<String, String> scopeBindings = new LinkedHashMap<>();
@@ -2028,7 +2115,7 @@ public class OASParserUtil {
     }
 
     private static void populateScopesFromAPI(Set<Scope> apiScopes, Map<String, String> scopes,
-                                              Map<String, String> scopeBindings) {
+            Map<String, String> scopeBindings) {
 
         if (apiScopes != null && !apiScopes.isEmpty()) {
             apiScopes.forEach(scope -> {
@@ -2079,8 +2166,8 @@ public class OASParserUtil {
      * @param operationScopes     Operation specific scopes for the security requirement
      */
     public static void addOASOperationSecurityReqFromAPI(List<SecurityRequirement> operationSecurities,
-                                                         List<String> apiSecurities, String securityReqName,
-                                                         List<String> operationScopes) {
+            List<String> apiSecurities, String securityReqName,
+            List<String> operationScopes) {
 
         if (apiSecurities.contains(securityReqName)) {
             boolean isSecurityExists = operationSecurities.stream().anyMatch(
@@ -2106,7 +2193,7 @@ public class OASParserUtil {
      * @param operation       Existing operation
      */
     public static void addOASBasicAuthResourceScopesFromAPI(List<String> operationScopes, List<String> apiSecurities,
-                                                            Operation operation) {
+            Operation operation) {
 
         if (!operationScopes.isEmpty() && apiSecurities.contains(APIConstants.API_SECURITY_BASIC_AUTH)) {
             operation.addExtension(APIConstants.SWAGGER_X_BASIC_AUTH_RESOURCE_SCOPES, operationScopes);
@@ -2122,8 +2209,8 @@ public class OASParserUtil {
      * @param operationScopes     Operation specific scopes for the security requirement
      */
     public static void addSwaggerOperationSecurityReqFromAPI(List<Map<String, List<String>>> operationSecurities,
-                                                             List<String> apiSecurities, String securityReqName,
-                                                             List<String> operationScopes) {
+            List<String> apiSecurities, String securityReqName,
+            List<String> operationScopes) {
 
         if (apiSecurities.contains(securityReqName)) {
             // If security requirement is set for the API.
@@ -2152,8 +2239,8 @@ public class OASParserUtil {
      * @param operation       Existing operation
      */
     public static void addSwaggerBasicAuthResourceScopesFromAPI(List<String> operationScopes,
-                                                                List<String> apiSecurities,
-                                                                io.swagger.models.Operation operation) {
+            List<String> apiSecurities,
+            io.swagger.models.Operation operation) {
 
         if (!operationScopes.isEmpty() && apiSecurities.contains(APIConstants.API_SECURITY_BASIC_AUTH)) {
             operation.setVendorExtension(APIConstants.SWAGGER_X_BASIC_AUTH_RESOURCE_SCOPES, operationScopes);
@@ -2169,7 +2256,7 @@ public class OASParserUtil {
      * @return isSwaggerValid boolean
      */
     public static boolean isValidWithPathsWithTrailingSlashes(OpenAPI openAPI, Swagger swagger,
-                                                              APIDefinitionValidationResponse validationResponse) {
+            APIDefinitionValidationResponse validationResponse) {
         Map<String, ?> pathItems = null;
         if (openAPI != null) {
             pathItems = openAPI.getPaths();
@@ -2201,7 +2288,7 @@ public class OASParserUtil {
     }
 
     private static boolean validateOAS3Paths(PathItem pathItem, PathItem newPathItem, String newPath,
-                                             APIDefinitionValidationResponse validationResponse) {
+            APIDefinitionValidationResponse validationResponse) {
         if (pathItem.getGet() != null && newPathItem.getGet() != null) {
             addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.GET.name(), APIConstants.OPEN_API);
             return false;
@@ -2235,7 +2322,7 @@ public class OASParserUtil {
     }
 
     private static boolean validateOAS2Paths(Path pathItem, Path newPathItem, String newPath,
-                                             APIDefinitionValidationResponse validationResponse) {
+            APIDefinitionValidationResponse validationResponse) {
         if (pathItem.getGet() != null && newPathItem.getGet() != null) {
             addError(validationResponse, newPath, APIConstants.SupportedHTTPVerbs.GET.name(), APIConstants.SWAGGER);
             return false;
@@ -2268,7 +2355,7 @@ public class OASParserUtil {
     }
 
     private static void addError(APIDefinitionValidationResponse validationResponse, String path, String operation,
-                                 String definitionType) {
+            String definitionType) {
         OASParserUtil.addErrorToValidationResponse(validationResponse,
                 "Multiple " + operation + " operations with the same resource path " + path +
                         " found in the " + definitionType + " definition");

@@ -38,6 +38,7 @@ import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDT
 import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.AIAPIConfigurationsDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.dto.ai.ApiMockConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
@@ -129,6 +130,7 @@ public class APIManagerConfiguration {
     private static MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDTO();
     private static ApiChatConfigurationDTO apiChatConfigurationDto = new ApiChatConfigurationDTO();
     private static DesignAssistantConfigurationDTO designAssistantConfigurationDto = new DesignAssistantConfigurationDTO();
+    private static ApiMockConfigurationDTO apiMockConfigurationDto = new ApiMockConfigurationDTO();
     private static AIAPIConfigurationsDTO aiapiConfigurationsDTO = new AIAPIConfigurationsDTO();
     private static final APIMGovernanceConfigDTO apimGovConfigurationDto = new APIMGovernanceConfigDTO();
 
@@ -203,6 +205,11 @@ public class APIManagerConfiguration {
     public DesignAssistantConfigurationDTO getDesignAssistantConfigurationDto() {
 
         return designAssistantConfigurationDto;
+    }
+
+    public ApiMockConfigurationDTO getApiMockConfigurationDto() {
+
+        return apiMockConfigurationDto;
     }
 
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
@@ -690,6 +697,8 @@ public class APIManagerConfiguration {
                 setDesignAssistantConfiguration(element);
             } else if (APIConstants.AI.AI_CONFIGURATION.equals(localName)){
                 setAiConfiguration(element);
+            } else if (APIConstants.AI.API_MOCK.equals(localName)){
+                setApiMockConfiguration(element);
             } else if (APIConstants.TokenValidationConstants.TOKEN_VALIDATION_CONFIG.equals(localName)) {
                 setTokenValidation(element);
             } else if (APIConstants.ORG_BASED_ACCESS_CONTROL.equals(localName)) {
@@ -2794,6 +2803,55 @@ public class APIManagerConfiguration {
                     resources.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE));
             if (designAssistantGenApiPayloadResource != null) {
                 designAssistantConfigurationDto.setGenApiPayloadResource(designAssistantGenApiPayloadResource.getText());
+            }
+        }
+    }
+
+    public void setApiMockConfiguration(OMElement omElement) {
+        OMElement apiMockEnableElement = omElement.getFirstChildWithName(new QName(APIConstants.AI.API_MOCK_ENABLED));
+        if (apiMockEnableElement != null) {
+            apiMockConfigurationDto.setEnabled(Boolean.parseBoolean(apiMockEnableElement.getText()));
+        }
+        if (apiMockConfigurationDto.isEnabled()) {
+            OMElement apiMockEndpoint = omElement.getFirstChildWithName(new QName(APIConstants.AI.API_MOCK_ENDPOINT));
+            if (apiMockEndpoint != null) {
+                apiMockConfigurationDto.setEndpoint(apiMockEndpoint.getText());
+            }
+            OMElement apiMockTokenEndpoint = omElement.getFirstChildWithName(
+                    new QName(APIConstants.AI.API_MOCK_TOKEN_ENDPOINT));
+            if (apiMockTokenEndpoint != null) {
+                apiMockConfigurationDto.setTokenEndpoint(apiMockTokenEndpoint.getText());
+            }
+            OMElement apiMockKey = omElement.getFirstChildWithName(new QName(APIConstants.AI.API_MOCK_KEY));
+
+            if (apiMockKey != null) {
+                String Key = MiscellaneousUtil.resolve(apiMockKey, secretResolver);
+                apiMockConfigurationDto.setKey(Key);
+                if (!Key.isEmpty()) {
+                    apiMockConfigurationDto.setKeyProvided(true);
+                }
+            }
+            OMElement apiMockToken = omElement.getFirstChildWithName(new QName("APIConstants.AI.API_MOCK_AUTH_TOKEN"));
+            if (apiMockToken != null) {
+                String AccessToken = MiscellaneousUtil.resolve(apiMockToken, secretResolver);
+                apiMockConfigurationDto.setAccessToken(AccessToken);
+                if (!AccessToken.isEmpty()) {
+                    apiMockConfigurationDto.setAuthTokenProvided(true);
+                }
+            }
+            OMElement resources = omElement.getFirstChildWithName(new QName(APIConstants.AI.RESOURCES));
+
+            if (resources != null) {
+                OMElement generateMockScriptsResource = resources.getFirstChildWithName(
+                        new QName(APIConstants.AI.API_MOCK_GENERATE_RESOURCE));
+                if (generateMockScriptsResource != null) {
+                    apiMockConfigurationDto.setGenerateMockScriptsResource(generateMockScriptsResource.getText());
+                }
+                OMElement modifyResourceScriptResource = resources.getFirstChildWithName(
+                        new QName(APIConstants.AI.API_MOCK_MODIFY_METHOD_RESOURCE));
+                if (modifyResourceScriptResource != null) {
+                    apiMockConfigurationDto.setModifyResourceScriptResource(modifyResourceScriptResource.getText());
+                }
             }
         }
     }
