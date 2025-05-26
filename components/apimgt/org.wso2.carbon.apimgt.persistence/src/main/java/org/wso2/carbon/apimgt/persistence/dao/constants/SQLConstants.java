@@ -98,11 +98,19 @@ public class SQLConstants {
     public static final String GET_DOCUMENTATION_FILE_SQL =
             "SELECT artifact FROM AM_ARTIFACT_DATA " +
                     "WHERE UUID = ? ";
+
     public static final String DELETE_DOCUMENTATION_SQL =
             "DELETE FROM AM_ARTIFACT_DATA " +
                     "WHERE type = 'DOCUMENTATION' " +
                     "AND UUID = ? ";
 
+    public static final String SAVE_OAS_DEFINITION_SQL =
+            "UPDATE AM_ARTIFACT_DATA SET " +
+                    "METADATA = ? " +
+                    "WHERE API_UUID = ? " +
+                    "AND TYPE = 'API_DEFINITION'";
 
-
+    public static final String DELETE_API_SCHEMA_SQL =
+            "DELETE FROM AM_ARTIFACT_DATA " +
+                    "WHERE API_UUID = ? ";
 }

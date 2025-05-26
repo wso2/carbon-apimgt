@@ -514,6 +514,30 @@ public class PersistenceDAO {
         return content;
     }
 
+    public void saveOASDefinition (String apiId, String oasDefinition) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+
+        String query = SQLConstants.SAVE_OAS_DEFINITION_SQL;
+
+        try {
+            connection = PersistanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, oasDefinition);
+            prepStmt.setString(2, apiId);
+
+            prepStmt.execute();
+
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while saving the OAS definition to the database", e);
+        } finally {
+            PersistanceDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
     public void deleteDocumentation(String docId) throws APIManagementException {
         Connection connection = null;
         PreparedStatement prepStmt = null;
@@ -537,9 +561,33 @@ public class PersistenceDAO {
         }
     }
 
-    private void handleException(String msg, Throwable t) throws APIManagementException {
+    public void deleteAPISchema(String apiId, String name) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
 
+        String query = SQLConstants.DELETE_API_SCHEMA_SQL;
+
+        try {
+            connection = PersistanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, apiId);
+
+            prepStmt.execute();
+
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while deleting the API schema from the database", e);
+        } finally {
+            PersistanceDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
+    private void handleException(String msg, Throwable t) throws APIManagementException {
         log.error(msg, t);
         throw new APIManagementException(msg, t);
     }
+
+
 }

@@ -94,7 +94,9 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
         try {
             String apiSchema = persistenceDAO.getAPISchemaByUUID(apiId, tenantDomain);
+            String swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiId, tenantDomain);
             JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(apiSchema);
+            jsonObject.addProperty("swaggerDefinition", swaggerDefinition);
             if (apiSchema != null) {
                 API api = DatabasePersistenceUtil.jsonToApi(jsonObject);
                 publisherAPI = APIMapper.INSTANCE.toPublisherApi(api);
@@ -113,12 +115,16 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public void deleteAPI(Organization org, String apiId) throws APIPersistenceException {
-
+        try {
+            persistenceDAO.deleteAPISchema(apiId, org.getName());
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while deleting API", e);
+        }
     }
 
     @Override
     public void deleteAllAPIs(Organization org) throws APIPersistenceException {
-
+        throw new UnsupportedOperationException("This method is not supported on this instance");
     }
 
     @Override
@@ -268,7 +274,11 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public void saveOASDefinition(Organization org, String apiId, String apiDefinition) throws OASPersistenceException {
-        log.info("Saving OAS definition");
+        try {
+            persistenceDAO.saveOASDefinition(apiId, apiDefinition);
+        } catch (APIManagementException e) {
+            throw new OASPersistenceException("Error while saving OAS definition", e);
+        }
     }
 
     @Override
