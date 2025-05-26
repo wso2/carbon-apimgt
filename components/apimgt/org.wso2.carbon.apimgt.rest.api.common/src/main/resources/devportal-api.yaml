@@ -1758,6 +1758,58 @@ paths:
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -X DELETE "https://localhost:9443/api/am/devportal/v3/applications/896658a0-b4ee-4535-bbfa-806c894a4015"'
 
+  /applications/{applicationId}/generate-sdk/{language}:
+    post:
+      tags:
+        - SDK Generation
+      summary: Generate a single SDK for multiple APIs and optionally generate application code
+      description: |
+        Retrieve Swagger definitions for the provided API IDs and generate SDKs.
+        Optionally generate application code if use case is provided.
+      parameters:
+        - $ref: '#/components/parameters/applicationId'
+        - name: language
+          in: path
+          description: |
+            Programming language of the SDK that is required.
+
+            Languages supported by default are **Java**, **Javascript**, **Android** and **JMeter**.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: |
+          Object containing the list of API IDs for which Swagger definitions need to be retrieved.
+          Optionally, a use case description can be provided.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SDKGenerationRequest'
+      responses:
+        200:
+          description: |
+            OK.
+            SDK generated successfully.
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: byte
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:subscribe
+            - apim:app_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/896658a0-b4ee-4535-bbfa-806c894a4015/generate-sdk"'
+
   /applications/{applicationId}/generate-keys:
     post:
       tags:
@@ -4333,6 +4385,37 @@ components:
           type: boolean
           description: Flag to indicate the monetization status
           example: true
+    SDKGenerationRequest:
+      title: SDK Generation Request
+      type: object
+      properties:
+        apiIdsList:
+          $ref: '#/components/schemas/APIIdsList'
+        useCaseDescription:
+          type: string
+          description: |
+            An optional description of the use case for generating the SDK.
+          example: "This SDK will be used for integrating multiple APIs into a mobile application."
+    APIIdsList:
+      title: API IDs List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of API IDs returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/APIId'
+    APIId:
+      title: API ID
+      type: object
+      properties:
+        apiId:
+          type: string
+          example: faae5fcc-cbae-40c4-bf43-89931630d313
     ApplicationList:
       title: Application List
       type: object
