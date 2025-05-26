@@ -87,7 +87,7 @@ public interface APIMGovernanceService {
                                                   String organization) throws APIMGovernanceException;
 
     /**
-     * Evaluate compliance of the artifact synchronously
+     * Evaluate compliance of the API synchronously
      *
      * @param artifactType           Artifact type (ExtendedArtifactType.REST_API)
      * @param state                  State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)

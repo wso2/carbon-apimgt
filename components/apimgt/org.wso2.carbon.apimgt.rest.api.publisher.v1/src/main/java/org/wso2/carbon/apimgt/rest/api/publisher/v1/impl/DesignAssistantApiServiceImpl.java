@@ -193,11 +193,11 @@ public class DesignAssistantApiServiceImpl implements DesignAssistantApiService 
                 String response;
                 if (configDto.isKeyProvided()) {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
-                            configDto.getKey(), configDto.getChatResource(), payload.toString(), null);
+                            configDto.getKey(), configDto.getRegenerateSpecResource(), payload.toString(), null);
 
                 } else {
                     response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
-                            configDto.getAccessToken(), configDto.getChatResource(), payload.toString(), null);
+                            configDto.getAccessToken(), configDto.getRegenerateSpecResource(), payload.toString(), null);
 
                 }
 

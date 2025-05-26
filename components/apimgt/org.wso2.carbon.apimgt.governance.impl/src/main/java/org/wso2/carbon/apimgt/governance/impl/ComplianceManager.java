@@ -604,120 +604,27 @@ public class ComplianceManager {
      * @throws APIMGovernanceException If an error occurs while handling the API compliance evaluation
      */
 
-    /// / BEST  -----------------------------------------------------------------------------------------------
-
-//    public ArtifactComplianceInfo handleComplianceEvalSyncGenAI(ExtendedArtifactType artifactType,
-//                                                                List<String> govPolicies,
-//                                                                Map<RuleType, String> artifactProjectContent,
-//                                                                APIMGovernableState state, String organization)
-//            throws APIMGovernanceException {
-//
-//
-//        ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
-//                .getValidationEngineService().getValidationEngine();
-//
-//        ArtifactComplianceInfo artifactComplianceInfo = new ArtifactComplianceInfo();
-//
-//        // List to collect all rule violations
-//        List<RuleViolation> allRuleViolations = new ArrayList<>();
-//
-////        ExtendedArtifactType extendedArtifactTypeForArtifact = APIMGovernanceUtil.getExtendedArtifactTypeForArtifact
-////                (artifactType); // API --> REST_API, ASYNC_API, etc
-//
-//        for (String policyId : govPolicies) {
-//            APIMGovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
-//            List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId, organization);
-//
-////            AuditLogger.log("Sync Eval Request", "Starting governance evaluation for artifact %s in organization %s " +
-////                    "against policy %s", organization, policyId);
-//
-//            // Validate the artifact against each ruleset
-//            for (Ruleset ruleset : rulesets) {
-//                ExtendedArtifactType extendedArtifactType = ruleset.getArtifactType();
-//
-//                // Check if ruleset's artifact type matches with the artifact's type
-//                if (extendedArtifactType.equals(artifactType)) {
-//
-//                    // Get target file content from artifact project based on ruleType
-//                    RuleType ruleType = ruleset.getRuleType();
-//                    String contentToValidate = artifactProjectContent.get(ruleType);
-//
-//                    log.info(contentToValidate);
-//
-//                    if (contentToValidate == null) {
-//                        log.warn(ruleType + " content not found in artifact project for artifact " +
-//                                ". Skipping governance evaluation for ruleset " + ruleset.getId());
-//                        continue;
-//                    }
-//
-//                    // Send target content and ruleset for validation
-//                    List<RuleViolation> ruleViolations = validationEngine.validate(contentToValidate, ruleset);
-//                    allRuleViolations.addAll(ruleViolations); // Collecting violations
-//
-////                    AuditLogger.log("Sync Eval Request", "Successfully evaluated artifact %s in organization %s " +
-////                            "against ruleset %s", organization, ruleset.getId());
-//
-//                    Map<APIMGovernanceActionType, List<RuleViolation>> blockableAndNonBlockableViolations =
-//                            filterBlockableAndNonBlockableRuleViolationsGenAI(artifactType, policy, ruleViolations, state, organization);
-//
-//                    // Add the rule violations to the compliance info
-//                    artifactComplianceInfo.addBlockingViolations(blockableAndNonBlockableViolations
-//                            .get(APIMGovernanceActionType.BLOCK));
-//                    artifactComplianceInfo.addNonBlockingViolations(blockableAndNonBlockableViolations
-//                            .get(APIMGovernanceActionType.NOTIFY));
-//
-//                } else {
-//                    String logMessage = "Skipping governance evaluation for artifact " +
-//                            "in organization %s against ruleset %s as the artifact type does not match" + organization + ruleset.getId();
-//                    log.debug(logMessage);
-//                    AuditLogger.log("Sync Eval Request", logMessage);
-//                }
-//            }
-//        }
-//
-//        log.info(allRuleViolations);
-//
-//        if (!artifactComplianceInfo.getBlockingRuleViolations().isEmpty()) {
-//            artifactComplianceInfo.setBlockingNecessary(true);
-//        }
-//
-//        log.info(artifactComplianceInfo);
-//        return artifactComplianceInfo;
-//    }
-
-
-
     public ArtifactComplianceInfo handleComplianceEvalSyncGenAI(ExtendedArtifactType artifactType,
                                                                 List<String> govPolicies,
                                                                 Map<RuleType, String> artifactProjectContent,
                                                                 APIMGovernableState state, String organization)
             throws APIMGovernanceException {
 
-
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
 
         ArtifactComplianceInfo artifactComplianceInfo = new ArtifactComplianceInfo();
-
-        // List to collect all rule violations
         List<RuleViolation> allRuleViolations = new ArrayList<>();
 
         for (String policyId : govPolicies) {
-//            APIMGovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
             List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId, organization);
 
-            // Validate the artifact against each ruleset
             for (Ruleset ruleset : rulesets) {
                 ExtendedArtifactType extendedArtifactType = ruleset.getArtifactType();
 
-                // Check if ruleset's artifact type matches with the artifact's type
                 if (extendedArtifactType.equals(artifactType)) {
-
-                    // Get target file content from artifact project based on ruleType
                     RuleType ruleType = ruleset.getRuleType();
                     String contentToValidate = artifactProjectContent.get(ruleType);
-
-                    log.info(contentToValidate);
 
                     if (contentToValidate == null) {
                         log.warn(ruleType + " content not found in artifact project for artifact " +
@@ -725,11 +632,8 @@ public class ComplianceManager {
                         continue;
                     }
 
-                    // Send target content and ruleset for validation
                     List<RuleViolation> ruleViolations = validationEngine.validate(contentToValidate, ruleset);
-                    allRuleViolations.addAll(ruleViolations); // Collecting violations
-
-//                    artifactComplianceInfo.addNonBlockingViolations(allRuleViolations);
+                    allRuleViolations.addAll(ruleViolations); 
                     artifactComplianceInfo.addBlockingViolations(allRuleViolations);
 
                 } else {
@@ -740,11 +644,7 @@ public class ComplianceManager {
                 }
             }
         }
-
-//        if (!artifactComplianceInfo.getBlockingRuleViolations().isEmpty()) {
-//            artifactComplianceInfo.setBlockingNecessary(true);
-//        }
-
+        
         return artifactComplianceInfo;
     }
 

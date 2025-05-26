@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
+import org.wso2.carbon.apimgt.governance.api.model.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
@@ -8,35 +9,24 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.*;
 import org.wso2.carbon.apimgt.governance.rest.api.util.APIMGovernanceAPIUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.ComplianceAPIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
-
 import javax.ws.rs.core.Response;
-
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import java.util.List;
 import java.io.InputStream;
-
-
-import org.wso2.carbon.apimgt.governance.api.model.*;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.apache.commons.io.IOUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 /**
  * This class implements the ArtifactComplianceApiService interface.
  */
@@ -108,6 +98,11 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
     /**
      * Get governance rule violation results for a specific API
      *
+     * @param artifactType artifact type (REST_API or ASYNC_API)
+     * @param governableStates list of governable states
+     * @param apiSchemaInputStream input stream of the API schema file
+     * @param apiSchemaDetail attachment details
+     * @param label optional label
      * @param messageContext message context
      * @return Response
      * @throws RuntimeException if an error occurs while getting the rule violation results
@@ -118,7 +113,6 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
         String apiSchemaCode = null;
 
         try {
-            // Get the file name from the attachment header to determine the type
             String fileName = apiSchemaDetail.getContentDisposition().getParameter("filename");
 
             if (fileName != null && fileName.endsWith(".zip")) {
@@ -145,7 +139,6 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
                         .entity("Unsupported file type. Only .zip or .txt are accepted.").build();
             }
 
-            // Construct the rule map
             Map<RuleType, String> apiDefinition = new HashMap<>();
             apiDefinition.put(RuleType.API_DEFINITION, apiSchemaCode);
 
@@ -197,10 +190,14 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
             return Response.ok(responseMap).build();
 
         } catch (IOException e) {
+            log.error("Error processing uploaded file", e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Error processing the uploaded file: " + e.getMessage()).build();
         } catch (APIManagementException e) {
             throw new RuntimeException(e);
+            log.error("Error checking governance compliance", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Error checking governance compliance: " + e.getMessage()).build();
         }
     }
 

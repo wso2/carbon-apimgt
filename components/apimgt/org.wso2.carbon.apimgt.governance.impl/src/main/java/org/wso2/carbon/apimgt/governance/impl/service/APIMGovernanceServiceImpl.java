@@ -22,7 +22,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
-import org.wso2.carbon.apimgt.governance.api.model.*;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernancePolicy;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
+import org.wso2.carbon.apimgt.governance.api.model.RuleType;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 import org.wso2.carbon.apimgt.governance.api.service.APIMGovernanceService;
 import org.wso2.carbon.apimgt.governance.impl.ComplianceManager;
 import org.wso2.carbon.apimgt.governance.impl.PolicyManager;
@@ -164,7 +172,7 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
     }
 
     /**
-     * Evaluate compliance of the artifact synchronously
+     * Evaluate compliance of the API synchronously
      *
      * @param artifactType           Artifact type (ExtendedArtifactType.REST_API)
      * @param state                  State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
@@ -183,12 +191,9 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
     public ArtifactComplianceInfo evaluateComplianceGenAI(ExtendedArtifactType artifactType,
                                                           APIMGovernableState state, Map<RuleType, String> artifactProjectContent,
                                                           String organization) throws APIMGovernanceException {
-        // Check whether the artifact is governable and if not return
-//        boolean isArtifactGovernable = APIMGovernanceUtil.isArtifactGovernable(artifactRefId, artifactType);
+
         boolean isArtifactGovernable = true;
         if (!isArtifactGovernable) {
-//            String message = String.format("Skipping sync compliance evaluation for artifact %s " +
-//                    "in organization %s due to incompatible artifact type", artifactRefId, organization);
             String message = "Skipping sync compliance evaluation for artifact %s " +
                     "in organization %s due to incompatible artifact type";
             log.debug(message);
@@ -199,14 +204,6 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
         }
 
         List<String> applicablePolicyIds = APIMGovernanceUtil.getApplicablePoliciesForArtifactWithStateGenAI(artifactType, state, organization);
-
-//        ArtifactComplianceInfo artifactComplianceInfo = complianceManager.handleComplianceEvalSyncGenAI
-//                (artifactType, applicablePolicyIds,artifactProjectContent, state, organization);
-
-        // Though compliance is evaluated sync , we need to evaluate the compliance for all dependent states async to
-        // update results in the database. Hence, calling the async method here and this won't take time as it is async
-//        evaluateComplianceAsync(artifactRefId, artifactType, state, organization);
-//        return artifactComplianceInfo;
 
         return complianceManager.handleComplianceEvalSyncGenAI
                 (artifactType, applicablePolicyIds,artifactProjectContent, state, organization);
