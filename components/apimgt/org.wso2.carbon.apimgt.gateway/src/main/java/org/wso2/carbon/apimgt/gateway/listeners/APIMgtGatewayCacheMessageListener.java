@@ -85,8 +85,17 @@ public class APIMgtGatewayCacheMessageListener implements MessageListener {
 
     private void handleUserCacheInvalidationMessage(JSONObject jsonValue) throws ParseException {
         JSONArray users = (JSONArray) jsonValue.get("users");
-        String organization  = (String) jsonValue.get("organization");
-        if (!TenantUtils.isTenantAvailable(organization)){
+        String organization = (String) jsonValue.get("organization");
+        if (organization == null || organization.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Organization is null in user cache invalidation message. Skipping cache invalidation.");
+            }
+            return;
+        }
+        if (!TenantUtils.isTenantAvailable(organization)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping user cache invalidation for unavailable tenant: " + organization);
+            }
             return;
         }
         ServiceReferenceHolder.getInstance().getCacheInvalidationService()
@@ -99,25 +108,34 @@ public class APIMgtGatewayCacheMessageListener implements MessageListener {
     }
 
     private void handleResourceCacheInvalidationMessage(JSONObject jsonValue) throws ParseException {
-            String apiContext = (String) jsonValue.get("apiContext");
-            String apiVersion = (String) jsonValue.get("apiVersion");
-            String organization = (String) jsonValue.get("organization");
-            JSONArray resources = (JSONArray) jsonValue.get("resources");
-            if (!TenantUtils.isTenantAvailable(organization)){
-                return;
+        String apiContext = (String) jsonValue.get("apiContext");
+        String apiVersion = (String) jsonValue.get("apiVersion");
+        String organization = (String) jsonValue.get("organization");
+        JSONArray resources = (JSONArray) jsonValue.get("resources");
+        if (organization == null || organization.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Organization is null in resource cache invalidation message. Skipping cache invalidation.");
             }
-            List<ResourceCacheInvalidationDto> resourceCacheInvalidationDtoList = new ArrayList<>();
-            for (Object resource : resources) {
-                JSONObject uriTemplate = (JSONObject) resource;
-                String resourceURLContext = (String) uriTemplate.get("resourceURLContext");
-                String httpVerb = (String) uriTemplate.get("httpVerb");
-                ResourceCacheInvalidationDto uriTemplateDto = new ResourceCacheInvalidationDto();
-                uriTemplateDto.setHttpVerb(httpVerb);
-                uriTemplateDto.setResourceURLContext(resourceURLContext);
-                resourceCacheInvalidationDtoList.add(uriTemplateDto);
+            return;
+        }
+        if (!TenantUtils.isTenantAvailable(organization)) {
+            if (log.isDebugEnabled()) {
+                log.debug("Skipping resource cache invalidation for unavailable tenant: " + organization);
             }
-            ServiceReferenceHolder.getInstance().getCacheInvalidationService().invalidateResourceCache(apiContext,
-                    apiVersion, resourceCacheInvalidationDtoList.toArray(new ResourceCacheInvalidationDto[0]));
+            return;
+        }
+        List<ResourceCacheInvalidationDto> resourceCacheInvalidationDtoList = new ArrayList<>();
+        for (Object resource : resources) {
+            JSONObject uriTemplate = (JSONObject) resource;
+            String resourceURLContext = (String) uriTemplate.get("resourceURLContext");
+            String httpVerb = (String) uriTemplate.get("httpVerb");
+            ResourceCacheInvalidationDto uriTemplateDto = new ResourceCacheInvalidationDto();
+            uriTemplateDto.setHttpVerb(httpVerb);
+            uriTemplateDto.setResourceURLContext(resourceURLContext);
+            resourceCacheInvalidationDtoList.add(uriTemplateDto);
+        }
+        ServiceReferenceHolder.getInstance().getCacheInvalidationService().invalidateResourceCache(apiContext,
+                apiVersion, resourceCacheInvalidationDtoList.toArray(new ResourceCacheInvalidationDto[0]));
 
     }
 

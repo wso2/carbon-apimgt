@@ -1675,13 +1675,33 @@ public class APIManagerConfiguration {
                 policyDeployerConfiguration.setPassword(APIUtil.replaceSystemProperty(policyDeployerServicePassword));
                 OMElement tenantLoadingOmelement = policyDeployerConnectionElement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.TENANT_LOADING));
                 if (tenantLoadingOmelement != null) {
-                    OMElement enableTenantLoading = tenantLoadingOmelement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.TENANT_LOADING));
+                    OMElement enableTenantLoading = tenantLoadingOmelement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.ENABLE_TENANT_LOADING));
                     if (enableTenantLoading != null) {
-                        policyDeployerConfiguration.setTenantLoading(Boolean.parseBoolean(tenantLoadingOmelement.getText()));
+                        policyDeployerConfiguration.setTenantLoading(Boolean.parseBoolean(enableTenantLoading.getText()));
                     }
-                    OMElement tenants = tenantLoadingOmelement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.TENANT_LOADING_TENANTS));
-                    if (tenants != null && StringUtils.isNotEmpty(tenants.getText())) {
-                        policyDeployerConfiguration.setTenants(tenants.getText().split("\\|"));
+                    OMElement tenantSToLoadElement = tenantLoadingOmelement.getFirstChildWithName(
+                            new QName(APIConstants.GatewayArtifactSynchronizer.TENANT_LOADING_TENANTS));
+                    if (tenantSToLoadElement != null && StringUtils.isNotEmpty(tenantSToLoadElement.getText())) {
+                        String[] tenantsToLoad = tenantSToLoadElement.getText().split(",");
+                        LoadingTenants loadingTenants = new LoadingTenants();
+                        for (String tenant : tenantsToLoad) {
+                            tenant = tenant.trim();
+                            if (tenant.equals("*")) {
+                                loadingTenants.setIncludeAllTenants(true);
+                            } else if (tenant.contains("!")) {
+                                if (tenant.contains("*")) {
+                                    throw new IllegalArgumentException(tenant + " is not a valid tenant domain");
+                                }
+                                loadingTenants.getExcludingTenants().add(tenant.replace("!", ""));
+                            } else {
+                                loadingTenants.getIncludingTenants().add(tenant);
+                            }
+                        }
+                        if (loadingTenants.isIncludeAllTenants()) {
+                            loadingTenants.getIncludingTenants().clear();
+                        }
+                        loadingTenants.getIncludingTenants().removeAll(loadingTenants.getExcludingTenants());
+                        policyDeployerConfiguration.setLoadingTenants(loadingTenants);
                     }
                 }
             }

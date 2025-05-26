@@ -2,9 +2,7 @@ package org.wso2.carbon.apimgt.impl.dto;
 
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class GatewayArtifactSynchronizerProperties {

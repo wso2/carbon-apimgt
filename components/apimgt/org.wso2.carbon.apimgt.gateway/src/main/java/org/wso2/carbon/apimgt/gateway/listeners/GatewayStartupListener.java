@@ -198,7 +198,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                         new TenancyLoader().retrieveAndLoadAllTenants();
                         DataHolder.getInstance().setTenantsProvisioned(true);
                     } catch (APIManagementException e) {
-                        log.error(e);
+                        log.error("Failed to load tenants during gateway startup.", e);
                     }
                 } else {
                     DataHolder.getInstance().setTenantsProvisioned(true);

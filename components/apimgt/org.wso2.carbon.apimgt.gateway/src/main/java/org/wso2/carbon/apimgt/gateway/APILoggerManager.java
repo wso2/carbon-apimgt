@@ -107,7 +107,7 @@ public class APILoggerManager {
         return Base64.encodeBase64((username + APIConstants.DELEM_COLON + pw).getBytes
                 (StandardCharsets.UTF_8));
     }
-    private String invokeService(String tenantDomain) throws IOException, APIManagementException {
+    private String invokeService(String organization) throws IOException, APIManagementException {
 
         String serviceURLStr = eventHubConfigurationDto.getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP);
         HttpGet method = new HttpGet(serviceURLStr + "/api-logging-configs");
@@ -118,8 +118,8 @@ public class APILoggerManager {
         String serviceProtocol = serviceURL.getProtocol();
         method.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BASIC
                 + new String(credentials, StandardCharsets.UTF_8));
-        if (tenantDomain != null) {
-            method.setHeader(APIConstants.HEADER_TENANT, tenantDomain);
+        if (organization != null) {
+            method.setHeader(APIConstants.HEADER_TENANT, organization);
         }
         HttpClient httpClient = APIUtil.getHttpClient(servicePort, serviceProtocol);
         try (CloseableHttpResponse httpResponse = APIUtil.executeHTTPRequestWithRetries(method, httpClient)){
