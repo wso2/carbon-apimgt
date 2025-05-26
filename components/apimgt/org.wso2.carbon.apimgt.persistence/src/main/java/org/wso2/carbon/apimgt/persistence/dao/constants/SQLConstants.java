@@ -113,4 +113,8 @@ public class SQLConstants {
     public static final String DELETE_API_SCHEMA_SQL =
             "DELETE FROM AM_ARTIFACT_DATA " +
                     "WHERE API_UUID = ? ";
+
+    public static final String ADD_THUMBNAIL_SQL =
+            "INSERT INTO AM_ARTIFACT_DATA (type, org, metadata, uuid, artifact, api_uuid) " +
+                    "VALUES (?, ?, ?, ?, ?, ?)";
 }

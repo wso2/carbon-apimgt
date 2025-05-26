@@ -446,7 +446,19 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public void saveThumbnail(Organization org, String apiId, ResourceFile resourceFile) throws ThumbnailPersistenceException {
+        try {
+            JsonObject metadataJson = new JsonObject();
+            metadataJson.addProperty("fileType", resourceFile.getContentType());
+            metadataJson.addProperty("fileName", resourceFile.getName());
+            String metadataJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(metadataJson);
 
+            JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
+            String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
+
+            persistenceDAO.addThumbnail(apiId, orgJsonString,resourceFile.getContent() ,metadataJsonString);
+        } catch (Exception e) {
+            throw new ThumbnailPersistenceException("Error while saving thumbnail for API: " + apiId, e);
+        }
     }
 
     @Override

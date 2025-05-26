@@ -8,6 +8,7 @@ import org.wso2.carbon.apimgt.persistence.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.persistence.dto.DocumentResult;
 import org.wso2.carbon.apimgt.persistence.dto.Organization;
 import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
+import org.wso2.carbon.apimgt.persistence.utils.DatabasePersistenceUtil;
 import org.wso2.carbon.apimgt.persistence.utils.PersistanceDBUtil;
 
 import java.io.ByteArrayInputStream;
@@ -579,6 +580,47 @@ public class PersistenceDAO {
             connection.commit();
         } catch (SQLException e) {
             handleException("Error while deleting the API schema from the database", e);
+        } finally {
+            PersistanceDBUtil.closeAllConnections(prepStmt, connection, null);
+        }
+    }
+
+    public void addThumbnail(String apiId, String org, InputStream fileStream, String metadata) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement prepStmt = null;
+
+        String query = SQLConstants.ADD_THUMBNAIL_SQL;
+
+        try {
+            connection = PersistanceDBUtil.getConnection();
+            connection.setAutoCommit(false);
+
+            // Read stream to byte array
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] data = new byte[8192];
+            int nRead;
+            while ((nRead = fileStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+            byte[] bytes = buffer.toByteArray();
+            int fileLength = bytes.length;
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+
+            prepStmt = connection.prepareStatement(query);
+            prepStmt.setString(1, "THUMBNAIL");
+            prepStmt.setString(2, org);
+            prepStmt.setString(3, metadata);
+            prepStmt.setString(4, UUID.randomUUID().toString());
+            prepStmt.setBinaryStream(5, byteArrayInputStream, fileLength);
+            prepStmt.setString(6, apiId);
+
+            prepStmt.execute();
+
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding the API thumbnail to the database", e);
+        } catch (IOException e) {
+            handleException("Error while reading the API thumbnail file", e);
         } finally {
             PersistanceDBUtil.closeAllConnections(prepStmt, connection, null);
         }
