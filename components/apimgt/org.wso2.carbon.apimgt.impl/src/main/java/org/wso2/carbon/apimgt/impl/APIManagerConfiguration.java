@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.AIAPIConfigurationsDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.dto.ai.SDKGenerationConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
@@ -129,6 +130,7 @@ public class APIManagerConfiguration {
     private static MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto = new MarketplaceAssistantConfigurationDTO();
     private static ApiChatConfigurationDTO apiChatConfigurationDto = new ApiChatConfigurationDTO();
     private static DesignAssistantConfigurationDTO designAssistantConfigurationDto = new DesignAssistantConfigurationDTO();
+    private static SDKGenerationConfigurationDTO sdkGenerationConfigurationDto = new SDKGenerationConfigurationDTO();
     private static AIAPIConfigurationsDTO aiapiConfigurationsDTO = new AIAPIConfigurationsDTO();
     private static final APIMGovernanceConfigDTO apimGovConfigurationDto = new APIMGovernanceConfigDTO();
 
@@ -203,6 +205,11 @@ public class APIManagerConfiguration {
     public DesignAssistantConfigurationDTO getDesignAssistantConfigurationDto() {
 
         return designAssistantConfigurationDto;
+    }
+
+    public SDKGenerationConfigurationDTO getSdkGenerationConfigurationDTO() {
+
+        return sdkGenerationConfigurationDto;
     }
 
     private Set<APIStore> externalAPIStores = new HashSet<APIStore>();
@@ -688,6 +695,8 @@ public class APIManagerConfiguration {
                 setApiChatConfiguration(element);
             } else if (APIConstants.AI.DESIGN_ASSISTANT.equals(localName)) {
                 setDesignAssistantConfiguration(element);
+            } else if (APIConstants.AI.SDK_GENERATION.equals(localName)) {
+                setSdkGenerationConfiguration(element);
             } else if (APIConstants.AI.AI_CONFIGURATION.equals(localName)){
                 setAiConfiguration(element);
             } else if (APIConstants.TokenValidationConstants.TOKEN_VALIDATION_CONFIG.equals(localName)) {
@@ -2794,6 +2803,58 @@ public class APIManagerConfiguration {
                     resources.getFirstChildWithName(new QName(APIConstants.AI.DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE));
             if (designAssistantGenApiPayloadResource != null) {
                 designAssistantConfigurationDto.setGenApiPayloadResource(designAssistantGenApiPayloadResource.getText());
+            }
+        }
+    }
+
+    public void setSdkGenerationConfiguration(OMElement omElement){
+        OMElement sdkGenerationEnableElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.SDK_GENERATION_ENABLED));
+        if (sdkGenerationEnableElement != null) {
+            sdkGenerationConfigurationDto.setEnabled(Boolean.parseBoolean(sdkGenerationEnableElement.getText()));
+        }
+        if (sdkGenerationConfigurationDto.isEnabled()) {
+            OMElement sdkGenerationEndpoint =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.SDK_GENERATION_ENDPOINT));
+            if (sdkGenerationEndpoint != null) {
+                sdkGenerationConfigurationDto.setEndpoint(sdkGenerationEndpoint.getText());
+            }
+            OMElement sdkGenerationTokenEndpoint =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.SDK_GENERATION_TOKEN_ENDPOINT));
+            if (sdkGenerationTokenEndpoint != null) {
+                sdkGenerationConfigurationDto.setTokenEndpoint(sdkGenerationTokenEndpoint.getText());
+            }
+            OMElement sdkGenerationKey =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.SDK_GENERATION_KEY));
+
+            if (sdkGenerationKey != null) {
+                String Key = MiscellaneousUtil.resolve(sdkGenerationKey, secretResolver);
+                sdkGenerationConfigurationDto.setKey(Key);
+                if (!Key.isEmpty()){
+                    sdkGenerationConfigurationDto.setKeyProvided(true);
+                }
+            }
+            OMElement sdkGenerationToken =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.SDK_GENERATION_AUTH_TOKEN));
+            if (sdkGenerationToken != null) {
+                String AccessToken = MiscellaneousUtil.resolve(sdkGenerationToken, secretResolver);
+                sdkGenerationConfigurationDto.setAccessToken(AccessToken);
+                if (!AccessToken.isEmpty()){
+                    sdkGenerationConfigurationDto.setAuthTokenProvided(true);
+                }
+            }
+            OMElement resources =
+                    omElement.getFirstChildWithName(new QName(APIConstants.AI.RESOURCES));
+
+            OMElement sdkGenerationMergeSpecResource =
+                    resources.getFirstChildWithName(new QName(APIConstants.AI.SDK_GENERATION_MERGE_SPEC_RESOURCE));
+            if (sdkGenerationMergeSpecResource != null) {
+                sdkGenerationConfigurationDto.setMergeSpecResource(sdkGenerationMergeSpecResource.getText());
+            }
+            OMElement sdkGenerationGenerateCodeResource =
+                    resources.getFirstChildWithName(new QName(APIConstants.AI.SDK_GENERATION_GENERATE_CODE_RESOURCE));
+            if (sdkGenerationGenerateCodeResource != null) {
+                sdkGenerationConfigurationDto.setGenerateCodeResource(sdkGenerationGenerateCodeResource.getText());
             }
         }
     }

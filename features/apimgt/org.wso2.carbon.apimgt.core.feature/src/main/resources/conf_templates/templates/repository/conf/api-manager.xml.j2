@@ -464,6 +464,24 @@
         </Resources>
     </DesignAssistant>
 
+    <SdkGeneration>
+        <!-- Enable AI Assisted SDK Generation for API Manager -->
+        <Enabled>{{apim.ai.enable}}</Enabled>
+
+        <AuthToken>{{apim.ai.token}}</AuthToken>
+
+        <Key>{{apim.ai.key}}</Key>
+
+        <Endpoint>{{apim.ai.endpoint}}</Endpoint>
+
+        <TokenEndpoint>{{apim.ai.token_endpoint}}</TokenEndpoint>
+
+        <Resources>
+            <MergeSpecResource>{{apim.ai.sdk_generation_merge_specs_resource}}</MergeSpecResource>
+            <GenerateCodeResource>{{apim.ai.sdk_generation_generate_code_resource}}</GenerateCodeResource>
+        </Resources>
+    </SdkGeneration>
+
     <!--
         API key validator configuration used by API key manager (IS), API Developer Portal and API gateway.
         API gateway uses it to validate and authenticate users against the provided API keys.
