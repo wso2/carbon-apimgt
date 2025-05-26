@@ -39,6 +39,10 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManager;
 import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.registry.core.Resource;
+import org.wso2.carbon.registry.core.exceptions.RegistryException;
+import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.rest.api.APIData;
 import org.wso2.carbon.rest.api.ResourceData;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
@@ -611,6 +615,53 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         return certificateManager.deleteClientCertificateFromGateway(alias);
     }
 
+    /**
+     * Checks if the registry should be updated with the new encrypted value.
+     *
+     * @param gatewayAPIDTO                      GatewayAPIDTO object
+     * @param propertyName                       Property to be updated in the secure vault
+     * @param mediationSecurityAdminServiceProxy MediationSecurityAdminServiceProxy object
+     * @param plainTextValue                     Newly encrypted value to be set in the registry
+     * @return true if the registry should be updated, false otherwise
+     * @throws APIManagementException When the registry cannot be accessed
+     */
+    private boolean shouldUpdateRegistry(GatewayAPIDTO gatewayAPIDTO, String propertyName,
+                                         MediationSecurityAdminServiceProxy mediationSecurityAdminServiceProxy,
+                                         String plainTextValue) throws APIManagementException {
+        String tenantDomain = gatewayAPIDTO.getTenantDomain();
+        UserRegistry registry = GatewayUtils.getRegistry(tenantDomain);
+        String path = APIConstants.API_SYSTEM_CONFIG_SECURE_VAULT_LOCATION;
+
+        PrivilegedCarbonContext.startTenantFlow();
+        if (tenantDomain != null && StringUtils.isNotEmpty(tenantDomain)) {
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
+        } else {
+            PrivilegedCarbonContext.getThreadLocalCarbonContext()
+                    .setTenantDomain(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME, true);
+        }
+        try {
+            Resource resource = registry.get(path);
+            if (resource.getProperty(propertyName) != null) {
+                if (!plainTextValue.equals(
+                        mediationSecurityAdminServiceProxy.doDecryption(resource.getProperty(propertyName)))) {
+                    // Property plain text value has been changed. Should update the registry.
+                    return true;
+                } else {
+                    // Property plain text value has not been changed. No need to update the registry.
+                    return false;
+                }
+            } else {
+                // The secure vault property doesn't exist in the registry. Should update the registry.
+                return true;
+            }
+        } catch (RegistryException e) {
+            throw new APIManagementException("Error while reading registry resource " + path + " for tenant " +
+                    tenantDomain, e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
+    }
+
     public boolean deployAPI(GatewayAPIDTO gatewayAPIDTO) throws AxisFault {
 
         CertificateManager certificateManager = CertificateManagerImpl.getInstance();
@@ -682,8 +733,12 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
         if (gatewayAPIDTO.getCredentialsToBeAdd() != null) {
             for (CredentialDto certificate : gatewayAPIDTO.getCredentialsToBeAdd()) {
                 try {
-                    String encryptedValue = mediationSecurityAdminServiceProxy.doEncryption(certificate.getPassword());
-                    setRegistryProperty(gatewayAPIDTO.getTenantDomain(), certificate.getAlias(), encryptedValue);
+                    String plainTextValue = certificate.getPassword();
+                    String encryptedValue = mediationSecurityAdminServiceProxy.doEncryption(plainTextValue);
+                    if (shouldUpdateRegistry(gatewayAPIDTO, certificate.getAlias(), mediationSecurityAdminServiceProxy,
+                            plainTextValue)) {
+                        setRegistryProperty(gatewayAPIDTO.getTenantDomain(), certificate.getAlias(), encryptedValue);
+                    }
                 } catch (APIManagementException e) {
                     log.error("Exception occurred while encrypting password.", e);
                     throw new AxisFault(e.getMessage());
