@@ -104,7 +104,7 @@ public class APIProviderImplWrapper extends APIProviderImpl {
     }
 
     @Override
-    protected void invalidateResourceCache(String apiContext, String apiVersion, Set<URITemplate> uriTemplates, String tenantDomain) {
+    protected void invalidateResourceCache(String apiContext, String apiVersion, Set<URITemplate> uriTemplates, String organization) {
         //do nothing
     }
 

@@ -39,17 +39,19 @@ public class TenantInfoApiServiceImpl implements TenantInfoApiService {
     private TenantInfoListDTO getTenantInfoListDTO(Tenant[] allTenants) {
         TenantInfoListDTO tenantInfoListDTO = new TenantInfoListDTO();
         List<TenantInfoDTO> tenantInfoList = new ArrayList<>();
-        for (Tenant tenant : allTenants) {
-            TenantInfoDTO tenantInfoDTO = new TenantInfoDTO();
-            tenantInfoDTO.setDomain(tenant.getDomain());
-            tenantInfoDTO.setTenantId(tenant.getId());
-            tenantInfoDTO.setActive(tenant.isActive());
-            tenantInfoDTO.setEmail(tenant.getEmail());
-            tenantInfoDTO.setAdminFirstName(tenant.getAdminFirstName());
-            tenantInfoDTO.setAdminLastName(tenant.getAdminLastName());
-            tenantInfoDTO.setAdminFullName(tenant.getAdminFullName());
-            tenantInfoDTO.setAdmin(tenant.getAdminName());
-            tenantInfoList.add(tenantInfoDTO);
+        if (allTenants != null) {
+            for (Tenant tenant : allTenants) {
+                TenantInfoDTO tenantInfoDTO = new TenantInfoDTO();
+                tenantInfoDTO.setDomain(tenant.getDomain());
+                tenantInfoDTO.setTenantId(tenant.getId());
+                tenantInfoDTO.setActive(tenant.isActive());
+                tenantInfoDTO.setEmail(tenant.getEmail());
+                tenantInfoDTO.setAdminFirstName(tenant.getAdminFirstName());
+                tenantInfoDTO.setAdminLastName(tenant.getAdminLastName());
+                tenantInfoDTO.setAdminFullName(tenant.getAdminFullName());
+                tenantInfoDTO.setAdmin(tenant.getAdminName());
+                tenantInfoList.add(tenantInfoDTO);
+            }
         }
         tenantInfoListDTO.setTenants(tenantInfoList);
         return tenantInfoListDTO;
@@ -61,21 +63,19 @@ public class TenantInfoApiServiceImpl implements TenantInfoApiService {
             byte[] decodedValue = Base64.decodeBase64(filter.getBytes(StandardCharsets.UTF_8));
             filter = new String(decodedValue, StandardCharsets.UTF_8);
             String[] filters = filter.split("&!");
-            if (filters.length >= 2) {
-                if ("*".equals(filters[0])) {
-                    loadingTenants.setIncludeAllTenants(true);
-                } else {
-                    loadingTenants.setIncludeAllTenants(false);
-                    String[] includingTenants = filters[0].split("\\|");
-                    for (String tenant : includingTenants) {
-                        loadingTenants.getIncludingTenants().add(tenant);
-                    }
+            if ("*".equals(filters[0])) {
+                loadingTenants.setIncludeAllTenants(true);
+            } else {
+                loadingTenants.setIncludeAllTenants(false);
+                String[] includingTenants = filters[0].split("\\|");
+                for (String tenant : includingTenants) {
+                    loadingTenants.getIncludingTenants().add(tenant);
                 }
-                if (filters.length == 2 && StringUtils.isNotEmpty(filters[1])) {
-                    String[] excludingTenants = filters[1].split("\\|");
-                    for (String tenant : excludingTenants) {
-                        loadingTenants.getExcludingTenants().add(tenant);
-                    }
+            }
+            if (filters.length >= 2 && StringUtils.isNotEmpty(filters[1])) {
+                String[] excludingTenants = filters[1].split("\\|");
+                for (String tenant : excludingTenants) {
+                    loadingTenants.getExcludingTenants().add(tenant);
                 }
             }
         } else {
@@ -83,5 +83,4 @@ public class TenantInfoApiServiceImpl implements TenantInfoApiService {
         }
         return loadingTenants;
     }
-
 }

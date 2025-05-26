@@ -62,8 +62,9 @@ public class DataHolder {
     }
 
     public void setTenantsProvisioned(boolean tenantsProvisioned) {
+        boolean oldTenantsProvisioned = this.tenantsProvisioned;
         this.tenantsProvisioned = tenantsProvisioned;
-        if (tenantsProvisioned){
+        if (tenantsProvisioned && !oldTenantsProvisioned) {
             initializeTenantDeploymentStatusMap();
         }
     }

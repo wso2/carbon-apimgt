@@ -428,7 +428,7 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
         } else if (EventType.DEPLOY_POLICY_MAPPING_IN_GATEWAY.toString().equals(eventType)
                 || EventType.REMOVE_POLICY_MAPPING_FROM_GATEWAY.toString().equals(eventType)) {
             GatewayPolicyEvent gatewayPolicyEvent = new Gson().fromJson(eventJson, GatewayPolicyEvent.class);
-            if (!TenantUtils.isTenantAvailable(gatewayPolicyEvent.getTenantDomain())){
+            if (!TenantUtils.isTenantAvailable(gatewayPolicyEvent.getTenantDomain())) {
                 return;
             }
             Set<String> systemConfiguredGatewayLabels = new HashSet(gatewayPolicyEvent.getGatewayLabels());
@@ -444,17 +444,15 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                         new GatewayPolicyDeployer(
                                 gatewayPolicyEvent.getGatewayPolicyMappingUuid()).deployGatewayPolicyMapping();
                     } catch (ArtifactSynchronizerException | APIManagementException e) {
-                        log.error("Error in deploying artifacts for " + gatewayPolicyEvent.getGatewayPolicyMappingUuid()
-                                + "in the Gateway");
+                        log.error(
+                                "Error in deploying artifacts for " + gatewayPolicyEvent.getGatewayPolicyMappingUuid() +
+                                        "in the Gateway");
                     } finally {
                         if (tenantFlowStarted) {
                             PrivilegedCarbonContext.endTenantFlow();
                         }
                     }
                 } else if (EventType.REMOVE_POLICY_MAPPING_FROM_GATEWAY.toString().equals(eventType)) {
-                    if (!TenantUtils.isTenantAvailable(gatewayPolicyEvent.getTenantDomain())){
-                        return;
-                    }
                     boolean tenantFlowStarted = false;
                     try {
                         PrivilegedCarbonContext.startTenantFlow();
@@ -464,8 +462,8 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                         new GatewayPolicyDeployer(
                                 gatewayPolicyEvent.getGatewayPolicyMappingUuid()).undeployGatewayPolicyMapping();
                     } catch (ArtifactSynchronizerException | APIManagementException e) {
-                        log.error("Error while un-deploying artifacts for " + gatewayPolicyEvent.getGatewayPolicyMappingUuid()
-                                + "from the Gateway");
+                        log.error("Error while un-deploying artifacts for " +
+                                gatewayPolicyEvent.getGatewayPolicyMappingUuid() + "from the Gateway");
                     } finally {
                         if (tenantFlowStarted) {
                             PrivilegedCarbonContext.endTenantFlow();

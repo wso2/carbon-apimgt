@@ -20,6 +20,7 @@
 
 package org.wso2.carbon.apimgt.impl.utils;
 
+import java.util.Arrays;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.dto.LoadingTenants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -48,9 +49,9 @@ public class TenantUtils {
         List<Tenant> tenants = new ArrayList<>();
         try {
             Tenant[] allTenants = tenantManager.getAllTenants();
-            if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain) && tenantDomain != null) {
-                Set<Tenant> tenantSet = Set.of(allTenants);
-                allTenants = tenantSet.stream().filter(tenant -> tenant.getDomain().equals(tenantDomain)).toArray(Tenant[]::new);
+            if (tenantDomain != null && !MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equals(tenantDomain)) {
+                allTenants = Arrays.stream(allTenants).filter(tenant -> tenant.getDomain().equals(tenantDomain))
+                                .toArray(Tenant[]::new);
             }
             for (Tenant tenant : allTenants) {
 
