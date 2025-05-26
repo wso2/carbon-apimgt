@@ -73,7 +73,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             String[] oldUserOrg = getUserOrg(oldUserName, oldTenantDomain);
 
             if (!isSameOrganization(oldUserOrg, newUserOrg)) {
-                RestApiUtil.handleBadRequest("New owner does not belong to the same organization as the existing owner", log);
+                RestApiUtil.handleBadRequest("New owner does not belong to the same organization as the existing owner",
+                        log);
             } else {
                 boolean applicationUpdated = apiConsumer.updateApplicationOwner(owner, organization, application);
                 if (applicationUpdated) {
@@ -82,7 +83,8 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
                             APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
                     return Response.ok().build();
                 } else {
-                    RestApiUtil.handleInternalServerError("Error while updating application owner " + applicationId, log);
+                    RestApiUtil.handleInternalServerError("Error while updating application owner " + applicationId,
+                            log);
                 }
             }
 
@@ -218,19 +220,17 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     }
 
     private boolean isSameOrganization(String[] oldUserOrg, String[] newUserOrg) {
+        if (oldUserOrg == null || newUserOrg == null) {
+            return false;
+        }
         Set<String> newUserOrgSet = new HashSet<>(Arrays.asList(newUserOrg));
-        return Arrays.stream(oldUserOrg)
-                .anyMatch(newUserOrgSet::contains);
+        return Arrays.stream(oldUserOrg).anyMatch(newUserOrgSet::contains);
     }
 
     private String[] getUserOrg(String user, String tenantDomain) throws APIManagementException {
-        JSONObject userConfig = new JSONObject();
-        userConfig.put("user", user);
-        userConfig.put("isSuperTenant", tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME));
-        String userConfigJSONString = userConfig.toJSONString();
-
+        JSONObject userConfig = new JSONObject(Map.of("user", user, "isSuperTenant",
+                tenantDomain.equals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)));
         String groupingExtractorClass = APIUtil.getRESTApiGroupingExtractorImplementation();
-
-        return APIUtil.getGroupIdsFromExtractor(userConfigJSONString, groupingExtractorClass);
+        return APIUtil.getGroupIdsFromExtractor(userConfig.toJSONString(), groupingExtractorClass);
     }
 }
