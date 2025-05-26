@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DatabasePersistenceUtil {
     private static final Log log = LogFactory.getLog(DatabasePersistenceUtil.class);
@@ -129,7 +131,8 @@ public class DatabasePersistenceUtil {
                     formattedString = unescapeJson(jsonStringWithoutQuotes);
                 }
                 ObjectMapper mapper = new ObjectMapper();
-                JsonNode root = mapper.readTree(formattedString);
+//                formattedString = fixDoubleQuotes(jsonString);
+                JsonNode root = mapper.readTree(jsonString);
                 cleanJson(root);
                 return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(root);
             }
@@ -179,6 +182,13 @@ public class DatabasePersistenceUtil {
                 cleanJson(item); // Recursive call for each array item
             }
         }
+    }
+
+    private static String fixDoubleQuotes(String json) {
+        Pattern pattern = Pattern.compile("\"\"([^\"]*?)\"\"");
+        Matcher matcher = pattern.matcher(json);
+
+        return matcher.replaceAll("\"$1\"");
     }
 
     public static String safeGetAsString(JsonObject obj, String memberName) {
