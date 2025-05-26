@@ -6,6 +6,7 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.validator.routines.InetAddressValidator;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
@@ -22,16 +23,11 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.databridge.agent.DataPublisher;
 
 import java.io.IOException;
-import java.net.Inet4Address;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 import javax.xml.stream.XMLStreamException;
 
 import static org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.*;
@@ -44,15 +40,9 @@ import static org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.*;
  */
 public class DataProcessAndPublishingAgent implements Runnable {
     private static final Log log = LogFactory.getLog(DataProcessAndPublishingAgent.class);
-    private static final Pattern IPV4_PATTERN = Pattern.compile(
-            "^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4}$");
-    private static final Pattern IPV6_PATTERN = Pattern.compile(
-            "([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4})");
     private static String streamID = "org.wso2.throttle.request.stream:1.0.0";
     private MessageContext messageContext;
     private DataPublisher dataPublisher;
-
-
 
     String applicationLevelThrottleKey;
     String applicationLevelTier;
@@ -243,10 +233,11 @@ public class DataProcessAndPublishingAgent implements Runnable {
                 log.warn("Client port will be ignored and only the IP address (IPV4) will concern from " + ipAddress);
                 ipAddress = ipAddress.split(":")[0];
             }
-            if (IPV4_PATTERN.matcher(ipAddress).matches()) {
+            InetAddressValidator validator = InetAddressValidator.getInstance();
+            if (validator.isValidInet4Address(ipAddress)) {
                 jsonObMap.put(APIThrottleConstants.IP, APIUtil.ipToLong(ipAddress));
                 jsonObMap.put(APIThrottleConstants.IPv6, 0);
-            } else if (IPV6_PATTERN.matcher(ipAddress).matches()) {
+            } else if (validator.isValidInet6Address(ipAddress)) {
                 jsonObMap.put(APIThrottleConstants.IPv6, APIUtil.ipToBigInteger(ipAddress));
                 jsonObMap.put(APIThrottleConstants.IP, 0);
             } else {

@@ -3,9 +3,9 @@ language: "en-US"
 early_access: false
 reviews:
   profile: "chill"
-  request_changes_workflow: false
+  request_changes_workflow: true
   high_level_summary: false
-  high_level_summary_in_walkthrough: true
+  high_level_summary_in_walkthrough: false
   poem: false
   review_status: true
   collapse_walkthrough: true

@@ -2985,23 +2985,27 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                 KeyManagerHolder.getTenantKeyManagerInstance(tenantDomain, apiKey.getKeyManager());
                     }
                     /* retrieving OAuth application information for specific consumer key */
-                    consumerKey = apiKey.getConsumerKey();
-                    OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
-                    if (oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME) != null) {
-                        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(oAuthApplicationInfo.
-                                        getParameter(ApplicationConstants.OAUTH_CLIENT_NAME).toString(), null,
-                                oAuthApplicationInfo.getCallBackURL(), null,
-                                null, application.getTokenType(), this.tenantDomain, apiKey.getKeyManager());
-                        oauthAppRequest.getOAuthApplicationInfo().setAppOwner(userId);
-                        oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
-                        /* updating the owner of the OAuth application with userId */
-                        OAuthApplicationInfo updatedAppInfo = keyManager.updateApplicationOwner(oauthAppRequest,
-                                userId);
-                        isAppUpdated = true;
-                        audit.info("Successfully updated the owner of application " + application.getName() +
-                                " from " + oldUserName + " to " + userId + ".");
-                    } else {
-                        throw new APIManagementException("Unable to retrieve OAuth application information.");
+                    if (!APIConstants.OAuthAppMode.MAPPED.name().equalsIgnoreCase(apiKey.getCreateMode())) {
+                        consumerKey = apiKey.getConsumerKey();
+                        OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                        Object oauthClientName =
+                                oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME);
+                        if (oauthClientName != null) {
+                            OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(
+                                    oauthClientName.toString(), null, oAuthApplicationInfo.getCallBackURL(),
+                                    null, null, application.getTokenType(), this.tenantDomain,
+                                    apiKey.getKeyManager());
+                            oauthAppRequest.getOAuthApplicationInfo().setAppOwner(userId);
+                            oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
+                            /* updating the owner of the OAuth application with userId */
+                            OAuthApplicationInfo updatedAppInfo = keyManager.updateApplicationOwner(oauthAppRequest,
+                                    userId);
+                            isAppUpdated = true;
+                            audit.info("Successfully updated the owner of application " + application.getName() +
+                                    " from " + oldUserName + " to " + userId + ".");
+                        } else {
+                            throw new APIManagementException("Unable to retrieve OAuth application information.");
+                        }
                     }
                 }
             } else {
@@ -3595,10 +3599,21 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         String organization = api.getOrganization();
         if (!domains.isEmpty()) {
             String customUrl = domains.get(APIConstants.CUSTOM_URL);
-            if (customUrl.startsWith(APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
-                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, customUrl);
-            } else {
-                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, customUrl);
+            if (customUrl != null) {
+                boolean isHttp = customUrl.startsWith(APIConstants.HTTP_PROTOCOL_URL_PREFIX);
+                boolean isHttps = customUrl.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX);
+
+                if (!isHttp && !isHttps) {
+                    hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, customUrl);
+                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, customUrl);
+                } else {
+                    if (isHttp) {
+                        hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, customUrl);
+                    }
+                    if (isHttps) {
+                        hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, customUrl);
+                    }
+                }
             }
         } else {
             Map<String, Environment> allEnvironments = APIUtil.getEnvironments(organization);

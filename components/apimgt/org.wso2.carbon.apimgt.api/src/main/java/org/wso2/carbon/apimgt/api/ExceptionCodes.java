@@ -122,6 +122,7 @@ public enum ExceptionCodes implements ErrorHandler {
     CANNOT_CREATE_API_VERSION(900362, "New API Version cannot be created from a different provider", 409, "Initial provider of an API must be preserved in all versions of that API"),
     INTERNAL_ERROR_WHILE_UPDATING_API(900363, "Internal Server Error occurred while updating the API", 500, "Internal Server Error. '%s'"),
     ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES(903010, "Error while updating required properties", 400, "Error while updating required properties."),
+    ERROR_WHILE_VALIDATING_MANDATORY_PROPERTIES(903015, "Error while validating required properties", 400, "Error while validating required properties."),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
@@ -426,6 +427,7 @@ public enum ExceptionCodes implements ErrorHandler {
     EXTERNAL_STORE_ID_NOT_FOUND(901200,"External Store Not Found", 404, "Error while publishing to external stores. " +
             "External Store Not Found"),
 
+    INVALID_QUOTA_LIMIT(901201, "Invalid Quota Limit", 400, "Quota limit should be non negative. "),
 
     // Tenant related
     INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found"),
@@ -806,7 +808,9 @@ public enum ExceptionCodes implements ErrorHandler {
             "defined as a primary endpoint", 400,
             "Failed to delete API endpoint with UUID '%s' since it is defined as a primary endpoint."),
     API_ENDPOINT_URL_INVALID(902049, "Endpoint URL is invalid", 400,
-            "Endpoint URL is invalid");
+            "Endpoint URL is invalid"),
+    INVALID_MEDIA_TYPE_VALIDATION(902050, "Invalid or mismatched media type detected.", 415,
+            "File extension '%s' does not match detected MIME type '%s'");
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

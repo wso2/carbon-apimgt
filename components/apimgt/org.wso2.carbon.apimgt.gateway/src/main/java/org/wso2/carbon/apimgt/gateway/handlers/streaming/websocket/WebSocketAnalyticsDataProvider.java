@@ -322,8 +322,7 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
         }
         customProperties.put(Constants.API_USER_NAME_KEY, getUserName());
         customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
-        customProperties.put(Constants.RESPONSE_SIZE,
-                WebSocketUtils.getPropertyFromChannel(Constants.RESPONSE_SIZE, ctx));
+        customProperties.put(Constants.RESPONSE_SIZE, getResponseSize());
         return customProperties;
     }
     
@@ -373,5 +372,10 @@ public class WebSocketAnalyticsDataProvider implements AnalyticsDataProvider {
                 (long) WebSocketUtils.getPropertyFromChannel(Constants.BACKEND_START_TIME_PROPERTY, ctx) == 0 &&
                         WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_START_TIME_PROPERTY, ctx) != null &&
                         WebSocketUtils.getPropertyFromChannel(Constants.REQUEST_END_TIME_PROPERTY, ctx) != null);
+    }
+
+    private long getResponseSize() {
+        Object responseSize = WebSocketUtils.getPropertyFromChannel(Constants.RESPONSE_SIZE, ctx);
+        return responseSize == null ? 0L : ((Number) responseSize).longValue();
     }
 }

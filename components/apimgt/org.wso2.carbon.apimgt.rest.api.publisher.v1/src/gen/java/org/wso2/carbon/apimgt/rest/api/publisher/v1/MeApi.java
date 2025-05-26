@@ -43,7 +43,8 @@ MeApiService delegate = new MeApiServiceImpl();
     @ApiOperation(value = "Get the Organization information of the user", notes = "Using this operation, logged-in user can get their organization information. ", response = OrganizationInfoDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:api_create", description = "Create API"),
-            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations")
+            @AuthorizationScope(scope = "apim:api_manage", description = "Manage all API related operations"),
+            @AuthorizationScope(scope = "apim:api_publish", description = "Publish API")
         })
     }, tags={ "Users",  })
     @ApiResponses(value = { 
