@@ -427,7 +427,6 @@ public enum ExceptionCodes implements ErrorHandler {
     EXTERNAL_STORE_ID_NOT_FOUND(901200,"External Store Not Found", 404, "Error while publishing to external stores. " +
             "External Store Not Found"),
 
-    INVALID_QUOTA_LIMIT(901201, "Invalid Quota Limit", 400, "Quota limit should be non negative. "),
 
     // Tenant related
     INVALID_TENANT(901300,"Tenant Not Found", 400, "Tenant Not Found"),
