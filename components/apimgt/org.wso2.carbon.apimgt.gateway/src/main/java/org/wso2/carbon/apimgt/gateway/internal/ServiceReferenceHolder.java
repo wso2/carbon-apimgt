@@ -51,6 +51,8 @@ import org.wso2.carbon.mediation.initializer.services.SynapseConfigurationServic
 import org.wso2.carbon.mediation.security.vault.MediationSecurityAdminService;
 import org.wso2.carbon.rest.api.service.RestApiAdmin;
 import org.wso2.carbon.sequences.services.SequenceAdmin;
+import org.wso2.carbon.tenant.mgt.services.TenantMgtService;
+import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.utils.ConfigurationContextService;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 import redis.clients.jedis.JedisPool;
@@ -102,6 +104,8 @@ public class ServiceReferenceHolder {
 
     private Set<String> activeTenants = new ConcurrentSkipListSet<>();
     private JedisPool redisPool;
+    private TenantMgtService tenantMgtService;
+    private RealmService realmService;
 
     public ThrottleDataHolder getThrottleDataHolder() {
         return throttleDataHolder;
@@ -475,5 +479,22 @@ public class ServiceReferenceHolder {
     public LLMProviderService getLLMProviderService(String type) {
 
         return llmProviderServiceMap.get(type);
+    }
+
+
+    public void setTenantMgtService(TenantMgtService tenantMgtService) {
+        this.tenantMgtService= tenantMgtService;
+    }
+
+    public TenantMgtService getTenantMgtService() {
+        return tenantMgtService;
+    }
+
+    public RealmService getRealmService() {
+        return realmService;
+    }
+
+    public void setRealmService(RealmService realmService) {
+        this.realmService = realmService;
     }
 }

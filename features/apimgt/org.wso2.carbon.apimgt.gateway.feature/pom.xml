@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.31.124-SNAPSHOT</version>
+        <version>9.31.127-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -183,6 +183,10 @@
             <groupId>org.wso2.orbit.software.amazon.awssdk</groupId>
             <artifactId>aws-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -308,6 +312,7 @@
                                 <bundleDef>io.swagger:swagger-annotations</bundleDef>
                                 <bundleDef>io.github.openfeign:feign-httpclient:${openfeign.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.com.nimbusds:nimbus-jose-jwt:${com.nimbusds.wso2.version}</bundleDef>
+                                <bundleDef>commons-validator:commons-validator:${commons-validator.version}</bundleDef>
                             </bundles>
                             <importBundles>
                                 <importBundleDef>
