@@ -453,4 +453,19 @@ public class DatabasePersistenceUtil {
         return null;
     }
 
+    public static String convertToBase64(InputStream inputStream, String contentType) throws Exception {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        byte[] buffer = new byte[8192];
+        int bytesRead;
+
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+            outputStream.write(buffer, 0, bytesRead);
+        }
+
+        byte[] fileBytes = outputStream.toByteArray();
+        String base64Encoded = Base64.getEncoder().encodeToString(fileBytes);
+
+        return "data:" + contentType + ";base64," + base64Encoded;
+    }
+
 }

@@ -117,4 +117,10 @@ public class SQLConstants {
     public static final String ADD_THUMBNAIL_SQL =
             "INSERT INTO AM_ARTIFACT_DATA (type, org, metadata, uuid, artifact, api_uuid) " +
                     "VALUES (?, ?, ?, ?, ?, ?)";
+
+    public static final String GET_THUMBNAIL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+                    "WHERE type = 'THUMBNAIL' " +
+                    "AND API_UUID = ? " +
+                    "AND JSON_VALUE(org, '$.name') = ? ";
 }

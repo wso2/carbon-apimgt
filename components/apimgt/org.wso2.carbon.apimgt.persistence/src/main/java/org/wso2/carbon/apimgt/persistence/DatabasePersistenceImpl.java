@@ -97,6 +97,19 @@ public class DatabasePersistenceImpl implements APIPersistence {
             String swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiId, tenantDomain);
             JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(apiSchema);
             jsonObject.addProperty("swaggerDefinition", swaggerDefinition);
+
+            try {
+                ResourceFile thumbnailResource = this.getThumbnail(org, apiId);
+                if (thumbnailResource != null) {
+                    String thumbnailUrl = DatabasePersistenceUtil.convertToBase64(thumbnailResource.getContent(), thumbnailResource.getContentType());
+                    jsonObject.addProperty("thumbnailUrl", thumbnailUrl);
+                } else {
+                    jsonObject.addProperty("thumbnailUrl", "");
+                }
+            } catch (Exception e) {
+                log.error("Error while retrieving thumbnail for API: " + apiId, e);
+            }
+
             if (apiSchema != null) {
                 API api = DatabasePersistenceUtil.jsonToApi(jsonObject);
                 publisherAPI = APIMapper.INSTANCE.toPublisherApi(api);
@@ -154,13 +167,13 @@ public class DatabasePersistenceImpl implements APIPersistence {
                 JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();
 
                 PublisherAPIInfo apiInfo = new PublisherAPIInfo();
-                apiInfo.setId(DatabasePersistenceUtil.safeGetAsString(jsonObject, "uuid"));
+                String apiId = DatabasePersistenceUtil.safeGetAsString(jsonObject, "uuid");
+                apiInfo.setId(apiId);
                 apiInfo.setApiName(DatabasePersistenceUtil.safeGetAsString(jsonObject.getAsJsonObject("id"), "apiName"));
                 apiInfo.setVersion(DatabasePersistenceUtil.safeGetAsString(jsonObject.getAsJsonObject("id"), "version"));
                 apiInfo.setProviderName(DatabasePersistenceUtil.safeGetAsString(jsonObject.getAsJsonObject("id"), "providerName"));
                 apiInfo.setContext(DatabasePersistenceUtil.safeGetAsString(jsonObject, "context"));
                 apiInfo.setType(DatabasePersistenceUtil.safeGetAsString(jsonObject, "type"));
-                apiInfo.setThumbnail(DatabasePersistenceUtil.safeGetAsString(jsonObject, "thumbnailUrl"));
                 apiInfo.setCreatedTime(DatabasePersistenceUtil.safeGetAsString(jsonObject, "createdTime"));
                 apiInfo.setUpdatedTime(jsonObject.has("lastUpdated") && !jsonObject.get("lastUpdated").isJsonNull()
                         ? new Date(jsonObject.get("lastUpdated").getAsString())
@@ -180,6 +193,18 @@ public class DatabasePersistenceImpl implements APIPersistence {
                 apiInfo.setTechnicalOwnerEmail(DatabasePersistenceUtil.safeGetAsString(jsonObject, "technicalOwnerEmail"));
                 apiInfo.setMonetizationStatus(jsonObject.has("monetizationStatus") && !jsonObject.get("monetizationStatus").isJsonNull()
                         && jsonObject.get("monetizationStatus").getAsBoolean());
+
+                try {
+                    ResourceFile thumbnailResource = this.getThumbnail(org, apiId);
+                    if (thumbnailResource != null) {
+                        String thumbnailUrl = DatabasePersistenceUtil.convertToBase64(thumbnailResource.getContent(), thumbnailResource.getContentType());
+                        apiInfo.setThumbnail(thumbnailUrl);
+                    } else {
+                        apiInfo.setThumbnail("");
+                    }
+                } catch (Exception e) {
+//                    log.error("Error while retrieving thumbnail for API: " + apiId, e);
+                }
 
                 publisherAPIInfoList.add(apiInfo);
             }
@@ -463,7 +488,23 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public ResourceFile getThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException {
-        return null;
+        try {
+           ThumbnailResult thumbnailResult = persistenceDAO.getThumbnail(apiId, org.getName());
+            if (thumbnailResult != null) {
+                InputStream content = thumbnailResult.getContent();
+                String metadata = thumbnailResult.getMetadata();
+                JsonObject metadataJson = DatabasePersistenceUtil.stringTojsonObject(metadata);
+                String contentType = DatabasePersistenceUtil.safeGetAsString(metadataJson, "fileType");
+                String fileName = DatabasePersistenceUtil.safeGetAsString(metadataJson, "fileName");
+                ResourceFile resourceFile = new ResourceFile(content, contentType);
+                resourceFile.setName(fileName);
+                return resourceFile;
+            } else {
+                throw new ThumbnailPersistenceException("Thumbnail not found for API: " + apiId);
+            }
+        } catch (APIManagementException e) {
+            throw new ThumbnailPersistenceException("Error while retrieving thumbnail for API: " + apiId, e);
+        }
     }
 
     @Override
