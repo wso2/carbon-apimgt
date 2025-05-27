@@ -19,19 +19,32 @@ package org.wso2.carbon.apimgt.gateway.handlers.streaming.webhook;
 
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.rest.RESTConstants;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsCustomDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Operation;
 import org.wso2.carbon.apimgt.common.analytics.publishers.dto.Target;
+import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.handlers.streaming.AsyncAnalyticsDataProvider;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class WebhooksAnalyticsDataProvider extends AsyncAnalyticsDataProvider {
 
     private MessageContext messageContext;
+    private AnalyticsCustomDataProvider analyticsCustomDataProvider;
 
     public WebhooksAnalyticsDataProvider(MessageContext messageContext) {
         super(messageContext);
         this.messageContext = messageContext;
+    }
+
+    public WebhooksAnalyticsDataProvider(MessageContext messageContext,
+                                         AnalyticsCustomDataProvider analyticsCustomDataProvider) {
+        super(messageContext);
+        this.messageContext = messageContext;
+        this.analyticsCustomDataProvider = analyticsCustomDataProvider;
     }
 
     @Override
@@ -62,6 +75,26 @@ public class WebhooksAnalyticsDataProvider extends AsyncAnalyticsDataProvider {
         target.setDestination(endpointAddress);
         target.setTargetResponseCode(targetResponseCode);
         return target;
+    }
+
+    public Map<String, Object> getProperties() {
+        Map<String, Object> customProperties;
+
+        if (analyticsCustomDataProvider != null) {
+            customProperties = analyticsCustomDataProvider.getCustomProperties(messageContext);
+        } else {
+            customProperties = new HashMap<>();
+        }
+        customProperties.put(Constants.API_CONTEXT_KEY, getApiContext());
+        return customProperties;
+    }
+
+    private String getApiContext() {
+
+        if (messageContext.getPropertyKeySet().contains(JWTConstants.REST_API_CONTEXT)) {
+            return (String) messageContext.getProperty(JWTConstants.REST_API_CONTEXT);
+        }
+        return null;
     }
 
 }
