@@ -39,6 +39,7 @@
                 org.wso2.carbon.apimgt.governance.rest.api.PoliciesApi,
                 org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApi,
                 org.wso2.carbon.apimgt.governance.rest.api.PolicyAdherenceApi,
+                org.wso2.carbon.apimgt.governance.rest.api.PolicyEvaluationApi
             </param-value>
         </init-param>
         <init-param>
