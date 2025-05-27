@@ -123,4 +123,16 @@ public class SQLConstants {
                     "WHERE type = 'THUMBNAIL' " +
                     "AND API_UUID = ? " +
                     "AND JSON_VALUE(org, '$.name') = ? ";
+
+    public static final String SAVE_ASYNC_API_DEFINITION_SQL =
+            "UPDATE AM_ARTIFACT_DATA SET " +
+                    "METADATA = ? " +
+                    "WHERE API_UUID = ? " +
+                    "AND TYPE = 'ASYNC_API_DEFINITION'";
+
+    public static final String GET_ASYNC_API_DEFINITION_BY_UUID_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+            "WHERE API_UUID = ? " +
+            "AND TYPE = 'ASYNC_API_DEFINITION' " +
+            "AND JSON_VALUE(org, '$.name') = ? ";
 }

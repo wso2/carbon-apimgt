@@ -63,6 +63,14 @@ public class DatabasePersistenceImpl implements APIPersistence {
                 }
             }
 
+            if (publisherAPI.getAsyncApiDefinition() != null) {
+                try {
+                    persistenceDAO.addAsyncDefinition(uuid, publisherAPI.getAsyncApiDefinition(), orgJsonString);
+                } catch (APIManagementException e) {
+                    log.error("Error while saving Async API definition for API: " + api.getId().getApiName(), e);
+                }
+            }
+
         } catch (APIManagementException e) {
             throw new RuntimeException(e);
         }
@@ -329,12 +337,23 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public void saveAsyncDefinition(Organization org, String apiId, String apiDefinition) throws AsyncSpecPersistenceException {
-
+        try {
+            persistenceDAO.saveAsyncAPIDefinition(apiId, apiDefinition);
+        } catch (APIManagementException e) {
+            throw new AsyncSpecPersistenceException("Error while saving Async API definition", e);
+        }
     }
 
     @Override
     public String getAsyncDefinition(Organization org, String apiId) throws AsyncSpecPersistenceException {
-        return "";
+        String asyncApiDefinition = null;
+        try {
+            asyncApiDefinition = persistenceDAO.getAsyncAPIDefinitionByUUID(apiId, org.getName());
+            asyncApiDefinition = DatabasePersistenceUtil.getFormattedJsonString(asyncApiDefinition);
+        } catch (APIManagementException e) {
+            throw new RuntimeException(e);
+        }
+        return asyncApiDefinition;
     }
 
     @Override

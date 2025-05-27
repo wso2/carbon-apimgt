@@ -73,6 +73,23 @@ public class PersistenceDAO {
         }
     }
 
+    public void addAsyncDefinition(String uuid, String asyncApiDefinition, String orgJsonString) throws APIManagementException {
+        String query = SQLConstants.ADD_ARTIFACT_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, "ASYNC_API_DEFINITION");
+            prepStmt.setString(2, orgJsonString);
+            prepStmt.setString(3, asyncApiDefinition);
+            prepStmt.setString(4, UUID.randomUUID().toString());
+            prepStmt.setString(5, uuid);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding the Async API definition to the database", e);
+        }
+    }
+
     public List<String> searchAPISchema(String searchQuery, String org, int start, int offset) throws SQLException {
         List<String> apiSchemas = new ArrayList<>();
         String query = SQLConstants.GET_ALL_API_ARTIFACT_SQL;
@@ -364,6 +381,39 @@ public class PersistenceDAO {
         } catch (SQLException e) {
             handleException("Error while saving the OAS definition to the database", e);
         }
+    }
+
+    public void saveAsyncAPIDefinition(String apiId, String asyncApiDefinition) throws APIManagementException {
+        String query = SQLConstants.SAVE_ASYNC_API_DEFINITION_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, asyncApiDefinition);
+            prepStmt.setString(2, apiId);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while saving the Async API definition to the database", e);
+        }
+    }
+
+    public String getAsyncAPIDefinitionByUUID(String apiId, String org) throws APIManagementException {
+        String asyncApiDefinition = null;
+        String query = SQLConstants.GET_ASYNC_API_DEFINITION_BY_UUID_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiId);
+            prepStmt.setString(2, org);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    asyncApiDefinition = rs.getString("metadata");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the Async API definition from the database", e);
+        }
+        return asyncApiDefinition;
     }
 
     public void deleteDocumentation(String docId) throws APIManagementException {
