@@ -16,6 +16,18 @@
 
 package org.wso2.carbon.apimgt.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Stack;
 import org.apache.axiom.om.OMAttribute;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMException;
@@ -36,6 +48,16 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
+import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
+import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
+import org.wso2.carbon.apimgt.impl.dto.LoadingTenants;
+import org.wso2.carbon.apimgt.impl.dto.OrgAccessControl;
+import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
+import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.dto.TokenValidationDto;
+import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.dto.ai.AIAPIConfigurationsDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
@@ -44,15 +66,6 @@ import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.TokenIssuerDto;
 import org.wso2.carbon.apimgt.common.gateway.extensionlistener.ExtensionListener;
-import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
-import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
-import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
-import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
-import org.wso2.carbon.apimgt.impl.dto.OrgAccessControl;
-import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
-import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.impl.dto.TokenValidationDto;
-import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.monetization.MonetizationConfigurationDto;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -66,18 +79,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.namespace.QName;
@@ -219,7 +220,7 @@ public class APIManagerConfiguration {
         return loginConfiguration;
     }
 
-    private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = new GatewayArtifactSynchronizerProperties();;
+    private final GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = new GatewayArtifactSynchronizerProperties();;
 
     private JSONArray customProperties = new JSONArray();
 
@@ -1658,32 +1659,52 @@ public class APIManagerConfiguration {
                 ThrottleProperties.PolicyDeployer policyDeployerConfiguration = new
                         ThrottleProperties
                                 .PolicyDeployer();
-                if (policyDeployerConnectionElement != null) {
-                    OMElement policyDeployerConnectionEnabledElement = policyDeployerConnectionElement
-                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLED));
-                    policyDeployerConfiguration.setEnabled(JavaUtils.isTrueExplicitly
-                            (policyDeployerConnectionEnabledElement.getText()));
-                    OMElement policyDeployerServiceUrlElement = policyDeployerConnectionElement
-                            .getFirstChildWithName(new QName
-                                    (APIConstants.AdvancedThrottleConstants.SERVICE_URL));
-                    if (policyDeployerServiceUrlElement != null) {
-                        policyDeployerConfiguration.setServiceUrl(APIUtil.replaceSystemProperty
-                                (policyDeployerServiceUrlElement.getText()));
-                    }
-                    OMElement policyDeployerServiceServiceUsernameElement = policyDeployerConnectionElement
-                            .getFirstChildWithName(new QName
-                                    (APIConstants.AdvancedThrottleConstants.USERNAME));
-                    if (policyDeployerServiceServiceUsernameElement != null) {
-                        policyDeployerConfiguration.setUsername(APIUtil.replaceSystemProperty
-                                (policyDeployerServiceServiceUsernameElement.getText()));
-                    }
-                    OMElement policyDeployerServicePasswordElement = policyDeployerConnectionElement
-                            .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.PASSWORD));
-                    String policyDeployerServicePassword = MiscellaneousUtil.
-                            resolve(policyDeployerServicePasswordElement, secretResolver);
-                    policyDeployerConfiguration.setPassword(APIUtil.replaceSystemProperty
-                            (policyDeployerServicePassword));
+            if (policyDeployerConnectionElement != null) {
+                OMElement policyDeployerConnectionEnabledElement = policyDeployerConnectionElement.getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLED));
+                policyDeployerConfiguration.setEnabled(JavaUtils.isTrueExplicitly(policyDeployerConnectionEnabledElement.getText()));
+                OMElement policyDeployerServiceUrlElement = policyDeployerConnectionElement.getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.SERVICE_URL));
+                if (policyDeployerServiceUrlElement != null) {
+                    policyDeployerConfiguration.setServiceUrl(APIUtil.replaceSystemProperty(policyDeployerServiceUrlElement.getText()));
                 }
+                OMElement policyDeployerServiceServiceUsernameElement = policyDeployerConnectionElement.getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.USERNAME));
+                if (policyDeployerServiceServiceUsernameElement != null) {
+                    policyDeployerConfiguration.setUsername(APIUtil.replaceSystemProperty(policyDeployerServiceServiceUsernameElement.getText()));
+                }
+                OMElement policyDeployerServicePasswordElement = policyDeployerConnectionElement.getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.PASSWORD));
+                String policyDeployerServicePassword = MiscellaneousUtil.resolve(policyDeployerServicePasswordElement, secretResolver);
+                policyDeployerConfiguration.setPassword(APIUtil.replaceSystemProperty(policyDeployerServicePassword));
+                OMElement tenantLoadingOmelement = policyDeployerConnectionElement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.TENANT_LOADING));
+                if (tenantLoadingOmelement != null) {
+                    OMElement enableTenantLoading = tenantLoadingOmelement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.ENABLE_TENANT_LOADING));
+                    if (enableTenantLoading != null) {
+                        policyDeployerConfiguration.setTenantLoading(Boolean.parseBoolean(enableTenantLoading.getText()));
+                    }
+                    OMElement tenantSToLoadElement = tenantLoadingOmelement.getFirstChildWithName(
+                            new QName(APIConstants.GatewayArtifactSynchronizer.TENANT_LOADING_TENANTS));
+                    if (tenantSToLoadElement != null && StringUtils.isNotEmpty(tenantSToLoadElement.getText())) {
+                        String[] tenantsToLoad = tenantSToLoadElement.getText().split(",");
+                        LoadingTenants loadingTenants = new LoadingTenants();
+                        for (String tenant : tenantsToLoad) {
+                            tenant = tenant.trim();
+                            if (tenant.equals("*")) {
+                                loadingTenants.setIncludeAllTenants(true);
+                            } else if (tenant.contains("!")) {
+                                if (tenant.contains("*")) {
+                                    throw new IllegalArgumentException(tenant + " is not a valid tenant domain");
+                                }
+                                loadingTenants.getExcludingTenants().add(tenant.replace("!", ""));
+                            } else {
+                                loadingTenants.getIncludingTenants().add(tenant);
+                            }
+                        }
+                        if (loadingTenants.isIncludeAllTenants()) {
+                            loadingTenants.getIncludingTenants().clear();
+                        }
+                        loadingTenants.getIncludingTenants().removeAll(loadingTenants.getExcludingTenants());
+                        policyDeployerConfiguration.setLoadingTenants(loadingTenants);
+                    }
+                }
+            }
                 throttleProperties.setPolicyDeployer(policyDeployerConfiguration);
 
                 //Configuring Block Condition retriever configuration
@@ -2436,9 +2457,45 @@ public class APIManagerConfiguration {
             log.debug("Gateway artifact synchronizer Event waiting time not set.");
         }
         OMElement enableEagerLoading =
-                omElement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.EnableOnDemandLoadingAPIS));
-        if (enableEagerLoading != null){
-            gatewayArtifactSynchronizerProperties.setOnDemandLoading(Boolean.parseBoolean(enableEagerLoading.getText()));
+                omElement.getFirstChildWithName(
+                        new QName(APIConstants.GatewayArtifactSynchronizer.EnableOnDemandLoadingAPIS));
+        if (enableEagerLoading != null) {
+            gatewayArtifactSynchronizerProperties.setOnDemandLoading(
+                    Boolean.parseBoolean(enableEagerLoading.getText()));
+        }
+        OMElement tenantLoadingOMElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.GatewayArtifactSynchronizer.TENANT_LOADING));
+        if (tenantLoadingOMElement != null) {
+            OMElement enableTenantLoading = tenantLoadingOMElement.getFirstChildWithName(
+                    new QName(APIConstants.GatewayArtifactSynchronizer.ENABLE_TENANT_LOADING));
+            if (enableTenantLoading != null) {
+                gatewayArtifactSynchronizerProperties.setTenantLoading(
+                        Boolean.parseBoolean(enableTenantLoading.getText()));
+            }
+            OMElement tenantSToLoadElement = tenantLoadingOMElement.getFirstChildWithName(
+                    new QName(APIConstants.GatewayArtifactSynchronizer.TENANT_LOADING_TENANTS));
+            if (tenantSToLoadElement != null && StringUtils.isNotEmpty(tenantSToLoadElement.getText())) {
+                String[] tenantsToLoad = tenantSToLoadElement.getText().split(",");
+                LoadingTenants loadingTenants = new LoadingTenants();
+                for (String tenant : tenantsToLoad) {
+                    tenant = tenant.trim();
+                    if (tenant.equals("*")) {
+                        loadingTenants.setIncludeAllTenants(true);
+                    } else if (tenant.contains("!")) {
+                        if (tenant.contains("*")) {
+                            throw new IllegalArgumentException(tenant + " is not a valid tenant domain");
+                        }
+                        loadingTenants.getExcludingTenants().add(tenant.replace("!", ""));
+                    } else {
+                        loadingTenants.getIncludingTenants().add(tenant);
+                    }
+                }
+                if (loadingTenants.isIncludeAllTenants()) {
+                    loadingTenants.getIncludingTenants().clear();
+                }
+                loadingTenants.getIncludingTenants().removeAll(loadingTenants.getExcludingTenants());
+                gatewayArtifactSynchronizerProperties.setLoadingTenants(loadingTenants);
+            }
         }
     }
 
