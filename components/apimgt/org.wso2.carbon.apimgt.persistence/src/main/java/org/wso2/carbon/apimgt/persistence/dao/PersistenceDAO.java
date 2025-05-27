@@ -34,8 +34,7 @@ public class PersistenceDAO {
         return INSTANCE;
     }
 
-    public void addAPISchema(String uuid, String metadata, String apiDefinition, String org) throws APIManagementException {
-        int apiSchemaId = -1;
+    public void addAPISchema(String uuid, String metadata, String org) throws APIManagementException {
         String query = SQLConstants.ADD_ARTIFACT_SQL;
         try (Connection connection = PersistanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -46,22 +45,31 @@ public class PersistenceDAO {
                 prepStmt.setString(4, UUID.randomUUID().toString());
                 prepStmt.setString(5, uuid);
                 prepStmt.execute();
-                try (ResultSet rs = prepStmt.getGeneratedKeys()) {
-                    if (rs.next()) {
-                        apiSchemaId = rs.getInt(1);
-                    }
-                }
-                prepStmt.setString(1, "API_DEFINITION");
-                prepStmt.setString(3, apiDefinition);
-                prepStmt.setString(4, UUID.randomUUID().toString());
-                prepStmt.execute();
+
                 connection.commit();
             } catch (SQLException e) {
                 connection.rollback();
-                handleException("Error while adding the API schema: " + apiSchemaId + " to the database", e);
+                handleException("Error while adding the API schema: " + uuid + " to the database", e);
             }
         } catch (SQLException e) {
-            handleException("Error while adding the API schema: " + apiSchemaId + " to the database", e);
+            handleException("Error while adding the API schema: " + uuid + " to the database", e);
+        }
+    }
+
+    public void addSwaggerDefinition(String uuid, String metadata, String org) throws APIManagementException {
+        String query = SQLConstants.ADD_ARTIFACT_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, "API_DEFINITION");
+            prepStmt.setString(2, org);
+            prepStmt.setString(3, metadata);
+            prepStmt.setString(4, UUID.randomUUID().toString());
+            prepStmt.setString(5, uuid);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding the Swagger definition to the database", e);
         }
     }
 

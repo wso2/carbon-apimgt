@@ -53,7 +53,16 @@ public class DatabasePersistenceImpl implements APIPersistence {
         String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
 
         try {
-            persistenceDAO.addAPISchema(uuid, apiJsonString, api.getSwaggerDefinition(), orgJsonString);
+            persistenceDAO.addAPISchema(uuid, apiJsonString, orgJsonString);
+
+            if (publisherAPI.getSwaggerDefinition() != null) {
+                try {
+                    persistenceDAO.addSwaggerDefinition(uuid, publisherAPI.getSwaggerDefinition(), orgJsonString);
+                } catch (APIManagementException e) {
+                    log.error("Error while saving Swagger definition for API: " + api.getId().getApiName(), e);
+                }
+            }
+
         } catch (APIManagementException e) {
             throw new RuntimeException(e);
         }
