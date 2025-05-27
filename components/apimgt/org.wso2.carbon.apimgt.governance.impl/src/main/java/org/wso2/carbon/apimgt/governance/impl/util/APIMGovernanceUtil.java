@@ -451,27 +451,6 @@ public class APIMGovernanceUtil {
     }
 
     /**
-     * Get all applicable policy IDs for an artifact given a specific state at which
-     * the artifact should be governed
-     *
-     * @param artifactType        Artifact Type
-     * @param apimGovernableState Governable state (The state at which the artifact should be governed)
-     * @param organization        Organization
-     * @return List of applicable policy IDs
-     * @throws APIMGovernanceException if an error occurs while checking for applicable policies
-     */
-    public static List<String> getApplicablePoliciesForArtifactWithStateGenAI(ExtendedArtifactType artifactType,
-                                                                         APIMGovernableState apimGovernableState,
-                                                                         String organization)
-            throws APIMGovernanceException {
-
-        PolicyManager policyManager = new PolicyManager();
-        Set<String> policies = new HashSet<>(policyManager.getOrganizationWidePoliciesByState(apimGovernableState, organization));
-
-        return new ArrayList<>(policies);
-    }
-
-    /**
      * Check for blocking actions in policies
      *
      * @param policyIds           List of policy IDs

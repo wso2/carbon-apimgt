@@ -1,38 +1,23 @@
 package org.wso2.carbon.apimgt.governance.rest.api.impl;
 
-import org.wso2.carbon.apimgt.governance.api.model.*;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.governance.api.error.APIMGovernanceException;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApiService;
-import org.wso2.carbon.apimgt.governance.rest.api.dto.*;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceDetailsDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceListDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryDTO;
+import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.util.APIMGovernanceAPIUtil;
 import org.wso2.carbon.apimgt.governance.rest.api.util.ComplianceAPIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+
 import javax.ws.rs.core.Response;
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
-import java.util.List;
-import java.io.InputStream;
-import org.apache.commons.io.IOUtils;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+
 /**
  * This class implements the ArtifactComplianceApiService interface.
  */
 public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiService {
-
-    private static final Log log = LogFactory.getLog(ArtifactComplianceApiServiceImpl.class);
 
     /**
      * This method retrieves compliance details for a specific API.
@@ -93,112 +78,6 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
                 username, organization);
 
         return Response.ok().entity(summaryDTO).build();
-    }
-
-    /**
-     * Get governance rule violation results for a specific API
-     *
-     * @param artifactType artifact type (REST_API or ASYNC_API)
-     * @param governableStates list of governable states
-     * @param apiSchemaInputStream input stream of the API schema file
-     * @param apiSchemaDetail attachment details
-     * @param label optional label
-     * @param messageContext message context
-     * @return Response
-     * @throws RuntimeException if an error occurs while getting the rule violation results
-     */
-    public Response getRuleViolationResultsByAPI(String artifactType, List<String> governableStates,
-                                                 InputStream apiSchemaInputStream, Attachment apiSchemaDetail,
-                                                 String label, MessageContext messageContext) {
-        String apiSchemaCode = null;
-
-        try {
-            String fileName = apiSchemaDetail.getContentDisposition().getParameter("filename");
-
-            if (fileName != null && fileName.endsWith(".zip")) {
-                try (ZipInputStream zis = new ZipInputStream(apiSchemaInputStream)) {
-                    ZipEntry entry;
-                    while ((entry = zis.getNextEntry()) != null) {
-                        if (entry.getName().endsWith("swagger.yaml")) {
-                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                            IOUtils.copy(zis, baos);
-                            apiSchemaCode = baos.toString(StandardCharsets.UTF_8);
-                            break;
-                        }
-                    }
-
-                    if (apiSchemaCode == null) {
-                        return Response.status(Response.Status.BAD_REQUEST)
-                                .entity("swagger.yaml not found in the uploaded zip file").build();
-                    }
-                }
-            } else if (fileName != null && fileName.endsWith(".txt")) {
-                apiSchemaCode = new String(apiSchemaInputStream.readAllBytes(), StandardCharsets.UTF_8);
-            } else {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("Unsupported file type. Only .zip or .txt are accepted.").build();
-            }
-
-            Map<RuleType, String> apiDefinition = new HashMap<>();
-            apiDefinition.put(RuleType.API_DEFINITION, apiSchemaCode);
-
-            // Convert artifactType string to ExtendedArtifactType enum
-            ExtendedArtifactType artifactEnum;
-            try {
-                artifactEnum = ExtendedArtifactType.valueOf(artifactType);
-            } catch (IllegalArgumentException e) {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("Invalid artifactType: " + artifactType).build();
-            }
-
-            // Convert governableStates strings to APIMGovernableState enums
-            List<APIMGovernableState> stateEnums = new ArrayList<>();
-            if (governableStates != null) {
-                for (String state : governableStates) {
-                    try {
-                        stateEnums.add(APIMGovernableState.valueOf(state));
-                    } catch (IllegalArgumentException e) {
-                        return Response.status(Response.Status.BAD_REQUEST)
-                                .entity("Invalid governable state: " + state).build();
-                    }
-                }
-            }
-
-            // If multiple states are provided, handle appropriately (only using the first for now)
-            APIMGovernableState selectedState = stateEnums.isEmpty() ? APIMGovernableState.API_CREATE : stateEnums.get(0);
-
-            ArtifactComplianceInfo complianceResult = PublisherCommonUtils.checkGovernanceComplianceGenAI(
-                    selectedState,
-                    artifactEnum,
-                    RestApiCommonUtil.getLoggedInUserTenantDomain(),
-                    apiDefinition
-            );
-
-            List<RuleViolation> violatedRulesOnly = complianceResult.getBlockingRuleViolations();
-            List<Map<String, String>> simplifiedViolations = new ArrayList<>();
-
-            for (RuleViolation violation : violatedRulesOnly) {
-                Map<String, String> violationMap = new HashMap<>();
-                violationMap.put("violatedPath", violation.getViolatedPath());
-                violationMap.put("ruleMessage", violation.getRuleMessage());
-                simplifiedViolations.add(violationMap);
-            }
-
-            Map<String, Object> responseMap = new HashMap<>();
-            responseMap.put("violatedRules", simplifiedViolations);
-
-            return Response.ok(responseMap).build();
-
-        } catch (IOException e) {
-            log.error("Error processing uploaded file", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error processing the uploaded file: " + e.getMessage()).build();
-        } catch (APIManagementException e) {
-            throw new RuntimeException(e);
-            log.error("Error checking governance compliance", e);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error checking governance compliance: " + e.getMessage()).build();
-        }
     }
 
     /**

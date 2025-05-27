@@ -172,44 +172,6 @@ public class APIMGovernanceServiceImpl implements APIMGovernanceService {
     }
 
     /**
-     * Evaluate compliance of the API synchronously
-     *
-     * @param artifactType           Artifact type (ExtendedArtifactType.REST_API)
-     * @param state                  State at which artifact should be governed (CREATE, UPDATE, DEPLOY, PUBLISH)
-     * @param artifactProjectContent This is a map of RuleType and String which contains the content of the artifact
-     *                               project. This is used to evaluate the compliance of the artifact.
-     *                               API_METADATA --> api.yaml content
-     *                               API_DEFINITION --> api definition content
-     *                               API_DOCUMENTATION --> api documentation content.
-     *                               <p>
-     *                               If not provided the details will be taken from DB
-     * @param organization           Organization
-     * @return ArtifactComplianceInfo object
-     * @throws APIMGovernanceException If an error occurs while evaluating compliance
-     */
-    @Override
-    public ArtifactComplianceInfo evaluateComplianceGenAI(ExtendedArtifactType artifactType,
-                                                          APIMGovernableState state, Map<RuleType, String> artifactProjectContent,
-                                                          String organization) throws APIMGovernanceException {
-
-        boolean isArtifactGovernable = true;
-        if (!isArtifactGovernable) {
-            String message = "Skipping sync compliance evaluation for artifact %s " +
-                    "in organization %s due to incompatible artifact type";
-            log.debug(message);
-            AuditLogger.log("Skip Sync Eval", message);
-            ArtifactComplianceInfo artifactComplianceInfo = new ArtifactComplianceInfo();
-            artifactComplianceInfo.setBlockingNecessary(false);
-            return artifactComplianceInfo;
-        }
-
-        List<String> applicablePolicyIds = APIMGovernanceUtil.getApplicablePoliciesForArtifactWithStateGenAI(artifactType, state, organization);
-
-        return complianceManager.handleComplianceEvalSyncGenAI
-                (artifactType, applicablePolicyIds,artifactProjectContent, state, organization);
-    }
-
-    /**
      * This method can be called to evaluate the compliance of the artifact without persisting the compliance data (A
      * dry run) using the provided artifact content file path and the artifact type.
      *

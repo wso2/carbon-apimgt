@@ -13,7 +13,6 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceDetailsD
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
-import java.io.File;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
 
 import java.util.List;
@@ -28,6 +27,5 @@ public interface ArtifactComplianceApiService {
       public Response getComplianceByAPIId(String apiId, MessageContext messageContext) throws APIMGovernanceException;
       public Response getComplianceStatusListOfAPIs(Integer limit, Integer offset, MessageContext messageContext) throws APIMGovernanceException;
       public Response getComplianceSummaryForAPIs(MessageContext messageContext) throws APIMGovernanceException;
-      public Response getRuleViolationResultsByAPI(String artifactType, List<String> governableStates, InputStream apiSchemaInputStream, Attachment apiSchemaDetail, String label, MessageContext messageContext) throws APIMGovernanceException;
       public Response getRulesetValidationResultsByAPIId(String apiId, String rulesetId, MessageContext messageContext) throws APIMGovernanceException;
 }

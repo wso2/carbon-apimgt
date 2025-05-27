@@ -4,7 +4,6 @@ import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceDetailsD
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceListDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ArtifactComplianceSummaryDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.ErrorDTO;
-import java.io.File;
 import org.wso2.carbon.apimgt.governance.rest.api.dto.RulesetValidationResultDTO;
 import org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApiService;
 import org.wso2.carbon.apimgt.governance.rest.api.impl.ArtifactComplianceApiServiceImpl;
@@ -95,25 +94,6 @@ ArtifactComplianceApiService delegate = new ArtifactComplianceApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
     public Response getComplianceSummaryForAPIs() throws APIMGovernanceException{
         return delegate.getComplianceSummaryForAPIs(securityContext);
-    }
-
-    @POST
-    @Path("/api/rule-violation-results")
-    @Consumes({ "multipart/form-data" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve rule violation results for a specific API", notes = "Retrieves the rule violation results after checking if the API complies with governance rulesets.", response = RulesetValidationResultDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
-        })
-    }, tags={ "Artifact Compliance",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "Successful response with governance rule violation results for specified API.", response = RulesetValidationResultDTO.class),
-        @ApiResponse(code = 400, message = "Bad request", response = ErrorDTO.class),
-        @ApiResponse(code = 401, message = "Unauthorized", response = ErrorDTO.class),
-        @ApiResponse(code = 403, message = "Forbidden", response = ErrorDTO.class),
-        @ApiResponse(code = 500, message = "Internal Server Error", response = ErrorDTO.class) })
-    public Response getRuleViolationResultsByAPI(@Multipart(value = "artifactType", required = false)  String artifactType, @Multipart(value = "governableStates", required = false)  List<String> governableStates,  @Multipart(value = "apiSchema", required = false) InputStream apiSchemaInputStream, @Multipart(value = "apiSchema" , required = false) Attachment apiSchemaDetail, @Multipart(value = "label", required = false)  String label) throws APIMGovernanceException{
-        return delegate.getRuleViolationResultsByAPI(artifactType, governableStates, apiSchemaInputStream, apiSchemaDetail, label, securityContext);
     }
 
     @GET

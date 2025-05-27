@@ -3578,29 +3578,6 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * This method is used to check governance compliance synchronously.
-     *
-     * @param state                  API state
-     * @param type                   API type
-     * @param organization           Organization of the logged-in user
-     * @param artifactProjectContent Content of the artifact project
-     * @return ArtifactComplianceInfo of compliance violations
-     * @throws APIManagementException If an error occurs while checking governance compliance
-     */
-    public static ArtifactComplianceInfo checkGovernanceComplianceGenAI(APIMGovernableState state,
-                                                                     ExtendedArtifactType type, String organization,
-                                                                     Map<RuleType, String> artifactProjectContent) throws APIManagementException {
-        try {
-            return apimGovernanceService.evaluateComplianceGenAI(
-                    type, state, artifactProjectContent, organization);
-
-        } catch (APIMGovernanceException e) {
-            log.error("Error occurred while executing governance compliance validation for API " , e);
-            return new ArtifactComplianceInfo(); // Return an empty object to prevent downstream NullPointerExceptions
-        }
-    }
-
-    /**
      * Check governance compliance for the API artifact asynchronously.
      *
      * @param artifactID   API ID
