@@ -19,7 +19,7 @@
 package org.wso2.carbon.apimgt.impl.dto.ai;
 
 /**
- * This class represent the Marketplace Assistant configuration DTO.
+ * This class represents the SDK Generation configuration DTO.
  */
 public class SDKGenerationConfigurationDTO {
 

@@ -571,6 +571,12 @@ public final class APIConstants {
         public static final String SDK_GENERATION_TOKEN_ENDPOINT = "TokenEndpoint";
         public static final String SDK_GENERATION_MERGE_SPEC_RESOURCE = "MergeSpecResource";
         public static final String SDK_GENERATION_GENERATE_CODE_RESOURCE = "GenerateCodeResource";
+        public static final String SPECIFICATIONS = "specifications";
+        public static final String APICONTEXTS = "contexts";
+        public static final String SPECIFICATION = "APISpecification";
+        public static final String METHODSFILE = "sdkMethodsFile";
+        public static final String USECASE = "useCase";
+        public static final String LANGUAGE = "language";
 
         private AI() {
 
