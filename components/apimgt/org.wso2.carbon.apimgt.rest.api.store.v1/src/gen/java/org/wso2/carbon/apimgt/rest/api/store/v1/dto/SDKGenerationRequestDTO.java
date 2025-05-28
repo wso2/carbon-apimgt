@@ -32,9 +32,10 @@ public class SDKGenerationRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
       @Valid
   @JsonProperty("apiIdsList")
+  @NotNull
   public APIIdsListDTO getApiIdsList() {
     return apiIdsList;
   }

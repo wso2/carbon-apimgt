@@ -135,7 +135,7 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
     @Path("/{applicationId}/generate-sdk/{language}")
     @Consumes({ "application/json" })
     @Produces({ "application/zip", "application/json" })
-    @ApiOperation(value = "Generate a single SDK for multiple APIs", notes = "Retrieve Swagger definitions for the provided API IDs and generate SDKs. ", response = byte[].class, authorizations = {
+    @ApiOperation(value = "Generate a single SDK for multiple APIs and optionally generate application code", notes = "Retrieve Swagger definitions for the provided API IDs and generate SDKs. Optionally generate application code if use case is provided. ", response = byte[].class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
             @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
