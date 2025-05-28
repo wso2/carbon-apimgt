@@ -1808,7 +1808,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/896658a0-b4ee-4535-bbfa-806c894a4015/generate-sdk"'
+            -H "Content-Type: application/json" -X POST -d @data.json "https://localhost:9443/api/am/devportal/v3/applications/896658a0-b4ee-4535-bbfa-806c894a4015/generate-sdk/java"'
 
   /applications/{applicationId}/generate-keys:
     post:
@@ -4388,6 +4388,8 @@ components:
     SDKGenerationRequest:
       title: SDK Generation Request
       type: object
+      required:
+        - apiIdsList
       properties:
         apiIdsList:
           $ref: '#/components/schemas/APIIdsList'
