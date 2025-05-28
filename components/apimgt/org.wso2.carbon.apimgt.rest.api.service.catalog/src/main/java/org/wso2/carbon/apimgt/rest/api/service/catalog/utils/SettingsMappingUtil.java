@@ -23,9 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.rest.api.service.catalog.dto.SettingsDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
