@@ -2,11 +2,11 @@ package org.wso2.carbon.apimgt.persistence.dto;
 
 import java.io.InputStream;
 
-public class ThumbnailResult {
+public class FileResult {
     private InputStream content;
     private String metadata;
 
-    public ThumbnailResult(InputStream content, String metadata) {
+    public FileResult(InputStream content, String metadata) {
         this.content = content;
         this.metadata = metadata;
     }

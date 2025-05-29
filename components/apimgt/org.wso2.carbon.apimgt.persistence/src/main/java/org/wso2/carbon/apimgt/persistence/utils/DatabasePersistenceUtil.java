@@ -468,4 +468,9 @@ public class DatabasePersistenceUtil {
         return "data:" + contentType + ";base64," + base64Encoded;
     }
 
+    public static String createWsdlFileName(String provider, String apiName, String apiVersion) {
+
+        return provider + "--" + apiName + apiVersion;
+    }
+
 }

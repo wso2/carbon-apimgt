@@ -114,7 +114,7 @@ public class SQLConstants {
             "DELETE FROM AM_ARTIFACT_DATA " +
                     "WHERE API_UUID = ? ";
 
-    public static final String ADD_THUMBNAIL_SQL =
+    public static final String ADD_FILE_ARTIFACT_SQL =
             "INSERT INTO AM_ARTIFACT_DATA (type, org, metadata, uuid, artifact, api_uuid) " +
                     "VALUES (?, ?, ?, ?, ?, ?)";
 
@@ -134,5 +134,17 @@ public class SQLConstants {
             "SELECT * FROM AM_ARTIFACT_DATA " +
             "WHERE API_UUID = ? " +
             "AND TYPE = 'ASYNC_API_DEFINITION' " +
+            "AND JSON_VALUE(org, '$.name') = ? ";
+
+    public static final String DELETE_THUMBNAIL_SQL =
+            "DELETE FROM AM_ARTIFACT_DATA " +
+            "WHERE type = 'THUMBNAIL' " +
+            "AND API_UUID = ? " +
+            "AND JSON_VALUE(org, '$.name') = ? ";
+
+    public static final String GET_WSDL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+            "WHERE type = 'WSDL' " +
+            "AND API_UUID = ? " +
             "AND JSON_VALUE(org, '$.name') = ? ";
 }

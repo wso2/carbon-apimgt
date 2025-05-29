@@ -17,7 +17,6 @@ import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.utils.DatabasePersistenceUtil;
 import org.wso2.carbon.apimgt.persistence.utils.PublisherAPISearchResultComparator;
 
-import java.io.File;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.*;
@@ -124,7 +123,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                     jsonObject.addProperty("thumbnailUrl", "");
                 }
             } catch (Exception e) {
-                log.error("Error while retrieving thumbnail for API: " + apiId, e);
+                //log.error("Error while retrieving thumbnail for API: " + apiId, e);
             }
 
             if (apiSchema != null) {
@@ -306,20 +305,67 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public void saveWSDL(Organization org, String apiId, ResourceFile wsdlResourceFile) throws WSDLPersistenceException {
+        try {
+            JsonObject metadataJson = new JsonObject();
 
+            if (wsdlResourceFile.getContentType() != null && !wsdlResourceFile.getContentType().isEmpty()) {
+                metadataJson.addProperty("fileType", wsdlResourceFile.getContentType());
+            }
+            String metadataJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(metadataJson);
+
+            JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
+            String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
+
+            persistenceDAO.addWSDL(apiId, orgJsonString, wsdlResourceFile.getContent(), metadataJsonString);
+        } catch (APIManagementException e) {
+            throw new WSDLPersistenceException("Error while saving WSDL for API: " + apiId, e);
+        }
     }
 
     @Override
     public ResourceFile getWSDL(Organization org, String apiId) throws WSDLPersistenceException {
-        return null;
+        try {
+            FileResult wsdlResult = persistenceDAO.getWSDL(apiId, org.getName());
+            if (wsdlResult != null) {
+                InputStream content = wsdlResult.getContent();
+                String metadata = wsdlResult.getMetadata();
+                JsonObject metadataJson = DatabasePersistenceUtil.stringTojsonObject(metadata);
+                String contentType = DatabasePersistenceUtil.safeGetAsString(metadataJson, "fileType");
+                if (contentType == null || contentType.isEmpty()) {
+                    contentType = "application/wsdl+xml"; // Default WSDL content type
+                }
+                ResourceFile resourceFile = new ResourceFile(content, contentType);
+                PublisherAPI publisherAPI = this.getPublisherAPI(org, apiId);
+                API api = APIMapper.INSTANCE.toApi(publisherAPI);
+                resourceFile.setName(DatabasePersistenceUtil.createWsdlFileName(
+                        api.getId().getApiName(), api.getId().getVersion(), api.getId().getProviderName()
+                ));
+                return resourceFile;
+            } else {
+                throw new WSDLPersistenceException("WSDL not found for API: " + apiId);
+            }
+        } catch (APIManagementException e) {
+            throw new WSDLPersistenceException("Error while retrieving WSDL for API: " + apiId, e);
+        } catch (APIPersistenceException e) {
+            throw new WSDLPersistenceException("Error while retrieving API for WSDL: " + apiId, e);
+        }
     }
 
     @Override
     public void saveOASDefinition(Organization org, String apiId, String apiDefinition) throws OASPersistenceException {
         try {
-            persistenceDAO.saveOASDefinition(apiId, apiDefinition);
+            String swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiId, org.getName());
+            if (swaggerDefinition != null) {
+                // If the API definition already exists, update it
+                persistenceDAO.saveOASDefinition(apiId, apiDefinition);
+            } else {
+                // If the API definition does not exist, create a new entry
+                persistenceDAO.addSwaggerDefinition(apiId, apiDefinition, DatabasePersistenceUtil.mapOrgToJson(org).toString());
+            }
         } catch (APIManagementException e) {
             throw new OASPersistenceException("Error while saving OAS definition", e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -328,7 +374,9 @@ public class DatabasePersistenceImpl implements APIPersistence {
         String swaggerDefinition = null;
         try {
             swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiId, org.getName());
-            swaggerDefinition = DatabasePersistenceUtil.getFormattedJsonString(swaggerDefinition);
+            if (swaggerDefinition != null) {
+                swaggerDefinition = DatabasePersistenceUtil.getFormattedJsonString(swaggerDefinition);
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -349,7 +397,9 @@ public class DatabasePersistenceImpl implements APIPersistence {
         String asyncApiDefinition = null;
         try {
             asyncApiDefinition = persistenceDAO.getAsyncAPIDefinitionByUUID(apiId, org.getName());
-            asyncApiDefinition = DatabasePersistenceUtil.getFormattedJsonString(asyncApiDefinition);
+            if (asyncApiDefinition != null) {
+                asyncApiDefinition = DatabasePersistenceUtil.getFormattedJsonString(asyncApiDefinition);
+            }
         } catch (APIManagementException e) {
             throw new RuntimeException(e);
         }
@@ -517,7 +567,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
     @Override
     public ResourceFile getThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException {
         try {
-           ThumbnailResult thumbnailResult = persistenceDAO.getThumbnail(apiId, org.getName());
+           FileResult thumbnailResult = persistenceDAO.getThumbnail(apiId, org.getName());
             if (thumbnailResult != null) {
                 InputStream content = thumbnailResult.getContent();
                 String metadata = thumbnailResult.getMetadata();
@@ -537,7 +587,11 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public void deleteThumbnail(Organization org, String apiId) throws ThumbnailPersistenceException {
-
+        try {
+            persistenceDAO.deleteThumbnail(apiId, org.getName());
+        } catch (APIManagementException e) {
+            throw new ThumbnailPersistenceException("Error while deleting thumbnail for API: " + apiId, e);
+        }
     }
 
     @Override

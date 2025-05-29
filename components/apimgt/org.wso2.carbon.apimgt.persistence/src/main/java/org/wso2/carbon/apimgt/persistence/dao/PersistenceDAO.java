@@ -1,15 +1,10 @@
 package org.wso2.carbon.apimgt.persistence.dao;
 
-import com.google.gson.JsonObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.persistence.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.persistence.dto.DocumentResult;
-import org.wso2.carbon.apimgt.persistence.dto.Organization;
-import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
-import org.wso2.carbon.apimgt.persistence.dto.ThumbnailResult;
-import org.wso2.carbon.apimgt.persistence.utils.DatabasePersistenceUtil;
+import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.utils.PersistanceDBUtil;
 
 import java.io.ByteArrayInputStream;
@@ -443,7 +438,7 @@ public class PersistenceDAO {
     }
 
     public void addThumbnail(String apiId, String org, InputStream fileStream, String metadata) throws APIManagementException {
-        String query = SQLConstants.ADD_THUMBNAIL_SQL;
+        String query = SQLConstants.ADD_FILE_ARTIFACT_SQL;
         try (Connection connection = PersistanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -472,8 +467,8 @@ public class PersistenceDAO {
         }
     }
 
-    public ThumbnailResult getThumbnail(String apiId, String org) throws APIManagementException {
-        ThumbnailResult thumbnailResult = null;
+    public FileResult getThumbnail(String apiId, String org) throws APIManagementException {
+        FileResult thumbnailResult = null;
         String query = SQLConstants.GET_THUMBNAIL_SQL;
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -484,13 +479,78 @@ public class PersistenceDAO {
                 if (rs.next()) {
                     InputStream content = rs.getBinaryStream("artifact");
                     String metadata = rs.getString("metadata");
-                    thumbnailResult = new ThumbnailResult(content, metadata);
+                    thumbnailResult = new FileResult(content, metadata);
                 }
             }
         } catch (SQLException e) {
             handleException("Error while retrieving the API thumbnail from the database", e);
         }
         return thumbnailResult;
+    }
+
+    public FileResult getWSDL(String apiId, String org) throws APIManagementException {
+        FileResult wsdlResult = null;
+        String query = SQLConstants.GET_WSDL_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiId);
+            prepStmt.setString(2, org);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    InputStream content = rs.getBinaryStream("artifact");
+                    String metadata = rs.getString("metadata");
+                    wsdlResult = new FileResult(content, metadata);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the WSDL from the database", e);
+        }
+        return wsdlResult;
+    }
+
+    public void deleteThumbnail(String apiId, String org) throws APIManagementException {
+        String query = SQLConstants.DELETE_THUMBNAIL_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiId);
+            prepStmt.setString(2, org);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while deleting the API thumbnail from the database", e);
+        }
+    }
+
+    public void addWSDL(String apiId, String org, InputStream wsdlStream, String metadata) throws APIManagementException {
+        String query = SQLConstants.ADD_FILE_ARTIFACT_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] data = new byte[8192];
+            int nRead;
+            while ((nRead = wsdlStream.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+            byte[] bytes = buffer.toByteArray();
+            int fileLength = bytes.length;
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+            try (PreparedStatement prepStmt = connection.prepareStatement(query)) {
+                prepStmt.setString(1, "WSDL");
+                prepStmt.setString(2, org);
+                prepStmt.setString(3, metadata);
+                prepStmt.setString(4, UUID.randomUUID().toString());
+                prepStmt.setBinaryStream(5, byteArrayInputStream, fileLength);
+                prepStmt.setString(6, apiId);
+                prepStmt.execute();
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding the WSDL to the database", e);
+        } catch (IOException e) {
+            handleException("Error while reading the WSDL file", e);
+        }
     }
 
     private void handleException(String msg, Throwable t) throws APIManagementException {
