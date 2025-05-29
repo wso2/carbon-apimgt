@@ -189,6 +189,26 @@ public class JWTGenerator extends AbstractJWTGenerator {
         return new HashMap<>();
     }
 
+    /**
+     * Retrieves user claims from the Key Manager for a given user and tenant context.
+     *
+     * This method communicates with the configured Key Manager to obtain claims associated
+     * with the specified user.
+     *
+     * @param username                   The username of the user whose claims are to be retrieved.
+     * @param accessToken                The access token associated with the user (can be {@code null}).
+     * @param tenantId                   The tenant ID corresponding to the user.
+     * @param dialectURI                 The claim dialect URI used to format the claims.
+     * @param keyManager                 The name of the configured Key Manager.
+     * @param isBindFederatedUserClaims A flag indicating whether federated user claims should be bound.
+     *                                   This is used in combination with the system-level
+     *                                   {@code BINDING_FEDERATED_USER_CLAIMS_FOR_OPAQUE} flag.
+     *
+     * @return A map of user claims if successfully retrieved from the Key Manager;
+     *         {@code null} if no claims are available or retrieval fails.
+     *
+     * @throws APIManagementException If an error occurs while retrieving claims from the Key Manager.
+     */
     private Map<String, String> getClaimsFromKeyManager(String username, String accessToken, int tenantId,
                                                         String dialectURI, String keyManager,
                                                         boolean isBindFederatedUserClaims)
