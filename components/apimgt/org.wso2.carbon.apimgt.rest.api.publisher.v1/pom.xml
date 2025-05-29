@@ -183,10 +183,6 @@
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.wso2.carbon.apimgt</groupId>
-            <artifactId>org.wso2.carbon.apimgt.governance.api</artifactId>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
@@ -286,14 +282,6 @@
                         <exclude>org/wso2/carbon/apimgt/rest/api/publisher/v1/**Api.**</exclude>
                         <exclude>org/wso2/carbon/apimgt/rest/api/publisher/v1/**Service.**</exclude>
                     </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>11</source>
-                    <target>11</target>
                 </configuration>
             </plugin>
         </plugins>

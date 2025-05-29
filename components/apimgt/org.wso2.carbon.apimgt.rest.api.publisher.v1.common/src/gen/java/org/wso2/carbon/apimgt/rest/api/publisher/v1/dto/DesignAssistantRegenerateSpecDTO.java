@@ -23,6 +23,7 @@ public class DesignAssistantRegenerateSpecDTO   {
     private String regeneratedSpec = null;
 
   /**
+   * Regenerated API specification.
    **/
   public DesignAssistantRegenerateSpecDTO regeneratedSpec(String regeneratedSpec) {
     this.regeneratedSpec = regeneratedSpec;
@@ -30,8 +31,9 @@ public class DesignAssistantRegenerateSpecDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "Regenerated API specification.")
   @JsonProperty("regenerated_spec")
+  @NotNull
   public String getRegeneratedSpec() {
     return regeneratedSpec;
   }
