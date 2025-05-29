@@ -201,6 +201,9 @@ public class JWTValidator {
             }
         }
 
+        boolean includeTokenInfoInMsgCtx = Boolean.parseBoolean(
+                System.getProperty(APIMgtGatewayConstants.INCLUDE_TOKEN_INFO_IN_MSG_CTX));
+
         if (StringUtils.isNotEmpty(jwtTokenIdentifier)) {
             if (RevokedJWTDataHolder.isJWTTokenSignatureExistsInRevokedMap(jwtTokenIdentifier)) {
                 if (log.isDebugEnabled()) {
@@ -208,6 +211,9 @@ public class JWTValidator {
                             getMaskedToken(jwtHeader));
                 }
                 log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
+                if (includeTokenInfoInMsgCtx) {
+                    synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token invalid");
+                }
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
@@ -229,6 +235,9 @@ public class JWTValidator {
                             + " Token: " + GatewayUtils.getMaskedToken(jwtHeader));
                 }
                 log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
+                if (includeTokenInfoInMsgCtx) {
+                    synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token invalid");
+                }
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
@@ -241,6 +250,9 @@ public class JWTValidator {
                             + " Token: " + GatewayUtils.getMaskedToken(jwtHeader));
                 }
                 log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
+                if (includeTokenInfoInMsgCtx) {
+                    synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token invalid");
+                }
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS, "Invalid JWT token");
             }
             if (!StringUtils.equals(entityId, authorizedParty) && RevokedJWTDataHolder.getInstance()
@@ -250,6 +262,9 @@ public class JWTValidator {
                             + " Token: " + GatewayUtils.getMaskedToken(jwtHeader));
                 }
                 log.error("Invalid JWT token. " + GatewayUtils.getMaskedToken(jwtHeader));
+                if (includeTokenInfoInMsgCtx) {
+                    synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token invalid");
+                }
                 throw new APISecurityException(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS,
                         "Invalid JWT token");
             }
@@ -276,12 +291,16 @@ public class JWTValidator {
                 if (!apiKeyValidationInfoDTO.isAuthorized()) {
                     log.debug(
                             "User is NOT authorized to access the Resource. API Subscription validation failed.");
+                    if (includeTokenInfoInMsgCtx) {
+                        synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token invalid");
+                    }
                     throw new APISecurityException(apiKeyValidationInfoDTO.getValidationStatus(),
                             "User is NOT authorized to access the Resource. API Subscription validation failed.");
 
                 }
                 // Validate scopes
-                validateScopes(apiContext, apiVersion, matchingResource, httpMethod, jwtValidationInfo, signedJWTInfo);
+                validateScopes(apiContext, apiVersion, matchingResource, httpMethod, jwtValidationInfo, signedJWTInfo,
+                        synCtx, includeTokenInfoInMsgCtx);
                 validateAudiences(signedJWTInfo);
                 synCtx.setProperty(APIMgtGatewayConstants.SCOPES, jwtValidationInfo.getScopes().toString());
                 synCtx.setProperty(APIMgtGatewayConstants.JWT_CLAIMS, jwtValidationInfo.getClaims());
@@ -312,10 +331,20 @@ public class JWTValidator {
                 return GatewayUtils.generateAuthenticationContext(jwtTokenIdentifier, jwtValidationInfo, apiKeyValidationInfoDTO,
                         endUserToken, true);
             } else {
+                if (includeTokenInfoInMsgCtx) {
+                    if (jwtValidationInfo.isExpired()) {
+                        synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token expired");
+                    } else {
+                        synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token invalid");
+                    }
+                }
                 throw new APISecurityException(jwtValidationInfo.getValidationCode(),
                         APISecurityConstants.getAuthenticationFailureMessage(jwtValidationInfo.getValidationCode()));
             }
         } else {
+            if (includeTokenInfoInMsgCtx) {
+                synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token invalid");
+            }
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
                     APISecurityConstants.API_AUTH_GENERAL_ERROR_MESSAGE);
         }
@@ -587,7 +616,7 @@ public class JWTValidator {
                 if (validateScopes) {
                     validateScopes(apiContext, apiVersion, matchingResource,
                             WebSocketApiConstants.WEBSOCKET_DUMMY_HTTP_METHOD_NAME, jwtValidationInfo,
-                            signedJWTInfo);
+                            signedJWTInfo, null, false);
                 }
                 log.debug("JWT authentication successful. user: " + apiKeyValidationInfoDTO.getEndUserName());
                 String endUserToken = generateBackendJWTForWS(jwtValidationInfo, apiKeyValidationInfoDTO, apiContext,
@@ -611,16 +640,19 @@ public class JWTValidator {
      * Validate scopes bound to the resource of the API being invoked against the scopes specified
      * in the JWT token payload.
      *
-     * @param apiContext        API Context
-     * @param apiVersion        API Version
-     * @param matchingResource  Accessed API resource
-     * @param httpMethod        API resource's HTTP method
-     * @param jwtValidationInfo Validated JWT Information
-     * @param jwtToken          JWT Token
+     * @param apiContext               API Context
+     * @param apiVersion               API Version
+     * @param matchingResource         Accessed API resource
+     * @param httpMethod               API resource's HTTP method
+     * @param jwtValidationInfo        Validated JWT Information
+     * @param jwtToken                 JWT Token
+     * @param synCtx                   MessageContext
+     * @param includeTokenInfoInMsgCtx Whether to include token info in message context
      * @throws APISecurityException in case of scope validation failure
      */
     private void validateScopes(String apiContext, String apiVersion, String matchingResource, String httpMethod,
-                                JWTValidationInfo jwtValidationInfo, SignedJWTInfo jwtToken)
+                                JWTValidationInfo jwtValidationInfo, SignedJWTInfo jwtToken, MessageContext synCtx,
+                                boolean includeTokenInfoInMsgCtx)
             throws APISecurityException {
 
         String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -650,6 +682,9 @@ public class JWTValidator {
             String message = "User is NOT authorized to access the Resource: " + matchingResource
                     + ". Scope validation failed.";
             log.debug(message);
+            if (includeTokenInfoInMsgCtx) {
+                synCtx.setProperty(APIMgtGatewayConstants.ACCESS_TOKEN_INVALID_REASON, "Access token invalid");
+            }
             throw new APISecurityException(APISecurityConstants.INVALID_SCOPE, message);
         }
     }
@@ -725,6 +760,7 @@ public class JWTValidator {
             }
             payload.setValid(false);
             payload.setValidationCode(APISecurityConstants.API_AUTH_INVALID_CREDENTIALS);
+            payload.setExpired(true);
             return payload;
         }
         return payload;
