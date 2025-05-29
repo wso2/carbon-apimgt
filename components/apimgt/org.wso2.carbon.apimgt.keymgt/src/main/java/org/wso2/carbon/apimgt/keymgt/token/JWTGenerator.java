@@ -200,7 +200,7 @@ public class JWTGenerator extends AbstractJWTGenerator {
      * @param tenantId                   The tenant ID corresponding to the user.
      * @param dialectURI                 The claim dialect URI used to format the claims.
      * @param keyManager                 The name of the configured Key Manager.
-     * @param isBindFederatedUserClaims A flag indicating whether federated user claims should be bound.
+     * @param isBindFederatedUserClaims  A flag indicating whether federated user claims should be bound.
      *                                   This is used in combination with the system-level
      *                                   {@code BINDING_FEDERATED_USER_CLAIMS_FOR_OPAQUE} flag.
      *
