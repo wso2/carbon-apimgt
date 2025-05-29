@@ -29,8 +29,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class PolicyEvaluationApiServiceImpl implements PolicyEvaluationApiService {
+
+    private static final Log log = LogFactory.getLog(PolicyEvaluationApiServiceImpl.class);
 
     public Response getPolicyEvaluationByAPI(String artifactType, String ruleCategory, String ruleType,
                                              InputStream fileInputStream, Attachment fileDetail,
@@ -38,6 +42,18 @@ public class PolicyEvaluationApiServiceImpl implements PolicyEvaluationApiServic
 
         ValidationEngine validationEngine = org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
+
+        ExtendedArtifactType extendedArtifactType;
+        RuleType parsedRuleType;
+        RuleCategory parsedRuleCategory;
+        try {
+            extendedArtifactType = ExtendedArtifactType.valueOf(artifactType);
+            parsedRuleType = RuleType.valueOf(ruleType);
+            parsedRuleCategory = RuleCategory.valueOf(ruleCategory);
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("Invalid ruleType or ruleCategory: " + e.getMessage()).build();
+        }
 
         Map<RuleType, String> apiProjectContentMap = new HashMap<>();
         String fileName = fileDetail.getContentDisposition().getParameter(RestApiConstants.CONTENT_DISPOSITION_FILENAME);
@@ -53,7 +69,7 @@ public class PolicyEvaluationApiServiceImpl implements PolicyEvaluationApiServic
                     || fileName.endsWith(APIConstants.JSON_FILE_EXTENSION)
                     || fileName.endsWith(APIConstants.GRAPHQL_SCHEMA_FILE_EXTENSION)
                     || fileName.endsWith(".txt"))) {
-                RuleType parsedRuleType = RuleType.valueOf(ruleType);
+
                 String apiProjectContent = new String(fileInputStream.readAllBytes(), StandardCharsets.UTF_8);
                 apiProjectContentMap.put(parsedRuleType, apiProjectContent);
 
@@ -61,9 +77,6 @@ public class PolicyEvaluationApiServiceImpl implements PolicyEvaluationApiServic
                 APIUtil.handleException(
                         "Unsupported file is uploaded : file name : " + fileName);
             }
-
-            ExtendedArtifactType extendedArtifactType = ExtendedArtifactType.valueOf(artifactType);
-            RuleCategory parsedRuleCategory = RuleCategory.valueOf(ruleCategory);
 
             APIMGovernanceService governanceService = new APIMGovernanceServiceImpl();
             ArtifactComplianceInfo artifactComplianceInfo = new ArtifactComplianceInfo();
@@ -89,10 +102,16 @@ public class PolicyEvaluationApiServiceImpl implements PolicyEvaluationApiServic
             artifactComplianceInfo.addNonBlockingViolations(ruleViolationsList);
             return Response.ok(artifactComplianceInfo).build();
 
-        } catch (IOException | APIManagementException e) {
+        } catch (IOException e) {
+            log.error("Error processing uploaded file: " + fileName, e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error processing the uploaded file.").build();
+                    .entity("Error processing the uploaded file: " + e.getMessage()).build();
+        } catch (APIManagementException e) {
+            log.error("API Management error during policy evaluation", e);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Internal error occurred during policy evaluation").build();
         } catch (APIMGovernanceException e) {
+            log.error("Governance service error", e);
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_GETTING_RULE_VIOLATIONS);
         }
     }
