@@ -169,6 +169,7 @@ public class APIKeyValidator {
                         getGatewayTokenCache().remove(apiKey);
                         // Put into invalid token cache
                         getInvalidTokenCache().put(apiKey, cachedToken);
+                        info.setExpired(true);
                     }
                     if (info.getEndUserToken() == null) {
                         return info;

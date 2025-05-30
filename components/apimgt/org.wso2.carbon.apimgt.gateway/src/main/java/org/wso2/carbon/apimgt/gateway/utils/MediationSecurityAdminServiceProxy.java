@@ -17,6 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.utils;
 
+import org.apache.axis2.AxisFault;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
@@ -64,6 +65,25 @@ public class MediationSecurityAdminServiceProxy {
             throw new APIManagementException(msg, e);
         }
         return encodedValue;
+    }
+
+    /**
+     * Decrypt the provided cipher test
+     *
+     * @param cipherText cipher text to be decrypted
+     * @return decrypted plain text
+     * @throws APIManagementException when an error occurs while decrypting
+     */
+    public String doDecryption(String cipherText) throws APIManagementException {
+
+        String decodedValue = null;
+        try {
+            decodedValue = mediationSecurityAdminService.doDecrypt(cipherText);
+        } catch (AxisFault e) {
+            String msg = "Failed to decrypt the cipherText";
+            throw new APIManagementException(msg, e);
+        }
+        return decodedValue;
     }
 
     public boolean isAliasExist(String alias) throws APIManagementException {

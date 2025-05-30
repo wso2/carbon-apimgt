@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.rest.api.gateway.impl;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.rest.api.gateway.ServerStartupHealthcheckApiService;
 
@@ -30,7 +31,7 @@ public class ServerStartupHealthcheckApiServiceImpl implements ServerStartupHeal
     public Response serverStartupHealthcheckGet(MessageContext messageContext) {
         boolean isAllApisDeployed = GatewayUtils.isAllApisDeployed();
         boolean isAllGatewayPoliciesDeployed = GatewayUtils.isAllGatewayPoliciesDeployed();
-        if (isAllApisDeployed && isAllGatewayPoliciesDeployed) {
+        if (GatewayUtils.isTenantsProvisioned() && isAllApisDeployed && isAllGatewayPoliciesDeployed) {
             return Response.status(Response.Status.OK).build();
         }
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();

@@ -111,7 +111,6 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                                                MessageContext messageContext) throws APIManagementException {
 
         RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
-        RestApiAdminUtils.validateThrottlePolicyDefaultLimitProperty(body);
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -305,7 +304,6 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                                                       MessageContext messageContext) throws APIManagementException {
 
         RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
-        RestApiAdminUtils.validateThrottlePolicyDefaultLimitProperty(body);
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -506,7 +504,6 @@ public class ThrottlingApiServiceImpl implements ThrottlingApiService {
                                                MessageContext messageContext) throws APIManagementException {
 
         RestApiAdminUtils.validateThrottlePolicyNameProperty(body.getPolicyName());
-        RestApiAdminUtils.validateThrottlePolicyDefaultLimitProperty(body);
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
