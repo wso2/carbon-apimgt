@@ -104,6 +104,9 @@ public class InboundWebSocketProcessor {
             setUris(req, inboundMessageContext);
             InboundWebsocketProcessorUtil.setTenantDomainToContext(inboundMessageContext);
             setMatchingResource(ctx, req, inboundMessageContext);
+            // This needs to be called after setMatchingResource() to correctly set the fullRequestPath when invoking
+            // with authorization as a query parameter
+            setUris(req, inboundMessageContext);
             String userAgent = req.headers().get(HttpHeaders.USER_AGENT);
 
             // '-' is used for empty values to avoid possible errors in DAS side.
