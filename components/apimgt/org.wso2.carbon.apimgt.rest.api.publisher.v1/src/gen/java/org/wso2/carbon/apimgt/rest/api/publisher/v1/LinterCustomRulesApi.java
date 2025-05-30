@@ -49,7 +49,7 @@ LinterCustomRulesApiService delegate = new LinterCustomRulesApiServiceImpl();
         @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response getLinterCustomRules() throws APIManagementException{
-        return delegate.getLinterCustomRules(securityContext);
+    public Response getLinterCustomRules( @ApiParam(value = "")  @QueryParam("apiId") String apiId,  @ApiParam(value = "")  @QueryParam("apiType") String apiType) throws APIManagementException{
+        return delegate.getLinterCustomRules(apiId, apiType, securityContext);
     }
 }

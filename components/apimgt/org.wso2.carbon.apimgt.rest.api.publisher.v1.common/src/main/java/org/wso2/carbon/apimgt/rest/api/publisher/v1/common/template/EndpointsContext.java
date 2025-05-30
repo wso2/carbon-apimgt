@@ -15,24 +15,13 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template;
 
-import com.google.gson.Gson;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.VelocityContext;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.dto.EndpointConfigDTO;
-import org.wso2.carbon.apimgt.api.dto.EndpointDTO;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.api.model.SimplifiedEndpoint;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * EndpointsContext is responsible for handling API and APIProduct endpoint configurations.
@@ -41,20 +30,23 @@ import java.util.stream.Collectors;
 public class EndpointsContext extends ConfigContextDecorator {
 
     private API api;
-    private List<EndpointDTO> endpointDTOList;
+    private List<SimplifiedEndpoint> endpoints;
+    private SimplifiedEndpoint defaultEndpoint;
 
     /**
      * Constructs an EndpointsContext instance for an API.
      *
-     * @param context         The base configuration context
-     * @param api             The API associated with the endpoints
-     * @param endpointDTOList The list of endpoint DTOs
+     * @param context   The base configuration context
+     * @param api       The API associated with the endpoints
+     * @param endpoints The list of endpoints
      */
-    public EndpointsContext(ConfigContext context, API api, List<EndpointDTO> endpointDTOList) {
+    public EndpointsContext(ConfigContext context, API api, List<SimplifiedEndpoint> endpoints,
+                            SimplifiedEndpoint defaultEndpoint) {
 
         super(context);
         this.api = api;
-        this.endpointDTOList = endpointDTOList;
+        this.endpoints = endpoints;
+        this.defaultEndpoint = defaultEndpoint;
     }
 
     /**
@@ -79,193 +71,10 @@ public class EndpointsContext extends ConfigContextDecorator {
 
         VelocityContext context = super.getContext();
 
-        if (this.endpointDTOList != null) {
-            Map<String, List<SimplifiedEndpointDTO>> groupedEndpoints = simplifyEndpoints(this.endpointDTOList).stream()
-                    .collect(Collectors.groupingBy(SimplifiedEndpointDTO::getDeploymentStage));
-
-            List<SimplifiedEndpointDTO> productionEndpoints =
-                    new ArrayList<>(groupedEndpoints.getOrDefault(APIConstants.PRODUCTION, Collections.emptyList()));
-            List<SimplifiedEndpointDTO> sandboxEndpoints =
-                    new ArrayList<>(groupedEndpoints.getOrDefault(APIConstants.SANDBOX, Collections.emptyList()));
-
-            SimplifiedEndpointDTO defaultProductionEndpoint = Optional.ofNullable(api.getPrimaryProductionEndpointId())
-                    .map(id -> findEndpointByUuid(productionEndpoints, id))
-                    .orElseGet(() -> !productionEndpoints.isEmpty() ? productionEndpoints.get(0) : null);
-            SimplifiedEndpointDTO defaultSandboxEndpoint = Optional.ofNullable(api.getPrimarySandboxEndpointId())
-                    .map(id -> findEndpointByUuid(sandboxEndpoints, id))
-                    .orElseGet(() -> !sandboxEndpoints.isEmpty() ? sandboxEndpoints.get(0) : null);
-
-            context.put("productionEndpoints", productionEndpoints);
-            context.put("sandboxEndpoints", sandboxEndpoints);
-            context.put("defaultProductionEndpoint", defaultProductionEndpoint);
-            context.put("defaultSandboxEndpoint", defaultSandboxEndpoint);
-        } else if (api.getEndpointConfig() != null) {
-            EndpointConfigDTO endpointConfigDTO = new Gson().fromJson(api.getEndpointConfig(), EndpointConfigDTO.class);
-            if (endpointConfigDTO.getProductionEndpoints() != null) {
-                addDefaultEndpointFromEndpointConfig(context, APIConstants.PRODUCTION, api);
-            }
-
-            if (endpointConfigDTO.getSandboxEndpoints() != null) {
-                addDefaultEndpointFromEndpointConfig(context, APIConstants.SANDBOX, api);
-            }
+        if (this.endpoints != null) {
+            context.put("endpoints", endpoints);
         }
-
+        context.put("defaultEndpoint", defaultEndpoint);
         return context;
-    }
-
-    /**
-     * Adds a default endpoint to the context based on the provided deploymentStage.
-     *
-     * @param context     The context map to store the default endpoint.
-     * @param deploymentStage The deploymentStage type (Production/Sandbox).
-     * @param api         The API object containing endpoint configurations.
-     */
-    private static void addDefaultEndpointFromEndpointConfig(VelocityContext context, String deploymentStage, API api) {
-
-        EndpointDTO defaultEndpoint = new EndpointDTO();
-        defaultEndpoint.setDeploymentStage(deploymentStage);
-        defaultEndpoint.setEndpointConfig(new Gson().fromJson(api.getEndpointConfig(), EndpointConfigDTO.class));
-
-        String contextKey = deploymentStage.equals(APIConstants.PRODUCTION) ? "defaultProductionEndpoint" :
-                "defaultSandboxEndpoint";
-        context.put(contextKey, new SimplifiedEndpointDTO(defaultEndpoint));
-    }
-
-    /**
-     * Finds an endpoint by its unique identifier.
-     *
-     * @param endpointList The list of endpoints to search
-     * @param endpointUuid The UUID of the endpoint to find
-     * @return The matching {@link EndpointDTO} if found, otherwise null
-     */
-    public static SimplifiedEndpointDTO findEndpointByUuid(List<SimplifiedEndpointDTO> endpointList,
-                                                           String endpointUuid) {
-
-        return endpointList.stream()
-                .filter(endpoint -> endpointUuid.equals(endpoint.getEndpointUuid()))
-                .findFirst()
-                .orElse(null);
-    }
-
-    /**
-     * Simplifies a list of EndpointDTO objects into a list of SimplifiedEndpointDTO objects.
-     *
-     * @param endpoints The list of endpoints to simplify
-     * @return A list of simplified endpoint DTOs
-     */
-    public static List<SimplifiedEndpointDTO> simplifyEndpoints(List<EndpointDTO> endpoints) {
-
-        if (endpoints.isEmpty()) {
-            return new ArrayList<>();
-        }
-        return endpoints.stream()
-                .map(SimplifiedEndpointDTO::new)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * A simplified representation of an EndpointDTO, containing key details.
-     */
-    public static class SimplifiedEndpointDTO {
-
-        private String endpointUuid;
-        private boolean endpointSecurityEnabled;
-        private String endpointName;
-        private String apiKeyIdentifier;
-        private String apiKeyValue;
-        private String apiKeyIdentifierType;
-        private String deploymentStage;
-        private static final Log log = LogFactory.getLog(SimplifiedEndpointDTO.class);
-
-        /**
-         * Constructs a SimplifiedEndpointDTO from an EndpointDTO.
-         *
-         * @param endpointDTO The endpoint to simplify
-         */
-        public SimplifiedEndpointDTO(EndpointDTO endpointDTO) {
-
-            if (endpointDTO == null) {
-                return;
-            }
-
-            this.endpointUuid = endpointDTO.getEndpointUuid();
-            this.endpointName = endpointDTO.getEndpointName();
-            this.deploymentStage = endpointDTO.getDeploymentStage();
-
-            if (endpointDTO.getEndpointConfig() != null) {
-                EndpointConfigDTO.EndpointSecurityConfig securityConfig =
-                        endpointDTO.getEndpointConfig().getEndpointSecurity();
-                if (securityConfig != null) {
-                    this.endpointSecurityEnabled = true;
-                    EndpointSecurity endpointSecurity = null;
-                    if (APIConstants.PRODUCTION.equals(deploymentStage)) {
-                        endpointSecurity = securityConfig.getProduction();
-                    } else if (APIConstants.SANDBOX.equals(deploymentStage)) {
-                        endpointSecurity = securityConfig.getSandbox();
-                    }
-                    if (endpointSecurity != null && endpointSecurity.isEnabled()) {
-                        this.apiKeyIdentifier = endpointSecurity.getApiKeyIdentifier();
-                        this.apiKeyValue = endpointSecurity.getApiKeyValue();
-                        this.apiKeyIdentifierType = endpointSecurity.getApiKeyIdentifierType();
-                    }
-                } else {
-                    this.endpointSecurityEnabled = false;
-                }
-            }
-        }
-
-        public String getDeploymentStage() {
-
-            return deploymentStage;
-        }
-
-        public String getEndpointUuid() {
-
-            return endpointUuid;
-        }
-
-        public String getEndpointName() {
-
-            return endpointName;
-        }
-
-        public String getApiKeyIdentifier() {
-
-            return apiKeyIdentifier;
-        }
-
-        public String getApiKeyValue() {
-
-            return apiKeyValue;
-        }
-
-        public String getApiKeyIdentifierType() {
-
-            return apiKeyIdentifierType;
-        }
-
-        public boolean getEndpointSecurityEnabled() {
-
-            return endpointSecurityEnabled;
-        }
-
-        /**
-         * Returns a string representation of the simplified endpoint.
-         *
-         * @return A formatted string containing endpoint details
-         */
-        @Override
-        public String toString() {
-
-            return "SimplifiedEndpointDTO{" +
-                    "  endpointUuid='" + endpointUuid + '\'' +
-                    ", endpointSecurityEnabled=" + endpointSecurityEnabled +
-                    ", endpointName='" + endpointName + '\'' +
-                    ", apiKeyIdentifier='" + apiKeyIdentifier + '\'' +
-                    ", apiKeyValue='" + apiKeyValue + '\'' +
-                    ", apiKeyIdentifierType='" + apiKeyIdentifierType + '\'' +
-                    ", deploymentStage='" + deploymentStage + '\'' +
-                    '}';
-        }
     }
 }

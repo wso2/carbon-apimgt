@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
@@ -36,6 +37,7 @@ import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import java.io.InputStream;
@@ -49,23 +51,37 @@ public class LinterCustomRulesApiServiceImpl implements LinterCustomRulesApiServ
     private static final String linterCustomRulesKey = "LinterCustomRules";
 
     /**
-     * Get linter custom rules (LinterCustomRules) from the tenant config
+     * Get linter custom rules from tenant-config
      *
-     * @return content of LinterCustomRules in tenant config
-     * @throws APIManagementException
+     * @param apiId          API ID if specified
+     * @param messageContext message context
+     * @return Linter custom rules
+     * @throws APIManagementException if an error occurs while getting linter custom rules
      */
-    public Response getLinterCustomRules(MessageContext messageContext) throws APIManagementException {
+    public Response getLinterCustomRules(String apiId, String apiType, MessageContext messageContext)
+            throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         String tenantConfig = apiAdmin.getTenantConfig(RestApiCommonUtil.getLoggedInUserTenantDomain());
+        String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
+
+        List<String> rulesets = new ArrayList<>();
 
         try {
             JSONObject jsonObject = new JSONObject(tenantConfig);
             if (jsonObject.has(linterCustomRulesKey)) {
                 String customRulesJson = jsonObject.getJSONObject(linterCustomRulesKey).toString();
-                return Response.ok().entity(customRulesJson)
-                        .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_JSON).build();
+                if (apiId == null && apiType == null) {
+                    return Response.ok().entity(customRulesJson)
+                            .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_JSON).build();
+                }
+                rulesets.add(customRulesJson);
             }
+            List<String> governanceRulesets = PublisherCommonUtils
+                    .getGovernanceRulesetsForLinter(apiId, apiType, organization);
+            rulesets.addAll(governanceRulesets);
+            return Response.ok().entity(rulesets)
+                    .header(RestApiConstants.HEADER_CONTENT_TYPE, RestApiConstants.APPLICATION_JSON).build();
         } catch (JSONException e) {
             RestApiUtil.handleInternalServerError("Error while getting linter custom rules from the tenant " +
                     "config", e, log);

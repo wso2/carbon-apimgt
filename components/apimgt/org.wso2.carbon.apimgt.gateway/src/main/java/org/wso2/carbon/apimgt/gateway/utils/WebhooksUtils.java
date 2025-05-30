@@ -124,14 +124,26 @@ public class WebhooksUtils {
      */
     public static String generateAPIKey(MessageContext messageContext, String tenantDomain)
             throws DataNotFoundException {
+        return generateAPI(messageContext, tenantDomain).getUuid();
+    }
+
+    /**
+     * Generates an API object based on the provided message context and tenant domain.
+     *
+     * @param messageContext The message context containing properties such as API context and version.
+     * @param tenantDomain   The tenant domain to retrieve the subscription store.
+     * @return The API object corresponding to the given context and version.
+     * @throws DataNotFoundException If the API information cannot be found for the given context and version.
+     */
+    public static API generateAPI(MessageContext messageContext, String tenantDomain) throws DataNotFoundException {
         String context = (String) messageContext.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
-        API api = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain).
-                getApiByContextAndVersion(context, apiVersion);
+        API api = SubscriptionDataHolder.getInstance().getTenantSubscriptionStore(tenantDomain)
+                .getApiByContextAndVersion(context, apiVersion);
         if (api == null) {
             throw new DataNotFoundException("Error occurred when getting API information");
         }
-        return api.getUuid();
+        return api;
     }
 
     /**

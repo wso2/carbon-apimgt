@@ -1,0 +1,17 @@
+# Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+#
+# This software is the property of WSO2 LLC. and its suppliers, if any.
+# Dissemination of any information or reproduction of any material contained
+# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
+# You may not alter or remove any copyright or other notice from copies of this content.
+
+name: WSO2 API Management Best Practices
+description: This policy enforces a set of best practices recommended by WSO2 for APIs on the WSO2 API Manager.
+labels:
+  - GLOBAL
+governableStates:
+  - API_CREATE
+  - API_UPDATE
+rulesetNames:
+  - WSO2 REST API Design Guidelines
+  - WSO2 API Management Guidelines

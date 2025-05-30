@@ -26,7 +26,7 @@ import javax.validation.constraints.*;
 
 @Api(description = "the retrieve-api-artifacts API")
 
-@Produces({ "application/json" })
+
 
 
 public class RetrieveApiArtifactsApi  {
@@ -44,7 +44,7 @@ RetrieveApiArtifactsApiService delegate = new RetrieveApiArtifactsApiServiceImpl
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "List of runtime Artifacts", response = Void.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response retrieveApiArtifactsPost(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  label associated with the APIs ")  @QueryParam("gatewayLabel") String gatewayLabel,  @ApiParam(value = "type of gateway ")  @QueryParam("type") String type, @ApiParam(value = "API UUID list payload" ) UUIDListDTO uuidList) throws APIManagementException{
+    public Response retrieveApiArtifactsPost( @NotNull  @ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.  label associated with the APIs ")  @QueryParam("gatewayLabel") String gatewayLabel,  @ApiParam(value = "type of gateway ")  @QueryParam("type") String type, @ApiParam(value = "API UUID list payload" ) UUIDListDTO uuidList) throws APIManagementException{
         return delegate.retrieveApiArtifactsPost(xWSO2Tenant, gatewayLabel, type, uuidList, securityContext);
     }
 }

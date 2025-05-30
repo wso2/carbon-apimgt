@@ -82,6 +82,18 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
                                   MessageContext messageContext) throws APIMGovernanceException {
         RulesetInfoDTO createdRulesetDTO;
         URI createdRulesetURI;
+
+        // Validation done manually for multipart form data
+        if (name != null && name.length() > 256) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                    String.format("Rule name `%s` exceeds " +
+                            "the maximum length of 256 characters", name));
+        } else if (description != null && description.length() > 1024) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                    String.format("Rule description `%s` exceeds " +
+                            "the maximum length of 1024 characters", description));
+        }
+
         Ruleset ruleset = new Ruleset();
         try {
             ruleset.setName(name);
@@ -115,7 +127,8 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
                     name);
             throw new APIMGovernanceException(error, e, APIMGovExceptionCodes.INTERNAL_SERVER_ERROR);
         } catch (IOException e) {
-            throw new APIMGovernanceException("Error while converting ruleset content stream", e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes
+                    .ERROR_WHILE_COVERTING_RULESET_CONTENT_STREAM_TO_BYTE_ARRAY, e);
         } finally {
             IOUtils.closeQuietly(rulesetContentInputStream);
         }
@@ -145,6 +158,17 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
                                       String description, String ruleCategory, String documentationLink,
                                       String provider, MessageContext messageContext)
             throws APIMGovernanceException {
+
+        // Validation done manually to multipart form data
+        if (name != null && name.length() > 256) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                    String.format("Rule name `%s` exceeds " +
+                            "the maximum length of 256 characters", name));
+        } else if (description != null && description.length() > 1024) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes.BAD_REQUEST,
+                    String.format("Rule description `%s` exceeds " +
+                            "the maximum length of 1024 characters", description));
+        }
 
         try {
             Ruleset ruleset = new Ruleset();
@@ -176,7 +200,8 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
             return Response.status(Response.Status.OK).entity(RulesetMappingUtil.
                     fromRulesetInfoToRulesetInfoDTO(updatedRuleset)).build();
         } catch (IOException e) {
-            throw new APIMGovernanceException("Error while converting ruleset content stream", e);
+            throw new APIMGovernanceException(APIMGovExceptionCodes
+                    .ERROR_WHILE_COVERTING_RULESET_CONTENT_STREAM_TO_BYTE_ARRAY, e);
         } finally {
             IOUtils.closeQuietly(rulesetContentInputStream);
         }
@@ -196,7 +221,8 @@ public class RulesetsApiServiceImpl implements RulesetsApiService {
         RulesetManager rulesetManager = new RulesetManager();
 
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
-        rulesetManager.deleteRuleset(rulesetId, organization);
+        String username = APIMGovernanceAPIUtil.getLoggedInUsername();
+        rulesetManager.deleteRuleset(rulesetId, username, organization);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 

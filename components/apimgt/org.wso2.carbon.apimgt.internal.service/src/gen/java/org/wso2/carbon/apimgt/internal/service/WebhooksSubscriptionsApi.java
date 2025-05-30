@@ -26,7 +26,7 @@ import javax.validation.constraints.*;
 
 @Api(description = "the webhooks-subscriptions API")
 
-@Produces({ "application/json" })
+
 
 
 public class WebhooksSubscriptionsApi  {
@@ -44,7 +44,7 @@ WebhooksSubscriptionsApiService delegate = new WebhooksSubscriptionsApiServiceIm
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "An array of webhooks subscriptions", response = WebhooksSubscriptionsListDTO.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response webhooksSubscriptionsGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be             retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant) throws APIManagementException{
+    public Response webhooksSubscriptionsGet( @NotNull  @ApiParam(value = "This is used to specify the tenant domain, where the resource need to be             retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant) throws APIManagementException{
         return delegate.webhooksSubscriptionsGet(xWSO2Tenant, securityContext);
     }
 }

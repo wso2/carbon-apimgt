@@ -161,4 +161,13 @@ public class PersistenceUtil {
         }
         return skipRoles;
     }
+    
+    public static boolean areOrganizationsRegistered(UserContext userContext) {
+        boolean orgAvailable = false;
+        Map<String, Object> properties = userContext.getProperties();
+        if (properties != null && properties.containsKey(APIConstants.USER_CTX_PROPERTY_ORGS_AVAILABLE)) {
+            orgAvailable = (Boolean) properties.get(APIConstants.USER_CTX_PROPERTY_ORGS_AVAILABLE);
+        }
+        return orgAvailable;
+    }
 }

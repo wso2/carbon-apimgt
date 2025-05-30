@@ -134,8 +134,9 @@ public class PoliciesApiServiceImpl implements PoliciesApiService {
             throws APIMGovernanceException {
         PolicyManager policyManager = new PolicyManager();
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String username = APIMGovernanceAPIUtil.getLoggedInUsername();
 
-        policyManager.deletePolicy(policyId, organization);
+        policyManager.deletePolicy(policyId, username, organization);
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 

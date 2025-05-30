@@ -18,37 +18,70 @@
 
 package org.wso2.carbon.apimgt.api.gateway;
 
-public class RBEndpointDTO {
+/**
+ * DTO representing a model endpoint in API Gateway.
+ */
+public class ModelEndpointDTO {
 
     private String model;
     private String endpointId;
     private double weight;
 
+    /**
+     * Gets the model name.
+     *
+     * @return the model name
+     */
     public String getModel() {
 
         return model;
     }
 
+    /**
+     * Sets the model name.
+     *
+     * @param model the model name to set
+     */
     public void setModel(String model) {
 
         this.model = model;
     }
 
+    /**
+     * Gets the endpoint ID.
+     *
+     * @return the endpoint ID
+     */
     public String getEndpointId() {
 
         return endpointId;
     }
 
+    /**
+     * Sets the endpoint ID.
+     *
+     * @param endpointId the endpoint ID to set
+     */
     public void setEndpointId(String endpointId) {
 
         this.endpointId = endpointId;
     }
 
+    /**
+     * Gets the weight of the endpoint.
+     *
+     * @return the weight
+     */
     public double getWeight() {
 
         return weight;
     }
 
+    /**
+     * Sets the weight of the endpoint.
+     *
+     * @param weight the weight to set
+     */
     public void setWeight(double weight) {
 
         this.weight = weight;

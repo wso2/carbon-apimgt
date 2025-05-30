@@ -173,7 +173,10 @@ public class APIKeyValidationService {
         log.debug("State after calling validateScopes... " + state);
 
         if (state && APIKeyMgtDataHolder.isJwtGenerationEnabled() &&
-                validationContext.getValidationInfoDTO().getEndUserName() != null && !validationContext.isCacheHit()) {
+                (validationContext.getValidationInfoDTO().getEndUserName() != null ||
+                        (validationContext.getTokenInfo() != null &&
+                                validationContext.getTokenInfo().isApplicationToken())) &&
+                !validationContext.isCacheHit()) {
             Timer timer5 = MetricManager.timer(org.wso2.carbon.metrics.manager.Level.INFO, MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), "GENERATE_JWT"));
             Timer.Context timerContext5 = timer5.start();

@@ -548,6 +548,11 @@ public final class APIConstants {
         public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
         public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE = "ApiCountResource";
         public static final String AI_CONFIGURATION = "AiConfiguration";
+        public static final String AI_CONFIGURATION_FAILOVER_CONFIGURATIONS = "FailoverConfigurations";
+        public static final String AI_CONFIGURATION_ROUND_ROBIN_CONFIGURATIONS = "RoundRobinConfigurations";
+        public static final String AI_CONFIGURATION_FAILOVER_CONFIGURATIONS_FAILOVER_ENDPOINTS_LIMIT =
+                "FailoverEndpointsLimit";
+        public static final String AI_CONFIGURATION_DEFAULT_REQUEST_TIMEOUT = "DefaultRequestTimout";
 
         public static final String DESIGN_ASSISTANT = "DesignAssistant";
         public static final String DESIGN_ASSISTANT_ENABLED = "Enabled";
@@ -557,6 +562,7 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_TOKEN_ENDPOINT = "TokenEndpoint";
         public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
+        public static final String DESIGN_ASSISTANT_REGENERATE_SPEC_RESOURCE = "RegenerateSpecResource";
 
         private AI() {
 
@@ -1699,6 +1705,7 @@ public final class APIConstants {
     public static final String OPEN_API_V3 = "3.0.x";
     public static final String OPEN_API = "openapi";
     public static final String OAS_V31 = "v31";
+    public static final String OAS_V30 = "v30";
     public static final String OPEN_API_V31_VERSION = "3.1.0";
     public static final String OPEN_API_VERSION_REGEX = "3\\.0\\.\\d{1,}";
     public static final String SWAGGER_IS_MISSING_MSG = "swagger is missing";
@@ -1727,6 +1734,11 @@ public final class APIConstants {
     public static final String SWAGGER_FILE = "file";
     public static final String SWAGGER_RESOURCE_PATH = "resourcePath";
     public static final String API_VERSION = "apiVersion";
+
+    public static final String OPENAPI_OBJECT_DATA_TYPE = "object";
+    public static final String OPENAPI_ARRAY_DATA_TYPE = "array";
+    public static final String OPENAPI_STRING_DATA_TYPE = "string";
+    public static final String OPENAPIV31_SCHEMA_TYPE_NULLABLE = "null";
 
     //swagger MG related constants
     public static final String X_WSO2_AUTH_HEADER = "x-wso2-auth-header";
@@ -1829,6 +1841,7 @@ public final class APIConstants {
     public static final String ENDPOINT_URLS = "urls";
     public static final String ENDPOINT_URL = "url";
     public static final String ENDPOINT_SECURITY_TYPE = "type";
+    public static final String ENDPOINT_SECURITY_TYPE_NONE = "none";
     public static final String ENDPOINT_SECURITY_TYPE_BASIC = "basic";
     public static final String ENDPOINT_SECURITY_TYPE_DIGEST = "digest";
     public static final String ENDPOINT_SECURITY_TYPE_OAUTH = "oauth";
@@ -1845,6 +1858,15 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_CLIENT_ID = "clientId";
     public static final String ENDPOINT_SECURITY_CLIENT_SECRET = "clientSecret";
     public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
+    public static final String ENDPOINT_SECURITY_PROXY_PASSWORD = "proxyPassword";
+    public static final String CONNECTION_TIMEOUT_CONFIG_TYPE = "connectionTimeoutConfigType";
+    public static final String PROXY_CONFIG_TYPE = "proxyConfigType";
+    public static final String CONNECTION_TIMEOUT_DURATION = "connectionTimeoutDuration";
+    public static final String CONNECTION_REQUEST_TIMEOUT_DURATION = "connectionRequestTimeoutDuration";
+    public static final String SOCKET_TIMEOUT_DURATION = "socketTimeoutDuration";
+    public static final String PROXY_CONFIGS = "proxyConfigs";
+    public static final String PROXY_ENABLED = "proxyEnabled";
+    public static final String CONNECTION_TIMEOUT_DEFAULT = "-1";
     public static final String ENDPOINT_SPECIFIC_CONFIG = "config";
     public static final String ENDPOINT_CONFIG_ACTION_DURATION = "actionDuration";
     public static final String ENDPOINT_TYPE_GRAPHQL = "graphql";
@@ -1931,6 +1953,7 @@ public final class APIConstants {
     public static final String ZIP_FILE_EXTENSION = ".zip";
     public static final String YAML_FILE_EXTENSION = ".yaml";
     public static final String YML_FILE_EXTENSION = ".yml";
+    public static final String TEXT_FILE_EXTENSION = ".txt";
 
     //Starts CEP based throttling policy implementation related constants
     public static final String CPS_SERVER_URL = "CPSServerUrl";
@@ -2173,6 +2196,7 @@ public final class APIConstants {
         public static final String TOOLTIP = "Tooltip";
         public static final String TYPE = "Type";
         public static final String ENABLE_EMPTY_VALUES_IN_APPLICATION_ATTRIBUTES = "EnableEmptyValuesInApplicationAttributes";
+        public static final String USER_ORGANIZATION = "INTERNAL_USER_ORGANIZATION_PROP";
     }
 
     public static class CustomPropertyAttributes {
@@ -2868,7 +2892,8 @@ public final class APIConstants {
         KEY_TEMPLATE,
         CORRELATION_CONFIG,
         GATEWAY_POLICY,
-        LLM_PROVIDER
+        LLM_PROVIDER,
+        LABEL
     }
 
     // Supported Event Types
@@ -2908,7 +2933,10 @@ public final class APIConstants {
         CUSTOM_POLICY_UPDATE,
         UPDATE_CORRELATION_CONFIGS,
         DEPLOY_POLICY_MAPPING_IN_GATEWAY,
-        REMOVE_POLICY_MAPPING_FROM_GATEWAY
+        REMOVE_POLICY_MAPPING_FROM_GATEWAY,
+        LABEL_CREATE,
+        LABEL_UPDATE,
+        LABEL_DELETE
     }
 
     public enum EventAction {
@@ -3080,6 +3108,7 @@ public final class APIConstants {
 
     public static final String USER_CTX_PROPERTY_ISADMIN = "isAdmin";
     public static final String USER_CTX_PROPERTY_SKIP_ROLES = "skipRoles";
+    public static final String USER_CTX_PROPERTY_ORGS_AVAILABLE = "organizationsAvailable";
 
     // Constants related to Service Catalog
     public static final String METADATA_FILE_NAME = "metadata";
@@ -3212,6 +3241,7 @@ public final class APIConstants {
     public static final String SYNAPSE_POLICY_DEFINITION_EXTENSION_XML = ".xml";
     public static final String CC_POLICY_DEFINITION_EXTENSION = ".gotmpl";
     public static final String YAML_CONTENT_TYPE = "yaml";
+    public static final String J2_CONTENT_TYPE = "j2";
     public static final String COMMON_OPERATION_POLICY_SPECIFICATIONS_LOCATION = "repository" + File.separator
             + "resources" + File.separator + "operation_policies" + File.separator + "specifications";
     public static final String COMMON_OPERATION_POLICY_DEFINITIONS_LOCATION = "repository" + File.separator
@@ -3222,6 +3252,7 @@ public final class APIConstants {
     public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_SOAPTOREST = "SOAPTOREST";
     public static final String OPERATION_POLICY_SUPPORTED_API_TYPE_GRAPHQL = "GRAPHQL";
     public static final String DEFAULT_POLICY_VERSION = "v1";
+    public static final String POLICY_FILENAME_INVALID_CHARS_REGEX = "[\\/:*?\"<>|]";
 
 
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
@@ -3281,9 +3312,7 @@ public final class APIConstants {
 
     //Property for enabling tenant aware sub claims when invoking APIs with API key
     public static final String ENABLE_TENANT_AWARE_SUB_CLAIM= "enable.tenant.aware.subclaim";
-
-    public static final String PRODUCTION = "PRODUCTION";
-    public static final String SANDBOX = "SANDBOX";
+    public static final String OM_ELEMENT_NAME = "name";
     public static class TokenValidationConstants {
         public static final String TOKEN_VALIDATION_CONFIG = "TokenValidation";
         public static final String ENFORCE_JWT_TYPE_HEADER_VALIDATION = "EnforceTypeHeaderValidation";
@@ -3307,8 +3336,22 @@ public final class APIConstants {
     public static class APIEndpoint {
         public static final String PRODUCTION = "PRODUCTION";
         public static final String SANDBOX = "SANDBOX";
-        public static final String PRIMARY_ENDPOINT_ID_SEPARATOR = "--";
-        public static final String DEFAULT_PROD_ENDPOINT = "Default Production Endpoint";
-        public static final String DEFAULT_SANDBOX_ENDPOINT = "Default Sandbox Endpoint";
+        public static final String DEFAULT_PROD_ENDPOINT_ID = "default_production_endpoint";
+        public static final String DEFAULT_SANDBOX_ENDPOINT_ID = "default_sandbox_endpoint";
+        public static final String DEFAULT_PROD_ENDPOINT_NAME = "Default Production Endpoint";
+        public static final String DEFAULT_SANDBOX_ENDPOINT_NAME = "Default Sandbox Endpoint";
+        public static final String ENDPOINT_CONFIG_PRODUCTION_ENDPOINTS = "production_endpoints";
+        public static final String ENDPOINT_CONFIG_SANDBOX_ENDPOINTS = "sandbox_endpoints";
+    }
+
+    // For APIM governance configurations
+    public static class APIMGovernance {
+        public static final String GOVERNANCE_CONFIG = "APIMGovernance";
+        public static final String DATA_SOURCE_NAME = "DataSource";
+        public static final String SCHEDULER_CONFIG = "SchedulerConfigurations";
+        public static final String SCHEDULER_THREAD_POOL_SIZE = "ThreadPoolSize";
+        public static final String SCHEDULER_QUEUE_SIZE = "QueueSize";
+        public static final String SCHEDULER_TASK_CHECK_INTERVAL = "TaskCheckIntervalMinutes";
+        public static final String SCHEDULER_TASK_CLEANUP_INTERVAL = "TaskCleanupIntervalMinutes";
     }
 }

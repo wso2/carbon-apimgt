@@ -27,6 +27,14 @@ public class OrganizationTiers {
     private String organizationID;
     private Set<Tier> tiers;
 
+    public OrganizationTiers() {
+    }
+
+    public OrganizationTiers(String organizationID, Set<Tier> tiers) {
+        this.organizationID = organizationID;
+        this.tiers = tiers;
+    }
+
     public String getOrganizationID() {
         return organizationID;
     }

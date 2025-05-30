@@ -1226,6 +1226,18 @@ public interface APIProvider extends APIManager {
     boolean isDocumentationExist(String uuid, String docName, String organization) throws APIManagementException;
 
     /**
+     * Checks whether the given document already exists for the given api/product
+     *
+     * @param uuid         API/Product id
+     * @param documentId         updating document id
+     * @param docOtherTypeName      Name of the other document type
+     * @param organization Identifier of the organization
+     * @return true if document already exists for the given api/product
+     * @throws APIManagementException if failed to check existence of the documentation
+     */
+    boolean isAnotherOverviewDocumentationExist(String uuid, String documentId, String docOtherTypeName, String organization) throws APIManagementException;
+
+    /**
      * Add WSDL to the api. wsdl can be provided either as a url or a resource file
      * @param apiId        ID of the API
      * @param resource     Resource
@@ -1603,16 +1615,27 @@ public interface APIProvider extends APIManager {
      * @param apiUUID      Unique identifier of API
      * @param apiEndpoint  API endpoint details
      * @param organization Organization name
-     * @return created endpoint UUID
-     * @throws APIManagementException if an error occurs while inserting endpoint detail
+     * @return UUID of the added endpoint
+     * @throws APIManagementException if an error occurs while adding the endpoint
      */
     String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint, String organization)
             throws APIManagementException;
 
     /**
-     * Delete an API endpoint by providing the endpoint UUID.
+     * Add endpoints to the provided API
      *
-     * @param endpointUUID Unique identifier of Endpoint
+     * @param apiUUID         Unique identifier of API
+     * @param apiEndpointList List of API endpoint details
+     * @param organization    Organization name
+     * @throws APIManagementException if an error occurs while adding the endpoints
+     */
+    void addAPIEndpoints(String apiUUID, List<APIEndpointInfo> apiEndpointList, String organization)
+            throws APIManagementException;
+
+    /**
+     * Delete endpoint by providing the endpoint UUID.
+     *
+     * @param endpointUUID Unique identifier of endpoint
      * @throws APIManagementException if an error occurs while deleting the endpoint
      */
     void deleteAPIEndpointById(String endpointUUID) throws APIManagementException;
@@ -1627,6 +1650,33 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException if an error occurs while updating the endpoint
      */
     APIEndpointInfo updateAPIEndpoint(String apiId, APIEndpointInfo apiEndpoint, String organization)
+            throws APIManagementException;
+
+    /**
+     * Delete API primary endpoint mappings by providing the API UUID
+     *
+     * @param apiId API UUID
+     * @throws APIManagementException if an error occurs while deleting the primary endpoint mappings
+     */
+    void deleteAPIPrimaryEndpointMappings(String apiId) throws APIManagementException;
+
+    /**
+     * Delete API endpoints by providing the API UUID
+     *
+     * @param apiId API UUID
+     * @throws APIManagementException if an error occurs while deleting the endpoints
+     */
+    void deleteAPIEndpointsByApiUUID(String apiId) throws APIManagementException;
+
+    /**
+     * Add primary endpoint mappings to new API version
+     *
+     * @param existingApiId Existing API UUID
+     * @param newApiId      New API UUID
+     * @param organization  organization
+     * @throws APIManagementException if an error occurs while adding primary endpoint mappings
+     */
+    void addPrimaryEndpointMappingsToNewAPI(String existingApiId, String newApiId, String organization)
             throws APIManagementException;
 
     /**
@@ -2158,4 +2208,57 @@ public interface APIProvider extends APIManager {
      * @return organization list
      */
     List<OrganizationDetailsDTO> getOrganizations(String orgId, String superOrganization) throws APIManagementException;
+
+    /**
+     * Imports a drafted api theme for the given organization and API ID.
+     *
+     * @param organization Organization name.
+     * @param themeContent Theme content as InputStream.
+     * @param apiId        API Identifier.
+     * @throws APIManagementException If a database error occurs.
+     */
+    void importDraftedApiTheme(String organization, InputStream themeContent, String apiId)
+            throws APIManagementException;
+
+    /**
+     * Updates the api theme status as published or unpublished.
+     *
+     * @param organization Organization name.
+     * @param action       Action to perform ("PUBLISH" or "UNPUBLISH").
+     * @param apiId        API Identifier.
+     * @throws APIManagementException If a database error occurs.
+     */
+    void updateApiThemeStatus(String organization, String action, String apiId)
+            throws APIManagementException;
+
+    /**
+     * Deletes an API theme.
+     *
+     * @param organization Organization name.
+     * @param themeId      Theme ID to delete.
+     * @param apiId        API Identifier.
+     * @throws APIManagementException If a database error occurs.
+     */
+    void deleteApiTheme(String organization, String themeId, String apiId) throws APIManagementException;
+
+    /**
+     * Gets an API theme.
+     *
+     * @param uuid      Theme ID to retrieve.
+     * @param organization Organization name.
+     * @param apiId        API Identifier.
+     * @return Input stream of API theme.
+     * @throws APIManagementException If a database error occurs.
+     */
+    InputStream getApiTheme(String uuid, String organization, String apiId) throws APIManagementException;
+
+    /**
+     * Gets API theme array.
+     *
+     * @param organization Organization name.
+     * @param apiId        API Identifier.
+     * @return Hash map of publish unpublish state and theme IDs.
+     * @throws APIManagementException If a database error occurs.
+     */
+    Map<String, String> getApiThemes(String organization, String apiId) throws APIManagementException;
 }

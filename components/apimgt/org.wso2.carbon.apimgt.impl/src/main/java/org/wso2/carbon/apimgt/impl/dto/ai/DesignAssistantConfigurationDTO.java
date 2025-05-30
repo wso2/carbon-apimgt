@@ -27,11 +27,9 @@ public class DesignAssistantConfigurationDTO {
     private String key;
     private String endpoint;
     private String tokenEndpoint;
-    private String apiPublishResource;
     private String chatResource;
     private String genApiPayload;
-    private String apiDeleteResource;
-    private String apiCountResource;
+    private String regenerateSpec;
     private boolean isEnabled;
     private boolean isAuthTokenProvided;
     private boolean isKeyProvided;
@@ -68,14 +66,6 @@ public class DesignAssistantConfigurationDTO {
         this.tokenEndpoint = tokenEndpoint;
     }
 
-    public String getApiPublishResource() {
-        return apiPublishResource;
-    }
-
-    public void setApiPublishResource(String apiPublishResource) {
-        this.apiPublishResource = apiPublishResource;
-    }
-
     public String getChatResource() {
         return chatResource;
     }
@@ -92,20 +82,12 @@ public class DesignAssistantConfigurationDTO {
         this.genApiPayload = genApiPayload;
     }
 
-    public String getApiDeleteResource() {
-        return apiDeleteResource;
+    public String getRegenerateSpecResource() {
+        return regenerateSpec;
     }
 
-    public void setApiDeleteResource(String apiDeleteResource) {
-        this.apiDeleteResource = apiDeleteResource;
-    }
-
-    public String getApiCountResource() {
-        return apiCountResource;
-    }
-
-    public void setApiCountResource(String apiCountResource) {
-        this.apiCountResource = apiCountResource;
+    public void setRegenerateSpecResource(String regenerateSpec) {
+        this.regenerateSpec = regenerateSpec;
     }
 
     public boolean isEnabled() {

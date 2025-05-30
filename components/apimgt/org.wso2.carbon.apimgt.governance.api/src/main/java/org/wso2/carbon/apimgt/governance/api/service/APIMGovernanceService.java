@@ -24,13 +24,16 @@ import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceDryRunInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactComplianceInfo;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.governance.api.model.ExtendedArtifactType;
+import org.wso2.carbon.apimgt.governance.api.model.RuleCategory;
 import org.wso2.carbon.apimgt.governance.api.model.RuleType;
+import org.wso2.carbon.apimgt.governance.api.model.Ruleset;
 
 import java.util.List;
 import java.util.Map;
 
 /**
  * This class represents the Governance Service, which is responsible for managing governance related operations
+ * on API Manager side.
  */
 public interface APIMGovernanceService {
 
@@ -88,13 +91,13 @@ public interface APIMGovernanceService {
      * dry run) using the provided artifact content file path and the artifact type. The artifact will be evaluated
      * against all the global policies configured in the system.
      *
-     * @param artifactType Artifact type (ExtendedArtifactType.REST_API, etc)
+     * @param artifactType Artifact type (ArtifactType.API)
      * @param zipArchive   File path of the artifact content (ZIP path)
      * @param organization Organization
      * @return ArtifactComplianceDryRunInfo object
      * @throws APIMGovernanceException If an error occurs while evaluating compliance
      */
-    ArtifactComplianceDryRunInfo evaluateComplianceDryRunSync(ExtendedArtifactType artifactType, byte[] zipArchive,
+    ArtifactComplianceDryRunInfo evaluateComplianceDryRunSync(ArtifactType artifactType, byte[] zipArchive,
                                                               String organization) throws APIMGovernanceException;
 
     /**
@@ -111,15 +114,6 @@ public interface APIMGovernanceService {
             throws APIMGovernanceException;
 
     /**
-     * Delete governance related data for the given label
-     *
-     * @param label        Label id to delete governance data
-     * @param organization Organization
-     * @throws APIMGovernanceException If an error occurs while deleting governance data
-     */
-    void deleteGovernanceDataForLabel(String label, String organization) throws APIMGovernanceException;
-
-    /**
      * Delete all governance data related to the artifact
      *
      * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)
@@ -127,4 +121,34 @@ public interface APIMGovernanceService {
      */
     void clearArtifactComplianceInfo(String artifactRefId, ArtifactType artifactType, String organization)
             throws APIMGovernanceException;
+
+
+    /**
+     * Get applicable rulesets for the artifact
+     *
+     * @param artifactRefId Artifact Reference ID (ID of artifact on APIM side)
+     * @param artifactType  Artifact type (ArtifactType.API)
+     * @param ruleType      Rule type (RuleType.API_DEFINITION)
+     * @param ruleCategory  Rule category (RuleCategory.SPECTRAL)
+     * @param organization  Organization
+     * @return List of Rulesets
+     * @throws APIMGovernanceException If an error occurs while getting the applicable rulesets
+     */
+    List<Ruleset> getApplicableRulesetsForArtifact(String artifactRefId, ArtifactType artifactType,
+                                                   RuleType ruleType, RuleCategory ruleCategory,
+                                                   String organization) throws APIMGovernanceException;
+
+    /**
+     * Get applicable rulesets by extended artifact type
+     *
+     * @param extendedArtifactType Extended artifact type (ExtendedArtifactType.REST_API)
+     * @param ruleType             Rule type (RuleType.API_DEFINITION)
+     * @param ruleCategory         Rule category (RuleCategory.SPECTRAL)
+     * @param organization         Organization
+     * @return List of Rulesets
+     * @throws APIMGovernanceException If an error occurs while getting the applicable rulesets
+     */
+    List<Ruleset> getApplicableRulesetsByExtendedArtifactType(ExtendedArtifactType extendedArtifactType,
+                                                              RuleType ruleType, RuleCategory ruleCategory,
+                                                              String organization) throws APIMGovernanceException;
 }

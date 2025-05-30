@@ -1180,12 +1180,17 @@ public class RegistryPersistenceImpl implements APIPersistence {
             String modifiedQuery = RegistrySearchUtil.getDevPortalSearchQuery(searchQuery, ctx,
                     isAllowDisplayAPIsWithMultipleStatus(), isAllowDisplayAPIsWithMultipleVersions());
             if (!PersistenceUtil.isAdminUser(ctx)) {
-                String orgName = ctx.getOrganization().getName();
-                if (orgName != null && orgName.contains(" ")) {
-                    orgName = orgName.replace(" ", "+");
-                }
-                modifiedQuery = modifiedQuery + "&visible_organizations=(" + APIConstants.DEFAULT_VISIBLE_ORG + " OR "
-                        + orgName + ")";
+                if (PersistenceUtil.areOrganizationsRegistered(ctx)) {
+                    String orgId = ctx.getOrganization().getId();
+                    if (requestedTenantDomain.equals(ctx.getOrganization().getName())) {
+                        // For migrated APIs
+                        modifiedQuery = modifiedQuery + "&visible_organizations=(" + APIConstants.VISIBLE_ORG_ALL
+                                + " OR " + orgId + " OR " + requestedTenantDomain + ")";
+                    } else {
+                        modifiedQuery = modifiedQuery + "&visible_organizations=(" + APIConstants.VISIBLE_ORG_ALL
+                                + " OR " + orgId + ")";
+                    }
+                } 
             }
             log.debug("Modified query for devportal search: " + modifiedQuery);
             String userNameLocal;
@@ -1801,7 +1806,7 @@ public class RegistryPersistenceImpl implements APIPersistence {
             isCrossTenant = true;
         }
         Map<String, String> attributes = RegistrySearchUtil.getDevPortalSearchAttributes(searchQuery, ctx, isCrossTenant,
-                isAllowDisplayAPIsWithMultipleStatus());
+                isAllowDisplayAPIsWithMultipleStatus(), userTenantDomain);
 
         if (log.isDebugEnabled()) {
             log.debug("Search attributes : " + attributes);
@@ -2810,6 +2815,13 @@ public class RegistryPersistenceImpl implements APIPersistence {
                                 if (searchQuery.toLowerCase().startsWith("name:")) {
                                     String requestedDocName = searchQuery.split(":")[1];
                                     if (doc.getName().equalsIgnoreCase(requestedDocName)) {
+                                        documentationList.add(doc);
+                                    }
+                                }
+                                else if (searchQuery.toLowerCase().startsWith("other:")) {
+                                    String requestedDocOtherTypeName = searchQuery.split(":")[1];
+                                    if (doc.getOtherTypeName() != null
+                                            && doc.getOtherTypeName().equalsIgnoreCase(requestedDocOtherTypeName)) {
                                         documentationList.add(doc);
                                     }
                                 } else {

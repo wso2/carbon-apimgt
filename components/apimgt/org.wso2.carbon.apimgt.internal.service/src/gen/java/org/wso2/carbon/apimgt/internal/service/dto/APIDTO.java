@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.internal.service.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.internal.service.dto.OperationPolicyDTO;
@@ -15,6 +17,8 @@ import java.util.Objects;
 import javax.xml.bind.annotation.*;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
 import com.fasterxml.jackson.annotation.JsonCreator;
+
+import javax.validation.Valid;
 
 
 
@@ -263,6 +267,7 @@ public class APIDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("apiPolicies")
   public List<OperationPolicyDTO> getApiPolicies() {
     return apiPolicies;
@@ -280,6 +285,7 @@ public class APIDTO   {
 
   
   @ApiModelProperty(value = "")
+      @Valid
   @JsonProperty("urlMappings")
   public List<URLMappingDTO> getUrlMappings() {
     return urlMappings;

@@ -40,6 +40,7 @@ import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
 import org.wso2.carbon.apimgt.api.quotalimiter.ResourceQuotaLimiter;
@@ -59,7 +60,6 @@ import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
-import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
@@ -85,6 +85,7 @@ import org.wso2.carbon.apimgt.impl.notifier.ExternallyDeployedApiNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.GatewayPolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.GoogleAnalyticsNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.LLMProviderNotifier;
+import org.wso2.carbon.apimgt.impl.notifier.LabelNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.Notifier;
 import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
 import org.wso2.carbon.apimgt.impl.notifier.ScopesNotifier;
@@ -219,6 +220,7 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new CorrelationConfigNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new LLMProviderNotifier(), null);
+            bundleContext.registerService(Notifier.class.getName(), new LabelNotifier(), null);
             if (configuration.getMarketplaceAssistantConfigurationDto().isKeyProvided() ||
                     configuration.getMarketplaceAssistantConfigurationDto().isAuthTokenProvided()) {
                 bundleContext.registerService(Notifier.class.getName(), new MarketplaceAssistantApiPublisherNotifier(), null);
@@ -816,18 +818,18 @@ public class APIManagerComponent {
     }
 
     @Reference(
-            name = "externalGatewayDeployer.component",
-            service = ExternalGatewayDeployer.class,
+            name = "external.gateway.connector.service",
+            service = GatewayAgentConfiguration.class,
             cardinality = ReferenceCardinality.MULTIPLE,
             policy = ReferencePolicy.DYNAMIC,
-            unbind = "removeExternalGatewayDeployers")
-    protected void addExternalGatewayDeployer(ExternalGatewayDeployer deployer) {
-        ServiceReferenceHolder.getInstance().addExternalGatewayDeployer(deployer.getType(), deployer);
+            unbind = "removeExternalGatewayConnectorConfigurations")
+    protected void addExternalGatewayConnectorConfiguration(GatewayAgentConfiguration gatewayConfiguration) {
+        ServiceReferenceHolder.getInstance().addExternalGatewayConnectorConfiguration(gatewayConfiguration.getType(), gatewayConfiguration);
     }
 
-    protected void removeExternalGatewayDeployers(ExternalGatewayDeployer deployer) {
+    protected void removeExternalGatewayConnectorConfigurations(GatewayAgentConfiguration gatewayConfiguration) {
 
-        ServiceReferenceHolder.getInstance().removeExternalGatewayDeployer(deployer.getType());
+        ServiceReferenceHolder.getInstance().removeExternalGatewayConnectorConfiguration(gatewayConfiguration.getType());
     }
 
     @Reference(

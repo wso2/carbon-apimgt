@@ -57,6 +57,7 @@ import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
+import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Subscriber;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -544,6 +545,7 @@ public class APIProviderImplTest {
         PowerMockito.when(realmService.getTenantUserRealm(-1234)).thenReturn(userRealm);
         PowerMockito.when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
         PowerMockito.when(userStoreManager.isExistingUser("admin")).thenReturn(true);
+        PowerMockito.when(MultitenantUtils.getTenantAwareUsername("admin")).thenReturn("admin");
 
         SortedMap<String, String> claimValues = new TreeMap<String, String>();
         claimValues.put("claim1", "http://wso2.org/claim1");
@@ -1489,6 +1491,12 @@ public class APIProviderImplTest {
 
         OperationPolicyData policyData = new OperationPolicyData();
         policyData.setPolicyId("11111");
+        OperationPolicySpecification policySpecification = new OperationPolicySpecification();
+        policySpecification.setCategory(OperationPolicySpecification.PolicyCategory.Mediation);
+        policySpecification.setName("in-policy");
+        policySpecification.setDisplayName("in-policy");
+        policySpecification.setDescription("This is a mediation policy migrated to an operation policy.");
+        policyData.setSpecification(policySpecification);
 
         PowerMockito.when(apiPersistenceInstance.getAllMediationPolicies(any(Organization.class), any(String.class))).thenReturn(localPolicies);
         PowerMockito.when(apiPersistenceInstance.getMediationPolicy(any(Organization.class), any(String.class), any(String.class))).thenReturn(mediationPolicy);

@@ -30,9 +30,10 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
 
         ArtifactType artifactType = ArtifactType.API;
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String username = APIMGovernanceAPIUtil.getLoggedInUsername();
 
         ArtifactComplianceDetailsDTO detailsDTO = ComplianceAPIUtil.getArtifactComplianceDetailsDTO
-                (apiId, artifactType, organization);
+                (apiId, artifactType, username, organization);
 
         return Response.ok().entity(detailsDTO).build();
     }
@@ -53,9 +54,9 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
 
         ArtifactType artifactType = ArtifactType.API;
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
-
+        String username = APIMGovernanceAPIUtil.getLoggedInUsername();
         ArtifactComplianceListDTO complianceListDTO = ComplianceAPIUtil
-                .getArtifactComplianceListDTO(artifactType, organization, limit, offset);
+                .getArtifactComplianceListDTO(artifactType, username, organization, limit, offset);
 
         return Response.ok().entity(complianceListDTO).build();
     }
@@ -70,10 +71,11 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
     public Response getComplianceSummaryForAPIs(MessageContext messageContext) throws APIMGovernanceException {
 
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String username = APIMGovernanceAPIUtil.getLoggedInUsername();
         ArtifactType artifactType = ArtifactType.API;
 
         ArtifactComplianceSummaryDTO summaryDTO = ComplianceAPIUtil.getArtifactComplianceSummary(artifactType,
-                organization);
+                username, organization);
 
         return Response.ok().entity(summaryDTO).build();
     }
@@ -91,10 +93,11 @@ public class ArtifactComplianceApiServiceImpl implements ArtifactComplianceApiSe
             throws APIMGovernanceException {
 
         String organization = APIMGovernanceAPIUtil.getValidatedOrganization(messageContext);
+        String username = APIMGovernanceAPIUtil.getLoggedInUsername();
         ArtifactType artifactType = ArtifactType.API;
 
         RulesetValidationResultDTO rulesetValidationResultDTO = ComplianceAPIUtil
-                .getRulesetValidationResultDTO(apiId, artifactType, rulesetId, organization);
+                .getRulesetValidationResultDTO(apiId, artifactType, rulesetId, username, organization);
 
         return Response.ok().entity(rulesetValidationResultDTO).build();
     }

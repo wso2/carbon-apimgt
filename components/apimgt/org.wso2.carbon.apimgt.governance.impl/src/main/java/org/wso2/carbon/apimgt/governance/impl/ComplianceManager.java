@@ -46,9 +46,10 @@ import org.wso2.carbon.apimgt.governance.impl.dao.impl.GovernancePolicyMgtDAOImp
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulesetMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
-import org.wso2.carbon.apimgt.governance.impl.util.APIMUtil;
+import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -102,8 +103,12 @@ public class ComplianceManager {
         for (ArtifactInfo artifact : artifacts) {
             String artifactRefId = artifact.getArtifactRefId();
             ArtifactType artifactType = artifact.getArtifactType();
-            complianceMgtDAO.addComplianceEvalRequest(artifactRefId, artifactType,
-                    Collections.singletonList(policyId), organization);
+            if (APIMGovernanceUtil.isArtifactGovernable(artifactRefId, artifactType)) {
+                complianceMgtDAO.addComplianceEvalRequest(artifactRefId, artifactType,
+                        Collections.singletonList(policyId), organization);
+                AuditLogger.log("New Async Eval Request", "New compliance evaluation request for artifact %s " +
+                        "with policy %s", artifactRefId, policyId);
+            }
         }
     }
 
@@ -168,20 +173,17 @@ public class ComplianceManager {
             ArtifactType artifactType = entry.getKey();
             List<String> artifactRefIds = artifactsMap.get(artifactType);
 
-            if (ArtifactType.API.equals(artifactType)) {
-                for (String artifactRefId : artifactRefIds) {
-                    String apiStatus = APIMUtil.getAPIStatus(artifactRefId);
-                    boolean isDeployed = APIMUtil.isAPIDeployed(artifactRefId);
-                    boolean isAPIGovernable = APIMUtil.isAPIGovernable(apiStatus, isDeployed, apimGovernableStates);
-                    // If the API should be governed by the policy
-                    if (isAPIGovernable) {
-                        ArtifactInfo artifactInfo = new ArtifactInfo();
-                        artifactInfo.setArtifactRefId(artifactRefId);
-                        artifactInfo.setArtifactType(artifactType);
-                        artifactInfoList.add(artifactInfo);
-                    }
+            for (String artifactRefId : artifactRefIds) {
+                boolean isArtifactGovernable = APIMGovernanceUtil.isArtifactGovernable(
+                        artifactRefId, artifactType, apimGovernableStates);
+                if (isArtifactGovernable) {
+                    ArtifactInfo artifactInfo = new ArtifactInfo();
+                    artifactInfo.setArtifactRefId(artifactRefId);
+                    artifactInfo.setArtifactType(artifactType);
+                    artifactInfoList.add(artifactInfo);
                 }
             }
+
         }
 
         return artifactInfoList;
@@ -218,6 +220,8 @@ public class ComplianceManager {
 
         if (govPolicies != null && !govPolicies.isEmpty()) {
             complianceMgtDAO.addComplianceEvalRequest(artifactRefId, artifactType, govPolicies, organization);
+            AuditLogger.log("New Async Eval Request", "New compliance evaluation request for artifact %s " +
+                    "with policy IDs %s", artifactRefId, Arrays.toString(govPolicies.toArray()));
         }
 
     }
@@ -429,8 +433,9 @@ public class ComplianceManager {
             String artifactRefId = artifactInfo.getArtifactRefId();
             ArtifactType artifactType = artifactInfo.getArtifactType();
             if (resolveArtifactNameAndVersion) {
-                artifactInfo.setName(APIMGovernanceUtil.getArtifactName(artifactRefId, artifactType));
-                artifactInfo.setVersion(APIMGovernanceUtil.getArtifactVersion(artifactRefId, artifactType));
+                artifactInfo.setName(APIMGovernanceUtil.getArtifactName(artifactRefId, artifactType, organization));
+                artifactInfo.setVersion(APIMGovernanceUtil
+                        .getArtifactVersion(artifactRefId, artifactType, organization));
             }
 
             List<String> violatedRulesets = complianceMgtDAO.getViolatedRulesetsForArtifact
@@ -469,7 +474,7 @@ public class ComplianceManager {
      * Handle API Compliance Evaluation Request Sync
      *
      * @param artifactRefId          Artifact Reference ID (ID of the artifact on APIM side)
-     * @param revisionNo             Revision number
+     * @param revisionId             Revision ID
      * @param artifactType           Artifact Type
      * @param govPolicies            List of governance policies to be evaluated
      * @param artifactProjectContent Map of artifact content
@@ -480,41 +485,38 @@ public class ComplianceManager {
      */
 
     public ArtifactComplianceInfo handleComplianceEvalSync(String artifactRefId,
-                                                           String revisionNo, ArtifactType artifactType,
+                                                           String revisionId, ArtifactType artifactType,
                                                            List<String> govPolicies,
                                                            Map<RuleType, String> artifactProjectContent,
                                                            APIMGovernableState state, String organization)
             throws APIMGovernanceException {
+
+        if (log.isDebugEnabled()) {
+            log.debug("Starting sync compliance evaluation for artifact " + artifactRefId
+                    + " in organization " + organization);
+        }
+        AuditLogger.log("New Sync Eval Request", "Starting sync compliance evaluation for artifact %s in organization" +
+                " %s against policies %s", artifactRefId, organization, Arrays.toString(govPolicies.toArray()));
 
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
 
         ArtifactComplianceInfo artifactComplianceInfo = new ArtifactComplianceInfo();
 
-        ExtendedArtifactType extendedArtifactTypeForArtifact =
-                APIMGovernanceUtil.getExtendedArtifactTypeForArtifact
-                        (artifactRefId, artifactType); // API --> REST_API, ASYNC_API, etc
-
-        // Check if artifact is SOAP or GRAPHQL
-        if (ExtendedArtifactType.SOAP_API.equals(extendedArtifactTypeForArtifact)
-                || ExtendedArtifactType.GRAPHQL_API.equals(extendedArtifactTypeForArtifact)) {
-            log.warn("Artifact type " + extendedArtifactTypeForArtifact +
-                    " not supported for artifact ID: " + artifactRefId + " " +
-                    ". Skipping governance evaluation");
-            return artifactComplianceInfo;
-        }
-
         if (artifactProjectContent == null || artifactProjectContent.isEmpty()) {
             if (log.isDebugEnabled()) {
-                log.debug("No content found in the artifact project for artifact ID: " + artifactRefId +
-                        ". Loading content from DB.");
+                log.debug("No content found in the artifact project for artifact "
+                        + artifactRefId + ". Loading content from DB.");
             }
 
-            byte[] project = APIMGovernanceUtil.getArtifactProjectWithRevision(artifactRefId, revisionNo, artifactType,
+            byte[] project = APIMGovernanceUtil.getArtifactProjectWithRevision(artifactRefId, revisionId, artifactType,
                     organization);
 
             if (project == null) {
-                log.warn("No content found in the artifact project for artifact ID: " + artifactRefId);
+                String logMessage = String.format("Artifact project not found for artifact %s in organization %s. " +
+                        "Skipping governance evaluation.", artifactRefId, organization);
+                log.warn(logMessage);
+                AuditLogger.log(AuditLogger.LogLevel.WARN, "Sync Eval Request", logMessage);
                 return artifactComplianceInfo;
             }
 
@@ -523,14 +525,23 @@ public class ComplianceManager {
 
 
             if (artifactProjectContent == null || artifactProjectContent.isEmpty()) {
-                log.warn("No content found in the artifact project for artifact ID: " + artifactRefId);
+                String logMessage = String.format("No content found in the artifact project for artifact %s in " +
+                        "organization %s. Skipping governance evaluation.", artifactRefId, organization);
+                log.warn(logMessage);
+                AuditLogger.log(AuditLogger.LogLevel.WARN, "Sync Eval Request", logMessage);
                 return artifactComplianceInfo;
             }
         }
 
+        ExtendedArtifactType extendedArtifactTypeForArtifact = APIMGovernanceUtil.getExtendedArtifactTypeForArtifact
+                (artifactRefId, artifactType); // API --> REST_API, ASYNC_API, etc
+
         for (String policyId : govPolicies) {
             APIMGovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
             List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId, organization);
+
+            AuditLogger.log("Sync Eval Request", "Starting governance evaluation for artifact %s in organization %s " +
+                    "against policy %s", artifactRefId, organization, policyId);
 
             // Validate the artifact against each ruleset
             for (Ruleset ruleset : rulesets) {
@@ -544,14 +555,16 @@ public class ComplianceManager {
                     String contentToValidate = artifactProjectContent.get(ruleType);
 
                     if (contentToValidate == null) {
-                        log.warn(ruleType + " content not found in artifact project for artifact ID: " +
-                                artifactRefId + ". Skipping governance evaluation for ruleset ID: " + ruleset.getId());
+                        log.warn(ruleType + " content not found in artifact project for artifact " +
+                                artifactRefId + ". Skipping governance evaluation for ruleset " + ruleset.getId());
                         continue;
                     }
 
                     // Send target content and ruleset for validation
                     List<RuleViolation> ruleViolations = validationEngine.validate(
                             contentToValidate, ruleset);
+                    AuditLogger.log("Sync Eval Request", "Successfully evaluated artifact %s in organization %s " +
+                            "against ruleset %s", artifactRefId, organization, ruleset.getId());
 
                     Map<APIMGovernanceActionType, List<RuleViolation>> blockableAndNonBlockableViolations =
                             filterBlockableAndNonBlockableRuleViolations(artifactRefId,
@@ -563,10 +576,11 @@ public class ComplianceManager {
                     artifactComplianceInfo.addNonBlockingViolations(blockableAndNonBlockableViolations
                             .get(APIMGovernanceActionType.NOTIFY));
                 } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Ruleset artifact type does not match with the artifact's type. Skipping " +
-                                "governance evaluation for ruleset ID: " + ruleset.getId());
-                    }
+                    String logMessage = String.format("Skipping governance evaluation for artifact %s " +
+                                    "in organization %s against ruleset %s as the artifact type does not match",
+                            artifactRefId, organization, ruleset.getId());
+                    log.debug(logMessage);
+                    AuditLogger.log("Sync Eval Request", logMessage);
                 }
             }
         }
@@ -580,7 +594,7 @@ public class ComplianceManager {
     /**
      * Handle API Compliance Evaluation Request Dry Run
      *
-     * @param artifactType           Artifact Type (REST_API, ASYNC_API, etc)
+     * @param artifactType           Extended Artifact Type
      * @param govPolicies            List of governance policies to be evaluated
      * @param artifactProjectContent Map of artifact content
      * @param organization           Organization
@@ -594,26 +608,33 @@ public class ComplianceManager {
                                                                    String organization) throws
             APIMGovernanceException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Starting dry run compliance evaluation for given artifact in organization " + organization);
+        }
+        AuditLogger.log("New Dry Run Eval Request", "Starting dry run compliance evaluation for given artifact in " +
+                "organization %s against policies %s", organization, Arrays.toString(govPolicies.toArray()));
+
+
         ValidationEngine validationEngine = ServiceReferenceHolder.getInstance()
                 .getValidationEngineService().getValidationEngine();
         ArtifactComplianceDryRunInfo artifactComplianceDryRunInfo = new ArtifactComplianceDryRunInfo();
 
-        // Check if artifact is SOAP or GRAPHQL
-        if (ExtendedArtifactType.SOAP_API.equals(artifactType) ||
-                ExtendedArtifactType.GRAPHQL_API.equals(artifactType)) {
-            log.error("Artifact type " + artifactType + " not supported. Skipping governance evaluation");
-            return null;
-        }
-
         // If artifact content is not provided dry run is not possible
         if (artifactProjectContent == null || artifactProjectContent.isEmpty()) {
-            log.error("No content found in the artifact project.");
+            String logMessage = String.format("No content found in the artifact project " +
+                    "for artifact in organization %s. Skipping governance evaluation.", organization);
+            log.warn(logMessage);
+            AuditLogger.log("Dry Run Eval Request", logMessage);
             return null;
         }
 
         for (String policyId : govPolicies) {
             APIMGovernancePolicy policy = policyMgtDAO.getGovernancePolicyByID(policyId, organization);
             List<Ruleset> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policyId, organization);
+
+            AuditLogger.log("Dry Run Eval Request",
+                    "Starting governance evaluation for given artifact in organization %s " +
+                            "against policy %s", organization, policyId);
 
             // Validate the artifact against each ruleset
             for (Ruleset ruleset : rulesets) {
@@ -629,22 +650,25 @@ public class ComplianceManager {
 
                     if (contentToValidate == null) {
                         log.warn(ruleType + " content not found in artifact project . Skipping governance " +
-                                "evaluation " +
-                                "for ruleset ID: " + ruleset.getId());
+                                "evaluation for ruleset " + ruleset.getId());
                         continue;
                     }
 
                     // Send target content and ruleset for validation
                     List<RuleViolation> ruleViolations = validationEngine.validate(
                             contentToValidate, ruleset);
+                    AuditLogger.log("Dry Run Eval Request", "Successfully evaluated artifact in organization %s " +
+                            "against ruleset %s", organization, ruleset.getId());
 
                     artifactComplianceDryRunInfo.addRuleViolationsForRuleset(policy, rulesetInfo, ruleViolations);
 
                 } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Ruleset artifact type does not match with the artifact's type. Skipping " +
-                                "governance evaluation for ruleset ID: " + ruleset.getId());
-                    }
+                    String logMessage =
+                            String.format("Skipping governance evaluation for given artifact in organization %s " +
+                                            "against ruleset %s as the artifact type does not match",
+                                    organization, ruleset.getId());
+                    log.debug(logMessage);
+                    AuditLogger.log("Dry Run Eval Request", logMessage);
                 }
             }
         }
@@ -733,8 +757,8 @@ public class ComplianceManager {
                                                  String organization) throws APIMGovernanceException {
         Set<String> violatedPolicies = new HashSet<>();
         for (String policy : evaluatedPolicies) {
-            List<String> rulesets = policyMgtDAO.getRulesetsWithContentByPolicyId(policy, organization).stream()
-                    .map(Ruleset::getId).collect(Collectors.toList());
+            List<String> rulesets = policyMgtDAO.getRulesetsByPolicyId(policy, organization).stream()
+                    .map(RulesetInfo::getId).collect(Collectors.toList());
             if (violatedRulesets.stream().anyMatch(rulesets::contains)) {
                 violatedPolicies.add(policy);
             }
@@ -743,19 +767,16 @@ public class ComplianceManager {
     }
 
     /**
-     * Check whether the evaluation is pending for the artifact
+     * Get the list of pending policies for the artifact
      *
      * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
      * @param artifactType  Artifact Type
      * @param organization  Organization
-     * @return Whether the evaluation is pending for the artifact
-     * @throws APIMGovernanceException If an error occurs while checking whether the evaluation
-     *                                 is pending for the artifact
+     * @return List of pending policies
+     * @throws APIMGovernanceException If an error occurs while getting the list of pending policies
      */
-
-    public boolean isEvaluationPendingForArtifact(String artifactRefId, ArtifactType artifactType,
-                                                  String organization) throws APIMGovernanceException {
-        String reqId = complianceMgtDAO.getPendingEvalRequest(artifactRefId, artifactType, organization);
-        return reqId != null;
+    public List<String> getPendingPoliciesForArtifact(String artifactRefId, ArtifactType artifactType,
+                                                      String organization) throws APIMGovernanceException {
+        return complianceMgtDAO.getPendingPoliciesForArtifact(artifactRefId, artifactType, organization);
     }
 }

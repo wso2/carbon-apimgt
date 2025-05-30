@@ -310,6 +310,10 @@ public class ImportUtils {
                         setOperationsToDTO(importedApiDTO, validationResponse);
                     }
                 }
+
+                // Drop any API Endpoints (if exists)
+                dropAPIEndpoints(targetApi, apiProvider);
+
                 targetApi.setOrganization(organization);
                 if (preservePortalConfigurations) {
                     APIDTO convertedOldAPI = APIMappingUtil.fromAPItoDTO(targetApi);
@@ -398,7 +402,7 @@ public class ImportUtils {
                     extractedAPIPolicies, currentTenantDomain);
 
             // Handle API Endpoints if endpoints file is defined
-            populateAPIWithEndpoints(importedApi, apiProvider, extractedFolderPath, organization);
+            populateAPIWithEndpoints(importedApi.getUuid(), apiProvider, extractedFolderPath, organization);
 
             // Update Custom Backend Data if endpoint type is selected to "custom_backend"
             Map endpointConf = (Map) importedApiDTO.getEndpointConfig();
@@ -410,13 +414,19 @@ public class ImportUtils {
             API oldAPI = apiProvider.getAPIbyUUID(importedApi.getUuid(), importedApi.getOrganization());
             Map<String, String> complianceResult = PublisherCommonUtils
                     .checkGovernanceComplianceSync(importedApi.getUuid(), APIMGovernableState.API_CREATE,
-                            ArtifactType.fromString(apiType), importedApi.getOrganization(), null, null);
+                            ArtifactType.API, importedApi.getOrganization(), null, null);
             if (!complianceResult.isEmpty()
                     && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                     && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
                 throw new APIComplianceException(complianceResult
                         .get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
             }
+
+            // Populate the primary endpoint IDs to the importedApi object prior to the API update call
+            String primaryProductionEndpointId = importedApiDTO.getPrimaryProductionEndpointId();
+            String primarySandboxEndpointId = importedApiDTO.getPrimarySandboxEndpointId();
+            importedApi.setPrimaryProductionEndpointId(primaryProductionEndpointId);
+            importedApi.setPrimarySandboxEndpointId(primarySandboxEndpointId);
 
             apiProvider.updateAPI(importedApi, oldAPI);
 
@@ -542,7 +552,7 @@ public class ImportUtils {
                         + "was updated and not deployed in any of the gateway environments.");
             }
             PublisherCommonUtils.checkGovernanceComplianceAsync(importedApi.getUuid(), APIMGovernableState.API_CREATE,
-                    ArtifactType.fromString(apiType), organization);
+                    ArtifactType.API, organization);
             return new ImportedAPIDTO(importedApi, revisionId);
         } catch (CryptoException | IOException e) {
             throw new APIManagementException(
@@ -700,6 +710,14 @@ public class ImportUtils {
             }
         }
 
+        if (policySpec == null) {
+            // As the last option, we check whether the policy is updated with the policy file,
+            // which has a name containing no special characters in the API project.
+            policySpec = getOperationPolicySpecificationFromFile(policyDirectory, APIUtil.getOperationPolicyFileName(
+                    appliedPolicy.getPolicyName().replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""),
+                    appliedPolicy.getPolicyVersion(), policyType));
+        }
+
         if (policySpec != null) {
             // if a policy specification is found, we need to validate the policy applied parameters.
             provider.validateAppliedPolicyWithSpecification(policySpec, appliedPolicy, apiType);
@@ -714,12 +732,32 @@ public class ImportUtils {
         }
     }
 
-    public static void populateAPIWithEndpoints(API api, APIProvider provider, String extractedFolderPath,
-            String organization) throws APIManagementException {
-        // Delete previously added endpoints
+    /**
+     * This method is used to drop any existing API endpoints of the API.
+     *
+     * @param api      API object
+     * @param provider API Provider
+     * @throws APIManagementException If an error occurs while dropping the API endpoints
+     */
+    private static void dropAPIEndpoints(API api, APIProvider provider) throws APIManagementException {
+        provider.deleteAPIPrimaryEndpointMappings(api.getUuid());
+        provider.deleteAPIEndpointsByApiUUID(api.getUuid());
+    }
 
-        // Retrieve endpoints from artifact
+    /**
+     * This method is used to populate the API with endpoints.
+     *
+     * @param apiUUID             API UUID
+     * @param provider            API Provider
+     * @param extractedFolderPath Extracted folder path of the API project
+     * @param organization        Organization
+     * @throws APIManagementException If an error occurs while populating the API with endpoints
+     */
+    public static void populateAPIWithEndpoints(String apiUUID, APIProvider provider, String extractedFolderPath,
+            String organization) throws APIManagementException {
+
         try {
+            // Retrieve endpoints from artifact
             String jsonContent = getFileContentAsJson(
                     extractedFolderPath + ImportExportConstants.API_ENDPOINTS_FILE_LOCATION);
             if (jsonContent != null) {
@@ -727,31 +765,21 @@ public class ImportUtils {
                 JsonElement endpointsJson = new JsonParser().parse(jsonContent).getAsJsonObject()
                         .get(APIConstants.DATA);
                 if (endpointsJson != null) {
-                    // Add API Endpoints if endpoints file is defined
                     JsonArray endpoints = endpointsJson.getAsJsonArray();
                     for (JsonElement endpointElement : endpoints) {
                         JsonObject endpointObj = endpointElement.getAsJsonObject();
                         APIEndpointInfo apiEndpointInfo = new Gson().fromJson(endpointObj, APIEndpointInfo.class);
-                        String endpointUUID = apiEndpointInfo.getEndpointUuid();
+                        String endpointUUID = apiEndpointInfo.getId();
                         try {
-                            // Check if endpoint already exists. If not, add it.
-                            APIEndpointInfo retrievedAPIEndpoint = provider.getAPIEndpointByUUID(api.getUuid(),
-                                    endpointUUID, organization);
-                            if (retrievedAPIEndpoint != null) {
-                                if (log.isDebugEnabled()) {
-                                    log.debug("API Endpoint with ID: " + endpointUUID + " already exists in the API");
-                                }
-                            } else {
-                                String createdEndpointUUID = provider.addAPIEndpoint(api.getUuid(), apiEndpointInfo,
-                                        organization);
-                                if (log.isDebugEnabled()) {
-                                    log.debug("API Endpoint with ID: " + createdEndpointUUID +
-                                            " has been added to the API");
-                                }
+                            String createdEndpointUUID = provider.addAPIEndpoint(apiUUID, apiEndpointInfo,
+                                    organization);
+                            if (log.isDebugEnabled()) {
+                                log.debug("API Endpoint with UUID: " + createdEndpointUUID +
+                                        " has been added to the API");
                             }
                         } catch (APIManagementException e) {
                             throw new APIManagementException("Error while adding API Endpoint with ID: " + endpointUUID,
-                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINTS, endpointUUID));
+                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINT, endpointUUID));
                         }
                     }
                 } else {
@@ -764,23 +792,9 @@ public class ImportUtils {
             throw new APIManagementException("Error while reading API endpoints from path: " + extractedFolderPath, e,
                     ExceptionCodes.ERROR_READING_API_ENDPOINTS_FILE);
         } catch (APIManagementException e) {
-            throw new APIManagementException("Error while adding API endpoints to the API", e,
+            throw new APIManagementException("Error while adding API endpoints to API: " + apiUUID, e,
                     ExceptionCodes.ERROR_ADDING_API_ENDPOINTS);
         }
-
-        // Add primary endpoints if primaryProductionEndpointId and/or primarySandboxEndpointId is defined
-        //        if (api.getPrimaryProductionEndpointId() != null || api.getPrimarySandboxEndpointId() != null) {
-        //            try {
-        //                provider.addPrimaryEndpoints(api.getUuid(), api.getPrimaryProductionEndpointId(),
-        //                        api.getPrimarySandboxEndpointId());
-        //                if (log.isDebugEnabled()) {
-        //                    log.debug("Primary endpoints have been added to the API");
-        //                }
-        //            } catch (APIManagementException e) {
-        //                throw new APIManagementException("Error while adding primary endpoints to the API", e,
-        //                        ExceptionCodes.ERROR_ADDING_PRIMARY_ENDPOINTS);
-        //            }
-        //        }
     }
 
     /**
@@ -897,6 +911,12 @@ public class ImportUtils {
                 if (!importedPolicies.containsKey(policyFileName)) {
                     OperationPolicySpecification policySpec =
                             getOperationPolicySpecificationFromFile(policyDirectory, policyFileName);
+                    if (policySpec == null) {
+                        policySpec = getOperationPolicySpecificationFromFile(policyDirectory,
+                                APIUtil.getOperationPolicyFileName(policy.getPolicyName()
+                                                .replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, ""),
+                                        policy.getPolicyVersion(), policyType));
+                    }
                     if (policySpec != null) {
                         OperationPolicyData operationPolicyData = new OperationPolicyData();
                         operationPolicyData.setSpecification(policySpec);
@@ -910,6 +930,18 @@ public class ImportUtils {
                         if (synapseDefinition == null) {
                             synapseDefinition = APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
                                     policyFileName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML);
+                        }
+                        // If the policy definition is still null, definition name is checked after removal of special
+                        // characters
+                        if (synapseDefinition == null) {
+                            String sanitizedPolicyName = policyFileName
+                                    .replaceAll(APIConstants.POLICY_FILENAME_INVALID_CHARS_REGEX, "");
+                            synapseDefinition = APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                    sanitizedPolicyName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION);
+                            if (synapseDefinition == null) {
+                                synapseDefinition = APIUtil.getOperationPolicyDefinitionFromFile(policyDirectory,
+                                        sanitizedPolicyName, APIConstants.SYNAPSE_POLICY_DEFINITION_EXTENSION_XML);
+                            }
                         }
                         if (synapseDefinition != null) {
                             synapseDefinition.setGatewayType(OperationPolicyDefinition.GatewayType.Synapse);
@@ -2504,6 +2536,14 @@ public class ImportUtils {
         }
     }
 
+    /**
+     * Retrieves endpoint configurations from a given archive path.
+     * The method attempts to load the endpoint configurations from either a YAML or JSON file.
+     *
+     * @param pathToArchive The file path to the archive containing endpoint configuration files.
+     * @return A list of EndpointDTO objects parsed from the retrieved configuration file.
+     * @throws APIManagementException If an error occurs while reading the endpoint file.
+     */
     public static List<EndpointDTO> retrieveEndpointConfigs(String pathToArchive)
             throws APIManagementException {
 
@@ -2514,16 +2554,13 @@ public class ImportUtils {
         String pathToJsonFile = pathToArchive + File.separator + ImportExportConstants.ENDPOINTS_FILE
                 + ImportExportConstants.JSON_EXTENSION;
         try {
-            // try loading file as YAML
             if (CommonUtil.checkFileExistence(pathToYamlFile)) {
                 log.debug("Found endpoint file " + pathToYamlFile);
                 String yamlContent = FileUtils.readFileToString(new File(pathToYamlFile));
                 jsonContent = CommonUtil.yamlToJson(yamlContent);
             } else if (CommonUtil.checkFileExistence(pathToJsonFile)) {
-                // load as a json fallback
                 log.debug("Found endpoint file " + pathToJsonFile);
-                jsonContent = FileUtils.
-                        readFileToString(new File(pathToJsonFile)).replace("{}", "\"{}\"");
+                jsonContent = FileUtils.readFileToString(new File(pathToJsonFile));
             }
             if (jsonContent == null) {
                 log.debug("No endpoint file found to be added, skipping");
@@ -2531,9 +2568,7 @@ public class ImportUtils {
             }
             JsonElement endpointsElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
             JsonArray endpointsArray = endpointsElement.getAsJsonArray();
-
-            Gson gson = new Gson();
-            return gson.fromJson(endpointsArray, new TypeToken<ArrayList<EndpointDTO>>() {
+            return new Gson().fromJson(endpointsArray, new TypeToken<ArrayList<EndpointDTO>>() {
             }.getType());
         } catch (IOException e) {
             throw new APIManagementException("Error in reading endpoint file", e);

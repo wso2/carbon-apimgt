@@ -62,7 +62,7 @@ ArtifactComplianceApiService delegate = new ArtifactComplianceApiServiceImpl();
     @Path("/api")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieves compliance of all API artifacts", notes = "Retrieves compliance of all API artifacts within the organization.", response = ArtifactComplianceListDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieves compliance of all API artifacts", notes = "Retrieves compliance of all API artifacts within the organization visible to logged-in user.", response = ArtifactComplianceListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
         })
@@ -81,7 +81,7 @@ ArtifactComplianceApiService delegate = new ArtifactComplianceApiServiceImpl();
     @Path("/api/summary")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieves the summary of compliance of all API artifacts", notes = "Retrieves the summary of compliance of all API artifacts within the organization.", response = ArtifactComplianceSummaryDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieves the summary of compliance of all API artifacts", notes = "Retrieves the summary of compliance of all API artifacts within the organization visible to logged-in user.", response = ArtifactComplianceSummaryDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
         })

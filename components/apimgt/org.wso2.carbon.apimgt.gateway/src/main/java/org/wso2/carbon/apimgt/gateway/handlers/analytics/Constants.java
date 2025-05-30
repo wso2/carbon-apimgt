@@ -79,8 +79,8 @@ public class Constants {
     public static final String NOT_APPLICABLE_VALUE = "N/A";
 
     public static final String AI_METADATA = "aiMetadata";
-    public static final String AI_VENDOR_NAME = "vendor_name";
-    public static final String AI_VENDOR_VERSION = "vendor_version";
+    public static final String AI_VENDOR_NAME = "vendorName";
+    public static final String AI_VENDOR_VERSION = "vendorVersion";
     public static final String AI_MODEL = "model";
     public static final String AI_TOKEN_USAGE = "aiTokenUsage";
     public static final String AI_PROMPT_TOKEN_USAGE = "promptTokens";
@@ -88,6 +88,6 @@ public class Constants {
     public static final String HOUR = "hour";
     public static final String AI_TOTAL_TOKEN_USAGE = "totalTokens";
     public static final String IS_EGRESS = "isEgress";
-    public static final String SUB_TYPE = "subtype";
+    public static final String SUBTYPE = "subtype";
 
 }

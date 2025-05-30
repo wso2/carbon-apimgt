@@ -26,7 +26,7 @@ import java.io.File;
 public class APIMGovernanceConstants {
     public static final String MIGRATE = "migrate";
 
-    public static final String DEFINITIONS_FOLDER = "Definitions";
+    public static final String DEFINITIONS_FOLDER = "Definitions/";
     public static final String DOCS_FOLDER = "Docs";
     public static final String SWAGGER_FILE_NAME = "swagger.yaml";
     public static final String ASYNC_API_FILE_NAME = "asyncapi.yaml";

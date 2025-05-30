@@ -28,6 +28,8 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -66,9 +68,11 @@ public class SwaggerYamlApi {
             if (openAPIDef == null) {
                 synchronized (LOCK_PUBLISHER_OPENAPI_DEF) {
                     if (openAPIDef == null) {
-                        String definition = IOUtils
-                                .toString(this.getClass().getResourceAsStream("/publisher-api.yaml"), "UTF-8");
-                        openAPIDef = new OAS3Parser().removeExamplesFromOpenAPI(definition);
+                        try (InputStream defStream = this.getClass()
+                                .getClassLoader().getResourceAsStream("publisher-api.yaml")) {
+                            String definition = IOUtils.toString(defStream, StandardCharsets.UTF_8);
+                            openAPIDef = new OAS3Parser().removeExamplesFromOpenAPI(definition);
+                        }
                     }
                 }
             }

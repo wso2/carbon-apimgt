@@ -17,7 +17,7 @@
  */
 package org.wso2.carbon.apimgt.gateway.mediators;
 
-import com.amazonaws.services.securitytoken.model.Credentials;
+import software.amazon.awssdk.services.sts.model.Credentials;
 
 import java.util.HashMap;
 import java.util.Map;

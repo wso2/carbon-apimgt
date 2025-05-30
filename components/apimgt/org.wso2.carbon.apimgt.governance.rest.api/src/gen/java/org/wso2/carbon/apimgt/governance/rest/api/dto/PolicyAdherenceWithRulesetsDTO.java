@@ -34,7 +34,8 @@ public class PolicyAdherenceWithRulesetsDTO   {
     public enum StatusEnum {
         FOLLOWED("FOLLOWED"),
         VIOLATED("VIOLATED"),
-        UNAPPLIED("UNAPPLIED");
+        UNAPPLIED("UNAPPLIED"),
+        PENDING("PENDING");
         private String value;
 
         StatusEnum (String v) {

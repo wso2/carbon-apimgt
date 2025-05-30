@@ -691,7 +691,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
     @MethodStats
     public boolean handleResponse(MessageContext messageContext) {
 
-        if (((Axis2MessageContext) messageContext).getAxis2MessageContext().getProperty(AI_API_RESPONSE_METADATA) != null) {
+        if (messageContext.getProperty(AI_API_RESPONSE_METADATA) != null) {
             Timer timer3 = getTimer(MetricManager.name(
                     APIConstants.METRICS_PREFIX, this.getClass().getSimpleName(), THROTTLE_MAIN));
             Timer.Context context3 = timer3.start();
@@ -1418,9 +1418,8 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         }
 
         try {
-            org.apache.axis2.context.MessageContext axis2MC = ((Axis2MessageContext) synCtx).getAxis2MessageContext();
             String throttleKey = generateThrottleKey(apiContext, apiVersion, authContext.getKeyType());
-            Map<String, String> llmMetadata = (Map<String, String>) axis2MC.getProperty(AI_API_RESPONSE_METADATA);
+            Map<String, String> llmMetadata = (Map<String, String>) synCtx.getProperty(AI_API_RESPONSE_METADATA);
 
             if (APIConstants.API_KEY_TYPE_PRODUCTION.equals(authContext.getKeyType())) {
                 return checkProductionLimit(synCtx, throttleKey, llmMetadata);

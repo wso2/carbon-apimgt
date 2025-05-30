@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.impl.utils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
@@ -168,6 +169,13 @@ public class GatewayUtils {
                 .concat(APIConstants.ENDPOINT_SECURITY_PASSWORD).concat("--").concat(type);
     }
 
+    public static String retrieveOAuthProxyPasswordAlias(String name, String version, String type) {
+
+        return name.concat("--v").concat(version).concat("--")
+                .concat(APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH).concat("--")
+                .concat(APIConstants.ENDPOINT_SECURITY_PROXY_PASSWORD).concat("--").concat(type);
+    }
+
     public static String retrieveBasicAuthAlias(String name, String version, String type) {
 
         return name.concat("--v").concat(version).concat("--").concat(type);
@@ -208,5 +216,26 @@ public class GatewayUtils {
             }
         }
         return ttl;
+    }
+
+    /**
+     * Sets the endpoint sequences to be removed for a given API in the Gateway API DTO.
+     *
+     * @param api           The API for which endpoint sequences are being removed.
+     * @param gatewayAPIDTO The DTO containing gateway API configurations, where the sequences
+     *                      to be removed will be updated.
+     */
+    public static void setEndpointSequencesToBeRemoved(API api, GatewayAPIDTO gatewayAPIDTO) {
+
+        String productionEndpointSequence =
+                APIUtil.getEndpointSequenceName(api) + AIAPIConstants.ENDPOINT_SEQUENCE
+                        + APIConstants.APIEndpoint.PRODUCTION;
+        gatewayAPIDTO.setSequencesToBeRemove(
+                addStringToList(productionEndpointSequence, gatewayAPIDTO.getSequencesToBeRemove()));
+        String sandboxEndpointSequence =
+                APIUtil.getEndpointSequenceName(api) + AIAPIConstants.ENDPOINT_SEQUENCE
+                        + APIConstants.APIEndpoint.SANDBOX;
+        gatewayAPIDTO.setSequencesToBeRemove(
+                addStringToList(sandboxEndpointSequence, gatewayAPIDTO.getSequencesToBeRemove()));
     }
 }

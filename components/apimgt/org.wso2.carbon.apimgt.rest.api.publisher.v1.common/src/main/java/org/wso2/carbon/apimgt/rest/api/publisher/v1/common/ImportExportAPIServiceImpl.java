@@ -102,7 +102,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         apiIdentifier = api.getId();
         apiIdentifier.setUuid(exportAPIUUID);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
-                preserveDocs, originalDevPortalUrl, organization);
+                preserveDocs, originalDevPortalUrl, organization, preserveCredentials);
     }
 
     @Override
@@ -124,7 +124,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         apiIdentifier.setUuid(apiId);
         APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
-                preserveDocs, StringUtils.EMPTY, organization);
+                preserveDocs, StringUtils.EMPTY, organization, preserveCredentials);
 
     }
 

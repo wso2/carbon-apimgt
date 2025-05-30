@@ -40,6 +40,7 @@
         <EnableJWKSApi>{{apim.jwt.enable_jwks_api}}</EnableJWKSApi>
         <!-- Name of the security context header to be added to the validated requests. -->
         <JWTHeader>{{apim.jwt.header}}</JWTHeader>
+        <JWTDecoding>{{apim.jwt.encoding}}</JWTDecoding>
 
         <!-- Fully qualified name of the class that will retrieve additional user claims
              to be appended to the JWT. If not specified no claims will be appended.If user wants to add all user claims in the
@@ -406,6 +407,11 @@
 
     <AiConfiguration>
         <Enabled>{{apim.ai.llm_provider_events_enabled}}</Enabled>
+        <FailoverConfigurations>
+            <FailoverEndpointsLimit>{{apim.ai.failover_configurations.failover_endpoints_limit}}</FailoverEndpointsLimit>
+            <DefaultRequestTimout>{{apim.ai.failover_configurations.default_request_timeout}}</DefaultRequestTimout>
+        </FailoverConfigurations>
+        <DefaultRequestTimout>{{apim.ai.default_request_timeout}}</DefaultRequestTimout>
     </AiConfiguration>
 
     <!--
@@ -455,6 +461,7 @@
         <Resources>
             <ChatResource>{{apim.ai.design_assistant_chat_resource}}</ChatResource>
             <GenApiPayloadResource>{{apim.ai.design_assistant_gen_api_payload_resource}}</GenApiPayloadResource>
+            <RegenerateSpecResource>{{apim.ai.design_assistant_regenerate_spec_resource}}</RegenerateSpecResource>
         </Resources>
     </DesignAssistant>
 
@@ -707,6 +714,19 @@
          You can enable this and set preferable Logger name. -->
     {% if apim.velocity_log.enabled %}
         <VelocityLogger>{{apim.velocity_log.name}}</VelocityLogger>
+    {% endif %}
+
+    {% if apim.governance.datasource.name is defined %}
+    <!-- This property is to configure the API Manager Governance capabilities -->
+    <APIMGovernance>
+        <DataSource>{{apim.governance.datasource.name}}</DataSource>
+        <SchedulerConfigurations>
+            <ThreadPoolSize>{{apim.governance.scheduler.thread_pool_size}}</ThreadPoolSize>
+            <QueueSize>{{apim.governance.scheduler.queue_size}}</QueueSize>
+            <TaskCheckIntervalMinutes>{{apim.governance.scheduler.task_check_interval_minutes}}</TaskCheckIntervalMinutes>
+            <TaskCleanupIntervalMinutes>{{apim.governance.scheduler.task_cleanup_interval_minutes}}</TaskCleanupIntervalMinutes>
+        </SchedulerConfigurations>
+    </APIMGovernance>
     {% endif %}
 
     <RESTAPI>
@@ -1163,6 +1183,7 @@
                 {% else %}
                 <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}'</connectionfactory.TopicConnectionFactory>
                 {% endif %}
+                <SequentialFailoverFromBeginning>{{apim.throttling.sequential_failover_from_beginning}}</SequentialFailoverFromBeginning>
             </JMSConnectionParameters>
         </JMSConnectionDetails>
 
@@ -1619,6 +1640,7 @@
              {% else %}
              <connectionfactory.TopicConnectionFactory>amqp://${admin.username}:${admin.password}@clientid/carbon?brokerlist='tcp://${carbon.local.ip}:${jms.port}?{% if apim.throttling.jms.ssl is defined %}ssl='{{apim.throttling.jms.ssl}}'{% endif %}'</connectionfactory.TopicConnectionFactory>
              {% endif %}
+             <SequentialFailoverFromBeginning>{{apim.throttling.sequential_failover_from_beginning}}</SequentialFailoverFromBeginning>
          </EventReceiverConfiguration>
      </EventHubConfigurations>
 
@@ -1700,8 +1722,6 @@
             <Sequence>_block_api_handler_.xml</Sequence>
             <Sequence>_backend_failure_handler_.xml</Sequence>
             <Sequence>_opa_policy_failure_handler_.xml</Sequence>
-            <Sequence>_ai_api_request_seq_.xml</Sequence>
-            <Sequence>_ai_api_response_seq_.xml</Sequence>
         {% if apim.sync_runtime_artifacts.gateway.skip_list.sequences is defined %}
             {%- for sequence in apim.sync_runtime_artifacts.gateway.skip_list.sequences -%}
             <Sequence>{{sequence}}</Sequence>
@@ -1768,6 +1788,9 @@
                  <ExpiresIn>{{apim.mediator_config.oauth.expires_in}}</ExpiresIn>
                  <!-- Enable/Disable retry API calls with new access token when the access token is invalid. Default is true. -->
                  <EnableRetryCallWithNewToken>{{apim.mediator_config.oauth.enable_retry_call_with_new_token}}</EnableRetryCallWithNewToken>
+                 <ConnectionTimeoutDuration>{{apim.mediator_config.oauth.connection_timeout_duration}}</ConnectionTimeoutDuration>
+                 <ConnectionRequestTimeoutDuration>{{apim.mediator_config.oauth.connection_request_timeout_duration}}</ConnectionRequestTimeoutDuration>
+                 <SocketTimeoutDuration>{{apim.mediator_config.oauth.socket_timeout_duration}}</SocketTimeoutDuration>
              </OAuth>
           </MediatorConfigs>
       {% endif %}

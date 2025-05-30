@@ -177,11 +177,10 @@ public interface GovernancePolicyMgtDAO {
     /**
      * Delete policy label mappings for a given label
      *
-     * @param label        label
-     * @param organization organization
+     * @param label label
      * @throws APIMGovernanceException If an error occurs while deleting the mappings
      */
-    void deleteLabelPolicyMappings(String label, String organization) throws APIMGovernanceException;
+    void deleteLabelPolicyMappings(String label) throws APIMGovernanceException;
 }
 
 

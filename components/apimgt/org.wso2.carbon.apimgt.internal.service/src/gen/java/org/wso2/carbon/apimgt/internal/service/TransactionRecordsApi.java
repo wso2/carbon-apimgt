@@ -26,7 +26,7 @@ import javax.validation.constraints.*;
 
 @Api(description = "the transaction-records API")
 
-@Produces({ "application/json" })
+
 
 
 public class TransactionRecordsApi  {

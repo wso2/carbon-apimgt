@@ -8,6 +8,8 @@ servers:
     variables:
       endpoint:
         default: your-resource-name.openai.azure.com
+      deployment-id:
+        default: your-deployment-id
 security:
   - bearer:
       - api.read

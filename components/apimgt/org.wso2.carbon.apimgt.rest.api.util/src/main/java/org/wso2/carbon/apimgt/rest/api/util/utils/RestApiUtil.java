@@ -1371,7 +1371,7 @@ public class RestApiUtil {
             throws APIManagementException {
         boolean allowed = false;
 
-        if (APIUtil.isOrganizationAccessControlEnabled()) {
+        if (APIUtil.areOrganizationsRegistered()) {
             String[] roles = APIUtil.getListOfRoles(APIUtil.getUserNameWithTenantSuffix(userName));
             if (Arrays.asList(roles).contains("admin")) {
                 return true;

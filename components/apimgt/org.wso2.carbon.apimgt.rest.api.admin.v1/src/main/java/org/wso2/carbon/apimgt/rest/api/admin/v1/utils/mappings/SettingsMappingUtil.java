@@ -23,11 +23,11 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
-import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
@@ -145,9 +145,9 @@ public class SettingsMappingUtil {
 
     private static List<SettingsGatewayConfigurationDTO> getSettingsGatewayConfigurationDTOList() {
         List<SettingsGatewayConfigurationDTO> list = new ArrayList<>();
-        Map<String, ExternalGatewayDeployer> externalGatewayConnectorConfigurationMap =
-                ServiceReferenceHolder.getInstance().getExternalGatewayDeployers();
-        externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
+        Map<String, GatewayAgentConfiguration> gatewayConfigurations =
+                ServiceReferenceHolder.getInstance().getExternalGatewayConnectorConfigurations();
+        gatewayConfigurations.forEach((gatewayName, gatewayConfiguration) -> {
             SettingsGatewayConfigurationDTO settingsFederatedGatewayConfigurationDTO =
                     new SettingsGatewayConfigurationDTO();
             settingsFederatedGatewayConfigurationDTO.setType(gatewayConfiguration.getType());

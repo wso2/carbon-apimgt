@@ -23,6 +23,7 @@ import org.apache.axis2.context.ConfigurationContext;
 import org.apache.axis2.context.OperationContext;
 import org.apache.axis2.context.ServiceContext;
 import org.apache.axis2.description.InOutAxisOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.MessageContextCreatorForAxis2;
@@ -264,13 +265,19 @@ public class WebsocketUtil {
 		String appLevelBlockingKey = "";
 		String subscriptionLevelBlockingKey = "";
 
+		String authorizedUser = infoDTO.getEndUserName();
+		//Check if the tenant domain is appended with authorizedUser and append if it is not there
+		if (!StringUtils.contains(authorizedUser, apiTenantDomain)) {
+			authorizedUser = authorizedUser + "@" + apiTenantDomain;
+		}
+
 		if (ServiceReferenceHolder.getInstance().getThrottleDataHolder().isBlockingConditionsPresent()) {
 			appLevelBlockingKey = infoDTO.getSubscriber() + ":" + infoDTO.getApplicationName();
 			subscriptionLevelBlockingKey = apiContext + ":" + apiVersion + ":" + infoDTO.getSubscriber() + ":"
 					+ infoDTO.getApplicationName() + ":" + infoDTO.getType();
 			isBlockedRequest = ServiceReferenceHolder.getInstance().getThrottleDataHolder()
-					.isRequestBlocked(apiContext, appLevelBlockingKey, infoDTO.getEndUserName(), clientIp,
-							apiTenantDomain, subscriptionLevelBlockingKey);
+					.isRequestBlocked(apiContext, appLevelBlockingKey, authorizedUser, clientIp, apiTenantDomain,
+							subscriptionLevelBlockingKey);
 		}
 
 		if (isBlockedRequest) {

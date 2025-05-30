@@ -96,6 +96,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.UUID;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_JSON_MEDIA_TYPE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.APPLICATION_XML_MEDIA_TYPE;
@@ -623,9 +624,16 @@ public class OAS2Parser extends APIDefinition {
         updateSwaggerSecurityDefinition(swaggerObj, swaggerData, "https://test.com",
                 new KeyManagerConfigurationDTO());
         updateLegacyScopesFromSwagger(swaggerObj, swaggerData);
-        
-        swaggerObj.getInfo().setTitle(swaggerData.getTitle());
-        swaggerObj.getInfo().setVersion(swaggerData.getVersion());
+
+        if (swaggerObj.getInfo() != null) {
+            swaggerObj.getInfo().setTitle(swaggerData.getTitle());
+            swaggerObj.getInfo().setVersion(swaggerData.getVersion());
+        } else {
+            Info info = new Info();
+            info.setTitle(swaggerData.getTitle());
+            info.setVersion(swaggerData.getVersion());
+            swaggerObj.setInfo(info);
+        }
 
         preserveResourcePathOrderFromAPI(swaggerData, swaggerObj);
         return getSwaggerJsonString(swaggerObj);
@@ -720,9 +728,27 @@ public class OAS2Parser extends APIDefinition {
         if (validationResponse.isValid() && parseAttemptForV2.getSwagger() != null){
             Swagger swagger = parseAttemptForV2.getSwagger();
             Info info = swagger.getInfo();
+            String title = null;
+            String version = null;
+            String description = null;
+
+            // If info is null, random values for metadata will be generated only if SWAGGER_RELAXED_VALIDATION is set.
+            if (info != null) {
+                if (!StringUtils.isBlank(info.getTitle())) {
+                    title = info.getTitle();
+                }
+                version = info.getVersion();
+                description = info.getDescription();
+            } else {
+                // Generate random placeholder values to prevent null assignments and ensure downstream components receive valid response attributes.
+                title = "API-Title-" + UUID.randomUUID().toString();
+                version = "v1-" + UUID.randomUUID().toString().substring(0, 3);
+                description = "API-description-" + UUID.randomUUID().toString();
+            }
+
             OASParserUtil.updateValidationResponseAsSuccess(
                     validationResponse, apiDefinition, swagger.getSwagger(),
-                    info.getTitle(), info.getVersion(), swagger.getBasePath(), info.getDescription(),
+                    title, version, swagger.getBasePath(), description,
                     (swagger.getHost() == null || swagger.getHost().isEmpty()) ? null :
                             new ArrayList<String>(Arrays.asList(swagger.getHost()))
             );

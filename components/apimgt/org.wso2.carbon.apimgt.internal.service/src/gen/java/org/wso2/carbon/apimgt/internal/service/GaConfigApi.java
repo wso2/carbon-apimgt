@@ -25,7 +25,7 @@ import javax.validation.constraints.*;
 
 @Api(description = "the ga-config API")
 
-@Produces({ "application/json" })
+
 
 
 public class GaConfigApi  {
@@ -43,7 +43,7 @@ GaConfigApiService delegate = new GaConfigApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "google analytics configuration", response = Void.class),
         @ApiResponse(code = 200, message = "Unexpected error", response = ErrorDTO.class) })
-    public Response gaConfigGet(@ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.   Api ID ")  @QueryParam("apiId") String apiId) throws APIManagementException{
+    public Response gaConfigGet( @NotNull  @ApiParam(value = "This is used to specify the tenant domain, where the resource need to be   retrieved from. " ,required=true)@HeaderParam("xWSO2Tenant") String xWSO2Tenant,  @ApiParam(value = "**Search condition**.   Api ID ")  @QueryParam("apiId") String apiId) throws APIManagementException{
         return delegate.gaConfigGet(xWSO2Tenant, apiId, securityContext);
     }
 }

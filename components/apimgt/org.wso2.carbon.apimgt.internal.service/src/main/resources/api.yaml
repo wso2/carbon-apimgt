@@ -1,553 +1,790 @@
-# this is an example of the Uber API
-# as a demonstration of an API spec in YAML
-swagger: '2.0'
+openapi: 3.0.1
 info:
   title: Internal Utility API
   description: This API allows you to access internal data.
-  version: "1.0.0"
-# the domain of the service
-host: apim.wso2.com
-# array of all schemes that your API supports
-schemes:
-  - https
-# will be prefixed to all paths
-basePath: /v1
-produces:
-  - application/json
+  version: 1.0.0
+servers:
+  - url: 'https://apim.wso2.com/v1'
 paths:
   /block:
     get:
+      tags:
+        - Throttling
       summary: blocking events available
       description: |
         This will provide access to throttled events in database.
-      tags:
-        - Throttling
       responses:
-        200:
+        '200':
           description: Block Conditions
-          schema:
-            type: object
-            additionalProperties:
-              $ref: "#/definitions/BlockConditions"
-
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/BlockConditions'
   /keyTemplates:
     get:
       summary: An Array of key templates according to custom policies
       description: |
         This will provide access to key templates define in custom policies
       responses:
-        200:
+        '200':
           description: An array of Key Templates
-          schema:
-            type: array
-            items:
-              type: string
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /keymanagers:
     get:
       summary: An Array of key managers configured
       description: |
         this will provide key managers configured
       parameters:
-        - $ref: '#/parameters/requestedTenant'
-      responses:
-        200:
-          description: An array of key managers
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
           schema:
-            type: array
-            items:
-              $ref: '#/definitions/KeyManager'
+            type: string
+      responses:
+        '200':
+          description: An array of key managers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KeyManager'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /revokedjwt:
     get:
-      summary: JTIs of revoked jwt tokens and application and subject entity revocation event data
+      summary: >-
+        JTIs of revoked jwt tokens and application and subject entity revocation
+        event data
       description: |
         This will provide access to 
           - JTIs of directly revoked JWT tokens in database
           - consumer application information of revoked JWTs due to application change events
           - subject entity information of revoked JWTs due to user change events
       responses:
-        200:
-          description: An object of revoke JWTs, revoked subject entities, revoked consumer keys
-          schema:
-            $ref: '#/definitions/RevokedEvents'
+        '200':
+          description: >-
+            An object of revoke JWTs, revoked subject entities, revoked consumer
+            keys
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevokedEvents'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /apis:
     get:
+      tags:
+        - Subscription Validation
       summary: Get all apis
       description: |
         This will provide access to apis in database.
       parameters:
-        - $ref: '#/parameters/requestedTenant'
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
+          schema:
+            type: string
         - name: apiId
           in: query
           description: |
             **Search condition**.
               Api ID
-          type: string
+          schema:
+            type: string
         - name: context
           in: query
           description: |
             **Search condition**.
              context of the api
-          type: string
+          schema:
+            type: string
         - name: version
           in: query
           description: |
             **Search condition**.
              versio  of the api
-          type: string
+          schema:
+            type: string
         - name: gatewayLabel
           in: query
           description: |
             **Search condition**.
              label associated with the APIs
-          type: string
+          schema:
+            type: string
         - name: expand
           in: query
-          description: |
-            Defines whether the returned response should contain full details of API
-          type: boolean
-          default: true
-        - $ref: "#/parameters/Accept"
-      tags:
-        - Subscription Validation
-      responses:
-        200:
-          description: An array of APIs in the database
+          description: >
+            Defines whether the returned response should contain full details of
+            API
           schema:
-            $ref: '#/definitions/APIList'
+            type: boolean
+            default: true
+        - name: Accept
+          in: header
+          description: >
+            Media types acceptable for the response. Default is
+            application/json.
+          schema:
+            type: string
+            default: application/json
+      responses:
+        '200':
+          description: An array of APIs in the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIList'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /applications:
     get:
+      tags:
+        - Subscription Validation
       summary: Get all applications
       description: |
         This will provide access to applications in database.
       parameters:
-        - $ref: '#/parameters/requestedTenant'
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
+          schema:
+            type: string
         - name: appId
           in: query
           description: |
             **Search condition**.
              Application ID of the application
-          type: integer
-      tags:
-        - Subscription Validation
-      responses:
-        200:
-          description: An array of applications in the database
           schema:
-            $ref: '#/definitions/ApplicationList'
+            type: integer
+      responses:
+        '200':
+          description: An array of applications in the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationList'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /subscriptions:
     get:
+      tags:
+        - Subscription Validation
       summary: Get all subscriptions
       description: |
         This will provide access to subscriptions in database.
       parameters:
-        - $ref: '#/parameters/requestedTenant'
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
+          schema:
+            type: string
         - name: apiId
           in: query
           description: |
             **Search condition**.
               Api ID  of the subscription
-          type: integer
+          schema:
+            type: integer
         - name: appId
           in: query
           description: |
             **Search condition**.
               Application ID  of the subscription
-          type: integer
+          schema:
+            type: integer
         - name: apiUUID
           in: query
           description: |
             **Search condition**.
               Api UUID  of the subscription
-          type: string
+          schema:
+            type: string
         - name: applicationUUID
           in: query
           description: |
             **Search condition**.
               Application UUID  of the subscription
-          type: string
-      tags:
-        - Subscription Validation
-      responses:
-        200:
-          description: An array of subscriptions in the database
           schema:
-            $ref: '#/definitions/SubscriptionList'
+            type: string
+      responses:
+        '200':
+          description: An array of subscriptions in the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionList'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /subscribe-internal:
     post:
-      summary: Subscribe to a subscription validation disabled API
-      description: |
-        This will allow creating subscriptions from applications to APIs which have
-        subscription validation disabled.
-      parameters:
-        - $ref: '#/parameters/requestedTenant'
-        - name: appId
-          in: query
-          type: integer
-          description: |
-            Application ID of the subscription
-        - name: appUuid
-          in: query
-          type: string
-          description: |
-            Application UUID
-        - name: api
-          in: body
-          description: The API object
-          schema:
-            $ref: '#/definitions/API'
       tags:
         - Subscription Validation
+      summary: Subscribe to a subscription validation disabled API
+      description: >
+        This will allow creating subscriptions from applications to APIs which
+        have
+
+        subscription validation disabled.
       operationId: subscribeToAPI
-      responses:
-        201:
-          description: Subscription created successfully
+      parameters:
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
           schema:
-            $ref: '#/definitions/Subscription'
+            type: string
+        - name: appId
+          in: query
+          description: |
+            Application ID of the subscription
+          schema:
+            type: integer
+        - name: appUuid
+          in: query
+          description: |
+            Application UUID
+          schema:
+            type: string
+      requestBody:
+        description: The API object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/API'
+        required: false
+      responses:
+        '201':
+          description: Subscription created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: api
   /subscription-policies:
     get:
+      tags:
+        - Subscription Validation
       summary: Get all subscription throttling policies
-      description: |
-        This will provide access to subscription level throttling policies in database.
+      description: >
+        This will provide access to subscription level throttling policies in
+        database.
       parameters:
-        - $ref: '#/parameters/requestedTenant'
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
+          schema:
+            type: string
         - name: policyName
           in: query
           description: |
             **Search condition**.
              Subscription policy name
-          type: string
-      tags:
-        - Subscription Validation
-      responses:
-        200:
-          description: An array of subscription policies in the database
           schema:
-            $ref: '#/definitions/SubscriptionPolicyList'
+            type: string
+      responses:
+        '200':
+          description: An array of subscription policies in the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionPolicyList'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /application-policies:
     get:
+      tags:
+        - Subscription Validation
       summary: Get all application throttling policies
-      description: |
-        This will provide access to application level throttling policies in database.
+      description: >
+        This will provide access to application level throttling policies in
+        database.
       parameters:
-        - $ref: '#/parameters/requestedTenant'
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
+          schema:
+            type: string
         - name: policyName
           in: query
           description: |
             **Search condition**.
              Application policy name
-          type: string
-      tags:
-        - Subscription Validation
-      responses:
-        200:
-          description: An array of application policies in the database
           schema:
-            $ref: '#/definitions/ApplicationPolicyList'
+            type: string
+      responses:
+        '200':
+          description: An array of application policies in the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationPolicyList'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /api-policies:
     get:
+      tags:
+        - Subscription Validation
       summary: Get all API throttling policies
       description: |
         This will provide access to api level throttling policies in database.
       parameters:
-        - $ref: '#/parameters/requestedTenant'
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
+          schema:
+            type: string
         - name: policyName
           in: query
           description: |
             **Search condition**.
              Api policy name
-          type: string
-      tags:
-        - Subscription Validation
-      responses:
-        200:
-          description: An array of api policies in the database
           schema:
-            $ref: '#/definitions/ApiPolicyList'
+            type: string
+      responses:
+        '200':
+          description: An array of api policies in the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiPolicyList'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /global-policies:
     get:
+      tags:
+        - Subscription Validation
       summary: Get all Global throttling policies
       description: |
         This will provide access to global throttling policies in database.
       parameters:
-        - $ref: '#/parameters/requestedTenant'
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
+          schema:
+            type: string
         - name: policyName
           in: query
           description: |
             **Search condition**.
              Global policy name
-          type: string
-      tags:
-        - Subscription Validation
-      responses:
-        200:
-          description: An array of global policies in the database
           schema:
-            $ref: '#/definitions/GlobalPolicyList'
+            type: string
+      responses:
+        '200':
+          description: An array of global policies in the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalPolicyList'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /application-key-mappings:
     get:
+      tags:
+        - Subscription Validation
       summary: Get all application key mappings
       description: |
         This will provide access to application vs key mappings in database.
       parameters:
-        - $ref: '#/parameters/requestedTenant'
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
+          schema:
+            type: string
         - name: consumerKey
           in: query
           description: |
             **Search condition**.
              Consumer Key of the application
-          type: string
+          schema:
+            type: string
         - name: keymanager
           in: query
           description: |
             **Search condition**.
              KeyManager associated to consumer_key of the application
-          type: string
-
-      tags:
-        - Subscription Validation
-      responses:
-        200:
-          description: An array of application key mappings in the database
           schema:
-            $ref: '#/definitions/ApplicationKeyMappingList'
+            type: string
+      responses:
+        '200':
+          description: An array of application key mappings in the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationKeyMappingList'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /scopes:
     get:
+      tags:
+        - Subscription Validation
       summary: Get all scopes.
       description: |
         This will provide access to the Scopes created in database.
       parameters:
-        - $ref: '#/parameters/requestedTenant'
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
+          schema:
+            type: string
         - name: scopeKey
           in: query
           description: |
             **Search condition**.
              Scope Key
-          type: string
-      tags:
-        - Subscription Validation
-      responses:
-        200:
-          description: An array of Scopes in Database.
           schema:
-            $ref: '#/definitions/ScopesList'
+            type: string
+      responses:
+        '200':
+          description: An array of Scopes in Database.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScopesList'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /runtime-artifacts:
     get:
+      tags:
+        - Retrieving Runtime artifacts
       summary: Get all the runtime artifacts for a given API UUID and gateway label
       description: |
         This will provide access to runtime artifacts in database.
       parameters:
-        - $ref: '#/parameters/requestedTenant'
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
+          schema:
+            type: string
         - name: apiId
           in: query
           description: |
             **Search condition**.
               Api ID
-          type: string
+          schema:
+            type: string
         - name: gatewayLabel
           in: query
           description: |
             **Search condition**.
              label associated with the APIs
-          type: string
+          schema:
+            type: string
         - name: type
           in: query
           description: |
             **Search condition**.
              type of gateway
-          type: string
+          schema:
+            type: string
         - name: name
           in: query
           description: |
             **Search condition**.
              name of API
-          type: string
+          schema:
+            type: string
         - name: version
           in: query
           description: |
             **Search condition**.
              version of API
-          type: string
-      tags:
-        - Retrieving Runtime artifacts
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: List of runtime Artifacts
+          content: {}
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /retrieve-api-artifacts:
     post:
+      tags:
+        - Retrieve API artifacts
       summary: Get API runtime artifacts from ID list
-      description: |
-        This will provide access to API runtime artifacts in database for a given API UUID list.
+      description: >
+        This will provide access to API runtime artifacts in database for a
+        given API UUID list.
       parameters:
-        - $ref: '#/parameters/requestedTenant'
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
+          schema:
+            type: string
         - name: gatewayLabel
           in: query
           description: |
             **Search condition**.
              label associated with the APIs
-          type: string
+          schema:
+            type: string
         - name: type
           in: query
           description: |
             type of gateway
-          type: string
-        - name: uuidList
-          in: body
-          description: 'API UUID list payload'
           schema:
-            $ref: "#/definitions/UUIDList"
-      tags:
-        - Retrieve API artifacts
+            type: string
+      requestBody:
+        description: API UUID list payload
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UUIDList'
+        required: false
       responses:
-        200:
+        '200':
           description: List of runtime Artifacts
+          content: {}
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: uuidList
   /runtime-metadata:
     get:
+      tags:
+        - Retrieving Runtime artifacts
       summary: Metadata information for API runtimes
       description: |
         This will provide access to the deployment metadata in json format
       parameters:
-        - $ref: '#/parameters/requestedTenant'
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
+          schema:
+            type: string
         - name: apiId
           in: query
           description: |
             **Search condition**.
               Api ID
-          type: string
+          schema:
+            type: string
         - name: gatewayLabel
           in: query
           description: |
             **Search condition**.
              label associated with the APIs
-          type: string
-      tags:
-        - Retrieving Runtime artifacts
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: Json file of runtime metadata
+          content: {}
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /gateway-policy-artifacts:
     get:
+      tags:
+        - Retrieving Runtime artifacts for gateway policies
       summary: Get all the runtime artifacts for a given API UUID and gateway label
       description: |
         This will provide access to runtime artifacts in database.
       parameters:
-        - $ref: '#/parameters/requestedTenant'
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
+          schema:
+            type: string
         - name: policyMappingUuid
           in: query
           description: |
             **Search condition**.
               Gateway policy mapping UUID
-          type: string
+          schema:
+            type: string
         - name: type
           in: query
           description: |
             **Search condition**.
              type of gateway
-          type: string
+          schema:
+            type: string
         - name: gatewayLabel
           in: query
           description: |
             **Search condition**.
              label associated with the policy mapping
-          type: string
-      tags:
-        - Retrieving Runtime artifacts for gateway policies
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: List of runtime Artifacts
+          content: {}
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /endpoint-certificates:
     get:
+      tags:
+        - Retrieving Runtime artifacts
       summary: Get all the endpoint certificates for given alias.
       description: |
         This will provide access to
       parameters:
-        - $ref: '#/parameters/requestedTenant'
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
+          schema:
+            type: string
         - name: alias
           in: query
           description: |
             **Search condition**.
               Alias
-          type: string
-      tags:
-        - Retrieving Runtime artifacts
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: List of endpoint certificates
+          content: {}
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  #--------------------------------------------
-  # Deployed revision information
-  #--------------------------------------------
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /apis/deployed-revisions:
     patch:
       tags:
@@ -556,23 +793,23 @@ paths:
       description: |
         Deploy a revision
       operationId: deployedAPIRevision
-      parameters:
-        - name: deployedAPIRevisionDTOList
-          in: body
-          description: 'Notification event payload'
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/DeployedAPIRevision'
+      requestBody:
+        description: Notification event payload
+        content:
+          '*/*':
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/DeployedAPIRevision'
+        required: false
       responses:
-        200:
+        '200':
           description: |
             Created.
+          content: {}
         default:
           $ref: '#/definitions/Error'
-  #--------------------------------------------
-  # UnDeployed revision information
-  #--------------------------------------------
+      x-codegen-request-body-name: deployedAPIRevisionDTOList
   /apis/undeployed-revision:
     post:
       tags:
@@ -580,1321 +817,1285 @@ paths:
       summary: Remove undeployed revision
       description: Remove undeployed Revision entry from the database
       operationId: unDeployedAPIRevision
-      parameters:
-        - name: unDeployedAPIRevisionDTO
-          in: body
-          description: 'Notification event payload'
-          schema:
-            $ref: '#/definitions/UnDeployedAPIRevision'
+      requestBody:
+        description: Notification event payload
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UnDeployedAPIRevision'
+        required: false
       responses:
-        200:
+        '200':
           description: Fetch un-deployed revision
+          content: {}
         default:
           $ref: '#/definitions/Error'
+      x-codegen-request-body-name: unDeployedAPIRevisionDTO
   /ga-config:
     get:
+      tags:
+        - Retrieving Runtime artifacts
       summary: Get Google analytics config related to tenant.
       description: |
         This will provide access to runtime artifacts in database.
       parameters:
-        - $ref: '#/parameters/requestedTenant'
+        - name: xWSO2Tenant
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
+          schema:
+            type: string
         - name: apiId
           in: query
           description: |
             **Search condition**.
               Api ID
-          type: string
-      tags:
-        - Retrieving Runtime artifacts
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: google analytics configuration
+          content: {}
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /webhooks-subscriptions:
     get:
+      tags:
+        - Retrieving webhooks subscriptions
       summary: Get webhooks subscriptions
       description: |
         This will provide list of webhooks subscriptions from the database.
       parameters:
         - name: xWSO2Tenant
           in: header
-          description: |
-            This is used to specify the tenant domain, where the resource need to be
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
                         retrieved from.
-          type: string
           required: true
-      tags:
-        - Retrieving webhooks subscriptions
-      responses:
-        200:
-          description: An array of webhooks subscriptions
           schema:
-            $ref: '#/definitions/webhooksSubscriptionsList'
+            type: string
+      responses:
+        '200':
+          description: An array of webhooks subscriptions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/webhooksSubscriptionsList'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /notify:
     post:
+      tags:
+        - Notification
       summary: Push notification events into nodes.
       description: |
         This pushes events to the other nodes.
       parameters:
-        - $ref: '#/parameters/type'
-        - name: body
-          in: body
-          description: 'Notification event payload'
+        - name: X-WSO2-KEY-MANAGER
+          in: header
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
+              retrieved from.
+          required: true
           schema:
             type: string
-      tags:
-        - 'Notification'
+      requestBody:
+        description: Notification event payload
+        content:
+          '*/*':
+            schema:
+              type: string
+        required: false
       responses:
-        200:
-          description: 'Event Received success'
-          schema:
-            type: object
+        '200':
+          description: Event Received success
+          content:
+            application/json:
+              schema:
+                type: object
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-codegen-request-body-name: body
   /api-logging-configs:
     get:
+      tags:
+        - Logging
       summary: Retrieve persisted per API logging data.
       description: |
         This retrieve the persisted API logging data for API logging support.
-      tags:
-        - 'Logging'
       responses:
-        200:
-          description: 'Event Received success'
-          schema:
-            $ref: '#/definitions/APILoggingConfigList'
+        '200':
+          description: Event Received success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APILoggingConfigList'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /llm-providers:
     get:
+      tags:
+        - LLMProviders
       summary: Retrieve persisted LLM Providers
       description: |
         This retrieve the persisted LLM Providers.
-      tags:
-        - 'LLMProviders'
+      operationId: getLLMProviders
       parameters:
         - name: name
           in: query
-          required: false
-          type: string
+          schema:
+            type: string
         - name: apiVersion
           in: query
-          required: false
-          type: string
+          schema:
+            type: string
         - name: xWSO2Tenant
           in: header
-          description: |
-            This is used to specify the tenant domain, where the resource need to be
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
                         retrieved from.
-          type: string
           required: true
-      responses:
-        200:
-          description: 'LLM providers received success'
           schema:
-            $ref: '#/definitions/LLMProviderList'
+            type: string
+      responses:
+        '200':
+          description: LLM providers received success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMProviderList'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-      operationId: getLLMProviders
-
-  /llm-providers/{llmProviderId}:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  '/llm-providers/{llmProviderId}':
     get:
+      tags:
+        - LLMProviders
       summary: Retrieve persisted LLM Providers
       description: |
         This retrieve the persisted LLM Providers.
-      tags:
-        - 'LLMProviders'
+      operationId: getLLMProviderById
       parameters:
         - name: llmProviderId
           in: path
           required: true
-          type: string
+          schema:
+            type: string
         - name: xWSO2Tenant
           in: header
-          description: |
-            This is used to specify the tenant domain, where the resource need to be
+          description: >
+            This is used to specify the tenant domain, where the resource need
+            to be
                         retrieved from.
-          type: string
           required: true
-      responses:
-        200:
-          description: 'Event Received success'
           schema:
-            $ref: '#/definitions/LLMProviderList'
+            type: string
+      responses:
+        '200':
+          description: Event Received success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LLMProviderList'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-      operationId: getLLMProviderById
-
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /correlation-configs:
     get:
-      summary: Retrieve persisted correlation configs data.
-      description: |
-        This retrieve the persisted correlation configs data for updating correlation logs.
       tags:
-        - 'Logging'
+        - Logging
+      summary: Retrieve persisted correlation configs data.
+      description: >
+        This retrieve the persisted correlation configs data for updating
+        correlation logs.
       responses:
-        200:
+        '200':
           description: An array of correlation component configs
-          schema:
-            $ref: '#/definitions/CorrelationComponentsList'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CorrelationComponentsList'
         default:
           description: Unexpected error
-          schema:
-            $ref: '#/definitions/Error'
-  #--------------------------------------------
-  # Transaction count related resources
-  #--------------------------------------------
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /transaction-records:
     post:
       summary: Insert Transaction Records
       description: Inserts a list of transaction records into the database.
       operationId: insertTransactionRecords
-      parameters:
-        - in: body
-          name: body
-          description: A list of transaction records to be inserted
-          required: true
-          schema:
-            type: array
-            items:
-              $ref: '#/definitions/TransactionRecord'
+      requestBody:
+        description: A list of transaction records to be inserted
+        content:
+          '*/*':
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TransactionRecord'
+        required: true
       responses:
         '200':
           description: Successfully inserted transaction records
-          schema:
-            type: boolean
+          content:
+            application/json:
+              schema:
+                type: boolean
         '400':
           description: Bad request. Invalid input data.
+          content: {}
         '500':
           description: Internal server error. Failed to insert transaction records.
-
-######################################################
-# Parameters - required by some of the APIs above
-######################################################
-parameters:
-  requestedTenant:
-    name: xWSO2Tenant
-    in: header
-    description: |
-      This is used to specify the tenant domain, where the resource need to be
-        retrieved from.
-    required: true
-    type: string
-  type:
-    name: X-WSO2-KEY-MANAGER
-    in: header
-    description: |
-      This is used to specify the tenant domain, where the resource need to be
-        retrieved from.
-    required: true
-    type: string
-  # The HTTP Accept header
-  Accept:
-    name: Accept
-    in: header
-    description: |
-      Media types acceptable for the response. Default is application/json.
-    default: application/json
-    type: string
-######################################################################
-# The resources used by some of the APIs above within the message body
-######################################################################
-definitions:
-  SynapseAttributes:
-    properties:
-      count:
-        type: integer
-      labels:
-        type: array
-        items:
-          type: string
-      apiId:
-        type: string
-
-
-  Error:
-    properties:
-      code:
-        type: integer
-        format: int32
-      message:
-        type: string
-      fields:
-        type: string
-
-  BlockConditions:
-    properties:
-      api:
-        type: array
-        items:
-          type: string
-      application:
-        type: array
-        items:
-          type: string
-      ip:
-        type: array
-        items:
-          $ref: '#/definitions/IPLevel'
-      user:
-        type: array
-        items:
-          type: string
-      custom:
-        type: array
-        items:
-          type: string
-      subscription:
-        type: array
-        items:
-          type: string
-  UUIDList:
-    properties:
-      uuids:
-        type: array
-        items:
-          type: string
-  RevokedEvents:
-    properties:
-      revokedJWTList:
-        type: array
-        items:
-          $ref: '#/definitions/RevokedJWT'
-      revokedJWTSubjectEntityList:
-        type: array
-        items:
-          $ref: '#/definitions/RevokedJWTSubjectEntity'
-      revokedJWTConsumerKeyList:
-        type: array
-        items:
-          $ref: '#/definitions/RevokedJWTConsumerKey'
-  RevokedJWT:
-    properties:
-      jwt_signature:
-        type: string
-        description: signature of the JWT token.
-      expiry_time:
-        type: integer
-        format: int64
-        description: expiry timestamp.
-  RevokedJWTSubjectEntity:
-    properties:
-      entity_id:
-        type: string
-        description: Subject Id of the revoked JWT(s). Can be user id or client id.
-      entity_type:
-        type: string
-        description: Type of the subject id. User id or client id.
-      revocation_time:
-        type: integer
-        format: int64
-        description: revocation timestamp.
-      organization:
-        type: string
-        description: Organization of the revoked subject entity.
-  RevokedJWTConsumerKey:
-    properties:
-      consumer_key:
-        type: string
-        description: consumer key of the JWT.
-      revocation_time:
-        type: integer
-        format: int64
-        description: revocation timestamp.
-      type:
-        type: string
-        description: revoked consumer key type.
-      organization:
-        type: string
-        description: organization of the revoked consumer key
-  RevokeAPIKey:
-    properties:
-      apiKey:
-        type: string
-        description: API Key token.
-      expiryTime:
-        type: integer
-        format: int64
-        description: expiry timestamp.
-      tenantId:
-        type: integer
-        format: int64
-        description: expiry timestamp.
-  IPLevel:
-    properties:
-      type:
-        type: string
-        example: iprange
-      fixedIp:
-        type: string
-        description: IP address.
-      startingIp:
-        type: string
-        description: Ip Range Starting IP
-      endingIp:
-        type: string
-        description: Ip Range Ending IP.
-      invert:
-        type: boolean
-        description: Condition is invert.
-      tenantDomain:
-        type: string
-      id:
-        type: integer
-  #-----------------------------------------------------
-  # The API List resource
-  #-----------------------------------------------------
-  APIList:
-    title: API List
-    properties:
-      count:
-        type: integer
-        description: |
-          Number of APIs returned.
-        example: 1
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/API'
-      pagination:
-        $ref: '#/definitions/Pagination'
-  DeployedAPIRevision:
-    title: Deployed revision information
-    properties:
-      apiId:
-        maxLength: 255
-        minLength: 0
-        type: string
-        example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
-      revisionId:
-        type: integer
-        example: 1
-      envInfo:
-        type: array
-        items:
-          $ref: '#/definitions/DeployedEnvInfo'
-  UnDeployedAPIRevision:
-    title: UnDeployed revision information
-    properties:
-      apiUUID:
-        maxLength: 255
-        minLength: 0
-        type: string
-        example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
-      revisionUUID:
-        maxLength: 255
-        minLength: 0
-        type: string
-        example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
-      environment:
-        maxLength: 255
-        minLength: 0
-        type: string
-        example: Default
-  DeployedEnvInfo:
-    title: Environment information
-    properties:
-      name:
-        maxLength: 255
-        minLength: 1
-        type: string
-        example: default
-      vhost:
-        maxLength: 255
-        minLength: 1
-        # hostname regex as per RFC 1123 (http://tools.ietf.org/html/rfc1123) and appended *
-        pattern: '^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$'
-        type: string
-        example: mg.wso2.com
-  #-----------------------------------------------------
-  # The API resource
-  #-----------------------------------------------------
-  API:
-    properties:
-      uuid:
-        type: string
-        description: UUID of API
-      apiId:
-        type: integer
-      provider:
-        type: string
-        description: API Provider name.
-      name:
-        type: string
-        description: Name of the API
-      version:
-        type: string
-        description: Version of the API.
-      context:
-        type: string
-        description: Context of the API.
-      contextTemplate:
-        type: string
-        description: Context template of the API.
-      policy:
-        type: string
-        description: API level throttling policy.
-      apiType:
-        type: string
-        description: Type of the API.
-        example: APIProduct
-      status:
-        type: string
-        description: Type of the API.
-        example: APIProduct
-      organization:
-        type: string
-        description: Organization of the API.
-        example: wso2.com
-      isDefaultVersion:
-        type: boolean
-        description: Whether this is the default version of the API.
-        example: false
-      apiPolicies:
-        type: array
-        items:
-          $ref: '#/definitions/OperationPolicy'
-      urlMappings:
-        type: array
-        items:
-          $ref: '#/definitions/URLMapping'
-      securityScheme:
-        type: string
-        description: Available authentication methods of the API.
-        example: Oauth2,api_key
-      isSubscriptionValidationDisabled:
-        type: boolean
-        description: Whether subscription validation is disabled.
-        default: false
-        example: false
-      isEgress:
-        type: boolean
-        description: Indicates if the API is an egress API.
-        example: false
-      subtype:
-        type: string
-        description: The subtype of the API.
-        example: Default
-
-  #-----------------------------------------------------
-  # synapse Artifact resource
-  #-----------------------------------------------------
-  synapseArtifact:
-    properties:
-      apiId:
-        type: string
-      apiName:
-        type: string
-        description: API Provider name.
-      version:
-        type: string
-        description: version of the API
-      tenantDomain:
-        type: string
-        description:  tenantDomain of the API
-      gatewayLabel:
-        type: string
-        description:  label of the API
-      gatewayInstruction:
-        type: string
-        description: Publish/Remove
-      bytesEncodedAsString:
-        type: string
-        description: bytes
-  #-----------------------------------------------------
-  # The Application List resource
-  #-----------------------------------------------------
-  ApplicationList:
-    title: Application List
-    properties:
-      count:
-        type: integer
-        description: |
-          Number of Applications returned.
-        example: 1
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/Application'
-      pagination:
-        $ref: '#/definitions/Pagination'
-  #-----------------------------------------------------
-  # The Application resource
-  #-----------------------------------------------------
-  Application:
-    properties:
-      uuid:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-      subName:
-        type: string
-      policy:
-        type: string
-        description: Application level throtting policy.
-      tokenType:
-        type: string
-        description: type of the token.
-        example: JWT
-      groupIds:
-        type: array
-        items:
-          $ref: '#/definitions/GroupId'
-        description: group ids associated with the application.
-        example: wso2
-      attributes:
-        type: object
-        additionalProperties:
-          type: string
-      organization:
-        type: string
-        description: organization of application.
-
-
-  #-----------------------------------------------------
-  # The Application Attribute resource
-  #-----------------------------------------------------
-  GroupId:
-    title: Application Group Id
-    properties:
-      groupId:
-        type: string
-      applicationId:
-        type: integer
-
-  KeyManager:
-    properties:
-      uuid:
-        type: string
-      name:
-        type: string
-      type:
-        type: string
-      enabled:
-        type: boolean
-      organization:
-        type: string
-      additionalProperties:
-        type: object
-      tokenType:
-        type: string
-        description: The type of the tokens to be used (exchanged or without exchanged).
-          Accepted values are EXCHANGED, DIRECT or BOTH.
-        example: EXCHANGED
-        default: DIRECT
-        enum:
-          - EXCHANGED
-          - DIRECT
-          - BOTH
-
-  #-----------------------------------------------------
-  # The Subscription List resource
-  #-----------------------------------------------------
-  SubscriptionList:
-    title: Application List
-    properties:
-      count:
-        type: integer
-        description: |
-          Number of Subscriptions returned.
-        example: 1
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/Subscription'
-      pagination:
-        $ref: '#/definitions/Pagination'
-  #-----------------------------------------------------
-  # The Subscription resource
-  #-----------------------------------------------------
-  Subscription:
-    properties:
-      subscriptionUUID:
-        type: string
-      subscriptionId:
-        type: integer
-      policyId:
-        type: string
-      apiUUID:
-        type: string
-      apiId:
-        type: integer
-      applicationUUID:
-        type: string
-      appId:
-        type: integer
-      subscriptionState:
-        type: string
-      apiName:
-        type: string
-      apiVersion:
-        type: string
-      apiOrganization:
-        type: string
-      applicationOrganization:
-        type: string
-  #-----------------------------------------------------
-  # The Synapse Artifacts  List resource
-  #-----------------------------------------------------
-  SynapseArtifactList:
-    title:  SynapseArtifactList
-    properties:
-      count:
-        type: integer
-        description: |
-          Number of Synapse Artifacts returned.
-        example: 1
-      list:
-        type: array
-        items:
-          type : string
-      pagination:
-        $ref: '#/definitions/Pagination'
-  #-----------------------------------------------------
-  # The ApplicationKeyMapping List resource
-  #-----------------------------------------------------
-  ApplicationKeyMappingList:
-    title: ApplicationKeyMapping List
-    properties:
-      count:
-        type: integer
-        description: |
-          Number of ApplicationKeyMappings returned.
-        example: 1
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/ApplicationKeyMapping'
-      pagination:
-        $ref: '#/definitions/Pagination'
-  #-----------------------------------------------------
-  # The Application Key Mapping resource
-  #-----------------------------------------------------
-  ApplicationKeyMapping:
-    properties:
-      applicationId:
-        type: integer
-      applicationUUID:
-        type: string
-      consumerKey:
-        type: string
-      keyType:
-        type: string
-      keyManager:
-        type: string
-
-  #-----------------------------------------------------
-  # The Scopes List resource
-  #-----------------------------------------------------
-  ScopesList:
-    title: Scopes List
-    properties:
-      count:
-        type: integer
-        description: |
-          Number of Scopes returned.
-        example: 1
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/Scope'
-      pagination:
-        $ref: '#/definitions/Pagination'
-  #-----------------------------------------------------
-  # The Scope resource
-  #-----------------------------------------------------
-  Scope:
-    properties:
-      name:
-        type: string
-      displayName:
-        type: string
-      description:
-        type: string
-      roles:
-        type: array
-        items:
-          type: string
-
-
-  #-----------------------------------------------------
-  # The Webhooks Subscription List resource
-  #-----------------------------------------------------
-  webhooksSubscriptionsList:
-    title: Scopes List
-    properties:
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/webhooksSubscription'
-      pagination:
-        $ref: '#/definitions/Pagination'
-  #-----------------------------------------------------
-  # The Webhooks Subscription resource
-  #-----------------------------------------------------
-  webhooksSubscription:
-    properties:
-      apiUUID:
-        type: string
-        description: The API UUID
-      apiContext:
-        type: string
-        description: The API context.
-      apiVersion:
-        type: string
-        description: The API version.
-      tenantDomain:
-        type: string
-        description: The tenant domain.
-      tenantId:
-        type: integer
-        description: The tenant id.
-        example: -1234
-      appID:
-        type: string
-        description: The application ID of the subscription.
-        example: 1
-      callbackURL:
-        type: string
-        description: The callback URL
-      topicName:
-        type: string
-        description: The topic name.
-      secret:
-        type: string
-        description: Secret value of the subscription.
-      expiryTime:
-        type: integer
-        format: int64
-        description: the expiry time in millis
-      tier:
-        type: string
-        description: the subscription tier.
-        example: Bronze
-      applicationTier:
-        type: string
-        description: the application tier.
-        example: Unlimited
-      apiTier:
-        type: string
-        description: the API tier.
-        example: Bronze
-      subscriberName:
-        type: string
-        description: the subscriber name.
-        example: admin
-
-
-  #---------------------  --------------------------------
-  # The Throttle Policy resource
-  #-----------------------------------------------------
-  Policy:
-    properties:
-      id:
-        type: integer
-      tenantId:
-        type: integer
-      tenantDomain:
-        type: string
-      name:
-        type: string
-      quotaType:
-        type: string
-  #-----------------------------------------------------
-  # The SubscriptionPolicy List resource
-  #-----------------------------------------------------
-  SubscriptionPolicyList:
-    title: SubscriptionPolicy List
-    properties:
-      count:
-        type: integer
-        description: |
-          Number of SubscriptionPolices returned.
-        example: 1
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/SubscriptionPolicy'
-      pagination:
-        $ref: '#/definitions/Pagination'
-  #-----------------------------------------------------
-  # The Subscription Level Policy resource
-  #-----------------------------------------------------
-  SubscriptionPolicy:
-    allOf:
-      - $ref: '#/definitions/Policy'
-      - $ref: '#/definitions/GraphQLQuery'
-      - properties:
-          rateLimitCount:
-            type: integer
-          rateLimitTimeUnit:
+          content: {}
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    SynapseAttributes:
+      type: object
+      properties:
+        count:
+          type: integer
+        labels:
+          type: array
+          items:
             type: string
-          stopOnQuotaReach:
-            type: boolean
-          defaultLimit:
-            $ref: '#/definitions/ThrottleLimit'
-
-  #-----------------------------------------------------
-  # The GraphQL Query resource
-  #-----------------------------------------------------
-  GraphQLQuery:
-    title: GraphQL Query
-    properties:
-      graphQLMaxComplexity:
-        type: integer
-        description: Maximum Complexity of the GraphQL query
-        example: 400
-      graphQLMaxDepth:
-        type: integer
-        description: Maximum Depth of the GraphQL query
-        example: 10
-  #-----------------------------------------------------
-  # The Application Policy List resource
-  #-----------------------------------------------------
-  ApplicationPolicyList:
-    title: ApplicationPolicy List
-    properties:
-      count:
-        type: integer
-        description: |
-          Number of ApplicationPolicies returned.
-        example: 1
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/ApplicationPolicy'
-      pagination:
-        $ref: '#/definitions/Pagination'
-  #-----------------------------------------------------
-  # The Application Level Policy resource
-  #-----------------------------------------------------
-  ApplicationPolicy:
-    allOf:
-      - $ref: '#/definitions/Policy'
-    properties:
-      defaultLimit:
-        $ref: '#/definitions/ThrottleLimit'
-      burstLimit:
-        $ref: '#/definitions/BurstLimit'
-  #-----------------------------------------------------
-  # The Api Policy List resource
-  #-----------------------------------------------------
-  ApiPolicyList:
-    title: ApiPolicy List
-    properties:
-      count:
-        type: integer
-        description: |
-          Number of Api Policies returned.
-        example: 1
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/ApiPolicy'
-      pagination:
-        $ref: '#/definitions/Pagination'
-
-  #-----------------------------------------------------
-  # The API Level Policy resource
-  #-----------------------------------------------------
-  ApiPolicy:
-    allOf:
-      - $ref: '#/definitions/Policy'
-      - properties:
-          conditionGroups:
-            type: array
-            items:
-              $ref: '#/definitions/ApiPolicyConditionGroup'
-          applicableLevel:
-            type: string
-          defaultLimit:
-            $ref: '#/definitions/ThrottleLimit'
-
-  #-----------------------------------------------------
-  # The API Policy Condition  Group resource
-  #-----------------------------------------------------
-  ApiPolicyConditionGroup:
-    properties:
-      policyId:
-        type: integer
-      quotaType:
-        type: string
-      conditionGroupId:
-        type: integer
-      condition:
-        type: array
-        items:
-          $ref: '#/definitions/Condition'
-      defaultLimit:
-        $ref: '#/definitions/ThrottleLimit'
-
-  #-----------------------------------------------------
-  # The Throttle Policy Condition resource
-  #-----------------------------------------------------
-  Condition:
-    properties:
-      conditionType:
-        type: string
-      name:
-        type: string
-      value:
-        type: string
-      isInverted:
-        type: boolean
-  #-----------------------------------------------------
-  # The Global Policy List resource
-  #-----------------------------------------------------
-  GlobalPolicyList:
-    title: Global Policy List
-    properties:
-      count:
-        type: integer
-        description: |
-          Number of Global Policies returned.
-        example: 1
-      list:
-        type: array
-        items:
-          $ref: '#/definitions/GlobalPolicy'
-      pagination:
-        $ref: '#/definitions/Pagination'
-
-  #-----------------------------------------------------
-  # The Global Policy resource
-  #-----------------------------------------------------
-  GlobalPolicy:
-    allOf:
-      - $ref: '#/definitions/Policy'
-      - properties:
-          siddhiQuery:
-            type: string
-          keyTemplate:
-            type: string
-
-  #-----------------------------------------------------
-  # The URL Mapping resource
-  #-----------------------------------------------------
-  URLMapping:
-    properties:
-      authScheme:
-        type: string
-      throttlingPolicy:
-        type: string
-      httpMethod:
-        type: string
-      urlPattern:
-        type: string
-      scopes:
-        type: array
-        items:
+        apiId:
           type: string
-      operationPolicies:
-        type: array
-        items:
-          $ref: '#/definitions/OperationPolicy'
-
-  OperationPolicy:
-    title: Operation Policy
-    properties:
-      policyName:
-        type: string
-      policyVersion:
-        type: string
-      direction:
-        type: string
-      policyId:
-        type: string
-      order:
-        type: integer
-      parameters:
-        type: object
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        fields:
+          type: string
+    BlockConditions:
+      type: object
+      properties:
+        api:
+          type: array
+          items:
+            type: string
+        application:
+          type: array
+          items:
+            type: string
+        ip:
+          type: array
+          items:
+            $ref: '#/components/schemas/IPLevel'
+        user:
+          type: array
+          items:
+            type: string
+        custom:
+          type: array
+          items:
+            type: string
+        subscription:
+          type: array
+          items:
+            type: string
+    UUIDList:
+      type: object
+      properties:
+        uuids:
+          type: array
+          items:
+            type: string
+    RevokedEvents:
+      type: object
+      properties:
+        revokedJWTList:
+          type: array
+          items:
+            $ref: '#/components/schemas/RevokedJWT'
+        revokedJWTSubjectEntityList:
+          type: array
+          items:
+            $ref: '#/components/schemas/RevokedJWTSubjectEntity'
+        revokedJWTConsumerKeyList:
+          type: array
+          items:
+            $ref: '#/components/schemas/RevokedJWTConsumerKey'
+    RevokedJWT:
+      type: object
+      properties:
+        jwt_signature:
+          type: string
+          description: signature of the JWT token.
+        expiry_time:
+          type: integer
+          description: expiry timestamp.
+          format: int64
+    RevokedJWTSubjectEntity:
+      type: object
+      properties:
+        entity_id:
+          type: string
+          description: Subject Id of the revoked JWT(s). Can be user id or client id.
+        entity_type:
+          type: string
+          description: Type of the subject id. User id or client id.
+        revocation_time:
+          type: integer
+          description: revocation timestamp.
+          format: int64
+        organization:
+          type: string
+          description: Organization of the revoked subject entity.
+    RevokedJWTConsumerKey:
+      type: object
+      properties:
+        consumer_key:
+          type: string
+          description: consumer key of the JWT.
+        revocation_time:
+          type: integer
+          description: revocation timestamp.
+          format: int64
+        type:
+          type: string
+          description: revoked consumer key type.
+        organization:
+          type: string
+          description: organization of the revoked consumer key
+    RevokeAPIKey:
+      type: object
+      properties:
+        apiKey:
+          type: string
+          description: API Key token.
+        expiryTime:
+          type: integer
+          description: expiry timestamp.
+          format: int64
+        tenantId:
+          type: integer
+          description: expiry timestamp.
+          format: int64
+    IPLevel:
+      type: object
+      properties:
+        type:
+          type: string
+          example: iprange
+        fixedIp:
+          type: string
+          description: IP address.
+        startingIp:
+          type: string
+          description: Ip Range Starting IP
+        endingIp:
+          type: string
+          description: Ip Range Ending IP.
+        invert:
+          type: boolean
+          description: Condition is invert.
+        tenantDomain:
+          type: string
+        id:
+          type: integer
+    APIList:
+      title: API List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of APIs returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/API'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    DeployedAPIRevision:
+      title: Deployed revision information
+      type: object
+      properties:
+        apiId:
+          maxLength: 255
+          minLength: 0
+          type: string
+          example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
+        revisionId:
+          type: integer
+          example: 1
+        envInfo:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeployedEnvInfo'
+    UnDeployedAPIRevision:
+      title: UnDeployed revision information
+      type: object
+      properties:
+        apiUUID:
+          maxLength: 255
+          minLength: 0
+          type: string
+          example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
+        revisionUUID:
+          maxLength: 255
+          minLength: 0
+          type: string
+          example: c26b2b9b-4632-4ca4-b6f3-521c8863990c
+        environment:
+          maxLength: 255
+          minLength: 0
+          type: string
+          example: Default
+    DeployedEnvInfo:
+      title: Environment information
+      type: object
+      properties:
+        name:
+          maxLength: 255
+          minLength: 1
+          type: string
+          example: default
+        vhost:
+          maxLength: 255
+          minLength: 1
+          pattern: >-
+            ^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$
+          type: string
+          example: mg.wso2.com
+    API:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: UUID of API
+        apiId:
+          type: integer
+        provider:
+          type: string
+          description: API Provider name.
+        name:
+          type: string
+          description: Name of the API
+        version:
+          type: string
+          description: Version of the API.
+        context:
+          type: string
+          description: Context of the API.
+        contextTemplate:
+          type: string
+          description: Context template of the API.
+        policy:
+          type: string
+          description: API level throttling policy.
+        apiType:
+          type: string
+          description: Type of the API.
+          example: APIProduct
+        status:
+          type: string
+          description: Type of the API.
+          example: APIProduct
+        organization:
+          type: string
+          description: Organization of the API.
+          example: wso2.com
+        isDefaultVersion:
+          type: boolean
+          description: Whether this is the default version of the API.
+          example: false
+        apiPolicies:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
+        urlMappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/URLMapping'
+        securityScheme:
+          type: string
+          description: Available authentication methods of the API.
+          example: 'Oauth2,api_key'
+        isSubscriptionValidationDisabled:
+          type: boolean
+          description: Whether subscription validation is disabled.
+          example: false
+          default: false
+        isEgress:
+          type: boolean
+          description: Indicates if the API is an egress API.
+          example: false
+        subtype:
+          type: string
+          description: The subtype of the API.
+          example: Default
+    synapseArtifact:
+      type: object
+      properties:
+        apiId:
+          type: string
+        apiName:
+          type: string
+          description: API Provider name.
+        version:
+          type: string
+          description: version of the API
+        tenantDomain:
+          type: string
+          description: tenantDomain of the API
+        gatewayLabel:
+          type: string
+          description: label of the API
+        gatewayInstruction:
+          type: string
+          description: Publish/Remove
+        bytesEncodedAsString:
+          type: string
+          description: bytes
+    ApplicationList:
+      title: Application List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Applications returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Application'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    Application:
+      type: object
+      properties:
+        uuid:
+          type: string
+        id:
+          type: integer
+        name:
+          type: string
+        subName:
+          type: string
+        policy:
+          type: string
+          description: Application level throtting policy.
+        tokenType:
+          type: string
+          description: type of the token.
+          example: JWT
+        groupIds:
+          type: array
+          description: group ids associated with the application.
+          example: wso2
+          items:
+            $ref: '#/components/schemas/GroupId'
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+        organization:
+          type: string
+          description: organization of application.
+    GroupId:
+      title: Application Group Id
+      type: object
+      properties:
+        groupId:
+          type: string
+        applicationId:
+          type: integer
+    KeyManager:
+      type: object
+      properties:
+        uuid:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        enabled:
+          type: boolean
+        organization:
+          type: string
         additionalProperties:
           type: object
-  #-----------------------------------------------------
-  # The pagination resource
-  #-----------------------------------------------------
-  Pagination:
-    title: Pagination
-    properties:
-      offset:
-        type: integer
-        example: 0
-      limit:
-        type: integer
-        example: 1
-      total:
-        type: integer
-        example: 10
-      next:
-        type: string
-        description: |
-          Link to the next subset of resources qualified.
-          Empty if no more resources are to be returned.
-      previous:
-        type: string
-        description: |
-          Link to the previous subset of resources qualified.
-          Empty if current subset is the first subset returned.
-
-  #-----------------------------------------------------
-  # The Throttling Limit Base resource
-  #-----------------------------------------------------
-  ThrottleLimitBase:
-    title: Throttle Limit Base
-    required:
-      - timeUnit
-      - unitTime
-    properties:
-      timeUnit:
-        type: string
-        description: Unit of the time. Allowed values are "sec", "min", "hour", "day"
-        example: min
-      unitTime:
-        type: integer
-        default: 0
-        description: Time limit that the throttling limit applies.
-        example: 10
-
-  #-----------------------------------------------------
-  # The Throttling Limit resource
-  #-----------------------------------------------------
-  ThrottleLimit:
-    title: Throttle Limit
-    required:
-      - type
-    properties:
-      quotaType:
-        type: string
-      requestCount:
-        $ref: '#/definitions/RequestCountLimit'
-      bandwidth:
-        $ref: '#/definitions/BandwidthLimit'
-      eventCount:
-        $ref: '#/definitions/EventCountLimit'
-      aiApiQuota:
-        $ref: '#/definitions/AIAPIQuotaLimit'
-
-  BurstLimit:
-    title: Burst Limit object
-    type: object
-    properties:
-      rateLimitCount:
-        type: integer
-        description: Burst control request count
-        example: 10
-      rateLimitTimeUnit:
-        type: string
-        description: Burst control time unit
-        example: min
-  #-----------------------------------------------------
-  # The Throttling Bandwidth Limit resource
-  #-----------------------------------------------------
-  BandwidthLimit:
-    title: Bandwidth Limit object
-    allOf:
-      - $ref: '#/definitions/ThrottleLimitBase'
-      - required:
-          - dataAmount
-          - dataUnit
-        properties:
-          dataAmount:
-            type: integer
-            format: int64
-            description: Amount of data allowed to be transfered
-            example: 1000
-          dataUnit:
-            type: string
-            description: Unit of data allowed to be transfered. Allowed values are "KB", "MB" and "GB"
-            example: KB
-
-  #-----------------------------------------------------
-  # The Throttling Request Count Limit resource
-  #-----------------------------------------------------
-  RequestCountLimit:
-    title: Request Count Limit object
-    allOf:
-      - $ref: '#/definitions/ThrottleLimitBase'
-      - required:
-          - requestCount
-        properties:
-          requestCount:
-            type: integer
-            format: int64
-            description: Maximum number of requests allowed
-            example: 1000
-
-  #-----------------------------------------------------
-  # The Throttling Event Count Limit resource
-  #-----------------------------------------------------
-  EventCountLimit:
-    title: Event Count Limit object
-    allOf:
-      - $ref: '#/definitions/ThrottleLimitBase'
-      - required:
-          - eventCount
-        type: object
-        properties:
-          eventCount:
-            type: integer
-            description: Maximum number of events allowed
-            format: int64
-            example: 3000
-
-  #-----------------------------------------------------
-  # The Throttling AI API Quota Limit resource
-  #-----------------------------------------------------
-  AIAPIQuotaLimit:
-    title: AI Quota Limit object
-    allOf:
-      - $ref: '#/definitions/ThrottleLimitBase'
-      - required:
-          - requestCount
-        properties:
-          requestCount:
-            type: integer
-            format: int64
-            description: Maximum number of requests allowed
-            example: 1000
-          totalTokenCount:
-            type: integer
-            description: Maximum number of total tokens allowed
-            format: int64
-            example: 1000
-          promptTokenCount:
-            type: integer
-            description: Maximum number of prompt tokens allowed
-            format: int64
-            example: 300
-          completionTokenCount:
-            type: integer
-            description: Maximum number of completion tokens allowed
-            format: int64
-            example: 300
-
-  #-----------------------------------------------------
-  # LLM Provider Config List
-  #-----------------------------------------------------
-  LLMProviderList:
-    title: LLM Provider Config List
-    properties:
-      llmProviders:
-        type: array
-        items:
-          $ref: '#/definitions/LLMProvider'
-  LLMProvider:
-    title: LLM Provider
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-      apiVersion:
-        type: string
-      organization:
-        type: string
-      configurations:
-        type: string
-
-  #-----------------------------------------------------
-  # API Logging detail list
-  #-----------------------------------------------------
-  APILoggingConfigList:
-    title: apis
-    properties:
-      apis:
-        type: array
-        items:
-          $ref: '#/definitions/APILoggingConfig'
-  APILoggingConfig:
-    title: API Info object with log details
-    required:
-      - context
-      - logLevel
-    properties:
-      context:
-        type: string
-        example: pizashack/v1.0.0
-      logLevel:
-        type: string
-        example: all
-      resourceMethod:
-        type: string
-        example: GET
-      resourcePath:
-        type: string
-        example: /v1.0.0/pizza
-
-  #-----------------------------------------------------
-  # Correlation Configs Components List
-  #-----------------------------------------------------
-  CorrelationComponentsList:
-    title: correlation-components
-    properties:
-      components:
-        type: array
-        items:
-          $ref: "#/definitions/CorrelationComponent"
-  CorrelationComponent:
-    title: Correlation Component INFO object
-    properties:
-      name:
-        type: string
-        example: http
-      enabled:
-        type: string
-        example: true
-      properties:
-        type: array
-        items:
-          $ref: "#/definitions/CorrelationComponentProperty"
-  CorrelationComponentProperty:
-    title: Properties for correlation components
-    properties:
-      name:
-        type: string
-        example: "deniedThreads"
-      value:
-        type: array
-        items:
+          properties: {}
+        tokenType:
           type: string
-          example: "MessageDeliveryTaskPool"
-  #-----------------------------------------------------
-  # The Transaction Count resource
-  #-----------------------------------------------------
-  TransactionRecord:
-    type: object
-    properties:
-      id:
+          description: >-
+            The type of the tokens to be used (exchanged or without exchanged).
+            Accepted values are EXCHANGED, DIRECT or BOTH.
+          example: EXCHANGED
+          default: DIRECT
+          enum:
+            - EXCHANGED
+            - DIRECT
+            - BOTH
+    SubscriptionList:
+      title: Application List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Subscriptions returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Subscription'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    Subscription:
+      type: object
+      properties:
+        subscriptionUUID:
+          type: string
+        subscriptionId:
+          type: integer
+        policyId:
+          type: string
+        apiUUID:
+          type: string
+        apiId:
+          type: integer
+        applicationUUID:
+          type: string
+        appId:
+          type: integer
+        subscriptionState:
+          type: string
+        apiName:
+          type: string
+        apiVersion:
+          type: string
+        apiOrganization:
+          type: string
+        applicationOrganization:
+          type: string
+    SynapseArtifactList:
+      title: SynapseArtifactList
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Synapse Artifacts returned.
+          example: 1
+        list:
+          type: array
+          items:
+            type: string
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    ApplicationKeyMappingList:
+      title: ApplicationKeyMapping List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of ApplicationKeyMappings returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApplicationKeyMapping'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    ApplicationKeyMapping:
+      type: object
+      properties:
+        applicationId:
+          type: integer
+        applicationUUID:
+          type: string
+        consumerKey:
+          type: string
+        keyType:
+          type: string
+        keyManager:
+          type: string
+    ScopesList:
+      title: Scopes List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Scopes returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Scope'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    Scope:
+      type: object
+      properties:
+        name:
+          type: string
+        displayName:
+          type: string
+        description:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+    webhooksSubscriptionsList:
+      title: Scopes List
+      type: object
+      properties:
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/webhooksSubscription'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    webhooksSubscription:
+      type: object
+      properties:
+        apiUUID:
+          type: string
+          description: The API UUID
+        apiContext:
+          type: string
+          description: The API context.
+        apiVersion:
+          type: string
+          description: The API version.
+        tenantDomain:
+          type: string
+          description: The tenant domain.
+        tenantId:
+          type: integer
+          description: The tenant id.
+          example: -1234
+        appID:
+          type: string
+          description: The application ID of the subscription.
+          example: '1'
+        callbackURL:
+          type: string
+          description: The callback URL
+        topicName:
+          type: string
+          description: The topic name.
+        secret:
+          type: string
+          description: Secret value of the subscription.
+        expiryTime:
+          type: integer
+          description: the expiry time in millis
+          format: int64
+        tier:
+          type: string
+          description: the subscription tier.
+          example: Bronze
+        applicationTier:
+          type: string
+          description: the application tier.
+          example: Unlimited
+        apiTier:
+          type: string
+          description: the API tier.
+          example: Bronze
+        subscriberName:
+          type: string
+          description: the subscriber name.
+          example: admin
+    Policy:
+      type: object
+      properties:
+        id:
+          type: integer
+        tenantId:
+          type: integer
+        tenantDomain:
+          type: string
+        name:
+          type: string
+        quotaType:
+          type: string
+    SubscriptionPolicyList:
+      title: SubscriptionPolicy List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of SubscriptionPolices returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/SubscriptionPolicy'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    SubscriptionPolicy:
+      allOf:
+        - $ref: '#/components/schemas/Policy'
+        - $ref: '#/components/schemas/GraphQLQuery'
+        - type: object
+          properties:
+            rateLimitCount:
+              type: integer
+            rateLimitTimeUnit:
+              type: string
+            stopOnQuotaReach:
+              type: boolean
+            defaultLimit:
+              $ref: '#/components/schemas/ThrottleLimit'
+    GraphQLQuery:
+      title: GraphQL Query
+      type: object
+      properties:
+        graphQLMaxComplexity:
+          type: integer
+          description: Maximum Complexity of the GraphQL query
+          example: 400
+        graphQLMaxDepth:
+          type: integer
+          description: Maximum Depth of the GraphQL query
+          example: 10
+    ApplicationPolicyList:
+      title: ApplicationPolicy List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of ApplicationPolicies returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApplicationPolicy'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    ApplicationPolicy:
+      properties:
+        defaultLimit:
+          $ref: '#/components/schemas/ThrottleLimit'
+        burstLimit:
+          $ref: '#/components/schemas/BurstLimit'
+      allOf:
+        - $ref: '#/components/schemas/Policy'
+    ApiPolicyList:
+      title: ApiPolicy List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Api Policies returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiPolicy'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    ApiPolicy:
+      allOf:
+        - $ref: '#/components/schemas/Policy'
+        - type: object
+          properties:
+            conditionGroups:
+              type: array
+              items:
+                $ref: '#/components/schemas/ApiPolicyConditionGroup'
+            applicableLevel:
+              type: string
+            defaultLimit:
+              $ref: '#/components/schemas/ThrottleLimit'
+    ApiPolicyConditionGroup:
+      type: object
+      properties:
+        policyId:
+          type: integer
+        quotaType:
+          type: string
+        conditionGroupId:
+          type: integer
+        condition:
+          type: array
+          items:
+            $ref: '#/components/schemas/Condition'
+        defaultLimit:
+          $ref: '#/components/schemas/ThrottleLimit'
+    Condition:
+      type: object
+      properties:
+        conditionType:
+          type: string
+        name:
+          type: string
+        value:
+          type: string
+        isInverted:
+          type: boolean
+    GlobalPolicyList:
+      title: Global Policy List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Global Policies returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/GlobalPolicy'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+    GlobalPolicy:
+      allOf:
+        - $ref: '#/components/schemas/Policy'
+        - type: object
+          properties:
+            siddhiQuery:
+              type: string
+            keyTemplate:
+              type: string
+    URLMapping:
+      type: object
+      properties:
+        authScheme:
+          type: string
+        throttlingPolicy:
+          type: string
+        httpMethod:
+          type: string
+        urlPattern:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        operationPolicies:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperationPolicy'
+    OperationPolicy:
+      title: Operation Policy
+      type: object
+      properties:
+        policyName:
+          type: string
+        policyVersion:
+          type: string
+        direction:
+          type: string
+        policyId:
+          type: string
+        order:
+          type: integer
+        parameters:
+          type: object
+          additionalProperties:
+            type: object
+            properties: {}
+    Pagination:
+      title: Pagination
+      type: object
+      properties:
+        offset:
+          type: integer
+          example: 0
+        limit:
+          type: integer
+          example: 1
+        total:
+          type: integer
+          example: 10
+        next:
+          type: string
+          description: |
+            Link to the next subset of resources qualified.
+            Empty if no more resources are to be returned.
+        previous:
+          type: string
+          description: |
+            Link to the previous subset of resources qualified.
+            Empty if current subset is the first subset returned.
+    ThrottleLimitBase:
+      title: Throttle Limit Base
+      required:
+        - timeUnit
+        - unitTime
+      type: object
+      properties:
+        timeUnit:
+          type: string
+          description: 'Unit of the time. Allowed values are "sec", "min", "hour", "day"'
+          example: min
+        unitTime:
+          type: integer
+          description: Time limit that the throttling limit applies.
+          example: 10
+    ThrottleLimit:
+      title: Throttle Limit
+      type: object
+      properties:
+        quotaType:
+          type: string
+        requestCount:
+          $ref: '#/components/schemas/RequestCountLimit'
+        bandwidth:
+          $ref: '#/components/schemas/BandwidthLimit'
+        eventCount:
+          $ref: '#/components/schemas/EventCountLimit'
+        aiApiQuota:
+          $ref: '#/components/schemas/AIAPIQuotaLimit'
+    BurstLimit:
+      title: Burst Limit object
+      type: object
+      properties:
+        rateLimitCount:
+          type: integer
+          description: Burst control request count
+          example: 10
+        rateLimitTimeUnit:
+          type: string
+          description: Burst control time unit
+          example: min
+    BandwidthLimit:
+      title: Bandwidth Limit object
+      allOf:
+        - $ref: '#/components/schemas/ThrottleLimitBase'
+        - required:
+            - dataAmount
+            - dataUnit
+          type: object
+          properties:
+            dataAmount:
+              type: integer
+              description: Amount of data allowed to be transfered
+              format: int64
+              example: 1000
+            dataUnit:
+              type: string
+              description: >-
+                Unit of data allowed to be transfered. Allowed values are "KB",
+                "MB" and "GB"
+              example: KB
+    RequestCountLimit:
+      title: Request Count Limit object
+      allOf:
+        - $ref: '#/components/schemas/ThrottleLimitBase'
+        - required:
+            - requestCount
+          type: object
+          properties:
+            requestCount:
+              type: integer
+              description: Maximum number of requests allowed
+              format: int64
+              example: 1000
+    EventCountLimit:
+      title: Event Count Limit object
+      allOf:
+        - $ref: '#/components/schemas/ThrottleLimitBase'
+        - required:
+            - eventCount
+          type: object
+          properties:
+            eventCount:
+              type: integer
+              description: Maximum number of events allowed
+              format: int64
+              example: 3000
+    AIAPIQuotaLimit:
+      title: AI Quota Limit object
+      allOf:
+        - $ref: '#/components/schemas/ThrottleLimitBase'
+        - required:
+            - requestCount
+          type: object
+          properties:
+            requestCount:
+              type: integer
+              description: Maximum number of requests allowed
+              format: int64
+              example: 1000
+            totalTokenCount:
+              type: integer
+              description: Maximum number of total tokens allowed
+              format: int64
+              example: 1000
+            promptTokenCount:
+              type: integer
+              description: Maximum number of prompt tokens allowed
+              format: int64
+              example: 300
+            completionTokenCount:
+              type: integer
+              description: Maximum number of completion tokens allowed
+              format: int64
+              example: 300
+    LLMProviderList:
+      title: LLM Provider Config List
+      type: object
+      properties:
+        llmProviders:
+          type: array
+          items:
+            $ref: '#/components/schemas/LLMProvider'
+    LLMProvider:
+      title: LLM Provider
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        apiVersion:
+          type: string
+        organization:
+          type: string
+        configurations:
+          type: string
+    APILoggingConfigList:
+      title: apis
+      type: object
+      properties:
+        apis:
+          type: array
+          items:
+            $ref: '#/components/schemas/APILoggingConfig'
+    APILoggingConfig:
+      title: API Info object with log details
+      required:
+        - context
+        - logLevel
+      type: object
+      properties:
+        context:
+          type: string
+          example: pizashack/v1.0.0
+        logLevel:
+          type: string
+          example: all
+        resourceMethod:
+          type: string
+          example: GET
+        resourcePath:
+          type: string
+          example: /v1.0.0/pizza
+    CorrelationComponentsList:
+      title: correlation-components
+      type: object
+      properties:
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/CorrelationComponent'
+    CorrelationComponent:
+      title: Correlation Component INFO object
+      type: object
+      properties:
+        name:
+          type: string
+          example: http
+        enabled:
+          type: string
+          example: 'true'
+        properties:
+          type: array
+          items:
+            $ref: '#/components/schemas/CorrelationComponentProperty'
+    CorrelationComponentProperty:
+      title: Properties for correlation components
+      type: object
+      properties:
+        name:
+          type: string
+          example: deniedThreads
+        value:
+          type: array
+          items:
+            type: string
+            example: MessageDeliveryTaskPool
+    TransactionRecord:
+      required:
+        - count
+        - id
+        - recordedTime
+      type: object
+      properties:
+        id:
+          type: string
+        serverID:
+          type: string
+        serverType:
+          type: string
+        host:
+          type: string
+        count:
+          type: integer
+        recordedTime:
+          type: string
+  parameters:
+    requestedTenant:
+      name: xWSO2Tenant
+      in: header
+      description: |
+        This is used to specify the tenant domain, where the resource need to be
+          retrieved from.
+      required: true
+      schema:
         type: string
-      serverID:
+    type:
+      name: X-WSO2-KEY-MANAGER
+      in: header
+      description: |
+        This is used to specify the tenant domain, where the resource need to be
+          retrieved from.
+      required: true
+      schema:
         type: string
-      serverType:
+    Accept:
+      name: Accept
+      in: header
+      description: |
+        Media types acceptable for the response. Default is application/json.
+      schema:
         type: string
-      host:
-        type: string
-      count:
-        type: integer
-      recordedTime:
-        type: string
-    required:
-      - id
-      - count
-      - recordedTime
+        default: application/json

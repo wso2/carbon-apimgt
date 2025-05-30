@@ -46,6 +46,8 @@ public class SettingsDTO   {
     private Boolean isJWTEnabledForLoginTokens = false;
     private Boolean orgAccessControlEnabled = null;
     private Boolean allowSubscriptionValidationDisabling = true;
+    private Boolean designAssistantEnabled = true;
+    private Boolean aiAuthTokenProvided = false;
     private List<SettingsCustomPropertiesDTO> customProperties = new ArrayList<SettingsCustomPropertiesDTO>();
 
   /**
@@ -388,6 +390,42 @@ public class SettingsDTO   {
   }
 
   /**
+   * Specifies whether Design Assistant enabled 
+   **/
+  public SettingsDTO designAssistantEnabled(Boolean designAssistantEnabled) {
+    this.designAssistantEnabled = designAssistantEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Specifies whether Design Assistant enabled ")
+  @JsonProperty("designAssistantEnabled")
+  public Boolean isDesignAssistantEnabled() {
+    return designAssistantEnabled;
+  }
+  public void setDesignAssistantEnabled(Boolean designAssistantEnabled) {
+    this.designAssistantEnabled = designAssistantEnabled;
+  }
+
+  /**
+   * Checks if the auth token is provided for AI service usage.
+   **/
+  public SettingsDTO aiAuthTokenProvided(Boolean aiAuthTokenProvided) {
+    this.aiAuthTokenProvided = aiAuthTokenProvided;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Checks if the auth token is provided for AI service usage.")
+  @JsonProperty("aiAuthTokenProvided")
+  public Boolean isAiAuthTokenProvided() {
+    return aiAuthTokenProvided;
+  }
+  public void setAiAuthTokenProvided(Boolean aiAuthTokenProvided) {
+    this.aiAuthTokenProvided = aiAuthTokenProvided;
+  }
+
+  /**
    **/
   public SettingsDTO customProperties(List<SettingsCustomPropertiesDTO> customProperties) {
     this.customProperties = customProperties;
@@ -434,12 +472,14 @@ public class SettingsDTO   {
         Objects.equals(isJWTEnabledForLoginTokens, settings.isJWTEnabledForLoginTokens) &&
         Objects.equals(orgAccessControlEnabled, settings.orgAccessControlEnabled) &&
         Objects.equals(allowSubscriptionValidationDisabling, settings.allowSubscriptionValidationDisabling) &&
+        Objects.equals(designAssistantEnabled, settings.designAssistantEnabled) &&
+        Objects.equals(aiAuthTokenProvided, settings.aiAuthTokenProvided) &&
         Objects.equals(customProperties, settings.customProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, customProperties);
+    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, designAssistantEnabled, aiAuthTokenProvided, customProperties);
   }
 
   @Override
@@ -466,6 +506,8 @@ public class SettingsDTO   {
     sb.append("    isJWTEnabledForLoginTokens: ").append(toIndentedString(isJWTEnabledForLoginTokens)).append("\n");
     sb.append("    orgAccessControlEnabled: ").append(toIndentedString(orgAccessControlEnabled)).append("\n");
     sb.append("    allowSubscriptionValidationDisabling: ").append(toIndentedString(allowSubscriptionValidationDisabling)).append("\n");
+    sb.append("    designAssistantEnabled: ").append(toIndentedString(designAssistantEnabled)).append("\n");
+    sb.append("    aiAuthTokenProvided: ").append(toIndentedString(aiAuthTokenProvided)).append("\n");
     sb.append("    customProperties: ").append(toIndentedString(customProperties)).append("\n");
     sb.append("}");
     return sb.toString();
