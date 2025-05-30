@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIInfo;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
@@ -843,12 +844,29 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
         return errorMessage != null && errorMessage.contains(UN_AUTHORIZED_ERROR_MESSAGE);
     }
 
+    /**
+     * Check whether the given API Product is indeed an API Product and not an API
+     * @param apiProductId the API Product ID to check
+     * @throws APIManagementException if the artifact corresponding to the given id is not found or it's not an API
+     *                                Product ID
+     */
+    private void validateAPIProduct(String apiProductId) throws APIManagementException {
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        APIInfo apiInfo = apiProvider.getAPIInfoByUUID(apiProductId);
+        if (apiInfo != null && !APIConstants.API_PRODUCT.equalsIgnoreCase(apiInfo.getApiType())) {
+            String msg = "Failed to get API Product. API Product artifact corresponding to artifactId " + apiProductId
+                    + " does not exist";
+            throw new APIMgtResourceNotFoundException(msg);
+        }
+    }
+
     @Override
     public Response createAPIProductRevision(String apiProductId, APIRevisionDTO apIRevisionDTO,
                                              MessageContext messageContext) throws APIManagementException {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            validateAPIProduct(apiProductId);
             APIRevision apiRevision = new APIRevision();
             apiRevision.setApiUUID(apiProductId);
             apiRevision.setDescription(apIRevisionDTO.getDescription());
@@ -883,6 +901,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                                              MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        validateAPIProduct(apiProductId);
         apiProvider.deleteAPIProductRevision(apiProductId, revisionId, organization);
         List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiProductId);
         APIRevisionListDTO apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
@@ -895,6 +914,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                                              MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        validateAPIProduct(apiProductId);
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTO) {
@@ -943,6 +963,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     public Response getAPIProductRevisionDeployments(String apiProductId,
                                                      MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        validateAPIProduct(apiProductId);
         List<APIRevisionDeployment> apiRevisionDeploymentsList = new ArrayList<>();
         List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiProductId);
         for (APIRevision apiRevision : apiRevisions) {
@@ -964,6 +985,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                                            MessageContext messageContext) throws APIManagementException {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            validateAPIProduct(apiProductId);
             APIRevisionListDTO apiRevisionListDTO;
             List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiProductId);
             apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(
@@ -982,6 +1004,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                                               MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        validateAPIProduct(apiProductId);
         apiProvider.restoreAPIProductRevision(apiProductId, revisionId, organization);
         APIProductDTO apiToReturn = getAPIProductByID(apiProductId, apiProvider);
         Response.Status status = Response.Status.CREATED;
@@ -994,6 +1017,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                                                List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO,
                                                MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        validateAPIProduct(apiProductId);
         if (revisionId == null && revisionNumber != null) {
             revisionId = apiProvider.getAPIRevisionUUID(revisionNumber, apiProductId);
             if (revisionId == null) {
@@ -1058,6 +1082,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     public Response updateAPIProductDeployment(String apiProductId, String deploymentId, APIRevisionDeploymentDTO
             apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        validateAPIProduct(apiProductId);
         String revisionId = apIRevisionDeploymentDTO.getRevisionUuid();
         String decodedDeploymentName;
         if (deploymentId != null) {
@@ -1138,6 +1163,7 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                                                 MessageContext messageContext) throws APIManagementException {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        validateAPIProduct(apiProductId);
         LifecycleStateDTO lifecycleStateDTO = getLifecycleState(apiProductId, organization);
         return Response.ok().entity(lifecycleStateDTO).build();
     }

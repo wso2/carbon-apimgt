@@ -5845,7 +5845,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             Organization org = new Organization(organization);
             PublisherAPIProduct publisherAPIProduct = apiPersistenceInstance.getPublisherAPIProduct(org, uuid);
-            if (publisherAPIProduct != null) {
+            if (publisherAPIProduct != null && APIConstants.API_PRODUCT.equalsIgnoreCase(publisherAPIProduct.getType())) {
                 APIProduct product = APIProductMapper.INSTANCE.toApiProduct(publisherAPIProduct);
                 product.setID(new APIProductIdentifier(publisherAPIProduct.getProviderName(),
                         publisherAPIProduct.getApiProductName(), publisherAPIProduct.getVersion(), uuid));

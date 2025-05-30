@@ -1381,10 +1381,10 @@ public class SQLConstants {
 
     public static final String GET_API_PRODUCT_ID_SQL =
             "SELECT API_ID FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? "
-                    + "AND API_VERSION = ? AND API_TYPE = '" + APIConstants.API_PRODUCT + "'";
+                    + "AND API_VERSION = ?";
 
     public static final String GET_API_PRODUCT_SQL =
-            "SELECT API_ID, API_TIER FROM AM_API WHERE API_UUID = ? AND API_TYPE = '" + APIConstants.API_PRODUCT + "'";
+            "SELECT API_ID, API_TIER FROM AM_API WHERE API_UUID = ?";
 
     public static final String GET_AUDIT_UUID_SQL =
             "SELECT MAP.AUDIT_UUID FROM AM_SECURITY_AUDIT_UUID_MAPPING MAP WHERE MAP.API_ID = ?";
@@ -2845,8 +2845,7 @@ public class SQLConstants {
             "DELETE FROM AM_API_AI_CONFIGURATION WHERE API_UUID = ?";
 
     public static final String DELETE_API_PRODUCT_SQL =
-            "DELETE FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ? AND API_TYPE = '"
-                    + APIConstants.API_PRODUCT + "'";
+            "DELETE FROM AM_API WHERE API_PROVIDER = ? AND API_NAME = ? AND API_VERSION = ?";
 
     public static final String UPDATE_PRODUCT_SQL =
             " UPDATE AM_API " +
@@ -2857,11 +2856,11 @@ public class SQLConstants {
             "   GATEWAY_VENDOR=?," +
             "   SUB_VALIDATION=?" +
             " WHERE" +
-            "   API_NAME=? AND API_PROVIDER=? AND API_VERSION=? AND API_TYPE='" + APIConstants.API_PRODUCT +"'";
+            "   API_NAME=? AND API_PROVIDER=? AND API_VERSION=?";
 
     public static final String GET_PRODUCT_ID =
             "SELECT API_ID FROM AM_API WHERE API_NAME = ? AND API_PROVIDER = ? AND "
-            + "API_VERSION = ? AND API_TYPE='" + APIConstants.API_PRODUCT +"'";
+            + "API_VERSION = ?";
 
     public static final String GET_URL_TEMPLATES_FOR_API =
             "SELECT URL_PATTERN , URL_MAPPING_ID, HTTP_METHOD FROM AM_API API , AM_API_URL_MAPPING URL "
