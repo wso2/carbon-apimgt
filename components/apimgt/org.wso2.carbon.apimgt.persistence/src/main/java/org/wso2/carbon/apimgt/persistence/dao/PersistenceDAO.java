@@ -553,6 +553,56 @@ public class PersistenceDAO {
         }
     }
 
+    public void addGraphQLSchema(String apiId, String metadata, String org) throws APIManagementException {
+        String query = SQLConstants.ADD_ARTIFACT_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, "GRAPHQL_SCHEMA");
+            prepStmt.setString(2, org);
+            prepStmt.setString(3, metadata);
+            prepStmt.setString(4, UUID.randomUUID().toString());
+            prepStmt.setString(5, apiId);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding the GraphQL schema to the database", e);
+        }
+    }
+
+    public void updateGraphQLSchema(String apiId, String metadata) throws APIManagementException {
+        String query = SQLConstants.UPDATE_GRAPHQL_SCHEMA_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, metadata);
+            prepStmt.setString(2, apiId);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while updating the GraphQL schema in the database", e);
+        }
+    }
+
+    public String getGraphQLSchema(String apiId, String org) throws APIManagementException {
+        String graphqlSchema = null;
+        String query = SQLConstants.GET_GRAPHQL_SCHEMA_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiId);
+            prepStmt.setString(2, org);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    graphqlSchema = rs.getString("metadata");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the GraphQL schema from the database", e);
+        }
+        return graphqlSchema;
+    }
+
     private void handleException(String msg, Throwable t) throws APIManagementException {
         log.error(msg, t);
         throw new APIManagementException(msg, t);

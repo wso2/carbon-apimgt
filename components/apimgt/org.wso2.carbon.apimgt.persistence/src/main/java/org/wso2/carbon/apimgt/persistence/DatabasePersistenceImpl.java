@@ -408,12 +408,38 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public void saveGraphQLSchemaDefinition(Organization org, String apiId, String schemaDefinition) throws GraphQLPersistenceException {
+        try {
+            JsonObject schemaJson = new JsonObject();
+            schemaJson.addProperty("schemaDefinition", schemaDefinition);
+            String schemaJsonString = schemaJson.toString();
 
+            String existingSchema = persistenceDAO.getGraphQLSchema(apiId, org.getName());
+            if (existingSchema != null) {
+                // If the GraphQL schema already exists, update it
+                persistenceDAO.updateGraphQLSchema(apiId, schemaJsonString);
+            } else {
+                // If the GraphQL schema does not exist, create a new entry
+                persistenceDAO.addGraphQLSchema(apiId, schemaJsonString, DatabasePersistenceUtil.mapOrgToJson(org).toString());
+            }
+        } catch (APIManagementException e) {
+            throw new GraphQLPersistenceException("Error while saving GraphQL schema definition", e);
+        }
     }
 
     @Override
     public String getGraphQLSchema(Organization org, String apiId) throws GraphQLPersistenceException {
-        return "";
+        String graphQLSchema = null;
+        try {
+            graphQLSchema = persistenceDAO.getGraphQLSchema(apiId, org.getName());
+            if (graphQLSchema != null) {
+                graphQLSchema = DatabasePersistenceUtil.safeGetAsString(
+                        DatabasePersistenceUtil.stringTojsonObject(graphQLSchema), "schemaDefinition"
+                );
+            }
+        } catch (APIManagementException e) {
+            throw new RuntimeException(e);
+        }
+        return graphQLSchema;
     }
 
     @Override

@@ -147,4 +147,16 @@ public class SQLConstants {
             "WHERE type = 'WSDL' " +
             "AND API_UUID = ? " +
             "AND JSON_VALUE(org, '$.name') = ? ";
+
+    public static final String UPDATE_GRAPHQL_SCHEMA_SQL =
+            "UPDATE AM_ARTIFACT_DATA SET " +
+            "METADATA = ? " +
+            "WHERE API_UUID = ? " +
+            "AND TYPE = 'GRAPHQL_SCHEMA'";
+
+    public static final String GET_GRAPHQL_SCHEMA_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+            "WHERE API_UUID = ? " +
+            "AND TYPE = 'GRAPHQL_SCHEMA' " +
+            "AND JSON_VALUE(org, '$.name') = ? ";
 }
