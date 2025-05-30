@@ -62,6 +62,8 @@ jobs:
     strategy:
       matrix:
         include:
+          - id: 1
+            segment: group1
           - id: 4
             segment: group4
       fail-fast: false
