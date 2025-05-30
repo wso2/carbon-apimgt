@@ -74,24 +74,8 @@ import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationServiceImpl;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationService;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerConfigurationServiceImpl;
-import org.wso2.carbon.apimgt.impl.notifier.ApisNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.ApplicationNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.ApplicationRegistrationNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.CertificateNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.CorrelationConfigNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.DeployAPIInGatewayNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.ExternalGatewayNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.ExternallyDeployedApiNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.GatewayPolicyNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.GoogleAnalyticsNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.LLMProviderNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.LabelNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.Notifier;
-import org.wso2.carbon.apimgt.impl.notifier.PolicyNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.ScopesNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.SubscriptionsNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.KeyTemplateNotifier;
-import org.wso2.carbon.apimgt.impl.notifier.MarketplaceAssistantApiPublisherNotifier;
+import org.wso2.carbon.apimgt.impl.listeners.APIMTenantMgtListener;
+import org.wso2.carbon.apimgt.impl.notifier.*;
 import org.wso2.carbon.apimgt.impl.observers.APIStatusObserverList;
 import org.wso2.carbon.apimgt.impl.observers.CommonConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.KeyMgtConfigDeployer;
@@ -126,6 +110,7 @@ import org.wso2.carbon.registry.core.session.UserRegistry;
 import org.wso2.carbon.registry.core.utils.AuthorizationUtils;
 import org.wso2.carbon.registry.core.utils.RegistryUtils;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
+import org.wso2.carbon.stratos.common.listeners.TenantMgtListener;
 import org.wso2.carbon.user.api.AuthorizationManager;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.UserRealm;
@@ -221,6 +206,10 @@ public class APIManagerComponent {
             bundleContext.registerService(Notifier.class.getName(), new GatewayPolicyNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new LLMProviderNotifier(), null);
             bundleContext.registerService(Notifier.class.getName(), new LabelNotifier(), null);
+            if (!configuration.getGatewayArtifactSynchronizerProperties().isTenantLoading()) {
+                bundleContext.registerService(Notifier.class.getName(), new TenantNotifier(), null);
+            }
+            bundleContext.registerService(TenantMgtListener.class.getName(), new APIMTenantMgtListener(), null);
             if (configuration.getMarketplaceAssistantConfigurationDto().isKeyProvided() ||
                     configuration.getMarketplaceAssistantConfigurationDto().isAuthTokenProvided()) {
                 bundleContext.registerService(Notifier.class.getName(), new MarketplaceAssistantApiPublisherNotifier(), null);

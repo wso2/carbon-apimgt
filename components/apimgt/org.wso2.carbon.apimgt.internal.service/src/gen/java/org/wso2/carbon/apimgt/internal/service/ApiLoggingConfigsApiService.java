@@ -21,5 +21,5 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface ApiLoggingConfigsApiService {
-      public Response apiLoggingConfigsGet(MessageContext messageContext) throws APIManagementException;
+      public Response apiLoggingConfigsGet(String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
 }

@@ -474,7 +474,17 @@ public class ThrottleProperties {
         private String serviceUrl;
         private String username;
         private String password;
+        private boolean tenantLoading  = true;
+        private LoadingTenants loadingTenants;
 
+        public boolean isTenantLoading() {
+            return tenantLoading;
+        }
+
+        public void setTenantLoading(boolean tenantLoading) {
+            this.tenantLoading = tenantLoading;
+        }
+        
         public boolean isEnabled() {
             return enabled;
         }
@@ -505,6 +515,14 @@ public class ThrottleProperties {
 
         public void setPassword(String password) {
             this.password = password;
+        }
+
+        public void setLoadingTenants(LoadingTenants loadingTenants) {
+            this.loadingTenants = loadingTenants;
+        }
+
+        public LoadingTenants getLoadingTenants() {
+            return loadingTenants;
         }
     }
 

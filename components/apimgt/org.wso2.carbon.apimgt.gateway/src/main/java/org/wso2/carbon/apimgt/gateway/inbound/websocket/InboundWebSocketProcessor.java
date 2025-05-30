@@ -67,6 +67,7 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -117,16 +118,14 @@ public class InboundWebSocketProcessor {
             if (isOauthAuthentication(req, inboundMessageContext)) {
                 inboundMessageContext.setAuthenticator(new OAuthAuthenticator());
                 setRequestHeaders(req, inboundMessageContext);
-                inboundMessageContext.getRequestHeaders().put(WebsocketUtil.authorizationHeader, req.headers()
-                        .get(WebsocketUtil.authorizationHeader));
+                setOrReplaceRequestHeaderIgnoreCase(WebsocketUtil.authorizationHeader, req, inboundMessageContext);
                 inboundProcessorResponseDTO =
                         handshakeProcessor.processHandshake(inboundMessageContext);
                 setRequestHeaders(req, inboundMessageContext);
             } else if (isAPIKeyAuthentication(req, inboundMessageContext)) {
                 inboundMessageContext.setAuthenticator(new ApiKeyAuthenticator());
                 setRequestHeaders(req, inboundMessageContext);
-                inboundMessageContext.getRequestHeaders().put(APIConstants.API_KEY_HEADER_QUERY_PARAM, req.headers()
-                        .get(APIConstants.API_KEY_HEADER_QUERY_PARAM));
+                setOrReplaceRequestHeaderIgnoreCase(APIConstants.API_KEY_HEADER_QUERY_PARAM, req, inboundMessageContext);
                 inboundProcessorResponseDTO =
                         handshakeProcessor.processHandshake(inboundMessageContext);
                 setRequestHeaders(req, inboundMessageContext);
@@ -226,7 +225,12 @@ public class InboundWebSocketProcessor {
     private boolean isOauthAuthentication(FullHttpRequest req, InboundMessageContext inboundMessageContext)
             throws APISecurityException {
 
-        if (!inboundMessageContext.getRequestHeaders().containsKey(WebsocketUtil.authorizationHeader)) {
+        boolean containsAuthorizationHeader = inboundMessageContext.getRequestHeaders()
+                .keySet()
+                .stream()
+                .anyMatch(key -> key.equalsIgnoreCase(WebsocketUtil.authorizationHeader));
+
+        if (!containsAuthorizationHeader) {
             QueryStringDecoder decoder = new QueryStringDecoder(inboundMessageContext.getFullRequestPath());
             Map<String, List<String>> requestMap = decoder.parameters();
             if (requestMap.containsKey(APIConstants.AUTHORIZATION_QUERY_PARAM_DEFAULT) && requestMap.get(APIConstants.
@@ -255,7 +259,12 @@ public class InboundWebSocketProcessor {
     private boolean isAPIKeyAuthentication(FullHttpRequest req, InboundMessageContext inboundMessageContext)
             throws APISecurityException {
 
-        if (!inboundMessageContext.getRequestHeaders().containsKey(APIConstants.API_KEY_HEADER_QUERY_PARAM)) {
+        boolean containsAuthorizationHeader = inboundMessageContext.getRequestHeaders()
+                .keySet()
+                .stream()
+                .anyMatch(key -> key.equalsIgnoreCase(APIConstants.API_KEY_HEADER_QUERY_PARAM));
+
+        if (!containsAuthorizationHeader) {
             QueryStringDecoder decoder = new QueryStringDecoder(inboundMessageContext.getFullRequestPath());
             Map<String, List<String>> requestMap = decoder.parameters();
             if (requestMap.containsKey(APIConstants.API_KEY_HEADER_QUERY_PARAM) && requestMap.get(APIConstants.
@@ -482,5 +491,23 @@ public class InboundWebSocketProcessor {
             request.headers().remove(header);
         }
         inboundMessageContext.setHeadersToRemove(new ArrayList<>());
+    }
+
+    /**
+     * Sets or replaces a request header in InboundMessageContext matching the header key case-insensitively.
+     *
+     * @param headerKey             Header key to set or replace
+     * @param request               Handshake request
+     * @param inboundMessageContext InboundMessageContext
+     */
+    private static void setOrReplaceRequestHeaderIgnoreCase(String headerKey, FullHttpRequest request,
+                                                            InboundMessageContext inboundMessageContext) {
+        Optional<String> existingKey = inboundMessageContext.getRequestHeaders().keySet()
+                .stream()
+                .filter(key -> key.equalsIgnoreCase(headerKey))
+                .findFirst();
+
+        existingKey.ifPresent(inboundMessageContext.getRequestHeaders()::remove);
+        inboundMessageContext.getRequestHeaders().put(headerKey, request.headers().get(headerKey));
     }
 }

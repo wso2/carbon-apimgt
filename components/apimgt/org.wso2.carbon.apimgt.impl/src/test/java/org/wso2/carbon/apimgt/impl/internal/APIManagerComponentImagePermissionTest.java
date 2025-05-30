@@ -25,6 +25,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
+import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -71,6 +72,8 @@ public class APIManagerComponentImagePermissionTest {
         APIManagerConfiguration configuration = Mockito.mock(APIManagerConfiguration.class);
         MarketplaceAssistantConfigurationDTO marketplaceAssistantConfigurationDto = Mockito.mock(
                 MarketplaceAssistantConfigurationDTO.class);
+        Mockito.when(configuration.getGatewayArtifactSynchronizerProperties())
+                .thenReturn(new GatewayArtifactSynchronizerProperties());
 
         Mockito.when(componentContext.getBundleContext()).thenReturn(bundleContext);
         Mockito.when(realmService.getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID)).thenReturn(userRealm);

@@ -25,12 +25,9 @@ import com.google.gson.Gson;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.LLMProviderConfiguration;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
-import org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants;
-import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
 import org.wso2.carbon.apimgt.common.jms.JMSConnectionEventListener;
 import org.wso2.carbon.apimgt.gateway.APILoggerManager;
@@ -38,9 +35,10 @@ import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GatewayPolicyDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
-import org.wso2.carbon.apimgt.gateway.LLMProviderManager;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.gateway.utils.TenantUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.EventType;
 import org.wso2.carbon.apimgt.impl.APIConstants.PolicyType;
@@ -49,25 +47,12 @@ import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.WebhooksDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
-import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.APIPolicyEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationPolicyEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationRegistrationEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.CertificateEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.GatewayPolicyEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.GoogleAnalyticsConfigEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.LLMProviderEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.PolicyEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.ScopeEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.ScopesEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.SubscriptionPolicyEvent;
-import org.wso2.carbon.apimgt.impl.notifier.events.KeyTemplateEvent;
+import org.wso2.carbon.apimgt.impl.notifier.events.*;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.keymgt.SubscriptionDataHolder;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
+import org.wso2.carbon.stratos.common.exception.TenantMgtException;
+import org.wso2.carbon.user.api.UserStoreException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -118,7 +103,7 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                 Topic jmsDestination = (Topic) message.getJMSDestination();
                 if (message instanceof TextMessage) {
                     String textMessage = ((TextMessage) message).getText();
-                    JsonNode payloadData =  new ObjectMapper().readTree(textMessage).path(APIConstants.EVENT_PAYLOAD).
+                    JsonNode payloadData = new ObjectMapper().readTree(textMessage).path(APIConstants.EVENT_PAYLOAD).
                             path(APIConstants.EVENT_PAYLOAD_DATA);
 
                     if (APIConstants.TopicNames.TOPIC_NOTIFICATION.equalsIgnoreCase(jmsDestination.getTopicName())) {
@@ -173,6 +158,9 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                     DeployAPIInGatewayEvent gatewayEvent = new Gson().fromJson(new String(eventDecoded),
                             DeployAPIInGatewayEvent.class);
                     String tenantDomain = gatewayEvent.getTenantDomain();
+                    if (!TenantUtils.isTenantAvailable(tenantDomain)){
+                        return;
+                    }
                     boolean tenantLoaded = ServiceReferenceHolder.getInstance().isTenantLoaded(tenantDomain);
                     if (!tenantLoaded) {
                         String syncKey = tenantDomain.concat("__").concat(this.getClass().getName());
@@ -233,17 +221,29 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
         if (EventType.APPLICATION_CREATE.toString().equals(eventType)
                 || EventType.APPLICATION_UPDATE.toString().equals(eventType)) {
             ApplicationEvent event = new Gson().fromJson(eventJson, ApplicationEvent.class);
+            if (!TenantUtils.isTenantAvailable(event.getTenantDomain())){
+                return;
+            }
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateApplication(event);
         } else if (EventType.SUBSCRIPTIONS_CREATE.toString().equals(eventType)
                 || EventType.SUBSCRIPTIONS_UPDATE.toString().equals(eventType)) {
             SubscriptionEvent event = new Gson().fromJson(eventJson, SubscriptionEvent.class);
+            if (!TenantUtils.isTenantAvailable(event.getTenantDomain())) {
+                return;
+            }
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateSubscription(event);
         } else if (EventType.API_UPDATE.toString().equals(eventType)) {
             APIEvent event = new Gson().fromJson(eventJson, APIEvent.class);
+            if (!TenantUtils.isTenantAvailable(event.getTenantDomain())){
+                return;
+            }
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateAPI(event);
             DataHolder.getInstance().addAPIMetaData(event);
         } else if (EventType.API_LIFECYCLE_CHANGE.toString().equals(eventType)) {
             APIEvent event = new Gson().fromJson(eventJson, APIEvent.class);
+            if (!TenantUtils.isTenantAvailable(event.getTenantDomain())){
+                return;
+            }
             if (APIStatus.RETIRED.toString().equals(event.getApiStatus())) {
                 ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeAPI(event);
                 DataHolder.getInstance().removeAPIFromAllTenantMap(event.getApiContext(), event.getTenantDomain());
@@ -252,39 +252,63 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
             }
         } else if (EventType.APPLICATION_REGISTRATION_CREATE.toString().equals(eventType)) {
             ApplicationRegistrationEvent event = new Gson().fromJson(eventJson, ApplicationRegistrationEvent.class);
+            if (!TenantUtils.isTenantAvailable(event.getTenantDomain())){
+                return;
+            }
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().addOrUpdateApplicationKeyMapping(event);
         } else if (EventType.SUBSCRIPTIONS_DELETE.toString().equals(eventType)) {
             SubscriptionEvent event = new Gson().fromJson(eventJson, SubscriptionEvent.class);
+            if (!TenantUtils.isTenantAvailable(event.getTenantDomain())){
+                return;
+            }
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeSubscription(event);
         } else if (EventType.APPLICATION_DELETE.toString().equals(eventType)) {
             ApplicationEvent event = new Gson().fromJson(eventJson, ApplicationEvent.class);
+            if (!TenantUtils.isTenantAvailable(event.getTenantDomain())){
+                return;
+            }
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeApplication(event);
         } else if (EventType.REMOVE_APPLICATION_KEYMAPPING.toString().equals(eventType)) {
             ApplicationRegistrationEvent event = new Gson().fromJson(eventJson, ApplicationRegistrationEvent.class);
+            if (!TenantUtils.isTenantAvailable(event.getTenantDomain())){
+                return;
+            }
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().removeApplicationKeyMapping(event);
         } else if (EventType.SCOPES_UPDATE.toString().equals(eventType)) {
             ScopesEvent event = new Gson().fromJson(eventJson, ScopesEvent.class);
+            if (!TenantUtils.isTenantAvailable(event.getTenantDomain())){
+                return;
+            }
             for (ScopeEvent scopeEvent : event.getScopes()) {
                 ServiceReferenceHolder.getInstance().getKeyManagerDataService().addScope(scopeEvent);
             }
         } else if (EventType.SCOPE_CREATE.toString().equals(eventType) ||
                 EventType.SCOPE_UPDATE.toString().equals(eventType)) {
             ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
+            if (!TenantUtils.isTenantAvailable(event.getTenantDomain())){
+                return;
+            }
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().addScope(event);
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, event.getName() + ": " + eventType,
                     APIConstants.AuditLogConstants.DEPLOYED,
                     APIConstants.AuditLogConstants.SYSTEM + ": " + event.getTenantDomain());
         } else if (EventType.SCOPE_DELETE.toString().equals(eventType)) {
             ScopeEvent event = new Gson().fromJson(eventJson, ScopeEvent.class);
+            if (!TenantUtils.isTenantAvailable(event.getTenantDomain())){
+                return;
+            }
             ServiceReferenceHolder.getInstance().getKeyManagerDataService().deleteScope(event);
             APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, event.getName() + ": " + eventType,
                     APIConstants.AuditLogConstants.DEPLOYED,
                     APIConstants.AuditLogConstants.SYSTEM + ": " + event.getTenantDomain());
         } else if (EventType.POLICY_CREATE.toString().equals(eventType) ||
-            EventType.POLICY_DELETE.toString().equals(eventType) ||
-            EventType.POLICY_UPDATE.toString().equals(eventType)) {
+                EventType.POLICY_DELETE.toString().equals(eventType) ||
+                EventType.POLICY_UPDATE.toString().equals(eventType)) {
             String policyName = null;
             PolicyEvent event = new Gson().fromJson(eventJson, PolicyEvent.class);
+            if (!TenantUtils.isTenantAvailable(event.getTenantDomain())){
+                return;
+            }
             boolean updatePolicy = false;
             boolean deletePolicy = false;
             if (EventType.POLICY_CREATE.toString().equals(eventType)
@@ -330,6 +354,9 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
         } else if (EventType.ENDPOINT_CERTIFICATE_ADD.toString().equals(eventType) ||
                 EventType.ENDPOINT_CERTIFICATE_REMOVE.toString().equals(eventType)) {
             CertificateEvent certificateEvent = new Gson().fromJson(eventJson, CertificateEvent.class);
+            if (!TenantUtils.isTenantAvailable(certificateEvent.getTenantDomain())){
+                return;
+            }
             if (EventType.ENDPOINT_CERTIFICATE_ADD.toString().equals(eventType)) {
                 try {
                     new EndpointCertificateDeployer(certificateEvent.getTenantDomain())
@@ -354,6 +381,9 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
         } else if (EventType.GA_CONFIG_UPDATE.toString().equals(eventType)) {
             GoogleAnalyticsConfigEvent googleAnalyticsConfigEvent =
                     new Gson().fromJson(eventJson, GoogleAnalyticsConfigEvent.class);
+            if (!TenantUtils.isTenantAvailable(googleAnalyticsConfigEvent.getTenantDomain())){
+                return;
+            }
             try {
                 new GoogleAnalyticsConfigDeployer(googleAnalyticsConfigEvent.getTenantDomain()).deploy();
             } catch (APIManagementException e) {
@@ -361,21 +391,33 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
             }
         } else if (EventType.UDATE_API_LOG_LEVEL.toString().equals(eventType)) {
             APIEvent apiEvent = new Gson().fromJson(eventJson, APIEvent.class);
+            if (!TenantUtils.isTenantAvailable(apiEvent.getTenantDomain())){
+                return;
+            }
             APILoggerManager.getInstance().updateLoggerMap(apiEvent.getApiContext(), apiEvent.getLogLevel(),
                     apiEvent.getResourceMethod(), apiEvent.getResourcePath());
         } else if (EventType.CUSTOM_POLICY_ADD.toString().equals(eventType)) {
             KeyTemplateEvent keyTemplateEvent = new Gson().fromJson(eventJson, KeyTemplateEvent.class);
+            if (!TenantUtils.isTenantAvailable(keyTemplateEvent.getTenantDomain())){
+                return;
+            }
             String key = keyTemplateEvent.getKeyTemplate();
             String keyTemplateValue = keyTemplateEvent.getKeyTemplate();
             ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
                     .addKeyTemplate(key, keyTemplateValue);
         } else if (EventType.CUSTOM_POLICY_DELETE.toString().equals(eventType)) {
             KeyTemplateEvent keyTemplateEvent = new Gson().fromJson(eventJson, KeyTemplateEvent.class);
+            if (!TenantUtils.isTenantAvailable(keyTemplateEvent.getTenantDomain())){
+                return;
+            }
             String key = keyTemplateEvent.getKeyTemplate();
             ServiceReferenceHolder.getInstance().getAPIThrottleDataService()
                     .removeKeyTemplate(key);
         } else if (EventType.CUSTOM_POLICY_UPDATE.toString().equals(eventType)) {
             KeyTemplateEvent keyTemplateEvent = new Gson().fromJson(eventJson, KeyTemplateEvent.class);
+            if (!TenantUtils.isTenantAvailable(keyTemplateEvent.getTenantDomain())){
+                return;
+            }
             String oldKey = keyTemplateEvent.getOldKeyTemplate();
             String newKey = keyTemplateEvent.getNewKeyTemplate();
             String newTemplateValue = newKey;
@@ -386,6 +428,9 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
         } else if (EventType.DEPLOY_POLICY_MAPPING_IN_GATEWAY.toString().equals(eventType)
                 || EventType.REMOVE_POLICY_MAPPING_FROM_GATEWAY.toString().equals(eventType)) {
             GatewayPolicyEvent gatewayPolicyEvent = new Gson().fromJson(eventJson, GatewayPolicyEvent.class);
+            if (!TenantUtils.isTenantAvailable(gatewayPolicyEvent.getTenantDomain())) {
+                return;
+            }
             Set<String> systemConfiguredGatewayLabels = new HashSet(gatewayPolicyEvent.getGatewayLabels());
             systemConfiguredGatewayLabels.retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
             if (!systemConfiguredGatewayLabels.isEmpty()) {
@@ -399,8 +444,9 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                         new GatewayPolicyDeployer(
                                 gatewayPolicyEvent.getGatewayPolicyMappingUuid()).deployGatewayPolicyMapping();
                     } catch (ArtifactSynchronizerException | APIManagementException e) {
-                        log.error("Error in deploying artifacts for " + gatewayPolicyEvent.getGatewayPolicyMappingUuid()
-                                + "in the Gateway");
+                        log.error(
+                                "Error in deploying artifacts for " + gatewayPolicyEvent.getGatewayPolicyMappingUuid() +
+                                        "in the Gateway");
                     } finally {
                         if (tenantFlowStarted) {
                             PrivilegedCarbonContext.endTenantFlow();
@@ -416,8 +462,8 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                         new GatewayPolicyDeployer(
                                 gatewayPolicyEvent.getGatewayPolicyMappingUuid()).undeployGatewayPolicyMapping();
                     } catch (ArtifactSynchronizerException | APIManagementException e) {
-                        log.error("Error while un-deploying artifacts for " + gatewayPolicyEvent.getGatewayPolicyMappingUuid()
-                                + "from the Gateway");
+                        log.error("Error while un-deploying artifacts for " +
+                                gatewayPolicyEvent.getGatewayPolicyMappingUuid() + "from the Gateway");
                     } finally {
                         if (tenantFlowStarted) {
                             PrivilegedCarbonContext.endTenantFlow();
@@ -428,6 +474,9 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
         } else if (EventType.LLM_PROVIDER_CREATE.toString().equals(eventType)) {
             try {
                 LLMProviderEvent providerEvent = new Gson().fromJson(eventJson, LLMProviderEvent.class);
+                if (!TenantUtils.isTenantAvailable(providerEvent.getTenantDomain())){
+                    return;
+                }
                 addProviderConfigurations(providerEvent, providerEvent.getTenantDomain());
             } catch (Exception e) {
                 log.error("Error while handling LLM provider add event", e);
@@ -435,6 +484,9 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
         } else if (EventType.LLM_PROVIDER_DELETE.toString().equals(eventType)) {
             try {
                 LLMProviderEvent providerEvent = new Gson().fromJson(eventJson, LLMProviderEvent.class);
+                if (!TenantUtils.isTenantAvailable(providerEvent.getTenantDomain())){
+                    return;
+                }
                 removeProviderConfigurations(providerEvent.getId());
             } catch (Exception e) {
                 log.error("Error while handling LLM provider delete event", e);
@@ -442,12 +494,39 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
         } else if (EventType.LLM_PROVIDER_UPDATE.toString().equals(eventType)) {
             try {
                 LLMProviderEvent providerEvent = new Gson().fromJson(eventJson, LLMProviderEvent.class);
+                if (!TenantUtils.isTenantAvailable(providerEvent.getTenantDomain())){
+                    return;
+                }
                 updateProviderConfigurations(providerEvent, providerEvent.getTenantDomain());
             } catch (Exception e) {
                 log.error("Error while handling LLM provider update event", e);
             }
+        } else if (EventType.TENANT_CREATE.toString().equals(eventType) ||
+                EventType.TENANT_UPDATE.toString().equals(eventType) ||
+                EventType.TENANT_ACTIVATION.toString().equals(eventType) ||
+                EventType.TENANT_DEACTIVATION.toString().equals(eventType)) {
+            if (GatewayUtils.isTenantLoadingEnable()) {
+                try {
+                    TenantEvent tenantEvent = new Gson().fromJson(eventJson, TenantEvent.class);
+                    if (!TenantUtils.isTenantAvailable(tenantEvent.getTenantDomain())){
+                        return;
+                    }
+                    addOrUpdateTenant(tenantEvent);
+                } catch (Exception e) {
+                    log.error("Error while loading tenant into gateway.", e);
+                }
+            }
         }
     }
+
+    private void addOrUpdateTenant(TenantEvent tenantEvent) throws TenantMgtException, UserStoreException {
+        if (ServiceReferenceHolder.getInstance().getTenantMgtService().isDomainAvailable(tenantEvent.getTenantDomain())) {
+            TenantUtils.addTenant(tenantEvent);
+        } else {
+            TenantUtils.updateTenant(tenantEvent);
+        }
+    }
+
 
     /**
      * Adds new LLM provider configurations to the DataHolder.
@@ -589,7 +668,7 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                 }
                 inMemoryApiDeployer.
                         deployAllAPIs(gatewayArtifactSynchronizerProperties.getGatewayLabels(),
-                        tenantDomain, true);
+                                tenantDomain, true);
             } catch (ArtifactSynchronizerException e) {
                 log.error("Error while redeploying gateway artifacts for tenant: " + tenantDomain, e);
             } catch (APIManagementException e) {

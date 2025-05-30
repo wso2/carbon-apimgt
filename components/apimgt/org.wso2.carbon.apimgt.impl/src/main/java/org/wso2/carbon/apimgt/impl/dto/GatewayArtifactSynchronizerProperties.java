@@ -20,6 +20,8 @@ public class GatewayArtifactSynchronizerProperties {
     private String gatewayStartup = "sync";
     private long eventWaitingTime = 1;
     private boolean onDemandLoading;
+    private boolean tenantLoading;
+    private LoadingTenants loadingTenants = new LoadingTenants();
 
 
     public String getSaverName() {
@@ -158,5 +160,21 @@ public class GatewayArtifactSynchronizerProperties {
 
     public boolean isOnDemandLoading() {
         return onDemandLoading;
+    }
+
+    public boolean isTenantLoading() {
+        return tenantLoading;
+    }
+
+    public void setTenantLoading(boolean tenantLoading) {
+        this.tenantLoading = tenantLoading;
+    }
+
+    public LoadingTenants getLoadingTenants() {
+        return loadingTenants;
+    }
+
+    public void setLoadingTenants(LoadingTenants loadingTenants) {
+        this.loadingTenants = loadingTenants;
     }
 }

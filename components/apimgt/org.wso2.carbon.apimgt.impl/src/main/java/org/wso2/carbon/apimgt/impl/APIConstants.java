@@ -563,6 +563,21 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
 
+        public static final String SDK_GENERATION = "SdkGeneration";
+        public static final String SDK_GENERATION_ENABLED = "Enabled";
+        public static final String SDK_GENERATION_AUTH_TOKEN = "AuthToken";
+        public static final String SDK_GENERATION_KEY = "Key";
+        public static final String SDK_GENERATION_ENDPOINT = "Endpoint";
+        public static final String SDK_GENERATION_TOKEN_ENDPOINT = "TokenEndpoint";
+        public static final String SDK_GENERATION_MERGE_SPEC_RESOURCE = "MergeSpecResource";
+        public static final String SDK_GENERATION_GENERATE_CODE_RESOURCE = "GenerateCodeResource";
+        public static final String SPECIFICATIONS = "specifications";
+        public static final String APICONTEXTS = "contexts";
+        public static final String SPECIFICATION = "APISpecification";
+        public static final String METHODSFILE = "sdkMethodsFile";
+        public static final String USECASE = "useCase";
+        public static final String LANGUAGE = "language";
+
         private AI() {
 
         }
@@ -683,6 +698,7 @@ public final class APIConstants {
     public static final String CHAR_ASTERIX = "*";
     public static final String CERTIFICATE_RETRIEVAL_ENDPOINT = "/endpoint-certificates";
     public static final String GA_CONFIG_RETRIEVAL_ENDPOINT = "/ga-config";
+    public static final String TENANT_INFO_ENDPOINT = "/tenant-info";
     public static final String API_OVERVIEW_WEBSUB_SUBSCRIPTION_CONFIGURATION
             = "overview_websubSubscriptionConfiguration";
     public static final String WEBSUB_DEFAULT_TOPIC_NAME = "_default";
@@ -2891,7 +2907,8 @@ public final class APIConstants {
         CORRELATION_CONFIG,
         GATEWAY_POLICY,
         LLM_PROVIDER,
-        LABEL
+        LABEL,
+        TENANT
     }
 
     // Supported Event Types
@@ -2934,7 +2951,12 @@ public final class APIConstants {
         REMOVE_POLICY_MAPPING_FROM_GATEWAY,
         LABEL_CREATE,
         LABEL_UPDATE,
-        LABEL_DELETE
+        LABEL_DELETE,
+        TENANT_CREATE,
+        TENANT_UPDATE,
+        TENANT_DELETE,
+        TENANT_ACTIVATION,
+        TENANT_DEACTIVATION
     }
 
     public enum EventAction {
@@ -2972,6 +2994,9 @@ public final class APIConstants {
         public static final String FILE_BASED_API_CONTEXTS = "FileBasedApiContexts";
         public static final String FILE_BASED_API_CONTEXT = "FileBasedApiContext";
         public static final String EnableOnDemandLoadingAPIS = "EnableOnDemandLoadingAPIS";
+        public static final String TENANT_LOADING = "TenantLoading";
+        public static final String ENABLE_TENANT_LOADING = "Enable";
+        public static final String TENANT_LOADING_TENANTS = "Tenants";
 
     }
 
