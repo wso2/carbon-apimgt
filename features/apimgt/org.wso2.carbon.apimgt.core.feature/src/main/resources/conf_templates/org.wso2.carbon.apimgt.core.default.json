@@ -32,6 +32,7 @@
   "apim.jwt.encode_x5t_without_padding": false,
   "apim.jwt.enable_tenant_based_signing": false,
   "apim.jwt.gateway_generator.enable_claim_retrieval": false,
+  "apim.jwt.continue_on_claim_retrieval_failure": true,
   "apim.jwt.binding_federated_user_claims": false,
   "apim.hashing.hashing_algorithm": "SHA-256",
   "apim.cache.gateway_token.enable": true,

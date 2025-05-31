@@ -456,7 +456,7 @@ public class JWTValidator {
         return endUserToken;
     }
 
-    private void includeUserStoreClaimsIntoClaims(JWTInfoDto jwtInfoDto) {
+    private void includeUserStoreClaimsIntoClaims(JWTInfoDto jwtInfoDto) throws JWTGeneratorException {
 
         JWTInfoDto localJWTInfoDto = new JWTInfoDto(jwtInfoDto);
         Map<String, String> userClaimsFromKeyManager = getUserClaimsFromKeyManager(localJWTInfoDto);
@@ -895,7 +895,7 @@ public class JWTValidator {
 
         return CacheProvider.getGatewayJWTTokenCache();
     }
-    private Map<String, String> getUserClaimsFromKeyManager(JWTInfoDto jwtInfoDto) {
+    private Map<String, String> getUserClaimsFromKeyManager(JWTInfoDto jwtInfoDto) throws JWTGeneratorException {
 
         if (jwtConfigurationDto.isEnableUserClaimRetrievalFromUserStore()) {
             String tenantDomain = CarbonContext.getThreadLocalCarbonContext().getTenantDomain();
@@ -917,7 +917,11 @@ public class JWTValidator {
                     try {
                         return keyManagerInstance.getUserClaims(jwtInfoDto.getEndUser(), properties);
                     } catch (APIManagementException e) {
-                        log.error("Error while retrieving User claims from Key Manager ", e);
+                        if (jwtConfigurationDto.isContinueOnClaimRetrievalFailure()) {
+                            log.error("Error while retrieving User Claims from Key Manager ", e);
+                        } else {
+                            throw new JWTGeneratorException("Error while retrieving User Claims from Key Manager", e);
+                        }
                     }
                 }
             }
