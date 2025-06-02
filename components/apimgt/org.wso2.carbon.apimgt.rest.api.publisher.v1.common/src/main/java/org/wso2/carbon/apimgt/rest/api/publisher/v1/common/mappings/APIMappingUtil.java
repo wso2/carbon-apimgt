@@ -1221,6 +1221,7 @@ public class APIMappingUtil {
                             String customParametersString = (String) productionEndpointSecurity
                                     .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                             JSONObject customParameters = (JSONObject) parser.parse(customParametersString);
+                            decryptCustomOauthParameters(customParameters, cryptoUtil);
                             productionEndpointSecurity.put(
                                     APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParameters);
                         }
@@ -1256,6 +1257,7 @@ public class APIMappingUtil {
                             String customParametersString = (String) sandboxEndpointSecurity
                                     .get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
                             JSONObject customParameters = (JSONObject) parser.parse(customParametersString);
+                            decryptCustomOauthParameters(customParameters, cryptoUtil);
                             sandboxEndpointSecurity.put(
                                     APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParameters);
                         }
@@ -1290,7 +1292,8 @@ public class APIMappingUtil {
                 log.error("Cannot convert endpoint configurations when setting endpoint for API. " +
                         "API ID = " + model.getId(), e);
             } catch (CryptoException e) {
-                log.error("Error while decrypting client credentials for API: " + model.getId(), e);
+                log.error("Error while decrypting client credentials or secret parameters for API: "
+                        + model.getId(), e);
             }
         }
         dto.setHasThumbnail(!StringUtils.isBlank(model.getThumbnailUrl()));
@@ -3401,6 +3404,10 @@ public class APIMappingUtil {
             if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
                 sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
             }
+            Object customParamsObj = sandboxEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+            if (customParamsObj instanceof JSONObject) {
+                maskSecretCustomParameters((JSONObject) customParamsObj);
+            }
             endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, sandboxEndpointSecurity);
         }
         if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
@@ -3415,6 +3422,11 @@ public class APIMappingUtil {
             }
             if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
                 productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
+            }
+            Object customParamsObj =
+                    productionEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+            if (customParamsObj instanceof JSONObject) {
+                maskSecretCustomParameters((JSONObject) customParamsObj);
             }
             endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
         }
@@ -3481,6 +3493,51 @@ public class APIMappingUtil {
             }
         }
         return awsEndpointConfig;
+    }
+
+    /**
+     * Decrypts the secret custom oauth parameters in the customParameters.
+     *
+     * @param customParameters The JSON object containing custom OAuth parameters.
+     * @param cryptoUtil       Utility for handling decryption logic (including base64 decoding).
+     * @throws CryptoException If an error occurs during the decryption process.
+     */
+    private static void decryptCustomOauthParameters(JSONObject customParameters, CryptoUtil cryptoUtil)
+            throws CryptoException {
+        if (customParameters == null || customParameters.isEmpty()) {
+            return;
+        }
+
+        for (Object valObj : customParameters.values()) {
+            // If value is an extended custom parameter object
+            if (valObj instanceof JSONObject) {
+                JSONObject valueObj = (JSONObject) valObj;
+                if (Boolean.TRUE.equals(valueObj.get(APIConstants.OAuthConstants.CUSTOM_PARAMETERS_SECURED))) {
+                    String encryptedValue = (String) valueObj.get(APIConstants.OAuthConstants.CUSTOM_PARAMETERS_VALUE);
+                    if (StringUtils.isNotEmpty(encryptedValue)) {
+                        String decryptedValue = new String(cryptoUtil.base64DecodeAndDecrypt(encryptedValue));
+                        valueObj.put(APIConstants.OAuthConstants.CUSTOM_PARAMETERS_VALUE, decryptedValue);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Masks (clears) the values of secret custom OAuth parameters in the given endpoint security configuration.
+     *
+     * @param customParams The JSON object that includes custom parameters.
+     */
+    private static void maskSecretCustomParameters(JSONObject customParams) {
+        for (Object valObj : customParams.values()) {
+            // If value is an extended custom parameter object
+            if (valObj instanceof JSONObject) {
+                JSONObject valueObj = (JSONObject) valObj;
+                if (Boolean.TRUE.equals((valueObj.get(APIConstants.OAuthConstants.CUSTOM_PARAMETERS_SECURED)))) {
+                    valueObj.put(APIConstants.OAuthConstants.CUSTOM_PARAMETERS_VALUE, "");
+                }
+            }
+        }
     }
 
     public static APIRevisionDTO fromAPIRevisiontoDTO(APIRevision model) throws APIManagementException {

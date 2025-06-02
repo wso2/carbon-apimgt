@@ -1520,6 +1520,9 @@ public final class APIConstants {
         public static final String ENDPOINT_SECURITY_ENABLED = "enabled";
         public static final String ENDPOINT_SECURITY_USERNAME = "username";
 
+        public static final String CUSTOM_PARAMETERS_SECURED = "secured";
+        public static final String CUSTOM_PARAMETERS_VALUE = "value";
+
         private OAuthConstants() {
 
         }
