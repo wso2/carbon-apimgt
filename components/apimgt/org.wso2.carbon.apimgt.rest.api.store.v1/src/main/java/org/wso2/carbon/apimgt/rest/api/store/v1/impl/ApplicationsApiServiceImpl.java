@@ -1314,6 +1314,13 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         try {
             APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
             Application application = apiConsumer.getLightweightApplicationByUUID(applicationId);
+            if (application == null) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
+            // Only the application owner can delete OAuth keys
+            if (!RestAPIStoreUtils.isUserOwnerOfApplication(application)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
+            }
             boolean result = apiConsumer.removalKeys(application, keyMappingId, xWSO2Tenant);
             if (result) {
                 return Response.ok().build();
