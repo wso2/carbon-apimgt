@@ -6,6 +6,8 @@ import com.google.gson.JsonParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
@@ -80,17 +82,155 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public String addAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException {
-        return "";
+        String revisionUUID;
+        try {
+            // Get API Schema data
+            String apiSchema = persistenceDAO.getAPISchemaByUUID(apiUUID, org.getName());
+            String swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiUUID, org.getName());
+            String asyncApiDefinition = persistenceDAO.getAsyncAPIDefinitionByUUID(apiUUID, org.getName());
+
+            // Generate new UUID for revision
+            revisionUUID = UUID.randomUUID().toString();
+
+            // Prepare JSON objects
+            JsonObject apiJson = DatabasePersistenceUtil.stringTojsonObject(apiSchema);
+            JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
+            String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
+
+
+            // Add revision entry
+            persistenceDAO.addAPIRevisionSchema(apiUUID, revisionId, revisionUUID, apiJson.toString(), orgJsonString);
+
+            // Add API definitions if they exist
+            if (swaggerDefinition != null) {
+                try {
+                    persistenceDAO.addAPIRevisionSwaggerDefinition(apiUUID, revisionId, revisionUUID,
+                        swaggerDefinition, orgJsonString);
+                } catch (APIManagementException e) {
+                    log.error("Error while saving Swagger definition for API revision: " + apiUUID, e);
+                }
+            }
+
+            if (asyncApiDefinition != null) {
+                try {
+                    persistenceDAO.addAPIRevisionAsyncDefinition(apiUUID, revisionId, revisionUUID,
+                        asyncApiDefinition, orgJsonString); 
+                } catch (APIManagementException e) {
+                    log.error("Error while saving Async API definition for API revision: " + apiUUID, e);
+                }
+            }
+
+            // Handle thumbnail if exists
+            try {
+                ResourceFile thumbnailResource = this.getThumbnail(org, apiUUID);
+                if (thumbnailResource != null) {
+                    persistenceDAO.addAPIRevisionThumbnail(apiUUID, revisionId, revisionUUID,
+                        thumbnailResource.getContent(), thumbnailResource.getContentType(), orgJsonString);
+                }
+            } catch (Exception e) {
+                // Log error but continue since thumbnail is not critical
+                log.error("Error while saving thumbnail for API revision: " + apiUUID, e);
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("API Revision " + revisionId + " created for API: " + apiUUID);
+            }
+
+        } catch (SQLException | APIManagementException e) {
+            throw new APIPersistenceException("Error while creating API Revision: " + revisionId + 
+                " for API: " + apiUUID, e);
+        }
+        return revisionUUID;
     }
 
     @Override
     public void restoreAPIRevision(Organization org, String apiUUID, String revisionUUID, int revisionId) throws APIPersistenceException {
+        boolean transactionCommitted = false;
+        try {
+            // Get API revision data
+            String apiRevisionSchema = persistenceDAO.getAPIRevisionSchemaById(revisionUUID, org.getName());
+            String swaggerRevisionDefinition = persistenceDAO.getAPIRevisionSwaggerDefinitionById(revisionUUID, org.getName());
+            String asyncAPIRevisionDefinition = persistenceDAO.getAPIRevisionAsyncDefinitionById(revisionUUID, org.getName());
+            String existingLifecycleStatus = persistenceDAO.getAPILifeCycleStatus(apiUUID, org.getName());
 
+            if (apiRevisionSchema == null) {
+                throw new APIMgtResourceNotFoundException("API Revision not found for revision ID: " + revisionId,
+                    ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, String.valueOf(revisionId)));
+            }
+
+            // Store the revision as current API version
+            JsonObject apiJson = DatabasePersistenceUtil.stringTojsonObject(apiRevisionSchema);
+            JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
+            String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
+
+            // Update value if there's property called status else add new
+            apiJson.addProperty("status", existingLifecycleStatus);
+            apiRevisionSchema = DatabasePersistenceUtil.getFormattedJsonStringToSave(apiJson);
+
+            // Update main API with revision data
+            persistenceDAO.updateAPISchema(apiUUID, apiRevisionSchema);
+
+            // Update swagger definition if exists
+            if (swaggerRevisionDefinition != null) {
+                try {
+                    persistenceDAO.updateSwaggerDefinition(apiUUID, swaggerRevisionDefinition);
+                } catch (APIManagementException e) {
+                    log.error("Error while updating Swagger definition from revision for API: " + apiUUID, e);
+                }
+            }
+
+            // Update async API definition if exists  
+            if (asyncAPIRevisionDefinition != null) {
+                try {
+                    persistenceDAO.updateAsyncAPIDefinition(apiUUID, asyncAPIRevisionDefinition);
+                } catch (APIManagementException e) {
+                    log.error("Error while updating Async API definition from revision for API: " + apiUUID, e);
+                }
+            }
+
+            // Restore thumbnail if exists in revision
+            try {
+                FileResult thumbnailRevision = persistenceDAO.getAPIRevisionThumbnail(apiUUID, revisionId, revisionUUID, org.getName());
+                if (thumbnailRevision != null && thumbnailRevision.getContent() != null) {
+                    persistenceDAO.updateThumbnail(apiUUID, thumbnailRevision.getContent(),
+                        thumbnailRevision.getMetadata());
+                }
+            } catch (APIManagementException e) {
+                // Log error but continue since thumbnail is not critical
+                log.error("Error while restoring thumbnail from revision for API: " + apiUUID, e);
+            }
+
+            transactionCommitted = true;
+
+            if (log.isDebugEnabled()) {
+                log.debug("API Revision " + revisionId + " restored successfully for API: " + apiUUID);
+            }
+
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while restoring API Revision: " + revisionId +
+                    " for API: " + apiUUID, e);
+        } finally {
+            if (!transactionCommitted) {
+                log.error("Transaction for restoring API Revision " + revisionId + " failed for API: " + apiUUID);
+            }
+        }
     }
 
     @Override
     public void deleteAPIRevision(Organization org, String apiUUID, String revisionUUID, int revisionId) throws APIPersistenceException {
+        boolean transactionCommitted = false;
+        try {
+            // Delete all associated revision artifacts
+            persistenceDAO.deleteAPIRevision(revisionUUID);
 
+            transactionCommitted = true;
+            if (log.isDebugEnabled()) {
+                log.debug("API Revision " + revisionId + " deleted successfully for API: " + apiUUID);
+            }
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while deleting API Revision: " + revisionId +
+                " for API: " + apiUUID, e);
+        }
     }
 
     @Override
@@ -604,7 +744,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                 resourceFile.setName(fileName);
                 return resourceFile;
             } else {
-                throw new ThumbnailPersistenceException("Thumbnail not found for API: " + apiId);
+                return null; // No thumbnail found for the given API ID
             }
         } catch (APIManagementException e) {
             throw new ThumbnailPersistenceException("Error while retrieving thumbnail for API: " + apiId, e);

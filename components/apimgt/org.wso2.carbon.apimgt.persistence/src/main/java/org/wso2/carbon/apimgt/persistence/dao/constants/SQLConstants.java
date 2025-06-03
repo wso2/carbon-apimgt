@@ -159,4 +159,66 @@ public class SQLConstants {
             "WHERE API_UUID = ? " +
             "AND TYPE = 'GRAPHQL_SCHEMA' " +
             "AND JSON_VALUE(org, '$.name') = ? ";
+
+    public static final String ADD_API_REVISION_SQL =
+            "INSERT INTO AM_REVISION_ARTIFACT (TYPE, ORG, REVISION_UUID, REVISION_ID, API_UUID, METADATA) " +
+            "VALUES (?, ?, ?, ?, ?, ?)";
+
+    public static final String GET_API_REVISION_BY_ID_SQL =
+            "SELECT * FROM AM_REVISION_ARTIFACT " +
+            "WHERE REVISION_UUID = ? " +
+            "AND TYPE = 'API' " +
+            "AND JSON_VALUE(ORG, '$.name') = ? ";
+
+    public static final String GET_API_REVISION_SWAGGER_DEFINITION_BY_ID_SQL =
+            "SELECT * FROM AM_REVISION_ARTIFACT " +
+            "WHERE REVISION_UUID = ? " +
+            "AND TYPE = 'API_DEFINITION' " +
+            "AND JSON_VALUE(ORG, '$.name') = ? ";
+
+    public static final String GET_API_REVISION_ASYNC_DEFINITION_BY_ID_SQL =
+            "SELECT * FROM AM_REVISION_ARTIFACT " +
+            "WHERE REVISION_UUID = ? " +
+            "AND TYPE = 'ASYNC_API_DEFINITION' " +
+            "AND JSON_VALUE(ORG, '$.name') = ? ";
+
+    public static final String GET_API_LIFECYCLE_STATUS_SQL =
+            "SELECT JSON_VALUE(metadata, '$.status') AS STATUS FROM AM_ARTIFACT_DATA " +
+            "WHERE API_UUID = ? " +
+            "AND JSON_VALUE(ORG, '$.name') = ? " +
+            "AND TYPE = 'API' ";
+
+    public static final String UPDATE_API_SQL =
+            "UPDATE AM_ARTIFACT_DATA " +
+                    "SET METADATA = ? " +
+                    "WHERE API_UUID = ? " +
+                    "AND TYPE = 'API' " ;
+
+    public static final String UPDATE_SWAGGER_DEFINITION_SQL =
+            "UPDATE AM_ARTIFACT_DATA " +
+                    "SET METADATA = ? " +
+                    "WHERE API_UUID = ? " +
+                    "AND TYPE = 'API_DEFINITION' ";
+
+    public static final String UPDATE_ASYNC_DEFINITION_SQL =
+            "UPDATE AM_ARTIFACT_DATA " +
+                    "SET METADATA = ? " +
+                    "WHERE API_UUID = ? " +
+                    "AND TYPE = 'ASYNC_API_DEFINITION' ";
+
+    public static final String GET_API_REVISION_THUMBNAIL_SQL =
+            "SELECT * FROM AM_REVISION_ARTIFACT " +
+            "WHERE TYPE = 'THUMBNAIL' " +
+            "AND REVISION_UUID = ? " +
+            "AND JSON_VALUE(ORG, '$.name') = ? ";
+
+    public static final String UPDATE_THUMBNAIL_SQL =
+            "UPDATE AM_ARTIFACT_DATA SET " +
+            "ARTIFACT = ? " +
+            "WHERE TYPE = 'THUMBNAIL' " +
+            "AND API_UUID = ? ";
+
+    public static final String DELETE_API_REVISION_SQL =
+            "DELETE FROM AM_REVISION_ARTIFACT " +
+            "WHERE REVISION_UUID = ? " ;
 }

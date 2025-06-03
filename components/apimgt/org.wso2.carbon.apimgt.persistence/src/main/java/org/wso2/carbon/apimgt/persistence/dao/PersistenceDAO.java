@@ -603,8 +603,280 @@ public class PersistenceDAO {
         return graphqlSchema;
     }
 
+    public void addAPIRevisionSchema(String apiUUID, int revisionId, String revisionUUID, String metadata, String orgJsonString) throws APIManagementException {
+        String query = SQLConstants.ADD_API_REVISION_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, "API");
+            prepStmt.setString(2, orgJsonString);
+            prepStmt.setString(3, revisionUUID);
+            prepStmt.setInt(4, revisionId);
+            prepStmt.setString(5, apiUUID);
+            prepStmt.setString(6, metadata);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding the API revision schema to the database", e);
+        }
+    }
+
     private void handleException(String msg, Throwable t) throws APIManagementException {
         log.error(msg, t);
         throw new APIManagementException(msg, t);
+    }
+
+
+    public void addAPIRevisionSwaggerDefinition(String apiUUID, int revisionId, String revisionUUID, String swaggerDefinition, String orgJsonString) throws APIManagementException {
+        String query = SQLConstants.ADD_API_REVISION_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, "API_DEFINITION");
+            prepStmt.setString(2, orgJsonString);
+            prepStmt.setString(3, revisionUUID);
+            prepStmt.setInt(4, revisionId);
+            prepStmt.setString(5, apiUUID);
+            prepStmt.setString(6, swaggerDefinition);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding the API revision Swagger definition to the database", e);
+        }
+    }
+
+    public void addAPIRevisionAsyncDefinition(String apiUUID, int revisionId, String revisionUUID, String asyncApiDefinition, String orgJsonString) throws APIManagementException {
+        String query = SQLConstants.ADD_API_REVISION_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, "ASYNC_API_DEFINITION");
+            prepStmt.setString(2, orgJsonString);
+            prepStmt.setString(3, revisionUUID);
+            prepStmt.setInt(4, revisionId);
+            prepStmt.setString(5, apiUUID);
+            prepStmt.setString(6, asyncApiDefinition);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding the API revision Async API definition to the database", e);
+        }
+    }
+
+
+    public void addAPIRevisionThumbnail(String apiUUID, int revisionId, String revisionUUID, InputStream content, String contentType, String orgJsonString) throws APIManagementException {
+        String query = SQLConstants.ADD_API_REVISION_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] data = new byte[8192];
+            int nRead;
+            while ((nRead = content.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+            byte[] bytes = buffer.toByteArray();
+            int fileLength = bytes.length;
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+            try (PreparedStatement prepStmt = connection.prepareStatement(query)) {
+                prepStmt.setString(1, "THUMBNAIL");
+                prepStmt.setString(2, orgJsonString);
+                prepStmt.setString(3, revisionUUID);
+                prepStmt.setInt(4, revisionId);
+                prepStmt.setString(5, apiUUID);
+                prepStmt.setBinaryStream(6, byteArrayInputStream, fileLength);
+                prepStmt.setString(7, contentType);
+                prepStmt.execute();
+            }
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding the API revision thumbnail to the database", e);
+        } catch (IOException e) {
+            handleException("Error while reading the API revision thumbnail file", e);
+        }
+    }
+
+    public String getAPIRevisionSchemaById(String revisionUUID, String org) throws APIManagementException {
+        String apiSchema = null;
+        String query = SQLConstants.GET_API_REVISION_BY_ID_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, revisionUUID);
+            prepStmt.setString(2, org);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    apiSchema = rs.getString("metadata");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the API revision schema from the database", e);
+        }
+        return apiSchema;
+    }
+
+    public String getAPIRevisionSwaggerDefinitionById(String revisionUUID, String name) throws APIManagementException {
+        String swaggerDefinition = null;
+        String query = SQLConstants.GET_API_REVISION_SWAGGER_DEFINITION_BY_ID_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, revisionUUID);
+            prepStmt.setString(2, name);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    swaggerDefinition = rs.getString("metadata");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the API revision Swagger definition from the database", e);
+        }
+        return swaggerDefinition;
+    }
+
+    public String getAPIRevisionAsyncDefinitionById(String revisionUUID, String org) throws APIManagementException {
+        String asyncApiDefinition = null;
+        String query = SQLConstants.GET_API_REVISION_ASYNC_DEFINITION_BY_ID_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, revisionUUID);
+            prepStmt.setString(2, org);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    asyncApiDefinition = rs.getString("metadata");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the API revision Async API definition from the database", e);
+        }
+        return asyncApiDefinition;
+    }
+
+    public String getAPILifeCycleStatus(String apiUUID, String org) throws APIManagementException {
+        String lifecycleStatus = null;
+        String query = SQLConstants.GET_API_LIFECYCLE_STATUS_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiUUID);
+            prepStmt.setString(2, org);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    lifecycleStatus = rs.getString("status");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the API lifecycle status from the database", e);
+        }
+        return lifecycleStatus;
+    }
+
+    public void updateAPISchema(String apiUUID, String apiRevisionSchema) throws APIManagementException {
+        String query = SQLConstants.UPDATE_API_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiRevisionSchema);
+            prepStmt.setString(2, apiUUID);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while updating the API schema in the database", e);
+        }
+    }
+
+    public void updateSwaggerDefinition(String apiUUID, String swaggerRevisionDefinition) throws APIManagementException {
+        try {
+            String query = SQLConstants.UPDATE_SWAGGER_DEFINITION_SQL;
+            try (Connection connection = PersistanceDBUtil.getConnection();
+                 PreparedStatement prepStmt = connection.prepareStatement(query)) {
+                connection.setAutoCommit(false);
+                prepStmt.setString(1, swaggerRevisionDefinition);
+                prepStmt.setString(2, apiUUID);
+                prepStmt.execute();
+                connection.commit();
+            }
+        } catch (SQLException e) {
+            handleException("Error while updating the API Swagger definition in the database", e);
+        }
+
+    }
+
+    public void updateAsyncAPIDefinition(String apiUUID, String asyncAPIRevisionDefinition) throws APIManagementException {
+    try {
+            String query = SQLConstants.UPDATE_ASYNC_DEFINITION_SQL;
+            try (Connection connection = PersistanceDBUtil.getConnection();
+                 PreparedStatement prepStmt = connection.prepareStatement(query)) {
+                connection.setAutoCommit(false);
+                prepStmt.setString(1, asyncAPIRevisionDefinition);
+                prepStmt.setString(2, apiUUID);
+                prepStmt.execute();
+                connection.commit();
+            }
+        } catch (SQLException e) {
+            handleException("Error while updating the API Async API definition in the database", e);
+        }
+    }
+
+    public FileResult getAPIRevisionThumbnail(String apiUUID, int revisionId, String revisionUUID, String name) throws APIManagementException {
+        FileResult thumbnailResult = null;
+        String query = SQLConstants.GET_API_REVISION_THUMBNAIL_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiUUID);
+            prepStmt.setInt(2, revisionId);
+            prepStmt.setString(3, revisionUUID);
+            prepStmt.setString(4, name);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    InputStream content = rs.getBinaryStream("artifact");
+                    String metadata = rs.getString("metadata");
+                    thumbnailResult = new FileResult(content, metadata);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the API revision thumbnail from the database", e);
+        }
+        return thumbnailResult;
+    }
+
+    public void updateThumbnail(String apiUUID, InputStream content, String metadata) throws APIManagementException {
+        String query = SQLConstants.UPDATE_THUMBNAIL_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            byte[] data = new byte[8192];
+            int nRead;
+            while ((nRead = content.read(data, 0, data.length)) != -1) {
+                buffer.write(data, 0, nRead);
+            }
+            byte[] bytes = buffer.toByteArray();
+            int fileLength = bytes.length;
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+            prepStmt.setBinaryStream(1, byteArrayInputStream, fileLength);
+            prepStmt.setString(2, metadata);
+            prepStmt.setString(3, apiUUID);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while updating the API revision thumbnail in the database", e);
+        } catch (IOException e) {
+            handleException("Error while reading the API revision thumbnail file", e);
+        }
+    }
+
+    public void deleteAPIRevision(String revisionUUID) throws APIManagementException {
+        String query = SQLConstants.DELETE_API_REVISION_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, revisionUUID);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while deleting the API revision from the database", e);
+        }
     }
 }
