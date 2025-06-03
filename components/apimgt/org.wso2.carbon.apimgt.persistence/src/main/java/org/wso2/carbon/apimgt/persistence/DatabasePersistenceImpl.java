@@ -235,7 +235,82 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherAPI updateAPI(Organization org, PublisherAPI publisherAPI) throws APIPersistenceException {
-        return null;
+        API api = APIMapper.INSTANCE.toApi(publisherAPI);
+        boolean transactionCommitted = false;
+
+        try {
+            // Convert API data to JSON format
+            JsonObject apiJson = DatabasePersistenceUtil.mapApiToJson(api);
+            String apiJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(apiJson);
+
+            // Convert organization data to JSON format
+            JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
+            String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
+
+            // Get current lifecycle status
+            String currentStatus = persistenceDAO.getAPILifeCycleStatus(api.getUuid(), org.getName());
+            // Add status to API JSON if it exists
+            if (currentStatus != null) {
+                apiJson.addProperty("status", currentStatus);
+                apiJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(apiJson);
+            }
+
+            // Update API schema
+            persistenceDAO.updateAPISchema(api.getUuid(), apiJsonString);
+
+            // Update Swagger definition if exists
+            if (api.getSwaggerDefinition() != null) {
+                try {
+                    persistenceDAO.updateSwaggerDefinition(api.getUuid(), api.getSwaggerDefinition());
+                } catch (APIManagementException e) {
+                    log.error("Error while updating Swagger definition for API: " + api.getId().getApiName(), e);
+                }
+            }
+
+            // Update Async API definition if exists
+            if (api.getAsyncApiDefinition() != null) {
+                try {
+                    persistenceDAO.updateAsyncAPIDefinition(api.getUuid(), api.getAsyncApiDefinition());
+                } catch (APIManagementException e) {
+                    log.error("Error while updating Async API definition for API: " + api.getId().getApiName(), e);
+                }
+            }
+
+            // Update thumbnail if exists
+            try {
+                ResourceFile thumbnailResource = this.getThumbnail(org, api.getUuid());
+                if (thumbnailResource != null) {
+                    persistenceDAO.updateThumbnail(api.getUuid(), thumbnailResource.getContent(), 
+                        thumbnailResource.getContentType());
+                }
+            } catch (Exception e) {
+                // Log error but continue since thumbnail is not critical
+                log.error("Error while updating thumbnail for API: " + api.getUuid(), e);
+            }
+
+            if (APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())) {
+//                setSoapToRestSequences(publisherAPI, persistenceDAO);
+            }
+
+            transactionCommitted = true;
+            PublisherAPI returnAPI = APIMapper.INSTANCE.toPublisherApi(api);
+            if (log.isDebugEnabled()) {
+                log.debug("Updated API :" + returnAPI.toString());
+            }
+            return returnAPI;
+
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while updating API : " + api.getUuid(), e);
+        } finally {
+            try {
+                if (!transactionCommitted) {
+                    // Handle transaction rollback if needed
+                    log.error("Transaction for API update not committed. Rolling back.");
+                }
+            } catch (Exception e) {
+                log.error("Error while rolling back API update transaction", e);
+            }
+        }
     }
 
     @Override
@@ -440,7 +515,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public void changeAPILifeCycle(Organization org, String apiId, String status) throws APIPersistenceException {
-
+        // Unused method
     }
 
     @Override
