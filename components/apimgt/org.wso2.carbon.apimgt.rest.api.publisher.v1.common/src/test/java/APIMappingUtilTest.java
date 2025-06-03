@@ -25,6 +25,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -107,5 +108,14 @@ public class APIMappingUtilTest {
         JsonObject endpointConfig = jsonParser.parse(model.getEndpointConfig()).getAsJsonObject();
         Assert.assertFalse("implementation_status flag not found",
                 endpointConfig.has(APIConstants.IMPLEMENTATION_STATUS));
+    }
+
+    @Test
+    public void testWsdlUrlMappingFromDtoToApiModel() throws APIManagementException {
+        String expectedUrl = "http://example.com/service?wsdl";
+        apidto.setWsdlUrl(expectedUrl);
+
+        API apiModel = APIMappingUtil.fromDTOtoAPI(apidto, PROVIDER);
+        Assert.assertEquals("WSDL URL not set on API model", expectedUrl, apiModel.getWsdlUrl());
     }
 }
