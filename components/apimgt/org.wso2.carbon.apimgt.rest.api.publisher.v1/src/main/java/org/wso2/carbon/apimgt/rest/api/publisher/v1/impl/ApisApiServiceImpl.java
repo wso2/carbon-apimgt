@@ -3302,7 +3302,9 @@ public class ApisApiServiceImpl implements ApisApiService {
             throw new APIManagementException(errorMessage, e,
                     ExceptionCodes.from(ExceptionCodes.ENDPOINT_SECURITY_CRYPTO_EXCEPTION, errorMessage));
         } catch (ParseException e) {
-            String errorMessage = "Error while parsing the endpoint configuration";
+            String errorMessage = "Error while parsing the endpoint configuration of API : "
+                    + apiDTOFromProperties.getProvider() + "-" + apiDTOFromProperties.getName() + "-"
+                    + apiDTOFromProperties.getVersion();
             throw new APIManagementException(errorMessage, e);
         }
         return null;
