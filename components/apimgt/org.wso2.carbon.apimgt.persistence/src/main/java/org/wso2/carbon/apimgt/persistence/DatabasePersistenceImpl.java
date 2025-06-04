@@ -8,16 +8,18 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.SOAPToRestSequence;
-import org.wso2.carbon.apimgt.api.model.Tag;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.persistence.dao.PersistenceDAO;
 import org.wso2.carbon.apimgt.persistence.dto.*;
+import org.wso2.carbon.apimgt.persistence.dto.Documentation;
+import org.wso2.carbon.apimgt.persistence.dto.Mediation;
+import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
+import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.utils.DatabasePersistenceUtil;
 import org.wso2.carbon.apimgt.persistence.utils.PublisherAPISearchResultComparator;
+import org.wso2.carbon.apimgt.persistence.utils.RegistrySearchUtil;
 
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -114,7 +116,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
             if (asyncApiDefinition != null) {
                 try {
                     persistenceDAO.addAPIRevisionAsyncDefinition(apiUUID, revisionId, revisionUUID,
-                        asyncApiDefinition, orgJsonString); 
+                        asyncApiDefinition, orgJsonString);
                 } catch (APIManagementException e) {
                     log.error("Error while saving Async API definition for API revision: " + apiUUID, e);
                 }
@@ -137,7 +139,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
             }
 
         } catch (SQLException | APIManagementException e) {
-            throw new APIPersistenceException("Error while creating API Revision: " + revisionId + 
+            throw new APIPersistenceException("Error while creating API Revision: " + revisionId +
                 " for API: " + apiUUID, e);
         }
         return revisionUUID;
@@ -179,7 +181,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                 }
             }
 
-            // Update async API definition if exists  
+            // Update async API definition if exists
             if (asyncAPIRevisionDefinition != null) {
                 try {
                     persistenceDAO.updateAsyncAPIDefinition(apiUUID, asyncAPIRevisionDefinition);
@@ -280,7 +282,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
             try {
                 ResourceFile thumbnailResource = this.getThumbnail(org, api.getUuid());
                 if (thumbnailResource != null) {
-                    persistenceDAO.updateThumbnail(api.getUuid(), thumbnailResource.getContent(), 
+                    persistenceDAO.updateThumbnail(api.getUuid(), thumbnailResource.getContent(),
                         thumbnailResource.getContentType());
                 }
             } catch (Exception e) {
@@ -377,9 +379,11 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
         PublisherAPISearchResult result = null;
 
-        log.debug("Requested query for publisher search: " + searchQuery);
+        log.debug("Requested query for publisher API product search: " + searchQuery);
+        String modifiedQuery = RegistrySearchUtil.getPublisherSearchQuery(searchQuery, ctx); // Reuse API search query builder
+        log.debug("Modified query for publisher API product search: " + modifiedQuery);
 
-        result = searchPaginatedPublisherAPIs(searchQuery, org, start, offset);
+        result = searchPaginatedPublisherAPIs(modifiedQuery, org, start, offset);
 
         return result;
     }
@@ -675,15 +679,15 @@ public class DatabasePersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public Documentation updateDocumentation(Organization org, String apiId, Documentation documentation) 
+    public Documentation updateDocumentation(Organization org, String apiId, Documentation documentation)
             throws DocumentationPersistenceException {
-        
+
         try {
             // Convert documentation metadata to JSON format
             JsonObject docJson = DatabasePersistenceUtil.mapDocumentToJson(documentation);
             String docJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(docJson);
 
-            // Convert organization data to JSON format 
+            // Convert organization data to JSON format
             JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
             String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
 
@@ -854,28 +858,271 @@ public class DatabasePersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public PublisherAPIProduct addAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct) throws APIPersistenceException {
-        return null;
+    public PublisherAPIProduct addAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
+            throws APIPersistenceException {
+        try {
+            // Convert to APIProduct model
+            APIProduct apiProduct = APIProductMapper.INSTANCE.toApiProduct(publisherAPIProduct);
+            String uuid = UUID.randomUUID().toString();
+            APIProductIdentifier id = new APIProductIdentifier(publisherAPIProduct.getProviderName(),
+                    publisherAPIProduct.getApiProductName(), publisherAPIProduct.getVersion());
+            apiProduct.setID(id);
+            apiProduct.setUuid(uuid);
+            apiProduct.setCreatedTime(new Date());
+            apiProduct.setLastUpdated(new Date());
+
+            // Convert APIProduct to JSON format
+            JsonObject apiProductJson = DatabasePersistenceUtil.mapApiProductToJson(apiProduct);
+            String apiProductJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(apiProductJson);
+
+            // Convert organization data to JSON format
+            JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
+            String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
+
+            // Save APIProduct metadata in database
+            persistenceDAO.addAPIProductSchema(uuid, apiProductJsonString, orgJsonString);
+
+            // Save API Product definition if exists
+            if (publisherAPIProduct.getDefinition() != null) {
+                try {
+                    persistenceDAO.addSwaggerDefinition(uuid, publisherAPIProduct.getDefinition(), orgJsonString);
+                } catch (APIManagementException e) {
+                    log.error("Error while saving API Product definition for API Product: " + apiProduct.getId().getName(), e);
+                }
+            }
+
+            // Set created time and UUID on response object
+            publisherAPIProduct.setCreatedTime(String.valueOf(new Date().getTime()));
+            publisherAPIProduct.setId(uuid);
+
+            if (log.isDebugEnabled()) {
+                log.debug("API Product Name: " + apiProduct.getId().getName() + " API Product Version " +
+                        apiProduct.getId().getVersion() + " created");
+            }
+
+            return publisherAPIProduct;
+
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while creating API Product", e);
+        }
     }
 
+
     @Override
-    public PublisherAPIProduct updateAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct) throws APIPersistenceException {
-        return null;
+    public PublisherAPIProduct updateAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
+            throws APIPersistenceException {
+        try {
+            // Convert to APIProduct model
+            APIProduct apiProduct = APIProductMapper.INSTANCE.toApiProduct(publisherAPIProduct);
+            APIProductIdentifier id = new APIProductIdentifier(publisherAPIProduct.getProviderName(),
+                    publisherAPIProduct.getApiProductName(), publisherAPIProduct.getVersion());
+            apiProduct.setID(id);
+            apiProduct.setLastUpdated(new Date());
+
+            // Convert APIProduct metadata to JSON format
+            JsonObject apiProductJson = DatabasePersistenceUtil.mapApiProductToJson(apiProduct);
+            String apiProductJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(apiProductJson);
+
+            // Convert organization data to JSON format
+            JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
+            String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
+
+            // Update APIProduct schema in database
+            persistenceDAO.updateAPIProductSchema(publisherAPIProduct.getId(), apiProductJsonString);
+
+            // Update API Product definition if exists
+            if (publisherAPIProduct.getDefinition() != null) {
+                try {
+                    persistenceDAO.updateSwaggerDefinition(publisherAPIProduct.getId(),
+                            publisherAPIProduct.getDefinition());
+                } catch (APIManagementException e) {
+                    log.error("Error while updating API Product definition for API Product: " +
+                            apiProduct.getId().getName(), e);
+                }
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("API Product " + apiProduct.getId().getName() + "-" +
+                        apiProduct.getId().getVersion() + " updated successfully");
+            }
+
+            return publisherAPIProduct;
+
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while updating API Product", e);
+        }
     }
 
     @Override
     public PublisherAPIProduct getPublisherAPIProduct(Organization org, String apiProductId) throws APIPersistenceException {
-        return null;
+        String tenantDomain = org.getName();
+        PublisherAPIProduct publisherAPIProduct = null;
+
+        try {
+            // Get API Product schema from database
+            String apiProductSchema = persistenceDAO.getAPISchemaByUUID(apiProductId, tenantDomain);
+            String swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiProductId, tenantDomain);
+            JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(apiProductSchema);
+            jsonObject.addProperty("definition", swaggerDefinition);
+
+            try {
+                ResourceFile thumbnailResource = this.getThumbnail(org, apiProductId);
+                if (thumbnailResource != null) {
+                    String thumbnailUrl = DatabasePersistenceUtil.convertToBase64(thumbnailResource.getContent(), thumbnailResource.getContentType());
+                    jsonObject.addProperty("thumbnailUrl", thumbnailUrl);
+                } else {
+                    jsonObject.addProperty("thumbnailUrl", "");
+                }
+            } catch (Exception e) {
+                log.error("Error while retrieving thumbnail for API Product: " + apiProductId, e);
+            }
+
+            if (apiProductSchema != null) {
+                APIProduct apiProduct = DatabasePersistenceUtil.jsonToApiProduct(jsonObject); 
+                publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
+
+                // Set needed fields explicitly
+                publisherAPIProduct.setId(apiProduct.getUuid());
+                publisherAPIProduct.setApiProductName(apiProduct.getId().getName());
+                publisherAPIProduct.setProviderName(apiProduct.getId().getProviderName());
+                publisherAPIProduct.setVersion(apiProduct.getId().getVersion());
+                publisherAPIProduct.setState(apiProduct.getState());
+                publisherAPIProduct.setThumbnail(apiProduct.getThumbnailUrl());
+                publisherAPIProduct.setDefinition(swaggerDefinition);
+            }
+        } catch (SQLException e) {
+            throw new APIPersistenceException("Error while retrieving API Product with ID " + apiProductId, e);
+        }
+
+        return publisherAPIProduct;
     }
 
     @Override
-    public PublisherAPIProductSearchResult searchAPIProductsForPublisher(Organization org, String searchQuery, int start, int offset, UserContext ctx) throws APIPersistenceException {
-        return null;
+    public PublisherAPIProductSearchResult searchAPIProductsForPublisher(Organization org, String searchQuery,
+                                                                         int start, int offset, UserContext ctx) 
+                                                                         throws APIPersistenceException {
+        String requestedTenantDomain = org.getName();
+        PublisherAPIProductSearchResult searchResult = null;
+
+        log.debug("Requested query for publisher API product search: " + searchQuery);
+        String modifiedQuery = RegistrySearchUtil.getPublisherSearchQuery(searchQuery, ctx); // Reuse API search query builder
+        log.debug("Modified query for publisher API product search: " + modifiedQuery);
+
+        try {
+            int totalLength = 0;
+            List<PublisherAPIProductInfo> apiProductList = new ArrayList<>();
+
+            // Get all API Products according to search criteria
+            List<String> results = persistenceDAO.searchAPIProductSchema(modifiedQuery, org.getName(), start, offset);
+            totalLength = PersistenceDAO.getInstance().getAllAPIProductCount(org.getName());
+
+            for (String result: results) {
+                JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();
+                
+                PublisherAPIProductInfo apiProductInfo = new PublisherAPIProductInfo();
+                String apiProductId = DatabasePersistenceUtil.safeGetAsString(jsonObject, "uuid");
+                apiProductInfo.setId(apiProductId);
+                apiProductInfo.setProviderName(DatabasePersistenceUtil.safeGetAsString(jsonObject.getAsJsonObject("id"), "providerName"));
+                apiProductInfo.setApiProductName(DatabasePersistenceUtil.safeGetAsString(jsonObject.getAsJsonObject("id"), "apiProductName")); 
+                apiProductInfo.setVersion(DatabasePersistenceUtil.safeGetAsString(jsonObject.getAsJsonObject("id"), "version"));
+                apiProductInfo.setState(DatabasePersistenceUtil.safeGetAsString(jsonObject, "state"));
+                apiProductInfo.setContext(DatabasePersistenceUtil.safeGetAsString(jsonObject, "context"));
+                apiProductInfo.setApiSecurity(DatabasePersistenceUtil.safeGetAsString(jsonObject, "apiSecurity"));
+
+                // Get thumbnail
+                try {
+                    ResourceFile thumbnailResource = this.getThumbnail(org, apiProductId);
+                    if (thumbnailResource != null) {
+                        String thumbnailUrl = DatabasePersistenceUtil.convertToBase64(thumbnailResource.getContent(), thumbnailResource.getContentType());
+                        apiProductInfo.setThumbnail(thumbnailUrl);
+                    } else {
+                        apiProductInfo.setThumbnail("");
+                    }
+                } catch (Exception e) {
+                    log.error("Error while retrieving thumbnail for API Product: " + apiProductId, e);
+                }
+
+                // Get audience info
+                JsonArray audiencesJson = jsonObject.get("audiences").getAsJsonArray();
+                apiProductInfo.setAudiences(DatabasePersistenceUtil.jsonArrayToSet(audiencesJson));
+
+                // Get business owner info
+                apiProductInfo.setBusinessOwner(DatabasePersistenceUtil.safeGetAsString(jsonObject, "businessOwner"));
+                apiProductInfo.setBusinessOwnerEmail(DatabasePersistenceUtil.safeGetAsString(jsonObject, "businessOwnerEmail"));
+                apiProductInfo.setTechnicalOwner(DatabasePersistenceUtil.safeGetAsString(jsonObject, "technicalOwner"));
+                apiProductInfo.setTechnicalOwnerEmail(DatabasePersistenceUtil.safeGetAsString(jsonObject, "technicalOwnerEmail"));
+
+                // Get monetization status
+                apiProductInfo.setMonetizationStatus(jsonObject.has("monetizationStatus") && 
+                    !jsonObject.get("monetizationStatus").isJsonNull() &&
+                    jsonObject.get("monetizationStatus").getAsBoolean());
+
+                apiProductList.add(apiProductInfo);
+            }
+
+            searchResult = new PublisherAPIProductSearchResult();
+            searchResult.setPublisherAPIProductInfoList(apiProductList);
+            searchResult.setReturnedAPIsCount(apiProductList.size());
+            searchResult.setTotalAPIsCount(totalLength);
+
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while searching API Products", e);
+        }
+        return searchResult;
     }
 
     @Override
-    public void deleteAPIProduct(Organization org, String apiId) throws APIPersistenceException {
+    public void deleteAPIProduct(Organization org, String apiProductId) throws APIPersistenceException {
+        try {
+            // Delete API Product schema
+            persistenceDAO.deleteAPIProductSchema(apiProductId, org.getName());
 
+            // Delete swagger definition if exists
+            try {
+                persistenceDAO.deleteSwaggerDefinition(apiProductId);
+            } catch (APIManagementException e) {
+                log.error("Error while deleting Swagger definition for API Product: " + apiProductId, e);
+            }
+
+            // Delete thumbnail if exists
+            try {
+                persistenceDAO.deleteThumbnail(apiProductId, org.getName());
+            } catch (APIManagementException e) {
+                log.error("Error while deleting thumbnail for API Product: " + apiProductId, e);
+            }
+
+            // Delete documentation if exists
+            try {
+                List<DocumentResult> docs = persistenceDAO.getAllDocuments(apiProductId);
+                if (docs != null) {
+                    for (DocumentResult doc : docs) {
+                        persistenceDAO.deleteDocumentation(doc.getUuid());
+                    }
+                }
+            } catch (APIManagementException e) {
+                log.error("Error while deleting documentation for API Product: " + apiProductId, e);
+            }
+
+            // Delete API Product revisions if exist
+            try {
+                List<String> getRevisionIds = persistenceDAO.getAllAPIRevisionIds(apiProductId);
+
+                if (getRevisionIds != null && !getRevisionIds.isEmpty()) {
+                    for (String revisionId : getRevisionIds) {
+                        persistenceDAO.deleteAPIRevision(revisionId);
+                    }
+                }
+
+            } catch (APIManagementException e) {
+                log.error("Error while deleting revisions for API Product: " + apiProductId, e);
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("Successfully deleted API Product with ID: " + apiProductId);
+            }
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while deleting API Product: " + apiProductId, e);
+        }
     }
 
     @Override

@@ -893,4 +893,145 @@ public class PersistenceDAO {
             handleException("Error while updating the API documentation in the database", e);
         }
     }
+
+    public void addAPIProductSchema(String uuid, String apiProductJsonString, String orgJsonString) throws APIManagementException {
+        String query = SQLConstants.ADD_ARTIFACT_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, "API_PRODUCT");
+            prepStmt.setString(2, orgJsonString);
+            prepStmt.setString(3, apiProductJsonString);
+            prepStmt.setString(4, UUID.randomUUID().toString());
+            prepStmt.setString(5, uuid);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while adding the API product schema to the database", e);
+        }
+    }
+
+    public void updateAPIProductSchema(String apiId, String apiProductJsonString) throws APIManagementException {
+        try {
+            String query = SQLConstants.UPDATE_API_PRODUCT_SQL;
+            try (Connection connection = PersistanceDBUtil.getConnection();
+                 PreparedStatement prepStmt = connection.prepareStatement(query)) {
+                connection.setAutoCommit(false);
+                prepStmt.setString(1, apiProductJsonString);
+                prepStmt.setString(2, apiId);
+                prepStmt.execute();
+                connection.commit();
+            }
+        } catch (SQLException e) {
+            handleException("Error while updating the API product schema in the database", e);
+        }
+    }
+
+    public List<String> searchAPIProductSchema(String modifiedQuery, String name, int start, int offset) throws APIManagementException {
+        List<String> apiProductSchemas = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_PRODUCT_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, modifiedQuery);
+            prepStmt.setString(2, name);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    apiProductSchemas.add(rs.getString("metadata"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching API product schemas in the database", e);
+        }
+        return apiProductSchemas;
+    }
+
+    public int getAllAPIProductCount(String name) throws APIManagementException {
+        int count = 0;
+        String query = SQLConstants.GET_API_PRODUCT_COUNT_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, name);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    count = rs.getInt("count");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the API product count from the database", e);
+        }
+        return count;
+    }
+
+    public void deleteAPIProductSchema(String apiProductId, String name) throws APIManagementException {
+        String query = SQLConstants.DELETE_API_PRODUCT_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiProductId);
+            prepStmt.setString(2, name);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while deleting the API product schema from the database", e);
+        }
+    }
+
+    public void deleteSwaggerDefinition(String apiProductId) throws APIManagementException {
+        String query = SQLConstants.DELETE_API_PRODUCT_SWAGGER_DEFINITION_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiProductId);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while deleting the API product Swagger definition from the database", e);
+        }
+    }
+
+    public List<DocumentResult> getAllDocuments(String apiId) throws APIManagementException {
+        String query = SQLConstants.GET_ALL_DOCUMENTS_FOR_API_SQL;
+        List<DocumentResult> documents = new ArrayList<>();
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiId);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String uuid = rs.getString("uuid");
+                    String apiUuid = rs.getString("api_uuid");
+                    String createdTime = rs.getString("created_time");
+                    String lastUpdatedTime = rs.getString("last_modified");
+                    DocumentResult documentResult = new DocumentResult(metadata, uuid, apiUuid, createdTime, lastUpdatedTime);
+                    documents.add(documentResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving all documents for the API from the database", e);
+        }
+        return documents;
+    }
+
+    public List<String> getAllAPIRevisionIds(String apiUUID) throws APIManagementException {
+        List<String> revisionIds = new ArrayList<>();
+        String query = SQLConstants.GET_ALL_API_REVISION_IDS_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiUUID);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    revisionIds.add(rs.getString("revision_uuid"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving all API revision IDs from the database", e);
+        }
+        return revisionIds;
+    }
 }

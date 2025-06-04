@@ -196,6 +196,16 @@ public class DatabasePersistenceUtil {
         return (element != null && !element.isJsonNull()) ? element.getAsString() : null;
     }
 
+    public static JsonObject mapApiProductToJson(APIProduct apiProduct) {
+        JsonObject jsonObject = gson.toJsonTree(apiProduct).getAsJsonObject();
+        jsonObject.remove("definition");
+        return jsonObject;
+    }
+
+    public static APIProduct jsonToApiProduct(JsonObject jsonObject) {
+       return gson.fromJson(jsonObject, APIProduct.class);
+    }
+
     public API mapJsonStringToAPI(String jsonString) {
         JsonObject jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
 

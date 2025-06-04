@@ -226,4 +226,42 @@ public class SQLConstants {
             "UPDATE AM_ARTIFACT_DATA SET " +
             "METADATA = ? " +
             "WHERE UUID = ? ";
+
+    public static final String UPDATE_API_PRODUCT_SQL =
+            "UPDATE AM_ARTIFACT_DATA " +
+                    "SET METADATA = ? " +
+                    "WHERE API_UUID = ? " +
+                    "AND TYPE = 'API_PRODUCT' ";
+
+    public static final String SEARCH_API_PRODUCT_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+                    "WHERE JSON_VALUE(org, '$.name') = ? " +
+                    "AND type = 'API_PRODUCT' " +
+                    "AND LOWER(metadata) LIKE ? " +
+                    "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String GET_API_PRODUCT_COUNT_SQL =
+            "SELECT COUNT(*) AS COUNT FROM AM_ARTIFACT_DATA " +
+                    "WHERE JSON_VALUE(org, '$.name') = ? " +
+                    "AND type = 'API_PRODUCT'";
+
+    public static final String DELETE_API_PRODUCT_SQL =
+            "DELETE FROM AM_ARTIFACT_DATA " +
+                    "WHERE type = 'API_PRODUCT' " +
+                    "AND API_UUID = ? ";
+
+    public static final String DELETE_API_PRODUCT_SWAGGER_DEFINITION_SQL =
+            "DELETE FROM AM_ARTIFACT_DATA " +
+                    "WHERE type = 'API_DEFINITION' " +
+                    "AND API_UUID = ? ";
+
+    public static final String GET_ALL_DOCUMENTS_FOR_API_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+                    "WHERE API_UUID = ? " +
+                    "AND TYPE = 'DOCUMENTATION' " ;
+
+    public static final String GET_ALL_API_REVISION_IDS_SQL =
+            "SELECT REVISION_UUID FROM AM_REVISION_ARTIFACT " +
+            "WHERE API_UUID = ? " +
+            "AND TYPE IN ('API', 'API_PRODUCT') ";
 }
