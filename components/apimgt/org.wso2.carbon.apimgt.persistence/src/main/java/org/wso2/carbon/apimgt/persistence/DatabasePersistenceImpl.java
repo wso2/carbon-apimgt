@@ -675,8 +675,26 @@ public class DatabasePersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public Documentation updateDocumentation(Organization org, String apiId, Documentation documentation) throws DocumentationPersistenceException {
-        return null;
+    public Documentation updateDocumentation(Organization org, String apiId, Documentation documentation) 
+            throws DocumentationPersistenceException {
+        
+        try {
+            // Convert documentation metadata to JSON format
+            JsonObject docJson = DatabasePersistenceUtil.mapDocumentToJson(documentation);
+            String docJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(docJson);
+
+            // Convert organization data to JSON format 
+            JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
+            String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
+
+            // Update documentation metadata in database
+            persistenceDAO.updateDocumentation(documentation.getId(), docJsonString);
+
+            return documentation;
+
+        } catch (APIManagementException e) {
+            throw new DocumentationPersistenceException("Error while updating documentation", e);
+        }
     }
 
     @Override

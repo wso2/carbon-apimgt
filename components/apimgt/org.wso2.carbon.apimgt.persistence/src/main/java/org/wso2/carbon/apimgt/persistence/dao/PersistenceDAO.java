@@ -879,4 +879,18 @@ public class PersistenceDAO {
             handleException("Error while deleting the API revision from the database", e);
         }
     }
+
+    public void updateDocumentation(String docId, String docJsonString) throws APIManagementException {
+        String query = SQLConstants.UPDATE_DOCUMENTATION_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, docJsonString);
+            prepStmt.setString(2, docId);
+            prepStmt.execute();
+            connection.commit();
+        } catch (SQLException e) {
+            handleException("Error while updating the API documentation in the database", e);
+        }
+    }
 }

@@ -221,4 +221,9 @@ public class SQLConstants {
     public static final String DELETE_API_REVISION_SQL =
             "DELETE FROM AM_REVISION_ARTIFACT " +
             "WHERE REVISION_UUID = ? " ;
+
+    public static final String UPDATE_DOCUMENTATION_SQL =
+            "UPDATE AM_ARTIFACT_DATA SET " +
+            "METADATA = ? " +
+            "WHERE UUID = ? ";
 }
