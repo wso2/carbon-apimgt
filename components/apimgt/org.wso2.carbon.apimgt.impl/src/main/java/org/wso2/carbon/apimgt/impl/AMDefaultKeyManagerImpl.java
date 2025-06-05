@@ -94,8 +94,6 @@ import java.util.Set;
 public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
     private static final Log log = LogFactory.getLog(AMDefaultKeyManagerImpl.class);
-    private static final String GRANT_TYPE_VALUE = "client_credentials";
-    public static final String SP_NAME_APPLICATION = "sp.name.application";
 
     private DCRClient dcrClient;
     private IntrospectionClient introspectionClient;
@@ -124,7 +122,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
 
         // Added to use the application name as part of sp name instead of application UUID when specified
-        String applicationSpNameProp = System.getProperty(SP_NAME_APPLICATION);
+        String applicationSpNameProp = System.getProperty(APIConstants.KeyManager.SP_NAME_APPLICATION);
         boolean applicationSpName = Boolean.parseBoolean(applicationSpNameProp);
         if (applicationSpName) {
             oauthClientName = oAuthApplicationInfo.getClientName();
@@ -398,7 +396,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         String keyType = (String) oAuthApplicationInfo.getParameter(ApplicationConstants.APP_KEY_TYPE);
 
         // Added to use the application name as part of sp name instead of application UUID when specified
-        String applicationSpNameProp = System.getProperty(SP_NAME_APPLICATION);
+        String applicationSpNameProp = System.getProperty(APIConstants.KeyManager.SP_NAME_APPLICATION);
         boolean applicationSpName = Boolean.parseBoolean(applicationSpNameProp);
         if (applicationSpName) {
             oauthClientName = oAuthApplicationInfo.getClientName();
@@ -527,7 +525,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                         tokenRequest.getGrantType(), scopes, (String) tokenRequest.getRequestParam(APIConstants
                                 .OAuthConstants.SUBJECT_TOKEN), APIConstants.OAuthConstants.JWT_TOKEN_TYPE);
             } else {
-                tokenResponse = authClient.generate(authToken, GRANT_TYPE_VALUE, scopes);
+                tokenResponse = authClient.generate(authToken, APIConstants.GRANT_TYPE_VALUE, scopes);
             }
 
         } catch (KeyManagerClientException e) {

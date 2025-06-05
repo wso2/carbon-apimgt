@@ -106,7 +106,6 @@ import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
-    public static final String SP_NAME_APPLICATION = "sp.name.application";
 
     boolean orgWideAppUpdateEnabled = Boolean.getBoolean(APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
 
@@ -588,7 +587,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         apiConsumer.updateApplication(application);
 
         // Added to use the application name as part of sp name instead of application UUID when specified
-        String applicationSpNameProp = System.getProperty(SP_NAME_APPLICATION);
+        String applicationSpNameProp = System.getProperty(APIConstants.KeyManager.SP_NAME_APPLICATION);
         boolean applicationSpName = Boolean.parseBoolean(applicationSpNameProp);
         //If application name is renamed, need to update SP app as well
         if (applicationSpName && !application.getName().equals(oldApplication.getName())) {
