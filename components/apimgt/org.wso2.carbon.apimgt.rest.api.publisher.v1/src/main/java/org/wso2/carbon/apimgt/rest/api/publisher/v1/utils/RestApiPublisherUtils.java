@@ -29,9 +29,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.multipart.ContentDisposition;
+import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MimeType;
+import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -63,7 +66,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class RestApiPublisherUtils {
 
@@ -372,26 +377,28 @@ public class RestApiPublisherUtils {
 
         String detectedMimeType;
         try (InputStream mimeDetectStream = new ByteArrayInputStream(fileBytes)) {
-            detectedMimeType = TikaConfig.getDefaultConfig().getDetector()
-                    .detect(TikaInputStream.get(mimeDetectStream), new Metadata()).toString();
+            Tika tika = new Tika();
+            detectedMimeType = tika.detect(mimeDetectStream, filename);
         } catch (Exception e) {
             throw new APIManagementException("Error detecting media type", e,
                     ExceptionCodes.INVALID_MEDIA_TYPE_VALIDATION);
         }
 
         int lastDot = filename.lastIndexOf('.');
-        String fileExtension = (lastDot == -1) ? "" : filename.substring(lastDot + 1).toLowerCase();
+        String fileExtension = (lastDot == -1) ? "" : filename.substring(lastDot).toLowerCase();
 
-        String expectedExtension = "";
+        boolean extensionMatches;
+        MimeType mimeType;
         try {
-            expectedExtension = MimeTypes.getDefaultMimeTypes().forName(detectedMimeType).getExtension()
-                    .replace(".", "");
-        } catch (Exception e) {
+            mimeType = MimeTypes.getDefaultMimeTypes().forName(detectedMimeType);
+        } catch (MimeTypeException e) {
             throw new APIManagementException("Error resolving expected extension", e,
-                    ExceptionCodes.INVALID_MEDIA_TYPE_VALIDATION);
+                    ExceptionCodes.from(ExceptionCodes.INVALID_MEDIA_TYPE_VALIDATION, fileExtension, detectedMimeType));
         }
+        Set<String> validExtensions = new HashSet<>(mimeType.getExtensions());
+        extensionMatches = validExtensions.stream().anyMatch(ext -> ext.equalsIgnoreCase(fileExtension));
 
-        if (!expectedExtension.equalsIgnoreCase(fileExtension)) {
+        if (!extensionMatches) {
             throw new APIManagementException(
                     ExceptionCodes.from(ExceptionCodes.INVALID_MEDIA_TYPE_VALIDATION, fileExtension, detectedMimeType));
         }

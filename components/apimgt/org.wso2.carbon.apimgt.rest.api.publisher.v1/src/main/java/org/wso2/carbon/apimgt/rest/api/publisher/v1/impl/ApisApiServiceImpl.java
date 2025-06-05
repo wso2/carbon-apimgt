@@ -250,6 +250,10 @@ public class ApisApiServiceImpl implements ApisApiService {
             String errorMessage = "Error while encrypting the secret key of API : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion() + " - " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        } catch (ParseException e){
+            String errorMessage = "Error while parsing the endpoint configuration of API : " + body.getProvider() +
+                    "-" + body.getName() + "-" + body.getVersion() + " - " + e.getMessage();
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -3272,7 +3276,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             // OAuth 2.0 backend protection: API Key and API Secret encryption
             PublisherCommonUtils
                     .encryptEndpointSecurityOAuthCredentials(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
-                            StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
+                            StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
+                            apiDTOFromProperties);
             PublisherCommonUtils
                     .encryptEndpointSecurityApiKeyCredentials(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
                             StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
@@ -3296,6 +3301,11 @@ public class ApisApiServiceImpl implements ApisApiService {
                             + apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion();
             throw new APIManagementException(errorMessage, e,
                     ExceptionCodes.from(ExceptionCodes.ENDPOINT_SECURITY_CRYPTO_EXCEPTION, errorMessage));
+        } catch (ParseException e) {
+            String errorMessage = "Error while parsing the endpoint configuration of API : "
+                    + apiDTOFromProperties.getProvider() + "-" + apiDTOFromProperties.getName() + "-"
+                    + apiDTOFromProperties.getVersion();
+            throw new APIManagementException(errorMessage, e);
         }
         return null;
     }

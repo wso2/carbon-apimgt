@@ -81,10 +81,20 @@ public class SecurityConfigContext extends ConfigContextDecorator {
                         if (endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
                             productionEndpointSecurity =
                                     (JSONObject) endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION);
+                            if (productionEndpointSecurity.containsKey(APIConstants.ENDPOINT_SECURITY_TYPE) &&
+                                    APIConstants.OAuthConstants.OAUTH.equals(
+                                            productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
+                                standardizeCustomParameters(productionEndpointSecurity);
+                            }
                         }
                         if (endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
                             sandboxEndpointSecurity =
                                     (JSONObject) endpointSecurity.get(APIConstants.ENDPOINT_SECURITY_SANDBOX);
+                            if (sandboxEndpointSecurity.containsKey(APIConstants.ENDPOINT_SECURITY_TYPE) &&
+                                    APIConstants.OAuthConstants.OAUTH.equals(
+                                            sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_TYPE))) {
+                                standardizeCustomParameters(sandboxEndpointSecurity);
+                            }
                         }
                     }
                 } catch (ParseException e) {
@@ -207,5 +217,52 @@ public class SecurityConfigContext extends ConfigContextDecorator {
             return endpointSecurityModel;
         }
         return null;
+    }
+
+    /**
+     * Standardizes custom OAuth parameters for compatibility with the OAuth mediator.
+     * <p>
+     * The OAuth mediator expects custom parameters in a simple key-value format (e.g.,
+     * {@code "key1": "value1", "key2": "value2"}).
+     * This method removes the {@code secured} field if present and extracts only the actual values
+     * from parameter objects. The result is stored as a JSON string containing just the key-value pairs.
+     *
+     * @param endpointSecurityJson The endpoint security JSON object containing the custom parameters.
+     * @throws APITemplateException If the custom parameters cannot be parsed.
+     */
+    private void standardizeCustomParameters(JSONObject endpointSecurityJson) throws APITemplateException {
+        if (endpointSecurityJson != null) {
+            Object customParamsObj = endpointSecurityJson.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+            if (customParamsObj instanceof String) {
+                String rawCustomParams = (String) customParamsObj;
+                if (StringUtils.isNotEmpty(rawCustomParams)) {
+                    try {
+                        JSONParser parser = new JSONParser();
+                        JSONObject rawCustomParamsJson = (JSONObject) parser.parse(rawCustomParams);
+                        JSONObject standardizedCustomParams = new JSONObject();
+
+                        for (Object keyObj : rawCustomParamsJson.keySet()) {
+                            String key = (String) keyObj;
+                            Object value = rawCustomParamsJson.get(key);
+
+                            if (value instanceof JSONObject) {
+                                JSONObject valueJson = (JSONObject) value;
+                                if (valueJson.containsKey(APIConstants.OAuthConstants.CUSTOM_PARAMETERS_VALUE)) {
+                                    standardizedCustomParams.put(key,
+                                            valueJson.get(APIConstants.OAuthConstants.CUSTOM_PARAMETERS_VALUE));
+                                }
+                            } else {
+                                standardizedCustomParams.put(key, value);
+                            }
+                        }
+
+                        endpointSecurityJson.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS,
+                                standardizedCustomParams.toString());
+                    } catch (ParseException e) {
+                        this.handleException("Unable to parse custom parameters in endpoint security configuration");
+                    }
+                }
+            }
+        }
     }
 }
