@@ -398,6 +398,7 @@ public class APIManagerConfiguration {
                     OMElement propertyElem = (OMElement) analyticsPropertiesIterator.next();
                     String name = propertyElem.getAttributeValue(new QName("name"));
                     String value = propertyElem.getText();
+                    value = MiscellaneousUtil.resolve(value, secretResolver);
                     if ("keystore_location".equals(name) || "truststore_location".equals(name)) {
                         analyticsProps.put(name, APIUtil.replaceSystemProperty(value));
                     } else {
