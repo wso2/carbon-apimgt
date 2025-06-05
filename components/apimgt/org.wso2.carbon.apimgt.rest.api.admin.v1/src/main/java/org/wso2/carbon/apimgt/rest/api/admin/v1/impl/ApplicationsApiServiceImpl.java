@@ -68,11 +68,11 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             String[] newUserOrg = getUserOrg(owner, organization);
 
             Application application = apiConsumer.getApplicationByUUID(applicationId);
-            String oldUserName = application.getSubscriber().getName();
-            String oldTenantDomain = MultitenantUtils.getTenantDomain(oldUserName);
-            String[] oldUserOrg = getUserOrg(oldUserName, oldTenantDomain);
+            String existingUserName = application.getSubscriber().getName();
+            String existingUserTenantDomain = MultitenantUtils.getTenantDomain(existingUserName);
+            String[] existingUserOrg = getUserOrg(existingUserName, existingUserTenantDomain);
 
-            if (!isSameOrganization(oldUserOrg, newUserOrg)) {
+            if (!isSameOrganization(existingUserOrg, newUserOrg)) {
                 RestApiUtil.handleBadRequest("New owner does not belong to the same organization as the existing owner",
                         log);
             } else {
@@ -218,13 +218,22 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
         return null;
     }
-
-    private boolean isSameOrganization(String[] oldUserOrg, String[] newUserOrg) {
-        if (oldUserOrg == null || newUserOrg == null) {
+    /**
+     * Checks if two users belong to the same organization.
+     *
+     * @param existingUserOrg An array of organization identifiers for the existing user.
+     * @param newUserOrg An array of organization identifiers for the new user.
+     * @return \true\ if both users belong to the same organization, \false\ otherwise.
+     */
+    private boolean isSameOrganization(String[] existingUserOrg, String[] newUserOrg) {
+        if (existingUserOrg == null && newUserOrg == null) {
+            return true;
+        }
+        if (existingUserOrg == null || newUserOrg == null) {
             return false;
         }
         Set<String> newUserOrgSet = new HashSet<>(Arrays.asList(newUserOrg));
-        return Arrays.stream(oldUserOrg).anyMatch(newUserOrgSet::contains);
+        return Arrays.stream(existingUserOrg).anyMatch(newUserOrgSet::contains);
     }
 
     private String[] getUserOrg(String user, String tenantDomain) throws APIManagementException {
