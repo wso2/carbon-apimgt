@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.api.model.Application;
 
 public class ApplicationWorkflowDTO extends WorkflowDTO {
 	private Application application;
-
 	private Application existingApplication;
 	private String userName;
 
