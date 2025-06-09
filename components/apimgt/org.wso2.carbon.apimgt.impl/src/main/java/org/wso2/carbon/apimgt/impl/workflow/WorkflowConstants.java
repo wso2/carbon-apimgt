@@ -30,6 +30,8 @@ public class WorkflowConstants {
 
     public static final String WF_TYPE_AM_APPLICATION_CREATION = "AM_APPLICATION_CREATION";
 
+    public static final String WF_TYPE_AM_APPLICATION_UPDATE = "AM_APPLICATION_UPDATE";
+
     public static final String WF_TYPE_AM_APPLICATION_DELETION = "AM_APPLICATION_DELETION";
 
     public static final String WF_TYPE_AM_REVISION_DEPLOYMENT = "AM_REVISION_DEPLOYMENT";
@@ -59,6 +61,7 @@ public class WorkflowConstants {
 
     public static final String APPLICATION_CREATION = "ApplicationCreation";
 
+    public static final String APPLICATION_UPDATE = "ApplicationUpdate";
     public static final String PRODUCTION_APPLICATION_REGISTRATION = "ProductionApplicationRegistration";
 
     public static final String SANDBOX_APPLICATION_REGISTRATION = "SandboxApplicationRegistration";

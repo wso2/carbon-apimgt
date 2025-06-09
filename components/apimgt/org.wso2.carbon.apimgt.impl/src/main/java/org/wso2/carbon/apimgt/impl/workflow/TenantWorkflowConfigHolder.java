@@ -136,6 +136,23 @@ public class TenantWorkflowConfigHolder implements Serializable {
                 workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_SANDBOX, workFlowExecutor);
 
                 workflowElem = workflowExtensionsElem.getFirstChildWithName(
+                        new QName(WorkflowConstants.APPLICATION_UPDATE));
+                if (workflowElem != null) {
+                    executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
+                    try {
+                        clazz = TenantWorkflowConfigHolder.class.getClassLoader().loadClass(executorClass);
+                        workFlowExecutor = (WorkflowExecutor) clazz.newInstance();
+                        loadProperties(workflowElem, workFlowExecutor);
+                    } catch (ClassNotFoundException e) {
+                        workFlowExecutor = new SubscriptionUpdateSimpleWorkflowExecutor();
+                    }
+                    workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE, workFlowExecutor);
+                } else {
+                    workFlowExecutor = new SubscriptionUpdateSimpleWorkflowExecutor();
+                    workflowExecutorMap.put(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE, workFlowExecutor);
+                }
+
+                workflowElem = workflowExtensionsElem.getFirstChildWithName(
                         new QName(WorkflowConstants.API_REVISION_DEPLOYMENT));
                 if (workflowElem != null) {
                     executorClass = workflowElem.getAttributeValue(new QName(WorkflowConstants.EXECUTOR));
