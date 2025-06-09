@@ -304,6 +304,7 @@ public class SubscriptionsApiServiceImpl implements SubscriptionsApiService {
             //Check whether the subscription status is not empty and also not blocked
             if (body.getStatus() != null && subscribedAPI != null) {
                 if ("BLOCKED".equals(body.getStatus().value()) || "ON_HOLD".equals(body.getStatus().value())
+                        || "PROD_ONLY_BLOCKED".equals(body.getStatus().value()) || "PROD_ONLY_BLOCKED".equals(subscribedAPI.getSubStatus())
                         || "REJECTED".equals(body.getStatus().value()) || "BLOCKED".equals(subscribedAPI.getSubStatus())
                         || "ON_HOLD".equals(subscribedAPI.getSubStatus())
                         || "REJECTED".equals(subscribedAPI.getSubStatus())) {
