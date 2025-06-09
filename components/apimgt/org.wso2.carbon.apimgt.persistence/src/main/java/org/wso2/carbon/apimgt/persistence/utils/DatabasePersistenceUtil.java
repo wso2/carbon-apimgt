@@ -456,9 +456,18 @@ public class DatabasePersistenceUtil {
         return byteArray.length;
     }
 
-    public static String getSearchQuery(String searchQuery) {
+    public static SearchQuery getSearchQuery(String searchQuery) {
         if (searchQuery != null && !searchQuery.isEmpty()) {
-            return searchQuery.split(":", 2)[1].trim();
+            String[] query = searchQuery.split(":", 2);
+
+            if (query.length == 2) {
+                String content = query[1].trim();
+                String type = query[0].trim();
+                return new SearchQuery(content, type);
+            } else {
+                // If the search query does not contain a type, treat it as a general search
+                return new SearchQuery(searchQuery.trim(), APIConstants.CONTENT_SEARCH_TYPE_PREFIX);
+            }
         }
         return null;
     }

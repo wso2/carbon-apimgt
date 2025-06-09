@@ -18,6 +18,7 @@ import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.utils.DatabasePersistenceUtil;
+import org.wso2.carbon.apimgt.persistence.utils.DatabaseSearchUtil;
 import org.wso2.carbon.apimgt.persistence.utils.PublisherAPISearchResultComparator;
 import org.wso2.carbon.apimgt.persistence.utils.RegistrySearchUtil;
 
@@ -380,7 +381,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
         PublisherAPISearchResult result = null;
 
         log.debug("Requested query for publisher API product search: " + searchQuery);
-        String modifiedQuery = RegistrySearchUtil.getPublisherSearchQuery(searchQuery, ctx); // Reuse API search query builder
+        SearchQuery modifiedQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
         log.debug("Modified query for publisher API product search: " + modifiedQuery);
 
         result = searchPaginatedPublisherAPIs(modifiedQuery, org, start, offset);
@@ -388,15 +389,20 @@ public class DatabasePersistenceImpl implements APIPersistence {
         return result;
     }
 
-    private PublisherAPISearchResult searchPaginatedPublisherAPIs(String searchQuery, Organization org, int start, int offset) {
+    private PublisherAPISearchResult searchPaginatedPublisherAPIs(SearchQuery searchQuery, Organization org, int start, int offset) {
         int totalLength = 0;
         PublisherAPISearchResult searchResults = new PublisherAPISearchResult();
         List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<PublisherAPIInfo>();
 
         try {
-            totalLength = PersistenceDAO.getInstance().getAllAPICount(org.getName());
+            totalLength = persistenceDAO.getAllAPICount(org.getName());
+            List<String> results = null;
 
-            List<String> results = persistenceDAO.searchAPISchema(searchQuery, org.getName(), start, offset);
+            if (searchQuery == null) {
+                results = persistenceDAO.getAllPIs(org.getName(), start, offset);
+            } else {
+                results = DatabaseSearchUtil.searchAPIsForPublisher(searchQuery, org.getName(), start, offset);
+            }
 
             for (String result: results) {
                 JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();
@@ -443,6 +449,8 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
                 publisherAPIInfoList.add(apiInfo);
             }
+        } catch (APIManagementException e) {
+            throw new RuntimeException(e);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -467,49 +475,122 @@ public class DatabasePersistenceImpl implements APIPersistence {
         try {
             String requestedTenantDomain = org.getName();
             int totalLength = 0;
-            searchQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
-            List<String> results = persistenceDAO.searchAPISchemaContent(searchQuery, requestedTenantDomain);
+            SearchQuery modifiedQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
+            List<ContentSearchResult> results = DatabaseSearchUtil.searchContentForPublisher(modifiedQuery, requestedTenantDomain, start, offset);
             List<SearchContent> contentData = new ArrayList<>();
 
-            for (String result: results) {
-                JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();
-                String type;
+            for (ContentSearchResult result: results) {
+                JsonObject jsonObject = JsonParser.parseString(result.getMetadata()).getAsJsonObject();
+                String contentType = result.getType();
 
-//                if (jsonObject.has("type") && !jsonObject.get("type").isJsonNull()) {
-//                    type = jsonObject.get("type").getAsString();
-//                } else {
-//                    type = "API";
-//                }
+                if (contentType == null || contentType.isEmpty()) {
+                    contentType = "API";
+                }
 
-                PublisherAPI publisherAPI = DatabasePersistenceUtil.getAPIForSearch(jsonObject);
-                PublisherSearchContent content = new PublisherSearchContent();
-                content.setContext(publisherAPI.getContext());
-                content.setDescription(publisherAPI.getDescription());
-                content.setId(publisherAPI.getId());
-                content.setName(publisherAPI.getApiName());
-                content.setProvider(
-                        DatabasePersistenceUtil.replaceEmailDomainBack(publisherAPI.getProviderName()));
-                content.setType("API");
-                content.setVersion(publisherAPI.getVersion());
-                content.setStatus(publisherAPI.getStatus());
-                content.setAdvertiseOnly(publisherAPI.isAdvertiseOnly());
-                content.setThumbnailUri(publisherAPI.getThumbnail());
-                content.setBusinessOwner(publisherAPI.getBusinessOwner());
-                content.setBusinessOwnerEmail(publisherAPI.getBusinessOwnerEmail());
-                content.setTechnicalOwner(publisherAPI.getTechnicalOwner());
-                content.setTechnicalOwnerEmail(publisherAPI.getTechnicalOwnerEmail());
-                content.setMonetizationStatus(publisherAPI.getMonetizationStatus());
-                contentData.add(content);
+                if (contentType.equals("API_PRODUCT")) {
+                    contentType = "APIProduct";
+                }
+
+                if (contentType.equals("DOCUMENTATION")) {
+                    // Handle documentation content
+                    DocumentSearchContent docContent = new DocumentSearchContent();
+                    Documentation doc = DatabasePersistenceUtil.jsonToDocument(jsonObject);
+                    String apiId = result.getApiId();
+
+                    if (apiId != null) {
+                        PublisherAPI pubAPI = this.getPublisherAPI(org, apiId);
+                        docContent.setApiName(pubAPI.getApiName());
+                        docContent.setApiProvider(pubAPI.getProviderName());
+                        docContent.setApiVersion(pubAPI.getVersion());
+                        docContent.setApiUUID(pubAPI.getId());
+                        docContent.setDocType(doc.getType());
+                        docContent.setId(doc.getId());
+                        docContent.setSourceType(doc.getSourceType());
+                        docContent.setVisibility(doc.getVisibility());
+                        docContent.setName(doc.getName());
+                        contentData.add(docContent);
+                    }
+                } else if (contentType.equals("API_DEFINITION") || contentType.equals("ASYNC_API_DEFINITION") || contentType.equals("GRAPHQL_SCHEMA") || contentType.equals("WSDL")) {
+                    // Handle API definition content
+                    APIDefSearchContent defContent = new APIDefSearchContent();
+                    String apiId = result.getApiId();
+
+                    if (apiId != null) {
+                        PublisherAPI pubAPI = this.getPublisherAPI(org, apiId);
+
+                        String associatedType = persistenceDAO.getAssociatedType(org.getName(), apiId);
+
+                        defContent.setId(pubAPI.getId());
+                        switch (contentType) {
+                            case "API_DEFINITION":
+                                defContent.setName(pubAPI.getApiName() + " swagger");
+                                break;
+                            case "ASYNC_API_DEFINITION":
+                                defContent.setName(pubAPI.getApiName() + " async");
+                                break;
+                            case "GRAPHQL_SCHEMA":
+                                defContent.setName(pubAPI.getApiName() + " graphql");
+                                break;
+                            case "WSDL":
+                                defContent.setName(pubAPI.getApiName() + " wsdl");
+                                break;
+                        }
+                        defContent.setApiUUID(pubAPI.getId());
+                        defContent.setApiName(pubAPI.getApiName());
+                        defContent.setApiContext(pubAPI.getContext());
+                        defContent.setApiProvider(pubAPI.getProviderName());
+                        defContent.setApiVersion(pubAPI.getVersion());
+                        defContent.setApiType(determineAPIType(pubAPI.getType()));
+                        defContent.setAssociatedType(associatedType);
+                        contentData.add(defContent);
+                    }
+                } else {
+                    // Handle API content
+                    PublisherAPI pubAPI = DatabasePersistenceUtil.getAPIForSearch(jsonObject);
+                    PublisherSearchContent content = new PublisherSearchContent();
+                    content.setContext(pubAPI.getContext());
+                    content.setDescription(pubAPI.getDescription());
+                    content.setId(pubAPI.getId());
+                    content.setName(pubAPI.getApiName());
+                    content.setProvider(DatabasePersistenceUtil.replaceEmailDomainBack(pubAPI.getProviderName()));
+                    content.setType(contentType);
+                    content.setVersion(pubAPI.getVersion());
+                    content.setStatus(pubAPI.getStatus());
+                    content.setAdvertiseOnly(pubAPI.isAdvertiseOnly());
+                    content.setThumbnailUri(pubAPI.getThumbnail());
+                    content.setBusinessOwner(pubAPI.getBusinessOwner());
+                    content.setBusinessOwnerEmail(pubAPI.getBusinessOwnerEmail());
+                    content.setTechnicalOwner(pubAPI.getTechnicalOwner());
+                    content.setTechnicalOwnerEmail(pubAPI.getTechnicalOwnerEmail());
+                    content.setMonetizationStatus(pubAPI.getMonetizationStatus());
+                    contentData.add(content);
+                }
             }
             totalLength = results.size();
             searchResult.setTotalCount(totalLength);
             searchResult.setReturnedCount(contentData.size());
             searchResult.setResults(contentData);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while searching content for publisher: " + searchQuery, e);
         }
 
         return searchResult;
+    }
+
+    private APIDefSearchContent.ApiType determineAPIType(String apiType) {
+        if (APIConstants.API_TYPE_SOAP.equals(apiType) ||
+                APIConstants.API_TYPE_SOAPTOREST.equals(apiType)) {
+            return APIDefSearchContent.ApiType.SOAP;
+        } else if (APIConstants.API_TYPE_GRAPHQL.equals(apiType)) {
+            return APIDefSearchContent.ApiType.GRAPHQL;
+        } else if (APIConstants.API_TYPE_WS.equals(apiType) ||
+                APIConstants.API_TYPE_WEBHOOK.equals(apiType) ||
+                APIConstants.API_TYPE_SSE.equals(apiType) ||
+                APIConstants.API_TYPE_WEBSUB.equals(apiType)) {
+            return APIDefSearchContent.ApiType.ASYNC;
+        } else {
+            return APIDefSearchContent.ApiType.REST;
+        }
     }
 
     @Override
@@ -763,7 +844,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
         try {
             String requestedTenantDomain = org.getName();
-            searchQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
+            searchQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery).getContent();
             List<DocumentResult> results = persistenceDAO.searchDocumentation(apiId, requestedTenantDomain, searchQuery, start, offset);
             List<Documentation> documentationList = new ArrayList<>();
 

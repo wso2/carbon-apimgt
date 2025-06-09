@@ -129,6 +129,25 @@ public class PersistenceDAO {
         return count;
     }
 
+    public List<String> getAllPIs(String org, int start, int offset) throws SQLException {
+        List<String> apiSchemas = new ArrayList<>();
+        String query = SQLConstants.GET_ALL_API_ARTIFACT_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setInt(2, start);
+            prepStmt.setInt(3, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String schemaJson = rs.getString("metadata");
+                    apiSchemas.add(schemaJson);
+                }
+            }
+        }
+        return apiSchemas;
+    }
+
     public String getAPISchemaByUUID(String uuid, String tenantDomain) throws SQLException {
         String apiSchema = null;
         String query = SQLConstants.GET_API_BY_UUID_SQL;
@@ -1034,4 +1053,504 @@ public class PersistenceDAO {
         }
         return revisionIds;
     }
+
+    // Search methods can be added here as needed
+    public List<String> searchAPIsByContent(String org, String searchQuery, int start, int offset) throws APIManagementException {
+        List<String> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_CONTENT_SQL;
+        searchQuery = "%" + searchQuery.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, searchQuery);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    apiResults.add(rs.getString("metadata"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by content in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<String> searchAPIsByName(String org, String name, int start, int offset) throws APIManagementException {
+        List<String> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_NAME_SQL;
+        name = "%" + name.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, name);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    apiResults.add(rs.getString("metadata"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by name in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<String> searchAPIsByProvider(String org, String provider, int start, int offset) throws APIManagementException {
+        List<String> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_PROVIDER_SQL;
+        provider = "%" + provider.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, provider);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    apiResults.add(rs.getString("metadata"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by provider in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<String> searchAPIsByVersion(String org, String version, int start, int offset) throws APIManagementException {
+        List<String> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_VERSION_SQL;
+        version = "%" + version.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, version);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    apiResults.add(rs.getString("metadata"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by version in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<String> searchAPIsByContext(String org, String context, int start, int offset) throws APIManagementException {
+        List<String> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_CONTEXT_SQL;
+        context = "%" + context.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, context);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    apiResults.add(rs.getString("metadata"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by context in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<String> searchAPIsByStatus(String org, String status, int start, int offset) throws APIManagementException {
+        List<String> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_STATUS_SQL;
+        status = "%" + status.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, status);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    apiResults.add(rs.getString("metadata"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by status in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<String> searchAPIsByDescription(String org, String description, int start, int offset) throws APIManagementException {
+        List<String> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_DESCRIPTION_SQL;
+        description = "%" + description.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, description);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    apiResults.add(rs.getString("metadata"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by description in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<String> searchAPIsByTags(String org, String tags, int start, int offset) throws APIManagementException {
+        List<String> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_TAGS_SQL;
+        tags = "%" + tags.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, tags);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    apiResults.add(rs.getString("metadata"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by tags in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<String> searchAPIsByCategory(String org, String category, int start, int offset) throws APIManagementException {
+        List<String> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_API_CATEGORY_SQL;
+        category = "%" + category.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, category);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    apiResults.add(rs.getString("metadata"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by category in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<String> searchAPIsByOther(String org, String property, String value, int start, int offset) throws APIManagementException {
+        List<String> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_OTHER_SQL(property);
+        value = "%" + value.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, value);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    apiResults.add(rs.getString("metadata"));
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by other criteria in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByContent(String org, String searchContent, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_CONTENT_SQL;
+        searchContent = "%" + searchContent.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, searchContent);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by content in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByName(String org, String name, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_NAME_SQL;
+        name = "%" + name.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, name);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by name in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByProvider(String org, String provider, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_PROVIDER_SQL;
+        provider = "%" + provider.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, provider);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by provider in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByVersion(String org, String version, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_VERSION_SQL;
+        version = "%" + version.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, version);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by version in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByContext(String org, String context, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_CONTEXT_SQL;
+        context = "%" + context.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, context);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by context in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByStatus(String org, String status, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_STATUS_SQL;
+        status = "%" + status.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, status);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by status in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByDescription(String org, String description, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_DESCRIPTION_SQL;
+        description = "%" + description.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, description);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by description in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByTags(String org, String tags, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_TAGS_SQL;
+        tags = "%" + tags.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, tags);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by tags in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByCategory(String org, String category, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_API_CATEGORY_SQL;
+        category = "%" + category.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, category);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by category in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByOther(String org, String property, String value, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_OTHER_SQL(property);
+        value = "%" + value.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, value);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by other criteria in the database", e);
+        }
+        return apiResults;
+    }
+
+    public String getAssociatedType(String org, String apiId) throws APIManagementException {
+        String query = SQLConstants.GET_ASSOCIATED_TYPE_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, apiId);
+            prepStmt.setString(2, org);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("type");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the associated type for API: " + apiId, e);
+        }
+        return null;
+    }
+
 }
