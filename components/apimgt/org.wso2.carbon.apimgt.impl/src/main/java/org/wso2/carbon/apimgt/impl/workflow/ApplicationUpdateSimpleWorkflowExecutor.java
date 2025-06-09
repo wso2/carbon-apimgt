@@ -10,9 +10,9 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 
 import java.util.List;
 
-public class ApplicationUpdateWorkflowExecutor extends WorkflowExecutor {
+public class ApplicationUpdateSimpleWorkflowExecutor extends WorkflowExecutor {
 
-    private static final Log log = LogFactory.getLog(ApplicationUpdateWorkflowExecutor.class);
+    private static final Log log = LogFactory.getLog(ApplicationUpdateSimpleWorkflowExecutor.class);
 
 
     @Override
