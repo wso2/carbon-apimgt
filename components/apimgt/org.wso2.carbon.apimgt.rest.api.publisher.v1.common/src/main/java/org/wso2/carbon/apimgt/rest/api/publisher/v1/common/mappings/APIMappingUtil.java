@@ -508,6 +508,10 @@ public class APIMappingUtil {
             model.setGatewayVendor(dto.getGatewayVendor());
         }
 
+        if (dto.getWsdlUrl() != null) {
+            model.setWsdlUrl(dto.getWsdlUrl());
+        }
+
         if (dto.getAsyncTransportProtocols() != null) {
             String asyncTransports = StringUtils.join(dto.getAsyncTransportProtocols(), ',');
             model.setAsyncTransportProtocols(asyncTransports);
