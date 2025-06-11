@@ -553,12 +553,12 @@ public class GatewayUtils {
 
     public static String getQualifiedApiName(String apiName, String version) {
 
-        return APIConstants.API_NAME_CONSTANT_PREFIX + "--" + apiName + ":v" + version;
+        return APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + apiName + ":v" + version;
     }
 
     public static String getQualifiedDefaultApiName(String apiName) {
 
-        return APIConstants.API_NAME_CONSTANT_PREFIX + "--" + apiName;
+        return APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + apiName;
     }
 
     /**

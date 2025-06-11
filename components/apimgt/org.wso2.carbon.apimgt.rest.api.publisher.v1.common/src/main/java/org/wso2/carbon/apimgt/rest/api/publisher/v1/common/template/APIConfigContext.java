@@ -157,11 +157,11 @@ public class APIConfigContext extends ConfigContext {
     }
 
     public String getAPIName(API api) {
-        return APIConstants.API_NAME_CONSTANT_PREFIX + "--" + api.getId().getApiName();
+        return APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + api.getId().getApiName();
     }
 
     public String getAPIProductName(APIProduct product) {
-        return APIConstants.API_NAME_CONSTANT_PREFIX + "--" + product.getId().getName();
+        return APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + product.getId().getName();
     }
 
     /**

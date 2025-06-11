@@ -36,8 +36,8 @@ public class APIGatewayAdminTest {
     String version = "1.0.0";
     String config = "abcdef";
     String tenantDomain = "carbon.super";
-    String apiName = APIConstants.API_NAME_CONSTANT_PREFIX + "--" + name + ":v" + version;
-    String apiDefaultName = APIConstants.API_NAME_CONSTANT_PREFIX + "--" + name;
+    String apiName = APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + name + ":v" + version;
+    String apiDefaultName = APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + name;
 
     @Test
     public void addApiForTenant() throws Exception {
