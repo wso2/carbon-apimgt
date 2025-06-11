@@ -85,34 +85,6 @@ public class PersistenceDAO {
         }
     }
 
-    public List<String> searchAPISchema(String searchQuery, String org, int start, int offset) throws SQLException {
-        List<String> apiSchemas = new ArrayList<>();
-        String query = SQLConstants.GET_ALL_API_ARTIFACT_SQL;
-        if (!searchQuery.isEmpty()) {
-            query = SQLConstants.SEARCH_API_ARTIFACT_SQL;
-        }
-        try (Connection connection = PersistanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(query)) {
-            connection.setAutoCommit(false);
-            prepStmt.setString(1, org);
-            if (!searchQuery.isEmpty()) {
-                prepStmt.setString(2, "%" + searchQuery.toLowerCase() + "%");
-                prepStmt.setInt(3, start);
-                prepStmt.setInt(4, offset);
-            } else {
-                prepStmt.setInt(2, start);
-                prepStmt.setInt(3, offset);
-            }
-            try (ResultSet rs = prepStmt.executeQuery()) {
-                while (rs.next()) {
-                    String schemaJson = rs.getString("metadata");
-                    apiSchemas.add(schemaJson);
-                }
-            }
-        }
-        return apiSchemas;
-    }
-
     public int getAllAPICount(String tenantDomain) throws SQLException {
         int count = 0;
         String query = SQLConstants.GET_ALL_API_COUNT;
@@ -1551,6 +1523,550 @@ public class PersistenceDAO {
             handleException("Error while retrieving the associated type for API: " + apiId, e);
         }
         return null;
+    }
+
+    public List<ContentSearchResult> getAllAPIsForDevPortal(String org, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.GET_ALL_API_ARTIFACTS_FOR_DEV_PORTAL_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setInt(2, start);
+            prepStmt.setInt(3, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving all APIs for Dev Portal from the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchAPIsByContentForDevPortal(String org, String searchContent, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_CONTENT_FOR_DEV_PORTAL_SQL;
+        searchContent = "%" + searchContent.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, searchContent);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                   String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by content for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchAPIsByNameForDevPortal(String org, String name, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_NAME_FOR_DEV_PORTAL_SQL;
+        name = "%" + name.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, name);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by name for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchAPIsByProviderForDevPortal(String org, String provider, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_PROVIDER_FOR_DEV_PORTAL_SQL;
+        provider = "%" + provider.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, provider);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by provider for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchAPIsByVersionForDevPortal(String org, String version, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_VERSION_FOR_DEV_PORTAL_SQL;
+        version = "%" + version.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, version);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by version for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchAPIsByContextForDevPortal(String org, String context, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_CONTEXT_FOR_DEV_PORTAL_SQL;
+        context = "%" + context.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, context);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by context for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchAPIsByStatusForDevPortal(String org, String status, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_STATUS_FOR_DEV_PORTAL_SQL;
+        status = "%" + status.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, status);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by status for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchAPIsByDescriptionForDevPortal(String org, String description, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_DESCRIPTION_FOR_DEV_PORTAL_SQL;
+        description = "%" + description.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, description);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by description for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchAPIsByTagsForDevPortal(String org, String tags, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_TAGS_FOR_DEV_PORTAL_SQL;
+        tags = "%" + tags.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, tags);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by tags for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchAPIsByCategoryForDevPortal(String org, String category, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_API_CATEGORY_FOR_DEV_PORTAL_SQL;
+        category = "%" + category.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, category);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by category for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchAPIsByOtherForDevPortal(String org, String property, String value, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_BY_OTHER_FOR_DEV_PORTAL_SQL(property);
+        value = "%" + value.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, value);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by other criteria for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByContentForDevPortal(String org, String searchContent, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_CONTENT_FOR_DEV_PORTAL_SQL;
+        searchContent = "%" + searchContent.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, searchContent);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching content by content for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByNameForDevPortal(String org, String name, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_NAME_FOR_DEV_PORTAL_SQL;
+        name = "%" + name.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, name);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching content by name for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByProviderForDevPortal(String org, String provider, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_PROVIDER_FOR_DEV_PORTAL_SQL;
+        provider = "%" + provider.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, provider);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching content by provider for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByVersionForDevPortal(String org, String version, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_VERSION_FOR_DEV_PORTAL_SQL;
+        version = "%" + version.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, version);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching content by version for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByContextForDevPortal(String org, String context, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_CONTEXT_FOR_DEV_PORTAL_SQL;
+        context = "%" + context.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, context);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching content by context for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByStatusForDevPortal(String org, String status, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_STATUS_FOR_DEV_PORTAL_SQL;
+        status = "%" + status.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, status);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching content by status for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByDescriptionForDevPortal(String org, String description, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_DESCRIPTION_FOR_DEV_PORTAL_SQL;
+        description = "%" + description.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, description);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching content by description for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByTagsForDevPortal(String org, String tags, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_TAGS_FOR_DEV_PORTAL_SQL;
+        tags = "%" + tags.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, tags);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching content by tags for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByCategoryForDevPortal(String org, String category, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_API_CATEGORY_FOR_DEV_PORTAL_SQL;
+        category = "%" + category.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, category);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching content by category for Dev Portal in the database", e);
+        }
+        return apiResults;
+    }
+
+    public List<ContentSearchResult> searchContentByOtherForDevPortal(String org, String property, String value, int start, int offset) throws APIManagementException {
+        List<ContentSearchResult> apiResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_CONTENT_BY_OTHER_FOR_DEV_PORTAL_SQL(property);
+        value = "%" + value.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, value);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    String type = rs.getString("type");
+                    String apiId = rs.getString("api_uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    apiResults.add(contentSearchResult);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching content by other criteria for Dev Portal in the database", e);
+        }
+        return apiResults;
     }
 
 }

@@ -11,6 +11,8 @@ import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.SearchQuery;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 enum SearchType {
     CONTENT("content"),
@@ -175,6 +177,104 @@ public class DatabaseSearchUtil {
                 break;
             default:
                 contentSearchResults = persistenceDAO.searchContentByOther(orgName, searchQuery.getType(), searchContent, start, offset);
+        }
+
+        return contentSearchResults;
+    }
+
+    public static List<ContentSearchResult> serachAPIsForDevPortal(SearchQuery searchQuery, String orgName, int start, int offset) throws APIManagementException {
+        String searchContent;
+        SearchType searchType;
+
+        try {
+            searchType = SearchType.valueOf(searchQuery.getType().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            searchType = SearchType.OTHER;
+        }
+        searchContent = searchQuery.getContent();
+
+        List<ContentSearchResult> searchResult;
+
+        switch (searchType) {
+            case CONTENT:
+                searchResult = persistenceDAO.searchAPIsByContentForDevPortal(orgName, searchContent, start, offset);
+                break;
+            case NAME:
+                searchResult = persistenceDAO.searchAPIsByNameForDevPortal(orgName, searchContent, start, offset);
+                break;
+            case PROVIDER:
+                searchResult = persistenceDAO.searchAPIsByProviderForDevPortal(searchContent, orgName, start, offset);
+                break;
+            case VERSION:
+                searchResult = persistenceDAO.searchAPIsByVersionForDevPortal(orgName, searchContent, start, offset);
+                break;
+            case CONTEXT:
+                searchResult = persistenceDAO.searchAPIsByContextForDevPortal(orgName, searchContent, start, offset);
+                break;
+            case STATUS:
+                searchResult = persistenceDAO.searchAPIsByStatusForDevPortal(orgName, searchContent, start, offset);
+                break;
+            case DESCRIPTION:
+                searchResult = persistenceDAO.searchAPIsByDescriptionForDevPortal(orgName, searchContent, start, offset);
+                break;
+            case TAGS:
+                searchResult = persistenceDAO.searchAPIsByTagsForDevPortal(orgName, searchContent, start, offset);
+                break;
+            case API_CATEGORY:
+                searchResult = persistenceDAO.searchAPIsByCategoryForDevPortal(orgName, searchContent, start, offset);
+                break;
+            default:
+                if (searchQuery.getType() == null || searchQuery.getType().isEmpty()) {
+                    throw new APIManagementException("Property for 'other' type cannot be null or empty.");
+                }
+                searchResult = persistenceDAO.searchAPIsByOtherForDevPortal(orgName, searchQuery.getType(), searchContent, start, offset);
+        }
+
+        return searchResult;
+    }
+
+    public static List<ContentSearchResult> searchContentForDevPortal(SearchQuery modifiedQuery, String requestedTenantDomain, int start, int offset) throws APIManagementException {
+        String searchContent = modifiedQuery.getContent();
+        SearchType searchType;
+
+        try {
+            searchType = SearchType.valueOf(modifiedQuery.getType().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            searchType = SearchType.OTHER;
+        }
+
+        List<ContentSearchResult> contentSearchResults;
+
+        switch (searchType) {
+            case CONTENT:
+                contentSearchResults = persistenceDAO.searchContentByContentForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                break;
+            case NAME:
+                contentSearchResults = persistenceDAO.searchContentByNameForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                break;
+            case PROVIDER:
+                contentSearchResults = persistenceDAO.searchContentByProviderForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                break;
+            case VERSION:
+                contentSearchResults = persistenceDAO.searchContentByVersionForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                break;
+            case CONTEXT:
+                contentSearchResults = persistenceDAO.searchContentByContextForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                break;
+            case STATUS:
+                contentSearchResults = persistenceDAO.searchContentByStatusForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                break;
+            case DESCRIPTION:
+                contentSearchResults = persistenceDAO.searchContentByDescriptionForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                break;
+            case TAGS:
+                contentSearchResults = persistenceDAO.searchContentByTagsForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                break;
+            case API_CATEGORY:
+                contentSearchResults = persistenceDAO.searchContentByCategoryForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                break;
+            default:
+                contentSearchResults = persistenceDAO.searchContentByOtherForDevPortal(requestedTenantDomain, modifiedQuery.getType(), searchContent, start, offset);
         }
 
         return contentSearchResults;

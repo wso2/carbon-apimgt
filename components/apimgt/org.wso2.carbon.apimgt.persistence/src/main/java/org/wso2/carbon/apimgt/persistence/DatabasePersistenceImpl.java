@@ -17,10 +17,9 @@ import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
 import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
-import org.wso2.carbon.apimgt.persistence.utils.DatabasePersistenceUtil;
-import org.wso2.carbon.apimgt.persistence.utils.DatabaseSearchUtil;
-import org.wso2.carbon.apimgt.persistence.utils.PublisherAPISearchResultComparator;
-import org.wso2.carbon.apimgt.persistence.utils.RegistrySearchUtil;
+import org.wso2.carbon.apimgt.persistence.utils.*;
+import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
+import org.wso2.carbon.governance.api.exception.GovernanceException;
 
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -250,14 +249,6 @@ public class DatabasePersistenceImpl implements APIPersistence {
             JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
             String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
 
-            // Get current lifecycle status
-            String currentStatus = persistenceDAO.getAPILifeCycleStatus(api.getUuid(), org.getName());
-            // Add status to API JSON if it exists
-            if (currentStatus != null) {
-                apiJson.addProperty("status", currentStatus);
-                apiJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(apiJson);
-            }
-
             // Update API schema
             persistenceDAO.updateAPISchema(api.getUuid(), apiJsonString);
 
@@ -357,7 +348,29 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException {
-        return null;
+        try {
+            String result = persistenceDAO.getAPISchemaByUUID(apiId, org.getName());
+            String swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiId, org.getName());
+            JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(result);
+            jsonObject.addProperty("swaggerDefinition", swaggerDefinition);
+
+            try {
+                ResourceFile thumbnailResource = this.getThumbnail(org, apiId);
+                if (thumbnailResource != null) {
+                    String thumbnailUrl = DatabasePersistenceUtil.convertToBase64(thumbnailResource.getContent(), thumbnailResource.getContentType());
+                    jsonObject.addProperty("thumbnailUrl", thumbnailUrl);
+                } else {
+                    jsonObject.addProperty("thumbnailUrl", "");
+                }
+            } catch (Exception e) {
+                log.debug("Error while retrieving thumbnail for API: " + apiId, e);
+            }
+
+            API api = DatabasePersistenceUtil.jsonToApi(jsonObject);
+            return APIMapper.INSTANCE.toDevPortalApi(api);
+        } catch (SQLException e) {
+            throw new APIPersistenceException("Error while retrieving API with ID: " + apiId, e);
+        }
     }
 
     @Override
@@ -465,7 +478,86 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset, UserContext ctx) throws APIPersistenceException {
-        return null;
+       String requestedDomain = org.getName();
+       DevPortalAPISearchResult result = null;
+
+        SearchQuery modifiedQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
+        result = searchPaginatedDevPortalAPIs(modifiedQuery, org, start, offset);
+
+        return result;
+    }
+
+    private DevPortalAPISearchResult searchPaginatedDevPortalAPIs(SearchQuery searchQuery, Organization org, int start, int offset) {
+        int totalLength = 0;
+        DevPortalAPISearchResult searchResult = new DevPortalAPISearchResult();
+        String orgName = org.getName();
+
+        try {
+            totalLength = persistenceDAO.getAllAPICount(orgName);
+
+            List<ContentSearchResult> results = null;
+
+            if (searchQuery == null) {
+                results = persistenceDAO.getAllAPIsForDevPortal(orgName, start, offset);
+            } else {
+                results = DatabaseSearchUtil.serachAPIsForDevPortal(searchQuery, orgName, start, offset);
+            }
+
+            if (results == null || results.isEmpty()) {
+                searchResult.setDevPortalAPIInfoList(Collections.emptyList());
+                searchResult.setReturnedAPIsCount(0);
+                searchResult.setTotalAPIsCount(totalLength);
+                return searchResult;
+            }
+
+            List<DevPortalAPIInfo> devPortalAPIInfoList = new ArrayList<>();
+
+            for (ContentSearchResult result : results) {
+                if (result.getMetadata() == null || result.getMetadata().isEmpty()) {
+                    continue; // Skip if metadata ilifecycleStatuss empty
+                }
+
+                String apiId = result.getApiId();
+                String type = result.getType();
+                if (type == null || type.isEmpty()) {
+                    type = "API"; // Default to API if type is not specified
+                }
+
+                JsonObject jsonObject = JsonParser.parseString(result.getMetadata()).getAsJsonObject();
+
+                DevPortalAPIInfo apiInfo = null;
+
+                if (type.equals("API_PRODUCT")) {
+                    APIProduct apiProduct = DatabasePersistenceUtil.jsonToApiProduct(jsonObject);
+                    apiInfo = DatabasePersistenceUtil.mapAPIProductToAPIInfo(apiProduct);
+                } else {
+                    API api = DatabasePersistenceUtil.jsonToApi(jsonObject);
+                    apiInfo = DatabasePersistenceUtil.mapAPItoAPIInfo(api);
+                }
+                try {
+                    ResourceFile thumbnailResource = this.getThumbnail(org, apiId);
+                    if (thumbnailResource != null) {
+                        String thumbnailUrl = DatabasePersistenceUtil.convertToBase64(thumbnailResource.getContent(), thumbnailResource.getContentType());
+                        apiInfo.setThumbnail(thumbnailUrl);
+                    } else {
+                        apiInfo.setThumbnail("");
+                    }
+                } catch (Exception e) {
+                    log.debug("Error while retrieving thumbnail for API: " + apiId, e);
+                }
+                devPortalAPIInfoList.add(apiInfo);
+            }
+
+            searchResult.setDevPortalAPIInfoList(devPortalAPIInfoList);
+            searchResult.setReturnedAPIsCount(devPortalAPIInfoList.size());
+            searchResult.setTotalAPIsCount(totalLength);
+        } catch (APIManagementException e) {
+            throw new RuntimeException("Error while searching Dev Portal APIs", e);
+        }catch (SQLException e) {
+            throw new RuntimeException("Error while retrieving API count for Dev Portal", e);
+        }
+
+        return searchResult;
     }
 
     @Override
@@ -595,7 +687,111 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public DevPortalContentSearchResult searchContentForDevPortal(Organization org, String searchQuery, int start, int offset, UserContext ctx) throws APIPersistenceException {
-        return null;
+        DevPortalContentSearchResult searchResult = new DevPortalContentSearchResult();
+
+        try {
+            String requestedTenantDomain = org.getName();
+            int totalLength = 0;
+            SearchQuery modifiedQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
+            List<ContentSearchResult> results = DatabaseSearchUtil.searchContentForDevPortal(modifiedQuery, requestedTenantDomain, start, offset);
+            List<SearchContent> contentData = new ArrayList<>();
+
+            for (ContentSearchResult result: results) {
+                JsonObject jsonObject = JsonParser.parseString(result.getMetadata()).getAsJsonObject();
+                String contentType = result.getType();
+
+                if (contentType == null || contentType.isEmpty()) {
+                    contentType = "API";
+                }
+
+                if (contentType.equals("API_PRODUCT")) {
+                    contentType = "APIProduct";
+                }
+
+                if (contentType.equals("DOCUMENTATION")) {
+                    // Handle documentation content
+                    DocumentSearchContent docContent = new DocumentSearchContent();
+                    Documentation doc = DatabasePersistenceUtil.jsonToDocument(jsonObject);
+                    String apiId = result.getApiId();
+
+                    if (apiId != null) {
+                        DevPortalAPI devAPI = this.getDevPortalAPI(org, apiId);
+                        docContent.setApiName(devAPI.getApiName());
+                        docContent.setApiProvider(devAPI.getProviderName());
+                        docContent.setApiVersion(devAPI.getVersion());
+                        docContent.setApiUUID(devAPI.getId());
+                        docContent.setDocType(doc.getType());
+                        docContent.setId(doc.getId());
+                        docContent.setSourceType(doc.getSourceType());
+                        docContent.setVisibility(doc.getVisibility());
+                        docContent.setName(doc.getName());
+                        contentData.add(docContent);
+                    }
+                } else if (contentType.equals("API_DEFINITION") || contentType.equals("ASYNC_API_DEFINITION") || contentType.equals("GRAPHQL_SCHEMA") || contentType.equals("WSDL")) {
+                    // Handle API definition content
+                    APIDefSearchContent defContent = new APIDefSearchContent();
+                    String apiId = result.getApiId();
+
+                    if (apiId != null) {
+                        DevPortalAPI devAPI = this.getDevPortalAPI(org, apiId);
+
+                        String associatedType = persistenceDAO.getAssociatedType(org.getName(), apiId);
+
+                        defContent.setId(devAPI.getId());
+                        switch (contentType) {
+                            case "API_DEFINITION":
+                                defContent.setName(devAPI.getApiName() + " swagger");
+                                break;
+                            case "ASYNC_API_DEFINITION":
+                                defContent.setName(devAPI.getApiName() + " async");
+                                break;
+                            case "GRAPHQL_SCHEMA":
+                                defContent.setName(devAPI.getApiName() + " graphql");
+                                break;
+                            case "WSDL":
+                                defContent.setName(devAPI.getApiName() + " wsdl");
+                                break;
+                        }
+                        defContent.setApiUUID(devAPI.getId());
+                        defContent.setApiName(devAPI.getApiName());
+                        defContent.setApiContext(devAPI.getContext());
+                        defContent.setApiProvider(devAPI.getProviderName());
+                        defContent.setApiVersion(devAPI.getVersion());
+                        defContent.setApiType(determineAPIType(devAPI.getType()));
+                        defContent.setAssociatedType(associatedType);
+                        contentData.add(defContent);
+                    }
+                } else {
+                    // Handle API content
+                    DevPortalAPI devAPI = this.getDevPortalAPI(org, result.getApiId());
+                    DevPortalSearchContent content = new DevPortalSearchContent();
+                    content.setContext(devAPI.getContext());
+                    content.setDescription(devAPI.getDescription());
+                    content.setId(devAPI.getId());
+                    content.setName(devAPI.getApiName());
+                    content.setProvider(DatabasePersistenceUtil.replaceEmailDomainBack(devAPI.getProviderName()));
+                    content.setType(contentType);
+                    content.setVersion(devAPI.getVersion());
+                    content.setStatus(devAPI.getStatus());
+                    content.setAdvertiseOnly(devAPI.isAdvertiseOnly());
+                    content.setThumbnailUri(devAPI.getThumbnail());
+                    content.setBusinessOwner(devAPI.getBusinessOwner());
+                    content.setBusinessOwnerEmail(devAPI.getBusinessOwnerEmail());
+                    content.setTechnicalOwner(devAPI.getTechnicalOwner());
+                    content.setTechnicalOwnerEmail(devAPI.getTechnicalOwnerEmail());
+                    content.setMonetizationStatus(devAPI.getMonetizationStatus());
+                    contentData.add(content);
+                }
+            }
+            totalLength = results.size();
+            searchResult.setTotalCount(totalLength);
+            searchResult.setReturnedCount(contentData.size());
+            searchResult.setResults(contentData);
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while searching content for Dev Portal: " + searchQuery, e);
+        }
+
+        return searchResult;
     }
 
     @Override
@@ -844,7 +1040,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
         try {
             String requestedTenantDomain = org.getName();
-            searchQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery).getContent();
+            searchQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery) != null ? DatabasePersistenceUtil.getSearchQuery(searchQuery).getContent() : "";
             List<DocumentResult> results = persistenceDAO.searchDocumentation(apiId, requestedTenantDomain, searchQuery, start, offset);
             List<Documentation> documentationList = new ArrayList<>();
 

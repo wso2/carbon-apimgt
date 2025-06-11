@@ -15,11 +15,11 @@ import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.dto.*;
+import org.wso2.carbon.apimgt.persistence.dto.OrganizationTiers;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class DatabasePersistenceUtil {
     private static final Log log = LogFactory.getLog(DatabasePersistenceUtil.class);
@@ -206,134 +207,6 @@ public class DatabasePersistenceUtil {
        return gson.fromJson(jsonObject, APIProduct.class);
     }
 
-    public API mapJsonStringToAPI(String jsonString) {
-        JsonObject jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
-
-        String providerName = DatabasePersistenceUtil.safeGetAsString(jsonObject.getAsJsonObject("id"), "providerName");
-        String apiName = DatabasePersistenceUtil.safeGetAsString(jsonObject.getAsJsonObject("id"), "apiName");
-        String version = DatabasePersistenceUtil.safeGetAsString(jsonObject.getAsJsonObject("id"), "version");
-        String uuid = DatabasePersistenceUtil.safeGetAsString(jsonObject, "uuid");
-
-        APIIdentifier id = new APIIdentifier(providerName, apiName, version, uuid);
-
-        API api = new API(id);
-        api.setUuid(uuid);
-        api.setDescription(DatabasePersistenceUtil.safeGetAsString(jsonObject, "description"));
-        api.setStatus(DatabasePersistenceUtil.safeGetAsString(jsonObject, "status"));
-        api.setThumbnailUrl(DatabasePersistenceUtil.safeGetAsString(jsonObject, "thumbnailUrl"));
-        api.setWsdlUrl(DatabasePersistenceUtil.safeGetAsString(jsonObject, "wsdlUrl"));
-        api.setWadlUrl(DatabasePersistenceUtil.safeGetAsString(jsonObject, "wadlUrl"));
-        api.setTechnicalOwner(DatabasePersistenceUtil.safeGetAsString(jsonObject, "technicalOwner"));
-        api.setTechnicalOwnerEmail(DatabasePersistenceUtil.safeGetAsString(jsonObject, "technicalOwnerEmail"));
-        api.setBusinessOwner(DatabasePersistenceUtil.safeGetAsString(jsonObject, "businessOwner"));
-        api.setBusinessOwnerEmail(DatabasePersistenceUtil.safeGetAsString(jsonObject, "businessOwnerEmail"));
-        api.setVisibility(DatabasePersistenceUtil.safeGetAsString(jsonObject, "visibility"));
-        api.setVisibleRoles(DatabasePersistenceUtil.safeGetAsString(jsonObject, "visibilityRoles"));
-        api.setVisibleTenants(DatabasePersistenceUtil.safeGetAsString(jsonObject, "visibleTenants"));
-        api.setEndpointSecured(getAsBoolean(DatabasePersistenceUtil.safeGetAsString(jsonObject, "endpointSecured")));
-//        api.setEndpointUTUsername();
-//        api.setEndpointUTPassword(JsonUtils.safeGetAsString(jsonObject, "endpointUTPassword"));
-        api.setTransports(DatabasePersistenceUtil.safeGetAsString(jsonObject, "transports"));
-//        api.setInSequence();
-//        api.setOutSequence();
-//        api.setFaultSequence();
-        api.setResponseCache(DatabasePersistenceUtil.safeGetAsString(jsonObject, "responseCache"));
-        api.setImplementation(DatabasePersistenceUtil.safeGetAsString(jsonObject, "implementation"));
-        api.setType(DatabasePersistenceUtil.safeGetAsString(jsonObject, "type"));
-        api.setProductionMaxTps(DatabasePersistenceUtil.safeGetAsString(jsonObject, "productionMaxTps"));
-        api.setProductionTimeUnit(DatabasePersistenceUtil.safeGetAsString(jsonObject, "productionTimeUnit"));
-        api.setSandboxMaxTps(DatabasePersistenceUtil.safeGetAsString(jsonObject, "sandboxMaxTps"));
-        api.setSandboxTimeUnit(DatabasePersistenceUtil.safeGetAsString(jsonObject, "sandboxTimeUnit"));
-
-        BackendThrottlingConfiguration backendThrottlingConfiguration = new BackendThrottlingConfiguration();
-        backendThrottlingConfiguration.setProductionMaxTps(DatabasePersistenceUtil.safeGetAsString(jsonObject, "backendProductionMaxTps"));
-        backendThrottlingConfiguration.setProductionTimeUnit(DatabasePersistenceUtil.safeGetAsString(jsonObject, "backendProductionTimeUnit"));
-        backendThrottlingConfiguration.setSandboxMaxTps(DatabasePersistenceUtil.safeGetAsString(jsonObject, "backendSandboxMaxTps"));
-        backendThrottlingConfiguration.setSandboxTimeUnit(DatabasePersistenceUtil.safeGetAsString(jsonObject, "backendSandboxTimeUnit"));
-
-        api.setBackendThrottlingConfiguration(backendThrottlingConfiguration);
-        api.setGatewayVendor(DatabasePersistenceUtil.safeGetAsString(jsonObject, "gatewayVendor"));
-        api.setAsyncTransportProtocols(DatabasePersistenceUtil.safeGetAsString(jsonObject, "asyncTransportProtocols"));
-
-        int cacheTimeout = APIConstants.API_RESPONSE_CACHE_TIMEOUT;
-        try {
-            String cacheTimeoutString = DatabasePersistenceUtil.safeGetAsString(jsonObject, "cacheTimeout");
-            if (cacheTimeoutString == null && !cacheTimeoutString.isEmpty()) {
-                cacheTimeout = Integer.parseInt(DatabasePersistenceUtil.safeGetAsString(jsonObject, "cacheTimeout"));
-            }
-        } catch (NumberFormatException e) {
-            log.error("Invalid cache timeout value. Using default value: " + APIConstants.API_RESPONSE_CACHE_TIMEOUT);
-        }
-
-        api.setCacheTimeout(cacheTimeout);
-        api.setEndpointConfig(DatabasePersistenceUtil.safeGetAsString(jsonObject, "endpointConfig"));
-        api.setRedirectURL(DatabasePersistenceUtil.safeGetAsString(jsonObject, "redirectUrl"));
-        api.setApiExternalProductionEndpoint(DatabasePersistenceUtil.safeGetAsString(jsonObject, "apiExternalProductionEndpoint"));
-        api.setApiExternalSandboxEndpoint(DatabasePersistenceUtil.safeGetAsString(jsonObject, "apiExternalSandboxEndpoint"));
-        api.setApiOwner(DatabasePersistenceUtil.safeGetAsString(jsonObject, "apiOwner"));
-        api.setAdvertiseOnly(getAsBoolean(DatabasePersistenceUtil.safeGetAsString(jsonObject, "advertiseOnly")));
-        api.setSubscriptionAvailability(DatabasePersistenceUtil.safeGetAsString(jsonObject, "subscriptionAvailability"));
-        api.setSubscriptionAvailableTenants(DatabasePersistenceUtil.safeGetAsString(jsonObject, "subscriptionAvailableTenants"));
-
-        String tenantDomainName = MultitenantUtils.getTenantDomain((providerName));
-        try {
-            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
-                    .getTenantId(tenantDomainName);
-        } catch (UserStoreException e) {
-            throw new RuntimeException(e);
-        }
-
-        String tiers = DatabasePersistenceUtil.safeGetAsString(jsonObject, "tiers");
-        Set<Tier> availableTiers = new HashSet<Tier>();
-        if(tiers != null) {
-            String[] tiersArray = tiers.split("\\|\\|");
-            for(String tierName : tiersArray) {
-                availableTiers.add(new Tier(tierName));
-            }
-        }
-        api.setAvailableTiers(availableTiers);
-
-        String organizationTiers =DatabasePersistenceUtil.safeGetAsString(jsonObject, "availableTiersForOrganizations");
-        api.setAvailableTiersForOrganizations(getAvailableTiersForOrganizationsFromString(organizationTiers));
-
-        api.setContext(DatabasePersistenceUtil.safeGetAsString(jsonObject, "context"));
-        api.setContextTemplate(DatabasePersistenceUtil.safeGetAsString(jsonObject, "contextTemplate"));
-        api.setLatest(getAsBoolean(DatabasePersistenceUtil.safeGetAsString(jsonObject, "isLatest")));
-        api.setEnableSchemaValidation(getAsBoolean(DatabasePersistenceUtil.safeGetAsString(jsonObject, "enableSchemaValidation")));
-        api.setEnableSubscriberVerification(getAsBoolean(DatabasePersistenceUtil.safeGetAsString(jsonObject, "enableSubscriberVerification")));
-        api.setEnableStore(getAsBoolean(DatabasePersistenceUtil.safeGetAsString(jsonObject, "enableStore")));
-        api.setTestKey(DatabasePersistenceUtil.safeGetAsString(jsonObject, "testKey"));
-        api.setTags(jsonArrayToSet(jsonObject.getAsJsonArray("tags")));
-        api.setLastUpdated(new Date());
-        api.setCreatedTime(DatabasePersistenceUtil.safeGetAsString(jsonObject, "createdTime"));
-        api.setImplementation(DatabasePersistenceUtil.safeGetAsString(jsonObject, "implementation"));
-        api.setEnvironments(getEnvironments(DatabasePersistenceUtil.safeGetAsString(jsonObject, "environments")));
-        api.setAuthorizationHeader(DatabasePersistenceUtil.safeGetAsString(jsonObject, "authorizationHeader"));
-        api.setApiKeyHeader(DatabasePersistenceUtil.safeGetAsString(jsonObject, "apiKeyHeader"));
-        api.setApiSecurity(DatabasePersistenceUtil.safeGetAsString(jsonObject, "apiSecurity"));
-        api.setMonetizationEnabled(getAsBoolean(DatabasePersistenceUtil.safeGetAsString(jsonObject, "isMonetizationEnabled")));
-        api.setAudiences(jsonArrayToSet(jsonObject.getAsJsonArray("audiences")));
-        api.setAudience(DatabasePersistenceUtil.safeGetAsString(jsonObject, "audience"));
-        api.setVersionTimestamp(DatabasePersistenceUtil.safeGetAsString(jsonObject, "versionTimestamp"));
-
-        String monetizationInfo = DatabasePersistenceUtil.safeGetAsString(jsonObject, "monetizationProperties");
-
-        if (StringUtils.isNotBlank(monetizationInfo)) {
-            JSONParser parser = new JSONParser();
-            JSONObject monetizationInfoJson = null;
-            try {
-                monetizationInfoJson = (JSONObject) parser.parse(monetizationInfo);
-            } catch (ParseException e) {
-                throw new RuntimeException(e);
-            }
-            api.setMonetizationProperties(monetizationInfoJson);
-        }
-//        api.setApiCategories(JsonUtils.safeGetAsString(jsonObject, "apiCategories"));
-
-
-        return api;
-    }
-
     private static boolean getAsBoolean(String value) {
         if (value == null) {
             return false;
@@ -349,7 +222,7 @@ public class DatabasePersistenceUtil {
         return input;
     }
 
-    public static Set<org.wso2.carbon.apimgt.api.model.OrganizationTiers> getAvailableTiersForOrganizationsFromString(
+    public static Set<OrganizationTiers> getAvailableTiersForOrganizationsFromString(
             String tiersString) {
 
         if (tiersString == null || tiersString.isEmpty()) {
@@ -357,8 +230,7 @@ public class DatabasePersistenceUtil {
         }
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            org.wso2.carbon.apimgt.api.model.OrganizationTiers[] tiersArray = objectMapper.readValue(tiersString,
-                    org.wso2.carbon.apimgt.api.model.OrganizationTiers[].class);
+            OrganizationTiers[] tiersArray = objectMapper.readValue(tiersString,OrganizationTiers[].class);
             return new LinkedHashSet<>(Arrays.asList(tiersArray));
         } catch (Exception e) {
             log.error("Error while converting string to availableTiersForOrganizations object", e);
@@ -492,4 +364,96 @@ public class DatabasePersistenceUtil {
         return provider + "--" + apiName + apiVersion;
     }
 
+    public static String getOrganizationTiersToString(Map<String, Set<String>> availableTiersForOrganizations) {
+        StringBuilder tiersStringBuilder = new StringBuilder();
+        for (Map.Entry<String, Set<String>> entry : availableTiersForOrganizations.entrySet()) {
+            String orgName = entry.getKey();
+            Set<String> tiers = entry.getValue();
+            if (tiers != null && !tiers.isEmpty()) {
+                tiersStringBuilder.append(orgName).append(": ").append(String.join(", ", tiers)).append("\n");
+            } else {
+                tiersStringBuilder.append(orgName).append(": No available tiers\n");
+            }
+        }
+        return tiersStringBuilder.toString().trim();
+    }
+
+    private static Map stringToStringMap(String additionalProperties) {
+        if (additionalProperties == null || additionalProperties.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(additionalProperties, Map.class);
+        } catch (IOException e) {
+            log.error("Error while converting string to Map", e);
+            return Collections.emptyMap();
+        }
+    }
+
+    public static DevPortalAPIInfo mapAPItoAPIInfo(API api) {
+        if (api == null) {
+            return null;
+        }
+
+        DevPortalAPIInfo apiInfo = new DevPortalAPIInfo();
+        apiInfo.setId(api.getUuid());
+        apiInfo.setApiName(api.getId().getApiName());
+        apiInfo.setVersion(api.getId().getVersion());
+        apiInfo.setProviderName(api.getId().getProviderName());
+        apiInfo.setContext(api.getContext());
+        apiInfo.setType(api.getType());
+        apiInfo.setThumbnail(api.getThumbnailUrl());
+        apiInfo.setBusinessOwner(api.getBusinessOwner());
+        apiInfo.setStatus(api.getStatus());
+        apiInfo.setAvailableTierNames(api.getAvailableTiers().stream().map(Tier::getName).collect(Collectors.toSet()));
+        apiInfo.setAvailableTiersForOrganizations(api.getAvailableTiersForOrganizations().stream().map(
+                tier -> {
+                    OrganizationTiers organizationTiers = new OrganizationTiers();
+                    organizationTiers.setTiers(tier.getTiers().stream().map(Tier::getName).collect(Collectors.toSet()));
+                    return organizationTiers;
+                }
+        ).collect(Collectors.toSet()));
+        apiInfo.setSubscriptionAvailability(api.getSubscriptionAvailability());
+        apiInfo.setSubscriptionAvailableOrgs(api.getSubscriptionAvailableTenants());
+        apiInfo.setCreatedTime(dateToString(stringToDate(api.getCreatedTime())));
+        apiInfo.setDescription(api.getDescription());
+        apiInfo.setGatewayVendor(api.getGatewayVendor());
+        apiInfo.setAdditionalProperties(api.getAdditionalProperties());
+        apiInfo.setBusinessOwnerEmail(api.getBusinessOwnerEmail());
+        apiInfo.setTechnicalOwner(api.getTechnicalOwner());
+        apiInfo.setTechnicalOwnerEmail(api.getTechnicalOwnerEmail());
+        apiInfo.setAdvertiseOnly(api.isAdvertiseOnly());
+
+        return apiInfo;
+    }
+
+    public static DevPortalAPIInfo mapAPIProductToAPIInfo(APIProduct apiProduct) {
+        if (apiProduct == null) {
+            return null;
+        }
+
+        DevPortalAPIInfo apiInfo = new DevPortalAPIInfo();
+        apiInfo.setId(apiProduct.getId().getUUID());
+        apiInfo.setApiName(apiProduct.getId().getName());
+        apiInfo.setVersion(apiProduct.getId().getVersion());
+        apiInfo.setProviderName(apiProduct.getId().getProviderName());
+        apiInfo.setContext(apiProduct.getContext());
+        apiInfo.setType(apiProduct.getType());
+        apiInfo.setThumbnail(apiProduct.getThumbnailUrl());
+        apiInfo.setBusinessOwner(apiProduct.getBusinessOwner());
+        apiInfo.setStatus(apiProduct.getState());
+        apiInfo.setAvailableTierNames(apiProduct.getAvailableTiers().stream().map(Tier::getName).collect(Collectors.toSet()));
+        apiInfo.setSubscriptionAvailability(apiProduct.getSubscriptionAvailability());
+        apiInfo.setSubscriptionAvailableOrgs(apiProduct.getSubscriptionAvailableTenants());
+        apiInfo.setCreatedTime(dateToString(apiProduct.getCreatedTime()));
+        apiInfo.setDescription(apiProduct.getDescription());
+        apiInfo.setGatewayVendor(apiProduct.getGatewayVendor());
+        apiInfo.setAdditionalProperties(apiProduct.getAdditionalProperties());
+
+        return apiInfo;
+    }
 }
+
+
+

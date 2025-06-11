@@ -8,15 +8,8 @@ public class SQLConstants {
     public static final String GET_ALL_API_ARTIFACT_SQL =
             "SELECT * FROM AM_ARTIFACT_DATA " +
                     "WHERE JSON_VALUE(org, '$.name') = ? " +
-                    "AND type = 'API' " +
-                    "ORDER BY ARTIFACT_ID DESC " +
-                    "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
-
-    public static final String SEARCH_API_ARTIFACT_SQL =
-            "SELECT * FROM AM_ARTIFACT_DATA " +
-                    "WHERE JSON_VALUE(org, '$.name') = ? " +
-                    "AND type = 'API' " +
-                    "AND LOWER(metadata) LIKE ? " +
+                    "AND TYPE = 'API' " +
+                    "ORDER BY LAST_MODIFIED DESC " +
                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String GET_ALL_API_COUNT =
@@ -270,70 +263,70 @@ public class SQLConstants {
             "SELECT * FROM AM_ARTIFACT_DATA " +
                     "WHERE JSON_VALUE(org, '$.name') = ? " +
                     "AND type = 'API' " +
-                    "AND CONTAINS(metadata, ?) > 0 " +
+                    "AND LOWER(metadata) LIKE ? " +
                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String SEARCH_API_BY_NAME_SQL =
             "SELECT * FROM AM_ARTIFACT_DATA " +
                     "WHERE JSON_VALUE(org, '$.name') = ? " +
                     "AND type = 'API' " +
-                    "AND CONTAINS(metadata, 'id.apiName: ?') > 0 " +
+                    "AND LOWER(JSON_VALUE(metadata, '$.id.apiName')) LIKE ? " +
                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String SEARCH_API_BY_PROVIDER_SQL =
             "SELECT * FROM AM_ARTIFACT_DATA " +
                     "WHERE JSON_VALUE(org, '$.name') = ? " +
                     "AND type = 'API' " +
-                    "AND CONTAINS(metadata, 'id.providerName: ?') > 0 " +
+                    "AND LOWER(JSON_QUERY(METADATA, '$.id.providerName')) LIKE ? " +
                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String SEARCH_API_BY_VERSION_SQL =
             "SELECT * FROM AM_ARTIFACT_DATA " +
                     "WHERE JSON_VALUE(org, '$.name') = ? " +
                     "AND type = 'API' " +
-                    "AND CONTAINS(metadata, 'id.version: ?') > 0 " +
+                    "AND LOWER(JSON_QUERY(METADATA, '$.id.version')) LIKE ?" +
                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String SEARCH_API_BY_CONTEXT_SQL =
             "SELECT * FROM AM_ARTIFACT_DATA " +
                     "WHERE JSON_VALUE(org, '$.name') = ? " +
                     "AND type = 'API' " +
-                    "AND CONTAINS(metadata, 'context: ?') > 0 " +
+                    "AND LOWER(JSON_QUERY(a2.METADATA, '$.context')) LIKE ? " +
                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String SEARCH_API_BY_STATUS_SQL =
             "SELECT * FROM AM_ARTIFACT_DATA " +
                     "WHERE JSON_VALUE(org, '$.name') = ? " +
                     "AND type = 'API' " +
-                    "AND CONTAINS(metadata, 'status: ?') > 0 " +
+                    "AND LOWER(JSON_QUERY(METADATA, '$.status')) LIKE ? " +
                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String SEARCH_API_BY_DESCRIPTION_SQL =
             "SELECT * FROM AM_ARTIFACT_DATA " +
                     "WHERE JSON_VALUE(org, '$.name') = ? " +
                     "AND type = 'API' " +
-                    "AND CONTAINS(metadata, 'description: ?') > 0 " +
+                    "AND LOWER(JSON_QUERY(METADATA, '$.description')) LIKE ? " +
                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String SEARCH_API_BY_TAGS_SQL =
             "SELECT * FROM AM_ARTIFACT_DATA " +
                     "WHERE JSON_VALUE(org, '$.name') = ? " +
                     "AND type = 'API' " +
-                    "AND CONTAINS(metadata, 'tags: ?') > 0 " +
+                    "AND LOWER(JSON_QUERY(METADATA, '$.tags')) LIKE ? " +
                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static final String SEARCH_API_BY_API_CATEGORY_SQL =
             "SELECT * FROM AM_ARTIFACT_DATA " +
                     "WHERE JSON_VALUE(org, '$.name') = ? " +
                     "AND type = 'API' " +
-                    "AND CONTAINS(metadata, 'apiCategories: ?') > 0 " +
+                    "AND LOWER(JSON_QUERY(METADATA, '$.apiCategories')) LIKE ? " +
                     "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
 
     public static String SEARCH_API_BY_OTHER_SQL(String propertyName) {
         return "SELECT * FROM AM_ARTIFACT_DATA " +
                 "WHERE JSON_VALUE(org, '$.name') = ? " +
                 "AND type = 'API' " +
-                "AND CONTAINS(metadata, '" + propertyName + ": ?') > 0 " +
+                "AND LOWER(JSON_QUERY(metadata, '$." + propertyName + "') LIKE ? " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -445,5 +438,206 @@ public class SQLConstants {
             "WHERE API_UUID = ? " +
             "AND JSON_VALUE(org, '$.name') = ? " +
             "AND type IN ('API', 'API_PRODUCT') ";
+
+    public static final String SEARCH_API_BY_CONTENT_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+            "WHERE JSON_VALUE(org, '$.name') = ? " +
+            "AND type = 'API' " +
+            "AND CONTAINS(metadata, ?) > 0 " +
+            "AND JSON_VALUE(metadata, '$.status') = 'PUBLISHED' " +
+            "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_API_BY_NAME_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+            "WHERE JSON_VALUE(org, '$.name') = ? " +
+            "AND type = 'API' " +
+            "AND LOWER(JSON_VALUE(metadata, '$.id.apiName')) LIKE ? " +
+            "AND JSON_VALUE(metadata, '$.status') = 'PUBLISHED' " +
+            "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_API_BY_PROVIDER_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+            "WHERE JSON_VALUE(org, '$.name') = ? " +
+            "AND type = 'API' " +
+            "AND LOWER(JSON_VALUE(metadata, '$.id.providerName')) LIKE ? " +
+            "AND JSON_VALUE(metadata, '$.status') = 'PUBLISHED' " +
+            "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_API_BY_VERSION_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+            "WHERE JSON_VALUE(org, '$.name') = ? " +
+            "AND type = 'API' " +
+            "AND LOWER(JSON_VALUE(metadata, '$.id.version')) LIKE ? " +
+            "AND JSON_VALUE(metadata, '$.status') = 'PUBLISHED' " +
+            "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_API_BY_CONTEXT_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+            "WHERE JSON_VALUE(org, '$.name') = ? " +
+            "AND type = 'API' " +
+            "AND LOWER(JSON_VALUE(metadata, '$.context')) LIKE ? " +
+            "AND JSON_VALUE(metadata, '$.status') = 'PUBLISHED' " +
+            "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_API_BY_STATUS_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+            "WHERE JSON_VALUE(org, '$.name') = ? " +
+            "AND type = 'API' " +
+            "AND LOWER(JSON_VALUE(metadata, '$.status')) LIKE ? " +
+            "AND JSON_VALUE(metadata, '$.status') = 'PUBLISHED' " +
+            "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_API_BY_DESCRIPTION_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+            "WHERE JSON_VALUE(org, '$.name') = ? " +
+            "AND type = 'API' " +
+            "AND LOWER(JSON_VALUE(metadata, '$.description')) LIKE ? " +
+            "AND JSON_VALUE(metadata, '$.status') = 'PUBLISHED' " +
+            "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_API_BY_TAGS_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+            "WHERE JSON_VALUE(org, '$.name') = ? " +
+            "AND type = 'API' " +
+            "AND LOWER(JSON_VALUE(metadata, '$.tags')) LIKE ? " +
+            "AND JSON_VALUE(metadata, '$.status') = 'PUBLISHED' " +
+            "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_API_BY_API_CATEGORY_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+            "WHERE JSON_VALUE(org, '$.name') = ? " +
+            "AND type = 'API' " +
+            "AND LOWER(JSON_VALUE(metadata, '$.apiCategories')) LIKE ? " +
+            "AND JSON_VALUE(metadata, '$.status') = 'PUBLISHED' " +
+            "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static String SEARCH_API_BY_OTHER_FOR_DEV_PORTAL_SQL(String propertyName) {
+        return "SELECT * FROM AM_ARTIFACT_DATA " +
+                "WHERE JSON_VALUE(org, '$.name') = ? " +
+                "AND type = 'API' " +
+                "AND LOWER(JSON_QUERY(metadata, '$." + propertyName + "')) LIKE ? " +
+                "AND JSON_VALUE(metadata, '$.status') = 'PUBLISHED' " +
+                "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    }
+
+    public static final String GET_ALL_API_ARTIFACTS_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA " +
+            "WHERE JSON_VALUE(org, '$.name') = ? " +
+            "AND TYPE IN ('API', 'API_PRODUCT') " +
+            "AND JSON_VALUE(metadata, '$.status') = 'PUBLISHED' " +
+            "ORDER BY LAST_MODIFIED DESC " +
+            "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_CONTENT_BY_CONTENT_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA a1 " +
+                    "WHERE EXISTS ( " +
+                    "SELECT 1 FROM AM_ARTIFACT_DATA a2 " +
+                    "WHERE a1.API_UUID = a2.API_UUID " +
+                    "AND LOWER(a2.METADATA) LIKE ? " +
+                    "AND JSON_VALUE(a2.METADATA, '$.status') = 'PUBLISHED' " +
+                    ") " +
+                    "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                    "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_CONTENT_BY_NAME_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA a1 " +
+                    "WHERE EXISTS ( " +
+                    "SELECT 1 FROM AM_ARTIFACT_DATA a2 " +
+                    "WHERE a1.API_UUID = a2.API_UUID " +
+                    "AND LOWER(JSON_QUERY(a2.METADATA, '$.id.apiName')) LIKE ? " +
+                    "AND JSON_VALUE(a2.METADATA, '$.status') = 'PUBLISHED' " +
+                    ") " +
+                    "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                    "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_CONTENT_BY_PROVIDER_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA a1 " +
+                    "WHERE EXISTS ( " +
+                    "SELECT 1 FROM AM_ARTIFACT_DATA a2 " +
+                    "WHERE a1.API_UUID = a2.API_UUID " +
+                    "AND LOWER(JSON_QUERY(a2.METADATA, '$.id.providerName')) LIKE ? " +
+                    "AND JSON_VALUE(a2.METADATA, '$.status') = 'PUBLISHED' " +
+                    ") " +
+                    "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                    "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_CONTENT_BY_VERSION_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA a1 " +
+                    "WHERE EXISTS ( " +
+                    "SELECT 1 FROM AM_ARTIFACT_DATA a2 " +
+                    "WHERE a1.API_UUID = a2.API_UUID " +
+                    "AND LOWER(JSON_QUERY(a2.METADATA, '$.id.version')) LIKE ? " +
+                    "AND JSON_VALUE(a2.METADATA, '$.status') = 'PUBLISHED' " +
+                    ") " +
+                    "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                    "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_CONTENT_BY_CONTEXT_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA a1 " +
+                    "WHERE EXISTS ( " +
+                    "SELECT 1 FROM AM_ARTIFACT_DATA a2 " +
+                    "WHERE a1.API_UUID = a2.API_UUID " +
+                    "AND LOWER(JSON_QUERY(a2.METADATA, '$.context')) LIKE ? " +
+                    "AND JSON_VALUE(a2.METADATA, '$.status') = 'PUBLISHED' " +
+                    ") " +
+                    "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                    "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_CONTENT_BY_STATUS_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA a1 " +
+                    "WHERE EXISTS ( " +
+                    "SELECT 1 FROM AM_ARTIFACT_DATA a2 " +
+                    "WHERE a1.API_UUID = a2.API_UUID " +
+                    "AND LOWER(JSON_QUERY(a2.METADATA, '$.status')) LIKE ? " +
+                    "AND JSON_VALUE(a2.METADATA, '$.status') = 'PUBLISHED' " +
+                    ") " +
+                    "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                    "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_CONTENT_BY_DESCRIPTION_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA a1 " +
+                    "WHERE EXISTS ( " +
+                    "SELECT 1 FROM AM_ARTIFACT_DATA a2 " +
+                    "WHERE a1.API_UUID = a2.API_UUID " +
+                    "AND LOWER(JSON_QUERY(a2.METADATA, '$.description')) LIKE ? " +
+                    "AND JSON_VALUE(a2.METADATA, '$.status') = 'PUBLISHED' " +
+                    ") " +
+                    "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                    "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_CONTENT_BY_TAGS_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA a1 " +
+                    "WHERE EXISTS ( " +
+                    "SELECT 1 FROM AM_ARTIFACT_DATA a2 " +
+                    "WHERE a1.API_UUID = a2.API_UUID " +
+                    "AND LOWER(JSON_QUERY(a2.METADATA, '$.tags')) LIKE ? " +
+                    "AND JSON_VALUE(a2.METADATA, '$.status') = 'PUBLISHED' " +
+                    ") " +
+                    "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                    "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static final String SEARCH_CONTENT_BY_API_CATEGORY_FOR_DEV_PORTAL_SQL =
+            "SELECT * FROM AM_ARTIFACT_DATA a1 " +
+                    "WHERE EXISTS ( " +
+                    "SELECT 1 FROM AM_ARTIFACT_DATA a2 " +
+                    "WHERE a1.API_UUID = a2.API_UUID " +
+                    "AND LOWER(JSON_QUERY(a2.METADATA, '$.apiCategories')) LIKE ? " +
+                    "AND JSON_VALUE(a2.METADATA, '$.status') = 'PUBLISHED' " +
+                    ") " +
+                    "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                    "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+
+    public static String SEARCH_CONTENT_BY_OTHER_FOR_DEV_PORTAL_SQL(String propertyName) {
+        return "SELECT * FROM AM_ARTIFACT_DATA a1 " +
+                "WHERE EXISTS ( " +
+                "SELECT 1 FROM AM_ARTIFACT_DATA a2 " +
+                "WHERE a1.API_UUID = a2.API_UUID " +
+                "AND LOWER(JSON_QUERY(a2.METADATA, '$." + propertyName + "')) LIKE ? " +
+                "AND JSON_VALUE(a2.METADATA, '$.status') = 'PUBLISHED' " +
+                ") " +
+                "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+    }
 
 }
