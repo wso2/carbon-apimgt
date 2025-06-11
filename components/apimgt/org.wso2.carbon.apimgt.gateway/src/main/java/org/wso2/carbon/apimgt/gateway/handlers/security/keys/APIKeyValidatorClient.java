@@ -56,7 +56,7 @@ public class APIKeyValidatorClient {
         } catch (APIKeyMgtException | APIManagementException e) {
             log.error("Error while retrieving data from datastore", e);
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR,
-                    "Error while retrieving data from datastore", e);
+                    e.getMessage(), e);
         }
 
     }
