@@ -3365,4 +3365,6 @@ public final class APIConstants {
         public static final String SCHEDULER_TASK_CHECK_INTERVAL = "TaskCheckIntervalMinutes";
         public static final String SCHEDULER_TASK_CLEANUP_INTERVAL = "TaskCleanupIntervalMinutes";
     }
+
+    public static final String API_NAME_CONSTANT_PREFIX = "prod";
 }
