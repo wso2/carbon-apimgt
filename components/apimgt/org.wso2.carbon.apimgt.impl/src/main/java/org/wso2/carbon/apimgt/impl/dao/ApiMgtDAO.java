@@ -5884,7 +5884,9 @@ public class ApiMgtDAO {
                 workflowDTO.setTenantDomain(rs.getString("TENANT_DOMAIN"));
                 workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
                 workflowDTO.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
-                InputStream metadataBlob = rs.getBinaryStream("WF_METADATA");
+
+               InputStream metadataBlob = rs.getBinaryStream("WF_METADATA");
+                InputStream wfProperties = rs.getBinaryStream("WF_PROPERTIES");
 
                 if (metadataBlob != null) {
                     String metadata = APIMgtDBUtil.getStringFromInputStream(metadataBlob);
@@ -5894,6 +5896,15 @@ public class ApiMgtDAO {
                 } else {
                     JSONObject metadataJson = new JSONObject();
                     workflowDTO.setMetadata(metadataJson);
+                }
+                if (wfProperties != null) {
+                    String properties = APIMgtDBUtil.getStringFromInputStream(wfProperties);
+                    Gson propertiesGson = new Gson();
+                    JSONObject propertiesJson = propertiesGson.fromJson(properties, JSONObject.class);
+                    workflowDTO.setProperties(propertiesJson);
+                } else {
+                    JSONObject propertiesJson = new JSONObject();
+                    workflowDTO.setProperties(propertiesJson);
                 }
             }
         } catch (SQLException e) {
