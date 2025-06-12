@@ -22,7 +22,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.ExpiredJWTCleaner;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
 import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
@@ -65,10 +67,18 @@ public abstract class AbstractKeyManagerEventHandler implements KeyManagerEventH
             properties.put(APIConstants.NotificationEvent.ORG_ID, orgId);
         }
         revocationRequestPublisher.publishRevocationEvents(tokenRevocationEvent.getAccessToken(), properties);
-        // Cleanup expired revoked tokens from db.
-        Runnable expiredJWTCleaner = new ExpiredJWTCleaner();
-        Thread cleanupThread = new Thread(expiredJWTCleaner);
-        cleanupThread.start();
+        APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+                .getAPIManagerConfiguration();
+
+        String isRevokeTokenCleanupEnabled = config.getFirstProperty(APIConstants.ENABLE_REVOKE_TOKEN_CLEANUP);
+
+        if (Boolean.parseBoolean(isRevokeTokenCleanupEnabled)) {
+            // Cleanup expired revoked tokens from db.
+            Runnable expiredJWTCleaner = new ExpiredJWTCleaner();
+            Thread cleanupThread = new Thread(expiredJWTCleaner);
+            cleanupThread.start();
+        }
+
         return true;
     }
 
