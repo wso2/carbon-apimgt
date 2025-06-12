@@ -79,6 +79,7 @@
   "apim.oauth_config.revoke_endpoint": "https://localhost:${mgt.transport.https.port}/oauth2/revoke",
   "apim.oauth_config.enable_token_encryption": false,
   "apim.oauth_config.enable_token_hashing": false,
+  "apim.oauth_config.enable_revoke_token_cleanup": true,
   "apim.oauth_config.enable_certificate_bound_access_token": false,
   "apim.oauth_config.allowed_scopes": [
     "^device_.*",
