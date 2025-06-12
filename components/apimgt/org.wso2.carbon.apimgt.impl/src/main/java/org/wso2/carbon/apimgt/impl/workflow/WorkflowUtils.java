@@ -78,6 +78,22 @@ public class WorkflowUtils {
                     appWFDto.getApplication().getTier(), appWFDto.getApplication().getGroupId(),
                     appWFDto.getApplication().getApplicationAttributes(), application.getSubscriber().getName());
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE.equals(wfType)) {
+            String applicationId = workflowDTO.getWorkflowReference();
+            int appId = Integer.parseInt(applicationId);
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            Application application = apiMgtDAO.getApplicationById(appId);
+            String orgId = application.getOrganization();
+            ApplicationWorkflowDTO appWFDto = (ApplicationWorkflowDTO) workflowDTO;
+            appWFDto.setApplication(application);
+            ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(),
+                    appWFDto.getTenantId(), orgId, appWFDto.getApplication().getId(),
+                    appWFDto.getApplication().getUUID(),
+                    appWFDto.getApplication().getName(), appWFDto.getApplication().getTokenType(),
+                    appWFDto.getApplication().getTier(), appWFDto.getApplication().getGroupId(),
+                    appWFDto.getApplication().getApplicationAttributes(), application.getSubscriber().getName());
+            APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equalsIgnoreCase(wfType)) {
             ApplicationWorkflowDTO appWFDto = (ApplicationWorkflowDTO) workflowDTO;
             String orgId = appWFDto.getApplication().getOrganization();
