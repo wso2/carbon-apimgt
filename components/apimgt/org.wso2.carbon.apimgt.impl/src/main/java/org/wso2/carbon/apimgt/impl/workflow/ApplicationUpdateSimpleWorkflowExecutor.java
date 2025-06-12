@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
+import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -40,9 +41,11 @@ public class ApplicationUpdateSimpleWorkflowExecutor extends WorkflowExecutor {
         }
         ApiMgtDAO dao = ApiMgtDAO.getInstance();
         try {
+            Application application = dao.getApplicationById(Integer.parseInt(workflowDTO.getWorkflowReference()));
             dao.updateApplicationStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),status);
+            dao.updateApplication(application);
         } catch (APIManagementException e) {
-            String msg = "Error occurred when updating the status of the Application update process";
+            String msg = "Error occurred when updating Application update process";
             log.error(msg, e);
             throw new WorkflowException(msg, e);
         }
