@@ -16,7 +16,10 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMModelDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderSummaryResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderSummaryResponseListDTO;
@@ -54,7 +57,8 @@ public class LLMProviderMappingUtil {
      * @param llmProvider The LLMProvider object to be converted.
      * @return An LLMProviderResponseDTO containing detailed information about the LLMProvider object.
      */
-    public static LLMProviderResponseDTO fromProviderToProviderResponseDTO(LLMProvider llmProvider) {
+    public static LLMProviderResponseDTO fromProviderToProviderResponseDTO(LLMProvider llmProvider)
+            throws JsonProcessingException {
 
         if (llmProvider == null) {
             return null;
@@ -67,7 +71,12 @@ public class LLMProviderMappingUtil {
         llmProviderResponseDTO.setApiDefinition(llmProvider.getApiDefinition());
         llmProviderResponseDTO.setBuiltInSupport(llmProvider.isBuiltInSupport());
         llmProviderResponseDTO.setConfigurations(llmProvider.getConfigurations());
-        llmProviderResponseDTO.setModelList(llmProvider.getModelList());
+        llmProviderResponseDTO.setMultipleVendorSupport(llmProvider.isModelFamilySupported());
+        List<LLMModelDTO> llmModelDTOList = llmProvider.getModelList().stream()
+                .map(model -> new LLMModelDTO().vendor(model.getModelVendor()).values(model.getValues()))
+                .collect(Collectors.toList());
+        ObjectMapper objectMapper = new ObjectMapper();
+        llmProviderResponseDTO.setModels(objectMapper.writeValueAsString(llmModelDTOList));
         return llmProviderResponseDTO;
     }
 

@@ -16,7 +16,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import org.wso2.carbon.apimgt.api.model.LLMModel;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LLMModelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LLMProviderResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LLMProviderSummaryResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LLMProviderSummaryResponseListDTO;
@@ -91,4 +93,14 @@ public class LLMProviderMappingUtil {
         return llmProviderSummaryDTO;
     }
 
+    public static List<LLMModelDTO> fromLLMModelToLLMModelDTO(List<LLMModel> modelList) {
+    if (modelList == null) {
+            return new ArrayList<>();
+        }
+        return modelList.stream()
+                .map(model -> {
+                    return new LLMModelDTO().vendor(model.getModelVendor()).values(model.getValues());
+                })
+                .collect(Collectors.toList());
+    }
 }

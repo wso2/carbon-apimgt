@@ -9321,7 +9321,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: string
+                  $ref: '#/components/schemas/LLMModel'
       security:
         - OAuth2Security:
             - apim:llm_provider_read
@@ -12778,6 +12778,18 @@ components:
             $ref: '#/components/schemas/APIEndpoint'
         pagination:
           $ref: '#/components/schemas/Pagination'
+    LLMModel:
+      title: LLM Model
+      type: object
+      properties:
+        values:
+          type: array
+          items:
+            type: string
+            example: "gpt-4o"
+        vendor:
+          type: string
+          example: OpenAI
     LLMProviderResponse:
       title: LLMProviderResponse
       type: object

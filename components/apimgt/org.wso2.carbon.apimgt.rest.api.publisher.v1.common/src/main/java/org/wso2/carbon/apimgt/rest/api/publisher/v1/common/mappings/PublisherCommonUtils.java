@@ -1556,6 +1556,7 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                     ExceptionCodes.INVALID_ENDPOINT_URL);
         }
+        APIUtil.validateAPIEndpointConfig(apiDto.getEndpointConfig(), apiDto.getType().toString(), apiDto.getName());
 
         // validate gateway type before proceeding
         String gatewayType = apiDto.getGatewayType();
