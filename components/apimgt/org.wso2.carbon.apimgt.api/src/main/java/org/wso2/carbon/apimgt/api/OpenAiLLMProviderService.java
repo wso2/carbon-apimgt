@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import java.util.Arrays;
 import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.apimgt.api.model.LLMModel;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
 import java.io.File;
@@ -90,10 +92,9 @@ public class OpenAiLLMProviderService extends BuiltInLLMProviderService {
             llmProviderConfiguration.setMetadata(llmProviderMetadata);
 
             // Set default model List
-            List<String> modelList = new ArrayList<>();
-            modelList.add("gpt-4o");
-            modelList.add("gpt-4o-mini");
-            modelList.add("o3-mini");
+            List<LLMModel> modelList = new ArrayList<>();
+            modelList.add(new LLMModel(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_OPENAI_NAME,
+                    Arrays.asList("gpt-4o", "gpt-4o-mini", "o3-mini")));
             llmProvider.setModelList(modelList);
 
             llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());
