@@ -2198,7 +2198,7 @@ paths:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v4/organizations/d7cf8523-9180-4255-84fa-6cb171c1f779"'
- 
+
   /me/organization-information:
     get:
       tags:
@@ -4239,7 +4239,7 @@ paths:
         Add a new Label
       requestBody:
         description: |
-            Label object that should to be added
+          Label object that should to be added
         content:
           application/json:
             schema:
@@ -4257,7 +4257,7 @@ paths:
         400:
           $ref: '#/components/responses/BadRequest'
         409:
-            $ref: '#/components/responses/Conflict'
+          $ref: '#/components/responses/Conflict'
       security:
         - OAuth2Security:
             - apim:admin
@@ -5385,6 +5385,13 @@ components:
           maxLength: 1023
           type: string
           example: OpenAI LLM
+        multipleVendorSupport:
+          type: boolean
+          description: |
+            Indicates whether the LLM Provider supports multiple vendors.
+            If true, the LLM Provider can support multiple vendors.
+            If false, the LLM Provider supports only one vendor.
+          default: false
         configurations:
           type: string
           description: LLM Provider configurations
@@ -5392,9 +5399,22 @@ components:
           type: string
           description: OpenAPI specification
           format: binary
-        modelList:
+        models:
+          type: array
+          items:
+            $ref: '#/components/schemas/LLMModel'
+    LLMModel:
+      title: LLM Model
+      type: object
+      properties:
+        values:
+          type: array
+          items:
+            type: string
+            example: "gpt-4o"
+        vendor:
           type: string
-          description: List of models supported by the LLM Provider as a stringified JSON array
+          example: OpenAI
     LLMProviderResponse:
       title: LLMProviderResponse
       type: object
@@ -5426,10 +5446,10 @@ components:
         apiDefinition:
           type: string
           description: OpenAPI specification
-        modelList:
+        models:
           type: array
           items:
-            type: string
+            $ref: '#/components/schemas/LLMModel'
           description: List of models supported by the LLM Provider
     LLMProviderSummaryResponse:
       title: LLMProviderSummaryResponse

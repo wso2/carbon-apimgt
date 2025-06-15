@@ -2,6 +2,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import java.io.File;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMModelDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderSummaryResponseListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.LlmProvidersApiService;
@@ -51,8 +52,8 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created LLM provider as entity in the body. ", response = LLMProviderResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class) })
-    public Response addLLMProvider(@Multipart(value = "name", required = false)  String name, @Multipart(value = "apiVersion", required = false)  String apiVersion, @Multipart(value = "description", required = false)  String description, @Multipart(value = "configurations", required = false)  String configurations,  @Multipart(value = "apiDefinition", required = false) InputStream apiDefinitionInputStream, @Multipart(value = "apiDefinition" , required = false) Attachment apiDefinitionDetail, @Multipart(value = "modelList", required = false)  String modelList) throws APIManagementException{
-        return delegate.addLLMProvider(name, apiVersion, description, configurations, apiDefinitionInputStream, apiDefinitionDetail, modelList, securityContext);
+    public Response addLLMProvider(@Multipart(value = "name", required = false)  String name, @Multipart(value = "apiVersion", required = false)  String apiVersion, @Multipart(value = "description", required = false)  String description, @Multipart(value = "multipleVendorSupport", required = false)  Boolean multipleVendorSupport, @Multipart(value = "configurations", required = false)  String configurations,  @Multipart(value = "apiDefinition", required = false) InputStream apiDefinitionInputStream, @Multipart(value = "apiDefinition" , required = false) Attachment apiDefinitionDetail, @Multipart(value = "models", required = false)  List<LLMModelDTO> models) throws APIManagementException{
+        return delegate.addLLMProvider(name, apiVersion, description, multipleVendorSupport, configurations, apiDefinitionInputStream, apiDefinitionDetail, models, securityContext);
     }
 
     @DELETE
@@ -116,7 +117,7 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. LLM Provider updated. ", response = LLMProviderResponseDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response updateLLMProvider(@ApiParam(value = "LLM Provider UUID ",required=true) @PathParam("llmProviderId") String llmProviderId, @Multipart(value = "name", required = false)  String name, @Multipart(value = "apiVersion", required = false)  String apiVersion, @Multipart(value = "description", required = false)  String description, @Multipart(value = "configurations", required = false)  String configurations,  @Multipart(value = "apiDefinition", required = false) InputStream apiDefinitionInputStream, @Multipart(value = "apiDefinition" , required = false) Attachment apiDefinitionDetail, @Multipart(value = "modelList", required = false)  String modelList) throws APIManagementException{
-        return delegate.updateLLMProvider(llmProviderId, name, apiVersion, description, configurations, apiDefinitionInputStream, apiDefinitionDetail, modelList, securityContext);
+    public Response updateLLMProvider(@ApiParam(value = "LLM Provider UUID ",required=true) @PathParam("llmProviderId") String llmProviderId, @Multipart(value = "name", required = false)  String name, @Multipart(value = "apiVersion", required = false)  String apiVersion, @Multipart(value = "description", required = false)  String description, @Multipart(value = "multipleVendorSupport", required = false)  Boolean multipleVendorSupport, @Multipart(value = "configurations", required = false)  String configurations,  @Multipart(value = "apiDefinition", required = false) InputStream apiDefinitionInputStream, @Multipart(value = "apiDefinition" , required = false) Attachment apiDefinitionDetail, @Multipart(value = "models", required = false)  List<LLMModelDTO> models) throws APIManagementException{
+        return delegate.updateLLMProvider(llmProviderId, name, apiVersion, description, multipleVendorSupport, configurations, apiDefinitionInputStream, apiDefinitionDetail, models, securityContext);
     }
 }

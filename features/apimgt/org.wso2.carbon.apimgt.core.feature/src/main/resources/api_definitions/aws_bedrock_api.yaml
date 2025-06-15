@@ -1,0 +1,180 @@
+openapi: 3.0.3
+info:
+  title: Amazon Bedrock Converse API
+  version: "1.0.0"
+  description: |
+    OpenAPI specification for Amazon Bedrock's Converse and ConverseStream operations.
+
+servers:
+  - url: https://bedrock-runtime.{region}.amazonaws.com
+    variables:
+      region:
+        default: us-east-1
+        description: AWS region
+
+paths:
+  /converse:
+    post:
+      summary: Converse with a Bedrock model
+      operationId: Converse
+      description: |
+        Sends a message to a Bedrock model endpoint and receives a response in a conversational interaction.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConverseRequest'
+      responses:
+        '200':
+          description: Successful response from Bedrock model.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConverseResponse'
+        '400':
+          description: Invalid request.
+        '500':
+          description: Internal server error.
+      security:
+        - api_key: []
+
+  /converse-stream:
+    post:
+      summary: Converse with a Bedrock model using streaming
+      operationId: ConverseStream
+      description: |
+        Sends messages to the specified Amazon Bedrock model and returns the response in a stream.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConverseRequest'
+      responses:
+        '200':
+          description: Successful streaming response from Bedrock model.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConverseStreamResponse'
+        '400':
+          description: Invalid request.
+        '500':
+          description: Internal server error.
+      security:
+        - api_key: []
+
+components:
+  securitySchemes:
+    api_key:
+      type: apiKey
+      in: header
+      name: Authorization
+
+  schemas:
+    ConverseRequest:
+      type: object
+      required:
+        - messages
+      properties:
+        sessionId:
+          type: string
+          description: A unique session ID to maintain conversation context.
+        messages:
+          type: array
+          description: List of conversation messages including prior turns.
+          items:
+            $ref: '#/components/schemas/Message'
+        system:
+          type: string
+          description: System prompt to define instructions or context for the model.
+        inferenceConfig:
+          $ref: '#/components/schemas/InferenceConfig'
+        additionalModelRequestFields:
+          type: object
+          description: Model-specific inference parameters.
+        promptVariables:
+          type: object
+          description: Variables to fill in the prompt when using Prompt management.
+        guardrailConfig:
+          type: object
+          description: Guardrail configuration to apply to the prompt.
+        toolConfig:
+          type: object
+          description: Tool configuration to assist the model in generating responses.
+        additionalModelResponseFieldPaths:
+          type: array
+          description: Fields to return as a JSON pointer object.
+          items:
+            type: string
+        requestMetadata:
+          type: object
+          description: Metadata to include for filtering in invocation logs.
+
+    Message:
+      type: object
+      required:
+        - role
+        - content
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+          description: Sender of the message.
+        content:
+          type: string
+          description: The text content of the message.
+
+    InferenceConfig:
+      type: object
+      properties:
+        maxTokens:
+          type: integer
+          description: Maximum number of tokens to generate.
+        temperature:
+          type: number
+          description: Sampling temperature.
+        topP:
+          type: number
+          description: Top-p sampling value.
+
+    ConverseResponse:
+      type: object
+      properties:
+        sessionId:
+          type: string
+          description: The session ID.
+        output:
+          $ref: '#/components/schemas/Message'
+        stopReason:
+          type: string
+          description: The reason the model stopped generating output.
+        metrics:
+          type: object
+          description: Metrics for the call.
+        usage:
+          type: object
+          description: Token usage information.
+        additionalModelResponseFields:
+          type: object
+          description: Additional fields returned as specified in the request.
+
+    ConverseStreamResponse:
+      type: object
+      properties:
+        stream:
+          type: array
+          description: Stream of events emitted by the model.
+          items:
+            $ref: '#/components/schemas/StreamEvent'
+
+    StreamEvent:
+      type: object
+      properties:
+        eventType:
+          type: string
+          description: Type of the event (e.g., messageStart, contentBlockStart).
+        data:
+          type: object
+          description: Event-specific data.

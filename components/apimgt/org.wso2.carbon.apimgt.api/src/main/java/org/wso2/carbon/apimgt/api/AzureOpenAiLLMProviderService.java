@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import java.util.Arrays;
 import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.apimgt.api.model.LLMModel;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
 import java.io.File;
@@ -55,8 +57,8 @@ public class AzureOpenAiLLMProviderService extends BuiltInLLMProviderService {
 
             llmProvider.setApiDefinition(readApiDefinition("repository" + File.separator + "resources"
                     + File.separator + "api_definitions" + File.separator
-                            + APIConstants.AIAPIConstants
-                            .LLM_PROVIDER_SERVICE_AZURE_OPENAI_API_DEFINITION_FILE_NAME));
+                    + APIConstants.AIAPIConstants
+                    .LLM_PROVIDER_SERVICE_AZURE_OPENAI_API_DEFINITION_FILE_NAME));
 
             LLMProviderConfiguration llmProviderConfiguration = new LLMProviderConfiguration();
             llmProviderConfiguration.setAuthHeader(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_KEY);
@@ -91,10 +93,9 @@ public class AzureOpenAiLLMProviderService extends BuiltInLLMProviderService {
             llmProviderConfiguration.setMetadata(llmProviderMetadata);
 
             // Set default model List
-            List<String> modelList = new ArrayList<>();
-            modelList.add("gpt-4o");
-            modelList.add("gpt-4o-mini");
-            modelList.add("o3-mini");
+            List<LLMModel> modelList = new ArrayList<>();
+            modelList.add(new LLMModel( APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_NAME,
+                    Arrays.asList("gpt-4o", "gpt-4o-mini", "o3-mini")));
             llmProvider.setModelList(modelList);
 
             llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());

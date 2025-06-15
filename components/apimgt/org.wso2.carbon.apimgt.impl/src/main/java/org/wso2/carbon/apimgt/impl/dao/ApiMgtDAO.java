@@ -71,6 +71,7 @@ import org.wso2.carbon.apimgt.api.model.GatewayPolicyDeployment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
+import org.wso2.carbon.apimgt.api.model.LLMModel;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
 import org.wso2.carbon.apimgt.api.model.MonetizationUsagePublishInfo;
@@ -14983,10 +14984,7 @@ public class ApiMgtDAO {
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             conn.setAutoCommit(false);
             String insertProviderQuery = SQLConstants.INSERT_LLM_PROVIDER_SQL;
-            String insertModelsQuery = SQLConstants.INSERT_LLM_PROVIDER_MODELS_SQL;
-            try (PreparedStatement prepStmtProvider = conn.prepareStatement(insertProviderQuery);
-                    PreparedStatement prepStmtModels = conn.prepareStatement(insertModelsQuery)) {
-
+            try (PreparedStatement prepStmtProvider = conn.prepareStatement(insertProviderQuery)) {
                 // Insert LLM provider
                 prepStmtProvider.setString(1, provider.getId());
                 prepStmtProvider.setString(2, provider.getName());
@@ -14997,14 +14995,7 @@ public class ApiMgtDAO {
                 prepStmtProvider.setBinaryStream(7, new ByteArrayInputStream(provider.getApiDefinition().getBytes()));
                 prepStmtProvider.setBinaryStream(8, new ByteArrayInputStream(provider.getConfigurations().getBytes()));
                 prepStmtProvider.executeUpdate();
-
-                // Insert LLM provider models
-                for (String model : provider.getModelList()) {
-                    prepStmtModels.setString(1, model);
-                    prepStmtModels.setString(2, provider.getId());
-                    prepStmtModels.addBatch();
-                }
-                prepStmtModels.executeBatch();
+                addLLMModels(conn, provider);
                 conn.commit();
                 return provider;
             } catch (SQLException e) {
@@ -15181,10 +15172,8 @@ public class ApiMgtDAO {
             connection.setAutoCommit(false);
             String updateProviderQuery = SQLConstants.UPDATE_LLM_PROVIDER_SQL;
             String deleteProviderModels = SQLConstants.DELETE_LLM_PROVIDER_MODELS_SQL;
-            String insertProviderModels = SQLConstants.INSERT_LLM_PROVIDER_MODELS_SQL;
             try (PreparedStatement prepStmtUpdateProvider = connection.prepareStatement(updateProviderQuery);
                     PreparedStatement prepStmtDeleteModels = connection.prepareStatement(deleteProviderModels);
-                    PreparedStatement prepStmtInsertModels = connection.prepareStatement(insertProviderModels);
             ) {
 
                 // Update LLM provider
@@ -15200,14 +15189,7 @@ public class ApiMgtDAO {
                 // Delete LLM provider models
                 prepStmtDeleteModels.setString(1, provider.getId());
                 prepStmtDeleteModels.executeUpdate();
-
-                // Insert LLM provider model
-                for (String model : provider.getModelList()) {
-                    prepStmtInsertModels.setString(1, model);
-                    prepStmtInsertModels.setString(2, provider.getId());
-                    prepStmtInsertModels.addBatch();
-                }
-                prepStmtInsertModels.executeBatch();
+                addLLMModels(connection, provider);
                 connection.commit();
                 return provider;
             } catch (SQLException e) {
@@ -15218,6 +15200,22 @@ public class ApiMgtDAO {
             handleException("DB connection error while updating LLM Provider in tenant domain: " + organization, e);
         }
         return null;
+    }
+
+    private void addLLMModels(Connection connection, LLMProvider llmProvider) throws SQLException {
+        try (PreparedStatement prepStmtInsertModels = connection.prepareStatement(
+                SQLConstants.INSERT_LLM_PROVIDER_MODELS_SQL)) {
+            // Insert LLM provider model
+            for (LLMModel model : llmProvider.getModelList()) {
+                for (String value : model.getValues()) {
+                    prepStmtInsertModels.setString(1, value);
+                    prepStmtInsertModels.setString(2, model.getModelVendor());
+                    prepStmtInsertModels.setString(3, llmProvider.getId());
+                    prepStmtInsertModels.addBatch();
+                }
+            }
+            prepStmtInsertModels.executeBatch();
+        }
     }
 
     /**
@@ -15255,6 +15253,7 @@ public class ApiMgtDAO {
                 provider.setOrganization(providerResultSet.getString("ORGANIZATION"));
                 provider.setBuiltInSupport(Boolean.parseBoolean(providerResultSet.getString("BUILT_IN_SUPPORT")));
                 provider.setDescription(providerResultSet.getString("DESCRIPTION"));
+                provider.setModelFamilySupported(Boolean.parseBoolean(providerResultSet.getString("MODEL_FAMILY_SUPPORTED")));
                 try (InputStream apiDefStream = providerResultSet.getBinaryStream("API_DEFINITION")) {
                     if (apiDefStream != null) {
                         provider.setApiDefinition(IOUtils.toString(apiDefStream));
@@ -15278,8 +15277,7 @@ public class ApiMgtDAO {
         }
 
         // Get models registered under the LLM provider
-        List<String> modelList = getLLMProviderModels(organization, llmProviderId);
-        provider.setModelList(modelList);
+        setLLMProviderModels(organization, provider);
 
         return provider;
     }
@@ -15333,6 +15331,8 @@ public class ApiMgtDAO {
             provider.setName(providerResultSet.getString("NAME"));
             provider.setApiVersion(providerResultSet.getString("API_VERSION"));
             provider.setBuiltInSupport(Boolean.parseBoolean(providerResultSet.getString("BUILT_IN_SUPPORT")));
+            provider.setModelFamilySupported(
+                    Boolean.parseBoolean(providerResultSet.getString("MODEL_FAMILY_SUPPORTED")));
             provider.setDescription(providerResultSet.getString("DESCRIPTION"));
             try (InputStream apiDefStream = providerResultSet.getBinaryStream("API_DEFINITION")) {
                 if (apiDefStream != null) {
@@ -15350,8 +15350,7 @@ public class ApiMgtDAO {
             }
 
             // Get models registered under the LLM provider
-            List<String> modelList = getLLMProviderModels(organization, providerResultSet.getString("UUID"));
-            provider.setModelList(modelList);
+            setLLMProviderModels(organization,provider);
 
             return provider;
         }
@@ -15361,29 +15360,40 @@ public class ApiMgtDAO {
      * Fetches an LLM providers' model list by provider ID and organization.
      *
      * @param organization the organization identifier
-     * @param llmProviderId the LLM provider ID
+     * @param provider the LLM provider
      * @return the LLM provider model list
      * @throws APIManagementException if failed to get model list
      */
-    public List<String> getLLMProviderModels(String organization, String llmProviderId) throws APIManagementException {
-        List<String> modelList = new ArrayList<>();
+    private void setLLMProviderModels(String organization,LLMProvider provider) throws APIManagementException {
+        List<LLMModel> modelList = new ArrayList<>();
         String getModelsQuery = SQLConstants.GET_LLM_PROVIDER_MODELS_SQL;
         try (Connection connection = APIMgtDBUtil.getConnection();
                 PreparedStatement prepStmt = connection.prepareStatement(getModelsQuery)) {
-            prepStmt.setString(1, llmProviderId);
+            prepStmt.setString(1, provider.getId());
             if (organization != null) {
                 prepStmt.setString(2, organization);
             }
             try (ResultSet rs = prepStmt.executeQuery()) {
+                Map<String,LLMModel> models = new HashMap<>();
                 while (rs.next()) {
                     String model = rs.getString("MODEL_NAME");
-                    modelList.add(model);
+                    String modelFamilyName = rs.getString("MODEL_FAMILY_NAME");
+                    LLMModel llmModel = models.get(modelFamilyName);
+                    if (llmModel != null) {
+                        llmModel = new LLMModel();
+                        llmModel.setModelVendor(modelFamilyName);
+                        llmModel.setValues(Arrays.asList(model));
+                        models.put(llmModel.getModelVendor(), llmModel);
+                    } else {
+                        llmModel.getValues().add(model);
+                    }
+                    modelList = new ArrayList<>(models.values());
                 }
             }
         } catch (SQLException e) {
-            handleException("Failed to get model list for LLM provider with ID: " + llmProviderId, e);
+            handleException("Failed to get model list for LLM provider with ID: " + provider.getId(), e);
         }
-        return modelList;
+        provider.setModelList(modelList);
     }
 
     /**

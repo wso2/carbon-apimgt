@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1;
 
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LLMModelDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LLMProviderEndpointConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LLMProviderResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LLMProviderSummaryResponseListDTO;
@@ -87,13 +88,13 @@ LlmProvidersApiService delegate = new LlmProvidersApiServiceImpl();
     @Path("/{llmProviderId}/models")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get LLM provider's model list", notes = "Get LLM provider's model list ", response = String.class, responseContainer = "List", authorizations = {
+    @ApiOperation(value = "Get LLM provider's model list", notes = "Get LLM provider's model list ", response = LLMModelDTO.class, responseContainer = "List", authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:llm_provider_read", description = "Read LLM Providers")
         })
     }, tags={ "LLMProvider",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. List of models ", response = String.class, responseContainer = "List") })
+        @ApiResponse(code = 200, message = "OK. List of models ", response = LLMModelDTO.class, responseContainer = "List") })
     public Response getLLMProviderModels(@ApiParam(value = "",required=true) @PathParam("llmProviderId") String llmProviderId) throws APIManagementException{
         return delegate.getLLMProviderModels(llmProviderId, securityContext);
     }
