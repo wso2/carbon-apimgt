@@ -509,6 +509,7 @@ public final class APIConstants {
     public static final String HASH_TOKENS_ON_PERSISTENCE = OAUTH_CONFIGS + "EnableTokenHashMode";
     public static final String TOKEN_ENDPOINT_CONTEXT = OAUTH_CONFIGS + "TokenEndPointName";
     public static final String REVOKE_ENDPOINT_CONTEXT = OAUTH_CONFIGS + "RevokeEndpointName";
+    public static final String ENABLE_REVOKE_TOKEN_CLEANUP = OAUTH_CONFIGS + "EnableRevokeTokenCleanup";
     public static final String DEFAULT_MODIFIED_ENDPOINT_PASSWORD = "*****"; //5 stars
     public static final String REGISTRY_HIDDEN_ENDPOINT_PROPERTY = "registry.HiddenEpProperty";
     public static final String OVERVIEW_ELEMENT = "overview";
