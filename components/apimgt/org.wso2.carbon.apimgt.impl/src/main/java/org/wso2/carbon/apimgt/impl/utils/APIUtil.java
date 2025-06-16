@@ -3079,8 +3079,10 @@ public final class APIUtil {
             if (!APIConstants.ENDPOINT_SECURITY_TYPE_NONE.equalsIgnoreCase(type) &&
                     !APIConstants.ENDPOINT_SECURITY_TYPE_BASIC.equalsIgnoreCase(type) &&
                     !APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST.equalsIgnoreCase(type) &&
-                    !APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase(type)) {
-                ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_SECURITY_CONFIG, environment);
+                    !APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH.equalsIgnoreCase(type) &&
+                    !APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY.equalsIgnoreCase(type)) {
+                ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_SECURITY_CONFIG,
+                        environment);
                 throw new APIManagementException(
                         "Invalid endpoint security type '" + type + "' in '" + environment + "' configuration.",
                         errorHandler);
