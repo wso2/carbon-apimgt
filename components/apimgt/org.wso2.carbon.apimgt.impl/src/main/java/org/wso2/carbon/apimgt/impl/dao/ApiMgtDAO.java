@@ -23033,6 +23033,7 @@ public class ApiMgtDAO {
                                 usedClonedPolicies, toBeClonedPolicyDetails);
                         Gson gson = new Gson();
                         String paramJSON = gson.toJson(policy.getParameters());
+                        InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8));
                         if (log.isDebugEnabled()) {
                             log.debug("Adding operation policy " + policy.getPolicyName() + " for API "
                                     + apiUUID + " to URL mapping Id " + template.getId());
@@ -23041,7 +23042,7 @@ public class ApiMgtDAO {
                         operationPolicyMappingStatement.setInt(1, template.getId());
                         operationPolicyMappingStatement.setString(2, updatedPoliciesMap.get(policy.getPolicyId()));
                         operationPolicyMappingStatement.setString(3, policy.getDirection());
-                        operationPolicyMappingStatement.setString(4, paramJSON);
+                        operationPolicyMappingStatement.setBinaryStream(4, paramInputStream, paramJSON.length());
                         operationPolicyMappingStatement.setInt(5, policy.getOrder());
                         operationPolicyMappingStatement.addBatch();
                     }
@@ -23269,6 +23270,7 @@ public class ApiMgtDAO {
 
                 Gson gson = new Gson();
                 String paramJSON = gson.toJson(policy.getParameters());
+                InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8));
 
                 if (log.isDebugEnabled()) {
                     log.debug("Adding API level policy " + policy.getPolicyName() + ":"
@@ -23279,7 +23281,7 @@ public class ApiMgtDAO {
                 statement.setString(2, revisionUUID);
                 statement.setString(3, updatedPoliciesMap.get(policy.getPolicyId()));
                 statement.setString(4, policy.getDirection());
-                statement.setString(5, paramJSON);
+                statement.setBinaryStream(5, paramInputStream, paramJSON.length());
                 statement.setInt(6, policy.getOrder());
                 statement.addBatch();
             }
@@ -23488,6 +23490,7 @@ public class ApiMgtDAO {
                         clonedPolicyMap, toBeClonedPolicyDetails);
                 Gson gson = new Gson();
                 String paramJSON = gson.toJson(policy.getParameters());
+                InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8));
 
                 if (log.isDebugEnabled()) {
                     log.debug("Adding API level policy " + policy.getPolicyName() + ":"
@@ -23498,7 +23501,7 @@ public class ApiMgtDAO {
                 apiLevelPolicyMappingStatement.setString(2, apiRevision.getRevisionUUID());
                 apiLevelPolicyMappingStatement.setString(3, clonedPolicyMap.get(policy.getPolicyId()));
                 apiLevelPolicyMappingStatement.setString(4, policy.getDirection());
-                apiLevelPolicyMappingStatement.setString(5, paramJSON);
+                apiLevelPolicyMappingStatement.setBinaryStream(5, paramInputStream, paramJSON.length());
                 apiLevelPolicyMappingStatement.setInt(6, policy.getOrder());
                 apiLevelPolicyMappingStatement.addBatch();
             }
@@ -23644,7 +23647,7 @@ public class ApiMgtDAO {
 
                 Gson gson = new Gson();
                 String paramJSON = gson.toJson(policy.getParameters());
-
+                InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8));
                 if (log.isDebugEnabled()) {
                     log.debug("Restored API level policy " + policy.getPolicyName() + ":"
                             + policy.getPolicyVersion() + " from API revision " + apiRevision.getRevisionUUID());
@@ -23654,7 +23657,7 @@ public class ApiMgtDAO {
                 apiLevelPolicyMappingStatement.setString(2, null);
                 apiLevelPolicyMappingStatement.setString(3, restoredPolicyMap.get(policy.getPolicyName()));
                 apiLevelPolicyMappingStatement.setString(4, policy.getDirection());
-                apiLevelPolicyMappingStatement.setString(5, paramJSON);
+                apiLevelPolicyMappingStatement.setBinaryStream(5, paramInputStream, paramJSON.length());
                 apiLevelPolicyMappingStatement.setInt(6, policy.getOrder());
                 apiLevelPolicyMappingStatement.addBatch();
             }
