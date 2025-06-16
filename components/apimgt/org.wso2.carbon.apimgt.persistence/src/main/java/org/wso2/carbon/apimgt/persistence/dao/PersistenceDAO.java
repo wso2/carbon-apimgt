@@ -120,7 +120,7 @@ public class PersistenceDAO {
         return apiSchemas;
     }
 
-    public String getAPISchemaByUUID(String uuid, String tenantDomain) throws SQLException {
+    public String getAPISchemaByUUID(String uuid, String tenantDomain) throws APIManagementException {
         String apiSchema = null;
         String query = SQLConstants.GET_API_BY_UUID_SQL;
         try (Connection connection = PersistanceDBUtil.getConnection();
@@ -132,11 +132,13 @@ public class PersistenceDAO {
                     apiSchema = rs.getString("metadata");
                 }
             }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the API schema for UUID: " + uuid, e);
         }
         return apiSchema;
     }
 
-    public String getSwaggerDefinitionByUUID(String uuid, String tenantDomain) throws SQLException {
+    public String getSwaggerDefinitionByUUID(String uuid, String tenantDomain) throws APIManagementException {
         String swaggerDefinition = null;
         String query = SQLConstants.GET_SWAGGER_DEFINITION_BY_UUID_SQL;
         try (Connection connection = PersistanceDBUtil.getConnection();
@@ -149,6 +151,8 @@ public class PersistenceDAO {
                     swaggerDefinition = rs.getString("metadata");
                 }
             }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the Swagger definition for UUID: " + uuid, e);
         }
         return swaggerDefinition;
     }
@@ -594,17 +598,16 @@ public class PersistenceDAO {
         return graphqlSchema;
     }
 
-    public void addAPIRevisionSchema(String apiUUID, int revisionId, String revisionUUID, String metadata, String orgJsonString) throws APIManagementException {
+    public void addAPIRevisionSchema(String type, int revisionId, String revisionUUID, String metadata, String orgJsonString) throws APIManagementException {
         String query = SQLConstants.ADD_API_REVISION_SQL;
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
-            prepStmt.setString(1, "API");
+            prepStmt.setString(1, type);
             prepStmt.setString(2, orgJsonString);
             prepStmt.setString(3, revisionUUID);
             prepStmt.setInt(4, revisionId);
-            prepStmt.setString(5, apiUUID);
-            prepStmt.setString(6, metadata);
+            prepStmt.setString(5, metadata);
             prepStmt.execute();
             connection.commit();
         } catch (SQLException e) {
@@ -618,7 +621,7 @@ public class PersistenceDAO {
     }
 
 
-    public void addAPIRevisionSwaggerDefinition(String apiUUID, int revisionId, String revisionUUID, String swaggerDefinition, String orgJsonString) throws APIManagementException {
+    public void addAPIRevisionSwaggerDefinition(int revisionId, String revisionUUID, String swaggerDefinition, String orgJsonString) throws APIManagementException {
         String query = SQLConstants.ADD_API_REVISION_SQL;
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -627,8 +630,7 @@ public class PersistenceDAO {
             prepStmt.setString(2, orgJsonString);
             prepStmt.setString(3, revisionUUID);
             prepStmt.setInt(4, revisionId);
-            prepStmt.setString(5, apiUUID);
-            prepStmt.setString(6, swaggerDefinition);
+            prepStmt.setString(5, swaggerDefinition);
             prepStmt.execute();
             connection.commit();
         } catch (SQLException e) {
@@ -636,7 +638,7 @@ public class PersistenceDAO {
         }
     }
 
-    public void addAPIRevisionAsyncDefinition(String apiUUID, int revisionId, String revisionUUID, String asyncApiDefinition, String orgJsonString) throws APIManagementException {
+    public void addAPIRevisionAsyncDefinition(int revisionId, String revisionUUID, String asyncApiDefinition, String orgJsonString) throws APIManagementException {
         String query = SQLConstants.ADD_API_REVISION_SQL;
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -645,8 +647,7 @@ public class PersistenceDAO {
             prepStmt.setString(2, orgJsonString);
             prepStmt.setString(3, revisionUUID);
             prepStmt.setInt(4, revisionId);
-            prepStmt.setString(5, apiUUID);
-            prepStmt.setString(6, asyncApiDefinition);
+            prepStmt.setString(5, asyncApiDefinition);
             prepStmt.execute();
             connection.commit();
         } catch (SQLException e) {
@@ -654,9 +655,8 @@ public class PersistenceDAO {
         }
     }
 
-
-    public void addAPIRevisionThumbnail(String apiUUID, int revisionId, String revisionUUID, InputStream content, String contentType, String orgJsonString) throws APIManagementException {
-        String query = SQLConstants.ADD_API_REVISION_SQL;
+    public void addAPIRevisionThumbnail(int revisionId, String revisionUUID, InputStream content, String metadata, String orgJsonString) throws APIManagementException {
+        String query = SQLConstants.ADD_API_REVISION_ARTIFACT_SQL;
         try (Connection connection = PersistanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -673,9 +673,8 @@ public class PersistenceDAO {
                 prepStmt.setString(2, orgJsonString);
                 prepStmt.setString(3, revisionUUID);
                 prepStmt.setInt(4, revisionId);
-                prepStmt.setString(5, apiUUID);
-                prepStmt.setBinaryStream(6, byteArrayInputStream, fileLength);
-                prepStmt.setString(7, contentType);
+                prepStmt.setBinaryStream(5, byteArrayInputStream, fileLength);
+                prepStmt.setString(6, metadata);
                 prepStmt.execute();
             }
             connection.commit();
@@ -916,27 +915,6 @@ public class PersistenceDAO {
         } catch (SQLException e) {
             handleException("Error while updating the API product schema in the database", e);
         }
-    }
-
-    public List<String> searchAPIProductSchema(String modifiedQuery, String name, int start, int offset) throws APIManagementException {
-        List<String> apiProductSchemas = new ArrayList<>();
-        String query = SQLConstants.SEARCH_API_PRODUCT_SQL;
-        try (Connection connection = PersistanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(query)) {
-            connection.setAutoCommit(false);
-            prepStmt.setString(1, modifiedQuery);
-            prepStmt.setString(2, name);
-            prepStmt.setInt(3, start);
-            prepStmt.setInt(4, offset);
-            try (ResultSet rs = prepStmt.executeQuery()) {
-                while (rs.next()) {
-                    apiProductSchemas.add(rs.getString("metadata"));
-                }
-            }
-        } catch (SQLException e) {
-            handleException("Error while searching API product schemas in the database", e);
-        }
-        return apiProductSchemas;
     }
 
     public int getAllAPIProductCount(String name) throws APIManagementException {
@@ -2069,4 +2047,293 @@ public class PersistenceDAO {
         return apiResults;
     }
 
+    public List<String> searchAPIProductsByContent(String org, String searchContent, int start, int offset) throws APIManagementException {
+        List<String> apiProductResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_PRODUCT_BY_CONTENT_SQL;
+        searchContent = "%" + searchContent.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, searchContent);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    apiProductResults.add(metadata);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching API Products by content in the database", e);
+        }
+        return apiProductResults;
+    }
+
+    public List<String> searchAPIProductsByName(String org, String name, int start, int offset) throws APIManagementException {
+        List<String> apiProductResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_PRODUCT_BY_NAME_SQL;
+        name = "%" + name.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, name);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    apiProductResults.add(metadata);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching API Products by name in the database", e);
+        }
+        return apiProductResults;
+    }
+
+    public List<String> searchAPIProductsByProvider(String org, String provider, int start, int offset) throws APIManagementException {
+        List<String> apiProductResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_PRODUCT_BY_PROVIDER_SQL;
+        provider = "%" + provider.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, provider);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    apiProductResults.add(metadata);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching API Products by provider in the database", e);
+        }
+        return apiProductResults;
+    }
+
+    public List<String> searchAPIProductsByVersion(String org, String version, int start, int offset) throws APIManagementException {
+        List<String> apiProductResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_PRODUCT_BY_VERSION_SQL;
+        version = "%" + version.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, version);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    apiProductResults.add(metadata);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching API Products by version in the database", e);
+        }
+        return apiProductResults;
+    }
+
+    public List<String> searchAPIProductsByContext(String org, String context, int start, int offset) throws APIManagementException {
+        List<String> apiProductResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_PRODUCT_BY_CONTEXT_SQL;
+        context = "%" + context.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, context);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    apiProductResults.add(metadata);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching API Products by context in the database", e);
+        }
+        return apiProductResults;
+    }
+
+    public List<String> searchAPIProductsByStatus(String org, String status, int start, int offset) throws APIManagementException {
+        List<String> apiProductResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_PRODUCT_BY_STATUS_SQL;
+        status = "%" + status.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, status);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    apiProductResults.add(metadata);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching API Products by status in the database", e);
+        }
+        return apiProductResults;
+    }
+
+    public List<String> searchAPIProductsByDescription(String org, String description, int start, int offset) throws APIManagementException {
+        List<String> apiProductResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_PRODUCT_BY_DESCRIPTION_SQL;
+        description = "%" + description.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, description);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    apiProductResults.add(metadata);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching API Products by description in the database", e);
+        }
+        return apiProductResults;
+    }
+
+    public List<String> searchAPIProductsByTags(String org, String tags, int start, int offset) throws APIManagementException {
+        List<String> apiProductResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_PRODUCT_BY_TAGS_SQL;
+        tags = "%" + tags.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, tags);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    apiProductResults.add(metadata);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching API Products by tags in the database", e);
+        }
+        return apiProductResults;
+    }
+
+    public List<String> searchAPIProductsByCategory(String org, String category, int start, int offset) throws APIManagementException {
+        List<String> apiProductResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_PRODUCT_BY_API_CATEGORY_SQL;
+        category = "%" + category.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, category);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    apiProductResults.add(metadata);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching API Products by category in the database", e);
+        }
+        return apiProductResults;
+    }
+
+    public List<String> searchAPIProductsByOther(String org, String property, String value, int start, int offset) throws APIManagementException {
+        List<String> apiProductResults = new ArrayList<>();
+        String query = SQLConstants.SEARCH_API_PRODUCT_BY_OTHER_SQL(property);
+        value = "%" + value.toLowerCase() + "%";
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, value);
+            prepStmt.setString(2, org);
+            prepStmt.setInt(3, start);
+            prepStmt.setInt(4, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    apiProductResults.add(metadata);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching API Products by other criteria in the database", e);
+        }
+        return apiProductResults;
+    }
+
+    public List<String> getAllApiProducts(String org, int start, int offset) throws APIManagementException {
+        List<String> apiProductResults = new ArrayList<>();
+        String query = SQLConstants.GET_ALL_API_PRODUCT_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setInt(2, start);
+            prepStmt.setInt(3, offset);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String metadata = rs.getString("metadata");
+                    apiProductResults.add(metadata);
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving all API Products in the database", e);
+        }
+        return apiProductResults;
+    }
+
+    public String getApiProductByUUID(String org, String apiProductUUID) throws APIManagementException {
+        String apiProductMetadata = null;
+        String query = SQLConstants.GET_API_PRODUCT_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, apiProductUUID);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    apiProductMetadata = rs.getString("metadata");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving API Product by UUID in the database", e);
+        }
+        return apiProductMetadata;
+    }
+
+    public boolean isAPIExists(String apiUUID, String name) throws APIManagementException {
+        boolean exists = false;
+        String query = SQLConstants.CHECK_API_EXISTS_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, name);
+            prepStmt.setString(2, apiUUID);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt("count");
+                    exists =  count > 0;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while checking if API exists in the database", e);
+        }
+        return exists;
+    }
 }

@@ -86,27 +86,45 @@ public class DatabasePersistenceImpl implements APIPersistence {
     public String addAPIRevision(Organization org, String apiUUID, int revisionId) throws APIPersistenceException {
         String revisionUUID;
         try {
+            // Get type of artifact
+            String artifactType = persistenceDAO.getAssociatedType(org.getName(), apiUUID);
+
+            if (artifactType == null || artifactType.isEmpty()) {
+                throw new APIPersistenceException("No associated type found for API: " + apiUUID);
+            }
+
+            // Check if the API exists
+            if (!persistenceDAO.isAPIExists(apiUUID, org.getName())) {
+                throw new APIPersistenceException("API with UUID: " + apiUUID + " does not exist in organization: " + org.getName());
+            }
+
             // Get API Schema data
-            String apiSchema = persistenceDAO.getAPISchemaByUUID(apiUUID, org.getName());
+            String apiOrApiProductSchema = null;
+
+            if (APIConstants.API_PRODUCT_DB_NAME.equals(artifactType)) {
+                apiOrApiProductSchema = persistenceDAO.getApiProductByUUID(org.getName(), apiUUID);
+            } else {
+                apiOrApiProductSchema = persistenceDAO.getAPISchemaByUUID(apiUUID, org.getName());
+            }
+
             String swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiUUID, org.getName());
             String asyncApiDefinition = persistenceDAO.getAsyncAPIDefinitionByUUID(apiUUID, org.getName());
 
-            // Generate new UUID for revision
-            revisionUUID = UUID.randomUUID().toString();
+            // Revision UUID is same as API UUID
+            revisionUUID = apiUUID;
 
             // Prepare JSON objects
-            JsonObject apiJson = DatabasePersistenceUtil.stringTojsonObject(apiSchema);
+            JsonObject apiJson = DatabasePersistenceUtil.stringTojsonObject(apiOrApiProductSchema);
             JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
             String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
 
-
             // Add revision entry
-            persistenceDAO.addAPIRevisionSchema(apiUUID, revisionId, revisionUUID, apiJson.toString(), orgJsonString);
+            persistenceDAO.addAPIRevisionSchema(artifactType, revisionId, apiUUID, apiJson.toString(), orgJsonString);
 
             // Add API definitions if they exist
             if (swaggerDefinition != null) {
                 try {
-                    persistenceDAO.addAPIRevisionSwaggerDefinition(apiUUID, revisionId, revisionUUID,
+                    persistenceDAO.addAPIRevisionSwaggerDefinition(revisionId, apiUUID,
                         swaggerDefinition, orgJsonString);
                 } catch (APIManagementException e) {
                     log.error("Error while saving Swagger definition for API revision: " + apiUUID, e);
@@ -115,7 +133,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
             if (asyncApiDefinition != null) {
                 try {
-                    persistenceDAO.addAPIRevisionAsyncDefinition(apiUUID, revisionId, revisionUUID,
+                    persistenceDAO.addAPIRevisionAsyncDefinition(revisionId, apiUUID,
                         asyncApiDefinition, orgJsonString);
                 } catch (APIManagementException e) {
                     log.error("Error while saving Async API definition for API revision: " + apiUUID, e);
@@ -125,9 +143,15 @@ public class DatabasePersistenceImpl implements APIPersistence {
             // Handle thumbnail if exists
             try {
                 ResourceFile thumbnailResource = this.getThumbnail(org, apiUUID);
-                if (thumbnailResource != null) {
-                    persistenceDAO.addAPIRevisionThumbnail(apiUUID, revisionId, revisionUUID,
-                        thumbnailResource.getContent(), thumbnailResource.getContentType(), orgJsonString);
+
+               if (thumbnailResource != null && thumbnailResource.getContent() != null) {
+                   JsonObject thumbnailMetadata = new JsonObject();
+                   thumbnailMetadata.addProperty("fileType", thumbnailResource.getContentType());
+                   thumbnailMetadata.addProperty("fileName", thumbnailResource.getName());
+                   String thumbnailMetadataString = DatabasePersistenceUtil.getFormattedJsonStringToSave(thumbnailMetadata);
+
+                   persistenceDAO.addAPIRevisionThumbnail(revisionId, apiUUID,
+                           thumbnailResource.getContent(), thumbnailMetadataString, orgJsonString);
                 }
             } catch (Exception e) {
                 // Log error but continue since thumbnail is not critical
@@ -138,7 +162,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                 log.debug("API Revision " + revisionId + " created for API: " + apiUUID);
             }
 
-        } catch (SQLException | APIManagementException e) {
+        } catch (APIManagementException e) {
             throw new APIPersistenceException("Error while creating API Revision: " + revisionId +
                 " for API: " + apiUUID, e);
         }
@@ -318,9 +342,26 @@ public class DatabasePersistenceImpl implements APIPersistence {
         PublisherAPI publisherAPI = null;
 
         try {
-            String apiSchema = persistenceDAO.getAPISchemaByUUID(apiId, tenantDomain);
-            String swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiId, tenantDomain);
-            JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(apiSchema);
+            // Determine if the artifact is an API or API Product
+            String artifactType = persistenceDAO.getAssociatedType(tenantDomain, apiId);
+
+            if (artifactType == null || artifactType.isEmpty()) {
+                throw new APIPersistenceException("No associated type found for API or API Product: " + apiId);
+            }
+
+            String schema;
+            String swaggerDefinition;
+
+            if (APIConstants.API_PRODUCT_DB_NAME.equals(artifactType)) {
+                // Handle API Product
+                schema = persistenceDAO.getApiProductByUUID(tenantDomain, apiId);
+            } else {
+                // Handle API
+                schema = persistenceDAO.getAPISchemaByUUID(apiId, tenantDomain);
+            }
+            swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiId, tenantDomain);
+
+            JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(schema);
             jsonObject.addProperty("swaggerDefinition", swaggerDefinition);
 
             try {
@@ -332,15 +373,24 @@ public class DatabasePersistenceImpl implements APIPersistence {
                     jsonObject.addProperty("thumbnailUrl", "");
                 }
             } catch (Exception e) {
-                //log.error("Error while retrieving thumbnail for API: " + apiId, e);
+                // Log error but continue
+                log.error("Error while retrieving thumbnail for API or API Product: " + apiId, e);
             }
 
-            if (apiSchema != null) {
-                API api = DatabasePersistenceUtil.jsonToApi(jsonObject);
-                publisherAPI = APIMapper.INSTANCE.toPublisherApi(api);
+            if (schema != null) {
+                if (APIConstants.API_PRODUCT_DB_NAME.equals(artifactType)) {
+                    // Map to API Product
+                    APIProduct apiProduct = DatabasePersistenceUtil.jsonToApiProduct(jsonObject);
+                    PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
+                    publisherAPI = DatabasePersistenceUtil.convertToPublisherAPI(publisherAPIProduct);
+                } else {
+                    // Map to API
+                    API api = DatabasePersistenceUtil.jsonToApi(jsonObject);
+                    publisherAPI = APIMapper.INSTANCE.toPublisherApi(api);
+                }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while retrieving API or API Product with ID: " + apiId, e);
         }
 
         return publisherAPI;
@@ -349,9 +399,26 @@ public class DatabasePersistenceImpl implements APIPersistence {
     @Override
     public DevPortalAPI getDevPortalAPI(Organization org, String apiId) throws APIPersistenceException {
         try {
-            String result = persistenceDAO.getAPISchemaByUUID(apiId, org.getName());
-            String swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiId, org.getName());
-            JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(result);
+            // Determine if the artifact is an API or API Product
+            String artifactType = persistenceDAO.getAssociatedType(org.getName(), apiId);
+
+            if (artifactType == null || artifactType.isEmpty()) {
+                throw new APIPersistenceException("No associated type found for API or API Product: " + apiId);
+            }
+
+            String schema;
+            String swaggerDefinition;
+
+            if (APIConstants.API_PRODUCT_DB_NAME.equals(artifactType)) {
+                // Handle API Product
+                schema = persistenceDAO.getApiProductByUUID(org.getName(), apiId);
+            } else {
+                // Handle API
+                schema = persistenceDAO.getAPISchemaByUUID(apiId, org.getName());
+            }
+            swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiId, org.getName());
+
+            JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(schema);
             jsonObject.addProperty("swaggerDefinition", swaggerDefinition);
 
             try {
@@ -363,13 +430,22 @@ public class DatabasePersistenceImpl implements APIPersistence {
                     jsonObject.addProperty("thumbnailUrl", "");
                 }
             } catch (Exception e) {
-                log.debug("Error while retrieving thumbnail for API: " + apiId, e);
+                log.error("Error while retrieving thumbnail for API or API Product: " + apiId, e);
             }
 
-            API api = DatabasePersistenceUtil.jsonToApi(jsonObject);
-            return APIMapper.INSTANCE.toDevPortalApi(api);
-        } catch (SQLException e) {
-            throw new APIPersistenceException("Error while retrieving API with ID: " + apiId, e);
+            if (APIConstants.API_PRODUCT_DB_NAME.equals(artifactType)) {
+                // Convert API Product data to DevPortalAPI
+                APIProduct apiProduct = DatabasePersistenceUtil.jsonToApiProduct(jsonObject);
+                DevPortalAPI devPortalAPI = DatabasePersistenceUtil.mapAPIProductToDevPortalAPI(apiProduct);
+                return devPortalAPI;
+            } else {
+                // Convert API data to DevPortalAPI
+                API api = DatabasePersistenceUtil.jsonToApi(jsonObject);
+                return APIMapper.INSTANCE.toDevPortalApi(api);
+            }
+
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while retrieving API or API Product with ID: " + apiId, e);
         }
     }
 
@@ -860,8 +936,6 @@ public class DatabasePersistenceImpl implements APIPersistence {
             }
         } catch (APIManagementException e) {
             throw new OASPersistenceException("Error while saving OAS definition", e);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
         }
     }
 
@@ -873,7 +947,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
             if (swaggerDefinition != null) {
                 swaggerDefinition = DatabasePersistenceUtil.getFormattedJsonString(swaggerDefinition);
             }
-        } catch (SQLException e) {
+        } catch (APIManagementException e) {
             throw new RuntimeException(e);
         }
         return swaggerDefinition;
@@ -1184,11 +1258,23 @@ public class DatabasePersistenceImpl implements APIPersistence {
         }
     }
 
-
     @Override
     public PublisherAPIProduct updateAPIProduct(Organization org, PublisherAPIProduct publisherAPIProduct)
             throws APIPersistenceException {
         try {
+            if (publisherAPIProduct.getId() == null || publisherAPIProduct.getId().isEmpty()) {
+                throw new APIPersistenceException("API Product ID cannot be null or empty");
+            }
+
+            if (publisherAPIProduct.getApiProductName() == null || publisherAPIProduct.getApiProductName().isEmpty()) {
+                PublisherAPIProduct currentAPIProduct = getPublisherAPIProduct(org, publisherAPIProduct.getId());
+                if (currentAPIProduct != null) {
+                    publisherAPIProduct.setApiProductName(currentAPIProduct.getApiProductName());
+                } else {
+                    throw new APIPersistenceException("API Product not found for ID: " + publisherAPIProduct.getId());
+                }
+            }
+
             // Convert to APIProduct model
             APIProduct apiProduct = APIProductMapper.INSTANCE.toApiProduct(publisherAPIProduct);
             APIProductIdentifier id = new APIProductIdentifier(publisherAPIProduct.getProviderName(),
@@ -1237,7 +1323,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
         try {
             // Get API Product schema from database
-            String apiProductSchema = persistenceDAO.getAPISchemaByUUID(apiProductId, tenantDomain);
+            String apiProductSchema = persistenceDAO.getApiProductByUUID(tenantDomain, apiProductId);
             String swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiProductId, tenantDomain);
             JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(apiProductSchema);
             jsonObject.addProperty("definition", swaggerDefinition);
@@ -1255,7 +1341,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
             }
 
             if (apiProductSchema != null) {
-                APIProduct apiProduct = DatabasePersistenceUtil.jsonToApiProduct(jsonObject); 
+                APIProduct apiProduct = DatabasePersistenceUtil.jsonToApiProduct(jsonObject);
                 publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
 
                 // Set needed fields explicitly
@@ -1267,7 +1353,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                 publisherAPIProduct.setThumbnail(apiProduct.getThumbnailUrl());
                 publisherAPIProduct.setDefinition(swaggerDefinition);
             }
-        } catch (SQLException e) {
+        } catch (APIManagementException e) {
             throw new APIPersistenceException("Error while retrieving API Product with ID " + apiProductId, e);
         }
 
@@ -1276,13 +1362,13 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherAPIProductSearchResult searchAPIProductsForPublisher(Organization org, String searchQuery,
-                                                                         int start, int offset, UserContext ctx) 
+                                                                         int start, int offset, UserContext ctx)
                                                                          throws APIPersistenceException {
         String requestedTenantDomain = org.getName();
         PublisherAPIProductSearchResult searchResult = null;
 
         log.debug("Requested query for publisher API product search: " + searchQuery);
-        String modifiedQuery = RegistrySearchUtil.getPublisherSearchQuery(searchQuery, ctx); // Reuse API search query builder
+        SearchQuery modifiedQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
         log.debug("Modified query for publisher API product search: " + modifiedQuery);
 
         try {
@@ -1290,17 +1376,29 @@ public class DatabasePersistenceImpl implements APIPersistence {
             List<PublisherAPIProductInfo> apiProductList = new ArrayList<>();
 
             // Get all API Products according to search criteria
-            List<String> results = persistenceDAO.searchAPIProductSchema(modifiedQuery, org.getName(), start, offset);
-            totalLength = PersistenceDAO.getInstance().getAllAPIProductCount(org.getName());
+            List<String> results = null;
+
+            if (modifiedQuery != null && !modifiedQuery.getContent().isEmpty()) {
+                results = DatabaseSearchUtil.searchAPIProductsForPublisher(modifiedQuery, requestedTenantDomain, start, offset);
+            } else {
+                results = persistenceDAO.getAllApiProducts(requestedTenantDomain, start, offset);
+            }
+
+            totalLength = persistenceDAO.getAllAPIProductCount(org.getName());
+
+            if (results == null || results.isEmpty()) {
+                log.debug("No API Products found for the given search criteria.");
+                return new PublisherAPIProductSearchResult();
+            }
 
             for (String result: results) {
                 JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();
-                
+
                 PublisherAPIProductInfo apiProductInfo = new PublisherAPIProductInfo();
                 String apiProductId = DatabasePersistenceUtil.safeGetAsString(jsonObject, "uuid");
                 apiProductInfo.setId(apiProductId);
                 apiProductInfo.setProviderName(DatabasePersistenceUtil.safeGetAsString(jsonObject.getAsJsonObject("id"), "providerName"));
-                apiProductInfo.setApiProductName(DatabasePersistenceUtil.safeGetAsString(jsonObject.getAsJsonObject("id"), "apiProductName")); 
+                apiProductInfo.setApiProductName(DatabasePersistenceUtil.safeGetAsString(jsonObject.getAsJsonObject("id"), "apiProductName"));
                 apiProductInfo.setVersion(DatabasePersistenceUtil.safeGetAsString(jsonObject.getAsJsonObject("id"), "version"));
                 apiProductInfo.setState(DatabasePersistenceUtil.safeGetAsString(jsonObject, "state"));
                 apiProductInfo.setContext(DatabasePersistenceUtil.safeGetAsString(jsonObject, "context"));
@@ -1330,7 +1428,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                 apiProductInfo.setTechnicalOwnerEmail(DatabasePersistenceUtil.safeGetAsString(jsonObject, "technicalOwnerEmail"));
 
                 // Get monetization status
-                apiProductInfo.setMonetizationStatus(jsonObject.has("monetizationStatus") && 
+                apiProductInfo.setMonetizationStatus(jsonObject.has("monetizationStatus") &&
                     !jsonObject.get("monetizationStatus").isJsonNull() &&
                     jsonObject.get("monetizationStatus").getAsBoolean());
 

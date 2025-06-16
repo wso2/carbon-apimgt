@@ -110,6 +110,21 @@ public class DatabasePersistenceUtil {
         }
     }
 
+    public static Date stringTimestampToDate(String timestamp) {
+        if (timestamp == null) return null;
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        try {
+            return formatter.parse(new Date(Long.parseLong(timestamp)).toString());
+        } catch (Exception e) {
+            log.error("Failed to parse timestamp string: " + timestamp, e);
+            return null;
+        }
+    }
+
+    public static String dateToTimestampString(Date date) {
+        return String.valueOf(date.getTime());
+    }
+
     public static Set<String> jsonArrayToSet(JsonArray jsonArray) {
         Set<String> resultSet = new HashSet<>();
         for (JsonElement element: jsonArray) {
@@ -416,7 +431,7 @@ public class DatabasePersistenceUtil {
         ).collect(Collectors.toSet()));
         apiInfo.setSubscriptionAvailability(api.getSubscriptionAvailability());
         apiInfo.setSubscriptionAvailableOrgs(api.getSubscriptionAvailableTenants());
-        apiInfo.setCreatedTime(dateToString(stringToDate(api.getCreatedTime())));
+        apiInfo.setCreatedTime(dateToString(stringTimestampToDate(api.getCreatedTime())));
         apiInfo.setDescription(api.getDescription());
         apiInfo.setGatewayVendor(api.getGatewayVendor());
         apiInfo.setAdditionalProperties(api.getAdditionalProperties());
@@ -434,7 +449,7 @@ public class DatabasePersistenceUtil {
         }
 
         DevPortalAPIInfo apiInfo = new DevPortalAPIInfo();
-        apiInfo.setId(apiProduct.getId().getUUID());
+        apiInfo.setId(apiProduct.getUuid());
         apiInfo.setApiName(apiProduct.getId().getName());
         apiInfo.setVersion(apiProduct.getId().getVersion());
         apiInfo.setProviderName(apiProduct.getId().getProviderName());
@@ -452,6 +467,79 @@ public class DatabasePersistenceUtil {
         apiInfo.setAdditionalProperties(apiProduct.getAdditionalProperties());
 
         return apiInfo;
+    }
+
+    public static PublisherAPI convertToPublisherAPI(PublisherAPIProduct publisherAPIProduct) {
+        PublisherAPI publisherAPI = new PublisherAPI();
+        publisherAPI.setId(publisherAPIProduct.getId());
+        publisherAPI.setApiName(publisherAPIProduct.getApiProductName());
+        publisherAPI.setProviderName(publisherAPIProduct.getProviderName());
+        publisherAPI.setVersion(publisherAPIProduct.getVersion());
+        publisherAPI.setContext(publisherAPIProduct.getContext());
+        publisherAPI.setStatus(publisherAPIProduct.getState());
+        publisherAPI.setThumbnail(publisherAPIProduct.getThumbnail());
+        publisherAPI.setDescription(publisherAPIProduct.getDescription());
+        publisherAPI.setBusinessOwner(publisherAPIProduct.getBusinessOwner());
+        publisherAPI.setBusinessOwnerEmail(publisherAPIProduct.getBusinessOwnerEmail());
+        publisherAPI.setTechnicalOwner(publisherAPIProduct.getTechnicalOwner());
+        publisherAPI.setTechnicalOwnerEmail(publisherAPIProduct.getTechnicalOwnerEmail());
+        publisherAPI.setAvailableTierNames(publisherAPIProduct.getAvailableTierNames());
+        publisherAPI.setVisibleOrganizations(publisherAPIProduct.getVisibleOrganizations());
+        publisherAPI.setSubscriptionAvailability(publisherAPIProduct.getSubscriptionAvailableOrgs());
+        publisherAPI.setCreatedTime(publisherAPIProduct.getCreatedTime());
+        publisherAPI.setLastUpdated(publisherAPIProduct.getLastUpdated());
+        publisherAPI.setGatewayVendor(publisherAPIProduct.getGatewayVendor());
+        publisherAPI.setAdditionalProperties(publisherAPIProduct.getAdditionalProperties());
+        return publisherAPI;
+    }
+
+    public static DevPortalAPI mapAPIProductToDevPortalAPI(APIProduct apiProduct) {
+        if (apiProduct == null) {
+            return null;
+        }
+
+    DevPortalAPI devPortalAPI = new DevPortalAPI();
+    devPortalAPI.setId(apiProduct.getUuid());
+    devPortalAPI.setApiName(apiProduct.getId().getName());
+    devPortalAPI.setVersion(apiProduct.getId().getVersion());
+    devPortalAPI.setProviderName(apiProduct.getId().getProviderName());
+    devPortalAPI.setContext(apiProduct.getContext());
+    devPortalAPI.setType(apiProduct.getType());
+    devPortalAPI.setThumbnail(apiProduct.getThumbnailUrl());
+    devPortalAPI.setBusinessOwner(apiProduct.getBusinessOwner());
+    devPortalAPI.setBusinessOwnerEmail(apiProduct.getBusinessOwnerEmail());
+    devPortalAPI.setTechnicalOwner(apiProduct.getTechnicalOwner());
+    devPortalAPI.setTechnicalOwnerEmail(apiProduct.getTechnicalOwnerEmail());
+    devPortalAPI.setStatus(apiProduct.getState());
+    devPortalAPI.setAvailableTierNames(apiProduct.getAvailableTiers().stream().map(Tier::getName).collect(Collectors.toSet()));
+    devPortalAPI.setSubscriptionAvailability(apiProduct.getSubscriptionAvailability());
+    devPortalAPI.setSubscriptionAvailableOrgs(apiProduct.getSubscriptionAvailableTenants());
+    devPortalAPI.setCreatedTime(dateToTimestampString(apiProduct.getCreatedTime()));
+    devPortalAPI.setDescription(apiProduct.getDescription());
+    devPortalAPI.setGatewayVendor(apiProduct.getGatewayVendor());
+    devPortalAPI.setAdditionalProperties(apiProduct.getAdditionalProperties());
+    devPortalAPI.setTransports(apiProduct.getTransports());
+    devPortalAPI.setVisibleOrganizations(apiProduct.getVisibleTenants());
+    devPortalAPI.setVisibleRoles(apiProduct.getVisibleRoles());
+    devPortalAPI.setTags(new ArrayList<>(apiProduct.getTags()));
+    devPortalAPI.setEnvironments(apiProduct.getEnvironments());
+    devPortalAPI.setApiSecurity(apiProduct.getApiSecurity());
+    devPortalAPI.setMonetizationEnabled(apiProduct.isMonetizationEnabled());
+    devPortalAPI.setApiCategories(apiProduct.getApiCategories().stream().map(APICategory::getName).collect(Collectors.toSet()));
+    devPortalAPI.setAdvertiseOnly(apiProduct.isEnableStore());
+    devPortalAPI.setDefaultVersion(apiProduct.isDefaultVersion());
+    devPortalAPI.setDeploymentEnvironments(apiProduct.getEnvironments().stream()
+            .map(env -> {
+                DeploymentEnvironments deploymentEnvironments = new DeploymentEnvironments();
+                deploymentEnvironments.setType(env);
+                return deploymentEnvironments;
+            }).collect(Collectors.toSet()));
+    devPortalAPI.setAuthorizationHeader(apiProduct.getAuthorizationHeader());
+    devPortalAPI.setApiKeyHeader(apiProduct.getApiKeyHeader());
+    devPortalAPI.setVisibility(apiProduct.getVisibility());
+    devPortalAPI.setAsyncTransportProtocols(apiProduct.isAsync() ? "async" : null);
+
+        return devPortalAPI;
     }
 }
 

@@ -279,4 +279,97 @@ public class DatabaseSearchUtil {
 
         return contentSearchResults;
     }
+
+    public static List<String> searchAPIProductsForPublisher(SearchQuery searchQuery, String orgName, int start, int offset) throws APIManagementException {
+        String searchContent;
+        SearchType searchType;
+        String property = null;
+
+        try {
+            searchType = SearchType.valueOf(searchQuery.getType().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            searchType = SearchType.OTHER;
+            property = searchQuery.getType();
+        }
+        searchContent = searchQuery.getContent();
+
+        List<String> searchResult;
+
+        switch (searchType) {
+            case CONTENT:
+                try {
+                    searchResult = persistenceDAO.searchAPIProductsByContent(orgName, searchContent, start, offset);
+                } catch (APIManagementException e) {
+                    throw new APIManagementException("Error while searching API Products by content: " + searchContent, e);
+                }
+                break;
+            case NAME:
+                try {
+                    searchResult = persistenceDAO.searchAPIProductsByName(orgName, searchContent, start, offset);
+                } catch (APIManagementException e) {
+                    throw new APIManagementException("Error while searching API Products by name: " + searchContent, e);
+                }
+                break;
+            case PROVIDER:
+                try {
+                    searchResult = persistenceDAO.searchAPIProductsByProvider(searchContent, orgName, start, offset);
+                } catch (APIManagementException e) {
+                    throw new APIManagementException("Error while searching API Products by provider: " + searchContent, e);
+                }
+                break;
+            case VERSION:
+                try {
+                    searchResult = persistenceDAO.searchAPIProductsByVersion(orgName, searchContent, start, offset);
+                } catch (APIManagementException e) {
+                    throw new APIManagementException("Error while searching API Products by version: " + searchContent, e);
+                }
+                break;
+            case CONTEXT:
+                try {
+                    searchResult = persistenceDAO.searchAPIProductsByContext(orgName, searchContent, start, offset);
+                } catch (APIManagementException e) {
+                    throw new APIManagementException("Error while searching API Products by context: " + searchContent, e);
+                }
+                break;
+            case STATUS:
+                try {
+                    searchResult = persistenceDAO.searchAPIProductsByStatus(orgName, searchContent, start, offset);
+                } catch (APIManagementException e) {
+                    throw new APIManagementException("Error while searching API Products by status: " + searchContent, e);
+                }
+                break;
+            case DESCRIPTION:
+                try {
+                    searchResult = persistenceDAO.searchAPIProductsByDescription(orgName, searchContent, start, offset);
+                } catch (APIManagementException e) {
+                    throw new APIManagementException("Error while searching API Products by description: " + searchContent, e);
+                }
+                break;
+            case TAGS:
+                try {
+                    searchResult = persistenceDAO.searchAPIProductsByTags(orgName, searchContent, start, offset);
+                } catch (APIManagementException e) {
+                    throw new APIManagementException("Error while searching API Products by tags: " + searchContent, e);
+                }
+                break;
+            case API_CATEGORY:
+                try {
+                    searchResult = persistenceDAO.searchAPIProductsByCategory(orgName, searchContent, start, offset);
+                } catch (APIManagementException e) {
+                    throw new APIManagementException("Error while searching API Products by category: " + searchContent, e);
+                }
+                break;
+            default:
+                try {
+                    if (property == null || property.isEmpty()) {
+                        throw new APIManagementException("Property for search type 'other' cannot be null or empty.");
+                    }
+                    searchResult = persistenceDAO.searchAPIProductsByOther(orgName, property, searchContent, start, offset);
+                } catch (APIManagementException e) {
+                    throw new APIManagementException("Error while searching API Products by property: " + property + " with content: " + searchContent, e);
+                }
+        }
+
+        return searchResult;
+    }
 }
