@@ -15956,8 +15956,7 @@ public class ApiMgtDAO {
                         }
                         ps.setInt(1, applicationId);
                         ps.setString(2, attribute.getKey());
-                        ps.setString(3, conn.getMetaData().getDatabaseProductName().contains("DB2") &&
-                                StringUtils.isEmpty(attribute.getValue()) ? "N/A" : attribute.getValue());
+                        ps.setString(3, attribute.getValue());
                         ps.setInt(4, tenantId);
                         ps.addBatch();
                     }
