@@ -1502,7 +1502,13 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public Set<Tag> getAllTags(Organization org, UserContext ctx) throws APIPersistenceException {
-        return Set.of();
+        Set<Tag> tags = new HashSet<>();
+        try {
+            tags = persistenceDAO.getAllTags(org.getName());
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while retrieving all tags", e);
+        }
+        return tags;
     }
 
     @Override

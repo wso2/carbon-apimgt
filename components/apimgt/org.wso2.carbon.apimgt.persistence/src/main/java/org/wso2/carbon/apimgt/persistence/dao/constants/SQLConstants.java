@@ -531,7 +531,7 @@ public class SQLConstants {
     public static final String SEARCH_API_BY_TAGS_FOR_DEV_PORTAL_SQL =
             "SELECT * FROM AM_ARTIFACT_DATA " +
             "WHERE JSON_VALUE(org, '$.name') = ? " +
-            "AND LOWER(JSON_VALUE(metadata, '$.tags')) LIKE ? " +
+            "AND LOWER(JSON_QUERY(metadata, '$.tags')) LIKE ? " +
             "AND (" +
                 "(TYPE = 'API' AND JSON_VALUE(METADATA, '$.status') = 'PUBLISHED') " +
                 "OR " +
@@ -543,7 +543,7 @@ public class SQLConstants {
     public static final String SEARCH_API_BY_API_CATEGORY_FOR_DEV_PORTAL_SQL =
             "SELECT * FROM AM_ARTIFACT_DATA " +
             "WHERE JSON_VALUE(org, '$.name') = ? " +
-            "AND LOWER(JSON_VALUE(metadata, '$.apiCategories')) LIKE ? " +
+            "AND LOWER(JSON_QUERY(metadata, '$.apiCategories')) LIKE ? " +
             "AND (" +
                 "(TYPE = 'API' AND JSON_VALUE(METADATA, '$.status') = 'PUBLISHED') " +
                 "OR " +
@@ -816,5 +816,16 @@ public class SQLConstants {
             "WHERE JSON_VALUE(org, '$.name') = ? " +
             "AND type IN ('API', 'API_PRODUCT') " +
             "AND API_UUID = ? ";
+
+    public static final String GET_ALL_TAGS_SQL =
+            "SELECT DISTINCT JSON_QUERY(METADATA, '$.tags') AS TAGS " +
+                    "FROM AM_ARTIFACT_DATA " +
+                    "WHERE JSON_VALUE(org, '$.name') = ? " +
+                    "AND JSON_QUERY(METADATA, '$.tags') IS NOT NULL " +
+                    "AND (" +
+                    "(type = 'API' AND JSON_VALUE(METADATA, '$.status') = 'PUBLISHED') " +
+                    "OR " +
+                    "(type = 'API_PRODUCT' AND JSON_VALUE(METADATA, '$.state') = 'PUBLISHED')" +
+                    ")";
 
 }

@@ -23,6 +23,7 @@ enum SearchType {
     STATUS("status"),
     DESCRIPTION("description"),
     TAGS("tags"),
+    TAG("tag"),
     API_CATEGORY("api-category"),
     OTHER("other");
 
@@ -113,6 +114,13 @@ public class DatabaseSearchUtil {
                     throw new APIManagementException("Error while searching APIs by tags: " + searchContent, e);
                 }
                 break;
+            case TAG:
+                try {
+                    searchResult = persistenceDAO.searchAPIsByTags(orgName, searchContent, start, offset);
+                } catch (APIManagementException e) {
+                    throw new APIManagementException("Error while searching APIs by tag: " + searchContent, e);
+                }
+                break;
             case API_CATEGORY:
                 try {
                     searchResult = persistenceDAO.searchAPIsByCategory(orgName, searchContent, start, offset);
@@ -170,6 +178,7 @@ public class DatabaseSearchUtil {
                 contentSearchResults = persistenceDAO.searchContentByDescription(orgName, searchContent, start, offset);
                 break;
             case TAGS:
+            case TAG:
                 contentSearchResults = persistenceDAO.searchContentByTags(orgName, searchContent, start, offset);
                 break;
             case API_CATEGORY:
@@ -218,6 +227,7 @@ public class DatabaseSearchUtil {
                 searchResult = persistenceDAO.searchAPIsByDescriptionForDevPortal(orgName, searchContent, start, offset);
                 break;
             case TAGS:
+            case TAG:
                 searchResult = persistenceDAO.searchAPIsByTagsForDevPortal(orgName, searchContent, start, offset);
                 break;
             case API_CATEGORY:
@@ -268,6 +278,7 @@ public class DatabaseSearchUtil {
                 contentSearchResults = persistenceDAO.searchContentByDescriptionForDevPortal(requestedTenantDomain, searchContent, start, offset);
                 break;
             case TAGS:
+            case TAG:
                 contentSearchResults = persistenceDAO.searchContentByTagsForDevPortal(requestedTenantDomain, searchContent, start, offset);
                 break;
             case API_CATEGORY:
@@ -350,6 +361,13 @@ public class DatabaseSearchUtil {
                     searchResult = persistenceDAO.searchAPIProductsByTags(orgName, searchContent, start, offset);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching API Products by tags: " + searchContent, e);
+                }
+                break;
+            case TAG:
+                try {
+                    searchResult = persistenceDAO.searchAPIProductsByTags(orgName, searchContent, start, offset);
+                } catch (APIManagementException e) {
+                    throw new APIManagementException("Error while searching API Products by tag: " + searchContent, e);
                 }
                 break;
             case API_CATEGORY:

@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.persistence.dao;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Tag;
 import org.wso2.carbon.apimgt.persistence.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.utils.PersistanceDBUtil;
@@ -12,9 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class PersistenceDAO {
     private static final Log log = LogFactory.getLog(PersistenceDAO.class);
@@ -2335,5 +2334,46 @@ public class PersistenceDAO {
             handleException("Error while checking if API exists in the database", e);
         }
         return exists;
+    }
+
+    public Set<Tag> getAllTags(String org) throws APIManagementException {
+        Set<Tag> tags = new HashSet<>();
+        List<String> tagNames = new ArrayList<>();
+        String query = SQLConstants.GET_ALL_TAGS_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                while (rs.next()) {
+                    String tagResults = rs.getString("tags");
+                    List<String> tagNamesList = Arrays.asList(tagResults.replace("[", "").replace("]", "").split(","));
+                    if (!tagNamesList.isEmpty()) {
+                        for (String tag : tagNamesList) {
+                            if (tag != null && !tag.trim().isEmpty()) {
+                                tag = tag.trim();
+                                // Avoid adding duplicate tags
+                                if (!tagNames.contains(tag)) {
+                                    Tag tagObj = new Tag(tag, 1);
+                                    tags.add(tagObj);
+                                } else {
+                                    // If tag already exists, increment the occurrence count
+                                    for (Tag existingTag : tags) {
+                                        if (existingTag.getName().equals(tag)) {
+                                            existingTag.setNoOfOccurrences(existingTag.getNoOfOccurrences() + 1);
+                                            break;
+                                        }
+                                    }
+                                }
+                                tagNames.add(tag);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving all tags in the database", e);
+        }
+        return tags;
     }
 }
