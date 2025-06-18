@@ -228,5 +228,8 @@
   "apim.transaction_counter.store_impl":"org.wso2.integration.transaction.counter.store.TransactionRecordStoreImpl",
   "apim.transaction_counter.service_username": "$ref{super_admin.username}",
   "apim.transaction_counter.service_password": "$ref{super_admin.password}",
-  "apim.transaction_counter.service_url": "https://localhost:${mgt.transport.https.port}/internal/data/v1/transaction-records"
+  "apim.transaction_counter.service_url": "https://localhost:${mgt.transport.https.port}/internal/data/v1/transaction-records",
+  "tenant_sharing.enable": false,
+  "tenant_sharing.reserved_user_name": "$ref{super_admin.username}",
+  "tenant_sharing.reserved_user_password": "$ref{super_admin.password}"
 }

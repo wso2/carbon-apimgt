@@ -3418,6 +3418,13 @@ public final class APIConstants {
     public static final String ORG_BASED_ACCESS_CONTROL_ORG_NAME_CLAIM = "OrganizationNameLocalClaim";
     public static final String ORG_BASED_ACCESS_CONTROL_ORG_ID_CLAIM = "OrganizationIDLocalClaim";
 
+    public static class TenantSharingConfigs {
+        public static final String TENANT_SHARING_CONFIGS = "TenantSharingConfigs";
+        public static final String ENABLE = "Enable";
+        public static final String RESERVED_USER_NAME = "ReservedUserName";
+        public static final String RESERVED_USER_PASSWORD = "ReservedUserPassword";
+    }
+
     public static class TransactionCounter {
 
         public static final String TRANSACTIONCOUNTER = "TransactionCounter";

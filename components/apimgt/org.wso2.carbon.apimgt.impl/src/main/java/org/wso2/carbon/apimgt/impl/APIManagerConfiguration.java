@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
 import org.wso2.carbon.apimgt.impl.dto.LoadingTenants;
 import org.wso2.carbon.apimgt.impl.dto.OrgAccessControl;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
+import org.wso2.carbon.apimgt.impl.dto.TenantSharingConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TokenValidationDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
@@ -149,6 +150,7 @@ public class APIManagerConfiguration {
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     private RedisConfig redisConfig = new RedisConfig();
     private OrgAccessControl orgAccessControl = new OrgAccessControl();
+    private TenantSharingConfigurationDTO tenantSharingConfiguration = new TenantSharingConfigurationDTO();
     public OrgAccessControl getOrgAccessControl() {
         return orgAccessControl;
     }
@@ -701,6 +703,8 @@ public class APIManagerConfiguration {
                 setTokenValidation(element);
             } else if (APIConstants.ORG_BASED_ACCESS_CONTROL.equals(localName)) {
                 setOrgBasedAccessControlConfigs(element);
+            } else if (APIConstants.TenantSharingConfigs.TENANT_SHARING_CONFIGS.equals(localName)) {
+                setTenantSharingConfiguration(element);
             } else if (APIConstants.HASHING.equals(localName)) {
                 setHashingAlgorithm(element);
             } else if (APIConstants.TransactionCounter.TRANSACTIONCOUNTER.equals(localName)) {
@@ -807,7 +811,30 @@ public class APIManagerConfiguration {
             orgAccessControl.setOrgIdLocalClaim(orgIdElement.getText());
         }
     }
-        
+
+    private void setTenantSharingConfiguration(OMElement element) {
+        OMElement tenantSharingEnabledElement =
+                element.getFirstChildWithName(new QName(APIConstants.TenantSharingConfigs.ENABLE));
+        if (tenantSharingEnabledElement != null) {
+            tenantSharingConfiguration.setIsEnabled(Boolean.parseBoolean(tenantSharingEnabledElement.getText()));
+        }
+
+        OMElement reservedUserNameElement =
+                element.getFirstChildWithName(new QName(APIConstants.TenantSharingConfigs.RESERVED_USER_NAME));
+        if (reservedUserNameElement != null) {
+            tenantSharingConfiguration.setReservedUserName(reservedUserNameElement.getText());;
+        }
+        OMElement reservedUserPasswordElement =
+                element.getFirstChildWithName(new QName(APIConstants.TenantSharingConfigs.RESERVED_USER_PASSWORD));
+        if (reservedUserPasswordElement != null) {
+            tenantSharingConfiguration.setReservedUserPassword(reservedUserPasswordElement.getText());;
+        }
+    }
+
+    public TenantSharingConfigurationDTO getTenantSharingConfiguration() {
+        return tenantSharingConfiguration;
+    }
+
     public boolean getTransactionCounterProperties() {
         return isTransactionCounterEnabled;
     }
