@@ -110,16 +110,15 @@ public class SseResponseStreamInterceptor extends DefaultStreamInterceptor {
             }
             throttlePublisherService.execute(
                     () -> SseUtils.publishNonThrottledEvent(eventCount, messageId, throttleInfo, propertiesMap));
-            if (APIUtil.isAnalyticsEnabled()) {
-                try {
-                    publishAnalyticsData(eventCount, axi2Ctx);
-                } catch (AnalyticsException e) {
-                    log.error("Error while publishing analytics data", e);
-                }
-            }
-            return true;
         } else {
             log.error("Throttle object cannot be null.");
+        }
+        if (APIUtil.isAnalyticsEnabled()) {
+            try {
+                publishAnalyticsData(eventCount, axi2Ctx);
+            } catch (AnalyticsException e) {
+                log.error("Error while publishing analytics data", e);
+            }
         }
         return true;
     }

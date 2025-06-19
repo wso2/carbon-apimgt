@@ -13,17 +13,23 @@ public class MonetizationUsageInfo {
     String applicationOwner;
     HashMap<String, Object> customAttributes;
     Long requestCount;
+    Long depth;
+    Long complexity;
+    Long payloadSize;
 
-    public MonetizationUsageInfo(Long currentTimestamp, String apiUuid, String apiName, String apiVersion, String tenantDomain, String applicationName, String applicationOwner, HashMap<String, Object> customAttributes, Long requestCount) {
-        this.currentTimestamp = currentTimestamp;
-        this.apiUuid = apiUuid;
-        this.apiName = apiName;
-        this.apiVersion = apiVersion;
-        this.tenantDomain = tenantDomain;
-        this.applicationName = applicationName;
-        this.applicationOwner = applicationOwner;
-        this.customAttributes = customAttributes;
+    public MonetizationUsageInfo(Long payloadSize, Long complexity, Long depth, Long requestCount, HashMap<String, Object> customAttributes, String applicationOwner, String applicationName, String tenantDomain, String apiVersion, String apiName, String apiUuid, Long currentTimestamp) {
+        this.payloadSize = payloadSize;
+        this.complexity = complexity;
+        this.depth = depth;
         this.requestCount = requestCount;
+        this.customAttributes = customAttributes;
+        this.applicationOwner = applicationOwner;
+        this.applicationName = applicationName;
+        this.tenantDomain = tenantDomain;
+        this.apiVersion = apiVersion;
+        this.apiName = apiName;
+        this.apiUuid = apiUuid;
+        this.currentTimestamp = currentTimestamp;
     }
 
     public Long getCurrentTimestamp() {
@@ -96,5 +102,29 @@ public class MonetizationUsageInfo {
 
     public void setRequestCount(Long requestCount) {
         this.requestCount = requestCount;
+    }
+
+    public Long getDepth() {
+        return depth;
+    }
+
+    public void setDepth(Long depth) {
+        this.depth = depth;
+    }
+
+    public Long getComplexity() {
+        return complexity;
+    }
+
+    public void setComplexity(Long complexity) {
+        this.complexity = complexity;
+    }
+
+    public Long getPayloadSize() {
+        return payloadSize;
+    }
+
+    public void setPayloadSize(Long payloadSize) {
+        this.payloadSize = payloadSize;
     }
 }
