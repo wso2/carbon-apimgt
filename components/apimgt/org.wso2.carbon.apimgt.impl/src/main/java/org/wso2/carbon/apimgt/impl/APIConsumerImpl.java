@@ -1903,12 +1903,36 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (StringUtils.isEmpty(application.getSharedOrganization())) {
             application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD);
         }
-        apiMgtDAO.updateApplication(application);
+
+        apiMgtDAO.updateApplicationStatus(application.getId(),APIConstants.ApplicationStatus.UPDATE_PENDING);
+
+        try{
+            WorkflowExecutor updateApplicationWFExecutor =
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
+            ApplicationWorkflowDTO appWFDto = new ApplicationWorkflowDTO();
+            appWFDto.setApplication(application);
+            appWFDto.setExistingApplication(existingApp);
+            appWFDto.setExternalWorkflowReference(updateApplicationWFExecutor.generateUUID());
+            appWFDto.setWorkflowReference(String.valueOf(existingApp.getId())); //VALIDATION REQUIRED !!!!
+            appWFDto.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
+            appWFDto.setCallbackUrl(updateApplicationWFExecutor.getCallbackURL());
+            appWFDto.setStatus(WorkflowStatus.CREATED);
+            appWFDto.setTenantDomain(organization);
+            appWFDto.setTenantId(tenantId);
+            appWFDto.setUserName(existingApp.getOwner());//VALIDATION REQUIRED !!!!!!
+            appWFDto.setCreatedTime(System.currentTimeMillis());
+            updateApplicationWFExecutor.execute(appWFDto);
+
+        } catch (WorkflowException e) {
+            throw new APIManagementException("Could not execute application update workflow", e);
+        }
+
         Application updatedApplication = apiMgtDAO.getApplicationById(application.getId());
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the Application: " + application.getId() + " in the database.");
         }
 
+        //VALIDATION REQUIRED !!!!
         JSONObject appLogObject = new JSONObject();
         appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
         appLogObject.put(APIConstants.AuditLogConstants.TIER, application.getTier());
@@ -1928,13 +1952,29 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             recommendationThread.start();
         }
 
-        ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
-                existingApp.getOrganization(), updatedApplication.getId(), updatedApplication.getUUID(),
-                updatedApplication.getName(), updatedApplication.getTokenType(), updatedApplication.getTier(),
-                updatedApplication.getGroupId(), updatedApplication.getApplicationAttributes(),
-                existingApp.getSubscriber().getName());
-        APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(application.getId()),
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
+
+        if (wfDTO != null){
+            if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
+                    ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                            System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
+                            existingApp.getOrganization(), updatedApplication.getId(), updatedApplication.getUUID(),
+                            updatedApplication.getName(), updatedApplication.getTokenType(), updatedApplication.getTier(),
+                            updatedApplication.getGroupId(), updatedApplication.getApplicationAttributes(),
+                            existingApp.getSubscriber().getName());
+                    APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());}
+        } else {
+            ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
+                    existingApp.getOrganization(), updatedApplication.getId(), updatedApplication.getUUID(),
+                    updatedApplication.getName(), updatedApplication.getTokenType(), updatedApplication.getTier(),
+                    updatedApplication.getGroupId(), updatedApplication.getApplicationAttributes(),
+                    existingApp.getSubscriber().getName());
+            APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        }
+
+
     }
 
     /**
