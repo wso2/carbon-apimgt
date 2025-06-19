@@ -56,6 +56,9 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         workflowDTO.setMetadata("requestedCustomAttributes", requestedCustomAttributes);
         workflowDTO.setMetadata("requestedGroupIDs", application.getGroupId());
 
+        workflowDTO.setProperties("applicationName", existingApplication.getName());
+        workflowDTO.setProperties("userName", existingApplication.getOwner());
+        workflowDTO.setProperties("applicationTier", existingApplication.getTier());
 
         if (!Objects.equals(application.getName(), existingApplication.getName())){
 
