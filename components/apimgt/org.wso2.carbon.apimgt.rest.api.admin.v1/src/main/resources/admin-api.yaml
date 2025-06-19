@@ -6352,6 +6352,7 @@ components:
             - SUBSCRIPTION_DELETION
             - SUBSCRIPTION_UPDATE
             - REVISION_DEPLOYMENT
+            - APPLICATION_UPDATE
         workflowStatus:
           type: string
           description: |
