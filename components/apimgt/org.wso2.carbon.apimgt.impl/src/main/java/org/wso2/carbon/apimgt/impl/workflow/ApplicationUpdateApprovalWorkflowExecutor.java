@@ -113,5 +113,23 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         return new GeneralWorkflowResponse();
     }
 
+    @Override
+    public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
+
+        String errorMsg;
+        if (log.isDebugEnabled()) {
+            log.debug("Starting cleanup task for ApplicationUpdateApprovalWorkflowExecutor for :" + workflowExtRef);
+        }
+        super.cleanUpPendingTask(workflowExtRef);
+        try {
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            apiMgtDAO.deleteWorkflowRequest(workflowExtRef);
+        } catch (APIManagementException axisFault) {
+            errorMsg = "Error sending out cancel pending application update approval process message. cause: " +
+                    axisFault.getMessage();
+            throw new WorkflowException(errorMsg, axisFault);
+        }
+    }
+
 }
 

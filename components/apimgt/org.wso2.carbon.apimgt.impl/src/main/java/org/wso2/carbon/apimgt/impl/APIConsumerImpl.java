@@ -2239,6 +2239,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             if (appCreationWorkflowExtRef != null) {
                 cleanupAppCreationPendingTask(applicationId, createApplicationWFExecutor, appCreationWorkflowExtRef);
             }
+
+            //cleanup pending application update task
+            String appUpdateWorkflowExtRef = apiMgtDAO.getExternalWorkflowRefByInternalRefWorkflowType(applicationId,
+                    WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
+            if (appUpdateWorkflowExtRef != null) {
+                cleanupAppUpdatePendingTask(applicationId, createApplicationWFExecutor, appCreationWorkflowExtRef);
+            }
+
         } catch (WorkflowException ex) {
             log.warn("Failed to load workflow executors");
         }
@@ -2256,6 +2264,16 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
     }
 
+    private void cleanupAppUpdatePendingTask(int applicationId, WorkflowExecutor workflowExecutor,
+                                               String workflowRef) {
+
+        try {
+            workflowExecutor.cleanUpPendingTask(workflowRef);
+        } catch (WorkflowException ex) {
+            // failed cleanup processes are ignored to prevent failing the application removal process
+            log.warn("Failed to clean pending application update approval task of " + applicationId);
+        }
+    }
     private void cleanupPendingApplicationRegistrationTask(String state, int applicationId, String apiKeyType,
                                                            String keyManagerName,
                                                            WorkflowExecutor applicationRegistrationWFExecutor) {
