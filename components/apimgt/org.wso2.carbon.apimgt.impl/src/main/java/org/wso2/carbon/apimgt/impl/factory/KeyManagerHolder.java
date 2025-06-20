@@ -121,9 +121,9 @@ public class KeyManagerHolder {
             keyManagerDto.setIssuer(issuer);
             keyManagerDto.setJwtValidator(jwtValidator);
             keyManagerDto.setKeyManager(keyManager);
-            tenantKeyManagerDto.putKeyManagerDto(keyManagerDto);
+            tenantKeyManagerDto.putKeyManagerDto(keyManagerDto, keyManagerConfiguration.getType());
             if (APIConstants.GLOBAL_KEY_MANAGER_TENANT_DOMAIN.equals(organization)) {
-                globalKMMap.putKeyManagerDto(keyManagerDto);
+                globalKMMap.putKeyManagerDto(keyManagerDto, keyManagerConfiguration.getType());
                 globalJWTValidatorMap.put(issuer, keyManagerDto);
             } else {
                 organizationWiseMap.put(organization, tenantKeyManagerDto);
