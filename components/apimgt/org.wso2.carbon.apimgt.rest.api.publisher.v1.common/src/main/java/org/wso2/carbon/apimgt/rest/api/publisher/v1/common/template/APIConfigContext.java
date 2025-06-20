@@ -138,6 +138,18 @@ public class APIConfigContext extends ConfigContext {
         } else {
             context.put("apiIsOauthProtected", Boolean.FALSE);
         }
+        // if API is secured with api_Key
+        if (apiSecurity != null && apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
+            context.put("apiIsApiKeyProtected", Boolean.TRUE);
+        } else {
+            context.put("apiIsApiKeyProtected", Boolean.FALSE);
+        }
+        // if API is secured with basic_auth
+        if (apiSecurity != null && apiSecurity.contains(APIConstants.API_SECURITY_BASIC_AUTH)) {
+            context.put("apiIsBasicAuthProtected", Boolean.TRUE);
+        } else {
+            context.put("apiIsBasicAuthProtected", Boolean.FALSE);
+        }
         if (apiProduct.isEnabledSchemaValidation()) {
             context.put("enableSchemaValidation", Boolean.TRUE);
         } else {
