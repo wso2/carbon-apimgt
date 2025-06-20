@@ -59,7 +59,7 @@ public final class APISpecParserConstants {
     public static final String SWAGGER_X_SCOPE = "x-scope";
     public static final String SWAGGER_X_AMZN_RESOURCE_NAME = "x-amzn-resource-name";
     public static final String SWAGGER_X_AMZN_RESOURCE_TIMEOUT = "x-amzn-resource-timeout";
-    public static final String SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED = "x-amzn-resource-content-encode";
+    public static final String SWAGGER_X_AMZN_RESOURCE_CONTENT_ENCODED = "x-amzn-resource-content-encode";
     public static final String SWAGGER_X_AUTH_TYPE = "x-auth-type";
     public static final String SWAGGER_X_THROTTLING_TIER = "x-throttling-tier";
     public static final String SWAGGER_X_THROTTLING_BANDWIDTH = "x-throttling-bandwidth";

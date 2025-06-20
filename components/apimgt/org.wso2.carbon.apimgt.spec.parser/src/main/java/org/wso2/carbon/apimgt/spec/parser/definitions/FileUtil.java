@@ -141,15 +141,15 @@ public class FileUtil {
             ZipEntry entry;
             int entries = 0;
             long total = 0;
+            boolean isFirstEntry = true;
 
             // Process each entry
             while ((entry = zis.getNextEntry()) != null) {
-                String currentEntry = entry.getName();
-                int index = 0;
+                String currentEntry = entry.getName().replace("\\", "/"); // Normalize backslashes
                 //This index variable is used to get the extracted folder name; that is root directory
-                if (index == 0 && currentEntry.indexOf('/') != -1) {
+                if (isFirstEntry && currentEntry.indexOf('/') != -1) {
                     archiveName = currentEntry.substring(0, currentEntry.indexOf('/'));
-                    --index;
+                    isFirstEntry = false;
                 }
 
                 File destinationFile = new File(destination, currentEntry);
@@ -177,23 +177,25 @@ public class FileUtil {
                     }
                 }
 
-                int count;
                 byte[] data = new byte[bufferSize];
-                FileOutputStream fos = new FileOutputStream(destinationFile);
-                BufferedOutputStream dest = new BufferedOutputStream(fos, bufferSize);
-                while (total + bufferSize <= sizeLimit && (count = zis.read(data, 0, bufferSize)) != -1) {
-                    dest.write(data, 0, count);
-                    total += count;
+                int count;
+
+                try (FileOutputStream fos = new FileOutputStream(destinationFile);
+                     BufferedOutputStream dest = new BufferedOutputStream(fos, bufferSize)) {
+                    while ((count = zis.read(data, 0, bufferSize)) != -1) {
+                        if (total + count > sizeLimit) {
+                            throw new APIManagementException("File being unzipped is too big.");
+                        }
+                        dest.write(data, 0, count);
+                        total += count;
+                    }
+                    dest.flush();
                 }
-                dest.flush();
-                dest.close();
+
                 zis.closeEntry();
                 entries++;
                 if (entries > maxEntryCount) {
                     throw new APIManagementException("Too many files to unzip.");
-                }
-                if (total + bufferSize > sizeLimit) {
-                    throw new APIManagementException("File being unzipped is too big.");
                 }
             }
             return archiveName;

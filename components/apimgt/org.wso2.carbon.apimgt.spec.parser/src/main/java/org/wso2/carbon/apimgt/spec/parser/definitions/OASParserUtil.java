@@ -1766,8 +1766,8 @@ public class OASParserUtil {
             updatedVendorExtensions.put(APISpecParserConstants.X_WSO2_APP_SECURITY, existingExtensions
                     .get(APISpecParserConstants.X_WSO2_APP_SECURITY));
         }
-        updatedVendorExtensions.put(APISpecParserConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED, existingExtensions
-                .get(APISpecParserConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED));
+        updatedVendorExtensions.put(APISpecParserConstants.SWAGGER_X_AMZN_RESOURCE_CONTENT_ENCODED, existingExtensions
+                .get(APISpecParserConstants.SWAGGER_X_AMZN_RESOURCE_CONTENT_ENCODED));
     }
 
     /**

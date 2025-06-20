@@ -400,7 +400,7 @@ public class OASParserUtilTest {
         Assert.assertEquals(endUserName, securityConfig.get(APISpecParserConstants.ENDPOINT_SECURITY_USERNAME).asText());
 
         //check http sandbox
-        sandNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
+        sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNotNull(sandNode);
         Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_HTTP, sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());
         Assert.assertNotNull(sandNode.get(APISpecParserConstants.ENDPOINT_SECURITY_CONFIG));
@@ -427,7 +427,7 @@ public class OASParserUtilTest {
         Assert.assertEquals(endUserName, securityConfig.get(APISpecParserConstants.ENDPOINT_SECURITY_USERNAME).asText());
 
         //check address sandbox
-        sandNode = OASParserUtil.generateOASConfigForEndpoints(api, true);
+        sandNode = OASParserUtil.generateOASConfigForEndpoints(api, false);
         Assert.assertNotNull(sandNode);
         Assert.assertEquals(APISpecParserConstants.ENDPOINT_TYPE_ADDRESS,
                 sandNode.get(APISpecParserConstants.X_WSO2_ENDPOINT_TYPE).asText());

@@ -402,9 +402,9 @@ public class OAS2Parser extends APIDefinition {
                         template.setAmznResourceTimeout(((Long)
                                 extensions.get(APISpecParserConstants.SWAGGER_X_AMZN_RESOURCE_TIMEOUT)).intValue());
                     }
-                    if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED)) {
+                    if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_AMZN_RESOURCE_CONTENT_ENCODED)) {
                         template.setAmznResourceContentEncoded((Boolean)
-                                extensions.get(APISpecParserConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED));
+                                extensions.get(APISpecParserConstants.SWAGGER_X_AMZN_RESOURCE_CONTENT_ENCODED));
                     }
                 }
                 urlTemplates.add(template);
@@ -1033,7 +1033,7 @@ public class OAS2Parser extends APIDefinition {
         if (resource.getAmznResourceName() != null) {
             operation.setVendorExtension(APISpecParserConstants.SWAGGER_X_AMZN_RESOURCE_NAME, resource.getAmznResourceName());
             if (resource.isAmznResourceContentEncoded()) {
-                operation.setVendorExtension(APISpecParserConstants.SWAGGER_X_AMZN_RESOURCE_CONTNET_ENCODED,
+                operation.setVendorExtension(APISpecParserConstants.SWAGGER_X_AMZN_RESOURCE_CONTENT_ENCODED,
                         resource.isAmznResourceContentEncoded());
             }
         }
