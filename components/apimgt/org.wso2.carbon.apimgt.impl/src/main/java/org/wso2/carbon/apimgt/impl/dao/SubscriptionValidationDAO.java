@@ -55,7 +55,9 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1357,7 +1359,15 @@ public class SubscriptionValidationDAO {
                         String policyVersion = resultSet.getString("POLICY_VERSION");
                         String operationPolicyDirection = resultSet.getString("OPERATION_POLICY_DIRECTION");
                         String operationPolicyID = resultSet.getString("OPERATION_POLICY_UUID");
-                        String parameters = resultSet.getString("OPERATION_PARAMS");
+                        InputStream parametersStream = resultSet.getBinaryStream("OPERATION_PARAMS");
+                        String parameters = null;
+                        try{
+                            parameters = new String(parametersStream.readAllBytes(), StandardCharsets.UTF_8);
+                        }
+                        catch (IOException e) {
+                            log.error("Error while reading policy specification attributes for the policy", e);
+                        }
+
                         URLMapping urlMapping = null;
                         if (StringUtils.isNotEmpty(httpMethod) && StringUtils.isNotEmpty(urlPattern)) {
                             urlMapping = api.getResource(urlPattern, httpMethod);
@@ -1401,8 +1411,18 @@ public class SubscriptionValidationDAO {
                     String apiPolicyUUID = resultSet.getString("API_POLICY_UUID");
 
                     // We get parameters of the policies separately. However, this can be retrieved from the AM_API_OPERATION_POLICY_MAPPING as it contains both API and Operation Policies
-                    String operationParameters = resultSet.getString("OPERATION_PARAMS");
-                    String apiParams = resultSet.getString("API_PARAMS");
+                    InputStream operationParametersStream = resultSet.getBinaryStream("OPERATION_PARAMS");
+                    InputStream apiParamsStream = resultSet.getBinaryStream("API_PARAMS");
+                    String operationParameters = null;
+                    String apiParams = null;
+                    try {
+                        operationParameters = new String(operationParametersStream.readAllBytes(), StandardCharsets.UTF_8);
+                        apiParams = new String(apiParamsStream.readAllBytes(), StandardCharsets.UTF_8);
+                    } catch (IOException e) {
+                        log.error("Error while reading policy specification attributes for the policy", e);
+                    }
+
+
                     URLMapping urlMapping = null;
                     if (StringUtils.isNotEmpty(httpMethod) && StringUtils.isNotEmpty(urlPattern)) {
                         urlMapping = api.getResource(urlPattern, httpMethod);
