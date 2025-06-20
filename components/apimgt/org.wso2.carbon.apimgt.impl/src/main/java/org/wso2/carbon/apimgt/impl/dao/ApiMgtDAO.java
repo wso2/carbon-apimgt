@@ -22918,7 +22918,13 @@ public class ApiMgtDAO {
         operationPolicy.setPolicyId(rs.getString("POLICY_UUID"));
         operationPolicy.setOrder(rs.getInt("POLICY_ORDER"));
         operationPolicy.setDirection(rs.getString("DIRECTION"));
-        operationPolicy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
+        InputStream policyParametersStream = rs.getBinaryStream("PARAMETERS");
+        try{
+            String parameters = new String(policyParametersStream.readAllBytes(), StandardCharsets.UTF_8);
+            operationPolicy.setParameters(APIMgtDBUtil.convertJSONStringToMap(parameters));
+        } catch (IOException e) {
+            log.error("Error while converting policy specification attributes for the policy");
+        }
         return operationPolicy;
     }
 
