@@ -20,12 +20,12 @@ package org.wso2.carbon.apimgt.api;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.BackendEndpointData;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -269,4 +269,7 @@ public abstract class APIDefinition {
      * @return String parserType
      */
     public abstract String getType();
+
+    public abstract Set<URITemplate> generateMCPTools(BackendEndpointData backendEndpointData,
+                                                 String mcpFeatureType, boolean isBackend);
 }

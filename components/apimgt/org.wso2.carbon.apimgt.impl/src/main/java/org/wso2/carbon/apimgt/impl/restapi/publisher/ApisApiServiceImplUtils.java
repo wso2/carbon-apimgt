@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
+import org.wso2.carbon.apimgt.api.model.BackendEndpointData;
 import org.apache.http.client.HttpClient;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -105,7 +106,7 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -700,36 +701,51 @@ public class ApisApiServiceImplUtils {
         }
         APIDefinition apiDefinition = validationResponse.getParser();
         SwaggerData swaggerData;
-        String definitionToAdd = validationResponse.getJsonContent();
-        if (syncOperations) {
-            validateScopes(apiToAdd, apiProvider, username);
-            swaggerData = new SwaggerData(apiToAdd);
-            definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
-        }
-        definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
+        String definitionToAdd = null;
 
-        Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
-        int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
-        String defaultAPILevelPolicy = APIUtil.getDefaultAPILevelPolicy(tenantId);
-        for (URITemplate uriTemplate : uriTemplates) {
-            if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
-                uriTemplate.setThrottlingTier(defaultAPILevelPolicy);
-            }
-            if (StringUtils.isEmpty(uriTemplate.getAuthType())) {
-                uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
-            }
-        }
+        if (APIConstants.API_SUBTYPE_MCP.equals(apiToAdd.getSubtype())) {
+            BackendEndpointData backendEndpointData = new BackendEndpointData(null,
+                    APIConstants.AI.MCP_DEFAULT_BACKEND_NAME);
+            backendEndpointData.setBackendDefinition(validationResponse.getJsonContent());
+            backendEndpointData.setEndpointConfig(apiToAdd.getEndpointConfig());
 
-        Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
-        apiToAdd.setUriTemplates(uriTemplates);
-        apiToAdd.setScopes(scopes);
-        //Set extensions from API definition to API object
-        apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd);
-        if (!syncOperations) {
-            validateScopes(apiToAdd, apiProvider, username);
             swaggerData = new SwaggerData(apiToAdd);
-            definitionToAdd = apiDefinition
-                    .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
+            APIDefinition parser = new OAS3Parser();
+            definitionToAdd = parser.generateAPIDefinition(swaggerData);
+
+            Set<URITemplate> uriTemplates = generateMCPFeatures(backendEndpointData);
+            apiToAdd.setUriTemplates(uriTemplates);
+        } else {
+            definitionToAdd = validationResponse.getJsonContent();
+            if (syncOperations) {
+                validateScopes(apiToAdd, apiProvider, username);
+                swaggerData = new SwaggerData(apiToAdd);
+                definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
+            }
+            definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
+            Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
+            int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
+            String defaultAPILevelPolicy = APIUtil.getDefaultAPILevelPolicy(tenantId);
+            for (URITemplate uriTemplate : uriTemplates) {
+                if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
+                    uriTemplate.setThrottlingTier(defaultAPILevelPolicy);
+                }
+                if (StringUtils.isEmpty(uriTemplate.getAuthType())) {
+                    uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+                }
+            }
+
+            Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
+            apiToAdd.setUriTemplates(uriTemplates);
+            apiToAdd.setScopes(scopes);
+            //Set extensions from API definition to API object
+            apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd);
+            if (!syncOperations) {
+                validateScopes(apiToAdd, apiProvider, username);
+                swaggerData = new SwaggerData(apiToAdd);
+                definitionToAdd = apiDefinition
+                        .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
+            }
         }
 
         // adding the definition
@@ -741,6 +757,21 @@ public class ApisApiServiceImplUtils {
         addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), organization);
 
         return addedAPI;
+    }
+
+    public static Set<URITemplate> generateMCPFeatures(BackendEndpointData backendEndpoint)
+            throws APIManagementException {
+
+        if (StringUtils.isEmpty(backendEndpoint.getEndpointConfig())) {
+            throw new APIManagementException("Backend operation mapping is not available.",
+                    ExceptionCodes.BACKEND_OPERATION_MAPPING_NOT_FOUND);
+        }
+        APIDefinition parser = new OAS3Parser();
+        Set<URITemplate> mcpTools = parser.generateMCPTools(backendEndpoint, APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE, true);
+        if (mcpTools == null) {
+            throw new APIManagementException("Failed to generate MCP feature.");
+        }
+        return mcpTools;
     }
 
     /**

@@ -13334,8 +13334,57 @@ components:
         uriMapping:
           type: string
           example: ""
+        schemaDefinition:
+          type: string
+          example: ""
+        description:
+          type: string
+          example: this is an operation of get orderId
         operationPolicies:
           $ref: '#/components/schemas/APIOperationPolicies'
+        backendOperationMapping:
+          $ref: '#/components/schemas/BackendOperationMapping'
+        operationProxyMapping:
+          $ref: '#/components/schemas/OperationProxyMapping'
+    OperationProxyMapping:
+      title: proxy mapping
+      type: object
+      properties:
+        target:
+          $ref: '#/components/schemas/TargetAPIOperation'
+    TargetAPIOperation:
+      title: target API
+      type: object
+      properties:
+        id:
+          type: string
+          description: |
+            UUID of the targetAPI
+          readOnly: true
+          example: 01234567-0123-0123-0123-012345678901
+        name:
+          maxLength: 150
+          minLength: 1
+          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\[\]\/]*$)'
+          type: string
+          example: PizzaShackAPI
+        context:
+          maxLength: 232
+          minLength: 1
+          type: string
+          example: pizza
+        version:
+          maxLength: 30
+          minLength: 1
+          type: string
+          pattern: '^[^~!@#;:%^*()+={}|\\<>"'',&/$\[\]\s+\/]+$'
+          example: 1.0.0
+        target:
+          type: string
+          example: /order/{orderId}
+        verb:
+          type: string
+          example: POST
     OrganizationPolicies:
       title: Organization based Subscription Policies
       type: object
@@ -14837,6 +14886,64 @@ components:
             $ref: '#/components/schemas/Label'
         pagination:
           $ref: '#/components/schemas/Pagination'
+    BackendOperation:
+      title: Backend Operation
+      type: object
+      properties:
+        target:
+          type: string
+          description: Backend target path
+          example: /order/{orderId}
+        verb:
+          type: string
+          description: Backend target method
+          example: POST
+        endpoint:
+          type: string
+          description: Backend endpoint URI
+          example: /order/{orderId}
+    BackendEndpointData:
+      title: Backend Data
+      type: object
+      properties:
+        id:
+          type: string
+          description: Backend ID consisting of the UUID of the Endpoint
+          example: 0c4439fd-9416-3c2e-be6e-1086e0b9aa93
+        name:
+          type: string
+          description: Backend name
+          example: backend1
+        endpoint:
+          type: string
+          description: Backend endpoint
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/BackendOperation'
+    BackendEndpointList:
+      title: Backend List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of backends returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/BackendEndpointData'
+    BackendOperationMapping:
+      title: API Operation Backend Mapping
+      type: object
+      properties:
+        backendId:
+          type: string
+          description: Backend ID
+          example: 1
+        backendOperation:
+          $ref: '#/components/schemas/BackendOperation'
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.
