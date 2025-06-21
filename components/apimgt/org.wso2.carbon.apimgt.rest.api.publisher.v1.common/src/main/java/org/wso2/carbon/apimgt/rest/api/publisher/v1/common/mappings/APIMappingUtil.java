@@ -67,8 +67,6 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.WebsubSubscriptionConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
-import org.wso2.carbon.apimgt.impl.definitions.AsyncApiParser;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.lifecycle.CheckListItem;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.model.WSDLInfo;
@@ -135,6 +133,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWs
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLValidationResponseWsdlInfoEndpointsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
+import org.wso2.carbon.apimgt.spec.parser.definitions.AsyncApiParser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 import org.wso2.carbon.user.api.UserStoreException;

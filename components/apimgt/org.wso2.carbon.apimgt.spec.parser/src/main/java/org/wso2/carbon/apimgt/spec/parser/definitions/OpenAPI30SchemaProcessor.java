@@ -16,7 +16,7 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.spec.parser.definitions;
 
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ComposedSchema;
@@ -25,7 +25,6 @@ import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -139,7 +138,7 @@ public class OpenAPI30SchemaProcessor implements SchemaProcessor {
      */
     private static void processComposedSchema(Schema<?> sc, OASParserUtil.SwaggerUpdateContext context,
                                               List<String> references) {
-        if (APIConstants.OPENAPI_OBJECT_DATA_TYPE.equalsIgnoreCase(sc.getType())) {
+        if (APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE.equalsIgnoreCase(sc.getType())) {
             references.addAll(extractReferenceFromNestedSchema(sc, context));
         } else if (sc.getItems() != null){
             OASParserUtil.processArraySchema(sc, context);
