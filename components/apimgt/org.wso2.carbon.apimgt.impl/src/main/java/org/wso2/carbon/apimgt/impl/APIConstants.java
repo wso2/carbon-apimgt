@@ -2779,6 +2779,7 @@ public final class APIConstants {
         public static final String DEFAULT_KEY_MANAGER_TYPE = "default";
         public static final String DEFAULT_KEY_MANAGER_DESCRIPTION = "This is Resident Key Manager";
         public static final String WSO2_IS_KEY_MANAGER_TYPE = "WSO2-IS";
+        public static final String SP_NAME_APPLICATION = "sp.name.application";
 
         public static final String ISSUER = "issuer";
         public static final String JWKS_ENDPOINT = "jwks_endpoint";
