@@ -1464,12 +1464,12 @@ public class OAS2Parser extends APIDefinition {
 
         KeyManagerConfigurationDTO keyManagerConfigurationDTO = null;
         try {
-            if (!StringUtils.isEmpty(kmId)) {
+            if (StringUtils.isNotEmpty(kmId)) {
                 String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
                 APIAdmin apiAdmin = new APIAdminImpl();
                 keyManagerConfigurationDTO = apiAdmin.getKeyManagerConfigurationById(tenantDomain, kmId);
-                if (keyManagerConfigurationDTO == null || (StringUtils.isEmpty(kmId) && !Objects.equals(
-                        keyManagerConfigurationDTO.getType(), APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE))) {
+                // If the key manager is not found by ID, try to get the default key manager.
+                if (keyManagerConfigurationDTO == null) {
                     keyManagerConfigurationDTO = apiAdmin.getKeyManagerConfigurationByName(tenantDomain,
                             APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
                 }
