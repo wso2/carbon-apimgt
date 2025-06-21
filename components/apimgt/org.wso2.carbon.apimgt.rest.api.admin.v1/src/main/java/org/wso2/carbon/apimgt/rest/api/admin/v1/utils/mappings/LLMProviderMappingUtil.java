@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMModelDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderSummaryResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderSummaryResponseListDTO;
@@ -67,7 +68,9 @@ public class LLMProviderMappingUtil {
         llmProviderResponseDTO.setApiDefinition(llmProvider.getApiDefinition());
         llmProviderResponseDTO.setBuiltInSupport(llmProvider.isBuiltInSupport());
         llmProviderResponseDTO.setConfigurations(llmProvider.getConfigurations());
-        llmProviderResponseDTO.setModelList(llmProvider.getModelList());
+        llmProviderResponseDTO.setModels(llmProvider.getModelList().stream()
+                .map(model -> new LLMModelDTO().vendor(model.getModelVendor()).values(model.getValues()))
+                .collect(Collectors.toList()));
         return llmProviderResponseDTO;
     }
 

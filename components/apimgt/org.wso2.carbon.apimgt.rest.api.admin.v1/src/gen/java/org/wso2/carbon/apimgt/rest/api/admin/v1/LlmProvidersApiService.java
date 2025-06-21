@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
 import java.io.File;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMModelDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderSummaryResponseListDTO;
 
@@ -23,9 +24,9 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface LlmProvidersApiService {
-      public Response addLLMProvider(String name, String apiVersion, String description, String configurations, InputStream apiDefinitionInputStream, Attachment apiDefinitionDetail, String modelList, MessageContext messageContext) throws APIManagementException;
+      public Response addLLMProvider(String name, String apiVersion, String description, Boolean multipleVendorSupport, String configurations, InputStream apiDefinitionInputStream, Attachment apiDefinitionDetail, List<LLMModelDTO> models, MessageContext messageContext) throws APIManagementException;
       public Response deleteLLMProvider(String llmProviderId, MessageContext messageContext) throws APIManagementException;
       public Response getLLMProvider(String llmProviderId, MessageContext messageContext) throws APIManagementException;
       public Response getLLMProviders(MessageContext messageContext) throws APIManagementException;
-      public Response updateLLMProvider(String llmProviderId, String name, String apiVersion, String description, String configurations, InputStream apiDefinitionInputStream, Attachment apiDefinitionDetail, String modelList, MessageContext messageContext) throws APIManagementException;
+      public Response updateLLMProvider(String llmProviderId, String name, String apiVersion, String description, Boolean multipleVendorSupport, String configurations, InputStream apiDefinitionInputStream, Attachment apiDefinitionDetail, List<LLMModelDTO> models, MessageContext messageContext) throws APIManagementException;
 }

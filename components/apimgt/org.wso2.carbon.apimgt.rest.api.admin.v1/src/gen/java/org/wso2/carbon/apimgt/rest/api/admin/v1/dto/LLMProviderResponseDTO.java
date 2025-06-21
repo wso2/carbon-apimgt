@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMModelDTO;
 import javax.validation.constraints.*;
 
 
@@ -29,7 +30,7 @@ public class LLMProviderResponseDTO   {
     private String description = null;
     private String configurations = null;
     private String apiDefinition = null;
-    private List<String> modelList = new ArrayList<String>();
+    private List<LLMModelDTO> models = new ArrayList<LLMModelDTO>();
 
   /**
    **/
@@ -156,19 +157,20 @@ public class LLMProviderResponseDTO   {
   /**
    * List of models supported by the LLM Provider
    **/
-  public LLMProviderResponseDTO modelList(List<String> modelList) {
-    this.modelList = modelList;
+  public LLMProviderResponseDTO models(List<LLMModelDTO> models) {
+    this.models = models;
     return this;
   }
 
   
   @ApiModelProperty(value = "List of models supported by the LLM Provider")
-  @JsonProperty("modelList")
-  public List<String> getModelList() {
-    return modelList;
+      @Valid
+  @JsonProperty("models")
+  public List<LLMModelDTO> getModels() {
+    return models;
   }
-  public void setModelList(List<String> modelList) {
-    this.modelList = modelList;
+  public void setModels(List<LLMModelDTO> models) {
+    this.models = models;
   }
 
 
@@ -188,12 +190,12 @@ public class LLMProviderResponseDTO   {
         Objects.equals(description, llMProviderResponse.description) &&
         Objects.equals(configurations, llMProviderResponse.configurations) &&
         Objects.equals(apiDefinition, llMProviderResponse.apiDefinition) &&
-        Objects.equals(modelList, llMProviderResponse.modelList);
+        Objects.equals(models, llMProviderResponse.models);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, apiVersion, builtInSupport, description, configurations, apiDefinition, modelList);
+    return Objects.hash(id, name, apiVersion, builtInSupport, description, configurations, apiDefinition, models);
   }
 
   @Override
@@ -208,7 +210,7 @@ public class LLMProviderResponseDTO   {
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    configurations: ").append(toIndentedString(configurations)).append("\n");
     sb.append("    apiDefinition: ").append(toIndentedString(apiDefinition)).append("\n");
-    sb.append("    modelList: ").append(toIndentedString(modelList)).append("\n");
+    sb.append("    models: ").append(toIndentedString(models)).append("\n");
     sb.append("}");
     return sb.toString();
   }

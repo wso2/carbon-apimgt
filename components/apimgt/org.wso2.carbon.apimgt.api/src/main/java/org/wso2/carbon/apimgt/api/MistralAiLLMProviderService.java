@@ -18,7 +18,9 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import java.util.Arrays;
 import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.apimgt.api.model.LLMModel;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
 import java.io.File;
@@ -90,10 +92,9 @@ public class MistralAiLLMProviderService extends BuiltInLLMProviderService {
             llmProviderConfiguration.setMetadata(llmProviderMetadata);
 
             // Set default model List
-            List<String> modelList = new ArrayList<>();
-            modelList.add("mistral-small-latest");
-            modelList.add("mistral-medium");
-            modelList.add("open-mistral-7b");
+            List<LLMModel> modelList = new ArrayList<>();
+            modelList.add(new LLMModel(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_MISTRALAI_NAME,
+                    Arrays.asList("mistral-small-latest", "mistral-medium", "open-mistral-7b")));
             llmProvider.setModelList(modelList);
 
             llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());

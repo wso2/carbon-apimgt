@@ -38,7 +38,8 @@ public class LLMProvider implements Serializable {
     private String configurations = null;
     private boolean builtInSupport = false;
     private String organization = null;
-    private List<String> modelList = new ArrayList<>();
+    private List<LLMModel> modelList = new ArrayList<>();
+    private boolean modelFamilySupported;
 
     public LLMProvider(String name, String apiVersion) {
 
@@ -118,11 +119,19 @@ public class LLMProvider implements Serializable {
         this.organization = organization;
     }
 
-    public List<String> getModelList() {
+    public List<LLMModel> getModelList() {
         return modelList;
     }
 
-    public void setModelList(List<String> modelList) {
+    public void setModelList(List<LLMModel> modelList) {
         this.modelList = modelList;
+    }
+
+    public void setModelFamilySupported(boolean modelFamilySupported) {
+        this.modelFamilySupported = modelFamilySupported;
+    }
+
+    public boolean isModelFamilySupported() {
+        return modelFamilySupported;
     }
 }
