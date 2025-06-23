@@ -93,6 +93,7 @@ public class WorkflowMappingUtil {
         workflowInfoDTO.setReferenceId(workflow.getExternalWorkflowReference());
         workflowInfoDTO.setDescription(workflow.getWorkflowDescription());
         workflowInfoDTO.setProperties(workflow.getProperties());
+        workflowInfoDTO.setMetadata(workflow.getMetadata());
 
         return workflowInfoDTO;
     }
