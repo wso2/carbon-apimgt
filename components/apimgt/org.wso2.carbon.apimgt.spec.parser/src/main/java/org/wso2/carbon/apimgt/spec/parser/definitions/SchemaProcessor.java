@@ -16,7 +16,7 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.spec.parser.definitions;
 
 import io.swagger.v3.oas.models.media.Schema;
 

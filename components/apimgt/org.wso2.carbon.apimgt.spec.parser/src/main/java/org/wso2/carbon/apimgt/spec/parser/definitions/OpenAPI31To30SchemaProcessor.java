@@ -16,12 +16,11 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.spec.parser.definitions;
 
 import io.swagger.v3.oas.models.media.Schema;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,9 +87,9 @@ public class OpenAPI31To30SchemaProcessor implements SchemaProcessor {
             schema.setExample(firstExample);
         }
 
-        if (schema.getTypes() != null && schema.getTypes().contains(APIConstants.OPENAPIV31_SCHEMA_TYPE_NULLABLE)) {
+        if (schema.getTypes() != null && schema.getTypes().contains(APISpecParserConstants.OPENAPIV31_SCHEMA_TYPE_NULLABLE)) {
             schema.setNullable(true);
-            schema.getTypes().remove(APIConstants.OPENAPIV31_SCHEMA_TYPE_NULLABLE);
+            schema.getTypes().remove(APISpecParserConstants.OPENAPIV31_SCHEMA_TYPE_NULLABLE);
         }
 
         String type = schema.getType();
@@ -171,8 +170,8 @@ public class OpenAPI31To30SchemaProcessor implements SchemaProcessor {
      */
     private static void processComposedSchema(Schema<?> sc, OASParserUtil.SwaggerUpdateContext context,
                                               List<String> references) {
-        if (APIConstants.OPENAPI_OBJECT_DATA_TYPE.equalsIgnoreCase(sc.getType())
-                || (sc.getTypes() != null && sc.getTypes().contains(APIConstants.OPENAPI_OBJECT_DATA_TYPE))) {
+        if (APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE.equalsIgnoreCase(sc.getType())
+                || (sc.getTypes() != null && sc.getTypes().contains(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE))) {
             references.addAll(extractReferenceFromNestedSchema(sc, context));
         } else if (sc.getItems() != null){
             OASParserUtil.processArraySchema(sc, context);

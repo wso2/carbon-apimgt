@@ -2027,6 +2027,11 @@
                 <version>${carbon.apimgt.version}</version>
                 <type>war</type>
             </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.apimgt</groupId>
+                <artifactId>org.wso2.carbon.apimgt.spec.parser</artifactId>
+                <version>${carbon.apimgt.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.spec.parser.definitions;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -15,17 +15,24 @@ import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.*;
-import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import static org.mockito.Mockito.when;
 
 public class OAS31ParserTest extends OASTestBase {
-    private OAS3Parser oas31Parser = new OAS3Parser(APIConstants.OAS_V31);
+    private OAS3Parser oas31Parser = new OAS3Parser(APISpecParserConstants.OAS_V31);
 
     @Test
     public void testGetURITemplates() throws Exception {
@@ -93,7 +100,7 @@ public class OAS31ParserTest extends OASTestBase {
         SwaggerParseResult parseAttemptForV3 = openAPIV3Parser.readContents(definition, null, null);
         OpenAPI openAPI = parseAttemptForV3.getOpenAPI();
         boolean isExtensionNotFound = openAPI.getExtensions() == null || !openAPI.getExtensions()
-                .containsKey(APIConstants.SWAGGER_X_WSO2_SECURITY);
+                .containsKey(APISpecParserConstants.SWAGGER_X_WSO2_SECURITY);
         Assert.assertTrue(isExtensionNotFound);
         Assert.assertEquals(2, openAPI.getPaths().size());
 
@@ -102,7 +109,7 @@ public class OAS31ParserTest extends OASTestBase {
             Map.Entry<String, PathItem> pathEntry = itr.next();
             PathItem path = pathEntry.getValue();
             for (Operation operation : path.readOperations()) {
-                Assert.assertFalse(operation.getExtensions().containsKey(APIConstants.SWAGGER_X_SCOPE));
+                Assert.assertFalse(operation.getExtensions().containsKey(APISpecParserConstants.SWAGGER_X_SCOPE));
             }
         }
 
@@ -116,9 +123,9 @@ public class OAS31ParserTest extends OASTestBase {
         Assert.assertTrue(implicityOauth.getScopes().containsKey("newScope"));
         Assert.assertEquals("newScopeDescription", implicityOauth.getScopes().get("newScope"));
 
-        Assert.assertTrue(implicityOauth.getExtensions().containsKey(APIConstants.SWAGGER_X_SCOPES_BINDINGS));
+        Assert.assertTrue(implicityOauth.getExtensions().containsKey(APISpecParserConstants.SWAGGER_X_SCOPES_BINDINGS));
         Map<String, String> scopeBinding =
-                (Map<String, String>) implicityOauth.getExtensions().get(APIConstants.SWAGGER_X_SCOPES_BINDINGS);
+                (Map<String, String>) implicityOauth.getExtensions().get(APISpecParserConstants.SWAGGER_X_SCOPES_BINDINGS);
         Assert.assertTrue(scopeBinding.containsKey("newScope"));
         Assert.assertEquals("admin", scopeBinding.get("newScope"));
     }
@@ -227,7 +234,7 @@ public class OAS31ParserTest extends OASTestBase {
 
     @Test
     public void testSwaggerValidatorWithRelaxValidationEnabledAndWithoutInfoTag() throws Exception {
-        System.setProperty(APIConstants.SWAGGER_RELAXED_VALIDATION, "true");
+        System.setProperty(APISpecParserConstants.SWAGGER_RELAXED_VALIDATION, "true");
         String faultySwagger = IOUtils.toString(
                 getClass().getClassLoader().getResourceAsStream("definitions" + File.separator + "oas31"
                         + File.separator + "openApi31_without_info_validation.json"),
@@ -239,7 +246,7 @@ public class OAS31ParserTest extends OASTestBase {
         Assert.assertTrue(response.getInfo().getName().startsWith("API-Title-"));
         Assert.assertEquals("attribute extraInfo is unexpected",
                 response.getErrorItems().get(0).getErrorDescription());
-        System.clearProperty(APIConstants.SWAGGER_RELAXED_VALIDATION);
+        System.clearProperty(APISpecParserConstants.SWAGGER_RELAXED_VALIDATION);
     }
 
     @Test
@@ -253,7 +260,7 @@ public class OAS31ParserTest extends OASTestBase {
                 String.valueOf(StandardCharsets.UTF_8));
         APIIdentifier apiIdentifier = new APIIdentifier("admin", "PizzaShackAPI", "1.0.0");
         Map<String, String> hostWithSchemes = new HashMap<>();
-        hostWithSchemes.put(APIConstants.HTTPS_PROTOCOL, "https://localhost");
+        hostWithSchemes.put(APISpecParserConstants.HTTPS_PROTOCOL, "https://localhost");
         API api = new API(apiIdentifier);
         api.setTransports("https");
         api.setContext("/");

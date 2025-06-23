@@ -16,14 +16,14 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.spec.parser.definitions;
 
 import io.swagger.v3.oas.models.SpecVersion;
-import io.swagger.v3.oas.models.media.*;
+import io.swagger.v3.oas.models.media.JsonSchema;
+import io.swagger.v3.oas.models.media.Schema;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -132,9 +132,9 @@ public class OAS31To30ProcessorTest {
         OASParserUtil.SwaggerUpdateContext context = new OASParserUtil.SwaggerUpdateContext();
         Schema<Object> mapSchema = getMapSchemaWithAdditionalProperties();
         processor.extractReferenceFromSchema(mapSchema, context);
-        Assert.assertEquals(APIConstants.OPENAPI_OBJECT_DATA_TYPE, mapSchema.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE, mapSchema.getType());
         Schema<?> additionalPropertySchema = (Schema<?>) mapSchema.getAdditionalProperties();
-        Assert.assertEquals(APIConstants.OPENAPI_STRING_DATA_TYPE, additionalPropertySchema.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE, additionalPropertySchema.getType());
 
         Map<String, String> exampleMap = (Map<String, String>) additionalPropertySchema.getExample();
         Assert.assertEquals(OASSchemaProcessorConstants.EXAMPLE_VERSION,
@@ -142,7 +142,7 @@ public class OAS31To30ProcessorTest {
         Assert.assertEquals(OASSchemaProcessorConstants.EXAMPLE_ENVIRONMENT,
                 exampleMap.get(OASSchemaProcessorConstants.ENVIRONMENT));
         Schema<?> descriptionSchema = mapSchema.getProperties().get(OASSchemaProcessorConstants.DESCRIPTION);
-        Assert.assertEquals(APIConstants.OPENAPI_STRING_DATA_TYPE, descriptionSchema.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE, descriptionSchema.getType());
         Assert.assertTrue(descriptionSchema.getNullable());
         Assert.assertEquals(OASSchemaProcessorConstants.SAMPLE_DESCRIPTION, descriptionSchema.getExample());
         Assert.assertEquals(context.getReferenceObjectMapping().get(OASSchemaProcessorConstants.SCHEMAS).size(), 1);
@@ -157,7 +157,7 @@ public class OAS31To30ProcessorTest {
         processor.extractReferenceFromSchema(allOfSchema, context);
         List<Schema> allOf = allOfSchema.getAllOf();
         Schema<?> cardIdSchema = ((Schema<?>) allOf.get(1).getProperties().get(OASSchemaProcessorConstants.CARD_ID));
-        Assert.assertEquals(APIConstants.OPENAPI_STRING_DATA_TYPE, cardIdSchema.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE, cardIdSchema.getType());
         Assert.assertEquals(OASSchemaProcessorConstants.EXAMPLE_CARD_ID, cardIdSchema.getExample());
         Assert.assertEquals(2, context.getReferenceObjectMapping()
                 .get(OASSchemaProcessorConstants.SCHEMAS).size());
@@ -175,9 +175,9 @@ public class OAS31To30ProcessorTest {
         Assert.assertEquals("VISA", oneOfSchemaWithRef.getExample());
         List<Schema> oneOfList = oneOfSchemaWithRef.getOneOf();
         Schema visaMastercardSchema = oneOfList.get(0);
-        Assert.assertEquals(APIConstants.OPENAPI_STRING_DATA_TYPE, visaMastercardSchema.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE, visaMastercardSchema.getType());
         Schema amexSchema = oneOfList.get(1);
-        Assert.assertEquals(APIConstants.OPENAPI_STRING_DATA_TYPE, amexSchema.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE, amexSchema.getType());
         Assert.assertEquals(1, context.getReferenceObjectMapping()
                 .get(OASSchemaProcessorConstants.SCHEMAS).size());
         Assert.assertTrue(context.getReferenceObjectMapping()
@@ -199,7 +199,7 @@ public class OAS31To30ProcessorTest {
         Schema<Object> schema = getSimpleSchema();
         processor.extractReferenceFromSchema(schema, context);
         Assert.assertEquals(OASSchemaProcessorConstants.EXAMPLE_CARD_ID, schema.getExample());
-        Assert.assertEquals(APIConstants.STRING, schema.getType());
+        Assert.assertEquals(APISpecParserConstants.STRING, schema.getType());
         Assert.assertTrue(schema.getNullable());
         Assert.assertTrue(context.getReferenceObjectMapping().get(OASSchemaProcessorConstants.SCHEMAS).isEmpty());
     }
@@ -210,13 +210,13 @@ public class OAS31To30ProcessorTest {
         OASParserUtil.SwaggerUpdateContext context = new OASParserUtil.SwaggerUpdateContext();
         Schema<Object> schema = getComplexComposedObjectSchema();
         processor.extractReferenceFromSchema(schema, context);
-        Assert.assertEquals(APIConstants.OPENAPI_OBJECT_DATA_TYPE, schema.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE, schema.getType());
         Map<String, Schema> properties = schema.getProperties();
         Schema<Object> composedObj = properties.get(OASSchemaProcessorConstants.COMPOSED_OBJECT);
-        Assert.assertEquals(APIConstants.OPENAPI_OBJECT_DATA_TYPE, composedObj.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE, composedObj.getType());
         Schema allOfObj = composedObj.getAllOf().get(0);
-        Assert.assertEquals(APIConstants.OPENAPI_OBJECT_DATA_TYPE, allOfObj.getType());
-        Assert.assertEquals(APIConstants.OPENAPI_STRING_DATA_TYPE, ((Schema<?>) allOfObj.getProperties()
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE, allOfObj.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE, ((Schema<?>) allOfObj.getProperties()
                 .get(OASSchemaProcessorConstants.CARD_ID)).getType());
         Assert.assertEquals(OASSchemaProcessorConstants.EXAMPLE_CARD_ID, ((Schema<?>) allOfObj.getProperties()
                 .get(OASSchemaProcessorConstants.CARD_ID)).getExample());
@@ -236,9 +236,9 @@ public class OAS31To30ProcessorTest {
         OASParserUtil.SwaggerUpdateContext context = new OASParserUtil.SwaggerUpdateContext();
         Schema<Object> schema = getNestedComposedSchema();
         processor.extractReferenceFromSchema(schema, context);
-        Assert.assertEquals(APIConstants.OPENAPI_STRING_DATA_TYPE, schema.getOneOf().get(0).getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE, schema.getOneOf().get(0).getType());
         Schema anyOfSchema = schema.getOneOf().get(1);
-        Assert.assertEquals(APIConstants.OPENAPI_OBJECT_DATA_TYPE, anyOfSchema.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE, anyOfSchema.getType());
         assertAnyOfSchemaWithRef((Schema) anyOfSchema.getProperties().get(OASSchemaProcessorConstants.ANY_OF_PROPERTY),
                 context);
     }
@@ -250,11 +250,11 @@ public class OAS31To30ProcessorTest {
         Schema<Object> schema = getNestedArrayInsideOneOf();
         processor.extractReferenceFromSchema(schema, context);
         Schema firstArray = schema.getOneOf().get(0);
-        Assert.assertEquals(APIConstants.OPENAPI_ARRAY_DATA_TYPE, firstArray.getType());
-        Assert.assertEquals(APIConstants.OPENAPI_ARRAY_DATA_TYPE, firstArray.getItems().getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_ARRAY_DATA_TYPE, firstArray.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_ARRAY_DATA_TYPE, firstArray.getItems().getType());
         Schema secondArray = schema.getOneOf().get(1);
-        Assert.assertEquals(APIConstants.OPENAPI_ARRAY_DATA_TYPE, secondArray.getType());
-        Assert.assertEquals(APIConstants.OPENAPI_STRING_DATA_TYPE, secondArray.getItems().getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_ARRAY_DATA_TYPE, secondArray.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE, secondArray.getItems().getType());
         Assert.assertEquals(1, context.getReferenceObjectMapping()
                 .get(OASSchemaProcessorConstants.SCHEMAS).size());
         Assert.assertTrue(context.getReferenceObjectMapping().get(OASSchemaProcessorConstants.SCHEMAS)
@@ -267,17 +267,17 @@ public class OAS31To30ProcessorTest {
         OASParserUtil.SwaggerUpdateContext context = new OASParserUtil.SwaggerUpdateContext();
         Schema<Object> schema = getNestedMapSchemaWithAdditionalProperties();
         processor.extractReferenceFromSchema(schema, context);
-        Assert.assertEquals(APIConstants.OPENAPI_OBJECT_DATA_TYPE, schema.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE, schema.getType());
         Schema description = schema.getProperties().get(OASSchemaProcessorConstants.DESCRIPTION);
-        Assert.assertEquals(APIConstants.OPENAPI_STRING_DATA_TYPE, description.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE, description.getType());
         Assert.assertTrue(description.getNullable());
         Assert.assertEquals(OASSchemaProcessorConstants.EXAMPLE_CARD_ID, description.getExample());
         Schema version = schema.getProperties().get(OASSchemaProcessorConstants.VERSION);
-        Assert.assertEquals(APIConstants.OPENAPI_OBJECT_DATA_TYPE, version.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE, version.getType());
         Object addProp = version.getAdditionalProperties();
         Assert.assertNotNull(addProp);
         Schema addPropSchema = (Schema) addProp;
-        Assert.assertEquals(APIConstants.OPENAPI_OBJECT_DATA_TYPE, addPropSchema.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE, addPropSchema.getType());
         Schema nestedAddProp = (Schema) addPropSchema.getAdditionalProperties();
         Assert.assertNotNull(nestedAddProp.get$ref());
         Assert.assertEquals(2, context.getReferenceObjectMapping()
@@ -293,16 +293,16 @@ public class OAS31To30ProcessorTest {
         OASParserUtil.SwaggerUpdateContext context = new OASParserUtil.SwaggerUpdateContext();
         Schema<Object> schema = getNestedArraySchemaWithRef();
         processor.extractReferenceFromSchema(schema, context);
-        Assert.assertEquals(APIConstants.OPENAPI_OBJECT_DATA_TYPE, schema.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE, schema.getType());
         Assert.assertNotNull(schema.getProperties());
         Assert.assertNotNull(schema.getProperties().get(OASSchemaProcessorConstants.CARD_DETAILS));
         Schema cardDetails = schema.getProperties().get(OASSchemaProcessorConstants.CARD_DETAILS).getItems();
-        Assert.assertEquals(APIConstants.OPENAPI_ARRAY_DATA_TYPE, schema.getProperties()
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_ARRAY_DATA_TYPE, schema.getProperties()
                 .get(OASSchemaProcessorConstants.CARD_DETAILS).getType());
-        Assert.assertEquals(APIConstants.OPENAPI_OBJECT_DATA_TYPE, cardDetails.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE, cardDetails.getType());
         Map<String, Schema> cardDetailsProp = cardDetails.getProperties();
         Schema cvv = cardDetailsProp.get(OASSchemaProcessorConstants.CVV);
-        Assert.assertEquals(APIConstants.OPENAPI_ARRAY_DATA_TYPE, cvv.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_ARRAY_DATA_TYPE, cvv.getType());
         Assert.assertNotNull(cvv.getItems());
         Assert.assertNotNull(cvv.getItems().get$ref());
         Assert.assertEquals(1, context.getReferenceObjectMapping()
@@ -330,11 +330,11 @@ public class OAS31To30ProcessorTest {
     }
 
     private void assertArraySchema(Schema<Object> arraySchema, OASParserUtil.SwaggerUpdateContext context) {
-        Assert.assertEquals(APIConstants.OPENAPI_ARRAY_DATA_TYPE, arraySchema.getType());
-        Assert.assertEquals(APIConstants.OPENAPI_OBJECT_DATA_TYPE, arraySchema.getItems().getType());
-        Assert.assertEquals(APIConstants.OPENAPI_STRING_DATA_TYPE, arraySchema.getItems().getProperties()
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_ARRAY_DATA_TYPE, arraySchema.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE, arraySchema.getItems().getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE, arraySchema.getItems().getProperties()
                 .get(OASSchemaProcessorConstants.NUMBER).getType());
-        Assert.assertEquals(APIConstants.OPENAPI_STRING_DATA_TYPE, arraySchema.getItems().getProperties()
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE, arraySchema.getItems().getProperties()
                 .get(OASSchemaProcessorConstants.EXPIRY_DATE).getType());
         Assert.assertEquals(OASSchemaProcessorConstants.EXAMPLE_DATE, arraySchema.getItems().getProperties()
                 .get(OASSchemaProcessorConstants.EXPIRY_DATE).getExample());
@@ -347,7 +347,7 @@ public class OAS31To30ProcessorTest {
         List<Schema> anyOf = (List<Schema>) anyOfSchema.getAnyOf();
         Schema<?> cardIdSchema = ((Schema<?>) anyOf.get(1).getProperties()
                 .get(OASSchemaProcessorConstants.CARD_ID));
-        Assert.assertEquals(APIConstants.OPENAPI_STRING_DATA_TYPE, cardIdSchema.getType());
+        Assert.assertEquals(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE, cardIdSchema.getType());
         Assert.assertEquals(OASSchemaProcessorConstants.EXAMPLE_CARD_ID, cardIdSchema.getExample());
         Assert.assertEquals(2, context.getReferenceObjectMapping()
                 .get(OASSchemaProcessorConstants.SCHEMAS).size());
@@ -366,7 +366,7 @@ public class OAS31To30ProcessorTest {
         Schema<Object> descriptionSchema = new JsonSchema();
         descriptionSchema.setSpecVersion(SpecVersion.V31);
         Set<String> stringTypes = getStringType();
-        stringTypes.add(APIConstants.OPENAPIV31_SCHEMA_TYPE_NULLABLE);
+        stringTypes.add(APISpecParserConstants.OPENAPIV31_SCHEMA_TYPE_NULLABLE);
         descriptionSchema.setTypes(stringTypes);
         descriptionSchema.setExamples(getExamples());
 
@@ -540,7 +540,7 @@ public class OAS31To30ProcessorTest {
         Schema<Object> descriptionSchema = new JsonSchema();
         descriptionSchema.setSpecVersion(SpecVersion.V31);
         Set<String> stringNullableType = getStringType();
-        stringNullableType.add(APIConstants.OPENAPIV31_SCHEMA_TYPE_NULLABLE);
+        stringNullableType.add(APISpecParserConstants.OPENAPIV31_SCHEMA_TYPE_NULLABLE);
         descriptionSchema.setTypes(stringNullableType);
         descriptionSchema.setExample(OASSchemaProcessorConstants.SAMPLE_DESCRIPTION);
 
@@ -676,7 +676,7 @@ public class OAS31To30ProcessorTest {
         Schema<Object> stringTypeSchema = new JsonSchema();
         stringTypeSchema.setSpecVersion(SpecVersion.V31);
         Set<String> stringType = getStringType();
-        stringType.add(APIConstants.OPENAPIV31_SCHEMA_TYPE_NULLABLE);
+        stringType.add(APISpecParserConstants.OPENAPIV31_SCHEMA_TYPE_NULLABLE);
         stringTypeSchema.setTypes(stringType);
         List<Object> examples = new ArrayList<>();
         examples.add(OASSchemaProcessorConstants.EXAMPLE_CARD_ID);
@@ -725,19 +725,19 @@ public class OAS31To30ProcessorTest {
 
     private Set<String> getObjectType() {
         Set<String> types = new HashSet<>();
-        types.add(APIConstants.OPENAPI_OBJECT_DATA_TYPE);
+        types.add(APISpecParserConstants.OPENAPI_OBJECT_DATA_TYPE);
         return types;
     }
 
     private Set<String> getStringType() {
         Set<String> types = new HashSet<>();
-        types.add(APIConstants.OPENAPI_STRING_DATA_TYPE);
+        types.add(APISpecParserConstants.OPENAPI_STRING_DATA_TYPE);
         return types;
     }
 
     private Set<String> getArrayType() {
         Set<String> types = new HashSet<>();
-        types.add(APIConstants.OPENAPI_ARRAY_DATA_TYPE);
+        types.add(APISpecParserConstants.OPENAPI_ARRAY_DATA_TYPE);
         return types;
     }
 

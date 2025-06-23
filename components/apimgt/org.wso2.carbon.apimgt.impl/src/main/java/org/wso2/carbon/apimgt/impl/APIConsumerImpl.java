@@ -95,7 +95,6 @@ import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
@@ -141,6 +140,7 @@ import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -164,6 +164,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
@@ -3452,13 +3453,33 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         Environment environment = APIUtil.getEnvironments().get(environmentName);
         GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
                 .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO = null;
+        try {
+            if (StringUtils.isNotEmpty(kmId)) {
+                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+                APIAdmin apiAdmin = new APIAdminImpl();
+                keyManagerConfigurationDTO = apiAdmin.getKeyManagerConfigurationById(tenantDomain, kmId);
+                // If the key manager is not found by ID, try to get the default key manager.
+                if (keyManagerConfigurationDTO == null) {
+                    keyManagerConfigurationDTO = apiAdmin.getKeyManagerConfigurationByName(tenantDomain,
+                            APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
+                }
+            }
+        } catch (APIManagementException e) {
+            if (!StringUtils.isEmpty(kmId)) {
+                throw new APIManagementException("Failed to retrieve key manager information by ID: " + kmId,
+                        ExceptionCodes.ERROR_RETRIEVE_KM_INFORMATION);
+            } else {
+                throw new APIManagementException("Failed to retrieve key manager information "
+                        + APIConstants.KeyManager.DEFAULT_KEY_MANAGER, ExceptionCodes.ERROR_RETRIEVE_KM_INFORMATION);
+            }
+        }
         if (gatewayConfiguration != null) {
             api.setContext("");
-            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
         } else {
             api.setContext(getBasePath(apiTenantDomain, api.getContext()));
-            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
         }
+        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, keyManagerConfigurationDTO);
         return updatedDefinition;
     }
 

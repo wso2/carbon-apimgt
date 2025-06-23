@@ -16,10 +16,9 @@
  *  under the License.
  *
  */
-package org.wso2.carbon.apimgt.impl.definitions;
+package org.wso2.carbon.apimgt.spec.parser.definitions;
 
 import io.swagger.v3.oas.models.media.Schema;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 
 /**
  * Factory class for creating and returning the appropriate {@link SchemaProcessor} based on the OpenAPI specification
@@ -49,9 +48,9 @@ public class SchemaProcessorFactory {
         if (schema == null || schema.getSpecVersion() == null) {
             throw new IllegalArgumentException("Invalid schema or spec version");
         }
-        if (APIConstants.OAS_V31.equalsIgnoreCase(schema.getSpecVersion().name())) {
+        if (APISpecParserConstants.OAS_V31.equalsIgnoreCase(schema.getSpecVersion().name())) {
             return OPEN_API_31_PROCESSOR;
-        } else if (APIConstants.OAS_V30.equalsIgnoreCase(schema.getSpecVersion().name()))  {
+        } else if (APISpecParserConstants.OAS_V30.equalsIgnoreCase(schema.getSpecVersion().name()))  {
             return OPEN_API_30_PROCESSOR;
         } else {
             throw new IllegalArgumentException("Invalid spec version. Only supported 3.0 and 3.1.");
