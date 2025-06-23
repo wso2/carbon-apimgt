@@ -443,7 +443,10 @@ public class APIAdminImpl implements APIAdmin {
         KeyManagerConfigurationDTO defaultKeyManagerConfiguration = null;
         while (iterator.hasNext()) {
             KeyManagerConfigurationDTO keyManagerConfigurationDTO = iterator.next();
-            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName())) {
+            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName()) && (
+                    APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())
+                            || APIConstants.KeyManager.WSO2_IS_KEY_MANAGER_TYPE.equals(
+                            keyManagerConfigurationDTO.getType()))) {
                 defaultKeyManagerConfiguration = keyManagerConfigurationDTO;
                 iterator.remove();
                 break;
@@ -567,7 +570,10 @@ public class APIAdminImpl implements APIAdmin {
             } else {
                 keyManagerConfigurationDTOS = new ArrayList<>();
             }
-            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName())) {
+            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName()) && (
+                    APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfiguration.getType())
+                            || APIConstants.KeyManager.WSO2_IS_KEY_MANAGER_TYPE.equals(
+                            keyManagerConfiguration.getType()))) {
                 APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfiguration);
             }
             keyManagerConfigurationDTOS.add(keyManagerConfiguration);
@@ -587,7 +593,10 @@ public class APIAdminImpl implements APIAdmin {
             return null;
         }
         if (keyManagerConfigurationDTO != null) {
-            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName())) {
+            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName()) && (
+                    APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())
+                            || APIConstants.KeyManager.WSO2_IS_KEY_MANAGER_TYPE.equals(
+                            keyManagerConfigurationDTO.getType()))) {
                 APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfigurationDTO);
             }
             maskValues(keyManagerConfigurationDTO);
@@ -775,7 +784,10 @@ public class APIAdminImpl implements APIAdmin {
 
     private void validateKeyManagerEndpointConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
-        if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName())) {
+        if (!(APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName()) && (
+                APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())
+                        || APIConstants.KeyManager.WSO2_IS_KEY_MANAGER_TYPE.equals(
+                        keyManagerConfigurationDTO.getType())))) {
             KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
                     .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
             if (keyManagerConnectorConfiguration != null) {
@@ -1114,7 +1126,9 @@ public class APIAdminImpl implements APIAdmin {
                     Integer.MAX_VALUE);
             if (apiUsage != null && apiUsage.getApiCount() == 0 && appUsages != null
                     && appUsages.getApplicationCount() == 0) {
-                if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(kmConfig.getName())) {
+                if (!(APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(kmConfig.getName()) && (
+                        APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(kmConfig.getType())
+                                || APIConstants.KeyManager.WSO2_IS_KEY_MANAGER_TYPE.equals(kmConfig.getType())))) {
                     deleteIdentityProvider(organization, kmConfig);
                     apiMgtDAO.deleteKeyManagerConfigurationById(kmConfig.getUuid(), organization);
                     new KeyMgtNotificationSender()
@@ -1137,7 +1151,10 @@ public class APIAdminImpl implements APIAdmin {
         KeyManagerConfigurationDTO keyManagerConfiguration =
                 apiMgtDAO.getKeyManagerConfigurationByName(organization, name);
         if (keyManagerConfiguration != null) {
-            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName())) {
+            if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName()) && (
+                    APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfiguration.getType())
+                            || APIConstants.KeyManager.WSO2_IS_KEY_MANAGER_TYPE.equals(
+                            keyManagerConfiguration.getType()))) {
                 APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfiguration);
             }
             maskValues(keyManagerConfiguration);
@@ -1464,7 +1481,10 @@ public class APIAdminImpl implements APIAdmin {
         if (StringUtils.isEmpty(keyManagerConfigurationDTO.getName())) {
             throw new APIManagementException("Key Manager Name can't be empty", ExceptionCodes.KEY_MANAGER_NAME_EMPTY);
         }
-        if (!APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName())) {
+        if (!(APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfigurationDTO.getName()) && (
+                APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfigurationDTO.getType())
+                        || APIConstants.KeyManager.WSO2_IS_KEY_MANAGER_TYPE.equals(
+                        keyManagerConfigurationDTO.getType())))) {
             KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
                     .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
             if (keyManagerConnectorConfiguration != null) {
