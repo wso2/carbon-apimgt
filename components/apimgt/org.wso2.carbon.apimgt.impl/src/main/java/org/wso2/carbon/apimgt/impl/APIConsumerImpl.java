@@ -2189,6 +2189,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         try {
             WorkflowExecutor createApplicationWFExecutor =
  getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            WorkflowExecutor updateApplicationWFExecutor =
+            getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
             WorkflowExecutor createSubscriptionWFExecutor =
             getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             WorkflowExecutor deleteSubscriptionWFExecutor =
@@ -2244,7 +2246,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             String appUpdateWorkflowExtRef = apiMgtDAO.getExternalWorkflowRefByInternalRefWorkflowType(applicationId,
                     WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
             if (appUpdateWorkflowExtRef != null) {
-                cleanupAppUpdatePendingTask(applicationId, createApplicationWFExecutor, appCreationWorkflowExtRef);
+                cleanupAppUpdatePendingTask(applicationId, updateApplicationWFExecutor, appUpdateWorkflowExtRef);
             }
 
         } catch (WorkflowException ex) {
