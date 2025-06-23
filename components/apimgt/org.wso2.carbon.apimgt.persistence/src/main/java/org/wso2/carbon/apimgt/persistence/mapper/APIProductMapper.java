@@ -43,9 +43,9 @@ import com.google.gson.Gson;
 public interface APIProductMapper {
     APIProductMapper INSTANCE = Mappers.getMapper(APIProductMapper.class);
     
-    //@Mapping(source = "providerName", target = "id.providerName")
-    //@Mapping(source = "apiProductName", target = "id.apiProductName")
-    //@Mapping(source = "version", target = "id.version")
+//    @Mapping(source = "providerName", target = "id.providerName")
+//    @Mapping(source = "apiProductName", target = "id.apiProductName")
+//    @Mapping(source = "version", target = "id.version")
     @Mapping(source = "id", target = "uuid")
     @Mapping(source = "thumbnail", target = "thumbnailUrl")
     @Mapping(source = "availableTierNames", target = "availableTiers")

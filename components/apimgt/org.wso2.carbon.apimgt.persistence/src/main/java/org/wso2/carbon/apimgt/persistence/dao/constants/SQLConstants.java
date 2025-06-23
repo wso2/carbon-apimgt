@@ -154,12 +154,12 @@ public class SQLConstants {
             "AND JSON_VALUE(org, '$.name') = ? ";
 
     public static final String ADD_API_REVISION_SQL =
-            "INSERT INTO AM_REVISION_ARTIFACT (TYPE, ORG, REVISION_UUID, REVISION_ID, METADATA) " +
-            "VALUES (?, ?, ?, ?, ?)";
+            "INSERT INTO AM_REVISION_ARTIFACT (TYPE, ORG, API_UUID, REVISION_UUID, REVISION_ID, METADATA) " +
+            "VALUES (?, ?, ?, ?, ?, ?)";
 
     public static final String ADD_API_REVISION_ARTIFACT_SQL =
-            "INSERT INTO AM_REVISION_ARTIFACT (TYPE, ORG, REVISION_UUID, REVISION_ID, ARTIFACT, METADATA) " +
-            "VALUES (?, ?, ?, ?, ?, ?)";
+            "INSERT INTO AM_REVISION_ARTIFACT (TYPE, ORG, API_UUID, REVISION_UUID, REVISION_ID, ARTIFACT, METADATA) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     public static final String GET_API_REVISION_BY_ID_SQL =
             "SELECT * FROM AM_REVISION_ARTIFACT " +
@@ -828,4 +828,9 @@ public class SQLConstants {
                     "(type = 'API_PRODUCT' AND JSON_VALUE(METADATA, '$.state') = 'PUBLISHED')" +
                     ")";
 
+    public static final String GET_API_UUID_BY_REVISION_UUID_SQL =
+            "SELECT API_UUID FROM AM_REVISION_ARTIFACT " +
+            "WHERE REVISION_UUID = ? " +
+            "AND JSON_VALUE(ORG, '$.name') = ? " +
+            "AND TYPE IN ('API', 'API_PRODUCT') ";
 }

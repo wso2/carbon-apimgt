@@ -110,8 +110,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
             String swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiUUID, org.getName());
             String asyncApiDefinition = persistenceDAO.getAsyncAPIDefinitionByUUID(apiUUID, org.getName());
 
-            // Revision UUID is same as API UUID
-            revisionUUID = apiUUID;
+            revisionUUID = UUID.randomUUID().toString();
 
             // Prepare JSON objects
             JsonObject apiJson = DatabasePersistenceUtil.stringTojsonObject(apiOrApiProductSchema);
@@ -119,12 +118,12 @@ public class DatabasePersistenceImpl implements APIPersistence {
             String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
 
             // Add revision entry
-            persistenceDAO.addAPIRevisionSchema(artifactType, revisionId, apiUUID, apiJson.toString(), orgJsonString);
+            persistenceDAO.addAPIRevisionSchema(apiUUID, artifactType, revisionId, revisionUUID, apiJson.toString(), orgJsonString);
 
             // Add API definitions if they exist
             if (swaggerDefinition != null) {
                 try {
-                    persistenceDAO.addAPIRevisionSwaggerDefinition(revisionId, apiUUID,
+                    persistenceDAO.addAPIRevisionSwaggerDefinition(apiUUID, revisionId, revisionUUID,
                         swaggerDefinition, orgJsonString);
                 } catch (APIManagementException e) {
                     log.error("Error while saving Swagger definition for API revision: " + apiUUID, e);
@@ -133,7 +132,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
             if (asyncApiDefinition != null) {
                 try {
-                    persistenceDAO.addAPIRevisionAsyncDefinition(revisionId, apiUUID,
+                    persistenceDAO.addAPIRevisionAsyncDefinition(apiUUID, revisionId, revisionUUID,
                         asyncApiDefinition, orgJsonString);
                 } catch (APIManagementException e) {
                     log.error("Error while saving Async API definition for API revision: " + apiUUID, e);
@@ -150,7 +149,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                    thumbnailMetadata.addProperty("fileName", thumbnailResource.getName());
                    String thumbnailMetadataString = DatabasePersistenceUtil.getFormattedJsonStringToSave(thumbnailMetadata);
 
-                   persistenceDAO.addAPIRevisionThumbnail(revisionId, apiUUID,
+                   persistenceDAO.addAPIRevisionThumbnail(apiUUID, revisionId, revisionUUID,
                            thumbnailResource.getContent(), thumbnailMetadataString, orgJsonString);
                 }
             } catch (Exception e) {
@@ -342,6 +341,15 @@ public class DatabasePersistenceImpl implements APIPersistence {
         PublisherAPI publisherAPI = null;
 
         try {
+            if (!persistenceDAO.isAPIExists(apiId, org.getName())) {
+                try {
+                    apiId = persistenceDAO.getAPIUUIDByRevisionUUID(org.getName(), apiId);
+                } catch (APIManagementException e) {
+                    log.error("Error while retrieving API UUID for revision UUID: " + apiId, e);
+                    throw new APIPersistenceException("API with ID: " + apiId + " does not exist in organization: " + tenantDomain, e);
+                }
+            }
+
             // Determine if the artifact is an API or API Product
             String artifactType = persistenceDAO.getAssociatedType(tenantDomain, apiId);
 
@@ -1322,6 +1330,15 @@ public class DatabasePersistenceImpl implements APIPersistence {
         PublisherAPIProduct publisherAPIProduct = null;
 
         try {
+            if (!persistenceDAO.isAPIExists(apiProductId, org.getName())) {
+                try {
+                    apiProductId = persistenceDAO.getAPIUUIDByRevisionUUID(org.getName(), apiProductId);
+                } catch (APIManagementException e) {
+                    log.error("Error while retrieving API UUID for revision UUID: " + apiProductId, e);
+                    throw new APIPersistenceException("API with ID: " + apiProductId + " does not exist in organization: " + tenantDomain, e);
+                }
+            }
+
             // Get API Product schema from database
             String apiProductSchema = persistenceDAO.getApiProductByUUID(tenantDomain, apiProductId);
             String swaggerDefinition = persistenceDAO.getSwaggerDefinitionByUUID(apiProductId, tenantDomain);

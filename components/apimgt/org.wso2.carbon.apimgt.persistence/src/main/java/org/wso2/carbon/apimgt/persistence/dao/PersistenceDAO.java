@@ -597,16 +597,17 @@ public class PersistenceDAO {
         return graphqlSchema;
     }
 
-    public void addAPIRevisionSchema(String type, int revisionId, String revisionUUID, String metadata, String orgJsonString) throws APIManagementException {
+    public void addAPIRevisionSchema(String apiUUID, String type, int revisionId, String revisionUUID, String metadata, String orgJsonString) throws APIManagementException {
         String query = SQLConstants.ADD_API_REVISION_SQL;
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
             prepStmt.setString(1, type);
             prepStmt.setString(2, orgJsonString);
-            prepStmt.setString(3, revisionUUID);
-            prepStmt.setInt(4, revisionId);
-            prepStmt.setString(5, metadata);
+            prepStmt.setString(3, apiUUID);
+            prepStmt.setString(4, revisionUUID);
+            prepStmt.setInt(5, revisionId);
+            prepStmt.setString(6, metadata);
             prepStmt.execute();
             connection.commit();
         } catch (SQLException e) {
@@ -620,16 +621,17 @@ public class PersistenceDAO {
     }
 
 
-    public void addAPIRevisionSwaggerDefinition(int revisionId, String revisionUUID, String swaggerDefinition, String orgJsonString) throws APIManagementException {
+    public void addAPIRevisionSwaggerDefinition(String apiUUID, int revisionId, String revisionUUID, String swaggerDefinition, String orgJsonString) throws APIManagementException {
         String query = SQLConstants.ADD_API_REVISION_SQL;
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
             prepStmt.setString(1, "API_DEFINITION");
             prepStmt.setString(2, orgJsonString);
-            prepStmt.setString(3, revisionUUID);
-            prepStmt.setInt(4, revisionId);
-            prepStmt.setString(5, swaggerDefinition);
+            prepStmt.setString(3, apiUUID);
+            prepStmt.setString(4, revisionUUID);
+            prepStmt.setInt(5, revisionId);
+            prepStmt.setString(6, swaggerDefinition);
             prepStmt.execute();
             connection.commit();
         } catch (SQLException e) {
@@ -637,16 +639,17 @@ public class PersistenceDAO {
         }
     }
 
-    public void addAPIRevisionAsyncDefinition(int revisionId, String revisionUUID, String asyncApiDefinition, String orgJsonString) throws APIManagementException {
+    public void addAPIRevisionAsyncDefinition(String apiUUID, int revisionId, String revisionUUID, String asyncApiDefinition, String orgJsonString) throws APIManagementException {
         String query = SQLConstants.ADD_API_REVISION_SQL;
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
             prepStmt.setString(1, "ASYNC_API_DEFINITION");
             prepStmt.setString(2, orgJsonString);
-            prepStmt.setString(3, revisionUUID);
-            prepStmt.setInt(4, revisionId);
-            prepStmt.setString(5, asyncApiDefinition);
+            prepStmt.setString(3, apiUUID);
+            prepStmt.setString(4, revisionUUID);
+            prepStmt.setInt(5, revisionId);
+            prepStmt.setString(6, asyncApiDefinition);
             prepStmt.execute();
             connection.commit();
         } catch (SQLException e) {
@@ -654,7 +657,7 @@ public class PersistenceDAO {
         }
     }
 
-    public void addAPIRevisionThumbnail(int revisionId, String revisionUUID, InputStream content, String metadata, String orgJsonString) throws APIManagementException {
+    public void addAPIRevisionThumbnail(String apiUUID, int revisionId, String revisionUUID, InputStream content, String metadata, String orgJsonString) throws APIManagementException {
         String query = SQLConstants.ADD_API_REVISION_ARTIFACT_SQL;
         try (Connection connection = PersistanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
@@ -670,10 +673,11 @@ public class PersistenceDAO {
             try (PreparedStatement prepStmt = connection.prepareStatement(query)) {
                 prepStmt.setString(1, "THUMBNAIL");
                 prepStmt.setString(2, orgJsonString);
-                prepStmt.setString(3, revisionUUID);
-                prepStmt.setInt(4, revisionId);
-                prepStmt.setBinaryStream(5, byteArrayInputStream, fileLength);
-                prepStmt.setString(6, metadata);
+                prepStmt.setString(3, apiUUID);
+                prepStmt.setString(4, revisionUUID);
+                prepStmt.setInt(5, revisionId);
+                prepStmt.setBinaryStream(6, byteArrayInputStream, fileLength);
+                prepStmt.setString(7, metadata);
                 prepStmt.execute();
             }
             connection.commit();
@@ -2376,4 +2380,24 @@ public class PersistenceDAO {
         }
         return tags;
     }
+
+    public String getAPIUUIDByRevisionUUID(String org, String revisionUUID) throws APIManagementException {
+        String apiUUID = null;
+        String query = SQLConstants.GET_API_UUID_BY_REVISION_UUID_SQL;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(query)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, revisionUUID);
+            prepStmt.setString(2, org);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    apiUUID = rs.getString("api_uuid");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving API UUID by revision UUID in the database", e);
+        }
+        return apiUUID;
+    }
 }
+
