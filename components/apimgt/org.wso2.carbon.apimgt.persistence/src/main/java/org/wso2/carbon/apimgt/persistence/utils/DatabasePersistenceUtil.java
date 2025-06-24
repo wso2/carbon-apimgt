@@ -541,6 +541,19 @@ public class DatabasePersistenceUtil {
 
         return devPortalAPI;
     }
+
+    public static List<String> getUserRoles(String roles) {
+
+        if (roles == null || roles.isEmpty()) {
+            return List.of(new String[0]);
+        }
+
+        // Split the roles by comma and trim whitespace
+        return List.of(Arrays.stream(roles.split(","))
+                .map(String::trim)
+                .filter(role -> !role.isEmpty())
+                .toArray(String[]::new));
+    }
 }
 
 

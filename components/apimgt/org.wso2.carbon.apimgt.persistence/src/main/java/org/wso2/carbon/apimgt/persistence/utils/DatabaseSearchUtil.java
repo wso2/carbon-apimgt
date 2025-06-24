@@ -42,7 +42,7 @@ public class DatabaseSearchUtil {
     private static final Log log = LogFactory.getLog(DatabaseSearchUtil.class);
     private static final PersistenceDAO persistenceDAO = PersistenceDAO.getInstance();
 
-    public static List<String> searchAPIsForPublisher(SearchQuery searchQuery, String orgName, int start, int offset) throws APIManagementException {
+    public static List<String> searchAPIsForPublisher(SearchQuery searchQuery, String orgName, int start, int offset, String[] roles) throws APIManagementException {
         String searchContent;
         SearchType searchType;
         String property = null;
@@ -60,70 +60,70 @@ public class DatabaseSearchUtil {
         switch (searchType) {
             case CONTENT:
                 try {
-                    searchResult = persistenceDAO.searchAPIsByContent(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIsByContent(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching APIs by content: " + searchContent, e);
                 }
                 break;
             case NAME:
                 try {
-                    searchResult = persistenceDAO.searchAPIsByName(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIsByName(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching APIs by name: " + searchContent, e);
                 }
                 break;
             case PROVIDER:
                 try {
-                    searchResult = persistenceDAO.searchAPIsByProvider(searchContent, orgName, start, offset);
+                    searchResult = persistenceDAO.searchAPIsByProvider(searchContent, orgName, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching APIs by provider: " + searchContent, e);
                 }
                 break;
             case VERSION:
                 try {
-                    searchResult = persistenceDAO.searchAPIsByVersion(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIsByVersion(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching APIs by version: " + searchContent, e);
                 }
                 break;
             case CONTEXT:
                 try {
-                    searchResult = persistenceDAO.searchAPIsByContext(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIsByContext(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching APIs by context: " + searchContent, e);
                 }
                 break;
             case STATUS:
                 try {
-                    searchResult = persistenceDAO.searchAPIsByStatus(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIsByStatus(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching APIs by status: " + searchContent, e);
                 }
                 break;
             case DESCRIPTION:
                 try {
-                    searchResult = persistenceDAO.searchAPIsByDescription(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIsByDescription(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching APIs by description: " + searchContent, e);
                 }
                 break;
             case TAGS:
                 try {
-                    searchResult = persistenceDAO.searchAPIsByTags(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIsByTags(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching APIs by tags: " + searchContent, e);
                 }
                 break;
             case TAG:
                 try {
-                    searchResult = persistenceDAO.searchAPIsByTags(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIsByTags(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching APIs by tag: " + searchContent, e);
                 }
                 break;
             case API_CATEGORY:
                 try {
-                    searchResult = persistenceDAO.searchAPIsByCategory(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIsByCategory(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching APIs by category: " + searchContent, e);
                 }
@@ -133,7 +133,7 @@ public class DatabaseSearchUtil {
                     if (property == null || property.isEmpty()) {
                         throw new APIManagementException("Property for search type 'other' cannot be null or empty.");
                     }
-                    searchResult = persistenceDAO.searchAPIsByOther(orgName, property, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIsByOther(orgName, property, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching APIs by property: " + property + " with content: " + searchContent, e);
                 }
@@ -142,7 +142,7 @@ public class DatabaseSearchUtil {
         return searchResult;
     }
 
-    public static List<ContentSearchResult> searchContentForPublisher(SearchQuery searchQuery, String orgName, int start, int offset) throws APIManagementException {
+    public static List<ContentSearchResult> searchContentForPublisher(SearchQuery searchQuery, String orgName, int start, int offset, String[] roles) throws APIManagementException {
         String searchContent;
         SearchType searchType;
 
@@ -157,35 +157,35 @@ public class DatabaseSearchUtil {
 
         switch (searchType) {
             case CONTENT:
-                contentSearchResults = persistenceDAO.searchContentByContent(orgName, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByContent(orgName, searchContent, start, offset, roles);
                 break;
             case NAME:
-                contentSearchResults = persistenceDAO.searchContentByName(orgName, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByName(orgName, searchContent, start, offset, roles);
                 break;
             case PROVIDER:
-                contentSearchResults = persistenceDAO.searchContentByProvider(orgName, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByProvider(orgName, searchContent, start, offset, roles);
                 break;
             case VERSION:
-                contentSearchResults = persistenceDAO.searchContentByVersion(orgName, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByVersion(orgName, searchContent, start, offset, roles);
                 break;
             case CONTEXT:
-                contentSearchResults = persistenceDAO.searchContentByContext(orgName, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByContext(orgName, searchContent, start, offset, roles);
                 break;
             case STATUS:
-                contentSearchResults = persistenceDAO.searchContentByStatus(orgName, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByStatus(orgName, searchContent, start, offset, roles);
                 break;
             case DESCRIPTION:
-                contentSearchResults = persistenceDAO.searchContentByDescription(orgName, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByDescription(orgName, searchContent, start, offset, roles);
                 break;
             case TAGS:
             case TAG:
-                contentSearchResults = persistenceDAO.searchContentByTags(orgName, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByTags(orgName, searchContent, start, offset, roles);
                 break;
             case API_CATEGORY:
-                contentSearchResults = persistenceDAO.searchContentByCategory(orgName, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByCategory(orgName, searchContent, start, offset, roles);
                 break;
             default:
-                contentSearchResults = persistenceDAO.searchContentByOther(orgName, searchQuery.getType(), searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByOther(orgName, searchQuery.getType(), searchContent, start, offset, roles);
         }
 
         return contentSearchResults;
@@ -291,7 +291,7 @@ public class DatabaseSearchUtil {
         return contentSearchResults;
     }
 
-    public static List<String> searchAPIProductsForPublisher(SearchQuery searchQuery, String orgName, int start, int offset) throws APIManagementException {
+    public static List<String> searchAPIProductsForPublisher(SearchQuery searchQuery, String orgName, int start, int offset, String[] roles) throws APIManagementException {
         String searchContent;
         SearchType searchType;
         String property = null;
@@ -309,70 +309,70 @@ public class DatabaseSearchUtil {
         switch (searchType) {
             case CONTENT:
                 try {
-                    searchResult = persistenceDAO.searchAPIProductsByContent(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIProductsByContent(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching API Products by content: " + searchContent, e);
                 }
                 break;
             case NAME:
                 try {
-                    searchResult = persistenceDAO.searchAPIProductsByName(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIProductsByName(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching API Products by name: " + searchContent, e);
                 }
                 break;
             case PROVIDER:
                 try {
-                    searchResult = persistenceDAO.searchAPIProductsByProvider(searchContent, orgName, start, offset);
+                    searchResult = persistenceDAO.searchAPIProductsByProvider(searchContent, orgName, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching API Products by provider: " + searchContent, e);
                 }
                 break;
             case VERSION:
                 try {
-                    searchResult = persistenceDAO.searchAPIProductsByVersion(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIProductsByVersion(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching API Products by version: " + searchContent, e);
                 }
                 break;
             case CONTEXT:
                 try {
-                    searchResult = persistenceDAO.searchAPIProductsByContext(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIProductsByContext(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching API Products by context: " + searchContent, e);
                 }
                 break;
             case STATUS:
                 try {
-                    searchResult = persistenceDAO.searchAPIProductsByStatus(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIProductsByStatus(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching API Products by status: " + searchContent, e);
                 }
                 break;
             case DESCRIPTION:
                 try {
-                    searchResult = persistenceDAO.searchAPIProductsByDescription(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIProductsByDescription(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching API Products by description: " + searchContent, e);
                 }
                 break;
             case TAGS:
                 try {
-                    searchResult = persistenceDAO.searchAPIProductsByTags(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIProductsByTags(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching API Products by tags: " + searchContent, e);
                 }
                 break;
             case TAG:
                 try {
-                    searchResult = persistenceDAO.searchAPIProductsByTags(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIProductsByTags(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching API Products by tag: " + searchContent, e);
                 }
                 break;
             case API_CATEGORY:
                 try {
-                    searchResult = persistenceDAO.searchAPIProductsByCategory(orgName, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIProductsByCategory(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching API Products by category: " + searchContent, e);
                 }
@@ -382,7 +382,7 @@ public class DatabaseSearchUtil {
                     if (property == null || property.isEmpty()) {
                         throw new APIManagementException("Property for search type 'other' cannot be null or empty.");
                     }
-                    searchResult = persistenceDAO.searchAPIProductsByOther(orgName, property, searchContent, start, offset);
+                    searchResult = persistenceDAO.searchAPIProductsByOther(orgName, property, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching API Products by property: " + property + " with content: " + searchContent, e);
                 }

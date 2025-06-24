@@ -481,29 +481,33 @@ public class DatabasePersistenceImpl implements APIPersistence {
         SearchQuery modifiedQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
         log.debug("Modified query for publisher API product search: " + modifiedQuery);
 
-        result = searchPaginatedPublisherAPIs(modifiedQuery, org, start, offset);
+        result = searchPaginatedPublisherAPIs(modifiedQuery, org, start, offset, ctx);
 
         return result;
     }
 
-    private PublisherAPISearchResult searchPaginatedPublisherAPIs(SearchQuery searchQuery, Organization org, int start, int offset) {
+    private PublisherAPISearchResult searchPaginatedPublisherAPIs(SearchQuery searchQuery, Organization org, int start, int offset, UserContext ctx) {
         int totalLength = 0;
         PublisherAPISearchResult searchResults = new PublisherAPISearchResult();
         List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<PublisherAPIInfo>();
+        String[] userRoles = ctx.getRoles();
 
         try {
-            totalLength = persistenceDAO.getAllAPICount(org.getName());
+            totalLength = persistenceDAO.getAllAPICount(org.getName(), userRoles);
             List<String> results = null;
 
             if (searchQuery == null) {
-                results = persistenceDAO.getAllPIs(org.getName(), start, offset);
+                results = persistenceDAO.getAllPIs(org.getName(), start, offset, userRoles);
             } else {
-                results = DatabaseSearchUtil.searchAPIsForPublisher(searchQuery, org.getName(), start, offset);
+                results = DatabaseSearchUtil.searchAPIsForPublisher(searchQuery, org.getName(), start, offset, userRoles);
             }
 
             for (String result: results) {
                 JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();
 
+                API api = DatabasePersistenceUtil.jsonToApi(jsonObject);
+
+                String access = api.getAccessControl();
                 PublisherAPIInfo apiInfo = new PublisherAPIInfo();
                 String apiId = DatabasePersistenceUtil.safeGetAsString(jsonObject, "uuid");
                 apiInfo.setId(apiId);
@@ -544,7 +548,10 @@ public class DatabasePersistenceImpl implements APIPersistence {
 //                    log.error("Error while retrieving thumbnail for API: " + apiId, e);
                 }
 
+
                 publisherAPIInfoList.add(apiInfo);
+
+
             }
         } catch (APIManagementException e) {
             throw new RuntimeException(e);
@@ -566,18 +573,18 @@ public class DatabasePersistenceImpl implements APIPersistence {
        DevPortalAPISearchResult result = null;
 
         SearchQuery modifiedQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
-        result = searchPaginatedDevPortalAPIs(modifiedQuery, org, start, offset);
+        result = searchPaginatedDevPortalAPIs(modifiedQuery, org, start, offset, ctx);
 
         return result;
     }
 
-    private DevPortalAPISearchResult searchPaginatedDevPortalAPIs(SearchQuery searchQuery, Organization org, int start, int offset) {
+    private DevPortalAPISearchResult searchPaginatedDevPortalAPIs(SearchQuery searchQuery, Organization org, int start, int offset, UserContext ctx) {
         int totalLength = 0;
         DevPortalAPISearchResult searchResult = new DevPortalAPISearchResult();
         String orgName = org.getName();
 
         try {
-            totalLength = persistenceDAO.getAllAPICount(orgName);
+            totalLength = persistenceDAO.getAllAPICount(orgName, ctx.getRoles());
 
             List<ContentSearchResult> results = null;
 
@@ -647,12 +654,13 @@ public class DatabasePersistenceImpl implements APIPersistence {
     @Override
     public PublisherContentSearchResult searchContentForPublisher(Organization org, String searchQuery, int start, int offset, UserContext ctx) throws APIPersistenceException {
         PublisherContentSearchResult searchResult = new PublisherContentSearchResult();
+        String[] userRoles = ctx.getRoles();
 
         try {
             String requestedTenantDomain = org.getName();
             int totalLength = 0;
             SearchQuery modifiedQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
-            List<ContentSearchResult> results = DatabaseSearchUtil.searchContentForPublisher(modifiedQuery, requestedTenantDomain, start, offset);
+            List<ContentSearchResult> results = DatabaseSearchUtil.searchContentForPublisher(modifiedQuery, requestedTenantDomain, start, offset, userRoles);
             List<SearchContent> contentData = new ArrayList<>();
 
             for (ContentSearchResult result: results) {
@@ -1383,6 +1391,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                                                                          throws APIPersistenceException {
         String requestedTenantDomain = org.getName();
         PublisherAPIProductSearchResult searchResult = null;
+        String[] userRoles = ctx.getRoles();
 
         log.debug("Requested query for publisher API product search: " + searchQuery);
         SearchQuery modifiedQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
@@ -1396,9 +1405,9 @@ public class DatabasePersistenceImpl implements APIPersistence {
             List<String> results = null;
 
             if (modifiedQuery != null && !modifiedQuery.getContent().isEmpty()) {
-                results = DatabaseSearchUtil.searchAPIProductsForPublisher(modifiedQuery, requestedTenantDomain, start, offset);
+                results = DatabaseSearchUtil.searchAPIProductsForPublisher(modifiedQuery, requestedTenantDomain, start, offset, userRoles);
             } else {
-                results = persistenceDAO.getAllApiProducts(requestedTenantDomain, start, offset);
+                results = persistenceDAO.getAllApiProducts(requestedTenantDomain, start, offset, userRoles);
             }
 
             totalLength = persistenceDAO.getAllAPIProductCount(org.getName());
