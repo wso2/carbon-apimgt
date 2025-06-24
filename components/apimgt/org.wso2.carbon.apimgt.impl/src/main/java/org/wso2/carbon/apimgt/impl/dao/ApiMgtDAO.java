@@ -21263,10 +21263,11 @@ public class ApiMgtDAO {
                         for (OperationPolicy operationPolicy : operationPolicies){
                             Gson gson = new Gson();
                             String paramJSON = gson.toJson(operationPolicy.getParameters());
+                            InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8));
                             preparedStatement.setInt(1, uriTemplate.getId());
                             preparedStatement.setString(2,operationPolicy.getPolicyId());
                             preparedStatement.setString(3, operationPolicy.getDirection());
-                            preparedStatement.setString(4, paramJSON);
+                            preparedStatement.setBinaryStream(4, paramInputStream, paramJSON.length());
                             preparedStatement.setInt(5, operationPolicy.getOrder());
                             preparedStatement.addBatch();
                         }
