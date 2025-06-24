@@ -1359,14 +1359,7 @@ public class SubscriptionValidationDAO {
                         String policyVersion = resultSet.getString("POLICY_VERSION");
                         String operationPolicyDirection = resultSet.getString("OPERATION_POLICY_DIRECTION");
                         String operationPolicyID = resultSet.getString("OPERATION_POLICY_UUID");
-                        InputStream parametersStream = resultSet.getBinaryStream("OPERATION_PARAMS");
-                        String parameters = null;
-                        try{
-                            parameters = new String(parametersStream.readAllBytes(), StandardCharsets.UTF_8);
-                        }
-                        catch (IOException e) {
-                            log.error("Error while reading policy specification attributes for the policy", e);
-                        }
+                        String parameters = APIMgtDBUtil.getStringFromInputStream(resultSet.getBinaryStream("OPERATION_PARAMS"));
 
                         URLMapping urlMapping = null;
                         if (StringUtils.isNotEmpty(httpMethod) && StringUtils.isNotEmpty(urlPattern)) {
@@ -1411,17 +1404,8 @@ public class SubscriptionValidationDAO {
                     String apiPolicyUUID = resultSet.getString("API_POLICY_UUID");
 
                     // We get parameters of the policies separately. However, this can be retrieved from the AM_API_OPERATION_POLICY_MAPPING as it contains both API and Operation Policies
-                    InputStream operationParametersStream = resultSet.getBinaryStream("OPERATION_PARAMS");
-                    InputStream apiParamsStream = resultSet.getBinaryStream("API_PARAMS");
-                    String operationParameters = null;
-                    String apiParams = null;
-                    try {
-                        operationParameters = new String(operationParametersStream.readAllBytes(), StandardCharsets.UTF_8);
-                        apiParams = new String(apiParamsStream.readAllBytes(), StandardCharsets.UTF_8);
-                    } catch (IOException e) {
-                        log.error("Error while reading policy specification attributes for the policy", e);
-                    }
-
+                    String operationParameters = APIMgtDBUtil.getStringFromInputStream(resultSet.getBinaryStream("OPERATION_PARAMS"));
+                    String apiParams = APIMgtDBUtil.getStringFromInputStream(resultSet.getBinaryStream("API_PARAMS"));
 
                     URLMapping urlMapping = null;
                     if (StringUtils.isNotEmpty(httpMethod) && StringUtils.isNotEmpty(urlPattern)) {
