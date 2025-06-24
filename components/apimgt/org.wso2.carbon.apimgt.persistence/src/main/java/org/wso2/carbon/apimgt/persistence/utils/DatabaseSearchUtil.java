@@ -191,7 +191,7 @@ public class DatabaseSearchUtil {
         return contentSearchResults;
     }
 
-    public static List<ContentSearchResult> serachAPIsForDevPortal(SearchQuery searchQuery, String orgName, int start, int offset) throws APIManagementException {
+    public static List<ContentSearchResult> serachAPIsForDevPortal(SearchQuery searchQuery, String orgName, int start, int offset, String[] roles) throws APIManagementException {
         String searchContent;
         SearchType searchType;
 
@@ -206,44 +206,44 @@ public class DatabaseSearchUtil {
 
         switch (searchType) {
             case CONTENT:
-                searchResult = persistenceDAO.searchAPIsByContentForDevPortal(orgName, searchContent, start, offset);
+                searchResult = persistenceDAO.searchAPIsByContentForDevPortal(orgName, searchContent, start, offset, roles);
                 break;
             case NAME:
-                searchResult = persistenceDAO.searchAPIsByNameForDevPortal(orgName, searchContent, start, offset);
+                searchResult = persistenceDAO.searchAPIsByNameForDevPortal(orgName, searchContent, start, offset, roles);
                 break;
             case PROVIDER:
-                searchResult = persistenceDAO.searchAPIsByProviderForDevPortal(searchContent, orgName, start, offset);
+                searchResult = persistenceDAO.searchAPIsByProviderForDevPortal(searchContent, orgName, start, offset, roles);
                 break;
             case VERSION:
-                searchResult = persistenceDAO.searchAPIsByVersionForDevPortal(orgName, searchContent, start, offset);
+                searchResult = persistenceDAO.searchAPIsByVersionForDevPortal(orgName, searchContent, start, offset, roles);
                 break;
             case CONTEXT:
-                searchResult = persistenceDAO.searchAPIsByContextForDevPortal(orgName, searchContent, start, offset);
+                searchResult = persistenceDAO.searchAPIsByContextForDevPortal(orgName, searchContent, start, offset, roles);
                 break;
             case STATUS:
-                searchResult = persistenceDAO.searchAPIsByStatusForDevPortal(orgName, searchContent, start, offset);
+                searchResult = persistenceDAO.searchAPIsByStatusForDevPortal(orgName, searchContent, start, offset, roles);
                 break;
             case DESCRIPTION:
-                searchResult = persistenceDAO.searchAPIsByDescriptionForDevPortal(orgName, searchContent, start, offset);
+                searchResult = persistenceDAO.searchAPIsByDescriptionForDevPortal(orgName, searchContent, start, offset, roles);
                 break;
             case TAGS:
             case TAG:
-                searchResult = persistenceDAO.searchAPIsByTagsForDevPortal(orgName, searchContent, start, offset);
+                searchResult = persistenceDAO.searchAPIsByTagsForDevPortal(orgName, searchContent, start, offset, roles);
                 break;
             case API_CATEGORY:
-                searchResult = persistenceDAO.searchAPIsByCategoryForDevPortal(orgName, searchContent, start, offset);
+                searchResult = persistenceDAO.searchAPIsByCategoryForDevPortal(orgName, searchContent, start, offset, roles);
                 break;
             default:
                 if (searchQuery.getType() == null || searchQuery.getType().isEmpty()) {
                     throw new APIManagementException("Property for 'other' type cannot be null or empty.");
                 }
-                searchResult = persistenceDAO.searchAPIsByOtherForDevPortal(orgName, searchQuery.getType(), searchContent, start, offset);
+                searchResult = persistenceDAO.searchAPIsByOtherForDevPortal(orgName, searchQuery.getType(), searchContent, start, offset, roles);
         }
 
         return searchResult;
     }
 
-    public static List<ContentSearchResult> searchContentForDevPortal(SearchQuery modifiedQuery, String requestedTenantDomain, int start, int offset) throws APIManagementException {
+    public static List<ContentSearchResult> searchContentForDevPortal(SearchQuery modifiedQuery, String requestedTenantDomain, int start, int offset, String[] roles) throws APIManagementException {
         String searchContent = modifiedQuery.getContent();
         SearchType searchType;
 
@@ -257,35 +257,35 @@ public class DatabaseSearchUtil {
 
         switch (searchType) {
             case CONTENT:
-                contentSearchResults = persistenceDAO.searchContentByContentForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByContentForDevPortal(requestedTenantDomain, searchContent, start, offset, roles);
                 break;
             case NAME:
-                contentSearchResults = persistenceDAO.searchContentByNameForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByNameForDevPortal(requestedTenantDomain, searchContent, start, offset, roles);
                 break;
             case PROVIDER:
-                contentSearchResults = persistenceDAO.searchContentByProviderForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByProviderForDevPortal(requestedTenantDomain, searchContent, start, offset, roles);
                 break;
             case VERSION:
-                contentSearchResults = persistenceDAO.searchContentByVersionForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByVersionForDevPortal(requestedTenantDomain, searchContent, start, offset, roles);
                 break;
             case CONTEXT:
-                contentSearchResults = persistenceDAO.searchContentByContextForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByContextForDevPortal(requestedTenantDomain, searchContent, start, offset, roles);
                 break;
             case STATUS:
-                contentSearchResults = persistenceDAO.searchContentByStatusForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByStatusForDevPortal(requestedTenantDomain, searchContent, start, offset, roles);
                 break;
             case DESCRIPTION:
-                contentSearchResults = persistenceDAO.searchContentByDescriptionForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByDescriptionForDevPortal(requestedTenantDomain, searchContent, start, offset, roles);
                 break;
             case TAGS:
             case TAG:
-                contentSearchResults = persistenceDAO.searchContentByTagsForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByTagsForDevPortal(requestedTenantDomain, searchContent, start, offset, roles);
                 break;
             case API_CATEGORY:
-                contentSearchResults = persistenceDAO.searchContentByCategoryForDevPortal(requestedTenantDomain, searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByCategoryForDevPortal(requestedTenantDomain, searchContent, start, offset, roles);
                 break;
             default:
-                contentSearchResults = persistenceDAO.searchContentByOtherForDevPortal(requestedTenantDomain, modifiedQuery.getType(), searchContent, start, offset);
+                contentSearchResults = persistenceDAO.searchContentByOtherForDevPortal(requestedTenantDomain, modifiedQuery.getType(), searchContent, start, offset, roles);
         }
 
         return contentSearchResults;

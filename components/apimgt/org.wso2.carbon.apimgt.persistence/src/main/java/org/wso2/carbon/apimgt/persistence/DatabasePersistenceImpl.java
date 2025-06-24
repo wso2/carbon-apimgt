@@ -582,6 +582,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
         int totalLength = 0;
         DevPortalAPISearchResult searchResult = new DevPortalAPISearchResult();
         String orgName = org.getName();
+        String[] userRoles = ctx.getRoles();
 
         try {
             totalLength = persistenceDAO.getAllAPICount(orgName, ctx.getRoles());
@@ -589,9 +590,9 @@ public class DatabasePersistenceImpl implements APIPersistence {
             List<ContentSearchResult> results = null;
 
             if (searchQuery == null) {
-                results = persistenceDAO.getAllAPIsForDevPortal(orgName, start, offset);
+                results = persistenceDAO.getAllAPIsForDevPortal(orgName, start, offset, userRoles);
             } else {
-                results = DatabaseSearchUtil.serachAPIsForDevPortal(searchQuery, orgName, start, offset);
+                results = DatabaseSearchUtil.serachAPIsForDevPortal(searchQuery, orgName, start, offset, userRoles);
             }
 
             if (results == null || results.isEmpty()) {
@@ -785,7 +786,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
             String requestedTenantDomain = org.getName();
             int totalLength = 0;
             SearchQuery modifiedQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
-            List<ContentSearchResult> results = DatabaseSearchUtil.searchContentForDevPortal(modifiedQuery, requestedTenantDomain, start, offset);
+            List<ContentSearchResult> results = DatabaseSearchUtil.searchContentForDevPortal(modifiedQuery, requestedTenantDomain, start, offset, ctx.getRoles());
             List<SearchContent> contentData = new ArrayList<>();
 
             for (ContentSearchResult result: results) {
