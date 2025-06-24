@@ -1361,7 +1361,6 @@ public abstract class AbstractAPIManager implements APIManager {
                 }
             }
         }
-
         if (APIConstants.IMPLEMENTATION_TYPE_INLINE.equalsIgnoreCase(api.getImplementation())) {
             for (URITemplate template : uriTemplates) {
                 template.setMediationScript(template.getAggregatedMediationScript());

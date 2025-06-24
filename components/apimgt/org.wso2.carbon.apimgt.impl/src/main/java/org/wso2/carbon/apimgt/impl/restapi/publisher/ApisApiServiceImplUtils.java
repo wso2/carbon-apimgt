@@ -106,7 +106,6 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -704,10 +703,11 @@ public class ApisApiServiceImplUtils {
         String definitionToAdd = null;
 
         if (APIConstants.API_SUBTYPE_MCP.equals(apiToAdd.getSubtype())) {
-            BackendEndpointData backendEndpointData = new BackendEndpointData(null,
-                    APIConstants.AI.MCP_DEFAULT_BACKEND_NAME);
+            BackendEndpointData backendEndpointData =
+                    new BackendEndpointData(APIConstants.AI.MCP_DEFAULT_BACKEND_ENDPOINT_NAME);
             backendEndpointData.setBackendDefinition(validationResponse.getJsonContent());
             backendEndpointData.setEndpointConfig(apiToAdd.getEndpointConfig());
+            apiToAdd.setEndpointConfig(null);
 
             swaggerData = new SwaggerData(apiToAdd);
             APIDefinition parser = new OAS3Parser();
@@ -715,6 +715,7 @@ public class ApisApiServiceImplUtils {
 
             Set<URITemplate> uriTemplates = generateMCPFeatures(backendEndpointData);
             apiToAdd.setUriTemplates(uriTemplates);
+            apiToAdd.getBackendEndpointData().add(backendEndpointData);
         } else {
             definitionToAdd = validationResponse.getJsonContent();
             if (syncOperations) {

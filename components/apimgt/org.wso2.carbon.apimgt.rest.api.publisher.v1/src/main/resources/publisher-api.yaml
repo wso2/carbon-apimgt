@@ -13346,14 +13346,18 @@ components:
           $ref: '#/components/schemas/BackendOperationMapping'
         operationProxyMapping:
           $ref: '#/components/schemas/OperationProxyMapping'
-    OperationProxyMapping:
-      title: proxy mapping
+    BackendOperationMapping:
+      title: API Operation Backend Mapping
       type: object
       properties:
-        target:
-          $ref: '#/components/schemas/TargetAPIOperation'
-    TargetAPIOperation:
-      title: target API
+        backendId:
+          type: string
+          description: Backend ID
+          example: "1"
+        backendOperation:
+          $ref: '#/components/schemas/BackendOperation'
+    OperationProxyMapping:
+      title: API Operation Proxy Mapping
       type: object
       properties:
         id:
@@ -13379,11 +13383,19 @@ components:
           type: string
           pattern: '^[^~!@#;:%^*()+={}|\\<>"'',&/$\[\]\s+\/]+$'
           example: 1.0.0
+        backendOperation:
+          $ref: '#/components/schemas/BackendOperation'
+    BackendOperation:
+      title: Backend Operation
+      type: object
+      properties:
         target:
           type: string
+          description: Backend target path
           example: /order/{orderId}
         verb:
           type: string
+          description: Backend target method
           example: POST
     OrganizationPolicies:
       title: Organization based Subscription Policies
@@ -14886,22 +14898,19 @@ components:
             $ref: '#/components/schemas/Label'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    BackendOperation:
-      title: Backend Operation
+    BackendEndpointList:
+      title: Backend List
       type: object
       properties:
-        target:
-          type: string
-          description: Backend target path
-          example: /order/{orderId}
-        verb:
-          type: string
-          description: Backend target method
-          example: POST
-        endpoint:
-          type: string
-          description: Backend endpoint URI
-          example: /order/{orderId}
+        count:
+          type: integer
+          description: |
+            Number of backends returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/BackendEndpointData'
     BackendEndpointData:
       title: Backend Data
       type: object
@@ -14917,33 +14926,6 @@ components:
         endpoint:
           type: string
           description: Backend endpoint
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/BackendOperation'
-    BackendEndpointList:
-      title: Backend List
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            Number of backends returned.
-          example: 1
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/BackendEndpointData'
-    BackendOperationMapping:
-      title: API Operation Backend Mapping
-      type: object
-      properties:
-        backendId:
-          type: string
-          description: Backend ID
-          example: 1
-        backendOperation:
-          $ref: '#/components/schemas/BackendOperation'
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.

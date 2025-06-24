@@ -23,7 +23,6 @@ public class BackendOperation implements Serializable {
 
     private String target;
     private String verb;
-    private String endpoint;
 
     public BackendOperation() {
 
@@ -47,15 +46,5 @@ public class BackendOperation implements Serializable {
     public void setVerb(String verb) {
 
         this.verb = verb;
-    }
-
-    public String getEndpoint() {
-
-        return endpoint;
-    }
-
-    public void setEndpoint(String endpoint) {
-
-        this.endpoint = endpoint;
     }
 }

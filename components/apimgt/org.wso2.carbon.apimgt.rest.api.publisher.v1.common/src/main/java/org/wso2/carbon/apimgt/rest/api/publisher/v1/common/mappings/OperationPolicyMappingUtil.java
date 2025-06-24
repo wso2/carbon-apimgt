@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecAttribute;
@@ -25,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.OperationPolicyComparator;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendOperationMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataListDTO;
@@ -138,6 +141,21 @@ public class OperationPolicyMappingUtil {
             }
         }
         return operationPoliciesList;
+    }
+
+    public static BackendOperationMapping fromDTOToAPIBackendOperationMapping(
+            BackendOperationMappingDTO backendOperationMappingDTO) {
+
+        BackendOperationMapping backendOperationMapping = new BackendOperationMapping();
+
+        BackendOperation backendOperation = new BackendOperation();
+        backendOperation.setTarget(backendOperationMappingDTO.getBackendOperation().getTarget());
+        backendOperation.setVerb(backendOperationMappingDTO.getBackendOperation().getVerb());
+        backendOperationMapping.setBackendOperation(backendOperation);
+
+        backendOperationMapping.setBackendId(backendOperationMappingDTO.getBackendId());
+
+        return backendOperationMapping;
     }
 
     public static OperationPolicyDataListDTO fromOperationPolicyDataListToDTO(

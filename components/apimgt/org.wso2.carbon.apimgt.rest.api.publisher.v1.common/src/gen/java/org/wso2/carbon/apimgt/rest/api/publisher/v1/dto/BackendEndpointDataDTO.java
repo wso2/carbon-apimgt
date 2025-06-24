@@ -4,9 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
-import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendOperationDTO;
 import javax.validation.constraints.*;
 
 
@@ -26,7 +23,6 @@ public class BackendEndpointDataDTO   {
     private String id = null;
     private String name = null;
     private String endpoint = null;
-    private List<BackendOperationDTO> list = new ArrayList<BackendOperationDTO>();
 
   /**
    * Backend ID consisting of the UUID of the Endpoint
@@ -82,24 +78,6 @@ public class BackendEndpointDataDTO   {
     this.endpoint = endpoint;
   }
 
-  /**
-   **/
-  public BackendEndpointDataDTO list(List<BackendOperationDTO> list) {
-    this.list = list;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("list")
-  public List<BackendOperationDTO> getList() {
-    return list;
-  }
-  public void setList(List<BackendOperationDTO> list) {
-    this.list = list;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -112,13 +90,12 @@ public class BackendEndpointDataDTO   {
     BackendEndpointDataDTO backendEndpointData = (BackendEndpointDataDTO) o;
     return Objects.equals(id, backendEndpointData.id) &&
         Objects.equals(name, backendEndpointData.name) &&
-        Objects.equals(endpoint, backendEndpointData.endpoint) &&
-        Objects.equals(list, backendEndpointData.list);
+        Objects.equals(endpoint, backendEndpointData.endpoint);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, endpoint, list);
+    return Objects.hash(id, name, endpoint);
   }
 
   @Override
@@ -129,7 +106,6 @@ public class BackendEndpointDataDTO   {
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    endpoint: ").append(toIndentedString(endpoint)).append("\n");
-    sb.append("    list: ").append(toIndentedString(list)).append("\n");
     sb.append("}");
     return sb.toString();
   }

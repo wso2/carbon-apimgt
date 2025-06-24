@@ -719,43 +719,45 @@ public class PublisherCommonUtils {
         //preserve monetization status in the update flow
         //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
 
-        if (!isAsyncAPI) {
-            String oldDefinition = apiProvider
-                    .getOpenAPIDefinition(apiToUpdate.getUuid(), originalAPI.getOrganization());
-            APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
-            SwaggerData swaggerData = new SwaggerData(apiToUpdate);
-            String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
-            apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition, originalAPI.getOrganization());
-            if (!isGraphql) {
-                Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(newDefinition);
+        if (!APIConstants.API_SUBTYPE_MCP.equals(originalAPI.getSubtype())) {
+            if (!isAsyncAPI) {
+                String oldDefinition = apiProvider
+                        .getOpenAPIDefinition(apiToUpdate.getUuid(), originalAPI.getOrganization());
+                APIDefinition apiDefinition = OASParserUtil.getOASParser(oldDefinition);
+                SwaggerData swaggerData = new SwaggerData(apiToUpdate);
+                String newDefinition = apiDefinition.generateAPIDefinition(swaggerData, oldDefinition);
+                apiProvider.saveSwaggerDefinition(apiToUpdate, newDefinition, originalAPI.getOrganization());
+                if (!isGraphql) {
+                    Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(newDefinition);
 
-                //set operation policies from the original API Payload
-                Set<URITemplate> uriTemplatesFromPayload = apiToUpdate.getUriTemplates();
-                Map<String, List<OperationPolicy>> operationPoliciesPerURITemplate = new HashMap<>();
-                for (URITemplate uriTemplate : uriTemplatesFromPayload) {
-                    if (!uriTemplate.getOperationPolicies().isEmpty()) {
+                    //set operation policies from the original API Payload
+                    Set<URITemplate> uriTemplatesFromPayload = apiToUpdate.getUriTemplates();
+                    Map<String, List<OperationPolicy>> operationPoliciesPerURITemplate = new HashMap<>();
+                    for (URITemplate uriTemplate : uriTemplatesFromPayload) {
+                        if (!uriTemplate.getOperationPolicies().isEmpty()) {
+                            String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
+                            operationPoliciesPerURITemplate.put(key, uriTemplate.getOperationPolicies());
+                        }
+                    }
+
+                    for (URITemplate uriTemplate : uriTemplates) {
                         String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
-                        operationPoliciesPerURITemplate.put(key, uriTemplate.getOperationPolicies());
+                        if (operationPoliciesPerURITemplate.containsKey(key)) {
+                            uriTemplate.setOperationPolicies(operationPoliciesPerURITemplate.get(key));
+                        }
                     }
-                }
 
-                for (URITemplate uriTemplate : uriTemplates) {
-                    String key = uriTemplate.getHTTPVerb() + ":" + uriTemplate.getUriTemplate();
-                    if (operationPoliciesPerURITemplate.containsKey(key)) {
-                        uriTemplate.setOperationPolicies(operationPoliciesPerURITemplate.get(key));
-                    }
+                    apiToUpdate.setUriTemplates(uriTemplates);
+                    apiToUpdate.setSwaggerDefinition(newDefinition);
                 }
-
-                apiToUpdate.setUriTemplates(uriTemplates);
-                apiToUpdate.setSwaggerDefinition(newDefinition);
+            } else {
+                String oldDefinition = apiProvider
+                        .getAsyncAPIDefinition(apiToUpdate.getUuid(), originalAPI.getOrganization());
+                AsyncApiParser asyncApiParser = new AsyncApiParser();
+                String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
+                apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
+                apiToUpdate.setSwaggerDefinition(updateAsyncAPIDefinition);
             }
-        } else {
-            String oldDefinition = apiProvider
-                    .getAsyncAPIDefinition(apiToUpdate.getUuid(), originalAPI.getOrganization());
-            AsyncApiParser asyncApiParser = new AsyncApiParser();
-            String updateAsyncAPIDefinition = asyncApiParser.updateAsyncAPIDefinition(oldDefinition, apiToUpdate);
-            apiProvider.saveAsyncApiDefinition(originalAPI, updateAsyncAPIDefinition);
-            apiToUpdate.setSwaggerDefinition(updateAsyncAPIDefinition);
         }
         apiToUpdate.setWsdlUrl(apiDtoToUpdate.getWsdlUrl());
         apiToUpdate.setGatewayType(apiDtoToUpdate.getGatewayType());

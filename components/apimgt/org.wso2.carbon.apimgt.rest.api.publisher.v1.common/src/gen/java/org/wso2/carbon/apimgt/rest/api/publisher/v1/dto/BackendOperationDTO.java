@@ -22,7 +22,6 @@ public class BackendOperationDTO   {
   
     private String target = null;
     private String verb = null;
-    private String endpoint = null;
 
   /**
    * Backend target path
@@ -60,24 +59,6 @@ public class BackendOperationDTO   {
     this.verb = verb;
   }
 
-  /**
-   * Backend endpoint URI
-   **/
-  public BackendOperationDTO endpoint(String endpoint) {
-    this.endpoint = endpoint;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "/order/{orderId}", value = "Backend endpoint URI")
-  @JsonProperty("endpoint")
-  public String getEndpoint() {
-    return endpoint;
-  }
-  public void setEndpoint(String endpoint) {
-    this.endpoint = endpoint;
-  }
-
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -89,13 +70,12 @@ public class BackendOperationDTO   {
     }
     BackendOperationDTO backendOperation = (BackendOperationDTO) o;
     return Objects.equals(target, backendOperation.target) &&
-        Objects.equals(verb, backendOperation.verb) &&
-        Objects.equals(endpoint, backendOperation.endpoint);
+        Objects.equals(verb, backendOperation.verb);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(target, verb, endpoint);
+    return Objects.hash(target, verb);
   }
 
   @Override
@@ -105,7 +85,6 @@ public class BackendOperationDTO   {
     
     sb.append("    target: ").append(toIndentedString(target)).append("\n");
     sb.append("    verb: ").append(toIndentedString(verb)).append("\n");
-    sb.append("    endpoint: ").append(toIndentedString(endpoint)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -52,7 +52,6 @@ public class URITemplate implements Serializable{
     private List<OperationPolicy> operationPolicies = new ArrayList<>();
     private String description;
     private String schemaDefinition = null;
-    private MappedEndpointResource mappedEndpointResource = null;
     private OperationProxyMapping operationProxyMapping = null;
     private BackendOperationMapping backendOperationMapping = null;
 
@@ -481,16 +480,6 @@ public class URITemplate implements Serializable{
     public void setSchemaDefinition(String schemaDefinition) {
 
         this.schemaDefinition = schemaDefinition;
-    }
-
-    public MappedEndpointResource getMappedEndpointResource() {
-
-        return mappedEndpointResource;
-    }
-
-    public void setMappedEndpointResource(MappedEndpointResource mappedEndpointResource) {
-
-        this.mappedEndpointResource = mappedEndpointResource;
     }
 
     public OperationProxyMapping getOperationProxyMapping() {

@@ -244,6 +244,8 @@ public class API implements Serializable {
   
     private String primaryProductionEndpointId;
 
+    private Set<BackendEndpointData> backendEndpointData = new LinkedHashSet<>();
+
     public AIConfiguration getAiConfiguration() {
 
         return aiConfiguration;
@@ -1613,5 +1615,15 @@ public class API implements Serializable {
 
     public void setPrimarySandboxEndpointId(String primarySandboxEndpointId) {
         this.primarySandboxEndpointId = primarySandboxEndpointId;
+    }
+
+    public Set<BackendEndpointData> getBackendEndpointData() {
+
+        return backendEndpointData;
+    }
+
+    public void setBackendEndpointData(Set<BackendEndpointData> backendEndpointData) {
+
+        this.backendEndpointData = backendEndpointData;
     }
 }

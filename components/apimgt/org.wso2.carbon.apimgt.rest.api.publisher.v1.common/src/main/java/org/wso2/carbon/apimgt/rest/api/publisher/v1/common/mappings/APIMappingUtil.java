@@ -50,6 +50,8 @@ import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendThrottlingConfiguration;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
@@ -106,6 +108,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendOperationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendOperationMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleHistoryItemDTO;
@@ -1364,20 +1368,25 @@ public class APIMappingUtil {
         model.getId().setUuid(model.getUuid());
         if (!isAsyncAPI) {
             // Get from swagger definition
-            List<APIOperationsDTO> apiOperationsDTO;
+            List<APIOperationsDTO> apiOperationsDTO = null;
             String apiSwaggerDefinition;
             if (model.getSwaggerDefinition() != null) {
                 apiSwaggerDefinition = model.getSwaggerDefinition();
             } else {
                 apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getUuid(), tenantDomain);
             }
-            //We will fetch operations from the swagger definition and not from the AM_API_URL_MAPPING table: table
-            //entries may have API level throttling tiers listed in case API level throttling is selected for the API.
-            //This will lead the x-throttling-tiers of API definition to get overwritten. (wso2/product-apim#11240)
-            apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
-            //since the operation details goes missing after fetching operations list from the swagger definition, we
-            //have to set them back from the original API model.
-            setOperationPoliciesToOperationsDTO(model, apiOperationsDTO);
+            if (APIConstants.API_SUBTYPE_MCP.equals(model.getSubtype())) {
+                apiOperationsDTO = getOperationsFromAPI(model);
+            } else {
+                // We will fetch operations from the swagger definition and not from the AM_API_URL_MAPPING table:
+                // table entries may have API level throttling tiers listed in case API level throttling is selected
+                // for the API. This will lead the x-throttling-tiers of API definition to get overwritten.
+                // (wso2/product-apim#11240)
+                apiOperationsDTO = getOperationsFromSwaggerDef(model, apiSwaggerDefinition);
+                // since the operation details goes missing after fetching operations list from the swagger
+                // definition, we have to set them back from the original API model.
+                setOperationPoliciesToOperationsDTO(model, apiOperationsDTO);
+            }
             dto.setOperations(apiOperationsDTO);
             List<ScopeDTO> scopeDTOS = getScopesFromSwagger(apiSwaggerDefinition);
             dto.setScopes(getAPIScopesFromScopeDTOs(scopeDTOS, apiProvider));
@@ -1933,7 +1942,8 @@ public class APIMappingUtil {
                     || (APIConstants.GRAPHQL_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))
                     || (APIConstants.WEBSUB_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))
                     || (APIConstants.SSE_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))
-                    || (APIConstants.WS_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))) {
+                    || (APIConstants.WS_SUPPORTED_METHOD_LIST.contains(httpVerb.toUpperCase()))
+                    || (APIConstants.MCP_SUPPORTED_FEATURE_LIST.contains(httpVerb.toUpperCase()))) {
                 isHttpVerbDefined = true;
                 String authType = operation.getAuthType();
                 if (APIConstants.OASResourceAuthTypes.APPLICATION_OR_APPLICATION_USER.equals(authType)) {
@@ -1954,9 +1964,15 @@ public class APIMappingUtil {
                 template.setHttpVerbs(httpVerb.toUpperCase());
                 template.setAuthType(authType);
                 template.setAuthTypes(authType);
+                template.setSchemaDefinition(operation.getSchemaDefinition());
+                template.setDescription(operation.getDescription());
                 if (operation.getOperationPolicies() != null) {
                     template.setOperationPolicies(OperationPolicyMappingUtil
                             .fromDTOToAPIOperationPoliciesList(operation.getOperationPolicies()));
+                }
+                if (operation.getBackendOperationMapping() != null) {
+                    template.setBackendOperationMapping(OperationPolicyMappingUtil
+                            .fromDTOToAPIBackendOperationMapping(operation.getBackendOperationMapping()));
                 }
                 uriTemplates.add(template);
             } else {
@@ -1997,6 +2013,9 @@ public class APIMappingUtil {
                 } else if (APIConstants.API_TYPE_WEBSUB.equals(model.getType()) ||
                         APIConstants.API_TYPE_SSE.equals(model.getType())) {
                     handleException("Topic '" + uriTempVal + "' has global parameters without " +
+                            "Operation Type");
+                } else if (APIConstants.API_SUBTYPE_MCP.equals(model.getSubtype())) {
+                    handleException("Tool '" + uriTempVal + "' has global parameters without " +
                             "Operation Type");
                 } else {
                     handleException("Resource '" + uriTempVal + "' has global parameters without " +
@@ -2480,6 +2499,22 @@ public class APIMappingUtil {
             operationsDTO.setUsedProductIds(usedProductIds);
         }
 
+        operationsDTO.setDescription(uriTemplate.getDescription());
+        operationsDTO.setSchemaDefinition(uriTemplate.getSchemaDefinition());
+        BackendOperationMapping mapping = uriTemplate.getBackendOperationMapping();
+        if (mapping != null) {
+            BackendOperation operation = mapping.getBackendOperation();
+
+            BackendOperationDTO operationDTO = new BackendOperationDTO();
+            operationDTO.setVerb(operation.getVerb());
+            operationDTO.setTarget(operation.getTarget());
+
+            BackendOperationMappingDTO mappingDTO = new BackendOperationMappingDTO();
+            mappingDTO.setBackendId(mapping.getBackendId());
+            mappingDTO.setBackendOperation(operationDTO);
+
+            operationsDTO.setBackendOperationMapping(mappingDTO);
+        }
         return operationsDTO;
     }
 

@@ -30,14 +30,16 @@ public class BackendEndpointData implements Serializable {
     private Set<BackendOperation> backendOperation;
 
     public BackendEndpointData(String backendId, String backendName) {
-
-        if (backendId == null || backendId.isEmpty()) {
-            this.backendId = UUID.randomUUID().toString();
-        } else {
-            this.backendId = backendId;
-        }
+        this.backendId = backendId;
         this.backendName = backendName;
     }
+
+    public BackendEndpointData(String backendName) {
+        this.backendId = UUID.randomUUID().toString();
+        this.backendName = backendName;
+    }
+
+    public BackendEndpointData() {}
 
     public String getBackendId() {
 
