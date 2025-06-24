@@ -142,6 +142,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -154,6 +155,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
                 " ) " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -166,6 +168,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -178,6 +181,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -190,6 +194,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -202,6 +207,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -214,6 +220,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -226,6 +233,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -238,6 +246,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -250,6 +259,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -523,6 +533,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForDevPortal(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -540,6 +551,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForDevPortal(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -557,6 +569,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForDevPortal(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -574,6 +587,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForDevPortal(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -591,6 +605,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForDevPortal(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -608,6 +623,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForDevPortal(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -625,6 +641,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForDevPortal(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -640,6 +657,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForDevPortal(roles) + ") " +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -658,6 +676,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForDevPortal(roles) + ")" +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -676,6 +695,7 @@ public class SQLQueryBuilder {
                 "AND (" + getRoleConditionForDevPortal(roles) + ")" +
                 ") " +
                 "AND JSON_VALUE(a1.org, '$.name') = ? " +
+                "AND TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 }
