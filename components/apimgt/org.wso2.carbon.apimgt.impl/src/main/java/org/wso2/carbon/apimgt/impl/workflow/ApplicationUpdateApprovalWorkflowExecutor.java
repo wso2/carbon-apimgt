@@ -75,11 +75,15 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        workflowDTO.setMetadata("changes", changesDiff);
+        workflowDTO.setProperties("changes", changesDiff);
+
         workflowDTO.setMetadata("requestedApplicationName", application.getName());
         workflowDTO.setMetadata("requestedTier", application.getTier());
         workflowDTO.setMetadata("requestedDescription", application.getDescription());
         workflowDTO.setMetadata("requestedSharedOrganization", application.getSharedOrganization());
+        if (application.getGroupId() != null){
+            workflowDTO.setMetadata("requestedGroupIDs", application.getGroupId());
+        }
 
         String requestedCustomAttributes;
         try {
@@ -88,7 +92,6 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
             throw new RuntimeException(e);
         }
         workflowDTO.setMetadata("requestedCustomAttributes", requestedCustomAttributes);
-        workflowDTO.setMetadata("requestedGroupIDs", application.getGroupId());
 
         //this has to be explicit with the details that are updated
         String message = "Approve application " + application.getName() +
@@ -119,16 +122,18 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
                         objectMapper.readValue(workFlowDTO.getMetadata("requestedCustomAttributes"), Map.class);
                 application.setApplicationAttributes(applicationAttributes);
 
-                application.setGroupId(workFlowDTO.getMetadata("requestedGroupIDs"));
+                if (workFlowDTO.getMetadata().containsKey("requestedGroupIDs")){
+                    application.setGroupId(workFlowDTO.getMetadata("requestedGroupIDs"));
+                }
+
                 application.setSharedOrganization(workFlowDTO.getMetadata("requestedSharedOrganization"));
-                dao.updateApplicationStatus(application.getId(),APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+                dao.updateApplicationStatus(application.getId(), APIConstants.ApplicationStatus.APPLICATION_APPROVED);
                 dao.updateApplication(application);
-            }else
-            {
+            } else {
                 dao.updateApplicationStatus(application.getId(), APIConstants.ApplicationStatus.APPLICATION_APPROVED);
             }
 
-        }catch (APIManagementException e) {
+        } catch (APIManagementException e) {
             String msg = "Error occurred when retrieving the Application creation with workflow ID :" + workFlowDTO
                     .getWorkflowReference();
             log.error(msg, e);
@@ -174,15 +179,17 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         for (String key : newMap.keySet()) {
             if (!oldMap.containsKey(key)) {
                 System.out.println("Added key: " + key + ", value: " + newMap.get(key));
+                attribChanges.add(createChangeObject(key, "N/A", newMap.get(key)));
             } else if (!Objects.equals(oldMap.get(key), newMap.get(key))) {
                 System.out.println("Changed key: " + key + ", from: " + oldMap.get(key) + " to: " + newMap.get(key));
-                attribChanges.add(createChangeObject(key,oldMap.get(key),newMap.get(key)));
+                attribChanges.add(createChangeObject(key, oldMap.get(key), newMap.get(key)));
             }
         }
 
         for (String key : oldMap.keySet()) {
             if (!newMap.containsKey(key)) {
                 System.out.println("Removed key: " + key + ", value was: " + oldMap.get(key));
+                attribChanges.add(createChangeObject(key, oldMap.get(key), "Removed"));
             }
         }
 
