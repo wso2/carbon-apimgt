@@ -44,6 +44,7 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
         workflowDTO.setProperties("applicationName", application.getName());
         workflowDTO.setProperties("userName", appWorkFlowDTO.getUserName());
         workflowDTO.setProperties("applicationTier", application.getTier());
+        workflowDTO.setMetadata("applicationStatus",application.getStatus());
         super.execute(workflowDTO);
 
         return new GeneralWorkflowResponse();
@@ -72,7 +73,14 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
             }
         } else if (WorkflowStatus.REJECTED.equals(workflowDTO.getStatus())) {
             try {
-                apiMgtDAO.updateApplicationStatus(Integer.parseInt(applicationWorkflowDTO.getWorkflowReference()), APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+                if (applicationWorkflowDTO.getMetadata() != null &&
+                        applicationWorkflowDTO.getMetadata().containsKey("applicationStatus")){
+                    apiMgtDAO.updateApplicationStatus(Integer.parseInt(applicationWorkflowDTO.getWorkflowReference()),
+                            applicationWorkflowDTO.getMetadata("applicationStatus"));
+                }else{
+                    apiMgtDAO.updateApplicationStatus(Integer.parseInt(applicationWorkflowDTO.getWorkflowReference()),
+                            APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+                }
             } catch (APIManagementException e) {
                 if (e.getMessage() == null) {
                     errorMsg = "Couldn't complete simple application deletion workflow for application: ";
