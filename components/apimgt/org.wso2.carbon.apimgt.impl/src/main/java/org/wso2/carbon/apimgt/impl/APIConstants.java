@@ -522,9 +522,9 @@ public final class APIConstants {
     public static final String HASHING = "Hashing";
     public static final String HASGING_ALGORITHM= "HashingAlgorithm";
 
-    // Constants related to AI features: API chat and Marketplace Assistant
+    // Constants related to AI features: API chat, Marketplace Assistant, Guardrails
     public static class AI {
-
+        public static final String AI = "AI";
         public static final String API_CHAT = "APIChat";
         public static final String ENABLED = "Enabled";
         public static final String API_CHAT_AUTH_TOKEN = "AuthToken";
@@ -563,6 +563,29 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_TOKEN_ENDPOINT = "TokenEndpoint";
         public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
+
+        public static final String AZURE_CONTENT_SAFETY = "AzureContentSafety";
+        public static final String AZURE_CONTENT_SAFETY_ENDPOINT = "Endpoint";
+        public static final String AZURE_CONTENT_SAFETY_KEY = "Key";
+
+        public static final String AWS_BEDROCK = "AWSBedrock";
+        public static final String AWS_BEDROCK_ACCESS_KEY = "AccessKey";
+        public static final String AWS_BEDROCK_SECRET_KEY = "SecretKey";
+        public static final String AWS_BEDROCK_SESSION_TOKEN = "SessionToken";
+        public static final String AWS_BEDROCK_ROLE_ARN = "RoleArn";
+        public static final String AWS_BEDROCK_ROLE_REGION = "RoleRegion";
+        public static final String AWS_BEDROCK_ROLE_EXTERNAL_ID = "RoleExternalId";
+
+        public static final String EMBEDDING_PROVIDER = "EmbeddingProvider";
+        public static final String EMBEDDING_PROVIDER_TYPE = "type";
+        public static final String EMBEDDING_PROVIDER_PROPERTY = "Property";
+        public static final String EMBEDDING_PROVIDER_PROPERTY_KEY = "name";
+        public static final String EMBEDDING_PROVIDER_API_KEY = "apikey";
+        public static final String EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT = "embedding_endpoint";
+        public static final String EMBEDDING_PROVIDER_EMBEDDING_MODEL = "embedding_model";
+        public static final String EMBEDDING_PROVIDER_EMBEDDING_REQUEST_MODEL = "model";
+        public static final String EMBEDDING_PROVIDER_EMBEDDING_REQUEST_INPUT = "input";
+        public static final String EMBEDDING_PROVIDER_RESPONSE_EMBEDDING_PATH = "/data/0/embedding";
 
         private AI() {
 

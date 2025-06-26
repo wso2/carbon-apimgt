@@ -1,0 +1,119 @@
+/*
+ *
+ * Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ *
+ */
+
+package org.wso2.carbon.apimgt.impl;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.util.EntityUtils;
+import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.EmbeddingProviderService;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
+
+@Component(
+        name = "mistral.embedding.provider.service",
+        immediate = true,
+        service = EmbeddingProviderService.class
+)
+public class MistralEmbeddingProviderServiceImpl implements EmbeddingProviderService {
+
+    private HttpClient httpClient;
+    private String mistralApiKey;
+    private String endpointUrl;
+    private String model;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Override
+    public void init(Map<String, String> providerConfig) throws APIManagementException {
+        mistralApiKey = providerConfig.get(APIConstants.AI.EMBEDDING_PROVIDER_API_KEY);
+        endpointUrl = providerConfig.get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT);
+        model = providerConfig.get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_MODEL);
+
+        if (mistralApiKey == null || endpointUrl == null || model == null) {
+            throw new APIManagementException(
+                    "Missing required Mistral configuration: 'apikey', 'embedding_endpoint', or 'embedding_model'");
+        }
+
+        httpClient = APIUtil.getHttpClient(endpointUrl);
+    }
+
+    @Override
+    public String getType() {
+        return "MISTRAL";
+    }
+
+    @Override
+    public int getEmbeddingDimension() throws APIManagementException {
+        return getEmbedding(getType()).length;
+    }
+
+    @Override
+    public double[] getEmbedding(String input) throws APIManagementException {
+        HttpPost post = new HttpPost(endpointUrl);
+        post.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                APIConstants.AUTHORIZATION_BEARER + mistralApiKey);
+        post.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+
+        try {
+            // Build the JSON payload
+            ObjectNode body = objectMapper.createObjectNode();
+            body.put(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_REQUEST_MODEL, model);
+            body.put(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_REQUEST_INPUT, input);
+            String jsonBody = objectMapper.writeValueAsString(body);
+            post.setEntity(new StringEntity(jsonBody, StandardCharsets.UTF_8));
+
+            try (CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(post, httpClient)) {
+                int statusCode = response.getStatusLine().getStatusCode();
+                String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+
+                if (statusCode == HttpStatus.SC_OK) {
+                    JsonNode root = objectMapper.readTree(responseBody);
+                    JsonNode embeddingArray = root.at(APIConstants.AI.EMBEDDING_PROVIDER_RESPONSE_EMBEDDING_PATH);
+
+                    if (embeddingArray.isMissingNode() || !embeddingArray.isArray()) {
+                        throw new APIManagementException(
+                                "Missing or invalid 'embedding' array in response: " + responseBody);
+                    }
+
+                    double[] embedding = new double[embeddingArray.size()];
+                    for (int i = 0; i < embedding.length; i++) {
+                        embedding[i] = embeddingArray.get(i).asDouble();
+                    }
+                    return embedding;
+                } else {
+                    throw new APIManagementException("Unexpected status code " + statusCode + ": " + responseBody);
+                }
+            }
+        } catch (IOException e) {
+            throw new APIManagementException("Error occurred while generating embedding", e);
+        }
+    }
+}
