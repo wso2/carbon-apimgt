@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.utils.*;
 import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
 import org.wso2.carbon.governance.api.exception.GovernanceException;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.InputStream;
 import java.sql.SQLException;
@@ -37,6 +38,10 @@ public class DatabasePersistenceImpl implements APIPersistence {
     public DatabasePersistenceImpl(Properties properties) {
         this();
         this.properties = properties;
+    }
+
+    protected String getTenantAwareUsername(String username) {
+        return MultitenantUtils.getTenantAwareUsername(username);
     }
 
     @Override
@@ -473,8 +478,6 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset, UserContext ctx) throws APIPersistenceException {
-        String requestedTenantDomain = org.getName();
-
         PublisherAPISearchResult result = null;
 
         log.debug("Requested query for publisher API product search: " + searchQuery);
@@ -493,8 +496,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
         String[] userRoles = ctx.getRoles();
 
         try {
-            totalLength = persistenceDAO.getAllAPICount(org.getName(), userRoles);
-            List<String> results = null;
+            SearchResult results = null;
 
             if (searchQuery == null) {
                 results = persistenceDAO.getAllPIs(org.getName(), start, offset, userRoles);
@@ -502,7 +504,9 @@ public class DatabasePersistenceImpl implements APIPersistence {
                 results = DatabaseSearchUtil.searchAPIsForPublisher(searchQuery, org.getName(), start, offset, userRoles);
             }
 
-            for (String result: results) {
+            totalLength = results.getTotalcount();
+
+            for (String result: results.getResult()) {
                 JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();
 
                 API api = DatabasePersistenceUtil.jsonToApi(jsonObject);
@@ -554,8 +558,6 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
             }
         } catch (APIManagementException e) {
-            throw new RuntimeException(e);
-        } catch (SQLException e) {
             throw new RuntimeException(e);
         }
 
@@ -1550,7 +1552,97 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public AdminContentSearchResult searchContentForAdmin(String org, String searchQuery, int start, int count, int limit) throws APIPersistenceException {
-        return null;
+        AdminContentSearchResult searchResult = new AdminContentSearchResult();
+
+//        try {
+//            log.debug("Requested query for admin content search: " + searchQuery);
+//            Map<String, String> attributes = RegistrySearchUtil.getAdminSearchAttributes(searchQuery);
+//            if (log.isDebugEnabled()) {
+//                log.debug("Admin search attributes: " + attributes);
+//            }
+//
+//            String tenantAwareUsername = getTenantAwareUsername(DatabasePersistenceUtil.getTenantAdminUserName(org));
+//
+//            SearchQuery modifiedQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
+//            List<ContentSearchResult> results;
+//
+//            if (APIConstants.ADMIN_ROLE.equals(tenantAwareUsername)) {
+//                results = DatabaseSearchUtil.searchContentForAdmin(modifiedQuery, org, start, count);
+//            } else {
+//                throw new APIPersistenceException("User does not have permission to perform admin content search");
+//                return searchResult;
+//            }
+//
+//
+//            if (results == null || results.isEmpty()) {
+//                searchResult.setApiCount(0);
+//                searchResult.setApiTotal(0);
+//                searchResult.setApis(Collections.emptyList());
+//                return searchResult;
+//            }
+//
+//            List<SearchContent> contentData = new ArrayList<>();
+//
+//            for (ContentSearchResult result : results) {
+//                if (result.getMetadata() == null || result.getMetadata().isEmpty()) {
+//                    continue;
+//                }
+//
+//                String apiId = result.getApiId();
+//                String type = result.getType();
+//                if (type == null || type.isEmpty()) {
+//                    type = "API"; // Default to API if type is not specified
+//                }
+//
+//                JsonObject jsonObject = JsonParser.parseString(result.getMetadata()).getAsJsonObject();
+//
+//                AdminApiSearchContent content = new AdminApiSearchContent();
+//
+//                content.setId(apiId);
+//                content.setName(DatabasePersistenceUtil.safeGetAsString(jsonObject, "name"));
+//                content.setContext(DatabasePersistenceUtil.safeGetAsString(jsonObject, "context"));
+//                content.setVersion(DatabasePersistenceUtil.safeGetAsString(jsonObject, "version"));
+//                content.setProvider(DatabasePersistenceUtil.replaceEmailDomainBack(
+//                        DatabasePersistenceUtil.safeGetAsString(jsonObject, "provider")));
+//                content.setStatus(DatabasePersistenceUtil.safeGetAsString(jsonObject, "status"));
+//                content.setType(type.equals("API_PRODUCT") ? APIConstants.API_PRODUCT : APIConstants.API);
+//                content.setDescription(DatabasePersistenceUtil.safeGetAsString(jsonObject, "description"));
+//                content.setAdvertiseOnly(jsonObject.has("advertiseOnly") &&
+//                        !jsonObject.get("advertiseOnly").isJsonNull() &&
+//                        jsonObject.get("advertiseOnly").getAsBoolean());
+//
+//                try {
+//                    ResourceFile thumbnailResource = this.getThumbnail(new Organization(org), apiId);
+//                    if (thumbnailResource != null) {
+//                        String thumbnailUrl = DatabasePersistenceUtil.convertToBase64(
+//                                thumbnailResource.getContent(), thumbnailResource.getContentType());
+//                        content.setThumbnailUri(thumbnailUrl);
+//                    } else {
+//                        content.setThumbnailUri("");
+//                    }
+//                } catch (Exception e) {
+//                    log.debug("Error while retrieving thumbnail for API: " + apiId, e);
+//                }
+//
+//                if (jsonObject.has("keyManagers")) {
+//                    String keyManagers = jsonObject.get("keyManagers").getAsString();
+//                    content.setKeyManagerEntry(keyManagers.replace("[\"","").replace("\"]","").replace("\",\""," , "));
+//                }
+//
+//                contentData.add(content);
+//            }
+//
+//            int totalCount = persistenceDAO.getAllAPICount(org);
+//
+//            searchResult.setApiCount(contentData.size());
+//            searchResult.setApiTotal(totalCount);
+//            searchResult.setApis(contentData);
+//
+//        } catch (SQLException | APIManagementException e) {
+//            throw new APIPersistenceException("Error while searching for admin content", e);
+//        }
+
+        return searchResult;
     }
 
     protected static int getMaxPaginationLimit() {

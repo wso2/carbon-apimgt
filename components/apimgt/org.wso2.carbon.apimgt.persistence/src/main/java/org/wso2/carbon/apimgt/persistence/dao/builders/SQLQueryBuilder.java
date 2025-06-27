@@ -51,6 +51,14 @@ public class SQLQueryBuilder {
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
+    public static String SEARCH_API_BY_CONTENT_COUNT_SQL(String[] roles) {
+        return "SELECT COUNT(*) AS COUNT FROM AM_ARTIFACT_DATA " +
+                "WHERE JSON_VALUE(org, '$.name') = ? " +
+                "AND type = 'API' " +
+                "AND LOWER(metadata) LIKE ? " +
+                "AND (" + getRoleConditionForPublisher(roles) + ")";
+    }
+
     public static String SEARCH_API_BY_NAME_SQL(String[] roles) {
         return "SELECT * FROM AM_ARTIFACT_DATA " +
                 "WHERE JSON_VALUE(org, '$.name') = ? " +
@@ -58,6 +66,14 @@ public class SQLQueryBuilder {
                 "AND LOWER(JSON_VALUE(metadata, '$.id.apiName')) LIKE ? " +
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+    }
+
+    public static String SEARCH_API_BY_NAME_COUNT_SQL(String[] roles) {
+        return "SELECT COUNT(*) AS COUNT FROM AM_ARTIFACT_DATA " +
+                "WHERE JSON_VALUE(org, '$.name') = ? " +
+                "AND type = 'API' " +
+                "AND LOWER(JSON_VALUE(metadata, '$.id.apiName')) LIKE ? " +
+                "AND (" + getRoleConditionForPublisher(roles) + ")";
     }
 
     public static String SEARCH_API_BY_PROVIDER_SQL(String[] roles) {
@@ -69,6 +85,14 @@ public class SQLQueryBuilder {
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
+    public static String SEARCH_API_BY_PROVIDER_COUNT_SQL(String[] roles) {
+        return "SELECT COUNT(*) AS COUNT FROM AM_ARTIFACT_DATA " +
+                "WHERE JSON_VALUE(org, '$.name') = ? " +
+                "AND type = 'API' " +
+                "AND LOWER(JSON_QUERY(METADATA, '$.id.providerName')) LIKE ? " +
+                "AND (" + getRoleConditionForPublisher(roles) + ")";
+    }
+
     public static String SEARCH_API_BY_VERSION_SQL(String[] roles) {
         return "SELECT * FROM AM_ARTIFACT_DATA " +
                 "WHERE JSON_VALUE(org, '$.name') = ? " +
@@ -76,6 +100,14 @@ public class SQLQueryBuilder {
                 "AND LOWER(JSON_QUERY(METADATA, '$.id.version')) LIKE ?" +
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+    }
+
+    public static String SEARCH_API_BY_VERSION_COUNT_SQL(String[] roles) {
+        return "SELECT COUNT(*) AS COUNT FROM AM_ARTIFACT_DATA " +
+                "WHERE JSON_VALUE(org, '$.name') = ? " +
+                "AND type = 'API' " +
+                "AND LOWER(JSON_QUERY(METADATA, '$.id.version')) LIKE ?" +
+                "AND (" + getRoleConditionForPublisher(roles) + ")";
     }
 
     public static String SEARCH_API_BY_CONTEXT_SQL(String[] roles) {
@@ -87,6 +119,14 @@ public class SQLQueryBuilder {
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
+    public static String SEARCH_API_BY_CONTEXT_COUNT_SQL(String[] roles) {
+        return "SELECT COUNT(*) AS COUNT FROM AM_ARTIFACT_DATA " +
+                "WHERE JSON_VALUE(org, '$.name') = ? " +
+                "AND type = 'API' " +
+                "AND LOWER(JSON_QUERY(METADATA, '$.context')) LIKE ? " +
+                "AND (" + getRoleConditionForPublisher(roles) + ")";
+    }
+
     public static String SEARCH_API_BY_STATUS_SQL(String[] roles) {
         return "SELECT * FROM AM_ARTIFACT_DATA " +
                 "WHERE JSON_VALUE(org, '$.name') = ? " +
@@ -94,6 +134,14 @@ public class SQLQueryBuilder {
                 "AND LOWER(JSON_QUERY(METADATA, '$.status')) LIKE ? " +
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+    }
+
+    public static String SEARCH_API_BY_STATUS_COUNT_SQL(String[] roles) {
+        return "SELECT COUNT(*) AS COUNT FROM AM_ARTIFACT_DATA " +
+                "WHERE JSON_VALUE(org, '$.name') = ? " +
+                "AND type = 'API' " +
+                "AND LOWER(JSON_QUERY(METADATA, '$.status')) LIKE ? " +
+                "AND (" + getRoleConditionForPublisher(roles) + ")";
     }
 
     public static String SEARCH_API_BY_DESCRIPTION_SQL(String[] roles) {
@@ -105,6 +153,14 @@ public class SQLQueryBuilder {
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
+    public static String SEARCH_API_BY_DESCRIPTION_COUNT_SQL(String[] roles) {
+        return "SELECT COUNT(*) AS COUNT FROM AM_ARTIFACT_DATA " +
+                "WHERE JSON_VALUE(org, '$.name') = ? " +
+                "AND type = 'API' " +
+                "AND LOWER(JSON_QUERY(METADATA, '$.description')) LIKE ? " +
+                "AND (" + getRoleConditionForPublisher(roles) + ")";
+    }
+
     public static String SEARCH_API_BY_TAGS_SQL(String[] roles) {
         return "SELECT * FROM AM_ARTIFACT_DATA " +
                 "WHERE JSON_VALUE(org, '$.name') = ? " +
@@ -112,6 +168,14 @@ public class SQLQueryBuilder {
                 "AND LOWER(JSON_QUERY(METADATA, '$.tags')) LIKE ? " +
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+    }
+
+    public static String SEARCH_API_BY_TAGS_COUNT_SQL(String[] roles) {
+        return "SELECT COUNT(*) AS COUNT FROM AM_ARTIFACT_DATA " +
+                "WHERE JSON_VALUE(org, '$.name') = ? " +
+                "AND type = 'API' " +
+                "AND LOWER(JSON_QUERY(METADATA, '$.tags')) LIKE ? " +
+                "AND (" + getRoleConditionForPublisher(roles) + ")";
     }
 
     public static String SEARCH_API_BY_API_CATEGORY_SQL(String[] roles) {
@@ -123,6 +187,14 @@ public class SQLQueryBuilder {
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
+    public static String SEARCH_API_BY_API_CATEGORY_COUNT_SQL(String[] roles) {
+        return "SELECT COUNT(*) AS COUNT FROM AM_ARTIFACT_DATA " +
+                "WHERE JSON_VALUE(org, '$.name') = ? " +
+                "AND type = 'API' " +
+                "AND LOWER(JSON_QUERY(METADATA, '$.apiCategories')) LIKE ? " +
+                "AND (" + getRoleConditionForPublisher(roles) + ")";
+    }
+
     public static String SEARCH_API_BY_OTHER_SQL(String propertyName, String[] roles) {
         return "SELECT * FROM AM_ARTIFACT_DATA " +
                 "WHERE JSON_VALUE(org, '$.name') = ? " +
@@ -130,6 +202,14 @@ public class SQLQueryBuilder {
                 "AND LOWER(JSON_QUERY(metadata, '$." + propertyName + "')) LIKE ? " +
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+    }
+
+    public static String SEARCH_API_BY_OTHER_COUNT_SQL(String propertyName, String[] roles) {
+        return "SELECT COUNT(*) AS COUNT FROM AM_ARTIFACT_DATA " +
+                "WHERE JSON_VALUE(org, '$.name') = ? " +
+                "AND type = 'API' " +
+                "AND LOWER(JSON_QUERY(metadata, '$." + propertyName + "')) LIKE ? " +
+                "AND (" + getRoleConditionForPublisher(roles) + ")";
     }
 
     // Content Search SQL Queries

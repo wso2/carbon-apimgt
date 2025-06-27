@@ -9,6 +9,7 @@ import org.wso2.carbon.apimgt.persistence.dao.PersistenceDAO;
 import org.wso2.carbon.apimgt.persistence.dto.ContentSearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.SearchQuery;
+import org.wso2.carbon.apimgt.persistence.dto.SearchResult;
 
 import java.util.List;
 import java.util.Map;
@@ -42,20 +43,37 @@ public class DatabaseSearchUtil {
     private static final Log log = LogFactory.getLog(DatabaseSearchUtil.class);
     private static final PersistenceDAO persistenceDAO = PersistenceDAO.getInstance();
 
-    public static List<String> searchAPIsForPublisher(SearchQuery searchQuery, String orgName, int start, int offset, String[] roles) throws APIManagementException {
+    private static SearchType getSearchType(String typeString) {
+        if (typeString == null || typeString.isEmpty()) {
+            return SearchType.OTHER;
+        }
+
+        // Handle special case for api-category
+        if ("api-category".equalsIgnoreCase(typeString)) {
+            return SearchType.API_CATEGORY;
+        }
+
+        try {
+            return SearchType.valueOf(typeString.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return SearchType.OTHER;
+        }
+    }
+
+    public static SearchResult searchAPIsForPublisher(SearchQuery searchQuery, String orgName, int start, int offset, String[] roles) throws APIManagementException {
         String searchContent;
         SearchType searchType;
         String property = null;
 
         try {
-            searchType = SearchType.valueOf(searchQuery.getType().toUpperCase());
+            searchType = getSearchType(searchQuery.getType());
         } catch (IllegalArgumentException e) {
             searchType = SearchType.OTHER;
             property = searchQuery.getType();
         }
         searchContent = searchQuery.getContent();
 
-        List<String> searchResult = null;
+        SearchResult searchResult = null;
 
         switch (searchType) {
             case CONTENT:
@@ -390,4 +408,52 @@ public class DatabaseSearchUtil {
 
         return searchResult;
     }
+
+//    public static List<ContentSearchResult> searchContentForAdmin(SearchQuery modifiedQuery, String org, int start, int count) {
+//        String searchContent = modifiedQuery.getContent();
+//        SearchType searchType;
+//
+//        try {
+//            searchType = SearchType.valueOf(modifiedQuery.getType().toUpperCase());
+//        } catch (IllegalArgumentException e) {
+//            searchType = SearchType.OTHER;
+//        }
+//
+//        List<ContentSearchResult> contentSearchResults;
+//
+//        switch (searchType) {
+//            case CONTENT:
+//                contentSearchResults = persistenceDAO.searchContentForAdmin(org, searchContent, start, count);
+//                break;
+//            case NAME:
+//                contentSearchResults = persistenceDAO.searchContentByNameForAdmin(org, searchContent, start, count);
+//                break;
+//            case PROVIDER:
+//                contentSearchResults = persistenceDAO.searchContentByProviderForAdmin(org, searchContent, start, count);
+//                break;
+//            case VERSION:
+//                contentSearchResults = persistenceDAO.searchContentByVersionForAdmin(org, searchContent, start, count);
+//                break;
+//            case CONTEXT:
+//                contentSearchResults = persistenceDAO.searchContentByContextForAdmin(org, searchContent, start, count);
+//                break;
+//            case STATUS:
+//                contentSearchResults = persistenceDAO.searchContentByStatusForAdmin(org, searchContent, start, count);
+//                break;
+//            case DESCRIPTION:
+//                contentSearchResults = persistenceDAO.searchContentByDescriptionForAdmin(org, searchContent, start, count);
+//                break;
+//            case TAGS:
+//            case TAG:
+//                contentSearchResults = persistenceDAO.searchContentByTagsForAdmin(org, searchContent, start, count);
+//                break;
+//            case API_CATEGORY:
+//                contentSearchResults = persistenceDAO.searchContentByCategoryForAdmin(org, searchContent, start, count);
+//                break;
+//            default:
+//                contentSearchResults = persistenceDAO.searchContentByOtherForAdmin(org, modifiedQuery.getType(), searchContent, start, count);
+//        }
+//
+//        return contentSearchResults;
+//    }
 }

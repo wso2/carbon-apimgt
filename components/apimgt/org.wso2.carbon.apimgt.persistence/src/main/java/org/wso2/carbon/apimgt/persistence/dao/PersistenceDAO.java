@@ -105,13 +105,15 @@ public class PersistenceDAO {
         return count;
     }
 
-    public List<String> getAllPIs(String org, int start, int offset, String[] roles) throws SQLException {
-        List<String> apiSchemas = new ArrayList<>();
+    public SearchResult getAllPIs(String org, int start, int offset, String[] roles) throws APIManagementException {
+        List<String> apiResults = new ArrayList<>();
+        int totalCount = 0;
         if (roles == null || roles.length == 0) {
-            return apiSchemas; // No roles provided, return empty list
+            return new SearchResult(totalCount, apiResults); // No roles provided, return empty list
         }
 
         String query = SQLQueryBuilder.GET_ALL_API_ARTIFACT_SQL(roles);
+        String countQuery = SQLQueryBuilder.GET_ALL_API_COUNT(roles);
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -121,11 +123,25 @@ public class PersistenceDAO {
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
                     String schemaJson = rs.getString("metadata");
-                    apiSchemas.add(schemaJson);
+                    apiResults.add(schemaJson);
                 }
             }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the API artifacts from the database", e);
         }
-        return apiSchemas;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement countStmt = connection.prepareStatement(countQuery)) {
+            connection.setAutoCommit(false);
+            countStmt.setString(1, org);
+            try (ResultSet rs = countStmt.executeQuery()) {
+                if (rs.next()) {
+                    totalCount = rs.getInt("TOTAL_API_COUNT");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving the API count from the database", e);
+        }
+        return new SearchResult(totalCount, apiResults);
     }
 
     public String getAPISchemaByUUID(String uuid, String tenantDomain) throws APIManagementException {
@@ -999,9 +1015,11 @@ public class PersistenceDAO {
     }
 
     // Search methods can be added here as needed
-    public List<String> searchAPIsByContent(String org, String searchQuery, int start, int offset, String[] roles) throws APIManagementException {
+    public SearchResult searchAPIsByContent(String org, String searchQuery, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
+        int apiCount = 0;
         String query = SQLQueryBuilder.SEARCH_API_BY_CONTENT_SQL(roles);
+        String countQuery = SQLQueryBuilder.SEARCH_API_BY_CONTENT_COUNT_SQL(roles);
         searchQuery = "%" + searchQuery.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1018,12 +1036,28 @@ public class PersistenceDAO {
         } catch (SQLException e) {
             handleException("Error while searching APIs by content in the database", e);
         }
-        return apiResults;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(countQuery)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, searchQuery);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    apiCount = rs.getInt("count");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by content in the database", e);
+        }
+
+        return new SearchResult(apiCount, apiResults);
     }
 
-    public List<String> searchAPIsByName(String org, String name, int start, int offset, String[] roles) throws APIManagementException {
+    public SearchResult searchAPIsByName(String org, String name, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
+        int apiCount = 0;
         String query = SQLQueryBuilder.SEARCH_API_BY_NAME_SQL(roles);
+        String countQuery = SQLQueryBuilder.SEARCH_API_BY_NAME_COUNT_SQL(roles);
         name = "%" + name.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1040,12 +1074,28 @@ public class PersistenceDAO {
         } catch (SQLException e) {
             handleException("Error while searching APIs by name in the database", e);
         }
-        return apiResults;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(countQuery)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, name);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    apiCount = rs.getInt("count");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by name in the database", e);
+        }
+
+        return new SearchResult(apiCount, apiResults);
     }
 
-    public List<String> searchAPIsByProvider(String org, String provider, int start, int offset, String[] roles) throws APIManagementException {
+    public SearchResult searchAPIsByProvider(String org, String provider, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
+        int apiCount = 0;
         String query = SQLQueryBuilder.SEARCH_API_BY_PROVIDER_SQL(roles);
+        String countQuery = SQLQueryBuilder.SEARCH_API_BY_PROVIDER_COUNT_SQL(roles);
         provider = "%" + provider.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1062,12 +1112,27 @@ public class PersistenceDAO {
         } catch (SQLException e) {
             handleException("Error while searching APIs by provider in the database", e);
         }
-        return apiResults;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(countQuery)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, provider);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    apiCount = rs.getInt("count");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by provider in the database", e);
+        }
+        return new SearchResult(apiCount, apiResults);
     }
 
-    public List<String> searchAPIsByVersion(String org, String version, int start, int offset, String[] roles) throws APIManagementException {
+    public SearchResult searchAPIsByVersion(String org, String version, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
+        int apiCount = 0;
         String query = SQLQueryBuilder.SEARCH_API_BY_VERSION_SQL(roles);
+        String countQuery = SQLQueryBuilder.SEARCH_API_BY_VERSION_COUNT_SQL(roles);
         version = "%" + version.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1084,12 +1149,27 @@ public class PersistenceDAO {
         } catch (SQLException e) {
             handleException("Error while searching APIs by version in the database", e);
         }
-        return apiResults;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(countQuery)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, version);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    apiCount = rs.getInt("count");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by version in the database", e);
+        }
+        return new SearchResult(apiCount, apiResults);
     }
 
-    public List<String> searchAPIsByContext(String org, String context, int start, int offset, String[] roles) throws APIManagementException {
+    public SearchResult searchAPIsByContext(String org, String context, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
+        int apiCount = 0;
         String query = SQLQueryBuilder.SEARCH_API_BY_CONTEXT_SQL(roles);
+        String countQuery = SQLQueryBuilder.SEARCH_API_BY_CONTEXT_COUNT_SQL(roles);
         context = "%" + context.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1106,12 +1186,27 @@ public class PersistenceDAO {
         } catch (SQLException e) {
             handleException("Error while searching APIs by context in the database", e);
         }
-        return apiResults;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(countQuery)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, context);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    apiCount = rs.getInt("count");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by context in the database", e);
+        }
+        return new SearchResult(apiCount, apiResults);
     }
 
-    public List<String> searchAPIsByStatus(String org, String status, int start, int offset, String[] roles) throws APIManagementException {
+    public SearchResult searchAPIsByStatus(String org, String status, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
+        int apiCount = 0;
         String query = SQLQueryBuilder.SEARCH_API_BY_STATUS_SQL(roles);
+        String countQuery = SQLQueryBuilder.SEARCH_API_BY_STATUS_COUNT_SQL(roles);
         status = "%" + status.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1128,12 +1223,27 @@ public class PersistenceDAO {
         } catch (SQLException e) {
             handleException("Error while searching APIs by status in the database", e);
         }
-        return apiResults;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(countQuery)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, status);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    apiCount = rs.getInt("count");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by status in the database", e);
+        }
+        return new SearchResult(apiCount, apiResults);
     }
 
-    public List<String> searchAPIsByDescription(String org, String description, int start, int offset, String[] roles) throws APIManagementException {
+    public SearchResult searchAPIsByDescription(String org, String description, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
+        int apiCount = 0;
         String query = SQLQueryBuilder.SEARCH_API_BY_DESCRIPTION_SQL(roles);
+        String countQuery = SQLQueryBuilder.SEARCH_API_BY_DESCRIPTION_COUNT_SQL(roles);
         description = "%" + description.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1150,12 +1260,27 @@ public class PersistenceDAO {
         } catch (SQLException e) {
             handleException("Error while searching APIs by description in the database", e);
         }
-        return apiResults;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(countQuery)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, description);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    apiCount = rs.getInt("count");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by description in the database", e);
+        }
+        return new SearchResult(apiCount, apiResults);
     }
 
-    public List<String> searchAPIsByTags(String org, String tags, int start, int offset, String[] roles) throws APIManagementException {
+    public SearchResult searchAPIsByTags(String org, String tags, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
+        int apiCount = 0;
         String query = SQLQueryBuilder.SEARCH_API_BY_TAGS_SQL(roles);
+        String countQuery = SQLQueryBuilder.SEARCH_API_BY_TAGS_COUNT_SQL(roles);
         tags = "%" + tags.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1172,12 +1297,27 @@ public class PersistenceDAO {
         } catch (SQLException e) {
             handleException("Error while searching APIs by tags in the database", e);
         }
-        return apiResults;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(countQuery)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, tags);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    apiCount = rs.getInt("count");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by tags in the database", e);
+        }
+        return new SearchResult(apiCount, apiResults);
     }
 
-    public List<String> searchAPIsByCategory(String org, String category, int start, int offset, String[] roles) throws APIManagementException {
+    public SearchResult searchAPIsByCategory(String org, String category, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
+        int apiCount = 0;
         String query = SQLQueryBuilder.SEARCH_API_BY_API_CATEGORY_SQL(roles);
+        String countQuery = SQLQueryBuilder.SEARCH_API_BY_API_CATEGORY_COUNT_SQL(roles);
         category = "%" + category.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1194,12 +1334,27 @@ public class PersistenceDAO {
         } catch (SQLException e) {
             handleException("Error while searching APIs by category in the database", e);
         }
-        return apiResults;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(countQuery)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, category);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    apiCount = rs.getInt("count");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by category in the database", e);
+        }
+        return new SearchResult(apiCount, apiResults);
     }
 
-    public List<String> searchAPIsByOther(String org, String property, String value, int start, int offset, String[] roles) throws APIManagementException {
+    public SearchResult searchAPIsByOther(String org, String property, String value, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
+        int apiCount = 0;
         String query = SQLQueryBuilder.SEARCH_API_BY_OTHER_SQL(property, roles);
+        String countQuery = SQLQueryBuilder.SEARCH_API_BY_OTHER_COUNT_SQL(property, roles);
         value = "%" + value.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1216,7 +1371,20 @@ public class PersistenceDAO {
         } catch (SQLException e) {
             handleException("Error while searching APIs by other criteria in the database", e);
         }
-        return apiResults;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(countQuery)) {
+            connection.setAutoCommit(false);
+            prepStmt.setString(1, org);
+            prepStmt.setString(2, value);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    apiCount = rs.getInt("count");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while searching APIs by other criteria in the database", e);
+        }
+        return new SearchResult(apiCount, apiResults);
     }
 
     public List<ContentSearchResult> searchContentByContent(String org, String searchContent, int start, int offset, String[] roles) throws APIManagementException {

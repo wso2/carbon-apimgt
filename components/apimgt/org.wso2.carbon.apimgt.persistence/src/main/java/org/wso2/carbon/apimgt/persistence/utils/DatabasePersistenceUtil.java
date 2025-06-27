@@ -11,12 +11,15 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.dto.OrganizationTiers;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
+import org.wso2.carbon.base.MultitenantConstants;
+import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
@@ -343,15 +346,38 @@ public class DatabasePersistenceUtil {
         return byteArray.length;
     }
 
+    private static String stripSpecialCharacters(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+
+        // Pattern to match special characters at the start and end
+        // This matches any non-alphanumeric character (except spaces) at beginning or end
+        String pattern = "^[^a-zA-Z0-9\\s]+|[^a-zA-Z0-9\\s]+$";
+
+        // Keep applying the pattern until no more special characters at start/end
+        String result = input;
+        String previous;
+        do {
+            previous = result;
+            result = result.replaceAll(pattern, "");
+        } while (!result.equals(previous));
+
+        return result.trim();
+    }
+
     public static SearchQuery getSearchQuery(String searchQuery) {
         if (searchQuery != null && !searchQuery.isEmpty()) {
-            String[] query = searchQuery.split(":", 2);
+            String[] query = searchQuery.split(APIConstants.CHAR_COLON, 2);
 
             if (query.length == 2) {
-                String content = query[1].trim();
+                String content = stripSpecialCharacters(query[1].trim());
                 String type = query[0].trim();
                 return new SearchQuery(content, type);
             } else {
+                if (searchQuery.equals(APIConstants.CHAR_ASTERIX)) {
+                    return null;
+                }
                 // If the search query does not contain a type, treat it as a general search
                 return new SearchQuery(searchQuery.trim(), APIConstants.CONTENT_SEARCH_TYPE_PREFIX);
             }
@@ -553,6 +579,26 @@ public class DatabasePersistenceUtil {
                 .map(String::trim)
                 .filter(role -> !role.isEmpty())
                 .toArray(String[]::new));
+    }
+
+    public static String getTenantAdminUserName(String tenantDomain) throws APIManagementException {
+        try {
+            int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
+                    getTenantId(tenantDomain);
+            PrivilegedCarbonContext.startTenantFlow();
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain);
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantId(tenantId);
+            String adminUserName = ServiceReferenceHolder.getInstance().getRealmService().getTenantUserRealm(tenantId)
+                    .getRealmConfiguration().getAdminUserName();
+            if (!tenantDomain.contentEquals(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME)) {
+                return adminUserName.concat("@").concat(tenantDomain);
+            }
+            return adminUserName;
+        } catch (UserStoreException e) {
+            throw new APIManagementException("Error in getting tenant admin username", e);
+        } finally {
+            PrivilegedCarbonContext.endTenantFlow();
+        }
     }
 }
 
