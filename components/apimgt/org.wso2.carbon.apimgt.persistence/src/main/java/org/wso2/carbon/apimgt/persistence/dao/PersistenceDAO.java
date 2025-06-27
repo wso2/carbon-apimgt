@@ -2558,4 +2558,21 @@ public class PersistenceDAO {
         }
         return tags;
     }
+
+    public String getSecuritySchemeByUUID(String apiId, String name) throws APIManagementException{
+        String securityScheme = null;
+        try (Connection connection = PersistanceDBUtil.getConnection();
+             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_SECURITY_SCHEME_BY_UUID_SQL)) {
+            prepStmt.setString(1, apiId);
+            prepStmt.setString(2, name);
+            try (ResultSet rs = prepStmt.executeQuery()) {
+                if (rs.next()) {
+                    securityScheme = rs.getString("api_security_scheme");
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving security scheme for API: " + apiId, e);
+        }
+        return securityScheme;
+    }
 }

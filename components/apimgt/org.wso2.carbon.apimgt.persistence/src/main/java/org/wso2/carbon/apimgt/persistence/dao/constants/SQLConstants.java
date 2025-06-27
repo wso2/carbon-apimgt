@@ -268,4 +268,10 @@ public class SQLConstants {
             "WHERE API_UUID = ? " +
             "AND JSON_VALUE(org, '$.name') = ? " +
             "AND TYPE IN ('API', 'API_PRODUCT') ";
+
+    public static final String GET_SECURITY_SCHEME_BY_UUID_SQL =
+            "SELECT JSON_QUERY(METADATA, '$.apiSecurity') as API_SECURITY_SCHEME FROM AM_ARTIFACT_DATA " +
+            "WHERE API_UUID = ? " +
+            "AND JSON_VALUE(org, '$.name') = ? " +
+            "AND TYPE IN ('API', 'API_PRODUCT') ";
 }

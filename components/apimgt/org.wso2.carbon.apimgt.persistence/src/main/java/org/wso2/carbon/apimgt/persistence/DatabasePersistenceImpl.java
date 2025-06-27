@@ -337,7 +337,21 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public String getSecuritySchemeOfAPI(Organization org, String apiId) throws APIPersistenceException {
-        return "";
+        try {
+            // Check if the API exists
+            if (!persistenceDAO.isAPIExists(apiId, org.getName())) {
+                throw new APIPersistenceException("API with ID: " + apiId + " does not exist in organization: " + org.getName());
+            }
+
+            // Get the security scheme from the API schema
+            String securityScheme = persistenceDAO.getSecuritySchemeByUUID(apiId, org.getName());
+            if (securityScheme == null) {
+                throw new APIPersistenceException("No security scheme found for API with ID: " + apiId);
+            }
+            return securityScheme;
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while retrieving security scheme for API with ID: " + apiId, e);
+        }
     }
 
     @Override
