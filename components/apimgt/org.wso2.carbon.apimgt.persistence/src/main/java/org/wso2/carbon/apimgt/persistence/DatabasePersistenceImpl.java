@@ -1547,7 +1547,30 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public void changeApiProvider(String providerName, String apiId, String org) throws APIManagementException, APIPersistenceException {
-
+        try {
+            if (persistenceDAO.isAPIExists(apiId, org)) {
+                String currentApiString = persistenceDAO.getAPISchemaByUUID(apiId, org);
+                if (currentApiString == null || currentApiString.isEmpty()) {
+                    throw new APIPersistenceException("API with ID: " + apiId + " does not exist in organization: " + org);
+                }
+                JsonObject apiJson = DatabasePersistenceUtil.stringTojsonObject(currentApiString);
+                // Update the provider name in the API JSON
+                JsonObject idJson = apiJson.getAsJsonObject("id");
+                if (idJson != null) {
+                    idJson.addProperty("providerName", providerName);
+                } else {
+                    throw new APIPersistenceException("API ID JSON object is null for API: " + apiId);
+                }
+                // Convert the updated API JSON back to a string
+                String updatedApiJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(apiJson);
+                // Update the API schema in the database
+                persistenceDAO.updateAPISchema(apiId, updatedApiJsonString);
+            } else {
+                throw new APIPersistenceException("API with ID: " + apiId + " does not exist in organization: " + org);
+            }
+        } catch (APIManagementException e) {
+            throw new APIPersistenceException("Error while changing API provider for API: " + apiId, e);
+        }
     }
 
     @Override
