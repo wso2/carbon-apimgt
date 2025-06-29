@@ -98,7 +98,6 @@ return null;
     private String updatedTime = null;
     private String referenceId = null;
     private Object properties = null;
-    private Object metadata = null;
     private String description = null;
 
   /**
@@ -210,25 +209,6 @@ return null;
   }
 
   /**
-   * Any metadata related to the workflow.
-   **/
-  public WorkflowInfoDTO metadata(Object metadata) {
-    this.metadata = metadata;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "Any metadata related to the workflow.")
-      @Valid
-  @JsonProperty("metadata")
-  public Object getMetadata() {
-    return metadata;
-  }
-  public void setMetadata(Object metadata) {
-    this.metadata = metadata;
-  }
-
-  /**
    * description is a message with basic details about the workflow request. 
    **/
   public WorkflowInfoDTO description(String description) {
@@ -262,13 +242,12 @@ return null;
         Objects.equals(updatedTime, workflowInfo.updatedTime) &&
         Objects.equals(referenceId, workflowInfo.referenceId) &&
         Objects.equals(properties, workflowInfo.properties) &&
-        Objects.equals(metadata, workflowInfo.metadata) &&
         Objects.equals(description, workflowInfo.description);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(workflowType, workflowStatus, createdTime, updatedTime, referenceId, properties, metadata, description);
+    return Objects.hash(workflowType, workflowStatus, createdTime, updatedTime, referenceId, properties, description);
   }
 
   @Override
@@ -282,7 +261,6 @@ return null;
     sb.append("    updatedTime: ").append(toIndentedString(updatedTime)).append("\n");
     sb.append("    referenceId: ").append(toIndentedString(referenceId)).append("\n");
     sb.append("    properties: ").append(toIndentedString(properties)).append("\n");
-    sb.append("    metadata: ").append(toIndentedString(metadata)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("}");
     return sb.toString();
