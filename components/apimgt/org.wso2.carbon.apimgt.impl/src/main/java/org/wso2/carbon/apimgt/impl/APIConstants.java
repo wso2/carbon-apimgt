@@ -867,6 +867,8 @@ public final class APIConstants {
             "internal_user_mgt_list"};
     public static final String KEY_MANAGER_CLIENT_APPLICATION_PREFIX = "wso2_apim_km_";
     public static final String DEFAULT_APP_SHARING_KEYWORD = "private";
+    public static final String APP_SHARING_WITH_THE_ORGANIZATION_DISABLED = "Private";
+    public static final String APP_SHARING_WITH_THE_ORGANIZATION_ENABLED = "Shared";
 
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";

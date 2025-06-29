@@ -46,12 +46,7 @@ import org.wso2.carbon.apimgt.impl.utils.LifeCycleUtils;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * This class used to handle notifications in Workflow.
@@ -363,6 +358,50 @@ public class WorkflowUtils {
         } catch (APIManagementException e) {
             String errorMsg = "Could not get workflow details for workflow reference id " + externalWorkflowRef;
             log.error(errorMsg, e);
+        }
+    }
+
+    protected static Map<String, String> constructApplicationUpdateRecord(String attributeName, String current, String expected) {
+        return Map.of(
+                "attributeName", attributeName,
+                "current", current == null ? "" : current,
+                "expected", expected == null ? "" : expected
+        );
+    }
+
+
+    protected static List<Map<String, String>> extractCustomAttributeDiffs(Map<String, String> oldMap, Map<String,
+            String> newMap) {
+
+        List<Map<String, String>> attribChanges = new ArrayList<>();
+        for (String key : newMap.keySet()) {
+            if (!oldMap.containsKey(key)) {
+                log.debug("Added key: " + key + ", value: " + newMap.get(key));
+                attribChanges.add(constructApplicationUpdateRecord(key, "N/A", newMap.get(key)));
+            } else if (!Objects.equals(oldMap.get(key), newMap.get(key))) {
+                log.debug("Changed key: " + key + ", from: " + oldMap.get(key) + " to: " + newMap.get(key));
+                attribChanges.add(constructApplicationUpdateRecord(key, oldMap.get(key), newMap.get(key)));
+            }
+        }
+
+        for (String key : oldMap.keySet()) {
+            if (!newMap.containsKey(key)) {
+                log.debug("Removed key: " + key + ", value was: " + oldMap.get(key));
+                attribChanges.add(constructApplicationUpdateRecord(key, oldMap.get(key), "Removed"));
+            }
+        }
+
+        return attribChanges;
+    }
+
+    protected static void compareAndAddToApplicationUpdateDiffs (
+            List<Map<String, String>> diffs,
+            String label,
+            String oldValue,
+            String newValue
+    ) {
+        if (!Objects.equals(oldValue, newValue)) {
+            diffs.add(constructApplicationUpdateRecord(label, oldValue, newValue));
         }
     }
 }
