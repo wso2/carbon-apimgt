@@ -361,6 +361,12 @@ public class WorkflowUtils {
         }
     }
 
+    /**
+     * Construct a record with the current and the expected value for a given application attribute.
+     * @param attributeName
+     * @param current
+     * @param expected
+     */
     protected static Map<String, String> constructApplicationUpdateRecord(String attributeName, String current, String expected) {
         return Map.of(
                 "attributeName", attributeName,
@@ -369,7 +375,11 @@ public class WorkflowUtils {
         );
     }
 
-
+    /**
+     * Identify newly added, removed and changed custom properties of an application.
+     * @param oldMap
+     * @param newMap
+     */
     protected static List<Map<String, String>> extractCustomAttributeDiffs(Map<String, String> oldMap, Map<String,
             String> newMap) {
 
@@ -394,6 +404,14 @@ public class WorkflowUtils {
         return attribChanges;
     }
 
+    /**
+     * Compare the current and the new value for a given attribute (ie: Application Name) and add it to the list
+     * if there is a difference.
+     * @param diffs
+     * @param label
+     * @param oldValue
+     * @param newValue
+     */
     protected static void compareAndAddToApplicationUpdateDiffs (
             List<Map<String, String>> diffs,
             String label,
@@ -405,6 +423,10 @@ public class WorkflowUtils {
         }
     }
 
+    /**
+     * Get the readable status (Private or Shared) of the 'share with organization' setting of the application
+     * @param org
+     */
     protected static String getShareWithOrganizationStatus(String org) {
         return APIConstants.DEFAULT_APP_SHARING_KEYWORD.equals(org)
                 ? APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_DISABLED
