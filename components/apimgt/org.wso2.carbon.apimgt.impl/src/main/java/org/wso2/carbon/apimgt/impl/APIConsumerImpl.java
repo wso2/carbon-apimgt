@@ -1913,13 +1913,13 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appWFDto.setApplication(application);
             appWFDto.setExistingApplication(existingApp);
             appWFDto.setExternalWorkflowReference(updateApplicationWFExecutor.generateUUID());
-            appWFDto.setWorkflowReference(String.valueOf(existingApp.getId())); //VALIDATION REQUIRED !!!!
+            appWFDto.setWorkflowReference(String.valueOf(existingApp.getId()));
             appWFDto.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
             appWFDto.setCallbackUrl(updateApplicationWFExecutor.getCallbackURL());
             appWFDto.setStatus(WorkflowStatus.CREATED);
             appWFDto.setTenantDomain(organization);
             appWFDto.setTenantId(tenantId);
-            appWFDto.setUserName(existingApp.getOwner());//VALIDATION REQUIRED !!!!!!
+            appWFDto.setUserName(existingApp.getOwner());
             appWFDto.setCreatedTime(System.currentTimeMillis());
             updateApplicationWFExecutor.execute(appWFDto);
 
@@ -1932,7 +1932,6 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             log.debug("Successfully updated the Application: " + application.getId() + " in the database.");
         }
 
-        //VALIDATION REQUIRED !!!!
         JSONObject appLogObject = new JSONObject();
         appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
         appLogObject.put(APIConstants.AuditLogConstants.TIER, application.getTier());
