@@ -14,6 +14,8 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 
 import java.util.*;
 
+import static org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils.*;
+
 public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(ApplicationUpdateApprovalWorkflowExecutor.class);
@@ -35,66 +37,71 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
             log.debug("Executing Application Update Approval Workflow.. ");
         }
         ApplicationWorkflowDTO applicationWorkflowDTO = (ApplicationWorkflowDTO) workflowDTO;
-        Application application = applicationWorkflowDTO.getApplication();
+        Application pendingApplication = applicationWorkflowDTO.getApplication();
         Application existingApplication = applicationWorkflowDTO.getExistingApplication();
 
         workflowDTO.setProperties("applicationName", existingApplication.getName());
         workflowDTO.setProperties("userName", existingApplication.getOwner());
         workflowDTO.setProperties("applicationTier", existingApplication.getTier());
 
-        List<Map<String, String>> changes = new ArrayList<>();
+        List<Map<String, String>> applicationUpdateDiffs = new ArrayList<>();
 
-        if (!Objects.equals(application.getName(), existingApplication.getName())){
-            changes.add(createChangeObject("Application Name",
-                    existingApplication.getName(), application.getName()));
-        }
-        if (!Objects.equals(application.getTier(), existingApplication.getTier())){
-            changes.add(createChangeObject("Tier",
-                    existingApplication.getTier(), application.getTier()));
-        }
-        if (!Objects.equals(application.getDescription(), existingApplication.getDescription())){
-            changes.add(createChangeObject("Description",
-                    existingApplication.getDescription(), application.getDescription()));
-        }
-        if (!Objects.equals(application.getGroupId(), existingApplication.getGroupId())){
-            changes.add(createChangeObject("Groups",
-                    existingApplication.getGroupId(), application.getGroupId()));
-        }
-        if (!Objects.equals(application.getSharedOrganization(), existingApplication.getSharedOrganization())){
-            changes.add(createChangeObject("Shared Organization",
-                    existingApplication.getSharedOrganization(), application.getSharedOrganization()));
-        }
+        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, "Application Name",
+                existingApplication.getName(), pendingApplication.getName());
 
-        changes.addAll(compareAndUpdateCustomAttributes
-                (existingApplication.getApplicationAttributes(),application.getApplicationAttributes()));
+        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, "Tier",
+                existingApplication.getTier(), pendingApplication.getTier());
 
-        String changesDiff;
+        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, "Description",
+                existingApplication.getDescription(), pendingApplication.getDescription());
+
+        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, "Groups",
+                existingApplication.getGroupId(), pendingApplication.getGroupId());
+
+        // Special case: since the shared organization (getSharedOrganization) is an uuid when
+        // "Sharing with the organization" is enabled
+        String currentSharingWithTheOrganizationStatus =
+                APIConstants.DEFAULT_APP_SHARING_KEYWORD.equals(existingApplication.getSharedOrganization())
+                ? APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_DISABLED
+                : APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_ENABLED;
+
+        String requestedSharingWithTheOrganizationStatus =
+                APIConstants.DEFAULT_APP_SHARING_KEYWORD.equals(pendingApplication.getSharedOrganization())
+                ? APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_DISABLED
+                : APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_ENABLED;
+
+        compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, "Sharing with the organization",
+                currentSharingWithTheOrganizationStatus, requestedSharingWithTheOrganizationStatus);
+
+        applicationUpdateDiffs.addAll(extractCustomAttributeDiffs
+                (existingApplication.getApplicationAttributes(), pendingApplication.getApplicationAttributes()));
+
+        String applicationUpdateDiffJson;
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            changesDiff = objectMapper.writeValueAsString(changes);
+            applicationUpdateDiffJson = objectMapper.writeValueAsString(applicationUpdateDiffs);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        workflowDTO.setProperties("changes", changesDiff);
+        workflowDTO.setProperties("changes", applicationUpdateDiffJson);
 
-        workflowDTO.setMetadata("requestedApplicationName", application.getName());
-        workflowDTO.setMetadata("requestedTier", application.getTier());
-        workflowDTO.setMetadata("requestedDescription", application.getDescription());
-        workflowDTO.setMetadata("requestedSharedOrganization", application.getSharedOrganization());
-        if (application.getGroupId() != null){
-            workflowDTO.setMetadata("requestedGroupIDs", application.getGroupId());
+        workflowDTO.setMetadata("requestedApplicationName", pendingApplication.getName());
+        workflowDTO.setMetadata("requestedTier", pendingApplication.getTier());
+        workflowDTO.setMetadata("requestedDescription", pendingApplication.getDescription());
+        workflowDTO.setMetadata("requestedSharedOrganization", pendingApplication.getSharedOrganization());
+        if (pendingApplication.getGroupId() != null) {
+            workflowDTO.setMetadata("requestedGroupIDs", pendingApplication.getGroupId());
         }
-
         String requestedCustomAttributes;
         try {
-            requestedCustomAttributes = objectMapper.writeValueAsString(application.getApplicationAttributes());
+            requestedCustomAttributes = objectMapper.writeValueAsString(pendingApplication.getApplicationAttributes());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
         workflowDTO.setMetadata("requestedCustomAttributes", requestedCustomAttributes);
 
         //this has to be explicit with the details that are updated
-        String message = "Approve application " + application.getName() +
+        String message = "Approve pendingApplication " + pendingApplication.getName() +
                 " update application request from application creator -" + applicationWorkflowDTO.getUserName();
         workflowDTO.setWorkflowDescription(message);
 
@@ -122,7 +129,7 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
                         objectMapper.readValue(workFlowDTO.getMetadata("requestedCustomAttributes"), Map.class);
                 application.setApplicationAttributes(applicationAttributes);
 
-                if (workFlowDTO.getMetadata().containsKey("requestedGroupIDs")){
+                if (workFlowDTO.getMetadata().containsKey("requestedGroupIDs")) {
                     application.setGroupId(workFlowDTO.getMetadata("requestedGroupIDs"));
                 }
 
@@ -163,37 +170,8 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         }
     }
 
-    private static Map<String, String> createChangeObject(String attributeName, String current, String expected) {
-        return Map.of(
-                "attributeName", attributeName,
-                "current", current == null ? "" : current,
-                "expected", expected == null ? "" : expected
-        );
-    }
 
 
-    public static List<Map<String, String>> compareAndUpdateCustomAttributes(Map<String, String> oldMap, Map<String,
-            String> newMap) {
 
-        List<Map<String, String>> attribChanges = new ArrayList<>();
-        for (String key : newMap.keySet()) {
-            if (!oldMap.containsKey(key)) {
-                System.out.println("Added key: " + key + ", value: " + newMap.get(key));
-                attribChanges.add(createChangeObject(key, "N/A", newMap.get(key)));
-            } else if (!Objects.equals(oldMap.get(key), newMap.get(key))) {
-                System.out.println("Changed key: " + key + ", from: " + oldMap.get(key) + " to: " + newMap.get(key));
-                attribChanges.add(createChangeObject(key, oldMap.get(key), newMap.get(key)));
-            }
-        }
-
-        for (String key : oldMap.keySet()) {
-            if (!newMap.containsKey(key)) {
-                System.out.println("Removed key: " + key + ", value was: " + oldMap.get(key));
-                attribChanges.add(createChangeObject(key, oldMap.get(key), "Removed"));
-            }
-        }
-
-        return attribChanges;
-    }
 }
 
