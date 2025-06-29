@@ -16,6 +16,9 @@ import java.util.*;
 
 import static org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils.*;
 
+/**
+ * Approval workflow for Application Update
+ */
 public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(ApplicationUpdateApprovalWorkflowExecutor.class);
@@ -30,6 +33,12 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         return null;
     }
 
+    /**
+     * Execute the Application Update workflow approval process
+     * @param workflowDTO - The WorkflowDTO which contains workflow contextual information related to the workflow.
+     * @return
+     * @throws WorkflowException
+     */
     @Override
     public WorkflowResponse execute(WorkflowDTO workflowDTO) throws WorkflowException {
 
@@ -60,18 +69,9 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
 
         // Special case: since the shared organization (getSharedOrganization) is an uuid when
         // "Sharing with the organization" is enabled
-        String currentSharingWithTheOrganizationStatus =
-                APIConstants.DEFAULT_APP_SHARING_KEYWORD.equals(existingApplication.getSharedOrganization())
-                ? APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_DISABLED
-                : APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_ENABLED;
-
-        String requestedSharingWithTheOrganizationStatus =
-                APIConstants.DEFAULT_APP_SHARING_KEYWORD.equals(pendingApplication.getSharedOrganization())
-                ? APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_DISABLED
-                : APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_ENABLED;
-
         compareAndAddToApplicationUpdateDiffs(applicationUpdateDiffs, "Sharing with the organization",
-                currentSharingWithTheOrganizationStatus, requestedSharingWithTheOrganizationStatus);
+                getShareWithOrganizationStatus(existingApplication.getSharedOrganization()),
+                getShareWithOrganizationStatus(pendingApplication.getSharedOrganization()));
 
         applicationUpdateDiffs.addAll(extractCustomAttributeDiffs
                 (existingApplication.getApplicationAttributes(), pendingApplication.getApplicationAttributes()));
@@ -81,28 +81,30 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         try {
             applicationUpdateDiffJson = objectMapper.writeValueAsString(applicationUpdateDiffs);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to serialize application update differences to JSON",e);
         }
-        workflowDTO.setProperties("changes", applicationUpdateDiffJson);
+        workflowDTO.setProperties("applicationUpdateDiff", applicationUpdateDiffJson);
 
         workflowDTO.setMetadata("requestedApplicationName", pendingApplication.getName());
         workflowDTO.setMetadata("requestedTier", pendingApplication.getTier());
         workflowDTO.setMetadata("requestedDescription", pendingApplication.getDescription());
         workflowDTO.setMetadata("requestedSharedOrganization", pendingApplication.getSharedOrganization());
+
         if (pendingApplication.getGroupId() != null) {
             workflowDTO.setMetadata("requestedGroupIDs", pendingApplication.getGroupId());
         }
+
         String requestedCustomAttributes;
         try {
             requestedCustomAttributes = objectMapper.writeValueAsString(pendingApplication.getApplicationAttributes());
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Failed to serialize requested custom attributes of application",e);
         }
         workflowDTO.setMetadata("requestedCustomAttributes", requestedCustomAttributes);
 
-        //this has to be explicit with the details that are updated
-        String message = "Approve pendingApplication " + pendingApplication.getName() +
-                " update application request from application creator -" + applicationWorkflowDTO.getUserName();
+
+        String message = "Approve update request for application '" + pendingApplication.getName() +
+                "' submitted by user: " + applicationWorkflowDTO.getUserName();
         workflowDTO.setWorkflowDescription(message);
 
         super.execute(workflowDTO);
@@ -110,6 +112,12 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         return new GeneralWorkflowResponse();
     }
 
+    /**
+     * Complete the application update approval workflow process
+     * @param workFlowDTO - The WorkflowDTO which contains workflow contextual information related to the workflow.
+     * @return
+     * @throws WorkflowException
+     */
     @Override
     public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
         workFlowDTO.setUpdatedTime(System.currentTimeMillis());
@@ -152,6 +160,12 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         return new GeneralWorkflowResponse();
     }
 
+    /**
+     * Handle cleanup task for application update Approval workflow executor.
+     * Use workflow external reference  to delete the pending workflow request
+     * @param workflowExtRef
+     * @throws WorkflowException
+     */
     @Override
     public void cleanUpPendingTask(String workflowExtRef) throws WorkflowException {
 

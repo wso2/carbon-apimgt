@@ -404,4 +404,10 @@ public class WorkflowUtils {
             diffs.add(constructApplicationUpdateRecord(label, oldValue, newValue));
         }
     }
+
+    protected static String getShareWithOrganizationStatus(String org) {
+        return APIConstants.DEFAULT_APP_SHARING_KEYWORD.equals(org)
+                ? APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_DISABLED
+                : APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_ENABLED;
+    }
 }
