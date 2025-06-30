@@ -32,11 +32,12 @@ import org.apache.http.util.EntityUtils;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EmbeddingProviderService;
+import org.wso2.carbon.apimgt.impl.dto.ai.EmbeddingProviderConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 @Component(
         name = "openai.embedding.provider.service",
@@ -51,10 +52,13 @@ public class OpenAIEmbeddingProviderServiceImpl implements EmbeddingProviderServ
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public void init(Map<String, String> providerConfig) throws APIManagementException {
-        openAiApiKey = providerConfig.get(APIConstants.AI.EMBEDDING_PROVIDER_API_KEY);
-        endpointUrl = providerConfig.get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT);
-        model = providerConfig.get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_MODEL);
+    public void init() throws APIManagementException {
+        EmbeddingProviderConfigurationDTO providerConfig = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getEmbeddingProvider();
+        openAiApiKey = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_API_KEY);
+        endpointUrl = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT);
+        model = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_MODEL);
 
         if (openAiApiKey == null || endpointUrl == null || model == null) {
             throw new APIManagementException(
@@ -66,7 +70,7 @@ public class OpenAIEmbeddingProviderServiceImpl implements EmbeddingProviderServ
 
     @Override
     public String getType() {
-        return "OPENAI";
+        return APIConstants.AI.OPENAI_EMBEDDING_PROVIDER_TYPE;
     }
 
     @Override

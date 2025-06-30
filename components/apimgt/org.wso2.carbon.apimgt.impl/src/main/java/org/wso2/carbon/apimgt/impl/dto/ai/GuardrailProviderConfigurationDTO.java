@@ -18,30 +18,33 @@
 
 package org.wso2.carbon.apimgt.impl.dto.ai;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * This class represent the Azure Content Safety configuration DTO.
+ * This class represents the Guardrail Provider Configuration DTO.
  */
-public class AzureContentSafetyConfigurationDTO {
-    private String subscriptionKey;
-    private String endpoint;
+public class GuardrailProviderConfigurationDTO {
+    private String type;
+    private Map<String, String> properties = new HashMap<>();
 
-    public String getSubscriptionKey() {
+    public String getType() {
 
-        return subscriptionKey;
+        return type;
     }
 
-    public void setSubscriptionKey(String subscriptionKey) {
+    public void setType(String type) {
 
-        this.subscriptionKey = subscriptionKey;
+        this.type = type;
     }
 
-    public String getEndpoint() {
+    public Map<String, String> getProperties() {
 
-        return endpoint;
+        return properties;
     }
 
-    public void setEndpoint(String endpoint) {
+    public void setProperties(Map<String, String> properties) {
 
-        this.endpoint = endpoint;
+        this.properties = properties;
     }
 }

@@ -59,11 +59,10 @@ import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TokenValidationDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.dto.ai.AIAPIConfigurationsDTO;
-import org.wso2.carbon.apimgt.impl.dto.ai.AWSBedrockGuardrailsConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
-import org.wso2.carbon.apimgt.impl.dto.ai.AzureContentSafetyConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.EmbeddingProviderConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.dto.ai.GuardrailProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
@@ -138,10 +137,7 @@ public class APIManagerConfiguration {
 
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
-    private final AzureContentSafetyConfigurationDTO azureContentSafetyConfiguration =
-            new AzureContentSafetyConfigurationDTO();
-    private final AWSBedrockGuardrailsConfigurationDTO awsBedrockGuardrailsConfigurationDTO =
-            new AWSBedrockGuardrailsConfigurationDTO();
+    private final Map<String, GuardrailProviderConfigurationDTO> guardrailProviders = new HashMap<>();
     private final EmbeddingProviderConfigurationDTO embeddingProviderConfigurationDTO =
             new EmbeddingProviderConfigurationDTO();
     private static Properties realtimeNotifierProperties;
@@ -718,44 +714,44 @@ public class APIManagerConfiguration {
                 for (Iterator<?> aiChildren = element.getChildElements(); aiChildren.hasNext(); ) {
                     OMElement aiChildElement = (OMElement) aiChildren.next();
 
-                    if (APIConstants.AI.AZURE_CONTENT_SAFETY.equals(aiChildElement.getLocalName())) {
-                        OMElement endpoint = aiChildElement.getFirstChildWithName(
-                                        new QName(APIConstants.AI.AZURE_CONTENT_SAFETY_ENDPOINT));
-                        OMElement key = aiChildElement.getFirstChildWithName(
-                                new QName(APIConstants.AI.AZURE_CONTENT_SAFETY_KEY));
+                    if (APIConstants.AI.GUARDRAIL_PROVIDERS.equals(aiChildElement.getLocalName())) {
+                        // Iterate through each <EmbeddingProvider>
+                        for (Iterator<?> providers = aiChildElement.getChildElements(); providers.hasNext(); ) {
+                            OMElement providerElement = (OMElement) providers.next();
 
-                        if (endpoint != null) this.azureContentSafetyConfiguration
-                                .setEndpoint(endpoint.getText());
-                        if (key != null) this.azureContentSafetyConfiguration
-                                .setSubscriptionKey(MiscellaneousUtil.resolve(key, secretResolver));
-                    }
+                            if (APIConstants.AI.GUARDRAIL_PROVIDER.equals(providerElement.getLocalName())) {
+                                // Get the provider type
+                                String type = providerElement.getAttributeValue(
+                                        new QName(APIConstants.AI.GUARDRAIL_PROVIDER_TYPE));
+                                if (type == null || type.isEmpty()) {
+                                    continue; // skip if no type defined
+                                }
 
-                    if (APIConstants.AI.AWS_BEDROCK.equals(aiChildElement.getLocalName())) {
-                        OMElement accessKey =
-                                aiChildElement.getFirstChildWithName(new QName(APIConstants.AI.AWS_BEDROCK_ACCESS_KEY));
-                        OMElement secretKey =
-                                aiChildElement.getFirstChildWithName(new QName(APIConstants.AI.AWS_BEDROCK_SECRET_KEY));
-                        OMElement sessionToken = aiChildElement.getFirstChildWithName(
-                                new QName(APIConstants.AI.AWS_BEDROCK_SESSION_TOKEN));
-                        OMElement roleArn =
-                                aiChildElement.getFirstChildWithName(new QName(APIConstants.AI.AWS_BEDROCK_ROLE_ARN));
-                        OMElement roleRegion = aiChildElement.getFirstChildWithName(
-                                new QName(APIConstants.AI.AWS_BEDROCK_ROLE_REGION));
-                        OMElement roleExternalId = aiChildElement.getFirstChildWithName(
-                                new QName(APIConstants.AI.AWS_BEDROCK_ROLE_EXTERNAL_ID));
+                                Map<String, String> propertiesMap = new HashMap<>();
 
-                        if (accessKey != null) this.awsBedrockGuardrailsConfigurationDTO
-                                .setAccessKey(MiscellaneousUtil.resolve(accessKey, secretResolver));
-                        if (secretKey != null) this.awsBedrockGuardrailsConfigurationDTO
-                                .setSecretKey(MiscellaneousUtil.resolve(secretKey, secretResolver));
-                        if (sessionToken != null) this.awsBedrockGuardrailsConfigurationDTO
-                                .setSessionToken(sessionToken.getText());
-                        if (roleArn != null) this.awsBedrockGuardrailsConfigurationDTO
-                                .setRoleArn(roleArn.getText());
-                        if (roleRegion != null) this.awsBedrockGuardrailsConfigurationDTO
-                                .setRoleRegion(roleRegion.getText());
-                        if (roleExternalId != null) this.awsBedrockGuardrailsConfigurationDTO
-                                .setRoleExternalId(roleExternalId.getText());
+                                // Iterate through each <Property>
+                                for (Iterator<?> props = providerElement.getChildElements(); props.hasNext(); ) {
+                                    OMElement prop = (OMElement) props.next();
+
+                                    if (APIConstants.AI.GUARDRAIL_PROVIDER_PROPERTY.equals(prop.getLocalName())) {
+                                        String key = prop.getAttributeValue(
+                                                new QName(APIConstants.AI.GUARDRAIL_PROVIDER_PROPERTY_KEY));
+                                        String value = MiscellaneousUtil.resolve(prop, secretResolver);
+
+                                        if (key != null && !key.isEmpty()) {
+                                            propertiesMap.put(key, value);
+                                        }
+                                    }
+                                }
+
+                                // Add to the main map
+                                GuardrailProviderConfigurationDTO guardrailProviderConfigurationDTO =
+                                        new GuardrailProviderConfigurationDTO();
+                                guardrailProviderConfigurationDTO.setType(type);
+                                guardrailProviderConfigurationDTO.setProperties(propertiesMap);
+                                guardrailProviders.put(type, guardrailProviderConfigurationDTO);
+                            }
+                        }
                     }
 
                     if (APIConstants.AI.EMBEDDING_PROVIDER.equals(aiChildElement.getLocalName())) {
@@ -775,7 +771,7 @@ public class APIManagerConfiguration {
                             if (APIConstants.AI.EMBEDDING_PROVIDER_PROPERTY.equals(prop.getLocalName())) {
                                 String key = prop.getAttributeValue(
                                         new QName(APIConstants.AI.EMBEDDING_PROVIDER_PROPERTY_KEY));
-                                String value = prop.getText();
+                                String value = MiscellaneousUtil.resolve(prop, secretResolver);
 
                                 if (key != null && !key.isEmpty()) {
                                     propertiesMap.put(key, value);
@@ -1217,14 +1213,9 @@ public class APIManagerConfiguration {
         return embeddingProviderConfigurationDTO;
     }
 
-    public AzureContentSafetyConfigurationDTO getAzureContentSafetyConfiguration() {
+    public GuardrailProviderConfigurationDTO getGuardrailProvider(String type) {
 
-        return azureContentSafetyConfiguration;
-    }
-
-    public AWSBedrockGuardrailsConfigurationDTO getAwsBedrockGuardrailsConfigurationDTO() {
-
-        return awsBedrockGuardrailsConfigurationDTO;
+        return guardrailProviders.get(type);
     }
 
     public RecommendationEnvironment getApiRecommendationEnvironment() {

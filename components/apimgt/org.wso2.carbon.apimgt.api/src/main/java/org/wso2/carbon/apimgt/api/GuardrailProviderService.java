@@ -20,7 +20,9 @@
 
 package org.wso2.carbon.apimgt.api;
 
-public interface EmbeddingProviderService {
+import java.util.Map;
+
+public interface GuardrailProviderService {
     /**
      * Initialize the provider with required HTTP client and configuration properties.
      *
@@ -28,28 +30,19 @@ public interface EmbeddingProviderService {
     void init() throws APIManagementException;
 
     /**
-     * The type identifier for this provider (e.g., "OPENAI", "MISTRAL").
+     * The type identifier for this provider (e.g., "AZURE-CONTENTSAFETY", "AWSBEDROCK-GUARDRAILS", etc).
      *
      * @return A unique string identifier.
      */
     String getType();
 
     /**
-     * Returns the dimensionality of the embedding vector produced by the embedding model.
-     * The dimension is determined by generating an embedding for an empty string input.
+     * Makes a callout to a guardrails service using the provided configuration parameters.
+     * This method is used to invoke external logic or validation rules defined by the guardrails layer.
      *
-     * @return the size of the embedding vector.
-     * @throws APIManagementException if an error occurs while retrieving the embedding dimension.
+     * @param callOutConfig a map containing the necessary configuration and input parameters for the guardrails call.
+     * @return the response returned by the guardrails service as a string.
+     * @throws APIManagementException if an error occurs while invoking the guardrails service or processing the response.
      */
-    int getEmbeddingDimension() throws APIManagementException;
-
-    /**
-     * Generates an embedding vector for the given input text using the embedding model.
-     *
-     * @param input the text to be embedded.
-     * @return a double array representing the embedding vector of the input text.
-     * @throws APIManagementException if an error occurs while generating the embedding.
-     */
-    double[] getEmbedding(String input) throws APIManagementException;
+    String callOut(Map<String, Object> callOutConfig) throws APIManagementException;
 }
-

@@ -276,6 +276,7 @@ public final class APIConstants {
     public static final String ID = "id";
     public static final String IS_VALID = "isValid";
     public static final String ASSESSMENT_REPORT = "/assessmentreport?";
+    public static final String OCP_APIM_SUBSCRIPTION_KEY = "Ocp-Apim-Subscription-Key";
 
     //registry resource containing the self signup user config
     public static final String SELF_SIGN_UP_NAME = "SelfSignUp";
@@ -564,18 +565,9 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
 
-        public static final String AZURE_CONTENT_SAFETY = "AzureContentSafety";
-        public static final String AZURE_CONTENT_SAFETY_ENDPOINT = "Endpoint";
-        public static final String AZURE_CONTENT_SAFETY_KEY = "Key";
-
-        public static final String AWS_BEDROCK = "AWSBedrock";
-        public static final String AWS_BEDROCK_ACCESS_KEY = "AccessKey";
-        public static final String AWS_BEDROCK_SECRET_KEY = "SecretKey";
-        public static final String AWS_BEDROCK_SESSION_TOKEN = "SessionToken";
-        public static final String AWS_BEDROCK_ROLE_ARN = "RoleArn";
-        public static final String AWS_BEDROCK_ROLE_REGION = "RoleRegion";
-        public static final String AWS_BEDROCK_ROLE_EXTERNAL_ID = "RoleExternalId";
-
+        public static final String OPENAI_EMBEDDING_PROVIDER_TYPE = "openai";
+        public static final String AZURE_OPENAI_EMBEDDING_PROVIDER_TYPE = "azure-openai";
+        public static final String MISTRAL_EMBEDDING_PROVIDER_TYPE = "mistral";
         public static final String EMBEDDING_PROVIDER = "EmbeddingProvider";
         public static final String EMBEDDING_PROVIDER_TYPE = "type";
         public static final String EMBEDDING_PROVIDER_PROPERTY = "Property";
@@ -587,10 +579,63 @@ public final class APIConstants {
         public static final String EMBEDDING_PROVIDER_EMBEDDING_REQUEST_INPUT = "input";
         public static final String EMBEDDING_PROVIDER_RESPONSE_EMBEDDING_PATH = "/data/0/embedding";
 
+        public static final String GUARDRAIL_PROVIDERS = "GuardrailProviders";
+        public static final String GUARDRAIL_PROVIDER = "GuardrailProvider";
+        public static final String GUARDRAIL_PROVIDER_TYPE = "type";
+        public static final String GUARDRAIL_PROVIDER_PROPERTY = "Property";
+        public static final String GUARDRAIL_PROVIDER_PROPERTY_KEY = "name";
+        public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_TYPE = "azure-contentsafety";
+        public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_KEY = "key";
+        public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_ENDPOINT = "endpoint";
+        public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_CALLOUT_SERVICE = "service";
+        public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_CALLOUT_PAYLOAD = "request_payload";
+
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_TYPE = "awsbedrock-guardrails";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_ACCESS_KEY = "access_key";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_SECRET_KEY = "secret_key";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_SESSION_TOKEN = "session_token";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_ROLE_ARN = "role_arn";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_ROLE_REGION = "role_region";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_ROLE_EXTERNAL_ID = "role_external_id";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_SERVICE = "service";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_SERVICE_REGION = "guardrail_region";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_HOST = "request_host";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_URI = "request_uri";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_URL = "request_url";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_PAYLOAD = "request_payload";
+
         private AI() {
 
         }
     }
+
+    // AWS S4 Constants
+    public static final String AMZ_DATE_FORMAT = "yyyyMMdd'T'HHmmss'Z'";
+    public static final String DATE_FORMAT = "yyyyMMdd";
+    public static final String HOST_HEADER = "host";
+    public static final String AMZ_DATE_HEADER = "x-amz-date";
+    public static final String AMZ_SECURITY_TOKEN_HEADER = "x-amz-security-token";
+    public static final String AMZ_CONTENT_SHA_HEADER = "x-amz-content-sha256";
+    public static final String AWS4_ALGORITHM = "AWS4-HMAC-SHA256";
+    public static final String AWS4_REQUEST = "aws4_request";
+    public static final String AWS4_CREDENTIAL = "Credential";
+    public static final String AWS4_SIGNED_HEADERS = "SignedHeaders";
+    public static final String AWS4_SIGNATURE = "Signature";
+    public static final String AWS4 = "AWS4";
+    public static final String HMAC_SHA_256 = "HmacSHA256";
+    public static final String DEFAULT_REGION = "us-east-1";
+    public static final String STS = "sts";
+    public static final String AWS_DOMAIN = "amazonaws.com";
+    public static final String SESSION_FORMAT = "%d%d%d";
+    public static final String ASSUME_ROLE_QUERY_ACTION = "Action=AssumeRole";
+    public static final String ASSUME_ROLE_QUERY_VERSION = "&Version=2011-06-15";
+    public static final String ASSUME_ROLE_QUERY_ROLE_ARN_KEY = "&RoleArn=";
+    public static final String ASSUME_ROLE_QUERY_ROLE_SESSION_KEY = "&RoleSessionName=";
+    public static final String ASSUME_ROLE_QUERY_ROLE_EXTERNAL_ID_KEY = "&ExternalId=";
+    public static final String ASSUME_ROLE_ACCESS_KEY = "AccessKeyId";
+    public static final String ASSUME_ROLE_SECRET_KEY = "SecretAccessKey";
+    public static final String ASSUME_ROLE_SESSION_TOKEN = "SessionToken";
+
 
     //documentation rxt
 
