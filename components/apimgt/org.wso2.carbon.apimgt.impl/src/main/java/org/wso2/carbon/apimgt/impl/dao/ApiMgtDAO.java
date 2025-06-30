@@ -22944,7 +22944,18 @@ public class ApiMgtDAO {
         operationPolicy.setPolicyId(rs.getString("POLICY_UUID"));
         operationPolicy.setOrder(rs.getInt("POLICY_ORDER"));
         operationPolicy.setDirection(rs.getString("DIRECTION"));
-        operationPolicy.setParameters(APIMgtDBUtil.convertJSONStringToMap(APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream("PARAMETERS"))));
+        try {
+            InputStream binaryStream = rs.getBinaryStream("PARAMETERS");
+            if (binaryStream != null) {
+                String jsonString = APIMgtDBUtil.getStringFromInputStream(binaryStream);
+                operationPolicy.setParameters(APIMgtDBUtil.convertJSONStringToMap(jsonString));
+            } else {
+                operationPolicy.setParameters(new HashMap<>());
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse parameters from binary stream, using empty map", e);
+            operationPolicy.setParameters(new HashMap<>());
+        }
         return operationPolicy;
     }
 
