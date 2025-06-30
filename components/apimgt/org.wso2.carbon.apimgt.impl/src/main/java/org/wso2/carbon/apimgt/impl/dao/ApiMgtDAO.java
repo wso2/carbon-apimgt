@@ -16459,13 +16459,19 @@ public class ApiMgtDAO {
 
                                 Gson gson = new Gson();
                                 String paramJSON = gson.toJson(policy.getParameters());
-
                                 insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
                                 insertOperationPolicyMappingStatement
                                         .setString(2, clonedPoliciesMap.get(policy.getPolicyId()));
                                 insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
-                                insertOperationPolicyMappingStatement.setString(4, paramJSON);
-                                insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
+
+                                try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                                    insertOperationPolicyMappingStatement.setBinaryStream(4, paramInputStream, paramJSON.length());
+                                } catch (IOException e) {
+                                    log.error("Error creating or reading InputStream for operation policy");
+                                    throw new APIManagementException("Error processing operation policy parameters for policy ID: " +
+                                            policy.getPolicyId() + " in URL Mapping ID: " + rs.getInt(1), e);
+                                }
+                            insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
                                 insertOperationPolicyMappingStatement.addBatch();
                             }
                         }
@@ -20455,7 +20461,15 @@ public class ApiMgtDAO {
                                 insertOperationPolicyMappingStatement.setInt(1, rs.getInt(1));
                                 insertOperationPolicyMappingStatement.setString(2, clonedPoliciesMap.get(policy.getPolicyId()));
                                 insertOperationPolicyMappingStatement.setString(3, policy.getDirection());
-                                insertOperationPolicyMappingStatement.setString(4, paramJSON);
+
+                                try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                                    insertOperationPolicyMappingStatement.setBinaryStream(4, paramInputStream, paramJSON.length());
+                                } catch (IOException e) {
+                                    log.error("Error creating or reading InputStream for operation policy");
+                                    throw new APIManagementException("Error processing operation policy parameters for policy ID: " +
+                                            policy.getPolicyId() + " in URL Mapping ID: " + rs.getInt(1), e);
+                                }
+
                                 insertOperationPolicyMappingStatement.setInt(5, policy.getOrder());
                                 insertOperationPolicyMappingStatement.addBatch();
                             }
@@ -20703,7 +20717,14 @@ public class ApiMgtDAO {
                                     addOperationPolicyStatement.setInt(1, rs.getInt(1));
                                     addOperationPolicyStatement.setString(2, clonedPoliciesMap.get(policy.getPolicyName()));
                                     addOperationPolicyStatement.setString(3, policy.getDirection());
-                                    addOperationPolicyStatement.setString(4, paramJSON);
+                                    try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                                        addOperationPolicyStatement.setBinaryStream(4, paramInputStream, paramJSON.length());
+                                    } catch (IOException e) {
+                                        log.error("Error creating or reading InputStream for operation policy");
+                                        throw new APIManagementException("Error processing operation policy parameters for policy ID: " +
+                                                policy.getPolicyId() + " in URL Mapping ID: " + rs.getInt(1), e);
+                                    }
+
                                     addOperationPolicyStatement.setInt(5, policy.getOrder());
                                     addOperationPolicyStatement.executeUpdate();
                                 }
@@ -21263,7 +21284,15 @@ public class ApiMgtDAO {
                             preparedStatement.setInt(1, uriTemplate.getId());
                             preparedStatement.setString(2,operationPolicy.getPolicyId());
                             preparedStatement.setString(3, operationPolicy.getDirection());
-                            preparedStatement.setString(4, paramJSON);
+
+                            try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                                preparedStatement.setBinaryStream(4, paramInputStream, paramJSON.length());
+                            } catch (IOException e) {
+                                log.error("Error creating or reading InputStream for operation policy");
+                                throw new APIManagementException("Error processing operation policy parameters for policy ID: " +
+                                        operationPolicy.getPolicyId(), e);
+                            }
+
                             preparedStatement.setInt(5, operationPolicy.getOrder());
                             preparedStatement.addBatch();
                         }
@@ -22915,7 +22944,18 @@ public class ApiMgtDAO {
         operationPolicy.setPolicyId(rs.getString("POLICY_UUID"));
         operationPolicy.setOrder(rs.getInt("POLICY_ORDER"));
         operationPolicy.setDirection(rs.getString("DIRECTION"));
-        operationPolicy.setParameters(APIMgtDBUtil.convertJSONStringToMap(rs.getString("PARAMETERS")));
+        try {
+            InputStream binaryStream = rs.getBinaryStream("PARAMETERS");
+            if (binaryStream != null) {
+                String jsonString = APIMgtDBUtil.getStringFromInputStream(binaryStream);
+                operationPolicy.setParameters(APIMgtDBUtil.convertJSONStringToMap(jsonString));
+            } else {
+                operationPolicy.setParameters(new HashMap<>());
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse parameters from binary stream, using empty map", e);
+            operationPolicy.setParameters(new HashMap<>());
+        }
         return operationPolicy;
     }
 
@@ -23041,7 +23081,15 @@ public class ApiMgtDAO {
                         operationPolicyMappingStatement.setInt(1, template.getId());
                         operationPolicyMappingStatement.setString(2, updatedPoliciesMap.get(policy.getPolicyId()));
                         operationPolicyMappingStatement.setString(3, policy.getDirection());
-                        operationPolicyMappingStatement.setString(4, paramJSON);
+
+                        try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                            operationPolicyMappingStatement.setBinaryStream(4, paramInputStream, paramJSON.length());
+                        } catch (IOException e) {
+                            log.error("Error creating or reading InputStream for operation policy");
+                            throw new APIManagementException("Error processing operation policy parameters for policy ID: " +
+                                    policy.getPolicyId(), e);
+                        }
+
                         operationPolicyMappingStatement.setInt(5, policy.getOrder());
                         operationPolicyMappingStatement.addBatch();
                     }
@@ -23055,7 +23103,6 @@ public class ApiMgtDAO {
                             usedClonedPolicies, toBeClonedPolicyDetails);
                     Gson gson = new Gson();
                     String paramJSON = gson.toJson(policy.getParameters());
-
                     if (log.isDebugEnabled()) {
                         log.debug("Adding API level policy " + policy.getPolicyName() + ":"
                                 + policy.getPolicyVersion() + " for API " + apiUUID);
@@ -23065,7 +23112,16 @@ public class ApiMgtDAO {
                     apiLevelPolicyMappingStatement.setString(2, null);
                     apiLevelPolicyMappingStatement.setString(3, updatedPoliciesMap.get(policy.getPolicyId()));
                     apiLevelPolicyMappingStatement.setString(4, policy.getDirection());
-                    apiLevelPolicyMappingStatement.setString(5, paramJSON);
+
+                    try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                        apiLevelPolicyMappingStatement.setBinaryStream(5, paramInputStream, paramJSON.length());
+
+                    } catch (IOException e) {
+                        log.error("Error creating or reading InputStream for API policy");
+                        throw new APIManagementException("Error processing API policy parameters for policy ID: " +
+                                policy.getPolicyId(), e);
+                    }
+
                     apiLevelPolicyMappingStatement.setInt(6, policy.getOrder());
                     apiLevelPolicyMappingStatement.addBatch();
                 }
@@ -23279,7 +23335,14 @@ public class ApiMgtDAO {
                 statement.setString(2, revisionUUID);
                 statement.setString(3, updatedPoliciesMap.get(policy.getPolicyId()));
                 statement.setString(4, policy.getDirection());
-                statement.setString(5, paramJSON);
+
+                try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                    statement.setBinaryStream(5, paramInputStream, paramJSON.length());
+                } catch (IOException e) {
+                    log.error("Error creating or reading InputStream for API policy");
+                    throw new APIManagementException("Error processing API policy parameters for policy ID: " +
+                            policy.getPolicyId(), e);
+                }
                 statement.setInt(6, policy.getOrder());
                 statement.addBatch();
             }
@@ -23474,7 +23537,14 @@ public class ApiMgtDAO {
                         operationPolicyMappingStatement.setInt(1, urlMapping.getId());
                         operationPolicyMappingStatement.setString(2, clonedPolicyMap.get(policy.getPolicyId()));
                         operationPolicyMappingStatement.setString(3, policy.getDirection());
-                        operationPolicyMappingStatement.setString(4, paramJSON);
+
+                        try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                            operationPolicyMappingStatement.setBinaryStream(4, paramInputStream, paramJSON.length());
+                        } catch (IOException e) {
+                            log.error("Error creating or reading InputStream for operation policy");
+                            throw new APIManagementException("Error processing operation policy parameters for policy ID: " +
+                                    policy.getPolicyId(), e);
+                        }
                         operationPolicyMappingStatement.setInt(5, policy.getOrder());
                         operationPolicyMappingStatement.addBatch();
                     }
@@ -23498,7 +23568,14 @@ public class ApiMgtDAO {
                 apiLevelPolicyMappingStatement.setString(2, apiRevision.getRevisionUUID());
                 apiLevelPolicyMappingStatement.setString(3, clonedPolicyMap.get(policy.getPolicyId()));
                 apiLevelPolicyMappingStatement.setString(4, policy.getDirection());
-                apiLevelPolicyMappingStatement.setString(5, paramJSON);
+
+                try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                    apiLevelPolicyMappingStatement.setBinaryStream(5, paramInputStream, paramJSON.length());
+                } catch (IOException e) {
+                    log.error("Error creating or reading InputStream for API policy");
+                    throw new APIManagementException("Error processing API policy parameters for policy ID: " +
+                            policy.getPolicyId(), e);
+                }
                 apiLevelPolicyMappingStatement.setInt(6, policy.getOrder());
                 apiLevelPolicyMappingStatement.addBatch();
             }
@@ -23621,7 +23698,14 @@ public class ApiMgtDAO {
                         operationPolicyMappingStatement.setInt(1, urlMapping.getId());
                         operationPolicyMappingStatement.setString(2, restoredPolicyMap.get(policy.getPolicyName()));
                         operationPolicyMappingStatement.setString(3, policy.getDirection());
-                        operationPolicyMappingStatement.setString(4, paramJSON);
+
+                        try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                            operationPolicyMappingStatement.setBinaryStream(4, paramInputStream, paramJSON.length());
+                        } catch (IOException e) {
+                            log.error("Error creating or reading InputStream for operation policy");
+                            throw new APIManagementException("Error processing operation policy parameters for policy ID: " +
+                                    policy.getPolicyId(), e);
+                        }
                         operationPolicyMappingStatement.setInt(5, policy.getOrder());
                         operationPolicyMappingStatement.addBatch();
                     }
@@ -23644,7 +23728,6 @@ public class ApiMgtDAO {
 
                 Gson gson = new Gson();
                 String paramJSON = gson.toJson(policy.getParameters());
-
                 if (log.isDebugEnabled()) {
                     log.debug("Restored API level policy " + policy.getPolicyName() + ":"
                             + policy.getPolicyVersion() + " from API revision " + apiRevision.getRevisionUUID());
@@ -23654,7 +23737,15 @@ public class ApiMgtDAO {
                 apiLevelPolicyMappingStatement.setString(2, null);
                 apiLevelPolicyMappingStatement.setString(3, restoredPolicyMap.get(policy.getPolicyName()));
                 apiLevelPolicyMappingStatement.setString(4, policy.getDirection());
-                apiLevelPolicyMappingStatement.setString(5, paramJSON);
+
+                try (InputStream paramInputStream = new ByteArrayInputStream(paramJSON.getBytes(StandardCharsets.UTF_8))) {
+                    apiLevelPolicyMappingStatement.setBinaryStream(5, paramInputStream, paramJSON.length());
+                } catch (IOException e) {
+                    log.error("Error creating or reading InputStream for API policy");
+                    throw new APIManagementException("Error processing API policy parameters for policy ID: " +
+                            policy.getPolicyId(), e);
+                }
+
                 apiLevelPolicyMappingStatement.setInt(6, policy.getOrder());
                 apiLevelPolicyMappingStatement.addBatch();
             }
