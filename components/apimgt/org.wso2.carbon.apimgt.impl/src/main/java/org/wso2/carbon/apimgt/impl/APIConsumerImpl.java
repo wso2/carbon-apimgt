@@ -1903,7 +1903,30 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (StringUtils.isEmpty(application.getSharedOrganization())) {
             application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD);
         }
-        apiMgtDAO.updateApplication(application);
+
+        apiMgtDAO.updateApplicationStatus(application.getId(),APIConstants.ApplicationStatus.UPDATE_PENDING);
+
+        try{
+            WorkflowExecutor updateApplicationWFExecutor =
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
+            ApplicationWorkflowDTO appWFDto = new ApplicationWorkflowDTO();
+            appWFDto.setApplication(application);
+            appWFDto.setExistingApplication(existingApp);
+            appWFDto.setExternalWorkflowReference(updateApplicationWFExecutor.generateUUID());
+            appWFDto.setWorkflowReference(String.valueOf(existingApp.getId()));
+            appWFDto.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
+            appWFDto.setCallbackUrl(updateApplicationWFExecutor.getCallbackURL());
+            appWFDto.setStatus(WorkflowStatus.CREATED);
+            appWFDto.setTenantDomain(organization);
+            appWFDto.setTenantId(tenantId);
+            appWFDto.setUserName(existingApp.getOwner());
+            appWFDto.setCreatedTime(System.currentTimeMillis());
+            updateApplicationWFExecutor.execute(appWFDto);
+
+        } catch (WorkflowException e) {
+            throw new APIManagementException("Could not execute application update workflow", e);
+        }
+
         Application updatedApplication = apiMgtDAO.getApplicationById(application.getId());
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the Application: " + application.getId() + " in the database.");
@@ -1928,13 +1951,29 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             recommendationThread.start();
         }
 
-        ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
-                existingApp.getOrganization(), updatedApplication.getId(), updatedApplication.getUUID(),
-                updatedApplication.getName(), updatedApplication.getTokenType(), updatedApplication.getTier(),
-                updatedApplication.getGroupId(), updatedApplication.getApplicationAttributes(),
-                existingApp.getSubscriber().getName());
-        APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(application.getId()),
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
+
+        if (wfDTO != null){
+            if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
+                    ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                            System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
+                            existingApp.getOrganization(), updatedApplication.getId(), updatedApplication.getUUID(),
+                            updatedApplication.getName(), updatedApplication.getTokenType(), updatedApplication.getTier(),
+                            updatedApplication.getGroupId(), updatedApplication.getApplicationAttributes(),
+                            existingApp.getSubscriber().getName());
+                    APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());}
+        } else {
+            ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
+                    existingApp.getOrganization(), updatedApplication.getId(), updatedApplication.getUUID(),
+                    updatedApplication.getName(), updatedApplication.getTokenType(), updatedApplication.getTier(),
+                    updatedApplication.getGroupId(), updatedApplication.getApplicationAttributes(),
+                    existingApp.getSubscriber().getName());
+            APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        }
+
+
     }
 
     /**
@@ -2149,6 +2188,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         try {
             WorkflowExecutor createApplicationWFExecutor =
  getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            WorkflowExecutor updateApplicationWFExecutor =
+            getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
             WorkflowExecutor createSubscriptionWFExecutor =
             getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             WorkflowExecutor deleteSubscriptionWFExecutor =
@@ -2199,6 +2240,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             if (appCreationWorkflowExtRef != null) {
                 cleanupAppCreationPendingTask(applicationId, createApplicationWFExecutor, appCreationWorkflowExtRef);
             }
+
+            //cleanup pending application update task
+            String appUpdateWorkflowExtRef = apiMgtDAO.getExternalWorkflowRefByInternalRefWorkflowType(applicationId,
+                    WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
+            if (appUpdateWorkflowExtRef != null) {
+                cleanupAppUpdatePendingTask(applicationId, updateApplicationWFExecutor, appUpdateWorkflowExtRef);
+            }
+
         } catch (WorkflowException ex) {
             log.warn("Failed to load workflow executors");
         }
@@ -2216,6 +2265,16 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
     }
 
+    private void cleanupAppUpdatePendingTask(int applicationId, WorkflowExecutor workflowExecutor,
+                                               String workflowRef) {
+
+        try {
+            workflowExecutor.cleanUpPendingTask(workflowRef);
+        } catch (WorkflowException ex) {
+            // failed cleanup processes are ignored to prevent failing the application removal process
+            log.warn("Failed to clean pending application update approval task of " + applicationId);
+        }
+    }
     private void cleanupPendingApplicationRegistrationTask(String state, int applicationId, String apiKeyType,
                                                            String keyManagerName,
                                                            WorkflowExecutor applicationRegistrationWFExecutor) {
