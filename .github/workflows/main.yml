@@ -3,10 +3,10 @@ name: API Manager Build with Test
 on:
   push:
     branches:
-      - master
+      - dakshina-patch-1
   pull_request:
     branches:
-      - master
+      - dakshina-patch-1
   workflow_dispatch:
 
 permissions:
