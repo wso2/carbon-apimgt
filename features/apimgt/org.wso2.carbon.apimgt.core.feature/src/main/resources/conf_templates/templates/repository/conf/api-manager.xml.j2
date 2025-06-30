@@ -1829,19 +1829,16 @@
       </Hashing>
 
       <AI>
-          <AzureContentSafety>
-              <Key>{{apim.ai.azurecontentsafety.key}}</Key>
-              <Endpoint>{{apim.ai.azurecontentsafety.endpoint}}</Endpoint>
-          </AzureContentSafety>
-
-          <AWSBedrock>
-              <AccessKey>{{apim.ai.awsbedrock.access_key}}</AccessKey>
-              <SecretKey>{{apim.ai.awsbedrock.secret_key}}</SecretKey>
-              {% if apim.ai.awsbedrock.session_token is defined %} <SessionToken>{{apim.ai.awsbedrock.session_token}}</SessionToken> {% endif %}
-              {% if apim.ai.awsbedrock.role_arn is defined %} <RoleArn>{{apim.ai.awsbedrock.role_arn}}</RoleArn> {% endif %}
-              {% if apim.ai.awsbedrock.custrole_regionom_properties is defined %} <RoleRegion>{{apim.ai.awsbedrock.role_region}}</RoleRegion> {% endif %}
-              {% if apim.ai.awsbedrock.role_external_id is defined %} <RoleExternalId>{{apim.ai.awsbedrock.role_external_id}}</RoleExternalId> {% endif %}
-          </AWSBedrock>
+          <!-- Custom Guardrail Providers -->
+          <GuardrailProviders>
+              {% for guardrail_provider in apim.ai.guardrail_provider %}
+              <GuardrailProvider type="{{guardrail_provider.type}}">
+                  {% for key,value in guardrail_provider.properties.items() %}
+                  <Property name="{{key}}">{{value}}</Property>
+                  {% endfor %}
+              </GuardrailProvider>
+              {% endfor %}
+          </GuardrailProviders>
 
           <EmbeddingProvider type="{{apim.ai.embedding_provider.type}}">
               {% for key,value in apim.ai.embedding_provider.properties.items() %}

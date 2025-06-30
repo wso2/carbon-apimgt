@@ -32,11 +32,12 @@ import org.apache.http.util.EntityUtils;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EmbeddingProviderService;
+import org.wso2.carbon.apimgt.impl.dto.ai.EmbeddingProviderConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 
 @Component(
         name = "azure.openai.embedding.provider.service",
@@ -47,14 +48,17 @@ public class AzureOpenAIEmbeddingProviderServiceImpl implements EmbeddingProvide
 
     private HttpClient httpClient;
     private String azureApiKey;
-    // e.g., https://<your-resource-name>.openai.azure.com/openai/deployments/<deployment-id>/embeddings?api-version=2024-02-15-preview
+    // e.g., https://<resource>.openai.azure.com/openai/deployments/<dep-id>/embeddings?api-version=2024-02-15-preview
     private String endpointUrl;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public void init(Map<String, String> providerConfig) throws APIManagementException {
-        azureApiKey = providerConfig.get(APIConstants.AI.EMBEDDING_PROVIDER_API_KEY);
-        endpointUrl = providerConfig.get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT);
+    public void init() throws APIManagementException {
+        EmbeddingProviderConfigurationDTO providerConfig = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getEmbeddingProvider();
+        azureApiKey = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_API_KEY);
+        endpointUrl = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT);
 
         if (this.azureApiKey == null || this.endpointUrl == null) {
             throw new APIManagementException(
@@ -66,7 +70,7 @@ public class AzureOpenAIEmbeddingProviderServiceImpl implements EmbeddingProvide
 
     @Override
     public String getType() {
-        return "AZURE_OPENAI";
+        return APIConstants.AI.AZURE_OPENAI_EMBEDDING_PROVIDER_TYPE;
     }
 
     @Override
