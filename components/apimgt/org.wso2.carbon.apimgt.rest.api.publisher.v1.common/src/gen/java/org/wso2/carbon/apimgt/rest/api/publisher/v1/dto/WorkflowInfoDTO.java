@@ -99,8 +99,6 @@ return null;
     private Object properties = null;
     private String description = null;
 
-    private String metadata = null;
-
   /**
    * Type of the Workflow Request. It shows which type of request is it. 
    **/
@@ -198,7 +196,7 @@ return null;
     return this;
   }
 
-
+  
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("properties")
@@ -208,16 +206,6 @@ return null;
   public void setProperties(Object properties) {
     this.properties = properties;
   }
-
-    @ApiModelProperty(value = "")
-    @Valid
-    @JsonProperty("metadata")
-    public String getMetadata() {
-        return metadata;
-    }
-    public void setMetadata(String metadata) {
-        this.metadata = metadata;
-    }
 
   /**
    * description is a message with basic details about the workflow request. 
