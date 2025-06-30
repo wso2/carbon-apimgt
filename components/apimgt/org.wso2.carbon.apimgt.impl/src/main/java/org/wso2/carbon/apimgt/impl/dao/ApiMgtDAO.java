@@ -273,8 +273,12 @@ public class ApiMgtDAO {
                 appRegPs.setLong(6, dto.getValidityTime());
                 appRegPs.setString(7, (String) dto.getAppInfoDTO().getOAuthApplicationInfo().getParameter("tokenScope"
                 ));
-                InputStream jsonStringStream = new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8));
-                appRegPs.setBinaryStream(8, jsonStringStream);
+                try (InputStream jsonStringStream = new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8))) {
+                    appRegPs.setBinaryStream(8, jsonStringStream);
+                } catch (IOException e) {
+                    handleException("Error occurred while creating input stream from JSON string for Application : "
+                            + application.getName(), e);
+                }
                 appRegPs.setString(9, dto.getKeyManager());
                 appRegPs.execute();
             }
