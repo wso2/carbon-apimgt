@@ -33,8 +33,8 @@ jobs:
         with:
           java-version: 11.0.24
           distribution: 'temurin'
-      - name: Maven Version
-        run: sudo echo mvn --version
+      - name: Show Maven version
+        run: mvn -v
       - uses: actions/setup-node@v3
         with:
           node-version: '14.x'
