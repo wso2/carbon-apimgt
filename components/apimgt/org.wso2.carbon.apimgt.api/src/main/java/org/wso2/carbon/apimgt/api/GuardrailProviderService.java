@@ -20,14 +20,20 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.dto.GuardrailProviderConfigurationDTO;
+
 import java.util.Map;
 
+/**
+ * Interface for Guardrail Provider Services.
+ * This interface defines the method for integrating with external guardrail provider services.
+ */
 public interface GuardrailProviderService {
     /**
      * Initialize the provider with required HTTP client and configuration properties.
      *
      */
-    void init() throws APIManagementException;
+    void init(GuardrailProviderConfigurationDTO configurationDTO) throws APIManagementException;
 
     /**
      * The type identifier for this provider (e.g., "AZURE-CONTENTSAFETY", "AWSBEDROCK-GUARDRAILS", etc).

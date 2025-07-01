@@ -16,15 +16,15 @@
  * under the License.
  */
 
-package org.wso2.carbon.apimgt.impl.dto.ai;
+package org.wso2.carbon.apimgt.api.dto;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class represents the Guardrail Provider Configuration DTO.
+ * This class represents the Embedding Provider Configuration DTO.
  */
-public class GuardrailProviderConfigurationDTO {
+public class EmbeddingProviderConfigurationDTO {
     private String type;
     private Map<String, String> properties = new HashMap<>();
 

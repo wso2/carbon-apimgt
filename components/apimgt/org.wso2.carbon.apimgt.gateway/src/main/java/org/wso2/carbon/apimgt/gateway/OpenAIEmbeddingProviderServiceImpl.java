@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.impl;
+package org.wso2.carbon.apimgt.gateway;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,41 +29,35 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EmbeddingProviderService;
-import org.wso2.carbon.apimgt.impl.dto.ai.EmbeddingProviderConfigurationDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.api.dto.EmbeddingProviderConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-@Component(
-        name = "mistral.embedding.provider.service",
-        immediate = true,
-        service = EmbeddingProviderService.class
-)
-public class MistralEmbeddingProviderServiceImpl implements EmbeddingProviderService {
-
+/**
+ * OpenAI Embedding Provider Service.
+ * This service interacts with the OpenAI API to generate embeddings for given input text.
+ */
+public class OpenAIEmbeddingProviderServiceImpl implements EmbeddingProviderService {
     private HttpClient httpClient;
-    private String mistralApiKey;
+    private String openAiApiKey;
     private String endpointUrl;
     private String model;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public void init() throws APIManagementException {
-        EmbeddingProviderConfigurationDTO providerConfig = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                .getEmbeddingProvider();
-        mistralApiKey = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_API_KEY);
+    public void init(EmbeddingProviderConfigurationDTO providerConfig) throws APIManagementException {
+        openAiApiKey = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_API_KEY);
         endpointUrl = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT);
         model = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_MODEL);
 
-        if (mistralApiKey == null || endpointUrl == null || model == null) {
+        if (openAiApiKey == null || endpointUrl == null || model == null) {
             throw new APIManagementException(
-                    "Missing required Mistral configuration: 'apikey', 'embedding_endpoint', or 'embedding_model'");
+                    "Missing required OpenAI configuration: 'apikey', 'embedding_endpoint', or 'embedding_model'");
         }
 
         httpClient = APIUtil.getHttpClient(endpointUrl);
@@ -71,7 +65,7 @@ public class MistralEmbeddingProviderServiceImpl implements EmbeddingProviderSer
 
     @Override
     public String getType() {
-        return APIConstants.AI.MISTRAL_EMBEDDING_PROVIDER_TYPE;
+        return APIConstants.AI.OPENAI_EMBEDDING_PROVIDER_TYPE;
     }
 
     @Override
@@ -83,16 +77,16 @@ public class MistralEmbeddingProviderServiceImpl implements EmbeddingProviderSer
     public double[] getEmbedding(String input) throws APIManagementException {
         HttpPost post = new HttpPost(endpointUrl);
         post.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
-                APIConstants.AUTHORIZATION_BEARER + mistralApiKey);
+                APIConstants.AUTHORIZATION_BEARER + openAiApiKey);
         post.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
 
         try {
-            // Build the JSON payload
-            ObjectNode body = objectMapper.createObjectNode();
-            body.put(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_REQUEST_MODEL, model);
-            body.put(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_REQUEST_INPUT, input);
-            String jsonBody = objectMapper.writeValueAsString(body);
-            post.setEntity(new StringEntity(jsonBody, StandardCharsets.UTF_8));
+            // Build request JSON
+            ObjectNode requestBody = objectMapper.createObjectNode();
+            requestBody.put(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_REQUEST_MODEL, model);
+            requestBody.put(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_REQUEST_INPUT, input);
+            String json = objectMapper.writeValueAsString(requestBody);
+            post.setEntity(new StringEntity(json, StandardCharsets.UTF_8));
 
             try (CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(post, httpClient)) {
                 int statusCode = response.getStatusLine().getStatusCode();
@@ -109,11 +103,11 @@ public class MistralEmbeddingProviderServiceImpl implements EmbeddingProviderSer
 
                     double[] embedding = new double[embeddingArray.size()];
                     for (int i = 0; i < embedding.length; i++) {
-                        embedding[i] = embeddingArray.get(i).asDouble();
+                        embedding[i] = embeddingArray.get(i).asDouble();  // cast to float32
                     }
                     return embedding;
                 } else {
-                    throw new APIManagementException("Unexpected status code " + statusCode + ": " + responseBody);
+                    throw new APIManagementException("Unexpected response code " + statusCode + ": " + responseBody);
                 }
             }
         } catch (IOException e) {

@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.impl;
+package org.wso2.carbon.apimgt.gateway;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,22 +29,20 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.GuardrailProviderService;
-import org.wso2.carbon.apimgt.impl.dto.ai.GuardrailProviderConfigurationDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.api.dto.GuardrailProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-@Component(
-        name = "aws.bedrock.guardrail.provider.service",
-        immediate = true,
-        service = GuardrailProviderService.class
-)
+/**
+ * AWS Bedrock Guardrail Provider Service.
+ * This service interacts with the AWS Bedrock Guardrails API to perform guardrail checks.
+ */
 public class AWSBedrockGuardrailProviderServiceImpl implements GuardrailProviderService {
 
     private String accessKey;
@@ -56,11 +54,7 @@ public class AWSBedrockGuardrailProviderServiceImpl implements GuardrailProvider
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public void init() throws APIManagementException {
-        GuardrailProviderConfigurationDTO providerConfig = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                .getGuardrailProvider(APIConstants.AI.GUARDRAIL_PROVIDER_AWSBEDROCK_TYPE);
-
+    public void init(GuardrailProviderConfigurationDTO providerConfig) throws APIManagementException {
         if (providerConfig == null || providerConfig.getProperties() == null) {
             throw new APIManagementException("AWS Bedrock guardrail provider configuration not found");
         }

@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.impl;
+package org.wso2.carbon.apimgt.gateway;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,21 +29,19 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
-import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EmbeddingProviderService;
-import org.wso2.carbon.apimgt.impl.dto.ai.EmbeddingProviderConfigurationDTO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.api.dto.EmbeddingProviderConfigurationDTO;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-@Component(
-        name = "azure.openai.embedding.provider.service",
-        immediate = true,
-        service = EmbeddingProviderService.class
-)
+/**
+ * Azure OpenAI Embedding Provider Service.
+ * This service interacts with the Azure OpenAI API to generate embeddings for given input text.
+ */
 public class AzureOpenAIEmbeddingProviderServiceImpl implements EmbeddingProviderService {
 
     private HttpClient httpClient;
@@ -53,10 +51,7 @@ public class AzureOpenAIEmbeddingProviderServiceImpl implements EmbeddingProvide
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public void init() throws APIManagementException {
-        EmbeddingProviderConfigurationDTO providerConfig = ServiceReferenceHolder.getInstance()
-                .getAPIManagerConfigurationService().getAPIManagerConfiguration()
-                .getEmbeddingProvider();
+    public void init(EmbeddingProviderConfigurationDTO providerConfig) throws APIManagementException {
         azureApiKey = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_API_KEY);
         endpointUrl = providerConfig.getProperties().get(APIConstants.AI.EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT);
 

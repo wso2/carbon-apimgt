@@ -20,12 +20,19 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.dto.EmbeddingProviderConfigurationDTO;
+
+/**
+ * Interface for embedding provider services.
+ * This interface defines methods for initializing the provider, retrieving the type,
+ * getting the embedding dimension, and generating embeddings for input text.
+ */
 public interface EmbeddingProviderService {
     /**
      * Initialize the provider with required HTTP client and configuration properties.
      *
      */
-    void init() throws APIManagementException;
+    void init(EmbeddingProviderConfigurationDTO providerConfig) throws APIManagementException;
 
     /**
      * The type identifier for this provider (e.g., "OPENAI", "MISTRAL").
