@@ -43,8 +43,8 @@ jobs:
           key: ${{ runner.os }}-m2
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Build carbon-apimgt with Tests, skipping AspectJ
-        run: mvn clean install --file pom.xml -Dskip.aspectj=true
+      - name: Build carbon-apimgt with Tests
+        run: mvn clean install --file pom.xml
 
       - name: Upload unit test coverage to Codecov
         uses: codecov/codecov-action@v3
@@ -90,8 +90,8 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2
           restore-keys: ${{ runner.os }}-m2
-      - name: Build carbon-apimgt without tests, skip AspectJ, skip portal builds
-        run: mvn clean install --file pom.xml -Dmaven.test.skip=true -Dskip.aspectj=true -Dnpm.build.skip=true
+      - name: Build carbon-apimgt without tests, skip portal builds
+        run: mvn clean install --file pom.xml -Dmaven.test.skip=true -Dnpm.build.skip=true
       - name: Get carbon.apimgt.version
         run: mvn help:evaluate -Dexpression=project.version -q -DforceStdout > ../CARBON_APIMGT_VERSION_FILE
       - name: Print carbon.apimgt.version
@@ -155,8 +155,8 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2
           restore-keys: ${{ runner.os }}-m2
-      - name: Build carbon-apimgt without tests, skip AspectJ, skip portal builds
-        run: mvn clean install --file pom.xml -Dmaven.test.skip=true -Dskip.aspectj=true -Dnpm.build.skip=true
+      - name: Build carbon-apimgt without tests, skip portal builds
+        run: mvn clean install --file pom.xml -Dmaven.test.skip=true -Dnpm.build.skip=true
       - name: Get carbon.apimgt.version
         run: mvn help:evaluate -Dexpression=project.version -q -DforceStdout > ../CARBON_APIMGT_VERSION_FILE
       - name: Print carbon.apimgt.version
