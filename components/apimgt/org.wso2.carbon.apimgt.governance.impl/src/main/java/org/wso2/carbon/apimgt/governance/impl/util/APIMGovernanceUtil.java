@@ -193,7 +193,8 @@ public class APIMGovernanceUtil {
         PolicyManager policyManager = new PolicyManager();
         try {
             // Fetch existing policies for the organization
-            Map<String, String> existingPolicies = policyManager.getOrganizationWidePolicies(organization);
+            List<APIMGovernancePolicy> existingPolicies = policyManager.getGovernancePolicies(organization)
+                    .getGovernancePolicyList();
 
             // Define the path to default policies
             String pathToPolicies = CarbonUtils.getCarbonHome() + File.separator
@@ -209,7 +210,9 @@ public class APIMGovernanceUtil {
                         APIMDefaultGovPolicy defaultPolicy = mapper.readValue(file, APIMDefaultGovPolicy.class);
 
                         // Add policy if it doesn't already exist
-                        if (!existingPolicies.containsValue(defaultPolicy.getName())) {
+                        boolean policyExists = existingPolicies.stream()
+                                .anyMatch(policy -> defaultPolicy.getName().equals(policy.getName()));
+                        if (!policyExists) {
                             log.info("Adding default policy: " + defaultPolicy.getName());
                             APIMGovernancePolicy policy = getGovPolicyFromDefaultGovPolicy(defaultPolicy, organization);
                             APIMGovernancePolicy createdPolicy = policyManager.createGovernancePolicy(organization,
