@@ -61,7 +61,7 @@ import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
-import org.wso2.carbon.apimgt.api.model.BackendEndpointData;
+import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
@@ -3527,7 +3527,7 @@ public class ApiMgtDAO {
                 application.getApplicationAttributes().put(APIConstants.ApplicationAttributes.USER_ORGANIZATION,
                         appOrg);
             }
-            
+
             //Adding data to AM_APPLICATION_ATTRIBUTES table
             if (application.getApplicationAttributes() != null) {
                 addApplicationAttributes(conn, application.getApplicationAttributes(), applicationId, tenantId);
@@ -3589,7 +3589,7 @@ public class ApiMgtDAO {
                 application.getApplicationAttributes().put(APIConstants.ApplicationAttributes.USER_ORGANIZATION,
                         appOrg);
             }
-            
+
             if (application.getApplicationAttributes() != null && !application.getApplicationAttributes().isEmpty()) {
                 addApplicationAttributes(conn, application.getApplicationAttributes(), application.getId(), tenantId);
             }
@@ -6277,11 +6277,11 @@ public class ApiMgtDAO {
                     }
                 }
 
-                if (APIConstants.API_SUBTYPE_MCP.equals(api.getSubtype())) {
+                if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
                     BackendOperationMapping mapping = uriTemplate.getBackendOperationMapping();
                     if (mapping != null) {
-                        addBackendOperationMappingPrepStmt.setString(1, mapping.getBackendId());
-                        addBackendOperationMappingPrepStmt.setInt(2, uriMappingId);
+                        addBackendOperationMappingPrepStmt.setInt(1, uriMappingId);
+                        addBackendOperationMappingPrepStmt.setString(2, mapping.getBackendId());
                         addBackendOperationMappingPrepStmt.setString(3, mapping.getBackendOperation().getTarget());
                         addBackendOperationMappingPrepStmt.setString(4, mapping.getBackendOperation().getVerb());
                         addBackendOperationMappingPrepStmt.addBatch();
@@ -6303,44 +6303,6 @@ public class ApiMgtDAO {
             addBackendOperationMappingPrepStmt.executeBatch();
         }
     }
-
-    /**
-     * Add a new backend and related mapped operations to the database
-     *
-     * @param apiId apiId
-     * @param backendEndpointDataList backendEndpointDataList
-     * @throws APIManagementException APIManagementException
-     */
-    public void addBackendsForAPI(int apiId, Set<BackendEndpointData> backendEndpointDataList)
-            throws APIManagementException {
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            connection.setAutoCommit(false);
-            try {
-                try (PreparedStatement addBackendPrepStmt =
-                             connection.prepareStatement(SQLConstants.ADD_AM_API_BACKEND_SQL)) {
-                    for (BackendEndpointData backendData : backendEndpointDataList) {
-                        addBackendPrepStmt.setString(1, backendData.getBackendId());
-                        addBackendPrepStmt.setString(2, backendData.getBackendName());
-                        addBackendPrepStmt.setBinaryStream(3,
-                                new ByteArrayInputStream(backendData.getEndpointConfig().getBytes()));
-                        addBackendPrepStmt.setBinaryStream(4,
-                                new ByteArrayInputStream(backendData.getBackendDefinition().getBytes()));
-                        addBackendPrepStmt.setInt(5, apiId);
-                        addBackendPrepStmt.addBatch();
-                    }
-                    addBackendPrepStmt.executeBatch();
-                }
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException("Error while adding backend to the database for Backend of apiId : " + apiId, e);
-            }
-        } catch (SQLException e) {
-            handleException("Error while adding backend to the database for Backend  of"
-                    + " apiId : " + apiId, e);
-        }
-    }
-
 
     /**
      * Checks whether application is accessible to the specified user
@@ -6871,28 +6833,7 @@ public class ApiMgtDAO {
     public void updateURITemplates(API api, int tenantId) throws APIManagementException {
 
         int apiId;
-        String deleteOldBackendOperationMapping = SQLConstants.REMOVE_FROM_AM_API_BACKEND_OPERATION_MAPPING_SQL;
         String deleteOldMappingsQuery = SQLConstants.REMOVE_FROM_URI_TEMPLATES_SQL;
-
-        try(Connection connection = APIMgtDBUtil.getConnection();
-            PreparedStatement prepStmt = connection.prepareStatement(deleteOldBackendOperationMapping)) {
-            connection.setAutoCommit(false);
-            for (URITemplate template: api.getUriTemplates()) {
-                prepStmt.setInt(1, template.getId());
-                prepStmt.setString(2, template.getBackendOperationMapping().getBackendId());
-                prepStmt.addBatch();
-            }
-            try {
-                prepStmt.executeBatch();
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException("Error while deleting backend operation mappings for API: " + api.getId(), e);
-            }
-            connection.commit();
-        } catch (SQLException e) {
-            handleException("Error while deleting backend operation mappings for API: " + api.getId(), e);
-        }
         try (Connection connection = APIMgtDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(deleteOldMappingsQuery)) {
             connection.setAutoCommit(false);
@@ -10627,7 +10568,7 @@ public class ApiMgtDAO {
                         .prepareStatement(SQLConstants.OrganizationSqlConstants.ORGANIZATIONS_EXIST)) {
             try (ResultSet resultSet = prepStmt.executeQuery()) {
                 resultSet.next();
-                int count = resultSet.getInt(1); 
+                int count = resultSet.getInt(1);
                 isExist = count > 0;
             }
         } catch (SQLException e) {
@@ -10635,7 +10576,7 @@ public class ApiMgtDAO {
         }
         return isExist;
     }
-    
+
     public API getLightWeightAPIInfoByAPIIdentifier(APIIdentifier apiIdentifier, String organization)
             throws APIManagementException {
 
@@ -21617,56 +21558,6 @@ public class ApiMgtDAO {
         return aiConfiguration;
     }
 
-    public Set<BackendEndpointData> getBackendEndpoints(String apiId, String organization) throws APIManagementException {
-
-        Set<BackendEndpointData> endpointDataList = new LinkedHashSet<>();
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            connection.setAutoCommit(false);
-            try {
-                int id = getAPIID(apiId, connection);
-                try (PreparedStatement getBackendPrepStmt =
-                             connection.prepareStatement(SQLConstants.GET_AM_API_BACKENDS_SQL)) {
-                    getBackendPrepStmt.setInt(1, id);
-                    try (ResultSet resultSet = getBackendPrepStmt.executeQuery()) {
-                        while (resultSet.next()) {
-                            BackendEndpointData endpointData = new BackendEndpointData();
-                            String backendId = resultSet.getString("BACKEND_ID");
-                            String backendName = resultSet.getString("BACKEND_NAME");
-                            endpointData.setBackendId(backendId);
-                            endpointData.setBackendName(backendName);
-                            try (InputStream endpointConfig =
-                                         resultSet.getBinaryStream("ENDPOINT_CONFIG")) {
-                                if (endpointConfig != null) {
-                                    endpointData.setEndpointConfig(IOUtils.toString(endpointConfig));
-                                }
-                            } catch (IOException e) {
-                                log.error("Error while retrieving endpoint config for backend "
-                                        + backendId + " of api " + apiId, e);
-                            }
-                            try (InputStream backendDefinition =
-                                         resultSet.getBinaryStream("BACKEND_DEFINITION")) {
-                                if (backendDefinition != null) {
-                                    endpointData.setBackendDefinition(IOUtils.toString(backendDefinition));
-                                }
-                            } catch (IOException e) {
-                                log.error("Error while retrieving backend definition for backend "
-                                        + backendId + " of api " + apiId, e);
-                            }
-                            endpointDataList.add(endpointData);
-                        }
-                    }
-                }
-                connection.commit();
-            } catch (SQLException e) {
-                connection.rollback();
-                handleException("Error while retrieving backends for apiId : " + apiId, e);
-            }
-        } catch (SQLException e) {
-            handleException("Error while retrieving backends for apiId : " + apiId, e);
-        }
-        return endpointDataList;
-    }
-
     public void deleteBackendOperationMapping(Set<URITemplate> uriTemplates) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection()) {
@@ -21692,6 +21583,85 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while retrieving to delete URL mappings", e);
         }
+    }
+
+    public void addAPIBackendEndpoints(int apiId, List<BackendEndpoint> backendEndpoints)
+            throws APIManagementException {
+        if (!backendEndpoints.isEmpty()) {
+            try (Connection connection = APIMgtDBUtil.getConnection()) {
+                connection.setAutoCommit(false);
+                String dbQuery = SQLConstants.ADD_AM_API_BACKENDS_SQL;
+                try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
+                    for (BackendEndpoint backendEndpoint : backendEndpoints) {
+                        statement.setString(1, backendEndpoint.getBackendId());
+                        statement.setString(2, backendEndpoint.getBackendName());
+                        statement.setBinaryStream(3,
+                                new ByteArrayInputStream(backendEndpoint.getEndpointConfig().getBytes()));
+                        statement.setBinaryStream(4,
+                                new ByteArrayInputStream(backendEndpoint.getBackendApiDefinition().getBytes()));
+                        statement.setInt(5, apiId);
+                        statement.addBatch();
+                    }
+                    statement.executeBatch();
+                    connection.commit();
+                } catch (SQLException e) {
+                    connection.rollback();
+                    handleException("Failed to add endpoints to API: " + apiId, e);
+                }
+            } catch (SQLException | APIManagementException e) {
+                handleException("Failed to add endpoints to API: " + apiId, e);
+            }
+        }
+    }
+
+    public List<BackendEndpoint> getBackendEndpoints(int apiId) throws APIManagementException {
+        List<BackendEndpoint> endpointsList = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                try (PreparedStatement getBackendPrepStmt =
+                             connection.prepareStatement(SQLConstants.GET_AM_API_BACKENDS_SQL)) {
+                    getBackendPrepStmt.setInt(1, apiId);
+                    try (ResultSet resultSet = getBackendPrepStmt.executeQuery()) {
+                        while (resultSet.next()) {
+                            BackendEndpoint endpoint = new BackendEndpoint();
+                            String backendId = resultSet.getString("BACKEND_ID");
+                            String backendName =  resultSet.getString("BACKEND_NAME");
+
+                            endpoint.setBackendId(backendId);
+                            endpoint.setBackendName(backendName);
+                            try (InputStream endpointConfig =
+                                         resultSet.getBinaryStream("ENDPOINT_CONFIG")) {
+                                if (endpointConfig != null) {
+                                    endpoint.setEndpointConfig(IOUtils.toString(endpointConfig));
+                                }
+                            } catch (IOException e) {
+                                log.error("Error while retrieving endpoint config for backend "
+                                        + backendId + " of api " + apiId, e);
+                            }
+
+                            try (InputStream backendDefinition =
+                                         resultSet.getBinaryStream("BACKEND_API_DEFINITION")) {
+                                if (backendDefinition != null) {
+                                    endpoint.setBackendApiDefinition(IOUtils.toString(backendDefinition));
+                                }
+                            } catch (IOException e) {
+                                log.error("Error while retrieving backend definition for backend "
+                                        + backendId + " of api " + apiId, e);
+                            }
+                            endpointsList.add(endpoint);
+                        }
+                    }
+                }
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Error while retrieving backends for apiId : " + apiId, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error while retrieving backends for apiId : " + apiId, e);
+        }
+        return endpointsList;
     }
 
     private class SubscriptionInfo {
@@ -25014,7 +24984,8 @@ public class ApiMgtDAO {
             statement.setString(3, "Current API");
             statement.setString(4, apiEndpoint.getName());
             statement.setString(5, apiEndpoint.getDeploymentStage());
-            statement.setBinaryStream(6, fromEndpointConfigMapToBA(apiEndpoint.getEndpointConfig()));
+            statement.setBinaryStream(6,
+                    fromEndpointConfigMapToBA(apiEndpoint.getEndpointConfig()));
             statement.setString(7, organization);
             if (statement.executeUpdate() > 0) {
                 return apiEndpoint.getId();

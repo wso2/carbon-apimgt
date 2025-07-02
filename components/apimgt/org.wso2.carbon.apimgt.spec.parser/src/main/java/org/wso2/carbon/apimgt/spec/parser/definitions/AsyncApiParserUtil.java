@@ -14,6 +14,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.io.IOException;
 import java.net.URL;
@@ -82,8 +83,9 @@ public class AsyncApiParserUtil {
             String version,
             String context,
             String description,
-            List<String> endpoints
-    ) {
+            List<String> endpoints,
+            List<URITemplate> uriTemplates)
+    {
         validationResponse.setValid(true);
         validationResponse.setContent(originalAPIDefinition);
         APIDefinitionValidationResponse.Info info = new APIDefinitionValidationResponse.Info();
@@ -93,6 +95,7 @@ public class AsyncApiParserUtil {
         info.setContext(context);
         info.setDescription(description);
         info.setEndpoints(endpoints);
+        info.setUriTemplates(uriTemplates);
         validationResponse.setInfo(info);
     }
 

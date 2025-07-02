@@ -1565,11 +1565,8 @@ public class SQLConstants {
             " VALUES (?,?,?,?,?,?,?,?)";
 
     public static final String ADD_AM_API_BACKEND_OPERATION_MAPPING_SQL =
-            "INSERT INTO AM_API_BACKEND_OPERATION_MAPPING (BACKEND_ID, URL_MAPPING_ID, TARGET, VERB) VALUES (?,?,?,?)";
-
-    public static final String ADD_AM_API_BACKEND_SQL = "INSERT INTO AM_API_BACKEND (BACKEND_ID, BACKEND_NAME, " +
-            "ENDPOINT_CONFIG, BACKEND_DEFINITION, API_ID) " +
-            "VALUES (?,?,?,?,?)";
+            "INSERT INTO AM_API_BACKEND_OPERATION_MAPPING (URL_MAPPING_ID, BACKEND_ID, TARGET, VERB) " +
+                    "VALUES (?,?,?,?)";
 
     public static final String ADD_AM_API_PROXY_OPERATION_MAPPING_SQL =
             "INSERT INTO AM_API_PROXY_MAPPING (URL_MAPPING_ID, REF_URL_MAPPING_ID, API_ID) VALUES (?, ?, ?)";
@@ -4622,8 +4619,12 @@ public class SQLConstants {
                         " ORDER BY AUM.URL_MAPPING_ID ASC ";
     }
 
+    public static final String ADD_AM_API_BACKENDS_SQL = "INSERT INTO AM_API_BACKEND (BACKEND_ID, BACKEND_NAME, " +
+            "ENDPOINT_CONFIG, BACKEND_API_DEFINITION, API_ID) VALUES (?,?,?,?,?)";
+
+
     public static final String GET_AM_API_BACKENDS_SQL = "SELECT BACKEND_ID, BACKEND_NAME, ENDPOINT_CONFIG, " +
-            "BACKEND_DEFINITION FROM AM_API_BACKEND WHERE API_ID = ?";
+            "BACKEND_API_DEFINITION FROM AM_API_BACKEND WHERE API_ID = ?";
 
     /**
      * Static class to hold database queries related to gateway policies tables
@@ -4782,8 +4783,9 @@ public class SQLConstants {
                         "REVISION_UUID, " +
                         "ENDPOINT_NAME, " +
                         "KEY_TYPE, " +
-                        "ENDPOINT_CONFIG, ORGANIZATION) " +
-                        "VALUES(?,?,?,?,?,?,?)";
+                        "ENDPOINT_CONFIG, " +
+                        "ORGANIZATION) " +
+                        "VALUES(?,?,?,?,?,?,?,?)";
 
         public static final String DELETE_PRIMARY_ENDPOINT_MAPPING =
                 "DELETE FROM AM_API_PRIMARY_EP_MAPPING WHERE API_UUID = ?";

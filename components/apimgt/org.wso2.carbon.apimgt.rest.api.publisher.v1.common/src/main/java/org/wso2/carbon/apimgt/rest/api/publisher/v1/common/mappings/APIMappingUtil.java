@@ -1375,7 +1375,7 @@ public class APIMappingUtil {
             } else {
                 apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getUuid(), tenantDomain);
             }
-            if (APIConstants.API_SUBTYPE_MCP.equals(model.getSubtype())) {
+            if (APIConstants.API_TYPE_MCP.equals(model.getType())) {
                 apiOperationsDTO = getOperationsFromAPI(model);
             } else {
                 // We will fetch operations from the swagger definition and not from the AM_API_URL_MAPPING table:
@@ -1972,7 +1972,7 @@ public class APIMappingUtil {
                 }
                 if (operation.getBackendOperationMapping() != null) {
                     template.setBackendOperationMapping(OperationPolicyMappingUtil
-                            .fromDTOToAPIBackendOperationMapping(operation.getBackendOperationMapping()));
+                            .fromDTOToBackendOperationMapping(operation.getBackendOperationMapping()));
                 }
                 uriTemplates.add(template);
             } else {
@@ -2014,7 +2014,7 @@ public class APIMappingUtil {
                         APIConstants.API_TYPE_SSE.equals(model.getType())) {
                     handleException("Topic '" + uriTempVal + "' has global parameters without " +
                             "Operation Type");
-                } else if (APIConstants.API_SUBTYPE_MCP.equals(model.getSubtype())) {
+                } else if (APIConstants.API_TYPE_MCP.equals(model.getType())) {
                     handleException("Tool '" + uriTempVal + "' has global parameters without " +
                             "Operation Type");
                 } else {
@@ -2236,6 +2236,14 @@ public class APIMappingUtil {
                 infoDTO.setContext(modelInfo.getContext());
                 infoDTO.setDescription(modelInfo.getDescription());
                 infoDTO.setEndpoints(modelInfo.getEndpoints());
+                List<APIOperationsDTO> apiOperationsDTO = new ArrayList<>();
+                for (URITemplate uriTemplate : modelInfo.getUriTemplates()) {
+                    APIOperationsDTO apiOperations = new APIOperationsDTO();
+                    apiOperations.setVerb(uriTemplate.getHTTPVerb());
+                    apiOperations.setTarget(uriTemplate.getUriTemplate());
+                    apiOperationsDTO.add(apiOperations);
+                }
+                infoDTO.setOperations(apiOperationsDTO);
                 responseDTO.setInfo(infoDTO);
             }
             if (returnContent) {

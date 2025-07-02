@@ -143,7 +143,7 @@ public class OperationPolicyMappingUtil {
         return operationPoliciesList;
     }
 
-    public static BackendOperationMapping fromDTOToAPIBackendOperationMapping(
+    public static BackendOperationMapping fromDTOToBackendOperationMapping(
             BackendOperationMappingDTO backendOperationMappingDTO) {
 
         BackendOperationMapping backendOperationMapping = new BackendOperationMapping();

@@ -1316,7 +1316,6 @@ public abstract class AbstractAPIManager implements APIManager {
         if (api.getType() != null && APIConstants.APITransportType.GRAPHQL.toString().equals(api.getType())) {
             api.setGraphQLSchema(getGraphqlSchemaDefinition(uuid, organization));
         }
-
         JsonElement paths = null;
         if (resourceConfigsString != null) {
             JsonObject resourceConfigsJSON = new Gson().fromJson(resourceConfigsString, JsonObject.class);

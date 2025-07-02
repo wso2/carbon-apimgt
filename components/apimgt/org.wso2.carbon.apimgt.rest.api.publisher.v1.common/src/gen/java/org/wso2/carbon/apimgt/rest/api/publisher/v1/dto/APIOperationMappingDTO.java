@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendOperationDTO;
 import javax.validation.constraints.*;
 
 
@@ -18,22 +19,21 @@ import javax.validation.Valid;
 
 
 
-public class BackendEndpointDataDTO   {
+public class APIOperationMappingDTO   {
   
     private String id = null;
-    private String name = null;
-    private String endpoint = null;
+    private BackendOperationDTO backendOperation = null;
 
   /**
-   * Backend ID consisting of the UUID of the Endpoint
+   * UUID of the targetAPI 
    **/
-  public BackendEndpointDataDTO id(String id) {
+  public APIOperationMappingDTO id(String id) {
     this.id = id;
     return this;
   }
 
   
-  @ApiModelProperty(example = "0c4439fd-9416-3c2e-be6e-1086e0b9aa93", value = "Backend ID consisting of the UUID of the Endpoint")
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the targetAPI ")
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -43,39 +43,21 @@ public class BackendEndpointDataDTO   {
   }
 
   /**
-   * Backend name
    **/
-  public BackendEndpointDataDTO name(String name) {
-    this.name = name;
+  public APIOperationMappingDTO backendOperation(BackendOperationDTO backendOperation) {
+    this.backendOperation = backendOperation;
     return this;
   }
 
   
-  @ApiModelProperty(example = "backend1", value = "Backend name")
-  @JsonProperty("name")
-  public String getName() {
-    return name;
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("backendOperation")
+  public BackendOperationDTO getBackendOperation() {
+    return backendOperation;
   }
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  /**
-   * Backend endpoint
-   **/
-  public BackendEndpointDataDTO endpoint(String endpoint) {
-    this.endpoint = endpoint;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "Backend endpoint")
-  @JsonProperty("endpoint")
-  public String getEndpoint() {
-    return endpoint;
-  }
-  public void setEndpoint(String endpoint) {
-    this.endpoint = endpoint;
+  public void setBackendOperation(BackendOperationDTO backendOperation) {
+    this.backendOperation = backendOperation;
   }
 
 
@@ -87,25 +69,23 @@ public class BackendEndpointDataDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    BackendEndpointDataDTO backendEndpointData = (BackendEndpointDataDTO) o;
-    return Objects.equals(id, backendEndpointData.id) &&
-        Objects.equals(name, backendEndpointData.name) &&
-        Objects.equals(endpoint, backendEndpointData.endpoint);
+    APIOperationMappingDTO apIOperationMapping = (APIOperationMappingDTO) o;
+    return Objects.equals(id, apIOperationMapping.id) &&
+        Objects.equals(backendOperation, apIOperationMapping.backendOperation);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, endpoint);
+    return Objects.hash(id, backendOperation);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class BackendEndpointDataDTO {\n");
+    sb.append("class APIOperationMappingDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
-    sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    endpoint: ").append(toIndentedString(endpoint)).append("\n");
+    sb.append("    backendOperation: ").append(toIndentedString(backendOperation)).append("\n");
     sb.append("}");
     return sb.toString();
   }
