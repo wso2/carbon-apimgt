@@ -25,6 +25,7 @@ public class ApiChatRequestDTO   {
     private String apiChatRequestId = null;
     private String command = null;
     private ApiChatRequestApiSpecDTO apiSpec = null;
+    private String schemaDefinition = null;
     private ApiChatRequestResponseDTO response = null;
 
   /**
@@ -82,6 +83,24 @@ public class ApiChatRequestDTO   {
   }
 
   /**
+   * GraphQL API schema definition
+   **/
+  public ApiChatRequestDTO schemaDefinition(String schemaDefinition) {
+    this.schemaDefinition = schemaDefinition;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "schema {   query: Query }  # The query type, represents all of the entry points into our object graph type Query {   hero(id: ID!): Character   allHeroes: [Character] }  # A character from the Star Wars universe type Character {   # The unique identifier for the character   id: ID!    # The name of the character   name: String!    # The list of episodes the character appears in   appearsIn: [String] }", value = "GraphQL API schema definition")
+  @JsonProperty("schemaDefinition")
+  public String getSchemaDefinition() {
+    return schemaDefinition;
+  }
+  public void setSchemaDefinition(String schemaDefinition) {
+    this.schemaDefinition = schemaDefinition;
+  }
+
+  /**
    **/
   public ApiChatRequestDTO response(ApiChatRequestResponseDTO response) {
     this.response = response;
@@ -112,12 +131,13 @@ public class ApiChatRequestDTO   {
     return Objects.equals(apiChatRequestId, apiChatRequest.apiChatRequestId) &&
         Objects.equals(command, apiChatRequest.command) &&
         Objects.equals(apiSpec, apiChatRequest.apiSpec) &&
+        Objects.equals(schemaDefinition, apiChatRequest.schemaDefinition) &&
         Objects.equals(response, apiChatRequest.response);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiChatRequestId, command, apiSpec, response);
+    return Objects.hash(apiChatRequestId, command, apiSpec, schemaDefinition, response);
   }
 
   @Override
@@ -128,6 +148,7 @@ public class ApiChatRequestDTO   {
     sb.append("    apiChatRequestId: ").append(toIndentedString(apiChatRequestId)).append("\n");
     sb.append("    command: ").append(toIndentedString(command)).append("\n");
     sb.append("    apiSpec: ").append(toIndentedString(apiSpec)).append("\n");
+    sb.append("    schemaDefinition: ").append(toIndentedString(schemaDefinition)).append("\n");
     sb.append("    response: ").append(toIndentedString(response)).append("\n");
     sb.append("}");
     return sb.toString();

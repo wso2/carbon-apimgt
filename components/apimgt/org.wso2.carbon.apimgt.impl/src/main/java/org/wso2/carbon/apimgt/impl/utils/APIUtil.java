@@ -11276,7 +11276,8 @@ public final class APIUtil {
                 tokenEndpoint, key, requestId, payload)){
             int statusCode = response.getStatusLine().getStatusCode();
             String responseStr = EntityUtils.toString(response.getEntity());
-            if (statusCode == HttpStatus.SC_CREATED) {
+            // STATUS CODE OK OR CREATED
+            if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_CREATED) {
                 return responseStr;
             } else if (statusCode == HttpStatus.SC_UNAUTHORIZED) {
                 String errorMsg = "Invalid credentials used when invoking the AI service.";

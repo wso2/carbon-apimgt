@@ -29,6 +29,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -153,6 +154,8 @@ import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -3355,15 +3358,25 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
 
     @Override
-    public String invokeApiChatExecute(String apiChatRequestId, String requestPayload) throws APIManagementException {
+    public String invokeApiChatExecute(String apiChatRequestId, String apiType, String requestPayload) throws APIManagementException {
         ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getApiChatConfigurationDto();
-        if (configDto.isKeyProvided()) {
-            return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
-                    configDto.getExecuteResource(), requestPayload, apiChatRequestId);
+        try {
+            org.apache.http.client.utils.URIBuilder uriBuilder = new org.apache.http.client.utils.URIBuilder(configDto.getExecuteResource());
+            uriBuilder.addParameter("apiType", apiType);
+            String resourceWithQueryParam = uriBuilder.build().toString();
+            
+            if (configDto.isKeyProvided()) {
+                return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
+                        resourceWithQueryParam, requestPayload, apiChatRequestId);
+            }
+            return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
+                    resourceWithQueryParam, requestPayload, apiChatRequestId);
+        } catch (java.net.URISyntaxException e) {
+            String errorMessage = "Error constructing URI for API Chat execute resource: " + e.getMessage();
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         }
-        return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
-                configDto.getExecuteResource(), requestPayload, apiChatRequestId);
     }
 
     @Override
@@ -3371,23 +3384,38 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             throws APIManagementException {
         try {
             // Generate the payload for prepare call
+            String apiType = ApiMgtDAO.getInstance().getAPITypeFromUUID(apiId);
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode openAPIDefinitionJsonNode = objectMapper.readTree(getOpenAPIDefinition(apiId, organization));
             ObjectNode payload = objectMapper.createObjectNode();
-            payload.set(APIConstants.OPEN_API, openAPIDefinitionJsonNode);
 
+            if (APIConstants.APITransportType.GRAPHQL.name().equalsIgnoreCase(apiType)) {
+                String graphQLSchema = getGraphqlSchemaDefinition(apiId, organization);
+                payload.put(APIConstants.GRAPHQL_SCHEMA, graphQLSchema);
+            } else {
+                JsonNode openAPIDefinitionJsonNode = objectMapper.readTree(getOpenAPIDefinition(apiId, organization));
+                payload.set(APIConstants.OPEN_API, openAPIDefinitionJsonNode);
+            }
             ApiChatConfigurationDTO configDto = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                     .getAPIManagerConfiguration().getApiChatConfigurationDto();
+
+            org.apache.http.client.utils.URIBuilder uriBuilder = new org.apache.http.client.utils.URIBuilder(configDto.getPrepareResource());
+            uriBuilder.addParameter("apiType", apiType);
+            String resourceWithQueryParam = uriBuilder.build().toString();
+
             if (configDto.isKeyProvided()) {
                 return APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(), configDto.getKey(),
-                        configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
+                        resourceWithQueryParam, payload.toString(), apiChatRequestId);
             }
             return APIUtil.invokeAIService(configDto.getEndpoint(), null, configDto.getAccessToken(),
-                    configDto.getPrepareResource(), payload.toString(), apiChatRequestId);
+                    resourceWithQueryParam, payload.toString(), apiChatRequestId);
         } catch (JsonProcessingException e) {
             String error = "Error while parsing OpenAPI definition of API ID: " + apiId + " to JSON";
             log.error(error, e);
             throw new APIManagementException(error, e);
+        } catch (java.net.URISyntaxException e) {
+            String errorMessage = "Error constructing URI for API Chat prepare resource: " + e.getMessage();
+            log.error(errorMessage, e);
+            throw new APIManagementException(errorMessage, e);
         }
     }
 

@@ -6148,6 +6148,10 @@ components:
                       schema:
                         type: "string"
                         format: "string"
+        schemaDefinition:
+          type: string
+          description: GraphQL API schema definition
+          example: "schema {\n  query: Query\n}\n\n# The query type, represents all of the entry points into our object graph\ntype Query {\n  hero(id: ID!): Character\n  allHeroes: [Character]\n}\n\n# A character from the Star Wars universe\ntype Character {\n  # The unique identifier for the character\n  id: ID!\n\n  # The name of the character\n  name: String!\n\n  # The list of episodes the character appears in\n  appearsIn: [String]\n}"
         response:
           type: object
           properties:
@@ -6208,6 +6212,10 @@ components:
                       schema:
                         type: "string"
                         format: "string"
+        schemaDefinition:
+          type: string
+          description: Processed GraphQL API schema definition (for GraphQL APIs)
+          example: "schema { query: Query } type Query { hero(id: ID!): Character allHeroes: [Character] } type Character { id: ID! name: String! appearsIn: [String] }"
         taskStatus:
           type: string
           description: Task status (IN_PROGRESS, TERMINATED or COMPLETED)
