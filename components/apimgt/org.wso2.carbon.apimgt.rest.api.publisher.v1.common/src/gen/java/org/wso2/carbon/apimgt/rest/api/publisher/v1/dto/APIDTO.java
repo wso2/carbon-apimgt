@@ -76,7 +76,8 @@ public class APIDTO   {
         WEBSUB("WEBSUB"),
         SSE("SSE"),
         WEBHOOK("WEBHOOK"),
-        ASYNC("ASYNC");
+        ASYNC("ASYNC"),
+        MCP("MCP");
         private String value;
 
         TypeEnum (String v) {
@@ -648,7 +649,7 @@ return null;
   }
 
   /**
-   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC
+   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC, MCP
    **/
   public APIDTO type(TypeEnum type) {
     this.type = type;
@@ -656,7 +657,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC")
+  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC, MCP")
   @JsonProperty("type")
   public TypeEnum getType() {
     return type;

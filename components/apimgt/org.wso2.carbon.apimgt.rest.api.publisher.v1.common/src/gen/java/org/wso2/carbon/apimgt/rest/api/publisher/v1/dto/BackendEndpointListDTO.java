@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendEndpointDataDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendEndpointDTO;
 import javax.validation.constraints.*;
 
 
@@ -24,7 +24,7 @@ import javax.validation.Valid;
 public class BackendEndpointListDTO   {
   
     private Integer count = null;
-    private List<BackendEndpointDataDTO> list = new ArrayList<BackendEndpointDataDTO>();
+    private List<BackendEndpointDTO> list = new ArrayList<BackendEndpointDTO>();
 
   /**
    * Number of backends returned. 
@@ -46,7 +46,7 @@ public class BackendEndpointListDTO   {
 
   /**
    **/
-  public BackendEndpointListDTO list(List<BackendEndpointDataDTO> list) {
+  public BackendEndpointListDTO list(List<BackendEndpointDTO> list) {
     this.list = list;
     return this;
   }
@@ -55,10 +55,10 @@ public class BackendEndpointListDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("list")
-  public List<BackendEndpointDataDTO> getList() {
+  public List<BackendEndpointDTO> getList() {
     return list;
   }
-  public void setList(List<BackendEndpointDataDTO> list) {
+  public void setList(List<BackendEndpointDTO> list) {
     this.list = list;
   }
 

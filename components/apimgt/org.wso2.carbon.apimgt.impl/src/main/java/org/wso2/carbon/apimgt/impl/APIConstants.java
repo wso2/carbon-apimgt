@@ -2207,7 +2207,6 @@ public final class APIConstants {
             "C"};
     public static final String API_SUBTYPE_DEFAULT = "DEFAULT";
     public static final String API_SUBTYPE_AI_API = "AIAPI";
-    public static final String API_SUBTYPE_MCP = "MCP";
     public static final String API_PRODUCT_REVISION = "Current";
     public static class AdvancedThrottleConstants {
 
@@ -2452,6 +2451,7 @@ public final class APIConstants {
 
     public static final String API_TYPE_WEBSUB = "WEBSUB";
     public static final String API_TYPE_SSE = "SSE";
+    public static final String API_TYPE_MCP = "MCP";
 
     public static final String API_TYPE_SOAP = "SOAP";
     public static final String API_TYPE_SOAPTOREST = "SOAPTOREST";

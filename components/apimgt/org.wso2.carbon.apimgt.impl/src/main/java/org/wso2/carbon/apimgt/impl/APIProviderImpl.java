@@ -70,7 +70,7 @@ import org.wso2.carbon.apimgt.api.model.APISearchResult;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.BackendEndpointData;
+import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
@@ -622,8 +622,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         addLocalScopes(api.getId().getApiName(), api.getUriTemplates(), api.getOrganization());
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        if (api.getBackendEndpointData() != null) {
-            addBackendsForAPI(apiId, api.getBackendEndpointData());
+        if (api.getBackendEndpoints() != null) {
+            addBackendEndpoints(apiId, api.getBackendEndpoints());
         }
         addURITemplates(apiId, api, tenantId);
         addAPIPolicies(api, tenantDomain);
@@ -657,9 +657,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
-    private void addBackendsForAPI(int apiId, Set<BackendEndpointData> backendEndpointData)
+    private void addBackendEndpoints(int apiId, List<BackendEndpoint> backendEndpoints)
             throws APIManagementException {
-        apiMgtDAO.addBackendsForAPI(apiId, backendEndpointData);
+        apiMgtDAO.addBackendEndpoints(apiId, backendEndpoints);
     }
 
     /**
@@ -1038,6 +1038,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //get product resource mappings on API before updating the API. Update uri templates on api will remove all
         //product mappings as well.
         List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
+        if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
+            updateMCPTools(api, existingAPI.getId().getId());
+        }
         updateAPI(api, tenantId, userNameWithoutChange);
         updateProductResourceMappings(api, organization, productResources);
 
@@ -1259,6 +1262,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 oldLocalScopesItr.remove();
             }
         }
+        apiMgtDAO.removeBackendOperationMapping(oldURITemplates);
         validateAndUpdateURITemplates(api, tenantId);
         apiMgtDAO.updateURITemplates(api, tenantId);
         if (log.isDebugEnabled()) {
@@ -2841,8 +2845,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         deleteScopes(localScopeKeysToDelete, tenantId);
         if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
             apiMgtDAO.deleteAIConfiguration(api.getUuid());
-        } else if(APIConstants.API_SUBTYPE_MCP.equals(api.getSubtype())) {
-            apiMgtDAO.deleteBackendOperationMapping(uriTemplates);
+        }
+        if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
+            apiMgtDAO.removeBackendOperationMapping(uriTemplates);
         }
         apiMgtDAO.deleteAPI(api.getUuid());
         if (log.isDebugEnabled()) {
@@ -8361,6 +8366,44 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return apiMgtDAO.getApiThemes(organization, apiId);
     }
 
+
+    @Override
+    public BackendEndpoint getMCPServerEndpoint(String uuid, String backendId)
+            throws APIManagementException {
+
+        String currentApiUuid;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+        } else {
+            currentApiUuid = uuid;
+        }
+        int apiId = apiMgtDAO.getAPIID(currentApiUuid);
+        if (apiRevision != null) {
+            return apiMgtDAO.getBackendEndpointRevision(apiId, apiRevision.getRevisionUUID(), backendId);
+        } else {
+            return apiMgtDAO.getBackendEndpoint(apiId, backendId);
+        }
+    }
+
+    @Override
+    public List<BackendEndpoint> getMCPServerEndpoints(String uuid) throws APIManagementException {
+
+        String currentApiUuid;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+        } else {
+            currentApiUuid = uuid;
+        }
+        int apiId = apiMgtDAO.getAPIID(currentApiUuid);
+        if (apiRevision != null) {
+            return apiMgtDAO.getBackendEndpointRevisions(apiId, apiRevision.getRevisionUUID());
+        } else {
+            return apiMgtDAO.getBackendEndpoints(apiId);
+        }
+    }
+
     @Override
     public String addAPIEndpoint(String apiUUID, APIEndpointInfo apiEndpoint, String organization)
             throws APIManagementException {
@@ -8461,6 +8504,28 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String sandboxEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
                     APIConstants.APIEndpoint.SANDBOX, revisionUuid, organization);
             api.setPrimarySandboxEndpointId(sandboxEndpointId);
+        }
+    }
+
+    /**
+     * Updates the given API's URI templates by generating MCP tools based on its associated backend endpoints.
+     *
+     * @param api   the {@link API} object to be updated
+     * @param apiId the unique identifier of the API
+     * @throws APIManagementException if MCP tools cannot be generated or a database access error occurs
+     */
+    private void updateMCPTools(API api, int apiId) throws APIManagementException {
+
+        List<BackendEndpoint> backendEndpoints = apiMgtDAO.getBackendEndpoints(apiId);
+        if (!backendEndpoints.isEmpty()) {
+            APIDefinition parser = new OAS3Parser();
+            Set<URITemplate> mcpTools = parser.updateMCPTools(backendEndpoints.get(0),
+                    APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE
+                    , true, api.getUriTemplates());
+            if (mcpTools == null) {
+                throw new APIManagementException("Failed to generate MCP tools.");
+            }
+            api.setUriTemplates(mcpTools);
         }
     }
 

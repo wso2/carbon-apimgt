@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.api;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.BackendEndpointData;
+import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -270,6 +270,13 @@ public abstract class APIDefinition {
      */
     public abstract String getType();
 
-    public abstract Set<URITemplate> generateMCPTools(BackendEndpointData backendEndpointData,
-                                                 String mcpFeatureType, boolean isBackend);
+    public abstract Set<URITemplate> generateMCPTools(BackendEndpoint backendEndpoint,
+                                                      String mcpFeatureType,
+                                                      boolean isBackend,
+                                                      Set<URITemplate> uriTemplates);
+
+    public abstract Set<URITemplate> updateMCPTools(BackendEndpoint backendEndpoint,
+                                     String mcpFeatureType,
+                                     boolean isBackend,
+                                     Set<URITemplate> uriTemplates);
 }

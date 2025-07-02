@@ -18,7 +18,11 @@
 
 package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
-import org.wso2.carbon.apimgt.api.model.BackendEndpointData;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.ParseOptions;
+import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
+import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.apache.http.client.HttpClient;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -106,9 +110,11 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.constructEndpointConfigForService;
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.validateScopes;
@@ -702,20 +708,21 @@ public class ApisApiServiceImplUtils {
         SwaggerData swaggerData;
         String definitionToAdd = null;
 
-        if (APIConstants.API_SUBTYPE_MCP.equals(apiToAdd.getSubtype())) {
-            BackendEndpointData backendEndpointData =
-                    new BackendEndpointData(APIConstants.AI.MCP_DEFAULT_BACKEND_ENDPOINT_NAME);
-            backendEndpointData.setBackendDefinition(validationResponse.getJsonContent());
-            backendEndpointData.setEndpointConfig(apiToAdd.getEndpointConfig());
+        if (APIConstants.API_TYPE_MCP.equals(apiToAdd.getType())) {
+            BackendEndpoint backendEndpoint = new BackendEndpoint();
+            backendEndpoint.setBackendId(UUID.randomUUID().toString());
+            backendEndpoint.setBackendName(APIConstants.AI.MCP_DEFAULT_BACKEND_ENDPOINT_NAME);
+            backendEndpoint.setBackendApiDefinition(validationResponse.getJsonContent());
+            backendEndpoint.setEndpointConfig(apiToAdd.getEndpointConfig());
             apiToAdd.setEndpointConfig(null);
 
             swaggerData = new SwaggerData(apiToAdd);
             APIDefinition parser = new OAS3Parser();
             definitionToAdd = parser.generateAPIDefinition(swaggerData);
 
-            Set<URITemplate> uriTemplates = generateMCPFeatures(backendEndpointData);
+            Set<URITemplate> uriTemplates = generateMCPFeatures(backendEndpoint, apiToAdd.getUriTemplates());
             apiToAdd.setUriTemplates(uriTemplates);
-            apiToAdd.getBackendEndpointData().add(backendEndpointData);
+            apiToAdd.getBackendEndpoints().add(backendEndpoint);
         } else {
             definitionToAdd = validationResponse.getJsonContent();
             if (syncOperations) {
@@ -760,19 +767,35 @@ public class ApisApiServiceImplUtils {
         return addedAPI;
     }
 
-    public static Set<URITemplate> generateMCPFeatures(BackendEndpointData backendEndpoint)
+    public static Set<URITemplate> generateMCPFeatures(BackendEndpoint backendEndpoint, Set<URITemplate> uriTemplates)
             throws APIManagementException {
 
-        if (StringUtils.isEmpty(backendEndpoint.getEndpointConfig())) {
+        if (backendEndpoint.getEndpointConfig() == null || backendEndpoint.getEndpointConfig().isEmpty()) {
             throw new APIManagementException("Backend operation mapping is not available.",
                     ExceptionCodes.BACKEND_OPERATION_MAPPING_NOT_FOUND);
         }
         APIDefinition parser = new OAS3Parser();
-        Set<URITemplate> mcpTools = parser.generateMCPTools(backendEndpoint, APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE, true);
+        Set<URITemplate> mcpTools = parser.generateMCPTools(backendEndpoint, APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE
+                , true, uriTemplates);
         if (mcpTools == null) {
             throw new APIManagementException("Failed to generate MCP feature.");
         }
         return mcpTools;
+    }
+
+    /**
+     * Get resolved  OpenAPI object
+     *
+     * @param oasDefinition OAS definition
+     * @return resolved OpenAPI
+     */
+    static OpenAPI getFullResolvedOpenAPI(String oasDefinition) {
+
+        ParseOptions options = new ParseOptions();
+        options.setResolve(true);
+        options.setResolveFully(true);
+        options.setFlatten(true);
+        return new OpenAPIV3Parser().readContents(oasDefinition, null, options).getOpenAPI();
     }
 
     /**

@@ -50,6 +50,7 @@ import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendThrottlingConfiguration;
@@ -108,6 +109,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendEndpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendOperationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendOperationMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
@@ -1375,7 +1377,7 @@ public class APIMappingUtil {
             } else {
                 apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getUuid(), tenantDomain);
             }
-            if (APIConstants.API_SUBTYPE_MCP.equals(model.getSubtype())) {
+            if (APIConstants.API_TYPE_MCP.equals(model.getType())) {
                 apiOperationsDTO = getOperationsFromAPI(model);
             } else {
                 // We will fetch operations from the swagger definition and not from the AM_API_URL_MAPPING table:
@@ -1972,7 +1974,7 @@ public class APIMappingUtil {
                 }
                 if (operation.getBackendOperationMapping() != null) {
                     template.setBackendOperationMapping(OperationPolicyMappingUtil
-                            .fromDTOToAPIBackendOperationMapping(operation.getBackendOperationMapping()));
+                            .fromDTOToBackendOperationMapping(operation.getBackendOperationMapping()));
                 }
                 uriTemplates.add(template);
             } else {
@@ -2014,7 +2016,7 @@ public class APIMappingUtil {
                         APIConstants.API_TYPE_SSE.equals(model.getType())) {
                     handleException("Topic '" + uriTempVal + "' has global parameters without " +
                             "Operation Type");
-                } else if (APIConstants.API_SUBTYPE_MCP.equals(model.getSubtype())) {
+                } else if (APIConstants.API_TYPE_MCP.equals(model.getType())) {
                     handleException("Tool '" + uriTempVal + "' has global parameters without " +
                             "Operation Type");
                 } else {
@@ -2236,6 +2238,14 @@ public class APIMappingUtil {
                 infoDTO.setContext(modelInfo.getContext());
                 infoDTO.setDescription(modelInfo.getDescription());
                 infoDTO.setEndpoints(modelInfo.getEndpoints());
+                List<APIOperationsDTO> apiOperationsDTO = new ArrayList<>();
+                for (URITemplate uriTemplate : modelInfo.getUriTemplates()) {
+                    APIOperationsDTO apiOperations = new APIOperationsDTO();
+                    apiOperations.setVerb(uriTemplate.getHTTPVerb());
+                    apiOperations.setTarget(uriTemplate.getUriTemplate());
+                    apiOperationsDTO.add(apiOperations);
+                }
+                infoDTO.setOperations(apiOperationsDTO);
                 responseDTO.setInfo(infoDTO);
             }
             if (returnContent) {
@@ -3691,6 +3701,20 @@ public class APIMappingUtil {
         apiEndpointDTO.setEndpointConfig(endpointConfig);
 
         return apiEndpointDTO;
+    }
+
+    public static BackendEndpointDTO fromBackendEndpointToDTO(BackendEndpoint endpoint, boolean preserveCredentials) {
+
+        BackendEndpointDTO backendEndpointDTO = new BackendEndpointDTO();
+
+        if (endpoint != null) {
+            backendEndpointDTO.setId(endpoint.getBackendId());
+            backendEndpointDTO.setName(endpoint.getBackendName());
+            backendEndpointDTO.setEndpointConfig(endpoint.getEndpointConfig());
+            backendEndpointDTO.setApiDefinition(endpoint.getBackendApiDefinition());
+        }
+
+        return backendEndpointDTO;
     }
 
     public static APIEndpointInfo fromDTOtoAPIEndpoint(APIEndpointDTO apiEndpointDTO, String organization)
