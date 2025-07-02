@@ -410,6 +410,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                     APIProduct apiProduct = DatabasePersistenceUtil.jsonToApiProduct(jsonObject);
                     PublisherAPIProduct publisherAPIProduct = APIProductMapper.INSTANCE.toPublisherApiProduct(apiProduct);
                     publisherAPI = DatabasePersistenceUtil.convertToPublisherAPI(publisherAPIProduct);
+                    publisherAPI.setApiName(apiProduct.getId().getName());
                 } else {
                     // Map to API
                     API api = DatabasePersistenceUtil.jsonToApi(jsonObject);
@@ -684,15 +685,11 @@ public class DatabasePersistenceImpl implements APIPersistence {
                 JsonObject jsonObject = JsonParser.parseString(result.getMetadata()).getAsJsonObject();
                 String contentType = result.getType();
 
-                if (contentType == null || contentType.isEmpty()) {
-                    contentType = "API";
+                if (contentType.equals(APIConstants.API_PRODUCT_DB_NAME)) {
+                    contentType = APIConstants.API_PRODUCT;
                 }
 
-                if (contentType.equals("API_PRODUCT")) {
-                    contentType = "APIProduct";
-                }
-
-                if (contentType.equals("DOCUMENTATION")) {
+                if (contentType.equals(APIConstants.DOCUMENTATION_DB_NAME)) {
                     // Handle documentation content
                     DocumentSearchContent docContent = new DocumentSearchContent();
                     Documentation doc = DatabasePersistenceUtil.jsonToDocument(jsonObject);
@@ -711,7 +708,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                         docContent.setName(doc.getName());
                         contentData.add(docContent);
                     }
-                } else if (contentType.equals("API_DEFINITION") || contentType.equals("ASYNC_API_DEFINITION") || contentType.equals("GRAPHQL_SCHEMA") || contentType.equals("WSDL")) {
+                } else if (contentType.equals(APIConstants.API_DEFINITION_DB_NAME) || contentType.equals(APIConstants.ASYNC_API_DEFINITION_DB_NAME) || contentType.equals(APIConstants.GRAPHQL_SCHEMA_DB_NAME) || contentType.equals(APIConstants.WSDL_DB_NAME)) {
                     // Handle API definition content
                     APIDefSearchContent defContent = new APIDefSearchContent();
                     String apiId = result.getApiId();
@@ -723,16 +720,16 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
                         defContent.setId(pubAPI.getId());
                         switch (contentType) {
-                            case "API_DEFINITION":
+                            case APIConstants.API_DEFINITION_DB_NAME:
                                 defContent.setName(pubAPI.getApiName() + " swagger");
                                 break;
-                            case "ASYNC_API_DEFINITION":
+                            case APIConstants.ASYNC_API_DEFINITION_DB_NAME:
                                 defContent.setName(pubAPI.getApiName() + " async");
                                 break;
-                            case "GRAPHQL_SCHEMA":
+                            case APIConstants.GRAPHQL_SCHEMA_DB_NAME:
                                 defContent.setName(pubAPI.getApiName() + " graphql");
                                 break;
-                            case "WSDL":
+                            case APIConstants.WSDL_DB_NAME:
                                 defContent.setName(pubAPI.getApiName() + " wsdl");
                                 break;
                         }
@@ -745,7 +742,27 @@ public class DatabasePersistenceImpl implements APIPersistence {
                         defContent.setAssociatedType(associatedType);
                         contentData.add(defContent);
                     }
-                } else {
+                } else if (contentType.equals(APIConstants.API_PRODUCT)) {
+                    // Handle API Product content
+                    PublisherAPIProduct pubAPIProduct = DatabasePersistenceUtil.getAPIProductForSearch(jsonObject);
+                    PublisherSearchContent content = new PublisherSearchContent();
+                    content.setContext(pubAPIProduct.getContext());
+                    content.setDescription(pubAPIProduct.getDescription());
+                    content.setId(pubAPIProduct.getId());
+                    content.setName(pubAPIProduct.getApiProductName());
+                    content.setProvider(DatabasePersistenceUtil.replaceEmailDomainBack(pubAPIProduct.getProviderName()));
+                    content.setType(contentType);
+                    content.setVersion(pubAPIProduct.getVersion());
+                    content.setStatus(pubAPIProduct.getState());
+                    content.setThumbnailUri(pubAPIProduct.getThumbnail());
+                    content.setBusinessOwner(pubAPIProduct.getBusinessOwner());
+                    content.setBusinessOwnerEmail(pubAPIProduct.getBusinessOwnerEmail());
+                    content.setTechnicalOwner(pubAPIProduct.getTechnicalOwner());
+                    content.setTechnicalOwnerEmail(pubAPIProduct.getTechnicalOwnerEmail());
+                    content.setMonetizationStatus(pubAPIProduct.getMonetizationStatus());
+                    contentData.add(content);
+                }
+                else {
                     // Handle API content
                     PublisherAPI pubAPI = DatabasePersistenceUtil.getAPIForSearch(jsonObject);
                     PublisherSearchContent content = new PublisherSearchContent();

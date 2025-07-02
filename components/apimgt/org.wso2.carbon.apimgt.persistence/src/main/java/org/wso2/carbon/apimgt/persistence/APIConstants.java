@@ -421,6 +421,7 @@ public final class APIConstants {
     public static final String THUMBNAIL_DB_NAME = "THUMBNAIL";
     public static final String GRAPHQL_SCHEMA_DB_NAME = "GRAPHQL_SCHEMA";
     public static final String ASYNC_API_DEFINITION_DB_NAME = "ASYNC_API_DEFINITION";
+    public static final String WSDL_DB_NAME = "WSDL";
 
     public static final String ADMIN_ROLE = "admin";
     public static final String CHAR_COLON = ":";

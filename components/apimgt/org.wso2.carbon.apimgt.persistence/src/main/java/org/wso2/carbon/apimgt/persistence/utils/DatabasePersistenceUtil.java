@@ -270,7 +270,7 @@ public class DatabasePersistenceUtil {
       try {
           api.setContext(safeGetAsString(json, "context"));
           api.setDescription(safeGetAsString(json, "description"));
-          api.setId(safeGetAsString(json.get("id").getAsJsonObject(), "uuid"));
+          api.setId(safeGetAsString(json, "uuid"));
           api.setStatus(safeGetAsString(json, "status"));
           api.setApiName(safeGetAsString(json.get("id").getAsJsonObject(), "apiName"));
           api.setProviderName(safeGetAsString(json.get("id").getAsJsonObject(), "providerName"));
@@ -287,6 +287,30 @@ public class DatabasePersistenceUtil {
       }
 
       return api;
+    }
+
+    public static PublisherAPIProduct getAPIProductForSearch(JsonObject json) {
+        PublisherAPIProduct apiProduct = new PublisherAPIProduct();
+
+        try {
+            apiProduct.setContext(safeGetAsString(json, "context"));
+            apiProduct.setDescription(safeGetAsString(json, "description"));
+            apiProduct.setId(safeGetAsString(json, "uuid"));
+            apiProduct.setState(safeGetAsString(json, "state"));
+            apiProduct.setApiProductName(safeGetAsString(json.get("id").getAsJsonObject(), "apiProductName"));
+            apiProduct.setProviderName(safeGetAsString(json.get("id").getAsJsonObject(), "providerName"));
+            apiProduct.setVersion(safeGetAsString(json.get("id").getAsJsonObject(), "version"));
+            apiProduct.setThumbnail(safeGetAsString(json, "thumbnailUrl"));
+            apiProduct.setBusinessOwner(safeGetAsString(json, "businessOwner"));
+            apiProduct.setBusinessOwnerEmail(safeGetAsString(json, "businessOwnerEmail"));
+            apiProduct.setTechnicalOwner(safeGetAsString(json, "technicalOwner"));
+            apiProduct.setTechnicalOwnerEmail(safeGetAsString(json, "technicalOwnerEmail"));
+            apiProduct.setMonetizationStatus(getAsBoolean(safeGetAsString(json, "isMonetizationEnabled")));
+        } catch (Exception e) {
+            throw new RuntimeException("Error while converting JSON to PublisherAPIProduct object", e);
+        }
+
+        return apiProduct;
     }
 
     public static org.wso2.carbon.apimgt.persistence.dto.Documentation jsonToDocument(JsonObject json) {
