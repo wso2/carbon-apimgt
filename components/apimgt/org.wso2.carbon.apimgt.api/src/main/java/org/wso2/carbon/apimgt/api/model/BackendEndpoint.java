@@ -14,32 +14,17 @@
  *  limitations under the License.
  *
  */
-
 package org.wso2.carbon.apimgt.api.model;
 
 import java.io.Serializable;
 import java.util.Set;
-import java.util.UUID;
 
-public class BackendEndpointData implements Serializable {
+public class BackendEndpoint implements Serializable {
 
     private String backendId;
-    private String backendDefinition;
+    private String backendApiDefinition;
     private String endpointConfig;
     private String backendName;
-    private Set<BackendOperation> backendOperation;
-
-    public BackendEndpointData(String backendId, String backendName) {
-        this.backendId = backendId;
-        this.backendName = backendName;
-    }
-
-    public BackendEndpointData(String backendName) {
-        this.backendId = UUID.randomUUID().toString();
-        this.backendName = backendName;
-    }
-
-    public BackendEndpointData() {}
 
     public String getBackendId() {
 
@@ -51,14 +36,14 @@ public class BackendEndpointData implements Serializable {
         this.backendId = backendId;
     }
 
-    public String getBackendDefinition() {
+    public String getBackendApiDefinition() {
 
-        return backendDefinition;
+        return backendApiDefinition;
     }
 
-    public void setBackendDefinition(String backendDefinition) {
+    public void setBackendApiDefinition(String backendApiDefinition) {
 
-        this.backendDefinition = backendDefinition;
+        this.backendApiDefinition = backendApiDefinition;
     }
 
     public String getEndpointConfig() {
@@ -80,15 +65,5 @@ public class BackendEndpointData implements Serializable {
     public void setBackendName(String backendName) {
 
         this.backendName = backendName;
-    }
-
-    public Set<BackendOperation> getBackendOperation() {
-
-        return backendOperation;
-    }
-
-    public void setBackendOperation(Set<BackendOperation> backendOperation) {
-
-        this.backendOperation = backendOperation;
     }
 }

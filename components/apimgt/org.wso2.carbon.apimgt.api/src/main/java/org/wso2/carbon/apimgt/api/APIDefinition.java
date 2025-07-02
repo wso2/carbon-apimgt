@@ -20,7 +20,7 @@ package org.wso2.carbon.apimgt.api;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.BackendEndpointData;
+import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -270,6 +270,31 @@ public abstract class APIDefinition {
      */
     public abstract String getType();
 
-    public abstract Set<URITemplate> generateMCPTools(BackendEndpointData backendEndpointData,
-                                                 String mcpFeatureType, boolean isBackend);
+    /**
+     * Generates MCP tool URITemplates by matching operations in the backend API definition.
+     *
+     * @param backendEndpoint backend definition and config
+     * @param mcpFeatureType  MCP feature type to assign
+     * @param isBackend       whether tools are for backend
+     * @param uriTemplates    existing URI templates to match
+     * @return set of generated MCP tool URITemplates
+     */
+    public abstract Set<URITemplate> generateMCPTools(BackendEndpoint backendEndpoint,
+                                                      String mcpFeatureType,
+                                                      boolean isBackend,
+                                                      Set<URITemplate> uriTemplates);
+
+    /**
+     * Updates MCP URITemplates based on the backend API definition.
+     *
+     * @param backendEndpoint backend API definition and config
+     * @param mcpFeatureType  MCP feature type to filter updates
+     * @param isBackend       whether tools are for backend
+     * @param uriTemplates    URI templates to update
+     * @return updated set of MCP URITemplates
+     */
+    public abstract Set<URITemplate> updateMCPTools(BackendEndpoint backendEndpoint,
+                                                    String mcpFeatureType,
+                                                    boolean isBackend,
+                                                    Set<URITemplate> uriTemplates);
 }

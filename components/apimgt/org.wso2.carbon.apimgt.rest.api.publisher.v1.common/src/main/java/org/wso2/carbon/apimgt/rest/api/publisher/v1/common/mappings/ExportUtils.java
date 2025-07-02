@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
+import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -72,6 +73,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendEndpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
@@ -223,7 +225,7 @@ public class ExportUtils {
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
         addOperationPoliciesToArchive(archivePath, tenantDomain, exportFormat, apiProvider,
                 api, currentApiUuid);
-        addAPIEndpointsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider, organization,
+        addAPIEndpointsToArchive(archivePath, api, exportFormat, apiProvider, organization,
                 preserveCredentials);
 
         if (api != null && !StringUtils.isEmpty(api.getEndpointConfig())) {
@@ -849,38 +851,72 @@ public class ExportUtils {
     }
 
     /**
-     * Add endpoint related information to the archive
+     * Adds API endpoint definitions to the export archive for the given API.
+     * Depending on the API type, retrieves either MCP server endpoints or standard API endpoints,
+     * maps them to DTOs, and writes the endpoint definitions into the archive as JSON.
      *
-     * @param archivePath         path to save API Endpoints
-     * @param apiID               Unique Identifier of API
-     * @param exportFormat        Format of export
-     * @param apiProvider         API provider
-     * @param organization        Organization identifier
-     * @param preserveCredentials Preserve credentials
-     * @throws APIManagementException If an error occurs while adding API endpoints to the archive
+     * @param archivePath         the file system path where the archive is being created
+     * @param api                 the {@link API} object whose endpoints should be exported
+     * @param exportFormat        the {@link ExportFormat} specifying how data should be written
+     * @param apiProvider         the {@link APIProvider} used to retrieve endpoint information
+     * @param organization        the organization context for the API retrieval
+     * @param preserveCredentials whether sensitive credentials should be retained in the exported data
+     * @throws APIManagementException if an error occurs while retrieving or writing endpoint data
      */
-    public static void addAPIEndpointsToArchive(String archivePath, String apiID, ExportFormat exportFormat,
-            APIProvider apiProvider, String organization, boolean preserveCredentials) throws APIManagementException {
-        try {
-            List<APIEndpointInfo> apiEndpointList = apiProvider.getAllAPIEndpointsByUUID(apiID, organization);
-            List<APIEndpointDTO> apiEndpointDTOList = new ArrayList<>();
-            for (APIEndpointInfo apiEndpointInfo : apiEndpointList) {
-                apiEndpointDTOList.add(
-                        APIMappingUtil.fromAPIEndpointToDTO(apiEndpointInfo, organization, preserveCredentials));
-            }
+    public static void addAPIEndpointsToArchive(String archivePath, API api, ExportFormat exportFormat,
+                                                APIProvider apiProvider, String organization,
+                                                boolean preserveCredentials) throws APIManagementException {
 
-            if (!apiEndpointDTOList.isEmpty()) {
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                JsonElement apiEndpointsObj = gson.toJsonTree(apiEndpointDTOList);
-                JsonArray apiEndpointsJson = (JsonArray) apiEndpointsObj;
-                CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_ENDPOINTS_FILE_LOCATION,
-                        exportFormat, ImportExportConstants.API_ENDPOINTS_TYPE, apiEndpointsJson);
+        String apiUuid = api.getUuid();
+        try {
+            if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
+                List<BackendEndpoint> backendEndpoints = apiProvider.getMCPServerEndpoints(apiUuid);
+                List<BackendEndpointDTO> backendEndpointDTOList = new ArrayList<>();
+                for (BackendEndpoint backendEndpoint : backendEndpoints) {
+                    backendEndpointDTOList.add(
+                            APIMappingUtil.fromBackendEndpointToDTO(backendEndpoint, organization,
+                                    preserveCredentials));
+                }
+                writeEndpointDTOsToFile(backendEndpointDTOList, archivePath, exportFormat);
+            } else {
+                List<APIEndpointInfo> apiEndpointList = apiProvider.getAllAPIEndpointsByUUID(apiUuid, organization);
+                List<APIEndpointDTO> apiEndpointDTOList = new ArrayList<>();
+                for (APIEndpointInfo apiEndpointInfo : apiEndpointList) {
+                    apiEndpointDTOList.add(
+                            APIMappingUtil.fromAPIEndpointToDTO(apiEndpointInfo, organization, preserveCredentials));
+                }
+                writeEndpointDTOsToFile(apiEndpointDTOList, archivePath, exportFormat);
             }
         } catch (APIImportExportException e) {
-            throw new APIManagementException("Error while adding operation endpoints details for API: " + apiID, e);
+            throw new APIManagementException("Error while adding operation endpoints details for API: " + apiUuid, e);
         } catch (IOException e) {
             throw new APIManagementException(
-                    "Error while saving deployment operation endpoints details for API: " + apiID + " as File", e);
+                    "Error while saving deployment operation endpoints details for API: " + apiUuid + " as File", e);
+        }
+    }
+
+    /**
+     * Writes a list of API endpoint DTOs as JSON into the archive file.
+     * Serializes the provided DTO list into a JSON array and saves it to the specified archive location.
+     *
+     * @param dtoList      the list of DTOs to serialize and write
+     * @param archivePath  the base path where the archive is located
+     * @param exportFormat the format used for export (e.g., YAML or JSON)
+     * @throws APIImportExportException if an error occurs during serialization or file writing
+     * @throws IOException              if an I/O error occurs while writing the file
+     */
+    private static void writeEndpointDTOsToFile(List<?> dtoList, String archivePath, ExportFormat exportFormat)
+            throws APIImportExportException, IOException {
+
+        if (!dtoList.isEmpty()) {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonElement jsonElement = gson.toJsonTree(dtoList);
+            JsonArray jsonArray = (JsonArray) jsonElement;
+            CommonUtil.writeDtoToFile(
+                    archivePath + ImportExportConstants.API_ENDPOINTS_FILE_LOCATION,
+                    exportFormat,
+                    ImportExportConstants.API_ENDPOINTS_TYPE,
+                    jsonArray);
         }
     }
 

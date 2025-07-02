@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import io.apicurio.datamodels.Library;
@@ -50,6 +51,7 @@ import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendThrottlingConfiguration;
@@ -108,6 +110,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AsyncAPISpecificationValidationResponseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendEndpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendOperationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendOperationMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
@@ -1375,7 +1378,7 @@ public class APIMappingUtil {
             } else {
                 apiSwaggerDefinition = apiProvider.getOpenAPIDefinition(model.getUuid(), tenantDomain);
             }
-            if (APIConstants.API_SUBTYPE_MCP.equals(model.getSubtype())) {
+            if (APIConstants.API_TYPE_MCP.equals(model.getType())) {
                 apiOperationsDTO = getOperationsFromAPI(model);
             } else {
                 // We will fetch operations from the swagger definition and not from the AM_API_URL_MAPPING table:
@@ -1972,7 +1975,7 @@ public class APIMappingUtil {
                 }
                 if (operation.getBackendOperationMapping() != null) {
                     template.setBackendOperationMapping(OperationPolicyMappingUtil
-                            .fromDTOToAPIBackendOperationMapping(operation.getBackendOperationMapping()));
+                            .fromDTOToBackendOperationMapping(operation.getBackendOperationMapping()));
                 }
                 uriTemplates.add(template);
             } else {
@@ -2014,7 +2017,7 @@ public class APIMappingUtil {
                         APIConstants.API_TYPE_SSE.equals(model.getType())) {
                     handleException("Topic '" + uriTempVal + "' has global parameters without " +
                             "Operation Type");
-                } else if (APIConstants.API_SUBTYPE_MCP.equals(model.getSubtype())) {
+                } else if (APIConstants.API_TYPE_MCP.equals(model.getType())) {
                     handleException("Tool '" + uriTempVal + "' has global parameters without " +
                             "Operation Type");
                 } else {
@@ -2236,6 +2239,14 @@ public class APIMappingUtil {
                 infoDTO.setContext(modelInfo.getContext());
                 infoDTO.setDescription(modelInfo.getDescription());
                 infoDTO.setEndpoints(modelInfo.getEndpoints());
+                List<APIOperationsDTO> apiOperationsDTO = new ArrayList<>();
+                for (URITemplate uriTemplate : modelInfo.getUriTemplates()) {
+                    APIOperationsDTO apiOperations = new APIOperationsDTO();
+                    apiOperations.setVerb(uriTemplate.getHTTPVerb());
+                    apiOperations.setTarget(uriTemplate.getUriTemplate());
+                    apiOperationsDTO.add(apiOperations);
+                }
+                infoDTO.setOperations(apiOperationsDTO);
                 responseDTO.setInfo(infoDTO);
             }
             if (returnContent) {
@@ -3472,36 +3483,75 @@ public class APIMappingUtil {
         return endpointSecurityElement;
     }
 
+    /**
+     * Decrypts sensitive information in the endpoint security configuration,
+     * including client secrets and custom OAuth parameters for sandbox and production endpoints.
+     *
+     * @param endpointSecurity JSONObject representing the endpoint security configuration.
+     * @return JSONObject with decrypted values where applicable.
+     */
     private static JSONObject handleEndpointSecurityDecrypt(JSONObject endpointSecurity) {
+
         JSONObject endpointSecurityElement = new JSONObject();
         endpointSecurityElement.putAll(endpointSecurity);
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+
         try {
-            if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
-                JSONObject sandboxEndpointSecurity = new JSONObject(
-                        (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_SANDBOX));
-                String apiKeyValue = (String) sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
-                if (StringUtils.isNotEmpty(apiKeyValue)) {
-                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
-                            new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
-                }
-                endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, sandboxEndpointSecurity);
-            }
-            if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
-                JSONObject productionEndpointSecurity = new JSONObject(
-                        (Map) endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION));
-                String apiKeyValue = (String) productionEndpointSecurity.get(
-                        APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
-                if (StringUtils.isNotEmpty(apiKeyValue)) {
-                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
-                            new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
-                }
-                endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
-            }
+            decryptSecurity(
+                    endpointSecurityElement,
+                    APIConstants.ENDPOINT_SECURITY_SANDBOX,
+                    cryptoUtil
+            );
+
+            decryptSecurity(
+                    endpointSecurityElement,
+                    APIConstants.ENDPOINT_SECURITY_PRODUCTION,
+                    cryptoUtil
+            );
         } catch (CryptoException e) {
-            log.error("Error while decrypting client credentials", e);
+            log.error("Error while decrypting client credentials in endpoint security configuration.", e);
+        } catch (ParseException e) {
+            log.error("Error while parsing custom OAuth parameters in endpoint security configuration.", e);
         }
         return endpointSecurityElement;
+    }
+
+    /**
+     * Decrypts sensitive fields in a specific endpoint security section (sandbox or production).
+     *
+     * @param endpointSecurityElement The main endpoint security JSON object.
+     * @param sectionKey              Either 'sandbox' or 'production'.
+     * @param cryptoUtil              Utility for cryptographic operations.
+     * @throws CryptoException if decryption fails.
+     * @throws ParseException  if custom parameters cannot be parsed.
+     */
+    private static void decryptSecurity(JSONObject endpointSecurityElement,
+                                        String sectionKey,
+                                        CryptoUtil cryptoUtil) throws CryptoException, ParseException {
+
+        Object sectionObj = endpointSecurityElement.get(sectionKey);
+        if (sectionObj instanceof Map) {
+            @SuppressWarnings("unchecked")
+            JSONObject deploymentStage = new JSONObject((Map<String, Object>) sectionObj);
+            String apiKeyValue = (String) deploymentStage.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE);
+            if (StringUtils.isNotEmpty(apiKeyValue)) {
+                deploymentStage.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
+                        new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
+            }
+            String clientSecret = (String) deploymentStage.get(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET);
+            if (StringUtils.isNotEmpty(clientSecret)) {
+                deploymentStage.put(APIConstants.OAuthConstants.OAUTH_CLIENT_SECRET,
+                        new String(cryptoUtil.base64DecodeAndDecrypt(clientSecret)));
+            }
+            String customParamsStr = (String) deploymentStage.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
+            if (StringUtils.isNotEmpty(customParamsStr) && !"{}".equals(customParamsStr)) {
+                JSONParser parser = new JSONParser();
+                JSONObject customParams = (JSONObject) parser.parse(customParamsStr);
+                decryptCustomOauthParameters(customParams, cryptoUtil);
+                deploymentStage.put(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS, customParams);
+            }
+            endpointSecurityElement.put(sectionKey, deploymentStage);
+        }
     }
 
     /**
@@ -3691,6 +3741,61 @@ public class APIMappingUtil {
         apiEndpointDTO.setEndpointConfig(endpointConfig);
 
         return apiEndpointDTO;
+    }
+
+    /**
+     * Converts a {@link BackendEndpoint} entity to a {@link BackendEndpointDTO}, updating
+     * its endpoint security details as needed.
+     *
+     * @param endpoint            the {@link BackendEndpoint} entity
+     * @param organization        the organization identifier
+     * @param preserveCredentials whether to keep sensitive credentials in the config
+     * @return a {@link BackendEndpointDTO} representing the backend endpoint
+     * @throws APIManagementException if JSON processing or security handling fails
+     */
+    public static BackendEndpointDTO fromBackendEndpointToDTO(BackendEndpoint endpoint,
+                                                              String organization,
+                                                              boolean preserveCredentials)
+            throws APIManagementException {
+
+        BackendEndpointDTO dto = new BackendEndpointDTO();
+        if (endpoint == null) {
+            return dto;
+        }
+        dto.setId(endpoint.getBackendId());
+        dto.setName(endpoint.getBackendName());
+        String endpointConfigJson = endpoint.getEndpointConfig();
+        if (endpointConfigJson != null && !endpointConfigJson.isEmpty()) {
+            try {
+                ObjectMapper mapper = new ObjectMapper();
+                Map<String, Object> endpointConfigMap = mapper.readValue(
+                        endpointConfigJson, new TypeReference<Map<String, Object>>() {
+                        });
+                Object securityObj = endpointConfigMap.get(APIConstants.ENDPOINT_SECURITY);
+                if (securityObj != null) {
+                    Map<String, Object> securityMap = (Map<String, Object>) securityObj;
+                    if (securityMap instanceof Map) {
+                        JSONObject endpointSecurityJson = new JSONObject(securityMap);
+                        if (endpointSecurityJson != null && !endpointSecurityJson.isEmpty()) {
+                            endpointSecurityJson = handleEndpointSecurity(endpointSecurityJson,
+                                    organization, preserveCredentials);
+                            if (preserveCredentials) {
+                                endpointSecurityJson = handleEndpointSecurityDecrypt(endpointSecurityJson);
+                            }
+                            endpointConfigMap.put(APIConstants.ENDPOINT_SECURITY, endpointSecurityJson);
+                        }
+                    }
+                }
+                String updatedConfigJson = mapper.writeValueAsString(endpointConfigMap);
+                dto.setEndpointConfig(updatedConfigJson);
+            } catch (JsonProcessingException e) {
+                String msg = "Error while processing endpoint configuration JSON.";
+                handleException(msg, e);
+            }
+        }
+
+        dto.setApiDefinition(endpoint.getBackendApiDefinition());
+        return dto;
     }
 
     public static APIEndpointInfo fromDTOtoAPIEndpoint(APIEndpointDTO apiEndpointDTO, String organization)

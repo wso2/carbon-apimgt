@@ -53,6 +53,7 @@ public final class APISpecParserConstants {
     public static final String GATEWAY_ENV_TYPE_SANDBOX = "sandbox";
     public static final String ENABLED = "Enabled";
     public static final String GRAPHQL_API = "GRAPHQL";
+    public static final String MCP_API = "MCP";
     public static final String HTTP_VERB_PUBLISH = "PUBLISH";
     public static final String HTTP_VERB_SUBSCRIBE = "SUBSCRIBE";
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
@@ -139,6 +140,7 @@ public final class APISpecParserConstants {
     public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
     public static final String TYPE = "type";
     public static final String HTTP_POST = "POST";
+    public static final String HTTP_GET = "GET";
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
     public static final String HTTP_TRANSPORT_PROTOCOL_NAME = "http";
     public static final String WS_TRANSPORT_PROTOCOL_NAME = "ws";
@@ -179,6 +181,8 @@ public final class APISpecParserConstants {
     public static final Set<String> SUPPORTED_METHODS =
             Collections.unmodifiableSet(new HashSet<String>(
                     Arrays.asList(new String[]{"get", "put", "post", "delete", "patch", "head", "options"})));
+    public static final String MCP_RESOURCES_MCP = "/mcp";
+    public static final String MCP_RESOURCES_WELL_KNOWN = "/.well-known/oauth-authorization-server";
 
     public static class OperationParameter {
         public static final String PAYLOAD_PARAM_NAME = "Payload";

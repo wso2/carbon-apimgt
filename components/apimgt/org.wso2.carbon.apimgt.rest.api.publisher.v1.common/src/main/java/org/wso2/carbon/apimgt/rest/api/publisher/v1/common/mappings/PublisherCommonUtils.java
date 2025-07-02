@@ -719,7 +719,7 @@ public class PublisherCommonUtils {
         //preserve monetization status in the update flow
         //apiProvider.configureMonetizationInAPIArtifact(originalAPI); ////////////TODO /////////REG call
 
-        if (!APIConstants.API_SUBTYPE_MCP.equals(originalAPI.getSubtype())) {
+        if (!APIConstants.API_TYPE_MCP.equals(originalAPI.getType())) {
             if (!isAsyncAPI) {
                 String oldDefinition = apiProvider
                         .getOpenAPIDefinition(apiToUpdate.getUuid(), originalAPI.getOrganization());

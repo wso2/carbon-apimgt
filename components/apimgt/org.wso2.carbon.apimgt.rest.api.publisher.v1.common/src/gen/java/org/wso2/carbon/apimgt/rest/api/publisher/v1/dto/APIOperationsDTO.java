@@ -6,9 +6,9 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendOperationMappingDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationProxyMappingDTO;
 import javax.validation.constraints.*;
 
 
@@ -41,7 +41,7 @@ public class APIOperationsDTO   {
     private String description = null;
     private APIOperationPoliciesDTO operationPolicies = null;
     private BackendOperationMappingDTO backendOperationMapping = null;
-    private OperationProxyMappingDTO operationProxyMapping = null;
+    private APIOperationMappingDTO operationProxyMapping = null;
 
   /**
    **/
@@ -319,7 +319,7 @@ public class APIOperationsDTO   {
 
   /**
    **/
-  public APIOperationsDTO operationProxyMapping(OperationProxyMappingDTO operationProxyMapping) {
+  public APIOperationsDTO operationProxyMapping(APIOperationMappingDTO operationProxyMapping) {
     this.operationProxyMapping = operationProxyMapping;
     return this;
   }
@@ -328,10 +328,10 @@ public class APIOperationsDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("operationProxyMapping")
-  public OperationProxyMappingDTO getOperationProxyMapping() {
+  public APIOperationMappingDTO getOperationProxyMapping() {
     return operationProxyMapping;
   }
-  public void setOperationProxyMapping(OperationProxyMappingDTO operationProxyMapping) {
+  public void setOperationProxyMapping(APIOperationMappingDTO operationProxyMapping) {
     this.operationProxyMapping = operationProxyMapping;
   }
 

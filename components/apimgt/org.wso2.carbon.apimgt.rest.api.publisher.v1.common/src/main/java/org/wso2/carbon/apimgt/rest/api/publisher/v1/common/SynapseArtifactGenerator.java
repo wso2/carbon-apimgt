@@ -118,12 +118,12 @@ public class SynapseArtifactGenerator implements GatewayArtifactGenerator {
                                     api.setGraphQLSchema(graphqlSchema);
                                     gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,
                                             tenantDomain, apidto, extractedFolderPath);
-                                } else if (api.getType() != null &&
-                                        (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
-                                                || APIConstants.API_TYPE_SOAP.equals(api.getType())
-                                                || APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())
-                                                || APIConstants.APITransportType.WEBHOOK.toString()
-                                                        .equals(api.getType()))) {
+                                } else if (api.getType() != null
+                                        && (APIConstants.APITransportType.HTTP.toString().equals(api.getType())
+                                        || APIConstants.API_TYPE_SOAP.equals(api.getType())
+                                        || APIConstants.API_TYPE_SOAPTOREST.equals(api.getType())
+                                        || APIConstants.APITransportType.WEBHOOK.toString().equals(api.getType())
+                                        || APIConstants.API_TYPE_MCP.equals(api.getType()))) {
                                     String openApiDefinition = ImportUtils.loadSwaggerFile(extractedFolderPath);
                                     api.setSwaggerDefinition(openApiDefinition);
                                     gatewayAPIDTO = TemplateBuilderUtil.retrieveGatewayAPIDto(api, environment,

@@ -2503,6 +2503,726 @@ paths:
           source: 'curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://localhost:9443/api/am/publisher/v4/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"'
 
+  /mcp-servers/import-mcp-server:
+    post:
+      tags:
+        - MCP Servers
+      summary: Create an MCP server using the backend API's OpenAPI definition
+      description: |
+        This operation can be used to create a MCP server using the backend API's OpenAPI definition. Provide 
+        either `url` or `file` to specify the definition.
+
+        Specify additionalProperties with **at least** API's name, version, context and endpointConfig.
+      operationId: importMCPServerDefinition
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                file:
+                  type: string
+                  description: Definition to upload as a file
+                  format: binary
+                url:
+                  type: string
+                  description: Definition url
+                additionalProperties:
+                  type: string
+                  description: Additional attributes specified as a stringified JSON with API's schema
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests.
+              schema:
+                type: string
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/API'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file=@openapi.json 
+          -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/import-mcp-server"'
+
+  /mcp-servers:
+    get:
+      tags:
+        - MCP Servers
+      summary: |
+        Retrieve/Search MCP servers
+      description: |
+        This operation provides you a list of available MCP servers qualifying under a given search condition.
+
+        Each retrieved API is represented with a minimal amount of attributes. If you want to get complete details, 
+        you need to use **Get details of an MCP server** operation.
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+        - $ref: '#/components/parameters/requestedTenant'
+        - name: query
+          in: query
+          description: |
+            **Search condition**.
+
+            You can search in attributes by using an **"<attribute>:"** modifier.
+
+            Eg.
+            "provider:wso2" will match an MCP server if the provider of the API contains "wso2".
+            "provider:"wso2"" will match an API if the provider of the API is exactly "wso2".
+            "status:PUBLISHED" will match an API if the API is in PUBLISHED state.
+
+            Also you can use combined modifiers
+            Eg. name:pizzashack version:v1 will match an API if the name of the API is pizzashack and version is v1.
+
+            Supported attribute modifiers are [**version, context, name, status,
+            description, provider, api-category, tags, doc, contexttemplate,
+            lcstate, content, type, label, enablestore, thirdparty**]
+
+            If no advanced attribute modifier has been specified,  the API names containing
+            the search term will be returned as a result.
+
+            Please note that you need to use encoded URL (URL encoding) if you are using a client which does not 
+            support URL encoding (such as curl)
+          schema:
+            type: string
+        - $ref: '#/components/parameters/If-None-Match'
+        - $ref: '#/components/parameters/Accept'
+      responses:
+        200:
+          description: |
+            OK.
+            List of qualifying APIs is returned.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIList'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+          content: { }
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:api_import_export
+            - apim:api_list_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers"'
+      operationId: getAllMCPServers
+
+  /mcp-servers/{apiId}:
+    get:
+      tags:
+        - MCP Server
+      summary: Get Details of an MCP Server
+      description: |
+        Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API 
+        to retrieve it.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/requestedTenant'
+        - $ref: '#/components/parameters/If-None-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Requested API is returned
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests.
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modified the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/API'
+        304:
+          description: |
+            Not Modified.
+            Empty body because the client has already the latest version of the requested resource.
+          content: { }
+        404:
+          $ref: '#/components/responses/NotFound'
+        406:
+          $ref: '#/components/responses/NotAcceptable'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_manage
+            - apim:api_import_export
+            - apim:api_product_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/7a2298c4-c905-403f-8fac-38c73301631f"'
+      operationId: getMCPServer
+
+    put:
+      tags:
+        - MCP Servers
+      summary: Update an API
+      description: |
+        This operation can be used to update an existing MCP Server.
+        But the properties `name`, `version`, `context`, `provider`, `state` will not be changed by this operation.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/If-Match'
+      requestBody:
+        description: API object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/API'
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated API object
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests.
+              schema:
+                type: string
+            Last-Modified:
+              description: |
+                Date and time the resource has been modified the last time.
+                Used by caches, or in conditional requests (Will be supported in future).
+              schema:
+                type: string
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/API'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT 
+          -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" 
+          -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/7a2298c4-c905-403f-8fac-38c73301631f"'
+      operationId: updateMCPServer
+
+    delete:
+      tags:
+        - MCP Servers
+      summary: Delete an MCP server API
+      description: |
+        This operation can be used to delete an MCP server API by providing the Id of the API.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/If-Match'
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully deleted.
+          content: { }
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        409:
+          $ref: '#/components/responses/Conflict'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:api_delete
+            - apim:api_manage
+            - apim:api_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/7a2298c4-c905-403f-8fac-38c73301631f"'
+      operationId: deleteMCPServer
+
+  /mcp-servers/{apiId}/revisions:
+    get:
+      tags:
+        - MCP Server Revisions
+      summary: List Revisions
+      description: |
+        List available revisions of a MCP server.
+      operationId: getMCPServerRevisions
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - name: query
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: |
+            OK.
+            List of MCP server revisions are returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIRevisionList'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions?query=deployed:true"'
+
+    post:
+      tags:
+        - MCP Server Revisions
+      summary: Create API Revision
+      description: |
+        Create a new API revision
+      operationId: createMCPServerRevision
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      requestBody:
+        description: API object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/APIRevision'
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created APIRevision object as the entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIRevision'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        412:
+          $ref: '#/components/responses/PreconditionFailed'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            -H "Content-Type: application/json" -d @data.json
+            "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions"'
+
+  /mcp-servers/{apiId}/revisions/{revisionId}:
+    get:
+      tags:
+        - MCP Server Revisions
+      summary: Retrieve revision of a MCP server.
+      description: |
+        Retrieve a revision of a MCP server
+      operationId: getMCPServerRevision
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/revisionId'
+      responses:
+        200:
+          description: |
+            OK.
+            A MCP server revision is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIRevision'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
+    delete:
+      tags:
+        - MCP Server Revisions
+      summary: Delete MCP server Revision
+      description: |
+        Delete a revision of a MCP server.
+      operationId: deleteMCPServerRevision
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/revisionId'
+      responses:
+        200:
+          description: |
+            OK.
+            List of remaining MCP servers revisions are returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIRevisionList'
+        204:
+          description: |
+            No Content.
+            Successfully deleted the revision
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
+
+  /mcp-servers/{apiId}/restore-revision:
+    post:
+      tags:
+        - MCP Server Revisions
+      summary: Restore MCP server revision
+      description: |
+        Restore a revision to the current MCP server
+      operationId: restoreMCPServerRevision
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/revisionId-Q'
+      responses:
+        201:
+          description: |
+            Restored.
+            Successful response with the newly restored API object as the entity in the body.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/API'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/restore-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+
+  /mcp-servers/{apiId}/endpoints:
+    get:
+      tags:
+        - MCP Server Endpoints
+      summary: Get a list of backend details of an MCP server
+      description: |
+        This operation can be used to get a list of backend endpoints of a MCP server by the API UUID.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+      responses:
+        200:
+          description: |
+            OK.
+            A list of BackendEndpoint objects are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackendEndpointList'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/96077508-fd01-4fae-bc64-5de0e2baf43c/endpoints"'
+      operationId: getMCPServerEndpoints
+
+  /mcp-servers/{apiId}/endpoints/{endpointId}:
+    get:
+      tags:
+        - MCP Server Endpoints
+      summary: Get a backend details of an MCP server
+      description: |
+        This operation can be used to get an endpoint of an API by UUID.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/endpointId'
+      responses:
+        200:
+          description: |
+            OK.
+            API Endpoint object is returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackendEndpoint'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_view
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/96077508-fd01-4fae-bc64-5de0e2baf43c/endpoints/13092607-ed01-4fa1-bc64-5da0e2abe92c"'
+      operationId: getMCPServerEndpoint
+
+    put:
+      tags:
+        - API Endpoints
+      summary: Update a backend details of an MCP server
+      description: |
+        This operation can be used to update a API endpoint.
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/endpointId'
+      requestBody:
+        description: API Endpoint object with updated details
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BackendEndpoint'
+      responses:
+        200:
+          description: |
+            OK.
+            Updated API Endpoint is returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackendEndpoint'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          -H "Content-Type: application/json" -d @data.json 
+          "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/96077508-fd01-4fae-bc64-5de0e2baf43c/endpoints/13092607-ed01-4fa1-bc64-5da0e2abe92c"'
+      operationId: updateMCPServerEndpoint
+
+  /mcp-servers/{apiId}/deploy-revision:
+    post:
+      tags:
+        - MCP Server Revisions
+      summary: Deploy Revision
+      description: |
+        Deploy a revision
+      operationId: deployMCPServerRevision
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/revisionId-Q'
+      requestBody:
+        description: Deployment object that needs to be added
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/APIRevisionDeployment'
+      responses:
+        200:
+          description: |
+            Created.
+            Successful response with the newly deployed APIRevisionDeployment List object as the entity in the body.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/APIRevisionDeployment'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json
+                "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+
+  /mcp-servers/{apiId}/undeploy-revision:
+    post:
+      tags:
+        - MCP Server Revisions
+      summary: UnDeploy Revision
+      description: |
+        UnDeploy a revision
+      operationId: undeployMCPServerRevision
+      parameters:
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/revisionId-Q'
+        - $ref: '#/components/parameters/revisionNum-Q'
+        - name: allEnvironments
+          in: query
+          schema:
+            type: boolean
+            default: false
+      requestBody:
+        description: Deployment object that needs to be added
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/APIRevisionDeployment'
+      responses:
+        200:
+          description: |
+            OK.
+        201:
+          description: |
+            Created.
+            Successful response with the newly undeployed APIRevisionDeploymentList object as the entity in the body.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/APIRevisionDeployment'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json
+                "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/undeploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+
   /apis/import-openapi:
     post:
       tags:
@@ -10885,7 +11605,7 @@ components:
         type:
           type: string
           description: The api creation type to be used. Accepted values are HTTP,
-            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC
+            WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC, MCP
           example: HTTP
           default: HTTP
           enum:
@@ -10898,6 +11618,7 @@ components:
             - SSE
             - WEBHOOK
             - ASYNC
+            - MCP
         audience:
           type: string
           description: The audience of the API. Accepted values are PUBLIC, SINGLE
@@ -12762,7 +13483,11 @@ components:
           type: object
           properties: {}
           description: |
-            Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.
+            Endpoint configuration of the API. This can be used to provide different types of endpoints including 
+            Simple REST Endpoints, Loadbalanced and Failover.
+        apiDefinition:
+          type: string
+          description: OpenAPI specification of the backend endpoint
     APIEndpointList:
       title: Endpoints List
       type: object
@@ -13345,7 +14070,7 @@ components:
         backendOperationMapping:
           $ref: '#/components/schemas/BackendOperationMapping'
         operationProxyMapping:
-          $ref: '#/components/schemas/OperationProxyMapping'
+          $ref: '#/components/schemas/APIOperationMapping'
     BackendOperationMapping:
       title: API Operation Backend Mapping
       type: object
@@ -13356,7 +14081,7 @@ components:
           example: "1"
         backendOperation:
           $ref: '#/components/schemas/BackendOperation'
-    OperationProxyMapping:
+    APIOperationMapping:
       title: API Operation Proxy Mapping
       type: object
       properties:
@@ -13366,23 +14091,6 @@ components:
             UUID of the targetAPI
           readOnly: true
           example: 01234567-0123-0123-0123-012345678901
-        name:
-          maxLength: 150
-          minLength: 1
-          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\[\]\/]*$)'
-          type: string
-          example: PizzaShackAPI
-        context:
-          maxLength: 232
-          minLength: 1
-          type: string
-          example: pizza
-        version:
-          maxLength: 30
-          minLength: 1
-          type: string
-          pattern: '^[^~!@#;:%^*()+={}|\\<>"'',&/$\[\]\s+\/]+$'
-          example: 1.0.0
         backendOperation:
           $ref: '#/components/schemas/BackendOperation'
     BackendOperation:
@@ -13397,6 +14105,37 @@ components:
           type: string
           description: Backend target method
           example: POST
+    BackendEndpointList:
+      title: Backend List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of backends returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/BackendEndpoint'
+    BackendEndpoint:
+      title: Backend Data
+      type: object
+      properties:
+        id:
+          type: string
+          description: Backend ID consisting of the UUID of the Endpoint
+          example: 0c4439fd-9416-3c2e-be6e-1086e0b9aa93
+        name:
+          type: string
+          description: Backend name
+          example: backend1
+        endpointConfig:
+          type: string
+          description: Endpoint configuration of the backend.
+        apiDefinition:
+          type: string
+          description: OpenAPI specification of the backend API
     OrganizationPolicies:
       title: Organization based Subscription Policies
       type: object
@@ -13694,6 +14433,12 @@ components:
               items:
                 type: string
                 example: https://localhost:9443/am/sample/pizzashack/v3/api/
+            operations:
+              type: array
+              description: |
+                contains operations specified in the OpenAPI file/URL
+              items:
+                $ref: '#/components/schemas/APIOperations'
           description: |
             API definition information
         errors:
@@ -14898,34 +15643,6 @@ components:
             $ref: '#/components/schemas/Label'
         pagination:
           $ref: '#/components/schemas/Pagination'
-    BackendEndpointList:
-      title: Backend List
-      type: object
-      properties:
-        count:
-          type: integer
-          description: |
-            Number of backends returned.
-          example: 1
-        list:
-          type: array
-          items:
-            $ref: '#/components/schemas/BackendEndpointData'
-    BackendEndpointData:
-      title: Backend Data
-      type: object
-      properties:
-        id:
-          type: string
-          description: Backend ID consisting of the UUID of the Endpoint
-          example: 0c4439fd-9416-3c2e-be6e-1086e0b9aa93
-        name:
-          type: string
-          description: Backend name
-          example: backend1
-        endpoint:
-          type: string
-          description: Backend endpoint
   responses:
     BadRequest:
       description: Bad Request. Invalid request or validation error.

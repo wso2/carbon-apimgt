@@ -2261,4 +2261,27 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If a database error occurs.
      */
     Map<String, String> getApiThemes(String organization, String apiId) throws APIManagementException;
+
+    /**
+     * Retrieves a specific {@link BackendEndpoint} for the MCP server corresponding to the given API UUID and
+     * backend ID. Handles both regular API UUIDs and API revision UUIDs transparently.
+     *
+     * @param apiUuid   the UUID of the API or API revision
+     * @param backendId the unique identifier of the backend endpoint
+     * @return a {@link BackendEndpoint} object if found; otherwise {@code null}
+     * @throws APIManagementException if an error occurs while accessing the database
+     */
+    BackendEndpoint getMCPServerEndpoint(String apiUuid, String backendId) throws APIManagementException;
+
+    /**
+     * Retrieves the list of {@link BackendEndpoint} instances for the MCP server corresponding to the given API UUID.
+     * Handles both regular API UUIDs and API revision UUIDs transparently.
+     *
+     * @param apiUuid the UUID of the API or API revision
+     * @return a list of {@link BackendEndpoint} objects associated with the API; empty if none exist
+     * @throws APIManagementException if an error occurs while accessing the database
+     */
+    List<BackendEndpoint> getMCPServerEndpoints(String apiUuid) throws APIManagementException;
+
+    void updateMCPServerEndpoint(String apiId, BackendEndpoint backendEndpoint) throws APIManagementException;
 }
