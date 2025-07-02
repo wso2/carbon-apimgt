@@ -58,6 +58,7 @@ import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContextDataHolder;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundWebSocketProcessor;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.WebSocketProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -80,7 +81,7 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
 
     private static final Log log = LogFactory.getLog(WebsocketInboundHandler.class);
     private WebSocketAnalyticsMetricsHandler metricsHandler;
-    private InboundWebSocketProcessor webSocketProcessor;
+    private WebSocketProcessor webSocketProcessor;
     private final String API_PROPERTIES = "API_PROPERTIES";
     private final String API_CONTEXT_URI = "API_CONTEXT_URI";
     private final String WEB_SC_API_UT = "api.ut.WS_SC";
@@ -90,12 +91,17 @@ public class WebsocketInboundHandler extends ChannelInboundHandlerAdapter {
         initializeDataPublisher();
     }
 
-    public InboundWebSocketProcessor getWebSocketProcessor() {
+    public WebSocketProcessor getWebSocketProcessor() {
         return webSocketProcessor;
     }
 
-    public InboundWebSocketProcessor initializeWebSocketProcessor() {
-        return new InboundWebSocketProcessor();
+    public WebSocketProcessor initializeWebSocketProcessor() {
+        WebSocketProcessor processor = ServiceReferenceHolder.getInstance().getWebsocketProcessor();
+        if (processor == null) {
+            return new InboundWebSocketProcessor();
+        } else {
+            return processor;
+        }
     }
 
     private void initializeDataPublisher() {
