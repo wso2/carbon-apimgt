@@ -273,7 +273,12 @@ public class ApiMgtDAO {
                 appRegPs.setLong(6, dto.getValidityTime());
                 appRegPs.setString(7, (String) dto.getAppInfoDTO().getOAuthApplicationInfo().getParameter("tokenScope"
                 ));
-                appRegPs.setString(8, jsonString);
+                try (InputStream jsonStringStream = new ByteArrayInputStream(jsonString.getBytes(StandardCharsets.UTF_8))) {
+                    appRegPs.setBinaryStream(8, jsonStringStream);
+                } catch (IOException e) {
+                    handleException("Error occurred while creating input stream from JSON string for Application : "
+                            + application.getName(), e);
+                }
                 appRegPs.setString(9, dto.getKeyManager());
                 appRegPs.execute();
             }
@@ -8871,7 +8876,7 @@ public class ApiMgtDAO {
                     OAuthAppRequest request = ApplicationUtils.createOauthAppRequest(application.getName(), null,
                             application.getCallbackUrl(), rs
                                     .getString("TOKEN_SCOPE"),
-                            rs.getString("INPUTS"), application.getTokenType(),
+                            APIMgtDBUtil.getStringFromInputStream(rs.getBinaryStream("INPUTS")), application.getTokenType(),
                             keyManagerConfigurationByUUID.getOrganization(), keyManagerConfigurationByUUID.getName());
                     request.setMappingId(workflowDTO.getWorkflowReference());
                     request.getOAuthApplicationInfo().setApplicationUUID(application.getUUID());
