@@ -1350,6 +1350,7 @@ public final class APIConstants {
         public static final String APPLICATION_ONHOLD = "ON_HOLD";
         public static final String DELETE_PENDING = "DELETE_PENDING";
         public static final String UPDATE_PENDING = "UPDATE_PENDING";
+        public static final String UPDATE_REJECTED = "UPDATE_REJECTED";
     }
 
     public static class APIRevisionStatus {

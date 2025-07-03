@@ -91,7 +91,7 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
-import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
+import org.wso2.carbon.apimgt.api.model.ApplicationResponse;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -1767,10 +1767,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * Updates an Application identified by its id
      *
      * @param application Application object to be updated
+     * @return
      * @throws APIManagementException
      */
     @Override
-    public void updateApplication(Application application) throws APIManagementException {
+    public ApplicationResponse updateApplication(Application application) throws APIManagementException {
 
         Application existingApp;
         String uuid = application.getUUID();
@@ -1904,9 +1905,9 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD);
         }
 
-        apiMgtDAO.updateApplicationStatus(application.getId(),APIConstants.ApplicationStatus.UPDATE_PENDING);
-
-        try{
+        apiMgtDAO.updateApplicationStatus(application.getId(), APIConstants.ApplicationStatus.UPDATE_PENDING);
+        WorkflowResponse workflowResponse = null;
+        try {
             WorkflowExecutor updateApplicationWFExecutor =
                     getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
             ApplicationWorkflowDTO appWFDto = new ApplicationWorkflowDTO();
@@ -1921,32 +1922,53 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
             appWFDto.setTenantId(tenantId);
             appWFDto.setUserName(existingApp.getOwner());
             appWFDto.setCreatedTime(System.currentTimeMillis());
-            updateApplicationWFExecutor.execute(appWFDto);
+            workflowResponse = updateApplicationWFExecutor.execute(appWFDto);
 
         } catch (WorkflowException e) {
-            throw new APIManagementException("Could not execute application update workflow", e);
+            throw new APIManagementException("Could not execute application update workflow",
+                    ExceptionCodes.WORKFLOW_EXCEPTION);
+        }
+        boolean updateRejected = false;
+        String updateStatus = null;
+        if (workflowResponse != null && workflowResponse.getJSONPayload() != null
+                && !workflowResponse.getJSONPayload().isEmpty()) {
+            try {
+                JSONObject wfResponseJson = (JSONObject) new JSONParser().parse(workflowResponse.getJSONPayload());
+                if (APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(wfResponseJson.get("Status"))) {
+                    updateRejected = true;
+                    updateStatus = APIConstants.ApplicationStatus.APPLICATION_REJECTED;
+                }
+            } catch (ParseException e) {
+                log.error('\'' + workflowResponse.getJSONPayload() + "' is not a valid JSON.", e);
+            }
         }
 
         Application updatedApplication = apiMgtDAO.getApplicationById(application.getId());
-        if (log.isDebugEnabled()) {
-            log.debug("Successfully updated the Application: " + application.getId() + " in the database.");
+
+        if (!updateRejected) {
+            updateStatus = updatedApplication.getStatus();
+            updatedApplication.getUUID();
+
+            JSONObject appLogObject = new JSONObject();
+            appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
+            appLogObject.put(APIConstants.AuditLogConstants.TIER, application.getTier());
+            appLogObject.put(APIConstants.AuditLogConstants.STATUS, existingApp != null ? existingApp.getStatus() : "");
+            appLogObject.put(APIConstants.AuditLogConstants.CALLBACK, application.getCallbackUrl());
+            appLogObject.put(APIConstants.AuditLogConstants.GROUPS, application.getGroupId());
+            appLogObject.put(APIConstants.AuditLogConstants.OWNER, application.getSubscriber().getName());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
+
+            if (workflowResponse == null) {
+                workflowResponse = new GeneralWorkflowResponse();
+            }
         }
-
-        JSONObject appLogObject = new JSONObject();
-        appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
-        appLogObject.put(APIConstants.AuditLogConstants.TIER, application.getTier());
-        appLogObject.put(APIConstants.AuditLogConstants.STATUS, existingApp != null ? existingApp.getStatus() : "");
-        appLogObject.put(APIConstants.AuditLogConstants.CALLBACK, application.getCallbackUrl());
-        appLogObject.put(APIConstants.AuditLogConstants.GROUPS, application.getGroupId());
-        appLogObject.put(APIConstants.AuditLogConstants.OWNER, application.getSubscriber().getName());
-
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
-                APIConstants.AuditLogConstants.UPDATED, this.username);
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
             RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application, username,
- requestedTenant);
+                    requestedTenant);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
@@ -1954,25 +1976,30 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(application.getId()),
                 WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
 
-        if (wfDTO != null){
-            if (WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
-                    ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
-                            System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
-                            existingApp.getOrganization(), updatedApplication.getId(), updatedApplication.getUUID(),
-                            updatedApplication.getName(), updatedApplication.getTokenType(), updatedApplication.getTier(),
-                            updatedApplication.getGroupId(), updatedApplication.getApplicationAttributes(),
-                            existingApp.getSubscriber().getName());
-                    APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());}
-        } else {
-            ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
-                    System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
-                    existingApp.getOrganization(), updatedApplication.getId(), updatedApplication.getUUID(),
-                    updatedApplication.getName(), updatedApplication.getTokenType(), updatedApplication.getTier(),
-                    updatedApplication.getGroupId(), updatedApplication.getApplicationAttributes(),
-                    existingApp.getSubscriber().getName());
+        if ((wfDTO == null) || WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
+            ApplicationEvent applicationEvent = new ApplicationEvent(
+                    UUID.randomUUID().toString(),
+                    System.currentTimeMillis(),
+                    APIConstants.EventType.APPLICATION_UPDATE.name(),
+                    tenantId,
+                    existingApp.getOrganization(),
+                    updatedApplication.getId(),
+                    updatedApplication.getUUID(),
+                    updatedApplication.getName(),
+                    updatedApplication.getTokenType(),
+                    updatedApplication.getTier(),
+                    updatedApplication.getGroupId(),
+                    updatedApplication.getApplicationAttributes(),
+                    existingApp.getSubscriber().getName()
+            );
             APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
         }
 
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully updated the Application: " + application.getId() + " in the database.");
+        }
+
+        return new ApplicationResponse(updateStatus, updatedApplication.getUUID(), workflowResponse);
 
     }
 
