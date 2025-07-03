@@ -1,3 +1,20 @@
+/*
+ *  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ *  WSO2 Inc. licenses this file to you under the Apache License,
+ *  Version 2.0 (the "License"); you may not use this file except
+ *  in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package org.wso2.carbon.apimgt.impl.workflow;
 
 import org.apache.commons.logging.Log;
@@ -55,11 +72,15 @@ public class ApplicationUpdateSimpleWorkflowExecutor extends WorkflowExecutor {
 
         if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
             status = APIConstants.ApplicationStatus.APPLICATION_APPROVED;
+        } else if (WorkflowStatus.CREATED.equals(workflowDTO.getStatus())) {
+            status = APIConstants.ApplicationStatus.APPLICATION_CREATED;
+        } else if (WorkflowStatus.REJECTED.equals(workflowDTO.getStatus())) {
+            status = APIConstants.ApplicationStatus.UPDATE_REJECTED;
         }
         ApiMgtDAO dao = ApiMgtDAO.getInstance();
         try {
             Application application = dao.getApplicationById(Integer.parseInt(workflowDTO.getWorkflowReference()));
-            dao.updateApplicationStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),status);
+            dao.updateApplicationStatus(Integer.parseInt(workflowDTO.getWorkflowReference()), status);
             dao.updateApplication(application);
         } catch (APIManagementException e) {
             String msg = "Error occurred when updating Application update process";
@@ -68,6 +89,7 @@ public class ApplicationUpdateSimpleWorkflowExecutor extends WorkflowExecutor {
         }
         return new GeneralWorkflowResponse();
     }
+
     @Override
     public List<WorkflowDTO> getWorkflowDetails(String workflowStatus) throws WorkflowException {
         return null;

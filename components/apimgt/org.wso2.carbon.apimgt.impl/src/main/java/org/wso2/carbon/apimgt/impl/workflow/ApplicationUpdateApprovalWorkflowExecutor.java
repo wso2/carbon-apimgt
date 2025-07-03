@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.carbon.apimgt.impl.workflow;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -22,6 +40,8 @@ import static org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils.*;
 public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor {
 
     private static final Log log = LogFactory.getLog(ApplicationUpdateApprovalWorkflowExecutor.class);
+    private static final ApiMgtDAO dao = ApiMgtDAO.getInstance();
+    ;
 
     @Override
     public String getWorkflowType() {
@@ -35,6 +55,7 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
 
     /**
      * Execute the Application Update workflow approval process
+     *
      * @param workflowDTO - The WorkflowDTO which contains workflow contextual information related to the workflow.
      * @return
      * @throws WorkflowException
@@ -81,7 +102,9 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         try {
             applicationUpdateDiffJson = objectMapper.writeValueAsString(applicationUpdateDiffs);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to serialize application update differences to JSON",e);
+            String msg = "Failed to serialize application update differences to JSON";
+            log.error(msg, e);
+            throw new WorkflowException(msg, e);
         }
         workflowDTO.setProperties("applicationUpdateDiff", applicationUpdateDiffJson);
 
@@ -98,7 +121,9 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         try {
             requestedCustomAttributes = objectMapper.writeValueAsString(pendingApplication.getApplicationAttributes());
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("Failed to serialize requested custom attributes of application",e);
+            String msg = "Failed to serialize requested custom attributes of application";
+            log.error(msg, e);
+            throw new WorkflowException(msg, e);
         }
         workflowDTO.setMetadata("requestedCustomAttributes", requestedCustomAttributes);
 
@@ -114,6 +139,7 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
 
     /**
      * Complete the application update approval workflow process
+     *
      * @param workFlowDTO - The WorkflowDTO which contains workflow contextual information related to the workflow.
      * @return
      * @throws WorkflowException
@@ -122,8 +148,6 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
     public WorkflowResponse complete(WorkflowDTO workFlowDTO) throws WorkflowException {
         workFlowDTO.setUpdatedTime(System.currentTimeMillis());
         super.complete(workFlowDTO);
-        ApiMgtDAO dao = ApiMgtDAO.getInstance();
-
         try {
             Application application = dao.getApplicationById(Integer.parseInt(workFlowDTO.getWorkflowReference()));
             if (WorkflowStatus.APPROVED.equals(workFlowDTO.getStatus())) {
@@ -145,7 +169,8 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
                 dao.updateApplicationStatus(application.getId(), APIConstants.ApplicationStatus.APPLICATION_APPROVED);
                 dao.updateApplication(application);
             } else {
-                dao.updateApplicationStatus(application.getId(), APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+                ;
+                dao.updateApplicationStatus(application.getId(), APIConstants.ApplicationStatus.UPDATE_REJECTED);
             }
 
         } catch (APIManagementException e) {
@@ -163,6 +188,7 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
     /**
      * Handle cleanup task for application update Approval workflow executor.
      * Use workflow external reference  to delete the pending workflow request
+     *
      * @param workflowExtRef
      * @throws WorkflowException
      */
@@ -175,17 +201,12 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         }
         super.cleanUpPendingTask(workflowExtRef);
         try {
-            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
-            apiMgtDAO.deleteWorkflowRequest(workflowExtRef);
+            dao.deleteWorkflowRequest(workflowExtRef);
         } catch (APIManagementException axisFault) {
             errorMsg = "Error sending out cancel pending application update approval process message. cause: " +
                     axisFault.getMessage();
             throw new WorkflowException(errorMsg, axisFault);
         }
     }
-
-
-
-
 }
 
