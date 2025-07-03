@@ -83,9 +83,11 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
         try {
 
             ObjectMapper objectMapper = new ObjectMapper();
-            List<LLMModelDTO> llmModel;
-            llmModel = objectMapper.readValue(models, new TypeReference<List<LLMModelDTO>>() {
-            });
+            List<LLMModelDTO> llmModel = new ArrayList<>();
+            if (StringUtils.isNotEmpty(models)) {
+                llmModel = objectMapper.readValue(models, new TypeReference<List<LLMModelDTO>>() {
+                });
+            }
             LLMProvider provider = buildLLMProvider(name, apiVersion, description, configurations,
                     apiDefinitionInputStream, llmModel, multipleVendorSupport);
             if (provider == null) {
@@ -149,12 +151,15 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
         provider.setConfigurations(configurations);
         provider.setApiDefinition(apiDefinition);
         if (StringUtils.isNotEmpty(multipleVendorSupport)) {
-            provider.setModelFamilySupported(Boolean.parseBoolean(multipleVendorSupport));
+            provider.setMultipleVendorSupport(Boolean.parseBoolean(multipleVendorSupport));
         }
         List<LLMModel> llmModels = new ArrayList<>();
         if (modelList != null) {
             for (LLMModelDTO modelDTO : modelList) {
-                llmModels.add(new LLMModel(modelDTO.getVendor(), modelDTO.getValues()));
+                if (modelDTO != null && modelDTO.getVendor() != null && modelDTO.getModels() != null) {
+                    // Ensure that the modelDTO has valid vendor and values before adding
+                    llmModels.add(new LLMModel(modelDTO.getVendor(), modelDTO.getModels()));
+                }
             }
         }
         provider.setModelList(llmModels);
@@ -242,9 +247,11 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             ObjectMapper objectMapper = new ObjectMapper();
-            List<LLMModelDTO> llmModel;
-            llmModel = objectMapper.readValue(models, new TypeReference<List<LLMModelDTO>>() {
-            });
+            List<LLMModelDTO> llmModel = new ArrayList<>();
+            if (StringUtils.isNotEmpty(models)) {
+                llmModel = objectMapper.readValue(models, new TypeReference<List<LLMModelDTO>>() {
+                });
+            }
             APIAdmin apiAdmin = new APIAdminImpl();
             LLMProvider retrievedProvider = apiAdmin.getLLMProvider(organization, llmProviderId);
 
@@ -306,7 +313,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
         provider.setName(retrievedProvider.getName());
         provider.setApiVersion(retrievedProvider.getApiVersion());
         provider.setBuiltInSupport(retrievedProvider.isBuiltInSupport());
-        provider.setModelFamilySupported(retrievedProvider.isModelFamilySupported());
+        provider.setMultipleVendorSupport(retrievedProvider.isMultipleVendorSupport());
         String apiDefinition = getApiDefinitionFromStream(apiDefinitionInputStream);
         boolean isBuiltIn = retrievedProvider.isBuiltInSupport();
 
@@ -322,7 +329,9 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
         List<LLMModel> llmModels = new ArrayList<>();
         if (modelList != null) {
             for (LLMModelDTO modelDTO : modelList) {
-                llmModels.add(new LLMModel(modelDTO.getVendor(), modelDTO.getValues()));
+                if (modelDTO != null && modelDTO.getVendor() != null && modelDTO.getModels() != null) {
+                    llmModels.add(new LLMModel(modelDTO.getVendor(), modelDTO.getModels()));
+                }
             }
         }
         provider.setModelList(llmModels);

@@ -1247,6 +1247,14 @@ public class APIMappingUtil {
                                         new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
                             }
                         }
+                        if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(productionEndpointType)) {
+                            String awsSecretKey = (String) productionEndpointSecurity.get(
+                                    APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                            if (StringUtils.isNotEmpty(awsSecretKey)) {
+                                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY,
+                                        new String(cryptoUtil.base64DecodeAndDecrypt(awsSecretKey)));
+                            }
+                        }
                         endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION,
                                 productionEndpointSecurity);
                         endpointConfigJson.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
@@ -1280,6 +1288,14 @@ public class APIMappingUtil {
                             if (StringUtils.isNotEmpty(apiKeyValue)) {
                                 sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
                                         new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
+                            }
+                        }
+                        if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(sandboxEndpointType)) {
+                            String awsSecretKey = (String) sandboxEndpointSecurity
+                                    .get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                            if (StringUtils.isNotEmpty(awsSecretKey)) {
+                                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY,
+                                        new String(cryptoUtil.base64DecodeAndDecrypt(awsSecretKey)));
                             }
                         }
                         endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX,
@@ -3408,6 +3424,9 @@ public class APIMappingUtil {
             if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
                 sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
             }
+            if (sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null) {
+                sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, "");
+            }
             Object customParamsObj = sandboxEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
             if (customParamsObj instanceof JSONObject) {
                 maskSecretCustomParameters((JSONObject) customParamsObj);
@@ -3426,6 +3445,9 @@ public class APIMappingUtil {
             }
             if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE) != null) {
                 productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE, "");
+            }
+            if (productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null) {
+                productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, "");
             }
             Object customParamsObj =
                     productionEndpointSecurity.get(APIConstants.OAuthConstants.OAUTH_CUSTOM_PARAMETERS);
@@ -3450,6 +3472,12 @@ public class APIMappingUtil {
                     sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
                             new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
                 }
+                String awsSecretKeyValue =
+                        (String) sandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                if (StringUtils.isNotEmpty(awsSecretKeyValue)) {
+                    sandboxEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY,
+                            new String(cryptoUtil.base64DecodeAndDecrypt(awsSecretKeyValue)));
+                }
                 endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_SANDBOX, sandboxEndpointSecurity);
             }
             if (endpointSecurityElement.get(APIConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
@@ -3460,6 +3488,12 @@ public class APIMappingUtil {
                 if (StringUtils.isNotEmpty(apiKeyValue)) {
                     productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE,
                             new String(cryptoUtil.base64DecodeAndDecrypt(apiKeyValue)));
+                }
+                String awsSecretKeyValue =
+                        (String) productionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
+                if (StringUtils.isNotEmpty(awsSecretKeyValue)) {
+                    productionEndpointSecurity.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY,
+                            new String(cryptoUtil.base64DecodeAndDecrypt(awsSecretKeyValue)));
                 }
                 endpointSecurityElement.put(APIConstants.ENDPOINT_SECURITY_PRODUCTION, productionEndpointSecurity);
             }

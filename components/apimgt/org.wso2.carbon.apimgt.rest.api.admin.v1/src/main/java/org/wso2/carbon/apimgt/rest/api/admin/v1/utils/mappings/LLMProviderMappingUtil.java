@@ -18,6 +18,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collections;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMModelDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderResponseDTO;
@@ -71,10 +72,12 @@ public class LLMProviderMappingUtil {
         llmProviderResponseDTO.setApiDefinition(llmProvider.getApiDefinition());
         llmProviderResponseDTO.setBuiltInSupport(llmProvider.isBuiltInSupport());
         llmProviderResponseDTO.setConfigurations(llmProvider.getConfigurations());
-        llmProviderResponseDTO.setMultipleVendorSupport(llmProvider.isModelFamilySupported());
-        List<LLMModelDTO> llmModelDTOList = llmProvider.getModelList().stream()
-                .map(model -> new LLMModelDTO().vendor(model.getModelVendor()).values(model.getValues()))
-                .collect(Collectors.toList());
+        llmProviderResponseDTO.setMultipleVendorSupport(llmProvider.isMultipleVendorSupport());
+        List<LLMModelDTO> llmModelDTOList =
+                llmProvider.getModelList() == null ? Collections.emptyList() : llmProvider.getModelList().stream()
+                        .map(model -> new LLMModelDTO().vendor(model.getModelVendor())
+                                .models(model.getValues()))
+                        .collect(Collectors.toList());
         ObjectMapper objectMapper = new ObjectMapper();
         llmProviderResponseDTO.setModels(objectMapper.writeValueAsString(llmModelDTOList));
         return llmProviderResponseDTO;

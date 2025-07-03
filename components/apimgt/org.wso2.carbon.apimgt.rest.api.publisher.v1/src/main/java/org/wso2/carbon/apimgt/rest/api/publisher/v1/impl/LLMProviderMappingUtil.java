@@ -99,7 +99,7 @@ public class LLMProviderMappingUtil {
         }
         return modelList.stream()
                 .map(model -> {
-                    return new LLMModelDTO().vendor(model.getModelVendor()).values(model.getValues());
+                    return new LLMModelDTO().vendor(model.getModelVendor()).models(model.getValues());
                 })
                 .collect(Collectors.toList());
     }

@@ -1,0 +1,418 @@
+openapi: 3.0.3
+info:
+  title: AWS Bedrock Converse API
+  description: |-
+    This OpenAPI specification defines the RESTful API for Amazon Bedrock's `converse` and `converseStream` operations.
+    It provides a unified interface for interacting with various foundation models, supporting multi-turn conversations,
+    streaming responses, and tool usage.
+
+    **Key Features:**
+    - **Converse:** A request/response-based endpoint for conversational inference.
+    - **ConverseStream:** A streaming endpoint for receiving conversational responses as a series of events.
+    - **Unified Model Interface:** Consistent request and response format across different foundation models.
+    - **Multimodality:** Support for text, images, and documents as input.
+    - **Tool Use:** Enables models to use developer-defined tools to perform actions.
+  version: "2023-05-31"
+servers:
+  - url: https://bedrock-runtime.{region}.amazonaws.com
+    variables:
+      region:
+        default: us-east-1
+        description: "The AWS region where Amazon Bedrock is available. e.g., `us-east-1`, `us-west-2`."
+paths:
+  /model/{modelId}/converse:
+    post:
+      operationId: Converse
+      summary: Send a conversation message
+      description: |-
+        Sends a multi-turn conversation message to the specified model.
+        This operation provides a consistent interface that works with all conversational models.
+        It allows you to write code once and use it with different models.
+      parameters:
+        - name: modelId
+          in: path
+          required: true
+          description: The unique identifier of the foundation model to use.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConverseRequest'
+      responses:
+        '200':
+          description: Successful response from the model.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConverseResponse'
+        '400':
+          description: ValidationException
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: AccessDeniedException
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: ResourceNotFoundException
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: InternalServerException
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /model/{modelId}/converse-stream:
+    post:
+      operationId: ConverseStream
+      summary: Send a streaming conversation message
+      description: |-
+        Sends a multi-turn conversation message to the specified model and receives the response as a stream of events.
+        This is useful for applications that want to display the response to the user as it is being generated.
+      parameters:
+        - name: modelId
+          in: path
+          required: true
+          description: The unique identifier of the foundation model to use.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConverseRequest'
+      responses:
+        '200':
+          description: Successful streaming response from the model.
+          content:
+            application/vnd.amazon.eventstream:
+              schema:
+                $ref: '#/components/schemas/ConverseStreamOutput'
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: ValidationException
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: AccessDeniedException
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: ResourceNotFoundException
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: InternalServerException
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    ConverseRequest:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+          description: An array of messages that form the conversation history.
+        system:
+          type: array
+          items:
+            $ref: '#/components/schemas/SystemContentBlock'
+          description: System-level prompts to guide the model's behavior.
+        inferenceConfig:
+          $ref: '#/components/schemas/InferenceConfiguration'
+        toolConfig:
+          $ref: '#/components/schemas/ToolConfiguration'
+        additionalModelRequestFields:
+          type: object
+          description: Additional model-specific fields to be sent to the model.
+      required:
+        - messages
+    ConverseResponse:
+      type: object
+      properties:
+        output:
+          type: object
+          properties:
+            message:
+              $ref: '#/components/schemas/Message'
+        stopReason:
+          type: string
+          enum: [end_turn, tool_use, max_tokens, stop_sequence, guardrail_intervened, content_filtered]
+          description: The reason why the model stopped generating text.
+        usage:
+          $ref: '#/components/schemas/TokenUsage'
+        metrics:
+          type: object
+          properties:
+            latencyMs:
+              type: integer
+              format: int64
+              description: The latency of the inference request in milliseconds.
+    ConverseStreamOutput:
+      type: object
+      properties:
+        messageStart:
+          $ref: '#/components/schemas/MessageStartEvent'
+        contentBlockStart:
+          $ref: '#/components/schemas/ContentBlockStartEvent'
+        contentBlockDelta:
+          $ref: '#/components/schemas/ContentBlockDeltaEvent'
+        contentBlockStop:
+          $ref: '#/components/schemas/ContentBlockStopEvent'
+        messageStop:
+          $ref: '#/components/schemas/MessageStopEvent'
+        metadata:
+          $ref: '#/components/schemas/ConverseStreamMetadata'
+    Message:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [user, assistant]
+          description: The role of the entity that is creating the message.
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentBlock'
+          description: The content of the message.
+      required:
+        - role
+        - content
+    ContentBlock:
+      type: object
+      oneOf:
+        - $ref: '#/components/schemas/TextContentBlock'
+        - $ref: '#/components/schemas/ImageContentBlock'
+        - $ref: '#/components/schemas/DocumentContentBlock'
+        - $ref: '#/components/schemas/ToolUseBlock'
+        - $ref: '#/components/schemas/ToolResultBlock'
+    TextContentBlock:
+      type: object
+      properties:
+        text:
+          type: string
+      required:
+        - text
+    ImageContentBlock:
+      type: object
+      properties:
+        image:
+          $ref: '#/components/schemas/ImageSource'
+      required:
+        - image
+    DocumentContentBlock:
+      type: object
+      properties:
+        document:
+          $ref: '#/components/schemas/DocumentSource'
+      required:
+        - document
+    ImageSource:
+      type: object
+      properties:
+        format:
+          type: string
+          enum: [png, jpeg, gif, webp]
+        source:
+          type: object
+          properties:
+            bytes:
+              type: string
+              format: byte
+              description: Base64-encoded image bytes.
+      required:
+        - format
+        - source
+    DocumentSource:
+      type: object
+      properties:
+        format:
+          type: string
+          enum: [pdf, csv, doc, docx, xls, xlsx, html, txt]
+        name:
+          type: string
+        source:
+          type: object
+          properties:
+            bytes:
+              type: string
+              format: byte
+              description: Base64-encoded document bytes.
+      required:
+        - format
+        - name
+        - source
+    SystemContentBlock:
+      type: object
+      properties:
+        text:
+          type: string
+    InferenceConfiguration:
+      type: object
+      properties:
+        maxTokens:
+          type: integer
+        temperature:
+          type: number
+          format: float
+        topP:
+          type: number
+          format: float
+        stopSequences:
+          type: array
+          items:
+            type: string
+    ToolConfiguration:
+      type: object
+      properties:
+        tools:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tool'
+    Tool:
+      type: object
+      properties:
+        toolSpec:
+          $ref: '#/components/schemas/ToolSpecification'
+    ToolSpecification:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        inputSchema:
+          type: object
+          properties:
+            json:
+              type: object
+              description: A JSON schema object defining the input for the tool.
+      required:
+        - name
+        - inputSchema
+    ToolUseBlock:
+      type: object
+      properties:
+        toolUseId:
+          type: string
+        name:
+          type: string
+        input:
+          type: object
+      required:
+        - toolUseId
+        - name
+        - input
+    ToolResultBlock:
+      type: object
+      properties:
+        toolUseId:
+          type: string
+        content:
+          type: array
+          items:
+            type: object
+            properties:
+              json:
+                type: object
+      required:
+        - toolUseId
+        - content
+    TokenUsage:
+      type: object
+      properties:
+        inputTokens:
+          type: integer
+        outputTokens:
+          type: integer
+        totalTokens:
+          type: integer
+      required:
+        - inputTokens
+        - outputTokens
+        - totalTokens
+    MessageStartEvent:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [assistant]
+    ContentBlockStartEvent:
+      type: object
+      properties:
+        contentBlockIndex:
+          type: integer
+        start:
+          type: object
+          properties:
+            toolUse:
+              $ref: '#/components/schemas/ToolUseBlock'
+    ContentBlockDeltaEvent:
+      type: object
+      properties:
+        contentBlockIndex:
+          type: integer
+        delta:
+          type: object
+          properties:
+            text:
+              type: string
+    ContentBlockStopEvent:
+      type: object
+      properties:
+        contentBlockIndex:
+          type: integer
+    MessageStopEvent:
+      type: object
+      properties:
+        stopReason:
+          type: string
+          enum: [end_turn, tool_use, max_tokens, stop_sequence, guardrail_intervened, content_filtered]
+    ConverseStreamMetadata:
+      type: object
+      properties:
+        usage:
+          $ref: '#/components/schemas/TokenUsage'
+        metrics:
+          type: object
+          properties:
+            latencyMs:
+              type: integer
+              format: int64
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+  securitySchemes:
+    aws.sigv4:
+      type: apiKey
+      name: Authorization
+      in: header
+      x-amazon-apigateway-authtype: aws:iam
+security:
+  - aws.sigv4: []

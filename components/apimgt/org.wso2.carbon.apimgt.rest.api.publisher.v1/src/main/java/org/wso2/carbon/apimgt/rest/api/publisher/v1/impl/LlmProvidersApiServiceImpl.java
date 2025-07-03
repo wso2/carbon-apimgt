@@ -19,10 +19,12 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.LLMProviderAuthenticationConfiguration;
 import org.wso2.carbon.apimgt.api.LLMProviderConfiguration;
 import org.wso2.carbon.apimgt.api.model.LLMModel;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
@@ -81,18 +83,20 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            LLMProvider provider = apiAdmin
-                    .getLLMProvider(organization, llmProviderId);
-            LLMProviderConfiguration providerConfiguration = new Gson()
-                    .fromJson(provider.getConfigurations(), LLMProviderConfiguration.class);
-            LLMProviderEndpointConfigurationDTO endpointConfigurationDTO = new LLMProviderEndpointConfigurationDTO();
-            if (providerConfiguration.getAuthHeader() != null) {
-                endpointConfigurationDTO.setAuthHeader(providerConfiguration.getAuthHeader());
-            }
-            if (providerConfiguration.getAuthQueryParameter() != null) {
-                endpointConfigurationDTO.setAuthQueryParameter(providerConfiguration.getAuthQueryParameter());
-            }
-            return Response.ok().entity(endpointConfigurationDTO).build();
+        LLMProvider provider = apiAdmin.getLLMProvider(organization, llmProviderId);
+        LLMProviderConfiguration providerConfiguration = new Gson()
+                .fromJson(provider.getConfigurations(), LLMProviderConfiguration.class);
+        LLMProviderEndpointConfigurationDTO endpointConfigurationDTO = new LLMProviderEndpointConfigurationDTO();
+        if (providerConfiguration.getAuthenticationConfiguration() != null) {
+            LLMProviderAuthenticationConfiguration authenticationConfiguration =
+                    providerConfiguration.getAuthenticationConfiguration();
+            LLMProviderEndpointAuthenticationConfigurationDTO llmProviderEndpointAuthenticationConfigurationDTO =
+                    new LLMProviderEndpointAuthenticationConfigurationDTO().enabled(
+                                    authenticationConfiguration.isEnabled()).type(authenticationConfiguration.getType())
+                            .parameters(authenticationConfiguration.getParameters());
+            endpointConfigurationDTO.setAuthenticationConfiguration(llmProviderEndpointAuthenticationConfigurationDTO);
+        }
+        return Response.ok().entity(endpointConfigurationDTO).build();
 
     }
 

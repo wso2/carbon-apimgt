@@ -22,24 +22,25 @@ import javax.validation.Valid;
 
 public class LLMModelDTO   {
   
-    private List<String> values = new ArrayList<String>();
+    private List<String> models = new ArrayList<String>();
     private String vendor = null;
 
   /**
    **/
-  public LLMModelDTO values(List<String> values) {
-    this.values = values;
+  public LLMModelDTO models(List<String> models) {
+    this.models = models;
     return this;
   }
 
   
-  @ApiModelProperty(value = "")
-  @JsonProperty("values")
-  public List<String> getValues() {
-    return values;
+  @ApiModelProperty(required = true, value = "")
+  @JsonProperty("models")
+  @NotNull
+  public List<String> getModels() {
+    return models;
   }
-  public void setValues(List<String> values) {
-    this.values = values;
+  public void setModels(List<String> models) {
+    this.models = models;
   }
 
   /**
@@ -69,13 +70,13 @@ public class LLMModelDTO   {
       return false;
     }
     LLMModelDTO llMModel = (LLMModelDTO) o;
-    return Objects.equals(values, llMModel.values) &&
+    return Objects.equals(models, llMModel.models) &&
         Objects.equals(vendor, llMModel.vendor);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(values, vendor);
+    return Objects.hash(models, vendor);
   }
 
   @Override
@@ -83,7 +84,7 @@ public class LLMModelDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class LLMModelDTO {\n");
     
-    sb.append("    values: ").append(toIndentedString(values)).append("\n");
+    sb.append("    models: ").append(toIndentedString(models)).append("\n");
     sb.append("    vendor: ").append(toIndentedString(vendor)).append("\n");
     sb.append("}");
     return sb.toString();
