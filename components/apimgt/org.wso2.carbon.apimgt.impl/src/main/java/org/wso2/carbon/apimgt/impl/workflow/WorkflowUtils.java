@@ -46,8 +46,13 @@ import org.wso2.carbon.apimgt.impl.utils.LifeCycleUtils;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import java.util.*;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Collections;
 /**
  * This class used to handle notifications in Workflow.
  */

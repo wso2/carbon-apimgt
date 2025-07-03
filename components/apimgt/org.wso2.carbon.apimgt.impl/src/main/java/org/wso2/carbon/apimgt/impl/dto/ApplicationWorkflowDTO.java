@@ -38,9 +38,9 @@ public class ApplicationWorkflowDTO extends WorkflowDTO {
 		this.application = application;
 	}
 
-	public Application getExistingApplication(){
+	public Application getExistingApplication() {
 		return existingApplication;
-	};
+	}
 
 	public void setExistingApplication(Application existingApplication) {
 		this.existingApplication = existingApplication;
