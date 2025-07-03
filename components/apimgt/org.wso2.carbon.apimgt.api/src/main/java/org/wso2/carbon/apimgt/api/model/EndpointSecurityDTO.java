@@ -59,6 +59,11 @@ public class EndpointSecurityDTO {
 
     private ProxyConfigs proxyConfigs;
 
+    private String accessKey;
+    private String secretKey;
+    private String region;
+    private String service;
+
     public EndpointSecurityDTO(EndpointSecurityDTO endpointSecurity) {
 
         this.uniqueIdentifier = endpointSecurity.uniqueIdentifier;
@@ -76,11 +81,16 @@ public class EndpointSecurityDTO {
         this.connectionRequestTimeoutDuration = endpointSecurity.connectionRequestTimeoutDuration;
         this.socketTimeoutDuration = endpointSecurity.socketTimeoutDuration;
         this.proxyConfigs = endpointSecurity.proxyConfigs;
+        this.accessKey = endpointSecurity.accessKey;
+        this.secretKey = endpointSecurity.secretKey;
+        this.region = endpointSecurity.region;
+        this.service = endpointSecurity.service;
     }
 
     public EndpointSecurityDTO() {
 
     }
+
     public ProxyConfigs getProxyConfigs() {
         return proxyConfigs;
     }
@@ -198,6 +208,7 @@ public class EndpointSecurityDTO {
 
         this.additionalProperties = additionalProperties;
     }
+
     public String getApiKeyIdentifier() {
 
         return apiKeyIdentifier;
@@ -307,6 +318,38 @@ public class EndpointSecurityDTO {
         public void setProxyPassword(String proxyPassword) {
             this.proxyPassword = proxyPassword;
         }
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public void setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(String service) {
+        this.service = service;
     }
 
     @Override

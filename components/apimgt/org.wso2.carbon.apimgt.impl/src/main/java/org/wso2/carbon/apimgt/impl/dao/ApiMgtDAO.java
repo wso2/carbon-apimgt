@@ -15009,7 +15009,7 @@ public class ApiMgtDAO {
                 prepStmtProvider.setString(6, provider.getDescription());
                 prepStmtProvider.setBinaryStream(7, new ByteArrayInputStream(provider.getApiDefinition().getBytes()));
                 prepStmtProvider.setBinaryStream(8, new ByteArrayInputStream(provider.getConfigurations().getBytes()));
-                prepStmtProvider.setString(9, Boolean.toString(provider.isModelFamilySupported()));
+                prepStmtProvider.setString(9, Boolean.toString(provider.isMultipleVendorSupport()));
                 prepStmtProvider.executeUpdate();
                 addLLMModels(conn, provider);
                 conn.commit();
@@ -15273,7 +15273,7 @@ public class ApiMgtDAO {
                 provider.setOrganization(providerResultSet.getString("ORGANIZATION"));
                 provider.setBuiltInSupport(Boolean.parseBoolean(providerResultSet.getString("BUILT_IN_SUPPORT")));
                 provider.setDescription(providerResultSet.getString("DESCRIPTION"));
-                provider.setModelFamilySupported(Boolean.parseBoolean(providerResultSet.getString("MODEL_FAMILY_SUPPORTED")));
+                provider.setMultipleVendorSupport(Boolean.parseBoolean(providerResultSet.getString("MODEL_FAMILY_SUPPORTED")));
                 try (InputStream apiDefStream = providerResultSet.getBinaryStream("API_DEFINITION")) {
                     if (apiDefStream != null) {
                         provider.setApiDefinition(IOUtils.toString(apiDefStream));
@@ -15351,7 +15351,7 @@ public class ApiMgtDAO {
             provider.setName(providerResultSet.getString("NAME"));
             provider.setApiVersion(providerResultSet.getString("API_VERSION"));
             provider.setBuiltInSupport(Boolean.parseBoolean(providerResultSet.getString("BUILT_IN_SUPPORT")));
-            provider.setModelFamilySupported(
+            provider.setMultipleVendorSupport(
                     Boolean.parseBoolean(providerResultSet.getString("MODEL_FAMILY_SUPPORTED")));
             provider.setDescription(providerResultSet.getString("DESCRIPTION"));
             try (InputStream apiDefStream = providerResultSet.getBinaryStream("API_DEFINITION")) {

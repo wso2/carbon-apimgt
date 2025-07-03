@@ -521,6 +521,36 @@ public final class APIConstants {
     public static final String CNF = "cnf";
     public static final String HASHING = "Hashing";
     public static final String HASGING_ALGORITHM= "HashingAlgorithm";
+    public static final String ENDPOINT_SECURITY_AWS_SECRET_KEY = "secretKey";
+
+    public static class AWSConstants{
+        // AWS S4 Constants
+        public static final String AMZ_DATE_FORMAT = "yyyyMMdd'T'HHmmss'Z'";
+        public static final String DATE_FORMAT = "yyyyMMdd";
+        public static final String HOST_HEADER = "host";
+        public static final String AMZ_DATE_HEADER = "x-amz-date";
+        public static final String AMZ_SECURITY_TOKEN_HEADER = "x-amz-security-token";
+        public static final String AMZ_CONTENT_SHA_HEADER = "x-amz-content-sha256";
+        public static final String AWS4_ALGORITHM = "AWS4-HMAC-SHA256";
+        public static final String AWS4_REQUEST = "aws4_request";
+        public static final String AWS4_CREDENTIAL = "Credential";
+        public static final String AWS4_SIGNED_HEADERS = "SignedHeaders";
+        public static final String AWS4_SIGNATURE = "Signature";
+        public static final String AWS4 = "AWS4";
+        public static final String HMAC_SHA_256 = "HmacSHA256";
+        public static final String DEFAULT_REGION = "us-east-1";
+        public static final String STS = "sts";
+        public static final String AWS_DOMAIN = "amazonaws.com";
+        public static final String SESSION_FORMAT = "%d%d%d";
+        public static final String ASSUME_ROLE_QUERY_ACTION = "Action=AssumeRole";
+        public static final String ASSUME_ROLE_QUERY_VERSION = "&Version=2011-06-15";
+        public static final String ASSUME_ROLE_QUERY_ROLE_ARN_KEY = "&RoleArn=";
+        public static final String ASSUME_ROLE_QUERY_ROLE_SESSION_KEY = "&RoleSessionName=";
+        public static final String ASSUME_ROLE_QUERY_ROLE_EXTERNAL_ID_KEY = "&ExternalId=";
+        public static final String ASSUME_ROLE_ACCESS_KEY = "AccessKeyId";
+        public static final String ASSUME_ROLE_SECRET_KEY = "SecretAccessKey";
+        public static final String ASSUME_ROLE_SESSION_TOKEN = "SessionToken";
+    }
 
     // Constants related to AI features: API chat, Marketplace Assistant, Guardrails
     public static class AI {
@@ -1930,6 +1960,8 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_TYPE_DIGEST = "digest";
     public static final String ENDPOINT_SECURITY_TYPE_OAUTH = "oauth";
     public static final String ENDPOINT_SECURITY_TYPE_API_KEY = "apikey";
+    public static final String ENDPOINT_SECURITY_TYPE_AWS =
+            org.wso2.carbon.apimgt.api.APIConstants.ENDPOINT_SECURITY_TYPE_AWS;
     public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER = "apiKeyIdentifier";
     public static final String ENDPOINT_SECURITY_API_KEY_VALUE = "apiKeyValue";
     public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE = "apiKeyIdentifierType";

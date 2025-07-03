@@ -33,8 +33,9 @@ public class LLMModelDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("values")
+  @NotNull
   public List<String> getValues() {
     return values;
   }

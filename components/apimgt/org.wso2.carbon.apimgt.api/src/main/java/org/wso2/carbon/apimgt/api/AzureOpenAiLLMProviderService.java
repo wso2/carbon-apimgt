@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.api;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.model.LLMModel;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
@@ -61,6 +63,9 @@ public class AzureOpenAiLLMProviderService extends BuiltInLLMProviderService {
                     .LLM_PROVIDER_SERVICE_AZURE_OPENAI_API_DEFINITION_FILE_NAME));
 
             LLMProviderConfiguration llmProviderConfiguration = new LLMProviderConfiguration();
+            LLMProviderAuthenticationConfiguration llmProviderAuthenticationConfiguration =
+                    getLlmProviderAuthenticationConfiguration();
+            llmProviderConfiguration.setAuthenticationConfiguration(llmProviderAuthenticationConfiguration);
             llmProviderConfiguration.setAuthHeader(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_KEY);
             llmProviderConfiguration.setAuthQueryParam(null);
             llmProviderConfiguration.setConnectorType(this.getType());
@@ -103,5 +108,19 @@ public class AzureOpenAiLLMProviderService extends BuiltInLLMProviderService {
         } catch (Exception e) {
             throw new APIManagementException("Error occurred when registering LLM Provider:" + this.getType());
         }
+    }
+
+    private static LLMProviderAuthenticationConfiguration getLlmProviderAuthenticationConfiguration() {
+        LLMProviderAuthenticationConfiguration llmProviderAuthenticationConfiguration =
+                new LLMProviderAuthenticationConfiguration();
+        llmProviderAuthenticationConfiguration.setType(APIConstants.AIAPIConstants.API_KEY_AUTHENTICATION_TYPE);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(APIConstants.AIAPIConstants.API_KEY_HEADER_NAME,
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_AZURE_OPENAI_KEY);
+        parameters.put(APIConstants.AIAPIConstants.API_KEY_HEADER_ENABLED, true);
+        parameters.put(APIConstants.AIAPIConstants.API_KEY_QUERY_PARAMETER_ENABLED, false);
+        llmProviderAuthenticationConfiguration.setParameters(parameters);
+        llmProviderAuthenticationConfiguration.setEnabled(true);
+        return llmProviderAuthenticationConfiguration;
     }
 }

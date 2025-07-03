@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LLMProviderEndpointAuthenticationConfigurationDTO;
 import javax.validation.constraints.*;
 
 
@@ -20,8 +21,27 @@ import javax.validation.Valid;
 
 public class LLMProviderEndpointConfigurationDTO   {
   
+    private LLMProviderEndpointAuthenticationConfigurationDTO authenticationConfiguration = null;
     private String authHeader = null;
     private String authQueryParameter = null;
+
+  /**
+   **/
+  public LLMProviderEndpointConfigurationDTO authenticationConfiguration(LLMProviderEndpointAuthenticationConfigurationDTO authenticationConfiguration) {
+    this.authenticationConfiguration = authenticationConfiguration;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("authenticationConfiguration")
+  public LLMProviderEndpointAuthenticationConfigurationDTO getAuthenticationConfiguration() {
+    return authenticationConfiguration;
+  }
+  public void setAuthenticationConfiguration(LLMProviderEndpointAuthenticationConfigurationDTO authenticationConfiguration) {
+    this.authenticationConfiguration = authenticationConfiguration;
+  }
 
   /**
    **/
@@ -67,13 +87,14 @@ public class LLMProviderEndpointConfigurationDTO   {
       return false;
     }
     LLMProviderEndpointConfigurationDTO llMProviderEndpointConfiguration = (LLMProviderEndpointConfigurationDTO) o;
-    return Objects.equals(authHeader, llMProviderEndpointConfiguration.authHeader) &&
+    return Objects.equals(authenticationConfiguration, llMProviderEndpointConfiguration.authenticationConfiguration) &&
+        Objects.equals(authHeader, llMProviderEndpointConfiguration.authHeader) &&
         Objects.equals(authQueryParameter, llMProviderEndpointConfiguration.authQueryParameter);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(authHeader, authQueryParameter);
+    return Objects.hash(authenticationConfiguration, authHeader, authQueryParameter);
   }
 
   @Override
@@ -81,6 +102,7 @@ public class LLMProviderEndpointConfigurationDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class LLMProviderEndpointConfigurationDTO {\n");
     
+    sb.append("    authenticationConfiguration: ").append(toIndentedString(authenticationConfiguration)).append("\n");
     sb.append("    authHeader: ").append(toIndentedString(authHeader)).append("\n");
     sb.append("    authQueryParameter: ").append(toIndentedString(authQueryParameter)).append("\n");
     sb.append("}");

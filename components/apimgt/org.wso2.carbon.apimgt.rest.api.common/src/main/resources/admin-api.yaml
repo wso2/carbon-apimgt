@@ -5404,6 +5404,8 @@ components:
     LLMModel:
       title: LLM Model
       type: object
+      required:
+        - values
       properties:
         values:
           type: array
