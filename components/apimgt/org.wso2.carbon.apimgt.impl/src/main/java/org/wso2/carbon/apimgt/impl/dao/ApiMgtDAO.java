@@ -15219,18 +15219,22 @@ public class ApiMgtDAO {
     }
 
     private void addLLMModels(Connection connection, LLMProvider llmProvider) throws SQLException {
-        try (PreparedStatement prepStmtInsertModels = connection.prepareStatement(
-                SQLConstants.INSERT_LLM_PROVIDER_MODELS_SQL)) {
-            // Insert LLM provider model
-            for (LLMModel model : llmProvider.getModelList()) {
-                for (String value : model.getValues()) {
-                    prepStmtInsertModels.setString(1, value);
-                    prepStmtInsertModels.setString(2, model.getModelVendor());
-                    prepStmtInsertModels.setString(3, llmProvider.getId());
-                    prepStmtInsertModels.addBatch();
+        if (llmProvider.getModelList() != null && !llmProvider.getModelList().isEmpty()) {
+            try (PreparedStatement prepStmtInsertModels = connection.prepareStatement(
+                    SQLConstants.INSERT_LLM_PROVIDER_MODELS_SQL)) {
+                // Insert LLM provider model
+                for (LLMModel model : llmProvider.getModelList()) {
+                    if (model.getValues() != null) {
+                        for (String value : model.getValues()) {
+                            prepStmtInsertModels.setString(1, value);
+                            prepStmtInsertModels.setString(2, model.getModelVendor());
+                            prepStmtInsertModels.setString(3, llmProvider.getId());
+                            prepStmtInsertModels.addBatch();
+                        }
+                    }
                 }
+                prepStmtInsertModels.executeBatch();
             }
-            prepStmtInsertModels.executeBatch();
         }
     }
 
