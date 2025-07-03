@@ -30,7 +30,9 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static org.wso2.carbon.apimgt.impl.workflow.WorkflowUtils.*;
 
@@ -41,7 +43,6 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
 
     private static final Log log = LogFactory.getLog(ApplicationUpdateApprovalWorkflowExecutor.class);
     private static final ApiMgtDAO dao = ApiMgtDAO.getInstance();
-    ;
 
     @Override
     public String getWorkflowType() {
@@ -99,14 +100,17 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
 
         String applicationUpdateDiffJson;
         ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            applicationUpdateDiffJson = objectMapper.writeValueAsString(applicationUpdateDiffs);
-        } catch (JsonProcessingException e) {
-            String msg = "Failed to serialize application update differences to JSON";
-            log.error(msg, e);
-            throw new WorkflowException(msg, e);
+
+        if (!applicationUpdateDiffs.isEmpty()) {
+            try {
+                applicationUpdateDiffJson = objectMapper.writeValueAsString(applicationUpdateDiffs);
+            } catch (JsonProcessingException e) {
+                String msg = "Failed to serialize application update differences to JSON";
+                log.error(msg, e);
+                throw new WorkflowException(msg, e);
+            }
+            workflowDTO.setProperties("applicationUpdateDiff", applicationUpdateDiffJson);
         }
-        workflowDTO.setProperties("applicationUpdateDiff", applicationUpdateDiffJson);
 
         workflowDTO.setMetadata("requestedApplicationName", pendingApplication.getName());
         workflowDTO.setMetadata("requestedTier", pendingApplication.getTier());
@@ -118,15 +122,16 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         }
 
         String requestedCustomAttributes;
-        try {
-            requestedCustomAttributes = objectMapper.writeValueAsString(pendingApplication.getApplicationAttributes());
-        } catch (JsonProcessingException e) {
-            String msg = "Failed to serialize requested custom attributes of application";
-            log.error(msg, e);
-            throw new WorkflowException(msg, e);
+        if (!pendingApplication.getApplicationAttributes().isEmpty()) {
+            try {
+                requestedCustomAttributes = objectMapper.writeValueAsString(pendingApplication.getApplicationAttributes());
+            } catch (JsonProcessingException e) {
+                String msg = "Failed to serialize requested custom attributes of application";
+                log.error(msg, e);
+                throw new WorkflowException(msg, e);
+            }
+            workflowDTO.setMetadata("requestedCustomAttributes", requestedCustomAttributes);
         }
-        workflowDTO.setMetadata("requestedCustomAttributes", requestedCustomAttributes);
-
 
         String message = "Approve update request for application '" + pendingApplication.getName() +
                 "' submitted by user: " + applicationWorkflowDTO.getUserName();
@@ -156,10 +161,12 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
                 application.setTier(workFlowDTO.getMetadata("requestedTier"));
                 application.setDescription(workFlowDTO.getMetadata("requestedDescription"));
 
-                ObjectMapper objectMapper = new ObjectMapper();
-                Map<String, String> applicationAttributes =
-                        objectMapper.readValue(workFlowDTO.getMetadata("requestedCustomAttributes"), Map.class);
-                application.setApplicationAttributes(applicationAttributes);
+                if (workFlowDTO.getMetadata().containsKey("requestedCustomAttributes")) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    Map<String, String> applicationAttributes =
+                            objectMapper.readValue(workFlowDTO.getMetadata("requestedCustomAttributes"), Map.class);
+                    application.setApplicationAttributes(applicationAttributes);
+                }
 
                 if (workFlowDTO.getMetadata().containsKey("requestedGroupIDs")) {
                     application.setGroupId(workFlowDTO.getMetadata("requestedGroupIDs"));
@@ -169,7 +176,6 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
                 dao.updateApplicationStatus(application.getId(), APIConstants.ApplicationStatus.APPLICATION_APPROVED);
                 dao.updateApplication(application);
             } else {
-                ;
                 dao.updateApplicationStatus(application.getId(), APIConstants.ApplicationStatus.UPDATE_REJECTED);
             }
 
