@@ -2041,6 +2041,43 @@ paths:
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/admin/v4/environments/d7cf8523-9180-4255-84fa-6cb171c1f779"'
 
+  /environments/{environmentId}/gateways:
+    get:
+      tags:
+        - Environments
+      summary: Get Live Gateways in a Gatway Environment
+      description: |
+        Retrieve list of live gateways in the gatway environment.
+      parameters:
+        - $ref: '#/components/parameters/environmentId'
+      responses:
+        200:
+          description: |
+            OK.
+            List of live gateways in the gatway environment returned
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LiveGatewayList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:admin
+            - apim:environment_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+          "https://127.0.0.1:9443/api/am/admin/v4/environments/8d263942-a6df-4cc2-a804-7a2525501450/gateways"'
+
   ######################################################
   # The "Organizations" resource API
   ######################################################
@@ -5322,6 +5359,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Environment'
+    LiveGatewayList:
+      title: Environment List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Live Gateways returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/LiveGateway'
+    LiveGateway:
+      title: Live gateway instants in the gateway environment
+      type: object
+      properties:
+        gatewayID:
+          type: string
+          example: "Env1_1372344"
+        lastActive:
+          type: string
+          example: "2025-06-26T06:47:50Z"
     Organization:
       title: Organization
       required:
