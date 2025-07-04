@@ -1827,4 +1827,23 @@
       <Hashing>
         <HashingAlgorithm>{{apim.hashing.hashing_algorithm}}</HashingAlgorithm>
       </Hashing>
+
+      <AI>
+          <!-- Custom Guardrail Providers -->
+          <GuardrailProviders>
+              {% for guardrail_provider in apim.ai.guardrail_provider %}
+              <GuardrailProvider type="{{guardrail_provider.type}}">
+                  {% for key,value in guardrail_provider.properties.items() %}
+                  <Property name="{{key}}">{{value}}</Property>
+                  {% endfor %}
+              </GuardrailProvider>
+              {% endfor %}
+          </GuardrailProviders>
+
+          <EmbeddingProvider type="{{apim.ai.embedding_provider.type}}">
+              {% for key,value in apim.ai.embedding_provider.properties.items() %}
+              <Property name="{{key}}">{{value}}</Property>
+              {% endfor %}
+          </EmbeddingProvider>
+      </AI>
 </APIManager>

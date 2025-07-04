@@ -30,26 +30,34 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.EmbeddingProviderService;
+import org.wso2.carbon.apimgt.api.GuardrailProviderService;
+import org.wso2.carbon.apimgt.api.dto.EmbeddingProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.common.analytics.AnalyticsCommonConfiguration;
 import org.wso2.carbon.apimgt.common.analytics.AnalyticsServiceReferenceHolder;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.APIMgtGatewayUrlSafeJWTGeneratorImpl;
 import org.wso2.carbon.apimgt.common.gateway.jwtgenerator.AbstractAPIMgtGatewayJWTGenerator;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
+import org.wso2.carbon.apimgt.gateway.AWSBedrockGuardrailProviderServiceImpl;
+import org.wso2.carbon.apimgt.gateway.AzureOpenAIEmbeddingProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.HybridThrottleProcessor;
+import org.wso2.carbon.apimgt.gateway.MistralEmbeddingProviderServiceImpl;
+import org.wso2.carbon.apimgt.gateway.OpenAIEmbeddingProviderServiceImpl;
 import org.wso2.carbon.apimgt.gateway.RedisBaseDistributedCountManager;
-import org.wso2.carbon.apimgt.gateway.TenancyLoader;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyValidatorClientPool;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTMapCleaner;
 import org.wso2.carbon.apimgt.gateway.listeners.GatewayStartupListener;
 import org.wso2.carbon.apimgt.gateway.listeners.ServerStartupListener;
-import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
+import org.wso2.carbon.apimgt.gateway.AzureContentSafetyGuardrailProviderServiceImpl;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
+import org.wso2.carbon.apimgt.api.dto.GuardrailProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.jms.listener.JMSListenerShutDownService;
 import org.wso2.carbon.apimgt.impl.jwt.JWTValidationService;
@@ -149,6 +157,79 @@ public class APIHandlerServiceComponent {
                         new HybridThrottleProcessor();
                 context.getBundleContext().registerService(DistributedThrottleProcessor.class,
                         hybridDistributedThrottleProcessor, null);
+            }
+        }
+
+        // Register Azure content safety services
+        GuardrailProviderConfigurationDTO azureContentSafetyDto =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                .getGuardrailProvider(APIConstants.AI.GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_TYPE);
+        if (azureContentSafetyDto != null) {
+            try {
+                AzureContentSafetyGuardrailProviderServiceImpl azureContentSafetyGuardrailProviderService =
+                        new AzureContentSafetyGuardrailProviderServiceImpl();
+                azureContentSafetyGuardrailProviderService.init(azureContentSafetyDto);
+                context.getBundleContext().registerService(
+                        GuardrailProviderService.class.getName(),
+                        azureContentSafetyGuardrailProviderService,
+                        null
+                );
+            } catch (APIManagementException e) {
+                // TODO: Notify ACP
+                log.error("Error initializing Azure Content Safety guardrail provider service", e);
+            }
+        }
+
+        // Register AWS Bedrock guardrail services
+        GuardrailProviderConfigurationDTO awsBedrockGuardrailDto =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
+                        .getGuardrailProvider(APIConstants.AI.GUARDRAIL_PROVIDER_AWSBEDROCK_TYPE);
+        if (awsBedrockGuardrailDto != null) {
+            try {
+                AWSBedrockGuardrailProviderServiceImpl awsBedrockGuardrailProviderService =
+                        new AWSBedrockGuardrailProviderServiceImpl();
+                awsBedrockGuardrailProviderService.init(awsBedrockGuardrailDto);
+                context.getBundleContext().registerService(
+                        GuardrailProviderService.class.getName(),
+                        awsBedrockGuardrailProviderService,
+                        null
+                );
+            } catch (APIManagementException e) {
+                // TODO: Notify ACP
+                log.error("Error initializing AWS Bedrock Guardrail provider service", e);
+            }
+        }
+
+        // Register the embedding provider services
+        EmbeddingProviderConfigurationDTO embeddingProviderConfigurationDTO =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEmbeddingProvider();
+        if (embeddingProviderConfigurationDTO.getType() != null) {
+            try {
+                String embeddingProviderType = embeddingProviderConfigurationDTO.getType();
+                EmbeddingProviderService embeddingProviderService;
+                switch (embeddingProviderType) {
+                    case APIConstants.AI.OPENAI_EMBEDDING_PROVIDER_TYPE:
+                        embeddingProviderService = new OpenAIEmbeddingProviderServiceImpl();
+                        break;
+                    case APIConstants.AI.MISTRAL_EMBEDDING_PROVIDER_TYPE:
+                        embeddingProviderService = new MistralEmbeddingProviderServiceImpl();
+                        break;
+                    case APIConstants.AI.AZURE_OPENAI_EMBEDDING_PROVIDER_TYPE:
+                        embeddingProviderService = new AzureOpenAIEmbeddingProviderServiceImpl();
+                        break;
+                    default:
+                        throw new APIManagementException("Unsupported embedding provider type: "
+                                + embeddingProviderType);
+                }
+                embeddingProviderService.init(embeddingProviderConfigurationDTO);
+                context.getBundleContext().registerService(
+                        EmbeddingProviderService.class.getName(),
+                        embeddingProviderService,
+                        null
+                );
+            } catch (APIManagementException e) {
+                // TODO: Notify ACP
+                log.error("Error initializing Embedding provider service", e);
             }
         }
 
