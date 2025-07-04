@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.gateway.TenancyLoader;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
+import org.wso2.carbon.apimgt.gateway.scheduler.HealthCheckAPIScheduler;
 import org.wso2.carbon.apimgt.gateway.throttling.util.BlockingConditionRetriever;
 import org.wso2.carbon.apimgt.gateway.throttling.util.KeyTemplateRetriever;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -99,6 +100,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     private String tenantsRootPath = CarbonBaseUtils.getCarbonHome() + File.separator + "repository" + File.separator
             + "tenants" + File.separator;
     private String synapseDeploymentPath = "synapse-configs" + File.separator + "default";
+    private HealthCheckAPIScheduler healthCheckAPIScheduler;
 
     public GatewayStartupListener() {
 
@@ -254,6 +256,9 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 LLMProviderManager.getInstance()
                         .initializeLLMProviderConfigurations(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             });
+
+            healthCheckAPIScheduler = new HealthCheckAPIScheduler();
+            healthCheckAPIScheduler.start();
         } else {
             log.info("Running on migration enabled mode: Stopped at Gateway Startup listener completed");
         }
@@ -382,6 +387,9 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         if (jmsTransportHandlerForEventHub != null) {
             log.debug("Unsubscribe from JMS Events...");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
+        }
+        if (healthCheckAPIScheduler != null) {
+            healthCheckAPIScheduler.stop();
         }
     }
 
@@ -564,6 +572,9 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         if (jmsTransportHandlerForEventHub != null) {
             log.debug("Unsubscribe from JMS Events...");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
+        }
+        if (healthCheckAPIScheduler != null) {
+            healthCheckAPIScheduler.stop();
         }
     }
 
