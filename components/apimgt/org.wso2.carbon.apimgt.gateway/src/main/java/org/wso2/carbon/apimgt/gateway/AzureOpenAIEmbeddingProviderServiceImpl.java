@@ -48,6 +48,11 @@ public class AzureOpenAIEmbeddingProviderServiceImpl implements EmbeddingProvide
     private String azureApiKey;
     // e.g., https://<resource>.openai.azure.com/openai/deployments/<dep-id>/embeddings?api-version=2024-02-15-preview
     private String endpointUrl;
+
+    private long retrievalTimeout;
+    private int maxRetryCount;
+    private double retryProgressionFactor;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -58,6 +63,20 @@ public class AzureOpenAIEmbeddingProviderServiceImpl implements EmbeddingProvide
         if (this.azureApiKey == null || this.endpointUrl == null) {
             throw new APIManagementException(
                     "Missing required Azure OpenAI configuration properties: 'apikey' and/or 'embedding_endpoint'");
+        }
+
+        // Retry parameters
+        try {
+            retrievalTimeout = Long.parseLong(providerConfig.getProperties()
+                    .getOrDefault(APIConstants.AI.RETRIEVAL_TIMEOUT, APIConstants.AI.DEFAULT_RETRIEVAL_TIMEOUT));
+            maxRetryCount = Integer.parseInt(providerConfig.getProperties()
+                    .getOrDefault(APIConstants.AI.RETRY_COUNT, APIConstants.AI.DEFAULT_RETRY_COUNT));
+            retryProgressionFactor = Double.parseDouble(providerConfig.getProperties()
+                    .getOrDefault(APIConstants.AI.RETRY_PROGRESSION_FACTOR,
+                            APIConstants.AI.DEFAULT_RETRY_PROGRESSION_FACTOR));
+        } catch (NumberFormatException e) {
+            throw new APIManagementException("Invalid retry configuration provided: " +
+                    "'retrieval_timeout', 'retry_count', 'retry_progression_factor'");
         }
 
         this.httpClient = APIUtil.getHttpClient(endpointUrl);
@@ -86,7 +105,8 @@ public class AzureOpenAIEmbeddingProviderServiceImpl implements EmbeddingProvide
             String json = objectMapper.writeValueAsString(requestBody);
             post.setEntity(new StringEntity(json, StandardCharsets.UTF_8));
 
-            try (CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(post, httpClient)) {
+            try (CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(
+                    post, httpClient, retrievalTimeout, maxRetryCount, retryProgressionFactor)) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
 

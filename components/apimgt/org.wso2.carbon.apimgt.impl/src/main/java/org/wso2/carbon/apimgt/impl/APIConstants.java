@@ -276,7 +276,6 @@ public final class APIConstants {
     public static final String ID = "id";
     public static final String IS_VALID = "isValid";
     public static final String ASSESSMENT_REPORT = "/assessmentreport?";
-    public static final String OCP_APIM_SUBSCRIPTION_KEY = "Ocp-Apim-Subscription-Key";
 
     //registry resource containing the self signup user config
     public static final String SELF_SIGN_UP_NAME = "SelfSignUp";
@@ -584,6 +583,7 @@ public final class APIConstants {
         public static final String GUARDRAIL_PROVIDER_TYPE = "type";
         public static final String GUARDRAIL_PROVIDER_PROPERTY = "Property";
         public static final String GUARDRAIL_PROVIDER_PROPERTY_KEY = "name";
+        public static final String AZURE_OCP_APIM_SUBSCRIPTION_KEY_HEADER = "Ocp-Apim-Subscription-Key";
         public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_TYPE = "azure-contentsafety";
         public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_KEY = "key";
         public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_ENDPOINT = "endpoint";
@@ -603,6 +603,14 @@ public final class APIConstants {
         public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_URI = "request_uri";
         public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_URL = "request_url";
         public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_PAYLOAD = "request_payload";
+
+        // Retry configuration
+        public static final String RETRIEVAL_TIMEOUT = "retrieval_timeout";
+        public static final String RETRY_COUNT = "retry_count";
+        public static final String RETRY_PROGRESSION_FACTOR = "retry_progression_factor";
+        public static final String DEFAULT_RETRIEVAL_TIMEOUT = "500"; // 500 milliseconds
+        public static final String DEFAULT_RETRY_COUNT = "0"; // 0 retry
+        public static final String DEFAULT_RETRY_PROGRESSION_FACTOR = "1"; // No progression factor, fixed retry time
 
         private AI() {
 

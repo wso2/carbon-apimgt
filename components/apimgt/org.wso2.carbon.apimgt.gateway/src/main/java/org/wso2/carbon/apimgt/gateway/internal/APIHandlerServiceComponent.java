@@ -97,7 +97,7 @@ public class APIHandlerServiceComponent {
     private ServiceRegistration registration;
 
     @Activate
-    protected void activate(ComponentContext context) throws APIManagementException {
+    protected void activate(ComponentContext context) {
 
         BundleContext bundleContext = context.getBundleContext();
         if (log.isDebugEnabled()) {
@@ -165,14 +165,19 @@ public class APIHandlerServiceComponent {
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
                 .getGuardrailProvider(APIConstants.AI.GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_TYPE);
         if (azureContentSafetyDto != null) {
-            AzureContentSafetyGuardrailProviderServiceImpl azureContentSafetyGuardrailProviderService =
-                    new AzureContentSafetyGuardrailProviderServiceImpl();
-            azureContentSafetyGuardrailProviderService.init(azureContentSafetyDto);
-            context.getBundleContext().registerService(
-                    GuardrailProviderService.class.getName(),
-                    azureContentSafetyGuardrailProviderService,
-                    null
-            );
+            try {
+                AzureContentSafetyGuardrailProviderServiceImpl azureContentSafetyGuardrailProviderService =
+                        new AzureContentSafetyGuardrailProviderServiceImpl();
+                azureContentSafetyGuardrailProviderService.init(azureContentSafetyDto);
+                context.getBundleContext().registerService(
+                        GuardrailProviderService.class.getName(),
+                        azureContentSafetyGuardrailProviderService,
+                        null
+                );
+            } catch (APIManagementException e) {
+                // TODO: Notify ACP
+                log.error("Error initializing Azure Content Safety guardrail provider service", e);
+            }
         }
 
         // Register AWS Bedrock guardrail services
@@ -180,41 +185,52 @@ public class APIHandlerServiceComponent {
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
                         .getGuardrailProvider(APIConstants.AI.GUARDRAIL_PROVIDER_AWSBEDROCK_TYPE);
         if (awsBedrockGuardrailDto != null) {
-            AWSBedrockGuardrailProviderServiceImpl awsBedrockGuardrailProviderService =
-                    new AWSBedrockGuardrailProviderServiceImpl();
-            awsBedrockGuardrailProviderService.init(awsBedrockGuardrailDto);
-            context.getBundleContext().registerService(
-                    GuardrailProviderService.class.getName(),
-                    awsBedrockGuardrailProviderService,
-                    null
-            );
+            try {
+                AWSBedrockGuardrailProviderServiceImpl awsBedrockGuardrailProviderService =
+                        new AWSBedrockGuardrailProviderServiceImpl();
+                awsBedrockGuardrailProviderService.init(awsBedrockGuardrailDto);
+                context.getBundleContext().registerService(
+                        GuardrailProviderService.class.getName(),
+                        awsBedrockGuardrailProviderService,
+                        null
+                );
+            } catch (APIManagementException e) {
+                // TODO: Notify ACP
+                log.error("Error initializing AWS Bedrock Guardrail provider service", e);
+            }
         }
 
         // Register the embedding provider services
         EmbeddingProviderConfigurationDTO embeddingProviderConfigurationDTO =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEmbeddingProvider();
         if (embeddingProviderConfigurationDTO.getType() != null) {
-            String embeddingProviderType = embeddingProviderConfigurationDTO.getType();
-            EmbeddingProviderService embeddingProviderService;
-            switch (embeddingProviderType) {
-                case APIConstants.AI.OPENAI_EMBEDDING_PROVIDER_TYPE:
-                    embeddingProviderService = new OpenAIEmbeddingProviderServiceImpl();
-                    break;
-                case APIConstants.AI.MISTRAL_EMBEDDING_PROVIDER_TYPE:
-                    embeddingProviderService = new MistralEmbeddingProviderServiceImpl();
-                    break;
-                case APIConstants.AI.AZURE_OPENAI_EMBEDDING_PROVIDER_TYPE:
-                    embeddingProviderService = new AzureOpenAIEmbeddingProviderServiceImpl();
-                    break;
-                default:
-                    throw new APIManagementException("Unsupported embedding provider type: " + embeddingProviderType);
+            try {
+                String embeddingProviderType = embeddingProviderConfigurationDTO.getType();
+                EmbeddingProviderService embeddingProviderService;
+                switch (embeddingProviderType) {
+                    case APIConstants.AI.OPENAI_EMBEDDING_PROVIDER_TYPE:
+                        embeddingProviderService = new OpenAIEmbeddingProviderServiceImpl();
+                        break;
+                    case APIConstants.AI.MISTRAL_EMBEDDING_PROVIDER_TYPE:
+                        embeddingProviderService = new MistralEmbeddingProviderServiceImpl();
+                        break;
+                    case APIConstants.AI.AZURE_OPENAI_EMBEDDING_PROVIDER_TYPE:
+                        embeddingProviderService = new AzureOpenAIEmbeddingProviderServiceImpl();
+                        break;
+                    default:
+                        throw new APIManagementException("Unsupported embedding provider type: "
+                                + embeddingProviderType);
+                }
+                embeddingProviderService.init(embeddingProviderConfigurationDTO);
+                context.getBundleContext().registerService(
+                        EmbeddingProviderService.class.getName(),
+                        embeddingProviderService,
+                        null
+                );
+            } catch (APIManagementException e) {
+                // TODO: Notify ACP
+                log.error("Error initializing Embedding provider service", e);
             }
-            embeddingProviderService.init(embeddingProviderConfigurationDTO);
-            context.getBundleContext().registerService(
-                    EmbeddingProviderService.class.getName(),
-                    embeddingProviderService,
-                    null
-            );
         }
 
         // Create caches for the super tenant

@@ -530,6 +530,9 @@ public final class APIUtil {
 
     /**
      * This method is used to execute an HTTP request with retry parameters obtained from configuration parameters.
+     * <p>
+     * Use {@link #executeHTTPRequestWithRetries(HttpRequestBase, HttpClient, long, int, double)}
+     * to execute HTTP request with custom retry parameters.
      *
      * @param method       HttpRequest Type
      * @param httpClient   HttpClient
@@ -538,9 +541,30 @@ public final class APIUtil {
     public static CloseableHttpResponse executeHTTPRequestWithRetries(HttpRequestBase method, HttpClient httpClient)
             throws IOException, APIManagementException {
 
+        // The logic is abstracted to a separate method to allow for custom retry parameters
+        return executeHTTPRequestWithRetries(
+                method, httpClient, retrievalTimeout, maxRetryCount, retryProgressionFactor
+        );
+    }
+
+    /**
+     * This method is used to execute an HTTP request with custom retry parameters.
+     *
+     * @param method       HttpRequest Type
+     * @param httpClient   HttpClient
+     * @param retryDuration Duration between retry in milliseconds
+     * @param maxRetryCount Maximum number of retries
+     * @param retryProgressionFactor Progression factor for retry duration
+     * @throws IOException             if an I/O error occurs
+     * @throws APIManagementException if a processing error occurs
+     * @return CloseableHttpResponse
+     */
+    public static CloseableHttpResponse executeHTTPRequestWithRetries(
+            HttpRequestBase method, HttpClient httpClient, long retryDuration, int maxRetryCount,
+            double retryProgressionFactor) throws IOException, APIManagementException {
+
         CloseableHttpResponse httpResponse = null;
         String path = method.getURI().getPath();
-        long retryDuration = retrievalTimeout;
         int retryCount = 0;
         boolean retry;
         do {

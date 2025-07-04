@@ -51,6 +51,11 @@ public class AWSBedrockGuardrailProviderServiceImpl implements GuardrailProvider
     private String roleArn;
     private String roleRegion;
     private String roleExternalId;
+
+    private long retrievalTimeout;
+    private int maxRetryCount;
+    private double retryProgressionFactor;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -77,6 +82,20 @@ public class AWSBedrockGuardrailProviderServiceImpl implements GuardrailProvider
                 .get(APIConstants.AI.GUARDRAIL_PROVIDER_AWSBEDROCK_ROLE_REGION);
         roleExternalId = providerConfig.getProperties()
                 .get(APIConstants.AI.GUARDRAIL_PROVIDER_AWSBEDROCK_ROLE_EXTERNAL_ID);
+
+        // Retry parameters
+        try {
+            retrievalTimeout = Long.parseLong(providerConfig.getProperties()
+                    .getOrDefault(APIConstants.AI.RETRIEVAL_TIMEOUT, APIConstants.AI.DEFAULT_RETRIEVAL_TIMEOUT));
+            maxRetryCount = Integer.parseInt(providerConfig.getProperties()
+                    .getOrDefault(APIConstants.AI.RETRY_COUNT, APIConstants.AI.DEFAULT_RETRY_COUNT));
+            retryProgressionFactor = Double.parseDouble(providerConfig.getProperties()
+                    .getOrDefault(APIConstants.AI.RETRY_PROGRESSION_FACTOR,
+                            APIConstants.AI.DEFAULT_RETRY_PROGRESSION_FACTOR));
+        } catch (NumberFormatException e) {
+            throw new APIManagementException("Invalid retry configuration provided: " +
+                    "'retrieval_timeout', 'retry_count', 'retry_progression_factor'");
+        }
     }
 
     @Override
@@ -127,7 +146,8 @@ public class AWSBedrockGuardrailProviderServiceImpl implements GuardrailProvider
             }
             post.setEntity(new StringEntity(body, StandardCharsets.UTF_8));
 
-            try (CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(post, httpClient)) {
+            try (CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(
+                    post, httpClient, retrievalTimeout, maxRetryCount, retryProgressionFactor)) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
 

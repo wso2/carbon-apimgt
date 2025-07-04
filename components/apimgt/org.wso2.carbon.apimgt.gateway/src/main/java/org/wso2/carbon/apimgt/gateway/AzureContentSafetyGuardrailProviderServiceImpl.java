@@ -46,6 +46,11 @@ public class AzureContentSafetyGuardrailProviderServiceImpl implements Guardrail
 
     private String contentSafetyEndpoint;
     private String contentSafetyApiKey;
+
+    private long retrievalTimeout;
+    private int maxRetryCount;
+    private double retryProgressionFactor;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -62,6 +67,20 @@ public class AzureContentSafetyGuardrailProviderServiceImpl implements Guardrail
         if (contentSafetyEndpoint == null || contentSafetyApiKey == null) {
             throw new APIManagementException(
                     "Missing required Azure content safety configuration: 'key', 'endpoint'");
+        }
+
+        // Retry parameters
+        try {
+            retrievalTimeout = Long.parseLong(providerConfig.getProperties()
+                    .getOrDefault(APIConstants.AI.RETRIEVAL_TIMEOUT, APIConstants.AI.DEFAULT_RETRIEVAL_TIMEOUT));
+            maxRetryCount = Integer.parseInt(providerConfig.getProperties()
+                    .getOrDefault(APIConstants.AI.RETRY_COUNT, APIConstants.AI.DEFAULT_RETRY_COUNT));
+            retryProgressionFactor = Double.parseDouble(providerConfig.getProperties()
+                    .getOrDefault(APIConstants.AI.RETRY_PROGRESSION_FACTOR,
+                            APIConstants.AI.DEFAULT_RETRY_PROGRESSION_FACTOR));
+        } catch (NumberFormatException e) {
+            throw new APIManagementException("Invalid retry configuration provided: " +
+                    "'retrieval_timeout', 'retry_count', 'retry_progression_factor'");
         }
     }
 
@@ -81,17 +100,20 @@ public class AzureContentSafetyGuardrailProviderServiceImpl implements Guardrail
             throw new APIManagementException(
                     "Missing or invalid Azure Content Safety callout parameters: 'service', request_payload");
         }
-        String url = contentSafetyEndpoint + service;
+        // Escape double slashes
+        String url = contentSafetyEndpoint.replaceAll("/+$", "")
+                + "/" + service.replaceFirst("^/+", "");
         HttpClient httpClient = APIUtil.getHttpClient(url);
         HttpPost post = new HttpPost(url);
-        post.setHeader(APIConstants.OCP_APIM_SUBSCRIPTION_KEY, contentSafetyApiKey);
+        post.setHeader(APIConstants.AI.AZURE_OCP_APIM_SUBSCRIPTION_KEY_HEADER, contentSafetyApiKey);
         post.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
 
         try {
             String body = objectMapper.writeValueAsString(payloadObj);
             post.setEntity(new StringEntity(body, StandardCharsets.UTF_8));
 
-            try (CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(post, httpClient)) {
+            try (CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(
+                    post, httpClient, retrievalTimeout, maxRetryCount, retryProgressionFactor)) {
                 int statusCode = response.getStatusLine().getStatusCode();
                 String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
 
