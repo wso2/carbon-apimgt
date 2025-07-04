@@ -184,7 +184,9 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
             log.error(msg, e);
             throw new WorkflowException(msg, e);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            String msg = "Error while parsing custom attributes from workflow metadata";
+            log.error(msg, e);
+            throw new WorkflowException(msg, e);
         }
 
         return new GeneralWorkflowResponse();
