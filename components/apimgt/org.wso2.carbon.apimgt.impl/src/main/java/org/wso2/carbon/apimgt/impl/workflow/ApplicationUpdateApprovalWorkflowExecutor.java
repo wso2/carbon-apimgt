@@ -156,7 +156,6 @@ public class ApplicationUpdateApprovalWorkflowExecutor extends WorkflowExecutor 
         try {
             Application application = dao.getApplicationById(Integer.parseInt(workFlowDTO.getWorkflowReference()));
             if (WorkflowStatus.APPROVED.equals(workFlowDTO.getStatus())) {
-                application.setStatus(APIConstants.ApplicationStatus.APPLICATION_APPROVED);
                 application.setName(workFlowDTO.getMetadata("requestedApplicationName"));
                 application.setTier(workFlowDTO.getMetadata("requestedTier"));
                 application.setDescription(workFlowDTO.getMetadata("requestedDescription"));
