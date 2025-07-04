@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.ArrayList;
-import java.util.List;
 import javax.validation.constraints.*;
 
 
@@ -26,10 +24,11 @@ public class LLMProviderResponseDTO   {
     private String name = null;
     private String apiVersion = null;
     private Boolean builtInSupport = null;
+    private Boolean multipleVendorSupport = null;
     private String description = null;
     private String configurations = null;
     private String apiDefinition = null;
-    private List<String> modelList = new ArrayList<String>();
+    private String models = null;
 
   /**
    **/
@@ -101,6 +100,24 @@ public class LLMProviderResponseDTO   {
   }
 
   /**
+   * Indicates whether the LLM Provider supports multiple vendors. If true, the LLM Provider can support multiple vendors. If false, the LLM Provider supports only one vendor. 
+   **/
+  public LLMProviderResponseDTO multipleVendorSupport(Boolean multipleVendorSupport) {
+    this.multipleVendorSupport = multipleVendorSupport;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Indicates whether the LLM Provider supports multiple vendors. If true, the LLM Provider can support multiple vendors. If false, the LLM Provider supports only one vendor. ")
+  @JsonProperty("multipleVendorSupport")
+  public Boolean isMultipleVendorSupport() {
+    return multipleVendorSupport;
+  }
+  public void setMultipleVendorSupport(Boolean multipleVendorSupport) {
+    this.multipleVendorSupport = multipleVendorSupport;
+  }
+
+  /**
    **/
   public LLMProviderResponseDTO description(String description) {
     this.description = description;
@@ -156,19 +173,19 @@ public class LLMProviderResponseDTO   {
   /**
    * List of models supported by the LLM Provider
    **/
-  public LLMProviderResponseDTO modelList(List<String> modelList) {
-    this.modelList = modelList;
+  public LLMProviderResponseDTO models(String models) {
+    this.models = models;
     return this;
   }
 
   
   @ApiModelProperty(value = "List of models supported by the LLM Provider")
-  @JsonProperty("modelList")
-  public List<String> getModelList() {
-    return modelList;
+  @JsonProperty("models")
+  public String getModels() {
+    return models;
   }
-  public void setModelList(List<String> modelList) {
-    this.modelList = modelList;
+  public void setModels(String models) {
+    this.models = models;
   }
 
 
@@ -185,15 +202,16 @@ public class LLMProviderResponseDTO   {
         Objects.equals(name, llMProviderResponse.name) &&
         Objects.equals(apiVersion, llMProviderResponse.apiVersion) &&
         Objects.equals(builtInSupport, llMProviderResponse.builtInSupport) &&
+        Objects.equals(multipleVendorSupport, llMProviderResponse.multipleVendorSupport) &&
         Objects.equals(description, llMProviderResponse.description) &&
         Objects.equals(configurations, llMProviderResponse.configurations) &&
         Objects.equals(apiDefinition, llMProviderResponse.apiDefinition) &&
-        Objects.equals(modelList, llMProviderResponse.modelList);
+        Objects.equals(models, llMProviderResponse.models);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, apiVersion, builtInSupport, description, configurations, apiDefinition, modelList);
+    return Objects.hash(id, name, apiVersion, builtInSupport, multipleVendorSupport, description, configurations, apiDefinition, models);
   }
 
   @Override
@@ -205,10 +223,11 @@ public class LLMProviderResponseDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
     sb.append("    builtInSupport: ").append(toIndentedString(builtInSupport)).append("\n");
+    sb.append("    multipleVendorSupport: ").append(toIndentedString(multipleVendorSupport)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    configurations: ").append(toIndentedString(configurations)).append("\n");
     sb.append("    apiDefinition: ").append(toIndentedString(apiDefinition)).append("\n");
-    sb.append("    modelList: ").append(toIndentedString(modelList)).append("\n");
+    sb.append("    models: ").append(toIndentedString(models)).append("\n");
     sb.append("}");
     return sb.toString();
   }
