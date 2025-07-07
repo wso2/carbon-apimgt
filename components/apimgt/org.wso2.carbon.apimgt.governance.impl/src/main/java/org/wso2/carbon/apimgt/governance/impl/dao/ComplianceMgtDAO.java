@@ -55,19 +55,6 @@ public interface ComplianceMgtDAO {
     List<ComplianceEvaluationRequest> getPendingComplianceEvalRequests() throws APIMGovernanceException;
 
     /**
-     * Add an artifact compliance evaluation request event
-     *
-     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType  Artifact Type
-     * @param organization  Organization
-     * @return Request ID
-     * @throws APIMGovernanceException If an error occurs while adding the artifact compliance evaluation
-     *                                 request
-     */
-    String getPendingEvalRequest(String artifactRefId, ArtifactType artifactType, String organization)
-            throws APIMGovernanceException;
-
-    /**
      * Get compliance pending artifacts
      *
      * @param artifactType Artifact Type
@@ -82,18 +69,21 @@ public interface ComplianceMgtDAO {
     /**
      * Update the evaluation status of a pending request to processing
      *
-     * @param requestId Request ID
+     * @param request Evaluation request
      * @return True if the request is updated successfully
      * @throws APIMGovernanceException If an error occurs while updating the evaluation status
      */
-    boolean updatePendingRequestToProcessing(String requestId) throws APIMGovernanceException;
+    boolean updatePendingRequestToProcessing(ComplianceEvaluationRequest request)
+            throws APIMGovernanceException;
 
     /**
-     * Update the evaluation status of all processing requests to pending
+     * Delete long lasting processing requests
      *
-     * @throws APIMGovernanceException If an error occurs while updating the evaluation status
+     * @param taskCleanupInterval Task cleanup interval in minutes
+     * @return List of deleted request IDs
+     * @throws APIMGovernanceException If an error occurs while deleting the long-lasting processing requests
      */
-    void updateProcessingRequestToPending() throws APIMGovernanceException;
+    List<String> deleteLongLastingProcessingReqs(int taskCleanupInterval) throws APIMGovernanceException;
 
     /**
      * Delete an evaluation request
@@ -261,6 +251,19 @@ public interface ComplianceMgtDAO {
      */
     List<ArtifactInfo> getEvaluatedArtifactsForPolicy(String policyId, String organization)
             throws APIMGovernanceException;
+
+
+    /**
+     * Get pending policies for an artifact
+     *
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
+     * @return List of pending policies
+     * @throws APIMGovernanceException If an error occurs while getting the pending policies
+     */
+    List<String> getPendingPoliciesForArtifact(String artifactRefId, ArtifactType artifactType,
+                                               String organization) throws APIMGovernanceException;
 
     /**
      * Delete all governance data related to the artifact

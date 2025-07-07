@@ -35,15 +35,15 @@
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.PoliciesApi"/>
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApi"/>
             <bean class="org.wso2.carbon.apimgt.governance.rest.api.PolicyAdherenceApi"/>
+            <bean class="org.wso2.carbon.apimgt.governance.rest.api.PolicyEvaluationApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>
-            <bean class="org.wso2.carbon.apimgt.governance.rest.api.util.APIMGovernanceExceptionMapper,"/>
-            <bean class="org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper"/>
+            <bean class="org.wso2.carbon.apimgt.governance.rest.api.util.APIMGovernanceExceptionMapper"/>
             <ref bean="cors-filter"/>
         </jaxrs:providers>
         <jaxrs:properties>
-            <!-- This is added to catch interceptor level exceptions in GlobalThrowableMapper. -->
+            <!-- This is added to catch interceptor level exceptions in APIMGovernanceExceptionMapper. -->
             <entry key="map.cxf.interceptor.fault" value="true"/>
             <!-- This is added to restrict the size of attachments sent through the requests. -->
             <entry key="attachment-max-size" value="#{systemProperties['rest.api.admin.attachment.max.size'] != null ?

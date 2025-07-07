@@ -42,7 +42,7 @@ PolicyAdherenceApiService delegate = new PolicyAdherenceApiServiceImpl();
     @Path("/{policyId}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve adherence details for a specific policy", notes = "Retrieve adherence details associated with a specific governance policy within the organization using its unique ID.", response = PolicyAdherenceDetailsDTO.class, authorizations = {
+    @ApiOperation(value = "Retrieve adherence details for a specific policy", notes = "Retrieve adherence details associated with a specific governance policy within the organization using its unique ID. The list of artifacts under the policy will only contain the artifacts visible to user", response = PolicyAdherenceDetailsDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:gov_result_read", description = "Read governance results")
         })

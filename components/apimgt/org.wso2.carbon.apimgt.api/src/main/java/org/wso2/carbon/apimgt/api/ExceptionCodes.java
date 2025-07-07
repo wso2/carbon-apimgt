@@ -120,7 +120,9 @@ public enum ExceptionCodes implements ErrorHandler {
     API_PRODUCT_NOT_FOUND(900360, "API Product Not Found", 404, "Requested API Product with id '%s' not found"),
     SUB_ORGANIZATION_NOT_IDENTIFIED(900361, "User's Organization Not Identified", 403, "User's Organization is not identified"),
     CANNOT_CREATE_API_VERSION(900362, "New API Version cannot be created from a different provider", 409, "Initial provider of an API must be preserved in all versions of that API"),
+    INTERNAL_ERROR_WHILE_UPDATING_API(900363, "Internal Server Error occurred while updating the API", 500, "Internal Server Error. '%s'"),
     ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES(903010, "Error while updating required properties", 400, "Error while updating required properties."),
+    ERROR_WHILE_VALIDATING_MANDATORY_PROPERTIES(903015, "Error while validating required properties", 400, "Error while validating required properties."),
 
     //Lifecycle related codes
     API_UPDATE_FORBIDDEN_PER_LC(900380, "Insufficient permission to update the API", 403,
@@ -480,6 +482,22 @@ public enum ExceptionCodes implements ErrorHandler {
     TENANT_THEME_IMPORT_NOT_ALLOWED(901702, "Super Tenant not allowed to import tenant theme", 400,
             "Super Tenant %s is not allowed to import a tenant theme"),
 
+    ORG_THEME_IMPORT_FAILED(901703, "Failed to import organization theme of organization %s", 500,
+            "%s"),
+    ORG_THEME_STATUS_UPDATE_FAILED(901704, "Failed to update status of theme of organization %s", 500,
+            "%s"),
+    ORG_THEME_DELETE_FAILED(901705, "Failed to delete organization theme of organization %s", 500,
+            "%s"),
+    ORG_THEME_EXPORT_FAILED(901706, "Failed to export org theme of organization %s", 500,
+            "%s"),
+    ID_CANNOT_BE_FOUND_IN_DRAFTED_STATE(901707, "ID cannot be found in drafted state", 404,
+            "ID cannot be found in drafted state"),
+    ID_CANNOT_BE_FOUND_IN_PUBLISHED_STATE(901708, "ID cannot be found in published state", 404,
+            "ID cannot be found in published state"),
+    USER_DOES_NOT_HAVE_THE_THEME(901709, "User does not use the theme", 400,
+            "User does not use the theme"),
+    USER_DOES_NOT_HAVE_ANY_PUBLISHED_OR_DRAFTED_THEMES(901710, "User does not have any drafted or published themes", 404,
+            "User does not have any drafted or published themes"),
     INVALID_API_IDENTIFIER(900851, "Provided API identifier (%s) is invalid", 400,
             "Provided API identifier (%s) is invalid"),
     API_NAME_OR_VERSION_NOT_NULL(900852, "name or version couldn't be null", 400, "name or version couldn't be null"),
@@ -585,7 +603,9 @@ public enum ExceptionCodes implements ErrorHandler {
     AI_SERVICE_QUOTA_EXCEEDED(903102, "Quota exceeded for AI service", 429, "Quota exceeded for AI service"),
     DOCUMENT_NAME_ILLEGAL_CHARACTERS(902016, "Document name cannot contain illegal characters", 400, "Document name contains one or more illegal characters"),
 
-    COMPLIANCE_VIOLATION_ERROR(903300, "Compliance violation error", 400, "Compliance violation error. %s", false),
+    // Compliance related errors
+    COMPLIANCE_VIOLATION_ERROR(903300, "Request does not adhere to governance standards", 400, "%s", false),
+    ERROR_WHILE_EXECUTING_COMPLIANCE_DRY_RUN(903301, "Error while performing compliance dry run", 500, "%s"),
     // Subscriptions related
     SUBSCRIPTION_ID_NOT_SPECIFIED(902017, "Subscription ID not specified.", 400,
             "Subscription ID not specified."),
@@ -767,20 +787,29 @@ public enum ExceptionCodes implements ErrorHandler {
             "Workflow status is not defined"),
     RESOURCE_URI_TEMPLATE_NOT_DEFINED(902032, "Resource URI template value not defined", 400,
             "Resource URI template value (target) not defined", false),
-    API_ENDPOINT_NOT_FOUND(902040, "Cannot find the required API Endpoint details.", 404,
+    API_ENDPOINT_NOT_FOUND(902040, "Cannot find the required API endpoint details.", 404,
             "Requested API endpoint with id '%s' not found."),
-    ERROR_UPDATING_API_ENDPOINT_API(902041, "Error has occurred. Cannot update an API endpoint.", 500,
-            "Error when updating the API Endpoint."),
-    ERROR_INSERTING_API_ENDPOINT_API(902042, "Error has occurred. Fail to add an API endpoint to API.", 500,
-            "Error has occurred while inserting an API endpoint."),
-    ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API(902043, "Missing mandatory API endpoint's endpoint config", 500,
-            "Required attributes %s for an API endpoint config specification %s are either missing or empty"),
-    ERROR_READING_API_ENDPOINTS_FILE(902044, "Error while reading API Endpoints from the endpoints file",
-            400, "Error while reading API Endpoints from the endpoints file"),
-    ERROR_ADDING_API_ENDPOINT(902045, "Error while adding API Endpoint to the API", 500,
-            "Error while adding API Endpoint with ID: %s to the API"),
+    ERROR_UPDATING_API_ENDPOINT(902041, "Error while updating the API endpoint.", 500,
+            "Error while updating the API endpoint."),
+    ENDPOINT_READONLY(902042, "API endpoint is read only", 400,
+            "API endpoint with UUID %s is read only"),
+    ERROR_ADDING_API_ENDPOINT(902043, "Failed to add endpoint to API.", 500,
+            "Error while adding API endpoint."),
+    ERROR_MISSING_ENDPOINT_CONFIG_OF_API_ENDPOINT_API(902044, "Mandatory endpoint config is missing " +
+            "in endpoint", 500, "Mandatory endpoint config is either missing or empty"),
+    ERROR_READING_API_ENDPOINTS_FILE(902045, "Error while reading API endpoints from the endpoints file",
+            400, "Error while reading API endpoints from the endpoints file"),
     ERROR_ADDING_API_ENDPOINTS(902046, "Error while adding API Endpoints to the API", 500,
-            "Error while adding API Endpoints to the API");
+            "Error while adding API Endpoint to the API"),
+    ERROR_DELETING_API_ENDPOINT(902047, "Error while deleting API endpoint", 500,
+            "Error while deleting API endpoint with UUID '%s'."),
+    ERROR_DELETING_PRIMARY_API_ENDPOINT(902048, "Failed to delete API endpoint since endpoint is " +
+            "defined as a primary endpoint", 400,
+            "Failed to delete API endpoint with UUID '%s' since it is defined as a primary endpoint."),
+    API_ENDPOINT_URL_INVALID(902049, "Endpoint URL is invalid", 400,
+            "Endpoint URL is invalid"),
+    INVALID_MEDIA_TYPE_VALIDATION(902050, "Invalid or mismatched media type detected.", 415,
+            "File extension '%s' does not match detected MIME type '%s'");
     private final long errorCode;
     private final String errorMessage;
     private final int httpStatusCode;

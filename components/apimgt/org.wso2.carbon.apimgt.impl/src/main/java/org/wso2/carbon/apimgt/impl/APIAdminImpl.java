@@ -52,6 +52,7 @@ import org.wso2.carbon.apimgt.api.model.ApplicationInfo;
 import org.wso2.carbon.apimgt.api.model.ApplicationInfoKeyManager;
 import org.wso2.carbon.apimgt.api.model.ConfigurationDto;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationUsages;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
@@ -69,13 +70,15 @@ import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
+import org.wso2.carbon.apimgt.impl.deployer.GatewayConfigurationService;
+import org.wso2.carbon.apimgt.impl.deployer.GatewayConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
+import org.wso2.carbon.apimgt.impl.notifier.events.LabelEvent;
 import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
@@ -117,8 +120,6 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.xml.XMLConstants;
@@ -160,7 +161,9 @@ public class APIAdminImpl implements APIAdmin {
         allEnvs.addAll(dynamicEnvs);
 
         for (Environment env : allEnvs) {
-            decryptGatewayConfigurationValues(env);
+            if (env.getProvider().equalsIgnoreCase(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+                maskValues(env);
+            }
         }
         return allEnvs;
     }
@@ -199,7 +202,7 @@ public class APIAdminImpl implements APIAdmin {
         validateForUniqueVhostNames(environment);
         Environment environmentToStore =  new Environment(environment);
         encryptGatewayConfigurationValues(null, environmentToStore);
-        return apiMgtDAO.addEnvironment(tenantDomain, environment);
+        return apiMgtDAO.addEnvironment(tenantDomain, environmentToStore);
     }
 
     @Override
@@ -215,6 +218,23 @@ public class APIAdminImpl implements APIAdmin {
         apiMgtDAO.deleteEnvironment(uuid);
     }
 
+    public Environment getEnvironmentWithoutPropertyMasking(String tenantDomain, String uuid) throws APIManagementException {
+        // priority for configured environments over dynamic environments
+        // name is the UUID of environments configured in api-manager.xml
+        Environment env = APIUtil.getReadOnlyEnvironments().get(uuid);
+        if (env == null) {
+            env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
+            if (env == null) {
+                String errorMessage = String.format("Failed to retrieve Environment with UUID %s. Environment not found",
+                        uuid);
+                throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
+                        ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid))
+                );
+            }
+        }
+        return env;
+    }
+
     @Override
     public boolean hasExistingDeployments(String tenantDomain, String uuid) throws APIManagementException {
         Environment existingEnv = getEnvironment(tenantDomain, uuid);
@@ -226,7 +246,7 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public Environment updateEnvironment(String tenantDomain, Environment environment) throws APIManagementException {
         // check if the VHost exists in the tenant domain with given UUID, throw error if not found
-        Environment existingEnv = getEnvironment(tenantDomain, environment.getUuid());
+        Environment existingEnv = getEnvironmentWithoutPropertyMasking(tenantDomain, environment.getUuid());
         if (existingEnv.isReadOnly()) {
             String errorMessage = String.format("Failed to update Environment with UUID '%s'. Environment is read only",
                     environment.getUuid());
@@ -245,6 +265,7 @@ public class APIAdminImpl implements APIAdmin {
 
         validateForUniqueVhostNames(environment);
         environment.setId(existingEnv.getId());
+        encryptGatewayConfigurationValues(existingEnv, environment);
         Environment updatedEnvironment = apiMgtDAO.updateEnvironment(environment);
         // If the update is successful without throwing an exception
         // Perform a separate task of updating gateway label names
@@ -811,11 +832,11 @@ public class APIAdminImpl implements APIAdmin {
                                                    Environment updatedGatewayConfigurationDto)
             throws APIManagementException {
 
-        ExternalGatewayDeployer gatewayDeployer = ServiceReferenceHolder.getInstance()
-                .getExternalGatewayDeployer(updatedGatewayConfigurationDto.getGatewayType());
-        if (gatewayDeployer != null) {
+        GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
+                .getExternalGatewayConnectorConfiguration(updatedGatewayConfigurationDto.getGatewayType());
+        if (gatewayConfiguration != null) {
             Map<String, String> additionalProperties = updatedGatewayConfigurationDto.getAdditionalProperties();
-            for (ConfigurationDto configurationDto : gatewayDeployer.getConnectionConfigurations()) {
+            for (ConfigurationDto configurationDto : gatewayConfiguration.getConnectionConfigurations()) {
                 if (configurationDto.isMask()) {
                     String value = additionalProperties.get(configurationDto.getName());
                     if (APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD.equals(value)) {
@@ -847,7 +868,7 @@ public class APIAdminImpl implements APIAdmin {
         return keyManagerConfigurationDTO;
     }
 
-    private Environment decryptGatewayConfigurationValues(Environment environment)
+    public Environment decryptGatewayConfigurationValues(Environment environment)
             throws APIManagementException {
 
         Map<String, String> additionalProperties = environment.getAdditionalProperties();
@@ -1320,7 +1341,11 @@ public class APIAdminImpl implements APIAdmin {
         }
 
         label.setLabelId(UUID.randomUUID().toString());
-        return labelsDAO.addLabel(label, tenantDomain);
+        Label newLabel = labelsDAO.addLabel(label, tenantDomain);
+        LabelEvent labelEvent = new LabelEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                APIConstants.EventType.LABEL_CREATE.name(), tenantDomain, newLabel.getLabelId(), newLabel.getName());
+        APIUtil.sendNotification(labelEvent, APIConstants.NotifierType.LABEL.name());
+        return newLabel;
     }
 
     /**
@@ -1361,6 +1386,9 @@ public class APIAdminImpl implements APIAdmin {
         }
 
         labelsDAO.updateLabel(updateLabelBody);
+        LabelEvent labelEvent = new LabelEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                APIConstants.EventType.LABEL_UPDATE.name(), tenantDomain, labelID, updateLabelBody.getName());
+        APIUtil.sendNotification(labelEvent, APIConstants.NotifierType.LABEL.name());
         return labelsDAO.getLabelByIdAndTenantDomain(labelID, tenantDomain);
     }
 
@@ -1383,6 +1411,9 @@ public class APIAdminImpl implements APIAdmin {
                     ExceptionCodes.from(ExceptionCodes.LABEL_CANNOT_DELETE_ASSOCIATED));
         }
         labelsDAO.deleteLabel(labelID);
+        LabelEvent labelEvent = new LabelEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
+                APIConstants.EventType.LABEL_DELETE.name(), tenantDomain, labelID, labelOriginal.getName());
+        APIUtil.sendNotification(labelEvent, APIConstants.NotifierType.LABEL.name());
     }
 
     /**
@@ -1519,11 +1550,11 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     private void maskValues(Environment environment) {
-        ExternalGatewayDeployer gatewayDeployer = ServiceReferenceHolder.getInstance()
-                .getExternalGatewayDeployer(environment.getGatewayType());
+        GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
+                .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
 
         Map<String, String> additionalProperties = environment.getAdditionalProperties();
-        List<ConfigurationDto> connectionConfigurations = gatewayDeployer.getConnectionConfigurations();
+        List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
         for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
             if (connectionConfiguration.isMask()) {
                 additionalProperties.replace(connectionConfiguration.getName(),
@@ -1681,6 +1712,31 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public String getTenantConfig(String organization) throws APIManagementException {
         return ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(organization);
+    }
+
+    @Override
+    public void importDraftedOrgTheme(String organization, InputStream themeContent) throws APIManagementException {
+        apiMgtDAO.importDraftedOrgTheme(organization, themeContent);
+    }
+
+    @Override
+    public void updateOrgThemeStatus(String organization, String action) throws APIManagementException {
+        apiMgtDAO.updateOrgThemeStatus(organization, action);
+    }
+
+    @Override
+    public void deleteOrgTheme(String organization, String themeId) throws APIManagementException {
+        apiMgtDAO.deleteOrgTheme(organization, themeId);
+    }
+
+    @Override
+    public InputStream getOrgTheme(String uuid, String organization) throws APIManagementException {
+        return apiMgtDAO.getOrgTheme(uuid, organization);
+    }
+
+    @Override
+    public Map<String, String> getOrgThemes(String organization) throws APIManagementException {
+        return apiMgtDAO.getOrgThemes(organization);
     }
 
     @Override

@@ -27,6 +27,7 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.wso2.carbon.CarbonConstants;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIKeyValidator;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityConstants;
@@ -51,6 +52,7 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.cache.Cache;
 import javax.cache.Caching;
@@ -65,6 +67,7 @@ public class BasicAuthCredentialValidator {
     protected Log log = LogFactory.getLog(getClass());
     private APIKeyMgtRemoteUserStoreMgtServiceStub apiKeyMgtRemoteUserStoreMgtServiceStub;
     private APIKeyValidator apiKeyValidator;
+    private static final String PRESERVED_CASE_SENSITIVE_VARIABLE = "preservedCaseSensitive";
     /**
      * Initialize the validator with the synapse environment.
      *
@@ -92,6 +95,11 @@ public class BasicAuthCredentialValidator {
             Options options = client.getOptions();
             options.setCallTransportCleanup(true);
             options.setManageSession(true);
+            if (System.getProperty(APIMgtGatewayConstants.AUTO_TRANSPORT_OPERATION_CLEANUP) != null) {
+                options.setProperty(ServiceClient.AUTO_OPERATION_CLEANUP,
+                        Boolean.parseBoolean(
+                                System.getProperty(APIMgtGatewayConstants.AUTO_TRANSPORT_OPERATION_CLEANUP)));
+            }
             CarbonUtils.setBasicAccessSecurityHeaders(username, password, client);
         } catch (AxisFault axisFault) {
             throw new APISecurityException(APISecurityConstants.API_AUTH_GENERAL_ERROR, axisFault.getMessage(), axisFault);
@@ -235,10 +243,25 @@ public class BasicAuthCredentialValidator {
                             // check if the roles related to the API resource contains any of the role of the user
                             for (String role : userRoleList) {
                                 if (scope.getRoles().contains(role)) {
-                                    if (gatewayKeyCacheEnabled) {
-                                        getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+                                    if (Boolean.parseBoolean(System.getProperty(
+                                            PRESERVED_CASE_SENSITIVE_VARIABLE))) {
+                                        if (scope.getRoles().contains(role)) {
+                                            if (gatewayKeyCacheEnabled) {
+                                                getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+                                            }
+                                            return true;
+                                        }
+                                    } else {
+                                        List<String> upperCaseRoles = scope.getRoles().stream()
+                                                .map(String::toUpperCase)
+                                                .collect(Collectors.toList());
+                                        if (upperCaseRoles.contains(role.toUpperCase())) {
+                                            if (gatewayKeyCacheEnabled) {
+                                                getGatewayBasicAuthResourceCache().put(resourceCacheKey, resourceKey);
+                                            }
+                                            return true;
+                                        }
                                     }
-                                    return true;
                                 }
                             }
                         }

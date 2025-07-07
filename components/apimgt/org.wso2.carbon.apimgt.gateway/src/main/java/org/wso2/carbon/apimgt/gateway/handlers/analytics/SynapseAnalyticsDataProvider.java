@@ -423,17 +423,14 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         org.wso2.carbon.apimgt.keymgt.model.entity.API api =
                 (org.wso2.carbon.apimgt.keymgt.model.entity.API) messageContext.getProperty(API_OBJECT);
         customProperties.put(Constants.IS_EGRESS, api.getEgress());
-        customProperties.put(Constants.SUB_TYPE, api.getSubtype());
+        customProperties.put(Constants.SUBTYPE, api.getSubtype());
 
-        org.apache.axis2.context.MessageContext axis2MessageContext =
-                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-
-        if (axis2MessageContext.getProperty(AIAPIConstants.AI_API_RESPONSE_METADATA) != null) {
+        if (messageContext.getProperty(AIAPIConstants.AI_API_RESPONSE_METADATA) != null) {
             Object requestStartTimeObj = messageContext.getProperty(Constants.REQUEST_START_TIME_PROPERTY);
             long requestStartTime = requestStartTimeObj == null ? 0L : (long) requestStartTimeObj;
             int requestStartHour = getHourByUTC(requestStartTime);
             getAiAnalyticsData(
-                    (Map) axis2MessageContext.getProperty(AIAPIConstants.AI_API_RESPONSE_METADATA),
+                    (Map) messageContext.getProperty(AIAPIConstants.AI_API_RESPONSE_METADATA),
                     requestStartHour,
                     customProperties
             );
@@ -464,7 +461,7 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         aiMetadata.put(
                 Constants.AI_MODEL,
                 Optional.ofNullable(aiApiResponseMetadata.get(
-                            AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_MODEL)
+                            AIAPIConstants.LLM_PROVIDER_SERVICE_METADATA_RESPONSE_MODEL)
                         )
                         .map(Object::toString)
                         .orElse(null)
@@ -597,8 +594,8 @@ public class SynapseAnalyticsDataProvider implements AnalyticsDataProvider {
         }
     }
 
-    public int getResponseSize() {
-        int responseSize = 0;
+    public long getResponseSize() {
+        long responseSize = 0L;
         if (buildResponseMessage == null) {
             Map<String,String> configs = APIManagerConfiguration.getAnalyticsProperties();
             if (configs.containsKey(Constants.BUILD_RESPONSE_MESSAGE_CONFIG)) {

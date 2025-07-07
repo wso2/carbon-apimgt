@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.31.25-SNAPSHOT</version>
+        <version>9.31.124-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -406,8 +406,8 @@
             <artifactId>velocity-engine-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.wso2.orbit.com.amazonaws</groupId>
-            <artifactId>awslambda</artifactId>
+            <groupId>org.wso2.orbit.software.amazon.awssdk</groupId>
+            <artifactId>aws-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon</groupId>
@@ -571,15 +571,17 @@
                             org.wso2.carbon.apimgt.keymgt.client.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.*;version="${carbon.apimgt.imp.pkg.version}",
                             org.wso2.carbon.apimgt.api.model.xsd.*;version="${carbon.apimgt.imp.pkg.version}",
-                            org.wso2.carbon.apimgt.persistence.*;version="${carbon.apimgt.version}",
+                            org.wso2.carbon.apimgt.persistence.*;version="${carbon.apimgt.imp.pkg.version}",
                             !org.wso2.carbon.apimgt.api.model.xsd.*,
-                            org.wso2.carbon.apimgt.persistence.*;version="${carbon.apimgt.version}",
                             javax.servlet;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.http;version="${javax.servlet.imp.pkg.version}",
                             javax.servlet.resources;version="${javax.servlet.imp.pkg.version}",
                             org.eclipse.equinox.http.helper,
                             com.google.gson,
-                            com.amazonaws.*; version="${com.amazonaws.version}",
+                            software.amazon.awssdk.services.sts.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
+                            software.amazon.awssdk.services.lambda.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
+                            software.amazon.awssdk.core.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
+                            software.amazon.awssdk.awscore.*; version="${org.wso2.orbit.com.amazonaws.version.range}"; resolution:=optional,
                             org.apache.axis2.*; version="${imp.pkg.version.axis2}",
                             org.apache.commons.io.*;version="${import.package.version.commons.io}",
                             org.apache.commons.codec.*;version="${import.package.version.commons.codec}",
@@ -654,7 +656,26 @@
                     <target>9</target>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>set-system-properties</goal>
+                        </goals>
+                        <configuration>
+                            <properties>
+                                <property>
+                                    <name>org.aspectj.weaver.openarchives</name>
+                                    <value>${org.aspectj.weaver.openarchives.limit}</value>
+                                </property>
+                            </properties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>

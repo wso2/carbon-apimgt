@@ -194,9 +194,9 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
     }
 
     @Override
-    public Response addAPIProductDocumentContent(String apiProductId, String documentId,
-                              String ifMatch, InputStream fileInputStream, Attachment fileDetail, String inlineContent,
-                                                                          MessageContext messageContext) {
+    public Response addAPIProductDocumentContent(String apiProductId, String documentId, String ifMatch,
+            InputStream fileInputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext)
+            throws APIManagementException {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -219,9 +219,13 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.FILE)) {
                     RestApiUtil.handleBadRequest("Source type of product document " + documentId + " is not FILE", log);
                 }
-                RestApiPublisherUtils
-                        .attachFileToProductDocument(apiProductId, documentation, fileInputStream, fileDetail,
-                                organization);
+                String filename = fileDetail.getContentDisposition().getFilename();
+                if (APIUtil.isSupportedFileType(filename)) {
+                    RestApiPublisherUtils.attachFileToProductDocument(apiProductId, documentation, fileInputStream,
+                            fileDetail, organization);
+                } else {
+                    RestApiUtil.handleBadRequest("Unsupported extension type of document file: " + filename, log);
+                }
             } else if (inlineContent != null) {
                 if (!documentation.getSourceType().equals(Documentation.DocumentSourceType.INLINE) && !documentation
                         .getSourceType().equals(Documentation.DocumentSourceType.MARKDOWN)) {
@@ -251,6 +255,8 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while adding content to the document: " + documentId + " of API Product "
                                 + apiProductId, e, log);
+            } else if (e.getErrorHandler() != ExceptionCodes.INTERNAL_ERROR) {
+                throw e;
             } else {
                 RestApiUtil.handleInternalServerError("Failed to add content to the document " + documentId, e, log);
             }
@@ -355,6 +361,12 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
                 RestApiUtil.handleBadRequest("Invalid document sourceUrl Format", log);
                 return null;
             }
+            if (body.getType() == DocumentDTO.TypeEnum.OTHER
+                    && body.getOtherTypeName() != null
+                    && apiProvider.isAnotherOverviewDocumentationExist(apiProductId, documentId, body.getOtherTypeName(), organization)) {
+                RestApiUtil.handleBadRequest("Requested other document type _overview already exists", log);
+                return null;
+            }
 
             //overriding some properties
             body.setName(oldDocument.getName());
@@ -448,6 +460,11 @@ public class ApiProductsApiServiceImpl implements ApiProductsApiService {
             if (apiProvider.isDocumentationExist(apiProductId, documentName, organization)) {
                 String errorMessage = "Requested document '" + documentName + "' already exists";
                 RestApiUtil.handleResourceAlreadyExistsError(errorMessage, log);
+            }
+            if (body.getType() == DocumentDTO.TypeEnum.OTHER
+                    && body.getOtherTypeName() != null
+                    && apiProvider.isAnotherOverviewDocumentationExist(apiProductId, null, body.getOtherTypeName(), organization)) {
+                RestApiUtil.handleBadRequest("Requested other document type _overview already exists", log);
             }
             documentation = apiProvider.addDocumentation(apiProductId, documentation, organization);
 

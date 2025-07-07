@@ -342,6 +342,43 @@ paths:
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d "{\"sessionId\": \"1234567890\"}" "https://127.0.0.1:9443/api/am/publisher/v4/design-assistant/generate-api-payload"'
       operationId: designAssistantApiPayloadGen
 
+  ############################################################
+  # The "API Design Assistant - Regenerate Spec" resource APIs
+  ############################################################
+  /design-assistant/regenerate-spec:
+    post:
+      tags:
+        - API Design Assistant
+      summary: Regenerate API Specifications without governance rule violations with API Design Assistant
+      description: |
+        Regenerates API specifications without governance rule violations.
+      requestBody:
+        description: Input for API specification regeneration
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DesignAssistantChatQuery'
+      responses:
+        200:
+          description: Successful API specification generation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DesignAssistantRegenerateSpec'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d "{\"text\": \"violated rules.\", \"sessionId\": \"1234567890\"}" "https://127.0.0.1:9443/api/am/publisher/v4/design-assistant/regenerate-spec"'
+      operationId: designAssistantRegenerateSpec
+
   ######################################################
   # The "Individual API" resource APIs
   ######################################################
@@ -7840,7 +7877,10 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_create
             - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7877,7 +7917,10 @@ paths:
           $ref: '#/components/responses/UnsupportedMediaType'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7917,7 +7960,10 @@ paths:
       security:
         - OAuth2Security:
             - apim:api_view
+            - apim:api_create
             - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7964,7 +8010,10 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -7993,7 +8042,10 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
+            - apim:api_create
             - apim:api_manage
+            - apim:api_publish
+            - apim:api_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -8607,6 +8659,14 @@ components:
       properties:
         generated_payload:
           type: string
+    DesignAssistantRegenerateSpec:
+      type: object
+      required:
+        - regenerated_spec
+      properties:
+        regenerated_spec:
+          type: string
+          description: Regenerated API specification.
     Comment:
       title: Comment
       required:
@@ -11877,6 +11937,15 @@ components:
           description: |
             Allow subscription validation disabling for OAuth tokens
           default: true
+        designAssistantEnabled:
+          type: boolean
+          description: |
+            Specifies whether Design Assistant enabled
+          default: true
+        aiAuthTokenProvided:
+          type: boolean
+          description: Checks if the auth token is provided for AI service usage.
+          default: false
         customProperties:
             type: array
             items:

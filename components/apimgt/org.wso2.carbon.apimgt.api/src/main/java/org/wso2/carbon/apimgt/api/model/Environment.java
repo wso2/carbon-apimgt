@@ -83,6 +83,7 @@ public class Environment implements Serializable {
         this.additionalProperties = new HashMap<>(environment.additionalProperties);
         this.visibilityRoles = environment.visibilityRoles;
         this.visibility = environment.visibility;
+        this.permissions = environment.permissions;
     }
     private GatewayVisibilityPermissionConfigurationDTO permissions = new GatewayVisibilityPermissionConfigurationDTO();
 

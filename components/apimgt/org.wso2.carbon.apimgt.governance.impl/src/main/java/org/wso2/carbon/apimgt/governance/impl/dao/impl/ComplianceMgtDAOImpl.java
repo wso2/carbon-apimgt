@@ -36,13 +36,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * This class represents the DAO class related to assessing compliance of APIs
@@ -50,6 +52,8 @@ import java.util.Set;
 public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
 
     private static final Log log = LogFactory.getLog(ComplianceMgtDAOImpl.class);
+    private static final Lock resultWrtiteDelLock = new ReentrantLock();
+
     private ComplianceMgtDAOImpl() {
 
     }
@@ -197,20 +201,22 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                                           String requestId, List<String> policyIds)
             throws SQLException {
 
+        List<String> newPolicyIds = new ArrayList<>(policyIds);
         List<String> existingPolicyIds = getPolicyIdsForRequest(connection, requestId);
-        policyIds.removeAll(existingPolicyIds);
+        newPolicyIds.removeAll(existingPolicyIds);
+
+        if (newPolicyIds.isEmpty()) {
+            return;
+        }
 
         String sqlQuery = SQLConstants.ADD_REQ_POLICY_MAPPING;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            for (String policyId : policyIds) {
-                try {
-                    prepStmnt.setString(1, requestId);
-                    prepStmnt.setString(2, policyId);
-                    prepStmnt.execute();
-                } catch (SQLException e) {
-                    throw e;
-                }
+            for (String policyId : newPolicyIds) {
+                prepStmnt.setString(1, requestId);
+                prepStmnt.setString(2, policyId);
+                prepStmnt.addBatch();
             }
+            prepStmnt.executeBatch();
         }
     }
 
@@ -218,41 +224,104 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     /**
      * Update the evaluation status of a pending request to processing
      *
-     * @param requestId Request ID
+     * @param request Compliance Evaluation Request
      * @return True if the update is successful, false otherwise
      * @throws APIMGovernanceException If an error occurs while updating the evaluation status
      */
     @Override
-    public boolean updatePendingRequestToProcessing(String requestId) throws APIMGovernanceException {
+    public boolean updatePendingRequestToProcessing(ComplianceEvaluationRequest request)
+            throws APIMGovernanceException {
 
-        String sqlQuery = SQLConstants.UPDATE_GOV_REQ_STATUS_TO_PROCESSING;
-        try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            Timestamp processingTime = new Timestamp(System.currentTimeMillis());
-            prepStmnt.setTimestamp(1, processingTime);
-            prepStmnt.setString(2, requestId);
-            int affectedRows = prepStmnt.executeUpdate();
-            return affectedRows > 0;
-        } catch (SQLIntegrityConstraintViolationException e) {
-            return false;
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
+            String checkQuery = SQLConstants.GET_PROCESSING_REQ_FOR_ARTIFACT;
+            try (PreparedStatement checkStmnt = connection.prepareStatement(checkQuery)) {
+                checkStmnt.setString(1, request.getArtifactRefId());
+                checkStmnt.setString(2, String.valueOf(request.getArtifactType()));
+                checkStmnt.setString(3, request.getOrganization());
+                try (ResultSet resultSet = checkStmnt.executeQuery()) {
+                    if (resultSet.next()) {
+                        return false;
+                    }
+                }
+            }
+
+            connection.setAutoCommit(false);
+            String sqlQuery = SQLConstants.UPDATE_GOV_REQ_STATUS_TO_PROCESSING;
+            try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
+                Timestamp processingTime = new Timestamp(System.currentTimeMillis());
+                prepStmnt.setTimestamp(1, processingTime);
+                prepStmnt.setString(2, request.getId());
+                int affectedRows = prepStmnt.executeUpdate();
+                connection.commit();
+                return affectedRows > 0;
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes
-                    .ERROR_WHILE_UPDATING_GOV_EVAL_REQUEST, e, requestId);
+                    .ERROR_WHILE_UPDATING_GOV_EVAL_REQUEST, e, request.getId());
         }
     }
 
     /**
-     * Update the evaluation status of all processing requests to pending
+     * Delete long lasting processing requests
      *
-     * @throws APIMGovernanceException If an error occurs while updating the evaluation status
+     * @param taskCleanupInterval Task Cleanup Interval in minutes
+     * @return List of deleted request IDs
+     * @throws APIMGovernanceException If an error occurs while deleting the long lasting processing requests
      */
     @Override
-    public void updateProcessingRequestToPending() throws APIMGovernanceException {
+    public List<String> deleteLongLastingProcessingReqs(int taskCleanupInterval)
+            throws APIMGovernanceException {
 
-        String sqlQuery = SQLConstants.UPDATE_GOV_REQ_STATUS_FROM_PROCESSING_TO_PENDING;
-        try (Connection connection = APIMGovernanceDBUtil.getConnection();
-             PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            prepStmnt.executeUpdate();
+        Map<String, Timestamp> longLastingProcessing = new HashMap<>();
+        Timestamp currentTime = new Timestamp(System.currentTimeMillis());
+        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
+
+            String processingReqQuery = SQLConstants.GET_PROCESSING_REQ;
+            try (PreparedStatement reqStmnt = connection.prepareStatement(processingReqQuery);
+                 ResultSet resultSet = reqStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    String reqId = resultSet.getString("REQ_ID");
+                    Timestamp processingTimestamp = resultSet.getTimestamp("PROCESSING_TIMESTAMP");
+
+                    long timeDifference = currentTime.getTime() - processingTimestamp.getTime();
+                    if (timeDifference > taskCleanupInterval * 60L * 1000) {
+                        longLastingProcessing.put(reqId, processingTimestamp);
+                    }
+                }
+            }
+            if (longLastingProcessing.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            connection.setAutoCommit(false);
+            try {
+                String sqlQuery = SQLConstants.DELETE_REQ_POLICY_MAPPING;
+                try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
+                    for (String reqId : longLastingProcessing.keySet()) {
+                        prepStmnt.setString(1, reqId);
+                        prepStmnt.addBatch();
+                    }
+                    prepStmnt.executeBatch();
+                }
+
+                sqlQuery = SQLConstants.DELETE_GOV_REQ;
+                try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
+                    for (String reqId : longLastingProcessing.keySet()) {
+                        prepStmnt.setString(1, reqId);
+                        prepStmnt.addBatch();
+                    }
+                    prepStmnt.executeBatch();
+                }
+
+                connection.commit();
+                return new ArrayList<>(longLastingProcessing.keySet());
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_CHANGING_PROCESSING_REQ_TO_PENDING, e);
@@ -373,27 +442,6 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Add an artifact compliance evaluation request event
-     *
-     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType  Artifact Type
-     * @param organization  Organization
-     * @return Request ID
-     * @throws APIMGovernanceException If an error occurs while adding the artifact compliance evaluation
-     *                                 request
-     */
-    @Override
-    public String getPendingEvalRequest(String artifactRefId, ArtifactType artifactType,
-                                        String organization) throws APIMGovernanceException {
-        try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
-            return getPendingEvalRequest(connection, artifactRefId, artifactType, organization);
-        } catch (SQLException e) {
-            throw new APIMGovernanceException(APIMGovExceptionCodes
-                    .ERROR_WHILE_GETTING_GOV_EVAL_REQUEST_FOR_ARTIFACT, e, artifactRefId);
-        }
-    }
-
-    /**
      * Get compliance pending artifacts
      *
      * @param artifactType Artifact Type
@@ -460,22 +508,25 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
                                          Map<String, List<RuleViolation>> rulesetViolationsMap, String organization)
             throws APIMGovernanceException {
 
-        List<String> rulesetIds = new ArrayList<>(rulesetViolationsMap.keySet());
+        resultWrtiteDelLock.lock();
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
+            String artifactKey = getArtifactKey(connection, artifactRefId, artifactType, organization);
+            if (artifactKey == null) {
+                throw new APIMGovernanceException(APIMGovExceptionCodes.ARTIFACT_NOT_FOUND, artifactRefId);
+            }
             connection.setAutoCommit(false);
 
             try {
-                clearOldRuleViolations(connection, artifactRefId, artifactType, rulesetIds, organization);
-                clearOldRulesetRuns(connection, artifactRefId, artifactType, rulesetIds, organization);
-                clearOldPolicyRun(connection, artifactRefId, artifactType, policyId, organization);
+                clearOldRuleViolations(connection, artifactKey, policyId);
+                clearOldRulesetRuns(connection, artifactKey, policyId);
+                clearOldPolicyRun(connection, artifactKey, policyId);
+                connection.commit(); // Required to release the locks and avoid deadlocks
 
-                String artifactKey = getArtifactKey(connection, artifactRefId, artifactType, organization);
                 addPolicyRun(connection, artifactKey, policyId);
-
                 for (Map.Entry<String, List<RuleViolation>> entry : rulesetViolationsMap.entrySet()) {
                     String rulesetId = entry.getKey();
                     List<RuleViolation> ruleViolations = entry.getValue();
-                    String rulesetResultId = addRulesetRuns(connection, artifactKey, rulesetId,
+                    String rulesetResultId = addRulesetRun(connection, artifactKey, rulesetId,
                             ruleViolations.isEmpty());
                     addRuleViolations(connection, rulesetResultId, ruleViolations);
                 }
@@ -489,29 +540,26 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.ERROR_WHILE_SAVING_GOVERNANCE_RESULT,
                     e, artifactRefId);
+        } finally {
+            resultWrtiteDelLock.unlock();
         }
     }
 
     /**
      * Clear old policy run results for the artifact
      *
-     * @param connection    Connection
-     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType  Artifact Type
-     * @param policyId      Policy ID
-     * @param organization  Organization
+     * @param connection  Connection
+     * @param artifactKey Artifact Key
+     * @param policyId    Policy ID
      * @throws SQLException If an error occurs while clearing the old policy result
      */
-    private void clearOldPolicyRun(Connection connection, String artifactRefId, ArtifactType artifactType,
-                                   String policyId, String organization)
+    private void clearOldPolicyRun(Connection connection, String artifactKey, String policyId)
             throws SQLException {
 
         String sqlQuery = SQLConstants.DELETE_POLICY_RUN_FOR_ARTIFACT_AND_POLICY;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            prepStmnt.setString(1, artifactRefId);
-            prepStmnt.setString(2, String.valueOf(artifactType));
-            prepStmnt.setString(3, organization);
-            prepStmnt.setString(4, policyId);
+            prepStmnt.setString(1, artifactKey);
+            prepStmnt.setString(2, policyId);
             prepStmnt.executeUpdate();
         }
     }
@@ -519,52 +567,37 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     /**
      * Clear old ruleset runs for the artifact
      *
-     * @param connection    Connection
-     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType  Artifact Type
-     * @param rulesetIds    List of Ruleset IDs
-     * @param organization  Organization
+     * @param connection  Connection
+     * @param artifactKey Artifact Reference ID (ID of the artifact on APIM side)
+     * @param policyId    Policy ID
      * @throws SQLException If an error occurs while clearing the old ruleset results
      */
-    private void clearOldRulesetRuns(Connection connection, String artifactRefId, ArtifactType artifactType,
-                                     List<String> rulesetIds, String organization) throws SQLException {
+    private void clearOldRulesetRuns(Connection connection, String artifactKey, String policyId) throws SQLException {
 
-        String sqlQuery = SQLConstants.DELETE_RULESET_RUN_FOR_ARTIFACT_AND_RULESET;
+        String sqlQuery = SQLConstants.DELETE_RULESET_RUN_FOR_ARTIFACT_AND_POLICY;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            for (String rulesetId : rulesetIds) {
-                prepStmnt.setString(1, artifactRefId);
-                prepStmnt.setString(2, String.valueOf(artifactType));
-                prepStmnt.setString(3, organization);
-                prepStmnt.setString(4, rulesetId);
-                prepStmnt.addBatch();
-            }
-            prepStmnt.executeBatch();
+            prepStmnt.setString(1, artifactKey);
+            prepStmnt.setString(2, policyId);
+            prepStmnt.executeUpdate();
         }
     }
 
     /**
      * Clear rule violations for the artifact and rulesets
      *
-     * @param connection    Connection
-     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
-     * @param artifactType  Artifact Type
-     * @param rulesetIds    List of Ruleset IDs
-     * @param organization  Organization
+     * @param connection  Connection
+     * @param artifactKey Artifact Key
+     * @param policyId    List of Ruleset IDs
      * @throws SQLException If an error occurs while clearing the rule violations
      */
-    private void clearOldRuleViolations(Connection connection, String artifactRefId, ArtifactType artifactType,
-                                        List<String> rulesetIds, String organization) throws SQLException {
+    private void clearOldRuleViolations(Connection connection, String artifactKey,
+                                        String policyId) throws SQLException {
 
-        String sqlQuery = SQLConstants.DELETE_RULE_VIOLATIONS_FOR_ARTIFACT_AND_RULESET;
+        String sqlQuery = SQLConstants.DELETE_RULE_VIOLATIONS_FOR_ARTIFACT_AND_POLICY;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
-            for (String rulesetId : rulesetIds) {
-                prepStmnt.setString(1, artifactRefId);
-                prepStmnt.setString(2, String.valueOf(artifactType));
-                prepStmnt.setString(3, organization);
-                prepStmnt.setString(4, rulesetId);
-                prepStmnt.addBatch();
-            }
-            prepStmnt.executeBatch();
+            prepStmnt.setString(1, artifactKey);
+            prepStmnt.setString(2, policyId);
+            prepStmnt.execute();
         }
     }
 
@@ -616,7 +649,7 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     }
 
     /**
-     * Add a ruleset compliance evaluation result
+     * Add or update a ruleset compliance evaluation result
      *
      * @param connection           Connection
      * @param artifactKey          Artifact Key
@@ -625,8 +658,8 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
      * @return Ruleset Result ID
      * @throws SQLException If an error occurs while adding the ruleset compliance evaluation result
      */
-    private String addRulesetRuns(Connection connection, String artifactKey, String rulesetId,
-                                  boolean isRulesetEvalSuccess) throws SQLException {
+    private String addRulesetRun(Connection connection, String artifactKey, String rulesetId,
+                                 boolean isRulesetEvalSuccess) throws SQLException {
 
         String sqlQuery = SQLConstants.ADD_RULESET_RUN;
         try (PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
@@ -1015,6 +1048,39 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         }
     }
 
+
+    /**
+     * Get pending policies for an artifact
+     *
+     * @param artifactRefId Artifact Reference ID (ID of the artifact on APIM side)
+     * @param artifactType  Artifact Type
+     * @param organization  Organization
+     * @return List of pending policies
+     * @throws APIMGovernanceException If an error occurs while getting the pending policies
+     */
+    @Override
+    public List<String> getPendingPoliciesForArtifact(String artifactRefId,
+                                                      ArtifactType artifactType,
+                                                      String organization) throws APIMGovernanceException {
+        String sqlQuery = SQLConstants.GET_PENDING_POLICIES_FOR_ARTIFACT;
+        List<String> policyIds = new ArrayList<>();
+        try (Connection connection = APIMGovernanceDBUtil.getConnection();
+             PreparedStatement prepStmnt = connection.prepareStatement(sqlQuery)) {
+            prepStmnt.setString(1, artifactRefId);
+            prepStmnt.setString(2, String.valueOf(artifactType));
+            prepStmnt.setString(3, organization);
+            try (ResultSet resultSet = prepStmnt.executeQuery()) {
+                while (resultSet.next()) {
+                    policyIds.add(resultSet.getString("POLICY_ID"));
+                }
+            }
+            return policyIds;
+        } catch (SQLException e) {
+            throw new APIMGovernanceException(APIMGovExceptionCodes
+                    .ERROR_WHILE_GETTING_EVAL_PENDING_POLICIES_FOR_ARTIFACT, e);
+        }
+    }
+
     /**
      * Delete all governance data related to the artifact
      *
@@ -1026,6 +1092,8 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
     @Override
     public void deleteArtifact(String artifactRefId, ArtifactType artifactType, String organization)
             throws APIMGovernanceException {
+
+        resultWrtiteDelLock.lock();
         try (Connection connection = APIMGovernanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
 
@@ -1086,6 +1154,8 @@ public class ComplianceMgtDAOImpl implements ComplianceMgtDAO {
         } catch (SQLException e) {
             throw new APIMGovernanceException(APIMGovExceptionCodes
                     .ERROR_WHILE_DELETING_GOVERNANCE_DATA, e, artifactRefId);
+        } finally {
+            resultWrtiteDelLock.unlock();
         }
     }
 }

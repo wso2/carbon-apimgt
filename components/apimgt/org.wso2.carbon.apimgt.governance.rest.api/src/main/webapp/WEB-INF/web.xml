@@ -39,6 +39,7 @@
                 org.wso2.carbon.apimgt.governance.rest.api.PoliciesApi,
                 org.wso2.carbon.apimgt.governance.rest.api.ArtifactComplianceApi,
                 org.wso2.carbon.apimgt.governance.rest.api.PolicyAdherenceApi,
+                org.wso2.carbon.apimgt.governance.rest.api.PolicyEvaluationApi
             </param-value>
         </init-param>
         <init-param>
@@ -50,7 +51,6 @@
             <param-value>
                 com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider,
                 org.wso2.carbon.apimgt.governance.rest.api.util.APIMGovernanceExceptionMapper,
-                org.wso2.carbon.apimgt.rest.api.util.exception.GlobalThrowableMapper,
                 org.apache.cxf.rs.security.cors.CrossOriginResourceSharingFilter(allowHeaders=Authorization
                 allowHeaders=X-WSO2-Tenant allowHeaders=content-type exposeHeaders=Content-Disposition
                 allowCredentials=true allowOrigins={systemProperties['rest.api.admin.allowed.origins']})

@@ -30,10 +30,13 @@ import org.wso2.carbon.apimgt.governance.impl.dao.RulesetMgtDAO;
 import org.wso2.carbon.apimgt.governance.impl.dao.impl.RulesetMgtDAOImpl;
 import org.wso2.carbon.apimgt.governance.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.governance.impl.util.APIMGovernanceUtil;
+import org.wso2.carbon.apimgt.governance.impl.util.AuditLogger;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class implements the Ruleset Manager.
@@ -73,18 +76,22 @@ public class RulesetManager {
                     ruleset.getName());
         }
 
-        return rulesetMgtDAO.createRuleset(ruleset, rules, organization);
+        RulesetInfo newRuleset = rulesetMgtDAO.createRuleset(ruleset, rules, organization);
+        AuditLogger.log("Ruleset", "New ruleset %s with id %s created by user %s in organization %s",
+                newRuleset.getName(), ruleset.getId(), ruleset.getCreatedBy(), organization);
+        return newRuleset;
     }
 
     /**
      * Delete a Governance Ruleset
      *
      * @param rulesetId    Ruleset ID
+     * @param userName     User name
      * @param organization Organization
      * @throws APIMGovernanceException If an error occurs while deleting the ruleset
      */
 
-    public void deleteRuleset(String rulesetId, String organization) throws APIMGovernanceException {
+    public void deleteRuleset(String rulesetId, String userName, String organization) throws APIMGovernanceException {
         RulesetInfo ruleset = rulesetMgtDAO.getRulesetById(rulesetId, organization);
         if (ruleset == null) {
             throw new APIMGovernanceException(APIMGovExceptionCodes.RULESET_NOT_FOUND, rulesetId);
@@ -93,6 +100,8 @@ public class RulesetManager {
                     ruleset.getId());
         }
         rulesetMgtDAO.deleteRuleset(rulesetId, organization);
+        AuditLogger.log("Ruleset", "Ruleset %s with id %s deleted by user %s in organization %s",
+                ruleset.getName(), ruleset.getId(), userName, organization);
     }
 
     /**
@@ -143,7 +152,10 @@ public class RulesetManager {
                     ruleset.getName());
         }
 
-        return rulesetMgtDAO.updateRuleset(rulesetId, ruleset, rules, organization);
+        RulesetInfo updatedRuleset = rulesetMgtDAO.updateRuleset(rulesetId, ruleset, rules, organization);
+        AuditLogger.log("Ruleset", "Ruleset %s with id %s updated by user %s in organization %s",
+                updatedRuleset.getName(), ruleset.getId(), ruleset.getUpdatedBy(), organization);
+        return updatedRuleset;
     }
 
     /**
@@ -262,23 +274,22 @@ public class RulesetManager {
      */
     private Map<String, String> getRulesetSearchCriteria(String query) {
         Map<String, String> criteriaMap = new HashMap<>();
-        String[] criteria = query.split(" ");
 
-        for (String criterion : criteria) {
-            String[] parts = criterion.split(":");
+        // Regex to match key-value pairs, allowing values with spaces
+        Pattern pattern = Pattern.compile("(\\w+):([^:]+)(?=\\s+\\w+:|$)");
+        Matcher matcher = pattern.matcher(query);
 
-            if (parts.length == 2) {
-                String searchPrefix = parts[0];
-                String searchValue = parts[1];
+        while (matcher.find()) {
+            String searchPrefix = matcher.group(1);
+            String searchValue = matcher.group(2);
 
-                // Add valid prefixes to criteriaMap
-                if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE)) {
-                    criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, searchValue);
-                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE)) {
-                    criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE, searchValue);
-                } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.NAME)) {
-                    criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.NAME, searchValue);
-                }
+            // Add valid prefixes to criteriaMap
+            if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE)) {
+                criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.ARTIFACT_TYPE, searchValue);
+            } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE)) {
+                criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.RULE_TYPE, searchValue);
+            } else if (searchPrefix.equalsIgnoreCase(APIMGovernanceConstants.RulesetSearchAttributes.NAME)) {
+                criteriaMap.put(APIMGovernanceConstants.RulesetSearchAttributes.NAME, searchValue);
             }
         }
 

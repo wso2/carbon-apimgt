@@ -262,16 +262,6 @@ public class API implements Serializable {
         this.backendThrottlingConfiguration = backendThrottlingConfiguration;
     }
 
-    public String getPrimaryProductionEndpointId() {
-
-        return primaryProductionEndpointId;
-    }
-
-    public void setPrimaryProductionEndpointId(String primaryProductionEndpointId) {
-
-        this.primaryProductionEndpointId = primaryProductionEndpointId;
-    }
-
     public String getAudience() {
         return audience;
     }
@@ -1605,6 +1595,16 @@ public class API implements Serializable {
 
     public void setEgress(int egress) {
         isEgress = egress;
+    }
+
+    public String getPrimaryProductionEndpointId() {
+
+        return primaryProductionEndpointId;
+    }
+
+    public void setPrimaryProductionEndpointId(String primaryProductionEndpointId) {
+
+        this.primaryProductionEndpointId = primaryProductionEndpointId;
     }
 
     public String getPrimarySandboxEndpointId() {

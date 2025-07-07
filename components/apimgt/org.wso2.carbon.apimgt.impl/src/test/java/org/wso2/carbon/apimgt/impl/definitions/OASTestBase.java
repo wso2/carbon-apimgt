@@ -298,6 +298,18 @@ public class OASTestBase {
         return definition;
     }
 
+    public String testGenerateAPIDefinitionWithoutInfoTag(APIDefinition parser, String content) throws Exception {
+        JSONObject jsonObject = new JSONObject(content);
+        String equalNoOfResourcesWithoutInfoTag = jsonObject.getJSONObject("equalNoOfResourcesWithoutInfoTag").toString();
+
+        APIIdentifier identifier = new APIIdentifier("admin", "simple", "1.0.0");
+        API api = new API(identifier);
+        api.setScopes(new HashSet<>(Arrays.asList(sampleScope, extensionScope)));
+        api.setUriTemplates(new HashSet<>(Arrays.asList(petGet)));
+
+        return parser.generateAPIDefinition(new SwaggerData(api), equalNoOfResourcesWithoutInfoTag);
+    }
+
     protected URITemplate getUriTemplate(String httpVerb, String authType, String uriTemplateString) {
         URITemplate uriTemplate = new URITemplate();
         uriTemplate.setAuthTypes(authType);

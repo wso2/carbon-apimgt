@@ -53,9 +53,11 @@ import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.Pipe;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyConfigDTO;
+import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyDeploymentConfigDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
-import org.wso2.carbon.apimgt.api.gateway.RBEndpointDTO;
-import org.wso2.carbon.apimgt.api.gateway.RBEndpointsPolicyDTO;
+import org.wso2.carbon.apimgt.api.gateway.ModelEndpointDTO;
+import org.wso2.carbon.apimgt.api.gateway.RBPolicyConfigDTO;
 import org.wso2.carbon.apimgt.common.gateway.constants.JWTConstants;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTInfoDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTValidationInfo;
@@ -469,7 +471,13 @@ public class GatewayUtils {
             bufferedInputStream = new BufferedInputStream(pipe.getInputStream());
         }
         inputStreamMap = new HashMap<>();
-        String contentType = axis2MC.getProperty(ThreatProtectorConstants.CONTENT_TYPE).toString();
+        String contentType;
+        Object contentTypeObject = axis2MC.getProperty(ThreatProtectorConstants.CONTENT_TYPE);
+        if (contentTypeObject != null) {
+            contentType = contentTypeObject.toString();
+        } else {
+            contentType = axis2MC.getProperty(ThreatProtectorConstants.SOAP_CONTENT_TYPE).toString();
+        }
 
         if (bufferedInputStream != null) {
             bufferedInputStream.mark(0);
@@ -1750,38 +1758,55 @@ public class GatewayUtils {
     }
 
     /**
-     * Retrieves available endpoints for round robin policies.
+     * Retrieves the appropriate failover policy configuration (Production/Sandbox).
+     * If no valid configuration is found, logs a debug message and returns null.
      *
-     * @param endpoints      RBEndpointsPolicyDTO object containing endpoint configurations.
-     * @param messageContext Synapse message context.
-     * @return The selected RBEndpointDTO list, or null if no active endpoints are available.
+     * @param messageContext The Synapse {@link MessageContext}.
+     * @param policyConfig   The failover policy configuration DTO.
+     * @return The appropriate {@link FailoverPolicyDeploymentConfigDTO}, or null if invalid.
      */
-    public static List<RBEndpointDTO> getActiveEndpoints(RBEndpointsPolicyDTO endpoints,
-                                                         org.apache.synapse.MessageContext messageContext) {
+    public static FailoverPolicyDeploymentConfigDTO getTargetConfig(org.apache.synapse.MessageContext messageContext,
+                                                                    FailoverPolicyConfigDTO policyConfig) {
 
-        List<RBEndpointDTO> productionEndpoints = endpoints.getProduction();
-        List<RBEndpointDTO> sandboxEndpoints = endpoints.getSandbox();
-
-        List<RBEndpointDTO> selectedEndpoints =
-                APIConstants.API_KEY_TYPE_PRODUCTION.equals(messageContext.getProperty(APIConstants.API_KEY_TYPE))
-                        ? productionEndpoints
-                        : sandboxEndpoints;
-
-        if (selectedEndpoints == null || selectedEndpoints.isEmpty()) {
+        if (policyConfig == null) {
             return null;
         }
 
-        List<RBEndpointDTO> activeEndpoints = new ArrayList<>();
+        String apiKeyType = (String) messageContext.getProperty(APIConstants.API_KEY_TYPE);
+        FailoverPolicyDeploymentConfigDTO targetConfig = APIConstants.API_KEY_TYPE_PRODUCTION.equals(apiKeyType)
+                ? policyConfig.getProduction()
+                : policyConfig.getSandbox();
 
-        for (RBEndpointDTO endpoint : selectedEndpoints) {
+        if (targetConfig == null || targetConfig.getFallbackModelEndpoints() == null
+                || targetConfig.getFallbackModelEndpoints().isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failover policy is not set");
+            }
+            return null;
+        }
+        return targetConfig;
+    }
+
+    /**
+     * Retrieves available endpoints for the given policy configuration.
+     *
+     * @param selectedEndpoints List of ModelEndpointDTO containing endpoint configurations.
+     * @param messageContext    Synapse message context.
+     * @return The selected ModelEndpointDTO list, or null if no active endpoints are available.
+     */
+    public static List<ModelEndpointDTO> filterActiveEndpoints(List<ModelEndpointDTO> selectedEndpoints,
+                                                               org.apache.synapse.MessageContext messageContext) {
+
+        if (selectedEndpoints == null || selectedEndpoints.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<ModelEndpointDTO> activeEndpoints = new ArrayList<>();
+        for (ModelEndpointDTO endpoint : selectedEndpoints) {
             if (!DataHolder.getInstance().isEndpointSuspended(getAPIKeyForEndpoints(messageContext),
                     getEndpointKey(endpoint))) {
                 activeEndpoints.add(endpoint);
             }
-        }
-
-        if (activeEndpoints.isEmpty()) {
-            return null;
         }
         return activeEndpoints;
     }
@@ -1805,12 +1830,20 @@ public class GatewayUtils {
     /**
      * Generates a unique key for an endpoint based on the endpoint's ID and model.
      *
-     * @param endpoint The RBEndpointDTO object containing the endpoint details.
+     * @param endpoint The ModelEndpointDTO object containing the endpoint details.
      * @return A unique key in the format "{endpointId}_{model}".
      */
-    public static String getEndpointKey(RBEndpointDTO endpoint) {
+    public static String getEndpointKey(ModelEndpointDTO endpoint) {
 
+        if (endpoint == null) {
+            throw new IllegalArgumentException("ModelEndpointDTO cannot be null");
+        }
+        if (StringUtils.isEmpty(endpoint.getEndpointId())) {
+            throw new IllegalArgumentException("Endpoint ID cannot be null or empty");
+        }
+        if (StringUtils.isEmpty(endpoint.getModel())) {
+            throw new IllegalArgumentException("Endpoint model cannot be null or empty");
+        }
         return endpoint.getEndpointId() + "_" + endpoint.getModel();
     }
-
 }

@@ -68,6 +68,8 @@ import org.wso2.carbon.apimgt.api.model.Documentation.DocumentVisibility;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
+import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.KeyManagerApplicationInfo;
@@ -89,7 +91,6 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
-import org.wso2.carbon.apimgt.impl.deployer.ExternalGatewayDeployer;
 import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -102,6 +103,7 @@ import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.SubscriptionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.TierPermissionDTO;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
+import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
 import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl;
@@ -160,6 +162,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -2982,23 +2985,27 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                                 KeyManagerHolder.getTenantKeyManagerInstance(tenantDomain, apiKey.getKeyManager());
                     }
                     /* retrieving OAuth application information for specific consumer key */
-                    consumerKey = apiKey.getConsumerKey();
-                    OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
-                    if (oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME) != null) {
-                        OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(oAuthApplicationInfo.
-                                        getParameter(ApplicationConstants.OAUTH_CLIENT_NAME).toString(), null,
-                                oAuthApplicationInfo.getCallBackURL(), null,
-                                null, application.getTokenType(), this.tenantDomain, apiKey.getKeyManager());
-                        oauthAppRequest.getOAuthApplicationInfo().setAppOwner(userId);
-                        oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
-                        /* updating the owner of the OAuth application with userId */
-                        OAuthApplicationInfo updatedAppInfo = keyManager.updateApplicationOwner(oauthAppRequest,
-                                userId);
-                        isAppUpdated = true;
-                        audit.info("Successfully updated the owner of application " + application.getName() +
-                                " from " + oldUserName + " to " + userId + ".");
-                    } else {
-                        throw new APIManagementException("Unable to retrieve OAuth application information.");
+                    if (!APIConstants.OAuthAppMode.MAPPED.name().equalsIgnoreCase(apiKey.getCreateMode())) {
+                        consumerKey = apiKey.getConsumerKey();
+                        OAuthApplicationInfo oAuthApplicationInfo = keyManager.retrieveApplication(consumerKey);
+                        Object oauthClientName =
+                                oAuthApplicationInfo.getParameter(ApplicationConstants.OAUTH_CLIENT_NAME);
+                        if (oauthClientName != null) {
+                            OAuthAppRequest oauthAppRequest = ApplicationUtils.createOauthAppRequest(
+                                    oauthClientName.toString(), null, oAuthApplicationInfo.getCallBackURL(),
+                                    null, null, application.getTokenType(), this.tenantDomain,
+                                    apiKey.getKeyManager());
+                            oauthAppRequest.getOAuthApplicationInfo().setAppOwner(userId);
+                            oauthAppRequest.getOAuthApplicationInfo().setClientId(consumerKey);
+                            /* updating the owner of the OAuth application with userId */
+                            OAuthApplicationInfo updatedAppInfo = keyManager.updateApplicationOwner(oauthAppRequest,
+                                    userId);
+                            isAppUpdated = true;
+                            audit.info("Successfully updated the owner of application " + application.getName() +
+                                    " from " + oldUserName + " to " + userId + ".");
+                        } else {
+                            throw new APIManagementException("Unable to retrieve OAuth application information.");
+                        }
                     }
                 }
             } else {
@@ -3443,9 +3450,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         hostsWithSchemes = getHostWithSchemeMappingForEnvironment(api, apiTenantDomain, environmentName);
 
         Environment environment = APIUtil.getEnvironments().get(environmentName);
-        Map<String, ExternalGatewayDeployer> externalGatewayDeployers = ServiceReferenceHolder.getInstance().getExternalGatewayDeployers();
-        ExternalGatewayDeployer gatewayDeployer = externalGatewayDeployers.get(environment.getGatewayType());
-        if (gatewayDeployer != null) {
+        GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
+                .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
+        if (gatewayConfiguration != null) {
             api.setContext("");
             updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
         } else {
@@ -3592,10 +3599,21 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         String organization = api.getOrganization();
         if (!domains.isEmpty()) {
             String customUrl = domains.get(APIConstants.CUSTOM_URL);
-            if (customUrl.startsWith(APIConstants.HTTP_PROTOCOL_URL_PREFIX)) {
-                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, customUrl);
-            } else {
-                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, customUrl);
+            if (customUrl != null) {
+                boolean isHttp = customUrl.startsWith(APIConstants.HTTP_PROTOCOL_URL_PREFIX);
+                boolean isHttps = customUrl.startsWith(APIConstants.HTTPS_PROTOCOL_URL_PREFIX);
+
+                if (!isHttp && !isHttps) {
+                    hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, customUrl);
+                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, customUrl);
+                } else {
+                    if (isHttp) {
+                        hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, customUrl);
+                    }
+                    if (isHttps) {
+                        hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, customUrl);
+                    }
+                }
             }
         } else {
             Map<String, Environment> allEnvironments = APIUtil.getEnvironments(organization);
@@ -3622,27 +3640,29 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             }
 
             VHost vhost = VHostUtils.getVhostFromEnvironment(environment, host);
-            Map<String, ExternalGatewayDeployer> externalGatewayDeployers = ServiceReferenceHolder.getInstance().getExternalGatewayDeployers();
-            ExternalGatewayDeployer gatewayDeployer = externalGatewayDeployers.get(environment.getGatewayType());
-            try {
-                if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)
-                        && vhost.getHttpPort() != -1) {
-                    String httpUrl = gatewayDeployer != null ?
-                            gatewayDeployer.getAPIExecutionURL(vhost.getHttpUrl(), environment,
-                                    APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(), environment.getUuid())) :
-                            vhost.getHttpUrl();
-                    hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, httpUrl);
-                }
-                if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)
-                        && vhost.getHttpsPort() != -1) {
-                    String httpsUrl = gatewayDeployer != null ?
-                            gatewayDeployer.getAPIExecutionURL(vhost.getHttpsUrl(), environment,
-                                    APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(), environment.getUuid())) :
-                            vhost.getHttpsUrl();
-                    hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, httpsUrl);
-                }
-            } catch (DeployerException e) {
-                throw new APIManagementException(e.getMessage());
+            GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
+                    .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
+
+            boolean isExternalGateway = false;
+            GatewayDeployer gatewayDeployer = null;
+            if (gatewayConfiguration != null && StringUtils.isNotEmpty(gatewayConfiguration.getImplementation())) {
+                gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain, environmentName);
+                isExternalGateway = true;
+            }
+
+            String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(),
+                    environment.getUuid());
+            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)
+                    && vhost.getHttpPort() != -1) {
+                String httpUrl = isExternalGateway ? gatewayDeployer.getAPIExecutionURL(externalReference) :
+                        vhost.getHttpUrl();
+                hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, httpUrl);
+            }
+            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)
+                    && vhost.getHttpsPort() != -1) {
+                String httpsUrl = isExternalGateway ? gatewayDeployer.getAPIExecutionURL(externalReference) :
+                        vhost.getHttpsUrl();
+                hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, httpsUrl);
             }
         }
         return hostsWithSchemes;
@@ -3886,7 +3906,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         String[] roles = APIUtil.getListOfRoles(userName);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
         UserContext userCtx = new UserContext(userNameWithoutChange,
-                new Organization(organizationInfo.getOrganizationId()), properties, roles);
+                new Organization(organizationInfo.getName(), organizationInfo.getOrganizationId(), null), properties,
+                roles);
 
         return searchPaginatedAPIs(searchQuery, start, end, org, userCtx, organizationInfo);
     }
@@ -4274,8 +4295,9 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
         String[] roles = APIUtil.getFilteredUserRoles(userName);
 
-        UserContext ctx = new UserContext(userName, new Organization(organizationInfo.getOrganizationId()),
-                properties, roles);
+        UserContext ctx = new UserContext(userName,
+                new Organization(organizationInfo.getName(), organizationInfo.getOrganizationId(), null), properties,
+                roles);
         return  searchPaginatedContent(org, searchQuery, start, end, ctx);
     }
 
@@ -4774,11 +4796,11 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         Set<String> set = new HashSet<>();
 
         for (String element : arr1) {
-            set.add(element);
+            set.add(element.toLowerCase(Locale.ENGLISH));
         }
 
         for (String element : arr2) {
-            if (set.contains(element)) {
+            if (set.contains(element.toLowerCase(Locale.ENGLISH))) {
                 return true;
             }
         }

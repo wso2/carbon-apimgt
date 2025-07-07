@@ -1,0 +1,309 @@
+# Copyright (c) 2025, WSO2 LLC. (http://www.wso2.com). All Rights Reserved.
+#
+# This software is the property of WSO2 LLC. and its suppliers, if any.
+# Dissemination of any information or reproduction of any material contained
+# herein in any form is strictly forbidden, unless permitted by WSO2 expressly.
+# You may not alter or remove any copyright or other notice from copies of this content.
+
+name: WSO2 API Management Guidelines
+description: >-
+  A guide detailing best practices for creating robust, scalable, and secure
+  APIs, ensuring alignment with industry standards for optimal design.
+ruleCategory: SPECTRAL
+ruleType: API_METADATA
+artifactType: REST_API
+documentationLink: "https://apim.docs.wso2.com/en/4.5.0/reference/governance/wso2-api-management-guidelines/"
+provider: WSO2
+rulesetContent:
+  rules:
+    api-name-required:
+      description: API name is required.
+      message: "API name is required."
+      severity: error
+      given: "$.data"
+      then:
+        field: "name"
+        function: truthy
+
+    api-name-no-special-characters:
+      description: API name should not contain whitespaces or special characters except for hyphens, underscores and periods.
+      message: "API name contains spaces or special characters. Use only letters, numbers, hyphens, underscores and periods."
+      severity: error
+      given: "$.data.name"
+      then:
+        function: pattern
+        functionOptions:
+          match: "^[a-zA-Z0-9-_\\.]+$"
+
+    api-name-length:
+      description: API name should be between 1 and 50 characters.
+      message: "API name must be between 1 and 50 characters."
+      severity: error
+      given: "$.data.name"
+      then:
+        function: length
+        functionOptions:
+          min: 1
+          max: 50
+
+    api-name-cannot-contain-version:
+      description: >
+        API name should not contain a semantic version substring (e.g., x.y.z). This helps keep the version separate from the API name.
+
+        **Correct Example**:
+        ```json
+        {
+          "data": {
+            "name": "CustomerProfileAPI"
+          }
+        }
+        ```
+
+        **Incorrect Example**:
+        ```json
+        {
+          "data": {
+            "name": "CustomerProfileAPI-1.2.3"
+          }
+        }
+        ```
+      message: "API name should not contain the version."
+      severity: warn
+      given: "$.data.name"
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: '[0-9]+\.[0-9]+\.[0-9]+'
+
+    api-context-required:
+      description: Checks that the API context field is present and starts with a slash.
+      message: "API 'context' must be present and begin with '/'."
+      severity: error
+      given: "$.data"
+      then:
+        field: "context"
+        function: truthy
+
+    api-context-no-special-characters:
+      description: API context should not contain whitespaces or special characters except for hyphens, underscores, periods and forward slashes.
+      message: "API context contains spaces or special characters. Use only letters, numbers, hyphens, underscores, periods and forwards slashes."
+      severity: error
+      given: "$.data.context"
+      then:
+        function: pattern
+        functionOptions:
+          match: '^/[\{\}/a-zA-Z0-9-_\\.]+$'
+
+    api-context-length:
+      description: API context should be between 1 and 200 characters.
+      message: "API context must be between 1 and 200 characters."
+      severity: error
+      given: "$.data.context"
+      then:
+        function: length
+        functionOptions:
+          min: 1
+          max: 200
+
+    api-context-cannot-end-with-slash:
+      description: >
+        API context should not end with a slash. For example, `/myapi/` is disallowed.
+
+        **Correct Example**:
+        ```json
+        {
+          "data": {
+            "context": "/myapi"
+          }
+        }
+        ```
+
+        **Incorrect Example**:
+        ```json
+        {
+          "data": {
+            "context": "/myapi/"
+          }
+        }
+        ```
+      message: "API context should not end with a slash."
+      severity: error
+      given: "$.data.context"
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: '/$'
+
+    api-context-cannot-contain-version:
+      description: >
+        API context should not contain the version (e.g., x.y.z) embedded. Instead, the version is specified separately in the 'version' field.
+
+        **Correct Example**:
+        ```json
+        {
+          "data": {
+            "context": "/customer"
+          }
+        }
+        ```
+
+        **Incorrect Example**:
+        ```json
+        {
+          "data": {
+            "context": "/customer/1.2.3"
+          }
+        }
+        ```
+      message: "API context should not contain the version."
+      severity: warn
+      given: "$.data.context"
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: '[0-9]+\.[0-9]+\.[0-9]+'
+
+    api-version-required:
+      description: Verifies the API version is specified and not empty.
+      message: "API 'version' is missing or empty."
+      severity: error
+      given: "$.data"
+      then:
+        field: "version"
+        function: truthy
+
+    api-no-unlimited-business-plan:
+      description: API should not have an unlimited business plan.
+      message: "API should not have an unlimited business plan."
+      severity: warn
+      given: "$.data.policies.*"
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: 'Unlimited'
+
+    api-no-insecure-transports:
+      description: API should not have insecure transports.
+      message: "API should not have insecure transports."
+      severity: warn
+      given: "$.data.transport.*"
+      then:
+        function: pattern
+        functionOptions:
+          notMatch: 'http$'
+
+    api-tags:
+      description: API should have tags.
+      message: "API should have tags."
+      severity: warn
+      given: "$.data"
+      then:
+        field: "tags"
+        function: truthy
+
+    api-tags-count:
+      description: API should have at least one tag.
+      message: "API should have at least one tag."
+      severity: warn
+      given: "$.data.tags"
+      then:
+        function: length
+        functionOptions:
+          min: 1
+
+    api-business-owner-email:
+      description: Checks that the business owner’s email is set
+      message: "Business owner email is missing or empty."
+      severity: warn
+      given: "$.data.businessInformation"
+      then:
+        field: "businessOwnerEmail"
+        function: truthy
+
+    api-business-owner-email-format:
+      description: Checks that the business owner’s email is valid.
+      message: "Business owner email seems invalid. Please use a proper email format."
+      severity: error
+      given: "$.data.businessInformation"
+      then:
+        field: "businessOwnerEmail"
+        function: pattern
+        functionOptions:
+          match: '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+
+    api-business-owner:
+      description: Checks that the business owner is set
+      message: "Business owner is missing or empty."
+      severity: warn
+      given: "$.data.businessInformation"
+      then:
+        field: "businessOwner"
+        function: truthy
+
+    api-technical-owner:
+      description: Checks that the technical owner is set
+      message: "Technical owner is missing or empty."
+      severity: warn
+      given: "$.data.businessInformation"
+      then:
+        field: "technicalOwner"
+        function: truthy
+
+    api-technical-owner-email:
+      description: Checks that the technical owner’s email is set
+      message: "Technical owner email is missing or empty."
+      severity: warn
+      given: "$.data.businessInformation"
+      then:
+        field: "technicalOwnerEmail"
+        function: truthy
+
+    api-technical-owner-email-format:
+      description: Checks that the technical owner’s email is valid.
+      message: "Technical owner email seems invalid. Please use a proper email format."
+      severity: error
+      given: "$.data.businessInformation"
+      then:
+        field: "technicalOwnerEmail"
+        function: pattern
+        functionOptions:
+          match: '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+
+    api-endpointConfig-production-required:
+      description: Confirms that a production endpoint is provided.
+      message: "Production endpoint is missing or has an empty URL."
+      severity: error
+      given: "$.data.endpointConfig"
+      then:
+        field: "production_endpoints"
+        function: truthy
+
+    api-endpointConfig-sandbox-suggestion:
+      description: Suggests providing a sandbox endpoint for testing if not already present.
+      message: "Consider providing a sandbox endpoint for testing."
+      severity: info
+      given: "$.data.endpointConfig"
+      then:
+        field: "sandbox_endpoints"
+        function: truthy
+
+    api-no-unlimited-throttling-policy:
+      description: "API should not have an unlimited throttling policy."
+      message: "API should not have an unlimited throttling policy."
+      severity: "warn"
+      given: "$.data.apiThrottlingPolicy"
+      then:
+        function: "pattern"
+        functionOptions:
+          notMatch: "^Unlimited$"
+
+    api-resources-security-required:
+      description: Checks that security is enabled for all resources.
+      message: "Security is not enabled for all resources."
+      severity: error
+      given: "$.data.operations.*"
+      then:
+        field: "authType"
+        function: pattern
+        functionOptions:
+          notMatch: 'None'
