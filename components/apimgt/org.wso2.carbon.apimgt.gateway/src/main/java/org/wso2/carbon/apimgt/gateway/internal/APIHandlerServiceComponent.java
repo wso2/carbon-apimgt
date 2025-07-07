@@ -639,7 +639,7 @@ public class APIHandlerServiceComponent {
     protected void setWebSocketProcessor(WebSocketProcessor websocketprocessor) {
 
         if (log.isDebugEnabled()) {
-            log.debug("Inbound websockeet processor bound to the API handlers");
+            log.debug("Inbound websocket processor bound to the API handlers");
         }
         ServiceReferenceHolder.getInstance().setWebsocketProcessor(websocketprocessor);
     }
