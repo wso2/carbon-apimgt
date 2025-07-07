@@ -522,9 +522,9 @@ public final class APIConstants {
     public static final String HASHING = "Hashing";
     public static final String HASGING_ALGORITHM= "HashingAlgorithm";
 
-    // Constants related to AI features: API chat and Marketplace Assistant
+    // Constants related to AI features: API chat, Marketplace Assistant, Guardrails
     public static class AI {
-
+        public static final String AI = "AI";
         public static final String API_CHAT = "APIChat";
         public static final String ENABLED = "Enabled";
         public static final String API_CHAT_AUTH_TOKEN = "AuthToken";
@@ -564,10 +564,86 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
 
+        public static final String OPENAI_EMBEDDING_PROVIDER_TYPE = "openai";
+        public static final String AZURE_OPENAI_EMBEDDING_PROVIDER_TYPE = "azure-openai";
+        public static final String MISTRAL_EMBEDDING_PROVIDER_TYPE = "mistral";
+        public static final String EMBEDDING_PROVIDER = "EmbeddingProvider";
+        public static final String EMBEDDING_PROVIDER_TYPE = "type";
+        public static final String EMBEDDING_PROVIDER_PROPERTY = "Property";
+        public static final String EMBEDDING_PROVIDER_PROPERTY_KEY = "name";
+        public static final String EMBEDDING_PROVIDER_API_KEY = "apikey";
+        public static final String EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT = "embedding_endpoint";
+        public static final String EMBEDDING_PROVIDER_EMBEDDING_MODEL = "embedding_model";
+        public static final String EMBEDDING_PROVIDER_EMBEDDING_REQUEST_MODEL = "model";
+        public static final String EMBEDDING_PROVIDER_EMBEDDING_REQUEST_INPUT = "input";
+        public static final String EMBEDDING_PROVIDER_RESPONSE_EMBEDDING_PATH = "/data/0/embedding";
+
+        public static final String GUARDRAIL_PROVIDERS = "GuardrailProviders";
+        public static final String GUARDRAIL_PROVIDER = "GuardrailProvider";
+        public static final String GUARDRAIL_PROVIDER_TYPE = "type";
+        public static final String GUARDRAIL_PROVIDER_PROPERTY = "Property";
+        public static final String GUARDRAIL_PROVIDER_PROPERTY_KEY = "name";
+        public static final String AZURE_OCP_APIM_SUBSCRIPTION_KEY_HEADER = "Ocp-Apim-Subscription-Key";
+        public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_TYPE = "azure-contentsafety";
+        public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_KEY = "key";
+        public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_ENDPOINT = "endpoint";
+        public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_CALLOUT_SERVICE = "service";
+        public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_CALLOUT_PAYLOAD = "request_payload";
+
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_TYPE = "awsbedrock-guardrails";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_ACCESS_KEY = "access_key";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_SECRET_KEY = "secret_key";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_SESSION_TOKEN = "session_token";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_ROLE_ARN = "role_arn";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_ROLE_REGION = "role_region";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_ROLE_EXTERNAL_ID = "role_external_id";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_SERVICE = "service";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_SERVICE_REGION = "guardrail_region";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_HOST = "request_host";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_URI = "request_uri";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_URL = "request_url";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_PAYLOAD = "request_payload";
+
+        // Retry configuration
+        public static final String RETRIEVAL_TIMEOUT = "retrieval_timeout";
+        public static final String RETRY_COUNT = "retry_count";
+        public static final String RETRY_PROGRESSION_FACTOR = "retry_progression_factor";
+        public static final String DEFAULT_RETRIEVAL_TIMEOUT = "500"; // 500 milliseconds
+        public static final String DEFAULT_RETRY_COUNT = "0"; // 0 retry
+        public static final String DEFAULT_RETRY_PROGRESSION_FACTOR = "1"; // No progression factor, fixed retry time
+
         private AI() {
 
         }
     }
+
+    // AWS S4 Constants
+    public static final String AMZ_DATE_FORMAT = "yyyyMMdd'T'HHmmss'Z'";
+    public static final String DATE_FORMAT = "yyyyMMdd";
+    public static final String HOST_HEADER = "host";
+    public static final String AMZ_DATE_HEADER = "x-amz-date";
+    public static final String AMZ_SECURITY_TOKEN_HEADER = "x-amz-security-token";
+    public static final String AMZ_CONTENT_SHA_HEADER = "x-amz-content-sha256";
+    public static final String AWS4_ALGORITHM = "AWS4-HMAC-SHA256";
+    public static final String AWS4_REQUEST = "aws4_request";
+    public static final String AWS4_CREDENTIAL = "Credential";
+    public static final String AWS4_SIGNED_HEADERS = "SignedHeaders";
+    public static final String AWS4_SIGNATURE = "Signature";
+    public static final String AWS4 = "AWS4";
+    public static final String HMAC_SHA_256 = "HmacSHA256";
+    public static final String DEFAULT_REGION = "us-east-1";
+    public static final String STS = "sts";
+    public static final String AWS_DOMAIN = "amazonaws.com";
+    public static final String SESSION_FORMAT = "%d%d%d";
+    public static final String ASSUME_ROLE_QUERY_ACTION = "Action=AssumeRole";
+    public static final String ASSUME_ROLE_QUERY_VERSION = "&Version=2011-06-15";
+    public static final String ASSUME_ROLE_QUERY_ROLE_ARN_KEY = "&RoleArn=";
+    public static final String ASSUME_ROLE_QUERY_ROLE_SESSION_KEY = "&RoleSessionName=";
+    public static final String ASSUME_ROLE_QUERY_ROLE_EXTERNAL_ID_KEY = "&ExternalId=";
+    public static final String ASSUME_ROLE_ACCESS_KEY = "AccessKeyId";
+    public static final String ASSUME_ROLE_SECRET_KEY = "SecretAccessKey";
+    public static final String ASSUME_ROLE_SESSION_TOKEN = "SessionToken";
+
 
     //documentation rxt
 

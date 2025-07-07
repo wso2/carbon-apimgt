@@ -61,6 +61,8 @@ import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.dto.ai.AIAPIConfigurationsDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.EmbeddingProviderConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.GuardrailProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
@@ -135,6 +137,9 @@ public class APIManagerConfiguration {
 
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
+    private final Map<String, GuardrailProviderConfigurationDTO> guardrailProviders = new HashMap<>();
+    private final EmbeddingProviderConfigurationDTO embeddingProviderConfigurationDTO =
+            new EmbeddingProviderConfigurationDTO();
     private static Properties realtimeNotifierProperties;
     private static Properties persistentNotifierProperties;
     private static Map<String, String> analyticsProperties;
@@ -705,6 +710,79 @@ public class APIManagerConfiguration {
                 }
             } else if (APIConstants.APIMGovernance.GOVERNANCE_CONFIG.equals(localName)) {
                 setAPIMGovernanceConfigurations(element);
+            } else if (APIConstants.AI.AI.equals(localName)) {
+                for (Iterator<?> aiChildren = element.getChildElements(); aiChildren.hasNext(); ) {
+                    OMElement aiChildElement = (OMElement) aiChildren.next();
+
+                    if (APIConstants.AI.GUARDRAIL_PROVIDERS.equals(aiChildElement.getLocalName())) {
+                        // Iterate through each <EmbeddingProvider>
+                        for (Iterator<?> providers = aiChildElement.getChildElements(); providers.hasNext(); ) {
+                            OMElement providerElement = (OMElement) providers.next();
+
+                            if (APIConstants.AI.GUARDRAIL_PROVIDER.equals(providerElement.getLocalName())) {
+                                // Get the provider type
+                                String type = providerElement.getAttributeValue(
+                                        new QName(APIConstants.AI.GUARDRAIL_PROVIDER_TYPE));
+                                if (type == null || type.isEmpty()) {
+                                    continue; // skip if no type defined
+                                }
+
+                                Map<String, String> propertiesMap = new HashMap<>();
+
+                                // Iterate through each <Property>
+                                for (Iterator<?> props = providerElement.getChildElements(); props.hasNext(); ) {
+                                    OMElement prop = (OMElement) props.next();
+
+                                    if (APIConstants.AI.GUARDRAIL_PROVIDER_PROPERTY.equals(prop.getLocalName())) {
+                                        String key = prop.getAttributeValue(
+                                                new QName(APIConstants.AI.GUARDRAIL_PROVIDER_PROPERTY_KEY));
+                                        String value = MiscellaneousUtil.resolve(prop, secretResolver);
+
+                                        if (key != null && !key.isEmpty()) {
+                                            propertiesMap.put(key, value);
+                                        }
+                                    }
+                                }
+
+                                // Add to the main map
+                                GuardrailProviderConfigurationDTO guardrailProviderConfigurationDTO =
+                                        new GuardrailProviderConfigurationDTO();
+                                guardrailProviderConfigurationDTO.setType(type);
+                                guardrailProviderConfigurationDTO.setProperties(propertiesMap);
+                                guardrailProviders.put(type, guardrailProviderConfigurationDTO);
+                            }
+                        }
+                    }
+
+                    if (APIConstants.AI.EMBEDDING_PROVIDER.equals(aiChildElement.getLocalName())) {
+                        // Get the provider type
+                        String type = aiChildElement.getAttributeValue(
+                                new QName(APIConstants.AI.EMBEDDING_PROVIDER_TYPE));
+                        if (type == null || type.isEmpty()) {
+                            continue; // skip if no type defined
+                        }
+
+                        Map<String, String> propertiesMap = new HashMap<>();
+
+                        // Iterate through each <Property>
+                        for (Iterator<?> props = aiChildElement.getChildElements(); props.hasNext(); ) {
+                            OMElement prop = (OMElement) props.next();
+
+                            if (APIConstants.AI.EMBEDDING_PROVIDER_PROPERTY.equals(prop.getLocalName())) {
+                                String key = prop.getAttributeValue(
+                                        new QName(APIConstants.AI.EMBEDDING_PROVIDER_PROPERTY_KEY));
+                                String value = MiscellaneousUtil.resolve(prop, secretResolver);
+
+                                if (key != null && !key.isEmpty()) {
+                                    propertiesMap.put(key, value);
+                                }
+                            }
+                        }
+
+                        this.embeddingProviderConfigurationDTO.setType(type);
+                        this.embeddingProviderConfigurationDTO.setProperties(propertiesMap);
+                    }
+                }
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -1128,6 +1206,16 @@ public class APIManagerConfiguration {
     public Map<String, Environment> getApiGatewayEnvironments() {
 
         return apiGatewayEnvironments;
+    }
+
+    public EmbeddingProviderConfigurationDTO getEmbeddingProvider() {
+
+        return embeddingProviderConfigurationDTO;
+    }
+
+    public GuardrailProviderConfigurationDTO getGuardrailProvider(String type) {
+
+        return guardrailProviders.get(type);
     }
 
     public RecommendationEnvironment getApiRecommendationEnvironment() {
