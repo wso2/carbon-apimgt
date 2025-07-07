@@ -38,43 +38,22 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.EmptyCallbackURLForCodeGrantsException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
-import org.wso2.carbon.apimgt.api.model.APIKey;
-import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.Application;
-import org.wso2.carbon.apimgt.api.model.ApplicationConstants;
-import org.wso2.carbon.apimgt.api.model.OAuthApplicationInfo;
-import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
-import org.wso2.carbon.apimgt.api.model.Scope;
-import org.wso2.carbon.apimgt.api.model.Subscriber;
-import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.APIManagerFactory;
+import org.wso2.carbon.apimgt.api.model.*;
+import org.wso2.carbon.apimgt.impl.*;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
+import org.wso2.carbon.apimgt.impl.dto.ai.SDKGenerationConfigurationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SDKGenerationRequestDTO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIInfoListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIKeyRevokeRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationDTO.VisibilityEnum;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationKeyMappingRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationThrottleResetDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PaginationDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ScopeInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.APIInfoMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationKeyMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.store.v1.mappings.ApplicationMappingUtil;
@@ -87,26 +66,23 @@ import org.wso2.carbon.identity.oauth.config.OAuthServerConfiguration;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.security.cert.Certificate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
     public static final String SP_NAME_APPLICATION = "sp.name.application";
+    private static SDKGenerationConfigurationDTO configDto;
 
     boolean orgWideAppUpdateEnabled = Boolean.getBoolean(APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
 
@@ -827,6 +803,361 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             RestApiUtil.handleInternalServerError("Error while deleting application " + applicationId, e, log);
         }
         return null;
+    }
+
+    /**
+     * Generates a client SDK for the specified subscribed APIs in the given programming language.
+     * If a use case description is provided, it also generates application code examples.
+     *
+     * @param applicationId             Application identifier
+     * @param language                  The preferred programming language for the generated SDK.
+     * @param sdKGenerationRequestDTO   DTO containing API IDs and use case description
+     * @return 200 Response             Object containing the generated SDK if successful.
+     */
+    @Override
+    public Response applicationsApplicationIdGenerateSdkLanguagePost(String applicationId, String language,
+        SDKGenerationRequestDTO sdKGenerationRequestDTO, MessageContext messageContext) throws APIManagementException {
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        Response finalResponse = null;
+        File responseFile = null;
+
+        try {
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
+
+            Subscriber subscriber = new Subscriber(username);
+            Application application = apiConsumer.getApplicationByUUID(applicationId);
+            String applicationName = application.getName();
+            String groupId = RestApiUtil.getLoggedInUserGroupId();
+
+            Set<SubscribedAPI> subscribedApis = apiConsumer.getSubscribedAPIs(subscriber, applicationName, groupId);
+            Set<String> subscribedApiIds = new HashSet<>();
+            for (SubscribedAPI api : subscribedApis) {
+                subscribedApiIds.add(api.getAPIUUId());
+            }
+
+            List<APIIdDTO> apiIdList = sdKGenerationRequestDTO.getApiIdsList().getList();
+            if (apiIdList != null && !apiIdList.isEmpty()) {
+                for (APIIdDTO apiIdDTO : apiIdList) {
+                    String apiId = apiIdDTO.getApiId();
+                    if (!subscribedApiIds.contains(apiId)) {
+                        return Response.status(Response.Status.FORBIDDEN)
+                                .entity("API with ID " + apiId + " is not subscribed to the application").build();
+                    }
+                }
+            } else {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("No APIs provided for SDK generation").build();
+            }
+
+            String apiSpecification = retrieveApiSpecification(apiConsumer, organization, apiIdList);
+
+            Response sdkResponse = getSDKForAPISpecification(apiSpecification, language, applicationName);
+            if (sdkResponse == null) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("Failed to generate SDK").build();
+            }
+
+            String useCase = sdKGenerationRequestDTO.getUseCaseDescription();
+            if (useCase != null && !useCase.isEmpty()) {
+                try {
+                    String sdkMethodsFile = extractMethodsFileFromSDK(sdkResponse, language, applicationName);
+                    if (sdkMethodsFile == null) {
+                        log.warn("Could not extract SDK methods file, returning SDK only");
+                        responseFile = (File) sdkResponse.getEntity();
+                        finalResponse = Response.ok(responseFile)
+                                .header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                                        "attachment; filename=\"" + responseFile.getName() + "\"")
+                                .build();
+                    }
+
+                    String applicationCode = retrieveApplicationCode(apiSpecification, sdkMethodsFile, useCase, language);
+                    finalResponse = packageSDKAndApplicationCode((File) sdkResponse.getEntity(), applicationCode, language);
+                } catch (IOException e) {
+                    log.error("Failed to generate application code: " + e.getMessage(), e);
+                    responseFile = (File) sdkResponse.getEntity();
+                    finalResponse = Response.ok(responseFile)
+                            .header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                                    "attachment; filename=\"" + responseFile.getName() + "\"")
+                            .build();
+                }
+            } else {
+                responseFile = (File) sdkResponse.getEntity();
+                finalResponse = Response.ok(responseFile)
+                        .header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
+                                "attachment; filename=\"" + responseFile.getName() + "\"")
+                        .build();
+            }
+        } catch (EmptyCallbackURLForCodeGrantsException e) {
+            RestApiUtil.handleBadRequest(e.getMessage(), log);
+        } catch (APIManagementException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("Failed to generate SDK: " + e.getMessage()).build();
+        }
+        return finalResponse;
+    }
+
+    /**
+     * Retrieve API specification for the provided API IDs.
+     *
+     * @param apiConsumer               APIConsumer instance
+     * @param apiIdList                 List of validated API IDs
+     * @param organization              Organization ID
+     * @return String                   API specification
+     * @throws APIManagementException
+     */
+    private String retrieveApiSpecification(APIConsumer apiConsumer, String organization,
+                                            List<APIIdDTO> apiIdList) throws APIManagementException  {
+        String apiSpecification = "";
+        Map<String, String> apiContexts = new HashMap<>();
+
+        try {
+            if (apiIdList.size() >= 2) {
+                StringBuilder apiSpecs = new StringBuilder();
+
+                for (APIIdDTO apiIdDTO : apiIdList) {
+                    ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiIdDTO.getApiId(), organization);
+                    String apiSpecifications = api.getApi().getSwaggerDefinition();
+                    String apiContext = api.getApi().getContext();
+                    apiSpecs.append(apiSpecifications).append("\n");
+                    apiContexts.put(api.getName(), apiContext);
+                }
+                apiSpecification = retrieveMergedAPISpec(apiSpecs.toString(), apiContexts);
+            } else {
+                APIIdDTO apiIdDTO = apiIdList.get(0);
+                ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiIdDTO.getApiId(), organization);
+                apiSpecification = api.getApi().getSwaggerDefinition();
+            }
+        } catch (Exception e) {
+            throw new APIManagementException("Failed to retrieve API specification: " + e.getMessage(), e);
+        }
+        return apiSpecification;
+    }
+
+    /**
+     * Sends API specifications to the AI Service through interceptor for merging.
+     *
+     * @param apiSpecifications   The OpenAPI specifications to be sent for merging.
+     * @param apiContexts         Map of API Names to their respective context.
+     * @return                    The merged OpenAPI specification as a JSON string.
+     */
+    private String retrieveMergedAPISpec (String apiSpecifications, Map<String, String> apiContexts)
+            throws APIManagementException {
+        APIManagerConfiguration configuration = ServiceReferenceHolder.
+                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+        try {
+            if (configuration == null) {
+                log.error("API Manager configuration is not initialized.");
+                throw new NullPointerException("API Manager configuration is not initialized.");
+            } else {
+                configDto = configuration.getSdkGenerationConfigurationDTO();
+            }
+            if (configDto.isKeyProvided() || configDto.isAuthTokenProvided()) {
+                JSONObject payload = new JSONObject();
+
+                payload.put(APIConstants.AI.SPECIFICATIONS, apiSpecifications);
+                payload.put(APIConstants.AI.APICONTEXTS, apiContexts);
+
+                String response;
+                if (configDto.isKeyProvided()) {
+                    response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
+                            configDto.getKey(), configDto.getMergeSpecResource(), payload.toString(), null);
+
+                } else {
+                    response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
+                            configDto.getAccessToken(), configDto.getMergeSpecResource(), payload.toString(), null);
+
+                }
+                return response;
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAIServiceNotAccessible(e) || RestApiUtil.isDueToAIServiceThrottled(e)) {
+                log.error("AI service error: " + e.getMessage(), e);
+                throw new APIManagementException(e.getMessage(), e);
+            } else {
+                String errorMessage = "Error encountered while executing the SDK Generation service for merging API specifications";
+                log.error(errorMessage, e);
+                throw new APIManagementException(errorMessage, e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Generates and retrieves the client SDK as a ZIP archive for the given API specification.
+     *
+     * @param mergedAPISpecification    The merged OpenAPI specification used for SDK generation.
+     * @param language                  The preferred programming language for the generated SDK.
+     * @param applicationName           The name of the application.
+     * @return                          A Response containing the SDK as a downloadable ZIP archive.
+     */
+    private Response getSDKForAPISpecification(String mergedAPISpecification, String language, String applicationName) {
+        APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
+        try {
+            Map<String, String> sdkArtifacts = apiClientGenerationManager.generateSDK(
+                    language, applicationName, "1.0.0", mergedAPISpecification);
+
+            File sdkFile = new File(sdkArtifacts.get("zipFilePath"));
+            return Response.ok(sdkFile, MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                    .header("Content-Disposition", "attachment; filename=\"" +
+                            sdkArtifacts.get("zipFileName") + "\"")
+                    .build();
+        } catch (APIClientGenerationException e) {
+            String message = "Error generating client SDK for language: " + language;
+            RestApiUtil.handleInternalServerError(message, e, log);
+            return null;
+        }
+    }
+
+    /**
+     * Extracts the methods file from the generated SDK ZIP.
+     *
+     * @param sdkResponse       Response object containing the SDK file
+     * @param language          The preferred programming language for the generated SDK.
+     * @param applicationName   The name of the application.
+     * @return                  The content of the methods file or null if not found
+     */
+    private String extractMethodsFileFromSDK(Response sdkResponse, String language, String applicationName) {
+        File sdkFile = (File) sdkResponse.getEntity();
+        String targetPath = "";
+
+        if ("java".equalsIgnoreCase(language)) {
+            targetPath = "/src/main/java/org/wso2/client/api/" + applicationName + "/DefaultApi.java";
+        } else if ("javascript".equalsIgnoreCase(language)) {
+            targetPath = "/src/org.wso2.client.api." + applicationName + "/DefaultApi.js";
+        } else {
+            log.error("Unsupported language for Application Code Generation: " + language);
+            throw new IllegalArgumentException("Unsupported language for Application Code Generation: " + language);
+        }
+
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(sdkFile))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (entry.getName().endsWith(targetPath)) {
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[1024];
+                    int len;
+                    while ((len = zis.read(buffer)) > 0) {
+                        baos.write(buffer, 0, len);
+                    }
+                    return baos.toString("UTF-8");
+                }
+            }
+        } catch (NullPointerException e) {
+            throw new NullPointerException("Null entry encountered while extracting methods file from SDK");
+        } catch (IOException e) {
+            log.error("Error extracting methods file from SDK", e);
+        }
+        return null;
+    }
+
+    /**
+     * Sends the specification, SDK methods and use case description to the AI service through interceptor to
+     * generate application code.
+     *
+     * @param apiSpecification          The API specification
+     * @param sdkMethodsFile            The extracted SDK methods file content
+     * @param useCase                   The use case description for application code generation
+     * @return                          The generated application code
+     */
+    private String retrieveApplicationCode (String apiSpecification, String sdkMethodsFile,
+                                            String useCase, String language) throws APIManagementException {
+        APIManagerConfiguration configuration = ServiceReferenceHolder.
+                getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+
+        try {
+            if (configuration == null) {
+                log.error("API Manager configuration is not initialized.");
+                throw new NullPointerException("API Manager configuration is not initialized.");
+            } else {
+                configDto = configuration.getSdkGenerationConfigurationDTO();
+            }
+            if (configDto.isKeyProvided() || configDto.isAuthTokenProvided()) {
+                JSONObject payload = new JSONObject();
+
+                payload.put(APIConstants.AI.SPECIFICATION, apiSpecification);
+                payload.put(APIConstants.AI.METHODSFILE, sdkMethodsFile);
+                payload.put(APIConstants.AI.USECASE, useCase);
+                payload.put(APIConstants.AI.LANGUAGE, language);
+
+                String response;
+                if (configDto.isKeyProvided()) {
+                    response = APIUtil.invokeAIService(configDto.getEndpoint(), configDto.getTokenEndpoint(),
+                            configDto.getKey(), configDto.getGenerateCodeResource(), payload.toString(), null);
+
+                } else {
+                    response = APIUtil.invokeAIService(configDto.getEndpoint(), null,
+                            configDto.getAccessToken(), configDto.getGenerateCodeResource(), payload.toString(), null);
+
+                }
+                return response;
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAIServiceNotAccessible(e) || RestApiUtil.isDueToAIServiceThrottled(e)) {
+                log.error("AI service error: " + e.getMessage(), e);
+                throw new APIManagementException(e.getMessage(), e);
+            } else {
+                String errorMessage = "Error encountered while executing the SDK Generation service for generating application code";
+                log.error(errorMessage, e);
+                throw new APIManagementException(errorMessage, e);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Packages the SDK and application code into a single ZIP file.
+     *
+     * @param sdkFile           The SDK file to include
+     * @param applicationCode   The application code
+     * @param language          The preferred programming language for the generated SDK and Application Code
+     * @return                  Response with the combined ZIP file
+     */
+    private Response packageSDKAndApplicationCode(File sdkFile, String applicationCode, String language)
+            throws IOException {
+        File tempDir = Files.createTempDirectory("sdk_code_package").toFile();
+        String zipFilePath = tempDir.getPath() + File.separator + "SDK_CODE.zip";
+        File zipFile = new File(zipFilePath);
+
+        try (FileOutputStream fos = new FileOutputStream(zipFile);
+             ZipOutputStream zos = new ZipOutputStream(fos)) {
+
+            try (ZipInputStream sdkZis = new ZipInputStream(new FileInputStream(sdkFile))) {
+                ZipEntry sdkEntry;
+                while ((sdkEntry = sdkZis.getNextEntry()) != null) {
+                    ZipEntry newEntry = new ZipEntry(sdkEntry.getName());
+                    zos.putNextEntry(newEntry);
+
+                    byte[] buffer = new byte[1024];
+                    int len;
+                    while ((len = sdkZis.read(buffer)) > 0) {
+                        zos.write(buffer, 0, len);
+                    }
+
+                    zos.closeEntry();
+                    sdkZis.closeEntry();
+                }
+            }
+
+            String appCodeEntryPath = "";
+            if ("java".equalsIgnoreCase(language)) {
+                appCodeEntryPath = "application_code" + File.separator + "ApplicationExample.java";
+            } else if ("javascript".equalsIgnoreCase(language)) {
+                appCodeEntryPath = "application_code" + File.separator + "applicationExample.js";
+            }
+
+            ZipEntry appCodeEntry = new ZipEntry(appCodeEntryPath);
+            zos.putNextEntry(appCodeEntry);
+            zos.write(applicationCode.getBytes(StandardCharsets.UTF_8));
+            zos.closeEntry();
+        }
+        tempDir.deleteOnExit();
+        zipFile.deleteOnExit();
+
+        return Response.ok(zipFile, MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                .header("Content-Disposition", "attachment; filename=\"SDK_CODE.zip\"")
+                .build();
     }
 
     /**

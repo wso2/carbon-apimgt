@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.31.122-SNAPSHOT</version>
+        <version>9.31.130-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -119,6 +119,19 @@
     </dependencies>
     <build>
             <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <configuration>
+                        <webResources>
+                            <resource>
+                                <!-- this is relative to the pom.xml directory -->
+                                <directory>src/main/webapp</directory>
+                            </resource>
+                        </webResources>
+                        <warName>internal#data#v1</warName>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
                     <configuration>

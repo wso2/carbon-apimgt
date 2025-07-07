@@ -464,6 +464,24 @@
         </Resources>
     </DesignAssistant>
 
+    <SdkGeneration>
+        <!-- Enable AI Assisted SDK Generation for API Manager -->
+        <Enabled>{{apim.ai.enable}}</Enabled>
+
+        <AuthToken>{{apim.ai.token}}</AuthToken>
+
+        <Key>{{apim.ai.key}}</Key>
+
+        <Endpoint>{{apim.ai.endpoint}}</Endpoint>
+
+        <TokenEndpoint>{{apim.ai.token_endpoint}}</TokenEndpoint>
+
+        <Resources>
+            <MergeSpecResource>{{apim.ai.sdk_generation_merge_specs_resource}}</MergeSpecResource>
+            <GenerateCodeResource>{{apim.ai.sdk_generation_generate_code_resource}}</GenerateCodeResource>
+        </Resources>
+    </SdkGeneration>
+
     <!--
         API key validator configuration used by API key manager (IS), API Developer Portal and API gateway.
         API gateway uses it to validate and authenticate users against the provided API keys.
@@ -1121,6 +1139,10 @@
             <ServiceURL>{{apim.throttling.service_url}}</ServiceURL>
             <Username>{{apim.throttling.policy_deploy.username}}</Username>
             <Password>{{apim.throttling.policy_deploy.password}}</Password>
+            <TenantLoading>
+              <Enable>{{apim.throttling.policy_deploy.tenant_loading.enable}}</Enable>
+              <Tenants>{{apim.throttling.policy_deploy.tenant_loading.tenants}}</Tenants>
+            </TenantLoading>
         </PolicyDeployer>
         <BlockCondition>
             <Enabled>{{apim.throttling.enable_blacklist_condition}}</Enabled>
@@ -1743,6 +1765,10 @@
             {% endif %}
         </FileBasedApiContexts>
         <EnableOnDemandLoadingAPIS>{{apim.sync_runtime_artifacts.gateway.enable_on_demand_loading}}</EnableOnDemandLoadingAPIS>
+        <TenantLoading>
+           <Enable>{{apim.sync_runtime_artifacts.tenant_loading.enable}}</Enable>
+           <Tenants>{{apim.sync_runtime_artifacts.tenant_loading.tenants}}</Tenants>
+        </TenantLoading>
     </SyncRuntimeArtifactsGateway>
     {% endif %}
 

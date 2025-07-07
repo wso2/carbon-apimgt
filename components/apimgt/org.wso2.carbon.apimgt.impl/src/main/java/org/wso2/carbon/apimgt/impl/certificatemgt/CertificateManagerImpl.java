@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateAliasExistsException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.CertificateMgtDAO;
+import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.CarbonContext;
@@ -593,7 +594,7 @@ public class CertificateManagerImpl implements CertificateManager {
 
     @Override
     public List<CertificateMetadataDTO> getAllCertificates() {
-        List<CertificateMetadataDTO> certificates = null;
+        List<CertificateMetadataDTO> certificates = new ArrayList<>();
 
         if (log.isDebugEnabled()) {
             log.debug("Get all the certificates");
@@ -603,6 +604,9 @@ public class CertificateManagerImpl implements CertificateManager {
         } catch (CertificateManagementException e) {
             log.error("Error retrieving certificates ", e);
         }
+        certificates.forEach(certificate->{
+            certificate.setOrganization(APIUtil.getTenantDomainFromTenantId(certificate.getTenantId()));
+        });
         return certificates;
     }
 }

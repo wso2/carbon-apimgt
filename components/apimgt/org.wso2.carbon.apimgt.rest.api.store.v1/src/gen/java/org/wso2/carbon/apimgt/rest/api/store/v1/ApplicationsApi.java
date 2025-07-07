@@ -17,6 +17,7 @@ import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ApplicationTokenGenerateRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import java.io.File;
+import org.wso2.carbon.apimgt.rest.api.store.v1.dto.SDKGenerationRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.ApplicationsApiService;
 import org.wso2.carbon.apimgt.rest.api.store.v1.impl.ApplicationsApiServiceImpl;
@@ -128,6 +129,25 @@ ApplicationsApiService delegate = new ApplicationsApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
     public Response applicationsApplicationIdGenerateKeysPost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "Application key generation request object " ,required=true) ApplicationKeyGenerateRequestDTO applicationKeyGenerateRequestDTO,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
         return delegate.applicationsApplicationIdGenerateKeysPost(applicationId, applicationKeyGenerateRequestDTO, xWSO2Tenant, securityContext);
+    }
+
+    @POST
+    @Path("/{applicationId}/generate-sdk/{language}")
+    @Consumes({ "application/json" })
+    @Produces({ "application/zip", "application/json" })
+    @ApiOperation(value = "Generate a single SDK for multiple APIs and optionally generate application code", notes = "Retrieve Swagger definitions for the provided API IDs and generate SDKs. Optionally generate application code if use case is provided. ", response = byte[].class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:subscribe", description = "Subscribe API"),
+            @AuthorizationScope(scope = "apim:app_manage", description = "Retrieve, Manage and Import, Export applications")
+        })
+    }, tags={ "SDK Generation",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. SDK generated successfully. ", response = byte[].class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
+    public Response applicationsApplicationIdGenerateSdkLanguagePost(@ApiParam(value = "Application Identifier consisting of the UUID of the Application. ",required=true) @PathParam("applicationId") String applicationId, @ApiParam(value = "Programming language of the SDK that is required.  Languages supported by default are **Java**, **Javascript**, **Android** and **JMeter**. ",required=true) @PathParam("language") String language, @ApiParam(value = "Object containing the list of API IDs for which Swagger definitions need to be retrieved. Optionally, a use case description can be provided. " ) SDKGenerationRequestDTO sdKGenerationRequestDTO) throws APIManagementException{
+        return delegate.applicationsApplicationIdGenerateSdkLanguagePost(applicationId, language, sdKGenerationRequestDTO, securityContext);
     }
 
     @GET

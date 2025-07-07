@@ -34,6 +34,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.common.analytics.collectors.AnalyticsCustomDataProvider;
 import org.wso2.carbon.apimgt.common.analytics.collectors.impl.GenericRequestDataCollector;
 import org.wso2.carbon.apimgt.common.analytics.exceptions.AnalyticsException;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -231,7 +232,14 @@ public class WebhooksUtils {
         org.apache.axis2.context.MessageContext axisCtx =
                 ((Axis2MessageContext) messageContext).getAxis2MessageContext();
         axisCtx.setProperty(PassThroughConstants.SYNAPSE_ARTIFACT_TYPE, APIConstants.API_TYPE_WEBSUB);
-        WebhooksAnalyticsDataProvider provider = new WebhooksAnalyticsDataProvider(messageContext);
+        AnalyticsCustomDataProvider analyticsCustomDataProvider = ServiceReferenceHolder.getInstance()
+                .getAnalyticsCustomDataProvider();
+        WebhooksAnalyticsDataProvider provider;
+        if (analyticsCustomDataProvider != null) {
+            provider = new WebhooksAnalyticsDataProvider(messageContext, analyticsCustomDataProvider);
+        } else {
+            provider = new WebhooksAnalyticsDataProvider(messageContext);
+        }
         GenericRequestDataCollector dataCollector = new GenericRequestDataCollector(provider);
         try {
             dataCollector.collectData();
