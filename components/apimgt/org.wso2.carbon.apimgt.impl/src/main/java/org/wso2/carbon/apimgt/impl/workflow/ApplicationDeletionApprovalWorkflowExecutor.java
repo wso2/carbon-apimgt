@@ -74,10 +74,10 @@ public class ApplicationDeletionApprovalWorkflowExecutor extends WorkflowExecuto
         } else if (WorkflowStatus.REJECTED.equals(workflowDTO.getStatus())) {
             try {
                 if (applicationWorkflowDTO.getMetadata() != null &&
-                        applicationWorkflowDTO.getMetadata().containsKey("applicationStatus")){
+                        applicationWorkflowDTO.getMetadata().containsKey("applicationStatus")) {
                     apiMgtDAO.updateApplicationStatus(Integer.parseInt(applicationWorkflowDTO.getWorkflowReference()),
                             applicationWorkflowDTO.getMetadata("applicationStatus"));
-                }else{
+                } else {
                     apiMgtDAO.updateApplicationStatus(Integer.parseInt(applicationWorkflowDTO.getWorkflowReference()),
                             APIConstants.ApplicationStatus.APPLICATION_APPROVED);
                 }
