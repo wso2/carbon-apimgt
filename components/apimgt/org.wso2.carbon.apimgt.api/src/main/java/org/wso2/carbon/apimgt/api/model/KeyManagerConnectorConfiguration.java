@@ -51,6 +51,16 @@ public interface KeyManagerConnectorConfiguration {
     public List<ConfigurationDto> getConnectionConfigurations();
 
     /**
+     * This method returns the AuthConfigurations related to key-manager registration
+     * This was introduced focusing on IS-7, with an improvement related to tenant sharing feature
+     *
+     * @return
+     */
+    public default List<ConfigurationDto> getAuthConfigurations() {
+        return new ArrayList<>();
+    }
+
+    /**
      * This method returns the Configurations related to Oauth Application Creation
      *
      * @return
