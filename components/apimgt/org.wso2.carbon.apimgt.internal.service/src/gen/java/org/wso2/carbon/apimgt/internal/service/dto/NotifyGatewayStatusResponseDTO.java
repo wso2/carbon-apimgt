@@ -25,7 +25,8 @@ public class NotifyGatewayStatusResponseDTO   {
     @XmlEnum(String.class)
     public enum StatusEnum {
         REGISTERED("registered"),
-        ACKNOWLEDGED("acknowledged");
+        ACKNOWLEDGED("acknowledged"),
+        RE_REGISTER("re-register");
         private String value;
 
         StatusEnum (String v) {

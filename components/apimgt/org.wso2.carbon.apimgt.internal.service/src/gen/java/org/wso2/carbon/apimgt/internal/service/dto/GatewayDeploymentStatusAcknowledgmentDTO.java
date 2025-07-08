@@ -20,6 +20,7 @@ import javax.validation.Valid;
 
 public class GatewayDeploymentStatusAcknowledgmentDTO   {
   
+    private String gatewayId = null;
     private String apiId = null;
 
     @XmlType(name="DeploymentStatusEnum")
@@ -88,6 +89,25 @@ return null;
     private String revisionId = null;
     private Integer errorCode = null;
     private String errorMessage = null;
+
+  /**
+   * The unique identifier assigned to the newly registered gateway.
+   **/
+  public GatewayDeploymentStatusAcknowledgmentDTO gatewayId(String gatewayId) {
+    this.gatewayId = gatewayId;
+    return this;
+  }
+
+  
+  @ApiModelProperty(required = true, value = "The unique identifier assigned to the newly registered gateway.")
+  @JsonProperty("gatewayId")
+  @NotNull
+  public String getGatewayId() {
+    return gatewayId;
+  }
+  public void setGatewayId(String gatewayId) {
+    this.gatewayId = gatewayId;
+  }
 
   /**
    * Unique identifier of the deployed API.
@@ -209,7 +229,8 @@ return null;
       return false;
     }
     GatewayDeploymentStatusAcknowledgmentDTO gatewayDeploymentStatusAcknowledgment = (GatewayDeploymentStatusAcknowledgmentDTO) o;
-    return Objects.equals(apiId, gatewayDeploymentStatusAcknowledgment.apiId) &&
+    return Objects.equals(gatewayId, gatewayDeploymentStatusAcknowledgment.gatewayId) &&
+        Objects.equals(apiId, gatewayDeploymentStatusAcknowledgment.apiId) &&
         Objects.equals(deploymentStatus, gatewayDeploymentStatusAcknowledgment.deploymentStatus) &&
         Objects.equals(action, gatewayDeploymentStatusAcknowledgment.action) &&
         Objects.equals(revisionId, gatewayDeploymentStatusAcknowledgment.revisionId) &&
@@ -219,7 +240,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiId, deploymentStatus, action, revisionId, errorCode, errorMessage);
+    return Objects.hash(gatewayId, apiId, deploymentStatus, action, revisionId, errorCode, errorMessage);
   }
 
   @Override
@@ -227,6 +248,7 @@ return null;
     StringBuilder sb = new StringBuilder();
     sb.append("class GatewayDeploymentStatusAcknowledgmentDTO {\n");
     
+    sb.append("    gatewayId: ").append(toIndentedString(gatewayId)).append("\n");
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    deploymentStatus: ").append(toIndentedString(deploymentStatus)).append("\n");
     sb.append("    action: ").append(toIndentedString(action)).append("\n");

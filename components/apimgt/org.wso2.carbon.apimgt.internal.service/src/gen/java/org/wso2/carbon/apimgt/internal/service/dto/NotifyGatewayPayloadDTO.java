@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.internal.service.dto.GatewayPropertiesDTO;
@@ -59,7 +58,7 @@ return null;
     private GatewayPropertiesDTO gatewayProperties = null;
     private List<String> environmentLabels = new ArrayList<>();
     private String gatewayId = null;
-    private OffsetDateTime timeStamp = null;
+    private Long timeStamp = null;
 
   /**
    * Indicates the type of payload. - \&quot;register\&quot;: Gateway registration payload - \&quot;heartbeat\&quot;: Heartbeat update payload 
@@ -135,20 +134,20 @@ return null;
   }
 
   /**
-   * The timestamp (ISO 8601) when the heartbeat was generated.
+   * The timestamp when the heartbeat was generated.
    **/
-  public NotifyGatewayPayloadDTO timeStamp(OffsetDateTime timeStamp) {
+  public NotifyGatewayPayloadDTO timeStamp(Long timeStamp) {
     this.timeStamp = timeStamp;
     return this;
   }
 
   
-  @ApiModelProperty(value = "The timestamp (ISO 8601) when the heartbeat was generated.")
+  @ApiModelProperty(value = "The timestamp when the heartbeat was generated.")
   @JsonProperty("timeStamp")
-  public OffsetDateTime getTimeStamp() {
+  public Long getTimeStamp() {
     return timeStamp;
   }
-  public void setTimeStamp(OffsetDateTime timeStamp) {
+  public void setTimeStamp(Long timeStamp) {
     this.timeStamp = timeStamp;
   }
 

@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -92,13 +93,13 @@ public class HealthCheckAPIClient {
         request.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT, APIConstants.AUTHORIZATION_BASIC
                 + new String(getServiceCredentials(config), StandardCharsets.UTF_8));
         request.setHeader("Content-Type", CONTENT_TYPE);
-        request.setEntity(new StringEntity(payload, StandardCharsets.UTF_8));
+        request.setEntity(new StringEntity(payload, ContentType.APPLICATION_JSON));
 
         return httpClient.execute(request);
     }
 
     private String getServiceURL() {
-        return getEventHubConfiguration().getServiceUrl() + APIConstants.INTERNAL_WEB_APP_EP;
+        return getEventHubConfiguration().getServiceUrl().concat(APIConstants.INTERNAL_WEB_APP_EP);
     }
 
     private EventHubConfigurationDto getEventHubConfiguration() {

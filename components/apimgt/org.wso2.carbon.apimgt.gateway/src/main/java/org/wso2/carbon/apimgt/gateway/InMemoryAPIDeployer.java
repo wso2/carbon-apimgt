@@ -45,6 +45,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin;
+import org.wso2.carbon.apimgt.gateway.utils.DeploymentStatusNotifierRunnable;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationServiceImpl;
@@ -69,6 +70,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This class contains the methods used to retrieve artifacts from a storage and deploy and undeploy the API in gateway.
@@ -78,6 +82,14 @@ public class InMemoryAPIDeployer {
     private static final Log log = LogFactory.getLog(InMemoryAPIDeployer.class);
     ArtifactRetriever artifactRetriever;
     GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
+    private static final int DEPLOYMENT_STATUS_MIN_THREAD = 1;
+    private static final int DEPLOYMENT_STATUS_MAX_THREAD = 4;
+    private static final long DEPLOYMENT_STATUS_KEEP_ALIVE = 60000L;
+    private static final int DEPLOYMENT_STATUS_JOB_QUEUE_SIZE = 100;
+    private static final ThreadPoolExecutor deploymentStatusNotifierExecutor =
+            new ThreadPoolExecutor(DEPLOYMENT_STATUS_MIN_THREAD, DEPLOYMENT_STATUS_MAX_THREAD,
+                                   DEPLOYMENT_STATUS_KEEP_ALIVE, TimeUnit.MILLISECONDS,
+                                   new LinkedBlockingQueue<>(DEPLOYMENT_STATUS_JOB_QUEUE_SIZE));
 
     public InMemoryAPIDeployer() {
 
@@ -95,6 +107,7 @@ public class InMemoryAPIDeployer {
     public boolean deployAPI(DeployAPIInGatewayEvent gatewayEvent) throws ArtifactSynchronizerException {
 
         String apiId = gatewayEvent.getUuid();
+
         Set<String> gatewayLabels = gatewayEvent.getGatewayLabels();
         gatewayLabels.retainAll(gatewayArtifactSynchronizerProperties.getGatewayLabels());
         try {
@@ -268,6 +281,13 @@ public class InMemoryAPIDeployer {
                                                         api.getApiProvider(), api.getApiType(), api.getContext());
                                         unDeployAPI(deployAPIInGatewayEvent);
                                         deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
+                                        // If the API is deployed we send /notify-api-deployment-status call with successfully deployed status
+                                        deploymentStatusNotifierExecutor.submit(
+                                                new DeploymentStatusNotifierRunnable(
+                                                        gatewayAPIDTO.getApiId(), gatewayAPIDTO.getRevision(), true, "DEPLOY", null, null
+                                                )
+                                        );
+
                                     } else {
                                         if (log.isDebugEnabled()) {
                                             log.debug("API " + gatewayAPIDTO.getName() + " is already deployed");
@@ -275,9 +295,23 @@ public class InMemoryAPIDeployer {
                                     }
                                 } else {
                                     deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
+                                    // If the API is deployed we send /notify-api-deployment-status call with successfully deployed status
+                                    deploymentStatusNotifierExecutor.submit(
+                                            new DeploymentStatusNotifierRunnable(
+                                                    gatewayAPIDTO.getApiId(), gatewayAPIDTO.getRevision(), true, "DEPLOY", null, null
+                                            )
+                                    );
                                 }
                             }
                         } catch (AxisFault axisFault) {
+                            // If exception occurs while deploying artifacts /notify-api-deployment-status call with failed status
+                            deploymentStatusNotifierExecutor.submit(
+                                    new DeploymentStatusNotifierRunnable(
+                                            gatewayAPIDTO.getApiId(), gatewayAPIDTO.getRevision(), false, "DEPLOY",
+                                            ExceptionCodes.INTERNAL_ERROR.getErrorCode(),
+                                            axisFault.getMessage()
+                                    )
+                            );
                             log.error("Error in deploying " + gatewayAPIDTO.getName() + " to the Gateway ", axisFault);
                             errorCount++;
                         }

@@ -2274,9 +2274,9 @@ components:
           type: string
           description: The unique identifier assigned to the newly registered gateway.
         timeStamp:
-          type: string
-          format: date-time
-          description: The timestamp (ISO 8601) when the heartbeat was generated.
+          type: integer
+          description: The timestamp when the heartbeat was generated.
+          format: int64
     NotifyGatewayStatusResponse:
       type: object
       required:
@@ -2285,7 +2285,7 @@ components:
         status:
           type: string
           description: Response status
-          enum: [registered, acknowledged]
+          enum: [registered, acknowledged, re-register]
           example: registered
         gatewayId:
           type: string
@@ -2303,9 +2303,13 @@ components:
     GatewayDeploymentStatusAcknowledgment:
       type: object
       required:
+        - gatewayId
         - apiId
         - deploymentStatus
       properties:
+        gatewayId:
+          type: string
+          description: The unique identifier assigned to the newly registered gateway.
         apiId:
           type: string
           description: Unique identifier of the deployed API.
