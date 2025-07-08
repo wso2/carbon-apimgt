@@ -128,6 +128,7 @@ public class SwaggerData {
     private String apiLevelPolicy;
     private Set<Resource> resources = new LinkedHashSet<>();
     private Set<Scope> scopes = new HashSet<>();
+    private String subtype;
 
     public SwaggerData(API api) {
         title = api.getId().getName();
@@ -164,6 +165,7 @@ public class SwaggerData {
         if (scopes != null) {
             this.scopes.addAll(scopes);
         }
+        subtype = api.getSubtype();
     }
 
     public SwaggerData(APIProduct apiProduct) {
@@ -241,4 +243,6 @@ public class SwaggerData {
     public String getApiLevelPolicy() {
         return apiLevelPolicy;
     }
+
+    public String getSubtype() { return subtype; }
 }

@@ -563,6 +563,10 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_TOKEN_ENDPOINT = "TokenEndpoint";
         public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
+        public static final String MCP_DEFAULT_FEATURE_TYPE = "tool";
+        public static final String MCP_DEFAULT_BACKEND_ENDPOINT_NAME = "default";
+        public static final String MCP_RESOURCES_MCP = "/mcp";
+        public static final String MCP_RESOURCES_WELL_KNOWN = "/.well-known/oauth-authorization-server";
 
         public static final String OPENAI_EMBEDDING_PROVIDER_TYPE = "openai";
         public static final String AZURE_OPENAI_EMBEDDING_PROVIDER_TYPE = "azure-openai";
@@ -1512,6 +1516,8 @@ public final class APIConstants {
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE"})));
     public static final Set<String> WS_SUPPORTED_METHOD_LIST =
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE", "PUBLISH"})));
+    public static final Set<String> MCP_SUPPORTED_FEATURE_LIST =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"TOOL"})));
 
     public static final String HTTP_VERB_PUBLISH = "PUBLISH";
     public static final String HTTP_VERB_SUBSCRIBE = "SUBSCRIBE";
@@ -2445,6 +2451,7 @@ public final class APIConstants {
 
     public static final String API_TYPE_WEBSUB = "WEBSUB";
     public static final String API_TYPE_SSE = "SSE";
+    public static final String API_TYPE_MCP = "MCP";
 
     public static final String API_TYPE_SOAP = "SOAP";
     public static final String API_TYPE_SOAPTOREST = "SOAPTOREST";

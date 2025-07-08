@@ -70,6 +70,7 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
+import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
@@ -1994,6 +1995,20 @@ public class OAS2Parser extends APIDefinition {
 
     @Override
     public String getType() {
+        return null;
+    }
+
+    @Override
+    public Set<URITemplate> generateMCPTools(BackendEndpoint backendEndpoint,
+                                             String mcpFeatureType, boolean isBackend, Set<URITemplate> uriTemplates) {
+
+        return null;
+    }
+
+    @Override
+    public Set<URITemplate> updateMCPTools(BackendEndpoint backendEndpoint,
+                                           String mcpFeatureType, boolean isBackend, Set<URITemplate> uriTemplate) {
+
         return null;
     }
 }

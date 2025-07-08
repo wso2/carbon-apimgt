@@ -70,6 +70,7 @@ import org.wso2.carbon.apimgt.api.model.APISearchResult;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
@@ -244,6 +245,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.wso2.carbon.apimgt.impl.APIConstants.API_SUBTYPE_AI_API;
+import static org.wso2.carbon.apimgt.impl.APIConstants.API_TYPE_MCP;
 import static org.wso2.carbon.apimgt.impl.APIConstants.COMMERCIAL_TIER_PLAN;
 
 /**
@@ -621,6 +623,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         addLocalScopes(api.getId().getApiName(), api.getUriTemplates(), api.getOrganization());
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+        if (api.getBackendEndpoints() != null) {
+            addAPIBackendEndpoints(apiId, api.getBackendEndpoints());
+        }
         addURITemplates(apiId, api, tenantId);
         addAPIPolicies(api, tenantDomain);
         addSubtypeConfiguration(api);
@@ -651,6 +656,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), api.getApiSecurity());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+    }
+
+    private void addAPIBackendEndpoints(int apiId, List<BackendEndpoint> backendEndpoints)
+            throws APIManagementException {
+        apiMgtDAO.addAPIBackendEndpoints(apiId, backendEndpoints);
     }
 
     /**
@@ -1029,6 +1039,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         //get product resource mappings on API before updating the API. Update uri templates on api will remove all
         //product mappings as well.
         List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
+        if (API_TYPE_MCP.equals(api.getType())) {
+            updateMCPTools(api);
+        }
         updateAPI(api, tenantId, userNameWithoutChange);
         updateProductResourceMappings(api, organization, productResources);
 
@@ -1089,6 +1102,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         return api;
+    }
+
+    private void updateMCPTools(API api)
+            throws APIManagementException {
+
+        List<BackendEndpoint> backendEndpoints = apiMgtDAO.getBackendEndpoints(api.getId().getId());
+
+        APIDefinition parser = new OAS3Parser();
+        Set<URITemplate> mcpTools = parser.updateMCPTools(backendEndpoints.get(0),
+                APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE
+                , true, api.getUriTemplates());
+        if (mcpTools == null) {
+            throw new APIManagementException("Failed to generate MCP tools.");
+        }
+        api.setUriTemplates(mcpTools);
     }
 
     /**
@@ -1250,6 +1278,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 oldLocalScopesItr.remove();
             }
         }
+        apiMgtDAO.deleteBackendOperationMapping(oldURITemplates);
         validateAndUpdateURITemplates(api, tenantId);
         apiMgtDAO.updateURITemplates(api, tenantId);
         if (log.isDebugEnabled()) {
@@ -2832,6 +2861,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         deleteScopes(localScopeKeysToDelete, tenantId);
         if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
             apiMgtDAO.deleteAIConfiguration(api.getUuid());
+        }
+        if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
+            apiMgtDAO.deleteBackendOperationMapping(uriTemplates);
         }
         apiMgtDAO.deleteAPI(api.getUuid());
         if (log.isDebugEnabled()) {

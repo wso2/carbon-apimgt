@@ -47,4 +47,5 @@ public class SolaceApiParser extends AsyncApiParser {
     public String getType() {
         return SolaceConstants.SOLACE_ENVIRONMENT;
     }
+
 }

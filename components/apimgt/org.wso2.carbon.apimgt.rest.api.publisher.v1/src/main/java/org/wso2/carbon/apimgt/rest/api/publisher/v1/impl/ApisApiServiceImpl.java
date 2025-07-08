@@ -2934,7 +2934,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             //Handle URL and file based definition imports
             if (url != null || fileInputStream != null) {
                 // Validate and retrieve the OpenAPI definition
-                Map validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, null,
+                Map validationResponseMap = RestApiPublisherUtils.validateOpenAPIDefinition(url, fileInputStream,
+                        fileDetail, null,
                         true, false);
                 APIDefinitionValidationResponse validationResponse =
                         (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
@@ -3208,7 +3209,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         // Validate and retrieve the OpenAPI definition
         Map validationResponseMap = null;
         try {
-            validationResponseMap = validateOpenAPIDefinition(url, fileInputStream, fileDetail, inlineApiDefinition,
+            validationResponseMap = RestApiPublisherUtils.validateOpenAPIDefinition(url, fileInputStream, fileDetail,
+                    inlineApiDefinition,
                     returnContent, false);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
@@ -3287,7 +3289,7 @@ public class ApisApiServiceImpl implements ApisApiService {
 
             // Import the API and Definition
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIDTO createdApiDTO = importOpenAPIDefinition(fileInputStream, url, inlineApiDefinition,
+            APIDTO createdApiDTO = RestApiPublisherUtils.importOpenAPIDefinition(fileInputStream, url, inlineApiDefinition,
                     apiDTOFromProperties, fileDetail, null, organization);
             if (createdApiDTO != null) {
                 // This URI used to set the location header of the POST response
@@ -3346,7 +3348,7 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     private Map<String, Object> validateWSDL(String url, InputStream fileInputStream, Attachment fileDetail, Boolean isServiceAPI)
             throws APIManagementException {
-        handleInvalidParams(fileInputStream, fileDetail, url, null, isServiceAPI);
+        RestApiPublisherUtils.handleInvalidParams(fileInputStream, fileDetail, url, null, isServiceAPI);
         WSDLValidationResponseDTO responseDTO;
         WSDLValidationResponse validationResponse = new WSDLValidationResponse();
 
@@ -3734,7 +3736,7 @@ public class ApisApiServiceImpl implements ApisApiService {
                 APIDTO apidto = createAPIDTO(existingAPI, newVersion);
                 if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) || ServiceEntry
                         .DefinitionType.OAS3.equals(service.getDefinitionType())) {
-                    newVersionedApi = importOpenAPIDefinition(service.getEndpointDef(), null, null, apidto,
+                    newVersionedApi = RestApiPublisherUtils.importOpenAPIDefinition(service.getEndpointDef(), null, null, apidto,
                             null, service, organization);
                 } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
                     newVersionedApi = importAsyncAPISpecification(service.getEndpointDef(), null, apidto,
@@ -4107,68 +4109,6 @@ public class ApisApiServiceImpl implements ApisApiService {
         apidto.setContext(existingAPI.getContextTemplate());
         apidto.setVersion(newVersion);
         return apidto;
-    }
-
-    /**
-     * Validate the provided OpenAPI definition (via file or url) and return a Map with the validation response
-     * information.
-     *
-     * @param url             OpenAPI definition url
-     * @param fileInputStream file as input stream
-     * @param apiDefinition   Swagger API definition String
-     * @param returnContent   whether to return the content of the definition in the response DTO
-     * @return Map with the validation response information. A value with key 'dto' will have the response DTO
-     * of type OpenAPIDefinitionValidationResponseDTO for the REST API. A value with key 'model' will have the
-     * validation response of type APIDefinitionValidationResponse coming from the impl level.
-     */
-    private Map validateOpenAPIDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
-                                          String apiDefinition, Boolean returnContent, Boolean isServiceAPI) throws APIManagementException {
-        //validate inputs
-        handleInvalidParams(fileInputStream, fileDetail, url, apiDefinition, isServiceAPI);
-        String fileName = null;
-
-        OpenAPIDefinitionValidationResponseDTO responseDTO;
-        APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
-        if (fileDetail != null) {
-            fileName = fileDetail.getContentDisposition().getFilename();
-        }
-        validationResponse = ApisApiServiceImplUtils.validateOpenAPIDefinition(url, fileInputStream, apiDefinition, fileName, returnContent);
-        responseDTO = APIMappingUtil.getOpenAPIDefinitionValidationResponseFromModel(validationResponse,
-                returnContent);
-
-        Map response = new HashMap();
-        response.put(RestApiConstants.RETURN_MODEL, validationResponse);
-        response.put(RestApiConstants.RETURN_DTO, responseDTO);
-        return response;
-    }
-
-    /**
-     * Validate API import definition/validate definition parameters
-     *
-     * @param fileInputStream file content stream
-     * @param url             URL of the definition
-     * @param apiDefinition   Swagger API definition String
-     */
-    private void handleInvalidParams(InputStream fileInputStream, Attachment fileDetail, String url,
-                                     String apiDefinition, Boolean isServiceAPI) {
-
-        String msg = "";
-        boolean isFileSpecified = (fileInputStream != null && fileDetail != null &&
-                fileDetail.getContentDisposition() != null && fileDetail.getContentDisposition().getFilename() != null)
-                || (fileInputStream != null && isServiceAPI);
-        if (url == null && !isFileSpecified && apiDefinition == null) {
-            msg = "One out of 'file' or 'url' or 'inline definition' should be specified";
-        }
-
-        boolean isMultipleSpecificationGiven = (isFileSpecified && url != null) || (isFileSpecified &&
-                apiDefinition != null) || (apiDefinition != null && url != null);
-        if (isMultipleSpecificationGiven) {
-            msg = "Only one of 'file', 'url', and 'inline definition' should be specified";
-        }
-
-        if (StringUtils.isNotBlank(msg)) {
-            RestApiUtil.handleBadRequest(msg, log);
-        }
     }
 
     /**
@@ -4599,7 +4539,7 @@ public class ApisApiServiceImpl implements ApisApiService {
     private Map<String, Object> validateAsyncAPISpecification(String url, InputStream fileInputStream, Attachment fileDetail,
                                                               Boolean returnContent, Boolean isServiceAPI) throws APIManagementException {
         //validate inputs
-        handleInvalidParams(fileInputStream, fileDetail, url, null, isServiceAPI);
+        RestApiPublisherUtils.handleInvalidParams(fileInputStream, fileDetail, url, null, isServiceAPI);
 
         AsyncAPISpecificationValidationResponseDTO responseDTO;
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
@@ -4809,7 +4749,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
-                createdApiDTO = importOpenAPIDefinition(service.getEndpointDef(), null, null, apiDto, null, service,
+                createdApiDTO = RestApiPublisherUtils.importOpenAPIDefinition(service.getEndpointDef(), null, null, apiDto, null, service,
                         organization);
             } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
                 createdApiDTO = importAsyncAPISpecification(service.getEndpointDef(), null, apiDto, null, service,
@@ -4880,7 +4820,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             Map validationResponseMap = new HashMap();
             if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) ||
                     ServiceEntry.DefinitionType.OAS3.equals(service.getDefinitionType())) {
-                validationResponseMap = validateOpenAPIDefinition(null, service.getEndpointDef(), null, null,
+                validationResponseMap = RestApiPublisherUtils.validateOpenAPIDefinition(null,
+                        service.getEndpointDef(), null, null,
                         true, true);
                 artifactType = ArtifactType.API;
             } else if (ServiceEntry.DefinitionType.ASYNC_API.equals(service.getDefinitionType())) {
@@ -4937,66 +4878,6 @@ public class ApisApiServiceImpl implements ApisApiService {
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
-    }
-
-    private APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, String inlineDefinition,
-                                           APIDTO apiDTOFromProperties, Attachment fileDetail, ServiceEntry service,
-                                           String organization) throws APIManagementException {
-        // Validate and retrieve the OpenAPI definition
-        Map validationResponseMap = null;
-        boolean isServiceAPI = false;
-
-        if (service != null) {
-            isServiceAPI = true;
-        }
-        try {
-            validationResponseMap = validateOpenAPIDefinition(definitionUrl, definition, fileDetail, inlineDefinition,
-                    true, isServiceAPI);
-        } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
-        }
-
-        OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
-                (OpenAPIDefinitionValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
-        APIDefinitionValidationResponse validationResponse =
-                (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
-
-        if (!validationResponseDTO.isIsValid()) {
-            ErrorDTO errorDTO = APIMappingUtil.getErrorDTOFromErrorListItems(validationResponseDTO.getErrors());
-            throw RestApiUtil.buildBadRequestException(errorDTO);
-        }
-
-        // Only HTTP or WEBHOOK type APIs should be allowed
-        if (!(APIDTO.TypeEnum.HTTP.equals(apiDTOFromProperties.getType())
-                || APIDTO.TypeEnum.WEBHOOK.equals(apiDTOFromProperties.getType()))) {
-            throw RestApiUtil.buildBadRequestException(
-                    "The API's type is not supported when importing an OpenAPI definition");
-        }
-        // Import the API and Definition
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        // Add description from definition if it is not defined by user
-        if (validationResponseDTO.getInfo().getDescription() != null
-                && apiDTOFromProperties.getDescription() == null) {
-            apiDTOFromProperties.setDescription(validationResponse.getInfo().getDescription());
-        }
-        if (isServiceAPI) {
-            apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), null));
-        }
-        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
-                RestApiCommonUtil.getLoggedInUsername(), organization);
-        boolean syncOperations = !apiDTOFromProperties.getOperations().isEmpty();
-        Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiToAdd.getUuid(),
-                APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
-        if (!complianceResult.isEmpty()
-                && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
-                && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
-           throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
-        }
-        API addedAPI = ApisApiServiceImplUtils.importAPIDefinition(apiToAdd, apiProvider, organization,
-                service, validationResponse, isServiceAPI, syncOperations);
-        PublisherCommonUtils.checkGovernanceComplianceAsync(addedAPI.getUuid(), APIMGovernableState.API_CREATE,
-                ArtifactType.API, organization);
-        return APIMappingUtil.fromAPItoDTO(addedAPI);
     }
 
     private APIDTO importAsyncAPISpecification(InputStream definition, String definitionUrl, APIDTO apiDTOFromProperties,

@@ -36,21 +36,31 @@ import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
+import org.wso2.carbon.apimgt.api.APIComplianceException;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
+import org.wso2.carbon.apimgt.api.model.ServiceEntry;
+import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
+import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
+import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
+import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.xml.sax.InputSource;
@@ -65,10 +75,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import static org.wso2.carbon.apimgt.impl.APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE;
 
 public class RestApiPublisherUtils {
 
@@ -551,5 +564,128 @@ public class RestApiPublisherUtils {
             }
         }
         return policies;
+    }
+
+    public static APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, String inlineDefinition,
+                                           APIDTO apiDTOFromProperties, Attachment fileDetail, ServiceEntry service,
+                                           String organization) throws APIManagementException {
+        // Validate and retrieve the OpenAPI definition
+        Map validationResponseMap = null;
+        boolean isServiceAPI = false;
+
+        if (service != null) {
+            isServiceAPI = true;
+        }
+        try {
+            validationResponseMap = validateOpenAPIDefinition(definitionUrl, definition, fileDetail, inlineDefinition,
+                    true, isServiceAPI);
+        } catch (APIManagementException e) {
+            RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+        }
+
+        OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
+                (OpenAPIDefinitionValidationResponseDTO) validationResponseMap.get(RestApiConstants.RETURN_DTO);
+        APIDefinitionValidationResponse validationResponse =
+                (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
+
+        if (!validationResponseDTO.isIsValid()) {
+            ErrorDTO errorDTO = APIMappingUtil.getErrorDTOFromErrorListItems(validationResponseDTO.getErrors());
+            throw RestApiUtil.buildBadRequestException(errorDTO);
+        }
+
+        // Only HTTP or WEBHOOK type APIs should be allowed
+        if (!(APIDTO.TypeEnum.HTTP.equals(apiDTOFromProperties.getType())
+                || APIDTO.TypeEnum.WEBHOOK.equals(apiDTOFromProperties.getType())
+                || APIDTO.TypeEnum.MCP.equals(apiDTOFromProperties.getType()))) {
+            throw RestApiUtil.buildBadRequestException(
+                    "The API's type is not supported when importing an OpenAPI definition");
+        }
+        // Import the API and Definition
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        // Add description from definition if it is not defined by user
+        if (validationResponseDTO.getInfo().getDescription() != null
+                && apiDTOFromProperties.getDescription() == null) {
+            apiDTOFromProperties.setDescription(validationResponse.getInfo().getDescription());
+        }
+        if (isServiceAPI) {
+            apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), null));
+        }
+        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
+                RestApiCommonUtil.getLoggedInUsername(), organization);
+        boolean syncOperations = !apiDTOFromProperties.getOperations().isEmpty();
+        Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiToAdd.getUuid(),
+                APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
+        if (!complianceResult.isEmpty()
+                && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
+                && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+            throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+        }
+        API addedAPI = ApisApiServiceImplUtils.importAPIDefinition(apiToAdd, apiProvider, organization,
+                service, validationResponse, isServiceAPI, syncOperations);
+        PublisherCommonUtils.checkGovernanceComplianceAsync(addedAPI.getUuid(), APIMGovernableState.API_CREATE,
+                ArtifactType.API, organization);
+        return APIMappingUtil.fromAPItoDTO(addedAPI);
+    }
+
+    /**
+     * Validate the provided OpenAPI definition (via file or url) and return a Map with the validation response
+     * information.
+     *
+     * @param url             OpenAPI definition url
+     * @param fileInputStream file as input stream
+     * @param apiDefinition   Swagger API definition String
+     * @param returnContent   whether to return the content of the definition in the response DTO
+     * @return Map with the validation response information. A value with key 'dto' will have the response DTO
+     * of type OpenAPIDefinitionValidationResponseDTO for the REST API. A value with key 'model' will have the
+     * validation response of type APIDefinitionValidationResponse coming from the impl level.
+     */
+    public static Map validateOpenAPIDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
+                                                String apiDefinition, Boolean returnContent, Boolean isServiceAPI) throws APIManagementException {
+        //validate inputs
+        handleInvalidParams(fileInputStream, fileDetail, url, apiDefinition, isServiceAPI);
+        String fileName = null;
+
+        OpenAPIDefinitionValidationResponseDTO responseDTO;
+        APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
+        if (fileDetail != null) {
+            fileName = fileDetail.getContentDisposition().getFilename();
+        }
+        validationResponse = ApisApiServiceImplUtils.validateOpenAPIDefinition(url, fileInputStream, apiDefinition, fileName, returnContent);
+        responseDTO = APIMappingUtil.getOpenAPIDefinitionValidationResponseFromModel(validationResponse,
+                returnContent);
+
+        Map response = new HashMap();
+        response.put(RestApiConstants.RETURN_MODEL, validationResponse);
+        response.put(RestApiConstants.RETURN_DTO, responseDTO);
+        return response;
+    }
+
+    /**
+     * Validate API import definition/validate definition parameters
+     *
+     * @param fileInputStream file content stream
+     * @param url             URL of the definition
+     * @param apiDefinition   Swagger API definition String
+     */
+    public static void handleInvalidParams(InputStream fileInputStream, Attachment fileDetail, String url,
+                                           String apiDefinition, Boolean isServiceAPI) {
+
+        String msg = "";
+        boolean isFileSpecified = (fileInputStream != null && fileDetail != null &&
+                fileDetail.getContentDisposition() != null && fileDetail.getContentDisposition().getFilename() != null)
+                || (fileInputStream != null && isServiceAPI);
+        if (url == null && !isFileSpecified && apiDefinition == null) {
+            msg = "One out of 'file' or 'url' or 'inline definition' should be specified";
+        }
+
+        boolean isMultipleSpecificationGiven = (isFileSpecified && url != null) || (isFileSpecified &&
+                apiDefinition != null) || (apiDefinition != null && url != null);
+        if (isMultipleSpecificationGiven) {
+            msg = "Only one of 'file', 'url', and 'inline definition' should be specified";
+        }
+
+        if (StringUtils.isNotBlank(msg)) {
+            RestApiUtil.handleBadRequest(msg, log);
+        }
     }
 }

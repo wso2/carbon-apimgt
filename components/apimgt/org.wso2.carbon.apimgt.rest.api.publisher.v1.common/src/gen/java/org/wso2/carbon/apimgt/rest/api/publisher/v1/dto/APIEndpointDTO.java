@@ -24,6 +24,7 @@ public class APIEndpointDTO   {
     private String name = null;
     private String deploymentStage = null;
     private Object endpointConfig = null;
+    private String apiDefinition = null;
 
   /**
    **/
@@ -78,7 +79,7 @@ public class APIEndpointDTO   {
   }
 
   /**
-   * Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover. 
+   * Endpoint configuration of the API. This can be used to provide different types of endpoints including  Simple REST Endpoints, Loadbalanced and Failover. 
    **/
   public APIEndpointDTO endpointConfig(Object endpointConfig) {
     this.endpointConfig = endpointConfig;
@@ -86,7 +87,7 @@ public class APIEndpointDTO   {
   }
 
   
-  @ApiModelProperty(value = "Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover. ")
+  @ApiModelProperty(value = "Endpoint configuration of the API. This can be used to provide different types of endpoints including  Simple REST Endpoints, Loadbalanced and Failover. ")
       @Valid
   @JsonProperty("endpointConfig")
   public Object getEndpointConfig() {
@@ -94,6 +95,24 @@ public class APIEndpointDTO   {
   }
   public void setEndpointConfig(Object endpointConfig) {
     this.endpointConfig = endpointConfig;
+  }
+
+  /**
+   * OpenAPI specification of the backend endpoint
+   **/
+  public APIEndpointDTO apiDefinition(String apiDefinition) {
+    this.apiDefinition = apiDefinition;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "OpenAPI specification of the backend endpoint")
+  @JsonProperty("apiDefinition")
+  public String getApiDefinition() {
+    return apiDefinition;
+  }
+  public void setApiDefinition(String apiDefinition) {
+    this.apiDefinition = apiDefinition;
   }
 
 
@@ -109,12 +128,13 @@ public class APIEndpointDTO   {
     return Objects.equals(id, apIEndpoint.id) &&
         Objects.equals(name, apIEndpoint.name) &&
         Objects.equals(deploymentStage, apIEndpoint.deploymentStage) &&
-        Objects.equals(endpointConfig, apIEndpoint.endpointConfig);
+        Objects.equals(endpointConfig, apIEndpoint.endpointConfig) &&
+        Objects.equals(apiDefinition, apIEndpoint.apiDefinition);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, deploymentStage, endpointConfig);
+    return Objects.hash(id, name, deploymentStage, endpointConfig, apiDefinition);
   }
 
   @Override
@@ -126,6 +146,7 @@ public class APIEndpointDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    deploymentStage: ").append(toIndentedString(deploymentStage)).append("\n");
     sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
+    sb.append("    apiDefinition: ").append(toIndentedString(apiDefinition)).append("\n");
     sb.append("}");
     return sb.toString();
   }

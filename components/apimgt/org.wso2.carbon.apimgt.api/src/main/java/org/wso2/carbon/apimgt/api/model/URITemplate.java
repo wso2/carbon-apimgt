@@ -50,6 +50,10 @@ public class URITemplate implements Serializable{
     private int amznResourceTimeout;
     private boolean amznResourceContentEncoded;
     private List<OperationPolicy> operationPolicies = new ArrayList<>();
+    private String description;
+    private String schemaDefinition = null;
+    private OperationProxyMapping operationProxyMapping = null;
+    private BackendOperationMapping backendOperationMapping = null;
 
     public ConditionGroupDTO[] getConditionGroups() {
         return conditionGroups;
@@ -456,5 +460,55 @@ public class URITemplate implements Serializable{
 
     public void addOperationPolicy(OperationPolicy policy) {
         operationPolicies.add(policy);
+    }
+
+    public String getDescription() {
+
+        return description;
+    }
+
+    public void setDescription(String description) {
+
+        this.description = description;
+    }
+
+    public String getSchemaDefinition() {
+
+        return schemaDefinition;
+    }
+
+    public void setSchemaDefinition(String schemaDefinition) {
+
+        this.schemaDefinition = schemaDefinition;
+    }
+
+    public OperationProxyMapping getOperationProxyMapping() {
+
+        return operationProxyMapping;
+    }
+
+    public void setOperationProxyMapping(OperationProxyMapping operationProxyMapping) {
+
+        this.operationProxyMapping = operationProxyMapping;
+    }
+
+    public BackendOperationMapping getBackendOperationMapping() {
+
+        return backendOperationMapping;
+    }
+
+    public void setBackendOperationMapping(BackendOperationMapping backendOperationMapping) {
+
+        this.backendOperationMapping = backendOperationMapping;
+    }
+
+    public String getHttpVerb() {
+
+        return httpVerb;
+    }
+
+    public void setHttpVerb(String httpVerb) {
+
+        this.httpVerb = httpVerb;
     }
 }
