@@ -21,7 +21,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
-import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
@@ -51,7 +50,7 @@ public class ApplicationUpdateSimpleWorkflowExecutor extends WorkflowExecutor {
      */
     public WorkflowResponse execute(WorkflowDTO workFlowDTO) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.info("Executing Application Update Workflow..");
+            log.debug("Executing Application Update Workflow..");
         }
         workFlowDTO.setStatus(WorkflowStatus.APPROVED);
         complete(workFlowDTO);
@@ -67,7 +66,7 @@ public class ApplicationUpdateSimpleWorkflowExecutor extends WorkflowExecutor {
      */
     public WorkflowResponse complete(WorkflowDTO workflowDTO) throws WorkflowException {
         if (log.isDebugEnabled()) {
-            log.info("Complete  Application Update Workflow..");
+            log.debug("Complete  Application Update Workflow..");
         }
         String status = null;
 
