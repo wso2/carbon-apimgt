@@ -391,17 +391,25 @@ public class WorkflowUtils {
         List<Map<String, String>> attribChanges = new ArrayList<>();
         for (String key : newMap.keySet()) {
             if (!oldMap.containsKey(key)) {
-                log.debug("Added key: " + key + ", value: " + newMap.get(key));
+                if (log.isDebugEnabled()) {
+                    log.debug("Added key: " + key + ", value: " + newMap.get(key));
+                }
+
                 attribChanges.add(constructApplicationUpdateRecord(key, "N/A", newMap.get(key)));
             } else if (!Objects.equals(oldMap.get(key), newMap.get(key))) {
-                log.debug("Changed key: " + key + ", from: " + oldMap.get(key) + " to: " + newMap.get(key));
+                if (log.isDebugEnabled()) {
+                    log.debug("Changed key: " + key + ", from: " + oldMap.get(key) + " to: " + newMap.get(key));
+                }
                 attribChanges.add(constructApplicationUpdateRecord(key, oldMap.get(key), newMap.get(key)));
             }
         }
 
         for (String key : oldMap.keySet()) {
             if (!newMap.containsKey(key)) {
-                log.debug("Removed key: " + key + ", value was: " + oldMap.get(key));
+                if (log.isDebugEnabled()) {
+                    log.debug("Removed key: " + key + ", value was: " + oldMap.get(key));
+                }
+
                 attribChanges.add(constructApplicationUpdateRecord(key, oldMap.get(key), "Removed"));
             }
         }
