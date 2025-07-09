@@ -38,7 +38,7 @@ public class ApplicationUpdateSimpleWorkflowExecutor extends WorkflowExecutor {
 
     @Override
     public String getWorkflowType() {
-        return null;
+        return WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE;
     }
 
     /**
