@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.api.model.TierPermission;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
+import org.wso2.carbon.apimgt.api.model.ApplicationResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -356,7 +357,7 @@ public interface APIConsumer extends APIManager {
      * @param application Application object containing updated data
      * @throws APIManagementException If an error occurs while updating the application
      */
-    void updateApplication(Application application) throws APIManagementException;
+    ApplicationResponse updateApplication(Application application) throws APIManagementException;
 
     /**
      * Function to remove an Application from the API Store
