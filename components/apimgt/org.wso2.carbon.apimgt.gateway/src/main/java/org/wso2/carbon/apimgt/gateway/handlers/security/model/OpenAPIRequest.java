@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security.model;
 
+import com.atlassian.oai.validator.model.Headers;
 import com.atlassian.oai.validator.model.Request;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -90,12 +91,16 @@ public class OpenAPIRequest implements Request {
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> Collections.singleton(entry.getValue())));
         //Set transport headers
-        String contentTypeHeader = "content-type";
         for (Map.Entry<String, Collection<String>> header : headerMap.entrySet()) {
             String headerKey = header.getKey();
-            String value =  header.getValue().iterator().next();
-            headerKey = headerKey.equalsIgnoreCase(contentTypeHeader) ?
-                    "Content-Type" : headerKey.toLowerCase(Locale.ROOT);
+            String value = header.getValue().iterator().next();
+            if (headerKey.equalsIgnoreCase(Headers.CONTENT_TYPE)) {
+                headerKey = Headers.CONTENT_TYPE;
+            } else if (headerKey.equalsIgnoreCase(Headers.ACCEPT)) {
+                headerKey = Headers.ACCEPT;
+            } else {
+                headerKey = headerKey.toLowerCase(Locale.ROOT);
+            }
             headers.put(headerKey, value);
         }
         String apiResource = "/";
