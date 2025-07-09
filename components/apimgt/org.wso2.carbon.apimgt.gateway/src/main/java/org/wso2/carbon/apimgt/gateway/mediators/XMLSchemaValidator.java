@@ -120,17 +120,14 @@ public class XMLSchemaValidator extends AbstractMediator {
                     }
                 }
             } catch (APIMThreatAnalyzerException e) {
-                logger.error("APIMThreatAnalyzerException occurred while analyzing the XML payload: "
-                        + APIMgtGatewayConstants.BAD_REQUEST, e);
+                logger.error(APIMgtGatewayConstants.BAD_REQUEST, e);
                 isValid = GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, e.getMessage());
 
             } catch (IOException | XMLStreamException e) {
-                logger.error("Error occurred while processing the XML payload: "
-                        + APIMgtGatewayConstants.BAD_REQUEST, e);
+                logger.error(APIMgtGatewayConstants.BAD_REQUEST, e);
                 isValid = GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE, e.getMessage());
-
             } finally {
-                //return analyzer to the pool
+                // return analyzer to the pool
                 if (apimThreatAnalyzer != null) {
                     AnalyzerHolder.returnObject(apimThreatAnalyzer);
                 }
