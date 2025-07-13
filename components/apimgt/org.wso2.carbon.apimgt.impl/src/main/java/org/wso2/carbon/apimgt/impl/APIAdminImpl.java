@@ -746,7 +746,7 @@ public class APIAdminImpl implements APIAdmin {
                         ExceptionCodes.IDP_ADDING_FAILED);
             }
         }
-
+        // TODO: if basic auth is selected and tenant wide cert is provided, add that cert into trust store providing an alias
         if (StringUtils.isBlank(keyManagerConfigurationDTO.getUuid())) {
             keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
         }
@@ -823,8 +823,15 @@ public class APIAdminImpl implements APIAdmin {
                 .getKeyManagerConnectorConfiguration(updatedKeyManagerConfigurationDto.getType());
         if (keyManagerConnectorConfiguration != null) {
             Map<String, Object> additionalProperties = updatedKeyManagerConfigurationDto.getAdditionalProperties();
-            for (ConfigurationDto configurationDto : keyManagerConnectorConfiguration
-                    .getConnectionConfigurations()) {
+            List<ConfigurationDto> connectionConfigurations;
+            // if authConfiguration array is not empty, use it as connector configuration
+            if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
+                    && !(keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty())) {
+                connectionConfigurations = keyManagerConnectorConfiguration.getAuthConfigurations();
+            } else {
+                connectionConfigurations = keyManagerConnectorConfiguration.getConnectionConfigurations();
+            }
+            for (ConfigurationDto configurationDto : connectionConfigurations) {
                 if (configurationDto.isMask()) {
                     String value = (String) additionalProperties.get(configurationDto.getName());
                     if (APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD.equals(value)) {
@@ -1489,8 +1496,15 @@ public class APIAdminImpl implements APIAdmin {
                     .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
             if (keyManagerConnectorConfiguration != null) {
                 List<String> missingRequiredConfigurations = new ArrayList<>();
-                for (ConfigurationDto configurationDto : keyManagerConnectorConfiguration
-                        .getConnectionConfigurations()) {
+                List<ConfigurationDto> connectionConfigurations;
+                // if authConfiguration array is not empty, use it as connector configuration
+                if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
+                        && !(keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty())) {
+                    connectionConfigurations = keyManagerConnectorConfiguration.getAuthConfigurations();
+                } else {
+                    connectionConfigurations = keyManagerConnectorConfiguration.getConnectionConfigurations();
+                }
+                for (ConfigurationDto configurationDto : connectionConfigurations) {
                     if (configurationDto.isRequired()) {
                         if (!keyManagerConfigurationDTO.getAdditionalProperties()
                                 .containsKey(configurationDto.getName())) {
@@ -1571,8 +1585,14 @@ public class APIAdminImpl implements APIAdmin {
                 .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
 
         Map<String, Object> additionalProperties = keyManagerConfigurationDTO.getAdditionalProperties();
-        List<ConfigurationDto> connectionConfigurations =
-                keyManagerConnectorConfiguration.getConnectionConfigurations();
+        List<ConfigurationDto> connectionConfigurations;
+        // if authConfiguration array is not empty, use it as connector configuration
+        if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
+                && !(keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty())) {
+            connectionConfigurations = keyManagerConnectorConfiguration.getAuthConfigurations();
+        } else {
+            connectionConfigurations = keyManagerConnectorConfiguration.getConnectionConfigurations();
+        }
         for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
             if (connectionConfiguration.isMask()) {
                 additionalProperties.replace(connectionConfiguration.getName(),

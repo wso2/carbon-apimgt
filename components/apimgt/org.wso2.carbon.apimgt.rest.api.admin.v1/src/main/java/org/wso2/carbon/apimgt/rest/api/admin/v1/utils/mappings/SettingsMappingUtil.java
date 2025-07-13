@@ -76,7 +76,10 @@ public class SettingsMappingUtil {
                 list.add(fromKeyManagerConfigurationToSettingsKeyManagerConfigurationDTO(keyManagerName,
                         keyManagerConfiguration.getDisplayName(),keyManagerConfiguration.getDefaultScopesClaim(),
                         keyManagerConfiguration.getDefaultConsumerKeyClaim(),
-                        keyManagerConfiguration.getConnectionConfigurations(),
+                        keyManagerConfiguration.getAuthConfigurations() != null &&
+                                !keyManagerConfiguration.getAuthConfigurations().isEmpty() ?
+                                keyManagerConfiguration.getAuthConfigurations()
+                                : keyManagerConfiguration.getConnectionConfigurations(),
                         keyManagerConfiguration.getAuthConfigurations(),
                         keyManagerConfiguration.getEndpointConfigurations()));
             }
