@@ -377,7 +377,7 @@ public class DatabasePersistenceUtil {
 
         // Pattern to match special characters at the start and end
         // This matches any non-alphanumeric character (except spaces) at beginning or end
-        String pattern = "^[^a-zA-Z0-9\\s]+|[^a-zA-Z0-9\\s]+$";
+        String pattern = "^[^a-zA-Z0-9/\\s]+|[^a-zA-Z0-9\\s]+$";
 
         // Keep applying the pattern until no more special characters at start/end
         String result = input;

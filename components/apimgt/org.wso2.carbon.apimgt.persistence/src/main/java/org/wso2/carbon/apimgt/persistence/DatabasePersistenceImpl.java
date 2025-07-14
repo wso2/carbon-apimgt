@@ -826,10 +826,6 @@ public class DatabasePersistenceImpl implements APIPersistence {
                 JsonObject jsonObject = JsonParser.parseString(result.getMetadata()).getAsJsonObject();
                 String contentType = result.getType();
 
-                if (contentType == null || contentType.isEmpty()) {
-                    contentType = "API";
-                }
-
                 if (contentType.equals("API_PRODUCT")) {
                     contentType = "APIProduct";
                 }
@@ -887,7 +883,8 @@ public class DatabasePersistenceImpl implements APIPersistence {
                         defContent.setAssociatedType(associatedType);
                         contentData.add(defContent);
                     }
-                } else {
+                }
+                else {
                     // Handle API content
                     DevPortalAPI devAPI = this.getDevPortalAPI(org, result.getApiId());
                     DevPortalSearchContent content = new DevPortalSearchContent();
@@ -905,7 +902,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                     content.setBusinessOwnerEmail(devAPI.getBusinessOwnerEmail());
                     content.setTechnicalOwner(devAPI.getTechnicalOwner());
                     content.setTechnicalOwnerEmail(devAPI.getTechnicalOwnerEmail());
-                    content.setMonetizationStatus(devAPI.getMonetizationStatus());
+                    content.setMonetizationStatus(devAPI.isMonetizationEnabled());
                     contentData.add(content);
                 }
             }

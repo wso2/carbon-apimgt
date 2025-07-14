@@ -69,8 +69,8 @@ public class DatabaseSearchUtil {
             searchType = getSearchType(searchQuery.getType());
         } catch (IllegalArgumentException e) {
             searchType = SearchType.OTHER;
-            property = searchQuery.getType();
         }
+        property = searchQuery.getType();
         searchContent = searchQuery.getContent();
 
         SearchResult searchResult = null;
@@ -92,7 +92,7 @@ public class DatabaseSearchUtil {
                 break;
             case PROVIDER:
                 try {
-                    searchResult = persistenceDAO.searchAPIsByProvider(searchContent, orgName, start, offset, roles);
+                    searchResult = persistenceDAO.searchAPIsByProvider(orgName, searchContent, start, offset, roles);
                 } catch (APIManagementException e) {
                     throw new APIManagementException("Error while searching APIs by provider: " + searchContent, e);
                 }
@@ -318,8 +318,9 @@ public class DatabaseSearchUtil {
             searchType = SearchType.valueOf(searchQuery.getType().toUpperCase());
         } catch (IllegalArgumentException e) {
             searchType = SearchType.OTHER;
-            property = searchQuery.getType();
         }
+
+        property = searchQuery.getType();
         searchContent = searchQuery.getContent();
 
         List<String> searchResult;

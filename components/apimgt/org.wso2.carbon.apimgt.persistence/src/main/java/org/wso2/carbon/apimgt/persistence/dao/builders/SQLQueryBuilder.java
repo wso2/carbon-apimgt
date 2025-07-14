@@ -114,7 +114,7 @@ public class SQLQueryBuilder {
         return "SELECT * FROM AM_ARTIFACT_DATA " +
                 "WHERE JSON_VALUE(org, '$.name') = ? " +
                 "AND type = 'API' " +
-                "AND LOWER(JSON_QUERY(a2.METADATA, '$.context')) LIKE ? " +
+                "AND LOWER(JSON_QUERY(METADATA, '$.context')) LIKE ? " +
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
