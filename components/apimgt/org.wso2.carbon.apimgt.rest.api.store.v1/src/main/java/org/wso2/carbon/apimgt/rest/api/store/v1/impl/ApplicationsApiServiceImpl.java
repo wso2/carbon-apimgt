@@ -101,6 +101,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Objects;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -480,7 +481,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (oldApplication == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
-
+            if (Objects.equals(oldApplication.getStatus(), APIConstants.ApplicationStatus.UPDATE_PENDING)) {
+                RestApiUtil.handleConflict("Application is in UPDATE PENDING state " +
+                        "and cannot be updated until the pending update is resolved.", log);
+            }
             if (!orgWideAppUpdateEnabled && !RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
