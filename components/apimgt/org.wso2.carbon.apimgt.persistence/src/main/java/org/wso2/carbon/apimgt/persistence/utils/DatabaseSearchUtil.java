@@ -1,19 +1,14 @@
 package org.wso2.carbon.apimgt.persistence.utils;
 
-import com.google.gson.JsonObject;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.persistence.dao.PersistenceDAO;
 import org.wso2.carbon.apimgt.persistence.dto.ContentSearchResult;
-import org.wso2.carbon.apimgt.persistence.dto.PublisherAPISearchResult;
 import org.wso2.carbon.apimgt.persistence.dto.SearchQuery;
 import org.wso2.carbon.apimgt.persistence.dto.SearchResult;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 enum SearchType {
     CONTENT("content"),

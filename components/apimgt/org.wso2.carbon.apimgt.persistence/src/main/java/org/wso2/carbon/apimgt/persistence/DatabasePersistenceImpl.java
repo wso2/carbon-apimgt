@@ -18,8 +18,6 @@ import org.wso2.carbon.apimgt.persistence.exceptions.*;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.utils.*;
-import org.wso2.carbon.governance.api.common.dataobjects.GovernanceArtifact;
-import org.wso2.carbon.governance.api.exception.GovernanceException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.InputStream;
@@ -104,7 +102,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
             }
 
             // Get API Schema data
-            String apiOrApiProductSchema = null;
+            String apiOrApiProductSchema;
 
             if (APIConstants.API_PRODUCT_DB_NAME.equals(artifactType)) {
                 apiOrApiProductSchema = persistenceDAO.getApiProductByUUID(org.getName(), apiUUID);
@@ -190,8 +188,6 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
             // Store the revision as current API version
             JsonObject apiJson = DatabasePersistenceUtil.stringTojsonObject(apiRevisionSchema);
-            JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
-            String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
 
             // Update value if there's property called status else add new
             apiJson.addProperty("status", existingLifecycleStatus);
@@ -248,12 +244,10 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public void deleteAPIRevision(Organization org, String apiUUID, String revisionUUID, int revisionId) throws APIPersistenceException {
-        boolean transactionCommitted = false;
         try {
             // Delete all associated revision artifacts
             persistenceDAO.deleteAPIRevision(revisionUUID);
 
-            transactionCommitted = true;
             if (log.isDebugEnabled()) {
                 log.debug("API Revision " + revisionId + " deleted successfully for API: " + apiUUID);
             }
@@ -272,10 +266,6 @@ public class DatabasePersistenceImpl implements APIPersistence {
             // Convert API data to JSON format
             JsonObject apiJson = DatabasePersistenceUtil.mapApiToJson(api);
             String apiJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(apiJson);
-
-            // Convert organization data to JSON format
-            JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
-            String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
 
             // Update API schema
             persistenceDAO.updateAPISchema(api.getUuid(), apiJsonString);
@@ -464,8 +454,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
             if (APIConstants.API_PRODUCT_DB_NAME.equals(artifactType)) {
                 // Convert API Product data to DevPortalAPI
                 APIProduct apiProduct = DatabasePersistenceUtil.jsonToApiProduct(jsonObject);
-                DevPortalAPI devPortalAPI = DatabasePersistenceUtil.mapAPIProductToDevPortalAPI(apiProduct);
-                return devPortalAPI;
+                return DatabasePersistenceUtil.mapAPIProductToDevPortalAPI(apiProduct);
             } else {
                 // Convert API data to DevPortalAPI
                 API api = DatabasePersistenceUtil.jsonToApi(jsonObject);
@@ -493,7 +482,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public PublisherAPISearchResult searchAPIsForPublisher(Organization org, String searchQuery, int start, int offset, UserContext ctx) throws APIPersistenceException {
-        PublisherAPISearchResult result = null;
+        PublisherAPISearchResult result;
 
         log.debug("Requested query for publisher API product search: " + searchQuery);
         SearchQuery modifiedQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
@@ -505,13 +494,13 @@ public class DatabasePersistenceImpl implements APIPersistence {
     }
 
     private PublisherAPISearchResult searchPaginatedPublisherAPIs(SearchQuery searchQuery, Organization org, int start, int offset, UserContext ctx) {
-        int totalLength = 0;
+        int totalLength;
         PublisherAPISearchResult searchResults = new PublisherAPISearchResult();
-        List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<PublisherAPIInfo>();
+        List<PublisherAPIInfo> publisherAPIInfoList = new ArrayList<>();
         String[] userRoles = ctx.getRoles();
 
         try {
-            SearchResult results = null;
+            SearchResult results;
 
             if (searchQuery == null) {
                 results = persistenceDAO.getAllPIs(org.getName(), start, offset, userRoles);
@@ -586,8 +575,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public DevPortalAPISearchResult searchAPIsForDevPortal(Organization org, String searchQuery, int start, int offset, UserContext ctx) throws APIPersistenceException {
-       String requestedDomain = org.getName();
-       DevPortalAPISearchResult result = null;
+       DevPortalAPISearchResult result;
 
         SearchQuery modifiedQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
         result = searchPaginatedDevPortalAPIs(modifiedQuery, org, start, offset, ctx);
@@ -596,7 +584,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
     }
 
     private DevPortalAPISearchResult searchPaginatedDevPortalAPIs(SearchQuery searchQuery, Organization org, int start, int offset, UserContext ctx) {
-        int totalLength = 0;
+        int totalLength;
         DevPortalAPISearchResult searchResult = new DevPortalAPISearchResult();
         String orgName = org.getName();
         String[] userRoles = ctx.getRoles();
@@ -604,7 +592,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
         try {
             totalLength = persistenceDAO.getAllAPICount(orgName, ctx.getRoles());
 
-            List<ContentSearchResult> results = null;
+            List<ContentSearchResult> results;
 
             if (searchQuery == null) {
                 results = persistenceDAO.getAllAPIsForDevPortal(orgName, start, offset, userRoles);
@@ -634,7 +622,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
                 JsonObject jsonObject = JsonParser.parseString(result.getMetadata()).getAsJsonObject();
 
-                DevPortalAPIInfo apiInfo = null;
+                DevPortalAPIInfo apiInfo;
 
                 if (type.equals("API_PRODUCT")) {
                     APIProduct apiProduct = DatabasePersistenceUtil.jsonToApiProduct(jsonObject);
@@ -676,7 +664,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
         try {
             String requestedTenantDomain = org.getName();
-            int totalLength = 0;
+            int totalLength;
             SearchQuery modifiedQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
             List<ContentSearchResult> results = DatabaseSearchUtil.searchContentForPublisher(modifiedQuery, requestedTenantDomain, start, offset, userRoles);
             List<SearchContent> contentData = new ArrayList<>();
@@ -817,7 +805,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
         try {
             String requestedTenantDomain = org.getName();
-            int totalLength = 0;
+            int totalLength;
             SearchQuery modifiedQuery = DatabasePersistenceUtil.getSearchQuery(searchQuery);
             List<ContentSearchResult> results = DatabaseSearchUtil.searchContentForDevPortal(modifiedQuery, requestedTenantDomain, start, offset, ctx.getRoles());
             List<SearchContent> contentData = new ArrayList<>();
@@ -1011,7 +999,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public String getAsyncDefinition(Organization org, String apiId) throws AsyncSpecPersistenceException {
-        String asyncApiDefinition = null;
+        String asyncApiDefinition;
         try {
             asyncApiDefinition = persistenceDAO.getAsyncAPIDefinitionByUUID(apiId, org.getName());
             if (asyncApiDefinition != null) {
@@ -1045,7 +1033,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public String getGraphQLSchema(Organization org, String apiId) throws GraphQLPersistenceException {
-        String graphQLSchema = null;
+        String graphQLSchema;
         try {
             graphQLSchema = persistenceDAO.getGraphQLSchema(apiId, org.getName());
             if (graphQLSchema != null) {
@@ -1085,10 +1073,6 @@ public class DatabasePersistenceImpl implements APIPersistence {
             JsonObject docJson = DatabasePersistenceUtil.mapDocumentToJson(documentation);
             String docJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(docJson);
 
-            // Convert organization data to JSON format
-            JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
-            String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
-
             // Update documentation metadata in database
             persistenceDAO.updateDocumentation(documentation.getId(), docJsonString);
 
@@ -1101,7 +1085,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public Documentation getDocumentation(Organization org, String apiId, String docId) throws DocumentationPersistenceException {
-        DocumentResult documentation = null;
+        DocumentResult documentation;
         try {
             documentation = persistenceDAO.getDocumentation(docId, org.getName());
             JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(documentation.getMetadata());
@@ -1116,7 +1100,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public DocumentContent getDocumentationContent(Organization org, String apiId, String docId) throws DocumentationPersistenceException {
-        DocumentContent documentContent = null;
+        DocumentContent documentContent;
         try {
             String documentationString = persistenceDAO.getDocumentationContent(docId);
             JsonObject jsonObject = DatabasePersistenceUtil.stringTojsonObject(documentationString);
@@ -1153,7 +1137,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
     @Override
     public DocumentSearchResult searchDocumentation(Organization org, String apiId, int start, int offset, String searchQuery, UserContext ctx) throws DocumentationPersistenceException {
         DocumentSearchResult searchResult = null;
-        int totalLength = 0;
+        int totalLength;
 
         if (offset == 0) {
             offset = 100;
@@ -1333,10 +1317,6 @@ public class DatabasePersistenceImpl implements APIPersistence {
             JsonObject apiProductJson = DatabasePersistenceUtil.mapApiProductToJson(apiProduct);
             String apiProductJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(apiProductJson);
 
-            // Convert organization data to JSON format
-            JsonObject orgJson = DatabasePersistenceUtil.mapOrgToJson(org);
-            String orgJsonString = DatabasePersistenceUtil.getFormattedJsonStringToSave(orgJson);
-
             // Update APIProduct schema in database
             persistenceDAO.updateAPIProductSchema(publisherAPIProduct.getId(), apiProductJsonString);
 
@@ -1421,7 +1401,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                                                                          int start, int offset, UserContext ctx)
                                                                          throws APIPersistenceException {
         String requestedTenantDomain = org.getName();
-        PublisherAPIProductSearchResult searchResult = null;
+        PublisherAPIProductSearchResult searchResult;
         String[] userRoles = ctx.getRoles();
 
         log.debug("Requested query for publisher API product search: " + searchQuery);
@@ -1429,11 +1409,11 @@ public class DatabasePersistenceImpl implements APIPersistence {
         log.debug("Modified query for publisher API product search: " + modifiedQuery);
 
         try {
-            int totalLength = 0;
+            int totalLength;
             List<PublisherAPIProductInfo> apiProductList = new ArrayList<>();
 
             // Get all API Products according to search criteria
-            List<String> results = null;
+            List<String> results;
 
             if (modifiedQuery != null && !modifiedQuery.getContent().isEmpty()) {
                 results = DatabaseSearchUtil.searchAPIProductsForPublisher(modifiedQuery, requestedTenantDomain, start, offset, userRoles);
@@ -1559,7 +1539,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
 
     @Override
     public Set<Tag> getAllTags(Organization org, UserContext ctx) throws APIPersistenceException {
-        Set<Tag> tags = new HashSet<>();
+        Set<Tag> tags;
         try {
             tags = persistenceDAO.getAllTags(org.getName());
         } catch (APIManagementException e) {
@@ -1574,7 +1554,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
     }
 
     @Override
-    public void changeApiProvider(String providerName, String apiId, String org) throws APIManagementException, APIPersistenceException {
+    public void changeApiProvider(String providerName, String apiId, String org) throws APIPersistenceException {
         try {
             if (persistenceDAO.isAPIExists(apiId, org)) {
                 String currentApiString = persistenceDAO.getAPISchemaByUUID(apiId, org);
@@ -1694,10 +1674,5 @@ public class DatabasePersistenceImpl implements APIPersistence {
 //        }
 
         return searchResult;
-    }
-
-    protected static int getMaxPaginationLimit() {
-
-        return Integer.MAX_VALUE;
     }
 }

@@ -117,7 +117,13 @@ public class DatabasePersistenceUtil {
         if (timestamp == null) return null;
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         try {
-            return formatter.parse(new Date(Long.parseLong(timestamp)).toString());
+            try {
+                Long longTimestamp = Long.parseLong(timestamp);
+                return formatter.parse(new Date(Long.parseLong(timestamp)).toString());
+            } catch (NumberFormatException e) {
+                // If the timestamp is not a long, try parsing it as a date string
+                return formatter.parse(timestamp);
+            }
         } catch (Exception e) {
             log.error("Failed to parse timestamp string: " + timestamp, e);
             return null;

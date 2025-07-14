@@ -4,8 +4,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Tag;
-import org.wso2.carbon.apimgt.persistence.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.persistence.dao.builders.SQLQueryBuilder;
+import org.wso2.carbon.apimgt.persistence.dao.queries.SQLQueryFactory;
+import org.wso2.carbon.apimgt.persistence.dao.queries.SQLQueryInterface;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.utils.PersistanceDBUtil;
 
@@ -19,8 +19,11 @@ import java.util.*;
 public class PersistenceDAO {
     private static final Log log = LogFactory.getLog(PersistenceDAO.class);
     private static PersistenceDAO INSTANCE = null;
+    private SQLQueryInterface SQLQuery;
 
-    private PersistenceDAO() {}
+    private PersistenceDAO() {
+        this.SQLQuery = SQLQueryFactory.getSQLQueries();
+    }
 
     public static PersistenceDAO getInstance() {
         if (INSTANCE == null) {
@@ -30,7 +33,7 @@ public class PersistenceDAO {
     }
 
     public void addAPISchema(String uuid, String metadata, String org) throws APIManagementException {
-        String query = SQLConstants.ADD_ARTIFACT_SQL;
+        String query = SQLQuery.getAddArtifactSQL();
         try (Connection connection = PersistanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             try (PreparedStatement prepStmt = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -52,7 +55,7 @@ public class PersistenceDAO {
     }
 
     public void addSwaggerDefinition(String uuid, String metadata, String org) throws APIManagementException {
-        String query = SQLConstants.ADD_ARTIFACT_SQL;
+        String query = SQLQuery.getAddArtifactSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -69,7 +72,7 @@ public class PersistenceDAO {
     }
 
     public void addAsyncDefinition(String uuid, String asyncApiDefinition, String orgJsonString) throws APIManagementException {
-        String query = SQLConstants.ADD_ARTIFACT_SQL;
+        String query = SQLQuery.getAddArtifactSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -91,7 +94,7 @@ public class PersistenceDAO {
             return count; // No roles provided, return count as 0
         }
 
-        String query = SQLQueryBuilder.GET_ALL_API_COUNT(roles);
+        String query = SQLQuery.getAllApiCountSql(roles);
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -112,8 +115,8 @@ public class PersistenceDAO {
             return new SearchResult(totalCount, apiResults); // No roles provided, return empty list
         }
 
-        String query = SQLQueryBuilder.GET_ALL_API_ARTIFACT_SQL(roles);
-        String countQuery = SQLQueryBuilder.GET_ALL_API_COUNT(roles);
+        String query = SQLQuery.getAllApiArtifactSql(roles);
+        String countQuery = SQLQuery.getAllApiCountSql(roles);
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -146,7 +149,7 @@ public class PersistenceDAO {
 
     public String getAPISchemaByUUID(String uuid, String tenantDomain) throws APIManagementException {
         String apiSchema = null;
-        String query = SQLConstants.GET_API_BY_UUID_SQL;
+        String query = SQLQuery.getGetAPIByUUIDSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -164,7 +167,7 @@ public class PersistenceDAO {
 
     public String getSwaggerDefinitionByUUID(String uuid, String tenantDomain) throws APIManagementException {
         String swaggerDefinition = null;
-        String query = SQLConstants.GET_SWAGGER_DEFINITION_BY_UUID_SQL;
+        String query = SQLQuery.getGetSwaggerDefinitionByUUIDSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -183,7 +186,7 @@ public class PersistenceDAO {
 
     public String addAPIDocumentation(String apiUuid, String metadata, String org) throws APIManagementException {
         String docId = UUID.randomUUID().toString();
-        String query = SQLConstants.ADD_ARTIFACT_SQL;
+        String query = SQLQuery.getAddArtifactSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -202,7 +205,7 @@ public class PersistenceDAO {
 
     public DocumentResult getDocumentation(String docId, String org) throws APIManagementException {
         DocumentResult documentation = null;
-        String query = SQLConstants.GET_DOCUMENTATION_SQL;
+        String query = SQLQuery.getGetDocumentationSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -225,9 +228,9 @@ public class PersistenceDAO {
 
     public List<DocumentResult> searchDocumentation(String apiUuid, String org, String searchQuery, int start, int offset) throws APIManagementException {
         List<DocumentResult> documentationList = new ArrayList<>();
-        String query = SQLConstants.SEARCH_DOCUMENTATION_SQL;
+        String query = SQLQuery.getSearchDocumentationSQL();
         if (searchQuery == null || searchQuery.isEmpty()) {
-            query = SQLConstants.GET_ALL_DOCUMENTATION_SQL;
+            query = SQLQuery.getGetAllDocumentationSQL();
         }
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -262,7 +265,7 @@ public class PersistenceDAO {
 
     public int getDocumentationCount(String apiUuid, String org) throws APIManagementException {
         int count = 0;
-        String query = SQLConstants.GET_DOCUMENTATION_COUNT;
+        String query = SQLQuery.getGetDocumentationCount();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -280,8 +283,8 @@ public class PersistenceDAO {
     }
 
     public void addDocumentationFile(String docId, String apiId, ResourceFile resourceFile) throws APIManagementException {
-        String query = SQLConstants.ADD_DOCUMENTATION_FILE_SQL;
-        String metadataQuery = SQLConstants.ADD_METADATA_FOR_FILE_SQL;
+        String query = SQLQuery.getAddDocumentationFileSQL();
+        String metadataQuery = SQLQuery.getAddMetadataForFileSQL();
         try (Connection connection = PersistanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             // Read stream to byte array
@@ -316,7 +319,7 @@ public class PersistenceDAO {
     }
 
     public void addDocumentationContent(String docId, String apiId, String content) throws APIManagementException {
-        String query = SQLConstants.ADD_DOCUMENTATION_CONTENT_SQL;
+        String query = SQLQuery.getAddDocumentationContentSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -331,7 +334,7 @@ public class PersistenceDAO {
 
     public String getDocumentationContent(String docId) throws APIManagementException {
         String content = null;
-        String query = SQLConstants.GET_DOCUMENTATION_CONTENT_SQL;
+        String query = SQLQuery.getGetDocumentationContentSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -349,7 +352,7 @@ public class PersistenceDAO {
 
     public InputStream getDocumentationFileContent(String docId) throws APIManagementException {
         InputStream content = null;
-        String query = SQLConstants.GET_DOCUMENTATION_FILE_SQL;
+        String query = SQLQuery.getGetDocumentationFileSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -366,7 +369,7 @@ public class PersistenceDAO {
     }
 
     public void saveOASDefinition(String apiId, String oasDefinition) throws APIManagementException {
-        String query = SQLConstants.SAVE_OAS_DEFINITION_SQL;
+        String query = SQLQuery.getSaveOASDefinitionSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -380,7 +383,7 @@ public class PersistenceDAO {
     }
 
     public void saveAsyncAPIDefinition(String apiId, String asyncApiDefinition) throws APIManagementException {
-        String query = SQLConstants.SAVE_ASYNC_API_DEFINITION_SQL;
+        String query = SQLQuery.getSaveAsyncAPIDefinitionSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -395,7 +398,7 @@ public class PersistenceDAO {
 
     public String getAsyncAPIDefinitionByUUID(String apiId, String org) throws APIManagementException {
         String asyncApiDefinition = null;
-        String query = SQLConstants.GET_ASYNC_API_DEFINITION_BY_UUID_SQL;
+        String query = SQLQuery.getGetAsyncAPIDefinitionByUUIDSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -413,7 +416,7 @@ public class PersistenceDAO {
     }
 
     public void deleteDocumentation(String docId) throws APIManagementException {
-        String query = SQLConstants.DELETE_DOCUMENTATION_SQL;
+        String query = SQLQuery.getDeleteDocumentationSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -426,7 +429,7 @@ public class PersistenceDAO {
     }
 
     public void deleteAPISchema(String apiId, String name) throws APIManagementException {
-        String query = SQLConstants.DELETE_API_SCHEMA_SQL;
+        String query = SQLQuery.getDeleteAPISchemaSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -439,7 +442,7 @@ public class PersistenceDAO {
     }
 
     public void addThumbnail(String apiId, String org, InputStream fileStream, String metadata) throws APIManagementException {
-        String query = SQLConstants.ADD_FILE_ARTIFACT_SQL;
+        String query = SQLQuery.getAddFileArtifactSQL();
         try (Connection connection = PersistanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -470,7 +473,7 @@ public class PersistenceDAO {
 
     public FileResult getThumbnail(String apiId, String org) throws APIManagementException {
         FileResult thumbnailResult = null;
-        String query = SQLConstants.GET_THUMBNAIL_SQL;
+        String query = SQLQuery.getGetThumbnailSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -491,7 +494,7 @@ public class PersistenceDAO {
 
     public FileResult getWSDL(String apiId, String org) throws APIManagementException {
         FileResult wsdlResult = null;
-        String query = SQLConstants.GET_WSDL_SQL;
+        String query = SQLQuery.getGetWSDLSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -511,7 +514,7 @@ public class PersistenceDAO {
     }
 
     public void deleteThumbnail(String apiId, String org) throws APIManagementException {
-        String query = SQLConstants.DELETE_THUMBNAIL_SQL;
+        String query = SQLQuery.getDeleteThumbnailSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -525,7 +528,7 @@ public class PersistenceDAO {
     }
 
     public void addWSDL(String apiId, String org, InputStream wsdlStream, String metadata) throws APIManagementException {
-        String query = SQLConstants.ADD_FILE_ARTIFACT_SQL;
+        String query = SQLQuery.getAddFileArtifactSQL();
         try (Connection connection = PersistanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -555,7 +558,7 @@ public class PersistenceDAO {
     }
 
     public void addGraphQLSchema(String apiId, String metadata, String org) throws APIManagementException {
-        String query = SQLConstants.ADD_ARTIFACT_SQL;
+        String query = SQLQuery.getAddArtifactSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -572,7 +575,7 @@ public class PersistenceDAO {
     }
 
     public void updateGraphQLSchema(String apiId, String metadata) throws APIManagementException {
-        String query = SQLConstants.UPDATE_GRAPHQL_SCHEMA_SQL;
+        String query = SQLQuery.getUpdateGraphQLSchemaSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -587,7 +590,7 @@ public class PersistenceDAO {
 
     public String getGraphQLSchema(String apiId, String org) throws APIManagementException {
         String graphqlSchema = null;
-        String query = SQLConstants.GET_GRAPHQL_SCHEMA_SQL;
+        String query = SQLQuery.getGetGraphQLSchemaSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -605,7 +608,7 @@ public class PersistenceDAO {
     }
 
     public void addAPIRevisionSchema(String apiUUID, String type, int revisionId, String revisionUUID, String metadata, String orgJsonString) throws APIManagementException {
-        String query = SQLConstants.ADD_API_REVISION_SQL;
+        String query = SQLQuery.getAddAPIRevisionSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -629,7 +632,7 @@ public class PersistenceDAO {
 
 
     public void addAPIRevisionSwaggerDefinition(String apiUUID, int revisionId, String revisionUUID, String swaggerDefinition, String orgJsonString) throws APIManagementException {
-        String query = SQLConstants.ADD_API_REVISION_SQL;
+        String query = SQLQuery.getAddAPIRevisionSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -647,7 +650,7 @@ public class PersistenceDAO {
     }
 
     public void addAPIRevisionAsyncDefinition(String apiUUID, int revisionId, String revisionUUID, String asyncApiDefinition, String orgJsonString) throws APIManagementException {
-        String query = SQLConstants.ADD_API_REVISION_SQL;
+        String query = SQLQuery.getAddAPIRevisionSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -665,7 +668,7 @@ public class PersistenceDAO {
     }
 
     public void addAPIRevisionThumbnail(String apiUUID, int revisionId, String revisionUUID, InputStream content, String metadata, String orgJsonString) throws APIManagementException {
-        String query = SQLConstants.ADD_API_REVISION_ARTIFACT_SQL;
+        String query = SQLQuery.getAddAPIRevisionArtifactSQL();
         try (Connection connection = PersistanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -697,7 +700,7 @@ public class PersistenceDAO {
 
     public String getAPIRevisionSchemaById(String revisionUUID, String org) throws APIManagementException {
         String apiSchema = null;
-        String query = SQLConstants.GET_API_REVISION_BY_ID_SQL;
+        String query = SQLQuery.getGetAPIRevisionByIdSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -716,7 +719,7 @@ public class PersistenceDAO {
 
     public String getAPIRevisionSwaggerDefinitionById(String revisionUUID, String name) throws APIManagementException {
         String swaggerDefinition = null;
-        String query = SQLConstants.GET_API_REVISION_SWAGGER_DEFINITION_BY_ID_SQL;
+        String query = SQLQuery.getGetAPIRevisionSwaggerDefinitionByIdSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -735,7 +738,7 @@ public class PersistenceDAO {
 
     public String getAPIRevisionAsyncDefinitionById(String revisionUUID, String org) throws APIManagementException {
         String asyncApiDefinition = null;
-        String query = SQLConstants.GET_API_REVISION_ASYNC_DEFINITION_BY_ID_SQL;
+        String query = SQLQuery.getGetAPIRevisionAsyncDefinitionByIdSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -754,7 +757,7 @@ public class PersistenceDAO {
 
     public String getAPILifeCycleStatus(String apiUUID, String org) throws APIManagementException {
         String lifecycleStatus = null;
-        String query = SQLConstants.GET_API_LIFECYCLE_STATUS_SQL;
+        String query = SQLQuery.getGetAPILifecycleStatusSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -772,7 +775,7 @@ public class PersistenceDAO {
     }
 
     public void updateAPISchema(String apiUUID, String apiRevisionSchema) throws APIManagementException {
-        String query = SQLConstants.UPDATE_API_SQL;
+        String query = SQLQuery.getUpdateAPISQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -787,7 +790,7 @@ public class PersistenceDAO {
 
     public void updateSwaggerDefinition(String apiUUID, String swaggerRevisionDefinition) throws APIManagementException {
         try {
-            String query = SQLConstants.UPDATE_SWAGGER_DEFINITION_SQL;
+            String query = SQLQuery.getUpdateSwaggerDefinitionSQL();
             try (Connection connection = PersistanceDBUtil.getConnection();
                  PreparedStatement prepStmt = connection.prepareStatement(query)) {
                 connection.setAutoCommit(false);
@@ -803,8 +806,8 @@ public class PersistenceDAO {
     }
 
     public void updateAsyncAPIDefinition(String apiUUID, String asyncAPIRevisionDefinition) throws APIManagementException {
-    try {
-            String query = SQLConstants.UPDATE_ASYNC_DEFINITION_SQL;
+        try {
+            String query = SQLQuery.getUpdateAsyncDefinitionSQL();
             try (Connection connection = PersistanceDBUtil.getConnection();
                  PreparedStatement prepStmt = connection.prepareStatement(query)) {
                 connection.setAutoCommit(false);
@@ -820,7 +823,7 @@ public class PersistenceDAO {
 
     public FileResult getAPIRevisionThumbnail(String apiUUID, int revisionId, String revisionUUID, String name) throws APIManagementException {
         FileResult thumbnailResult = null;
-        String query = SQLConstants.GET_API_REVISION_THUMBNAIL_SQL;
+        String query = SQLQuery.getGetAPIRevisionThumbnailSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -842,7 +845,7 @@ public class PersistenceDAO {
     }
 
     public void updateThumbnail(String apiUUID, InputStream content, String metadata) throws APIManagementException {
-        String query = SQLConstants.UPDATE_THUMBNAIL_SQL;
+        String query = SQLQuery.getUpdateThumbnailSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -868,7 +871,7 @@ public class PersistenceDAO {
     }
 
     public void deleteAPIRevision(String revisionUUID) throws APIManagementException {
-        String query = SQLConstants.DELETE_API_REVISION_SQL;
+        String query = SQLQuery.getDeleteAPIRevisionSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -881,7 +884,7 @@ public class PersistenceDAO {
     }
 
     public void updateDocumentation(String docId, String docJsonString) throws APIManagementException {
-        String query = SQLConstants.UPDATE_DOCUMENTATION_SQL;
+        String query = SQLQuery.getUpdateDocumentationSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -895,7 +898,7 @@ public class PersistenceDAO {
     }
 
     public void addAPIProductSchema(String uuid, String apiProductJsonString, String orgJsonString) throws APIManagementException {
-        String query = SQLConstants.ADD_ARTIFACT_SQL;
+        String query = SQLQuery.getAddArtifactSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -913,7 +916,7 @@ public class PersistenceDAO {
 
     public void updateAPIProductSchema(String apiId, String apiProductJsonString) throws APIManagementException {
         try {
-            String query = SQLConstants.UPDATE_API_PRODUCT_SQL;
+            String query = SQLQuery.getUpdateAPIProductSQL();
             try (Connection connection = PersistanceDBUtil.getConnection();
                  PreparedStatement prepStmt = connection.prepareStatement(query)) {
                 connection.setAutoCommit(false);
@@ -929,7 +932,7 @@ public class PersistenceDAO {
 
     public int getAllAPIProductCount(String name) throws APIManagementException {
         int count = 0;
-        String query = SQLConstants.GET_API_PRODUCT_COUNT_SQL;
+        String query = SQLQuery.getGetAPIProductCountSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -946,7 +949,7 @@ public class PersistenceDAO {
     }
 
     public void deleteAPIProductSchema(String apiProductId, String name) throws APIManagementException {
-        String query = SQLConstants.DELETE_API_PRODUCT_SQL;
+        String query = SQLQuery.getDeleteAPIProductSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -960,7 +963,7 @@ public class PersistenceDAO {
     }
 
     public void deleteSwaggerDefinition(String apiProductId) throws APIManagementException {
-        String query = SQLConstants.DELETE_API_PRODUCT_SWAGGER_DEFINITION_SQL;
+        String query = SQLQuery.getDeleteAPIProductSwaggerDefinitionSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -973,7 +976,7 @@ public class PersistenceDAO {
     }
 
     public List<DocumentResult> getAllDocuments(String apiId) throws APIManagementException {
-        String query = SQLConstants.GET_ALL_DOCUMENTS_FOR_API_SQL;
+        String query = SQLQuery.getGetAllDocumentsForAPISQL();
         List<DocumentResult> documents = new ArrayList<>();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -998,7 +1001,7 @@ public class PersistenceDAO {
 
     public List<String> getAllAPIRevisionIds(String apiUUID) throws APIManagementException {
         List<String> revisionIds = new ArrayList<>();
-        String query = SQLConstants.GET_ALL_API_REVISION_IDS_SQL;
+        String query = SQLQuery.getGetAllAPIRevisionIdsSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -1018,8 +1021,8 @@ public class PersistenceDAO {
     public SearchResult searchAPIsByContent(String org, String searchQuery, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
         int apiCount = 0;
-        String query = SQLQueryBuilder.SEARCH_API_BY_CONTENT_SQL(roles);
-        String countQuery = SQLQueryBuilder.SEARCH_API_BY_CONTENT_COUNT_SQL(roles);
+        String query = SQLQuery.searchApiByContentSql(roles);
+        String countQuery = SQLQuery.searchApiByContentCountSql(roles);
         searchQuery = "%" + searchQuery.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1056,8 +1059,8 @@ public class PersistenceDAO {
     public SearchResult searchAPIsByName(String org, String name, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
         int apiCount = 0;
-        String query = SQLQueryBuilder.SEARCH_API_BY_NAME_SQL(roles);
-        String countQuery = SQLQueryBuilder.SEARCH_API_BY_NAME_COUNT_SQL(roles);
+        String query = SQLQuery.searchApiByNameSql(roles);
+        String countQuery = SQLQuery.searchApiByNameCountSql(roles);
         name = "%" + name.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1094,8 +1097,8 @@ public class PersistenceDAO {
     public SearchResult searchAPIsByProvider(String org, String provider, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
         int apiCount = 0;
-        String query = SQLQueryBuilder.SEARCH_API_BY_PROVIDER_SQL(roles);
-        String countQuery = SQLQueryBuilder.SEARCH_API_BY_PROVIDER_COUNT_SQL(roles);
+        String query = SQLQuery.searchApiByProviderSql(roles);
+        String countQuery = SQLQuery.searchApiByProviderCountSql(roles);
         provider = "%" + provider.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1131,8 +1134,8 @@ public class PersistenceDAO {
     public SearchResult searchAPIsByVersion(String org, String version, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
         int apiCount = 0;
-        String query = SQLQueryBuilder.SEARCH_API_BY_VERSION_SQL(roles);
-        String countQuery = SQLQueryBuilder.SEARCH_API_BY_VERSION_COUNT_SQL(roles);
+        String query = SQLQuery.searchApiByVersionSql(roles);
+        String countQuery = SQLQuery.searchApiByVersionCountSql(roles);
         version = "%" + version.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1168,8 +1171,8 @@ public class PersistenceDAO {
     public SearchResult searchAPIsByContext(String org, String context, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
         int apiCount = 0;
-        String query = SQLQueryBuilder.SEARCH_API_BY_CONTEXT_SQL(roles);
-        String countQuery = SQLQueryBuilder.SEARCH_API_BY_CONTEXT_COUNT_SQL(roles);
+        String query = SQLQuery.searchApiByContextSql(roles);
+        String countQuery = SQLQuery.searchApiByContextCountSql(roles);
         context = "%" + context.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1205,8 +1208,8 @@ public class PersistenceDAO {
     public SearchResult searchAPIsByStatus(String org, String status, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
         int apiCount = 0;
-        String query = SQLQueryBuilder.SEARCH_API_BY_STATUS_SQL(roles);
-        String countQuery = SQLQueryBuilder.SEARCH_API_BY_STATUS_COUNT_SQL(roles);
+        String query = SQLQuery.searchApiByStatusSql(roles);
+        String countQuery = SQLQuery.searchApiByStatusCountSql(roles);
         status = "%" + status.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1242,8 +1245,8 @@ public class PersistenceDAO {
     public SearchResult searchAPIsByDescription(String org, String description, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
         int apiCount = 0;
-        String query = SQLQueryBuilder.SEARCH_API_BY_DESCRIPTION_SQL(roles);
-        String countQuery = SQLQueryBuilder.SEARCH_API_BY_DESCRIPTION_COUNT_SQL(roles);
+        String query = SQLQuery.searchApiByDescriptionSql(roles);
+        String countQuery = SQLQuery.searchApiByDescriptionCountSql(roles);
         description = "%" + description.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1279,8 +1282,8 @@ public class PersistenceDAO {
     public SearchResult searchAPIsByTags(String org, String tags, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
         int apiCount = 0;
-        String query = SQLQueryBuilder.SEARCH_API_BY_TAGS_SQL(roles);
-        String countQuery = SQLQueryBuilder.SEARCH_API_BY_TAGS_COUNT_SQL(roles);
+        String query = SQLQuery.searchApiByTagsSql(roles);
+        String countQuery = SQLQuery.searchApiByTagsCountSql(roles);
         tags = "%" + tags.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1316,8 +1319,8 @@ public class PersistenceDAO {
     public SearchResult searchAPIsByCategory(String org, String category, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
         int apiCount = 0;
-        String query = SQLQueryBuilder.SEARCH_API_BY_API_CATEGORY_SQL(roles);
-        String countQuery = SQLQueryBuilder.SEARCH_API_BY_API_CATEGORY_COUNT_SQL(roles);
+        String query = SQLQuery.searchApiByApiCategorySql(roles);
+        String countQuery = SQLQuery.searchApiByApiCategoryCountSql(roles);
         category = "%" + category.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1353,8 +1356,8 @@ public class PersistenceDAO {
     public SearchResult searchAPIsByOther(String org, String property, String value, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiResults = new ArrayList<>();
         int apiCount = 0;
-        String query = SQLQueryBuilder.SEARCH_API_BY_OTHER_SQL(property, roles);
-        String countQuery = SQLQueryBuilder.SEARCH_API_BY_OTHER_COUNT_SQL(property, roles);
+        String query = SQLQuery.searchApiByOtherSql(property, roles);
+        String countQuery = SQLQuery.searchApiByOtherCountSql(property, roles);
         value = "%" + value.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1389,7 +1392,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByContent(String org, String searchContent, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_CONTENT_SQL(roles);
+        String query = SQLQuery.searchContentByContentSql(roles);
         searchContent = "%" + searchContent.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1415,7 +1418,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByName(String org, String name, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_NAME_SQL(roles);
+        String query = SQLQuery.searchContentByNameSql(roles);
         name = "%" + name.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1441,7 +1444,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByProvider(String org, String provider, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_PROVIDER_SQL(roles);
+        String query = SQLQuery.searchContentByProviderSql(roles);
         provider = "%" + provider.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1467,7 +1470,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByVersion(String org, String version, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_VERSION_SQL(roles);
+        String query = SQLQuery.searchContentByVersionSql(roles);
         version = "%" + version.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1489,11 +1492,11 @@ public class PersistenceDAO {
             handleException("Error while searching APIs by version in the database", e);
         }
         return apiResults;
-    } 
+    }
 
     public List<ContentSearchResult> searchContentByContext(String org, String context, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_CONTEXT_SQL(roles);
+        String query = SQLQuery.searchContentByContextSql(roles);
         context = "%" + context.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1519,7 +1522,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByStatus(String org, String status, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_STATUS_SQL(roles);
+        String query = SQLQuery.searchContentByStatusSql(roles);
         status = "%" + status.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1545,7 +1548,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByDescription(String org, String description, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_DESCRIPTION_SQL(roles);
+        String query = SQLQuery.searchContentByDescriptionSql(roles);
         description = "%" + description.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1566,12 +1569,12 @@ public class PersistenceDAO {
         } catch (SQLException e) {
             handleException("Error while searching APIs by description in the database", e);
         }
-         return apiResults;
-    } 
+        return apiResults;
+    }
 
     public List<ContentSearchResult> searchContentByTags(String org, String tags, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_TAGS_SQL(roles);
+        String query = SQLQuery.searchContentByTagsSql(roles);
         tags = "%" + tags.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1597,7 +1600,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByCategory(String org, String category, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_API_CATEGORY_SQL(roles);
+        String query = SQLQuery.searchContentByApiCategorySql(roles);
         category = "%" + category.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1623,7 +1626,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByOther(String org, String property, String value, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_OTHER_SQL(property, roles);
+        String query = SQLQuery.searchContentByOtherSql(property, roles);
         value = "%" + value.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1649,7 +1652,7 @@ public class PersistenceDAO {
 
     public List<String> searchAPIProductsByContent(String org, String searchContent, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiProductResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_PRODUCT_BY_CONTENT_SQL(roles);
+        String query = SQLQuery.searchApiProductByContentSql(roles);
         searchContent = "%" + searchContent.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1672,7 +1675,7 @@ public class PersistenceDAO {
 
     public List<String> searchAPIProductsByName(String org, String name, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiProductResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_PRODUCT_BY_NAME_SQL(roles);
+        String query = SQLQuery.searchApiProductByNameSql(roles);
         name = "%" + name.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1695,7 +1698,7 @@ public class PersistenceDAO {
 
     public List<String> searchAPIProductsByProvider(String org, String provider, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiProductResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_PRODUCT_BY_PROVIDER_SQL(roles);
+        String query = SQLQuery.searchApiProductByProviderSql(roles);
         provider = "%" + provider.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1718,7 +1721,7 @@ public class PersistenceDAO {
 
     public List<String> searchAPIProductsByVersion(String org, String version, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiProductResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_PRODUCT_BY_VERSION_SQL(roles);
+        String query = SQLQuery.searchApiProductByVersionSql(roles);
         version = "%" + version.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1741,7 +1744,7 @@ public class PersistenceDAO {
 
     public List<String> searchAPIProductsByContext(String org, String context, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiProductResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_PRODUCT_BY_CONTEXT_SQL(roles);
+        String query = SQLQuery.searchApiProductByContextSql(roles);
         context = "%" + context.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1764,7 +1767,7 @@ public class PersistenceDAO {
 
     public List<String> searchAPIProductsByStatus(String org, String status, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiProductResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_PRODUCT_BY_STATUS_SQL(roles);
+        String query = SQLQuery.searchApiProductByStatusSql(roles);
         status = "%" + status.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1787,7 +1790,7 @@ public class PersistenceDAO {
 
     public List<String> searchAPIProductsByDescription(String org, String description, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiProductResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_PRODUCT_BY_DESCRIPTION_SQL(roles);
+        String query = SQLQuery.searchApiProductByDescriptionSql(roles);
         description = "%" + description.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1810,7 +1813,7 @@ public class PersistenceDAO {
 
     public List<String> searchAPIProductsByTags(String org, String tags, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiProductResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_PRODUCT_BY_TAGS_SQL(roles);
+        String query = SQLQuery.searchApiProductByTagsSql(roles);
         tags = "%" + tags.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1833,7 +1836,7 @@ public class PersistenceDAO {
 
     public List<String> searchAPIProductsByCategory(String org, String category, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiProductResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_PRODUCT_BY_API_CATEGORY_SQL(roles);
+        String query = SQLQuery.searchApiProductByTagsSql(roles);
         category = "%" + category.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1856,7 +1859,7 @@ public class PersistenceDAO {
 
     public List<String> searchAPIProductsByOther(String org, String property, String value, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiProductResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_PRODUCT_BY_OTHER_SQL(property, roles);
+        String query = SQLQuery.searchApiProductByOtherSql(property, roles);
         value = "%" + value.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1879,7 +1882,7 @@ public class PersistenceDAO {
 
     public List<String> getAllApiProducts(String org, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiProductResults = new ArrayList<>();
-        String query = SQLQueryBuilder.GET_ALL_API_PRODUCT_SQL(roles);
+        String query = SQLQuery.getAllApiProductSql(roles);
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -1901,7 +1904,7 @@ public class PersistenceDAO {
     // Keep all DEV_PORTAL related methods unchanged
     public List<ContentSearchResult> getAllAPIsForDevPortal(String org, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.GET_ALL_API_ARTIFACTS_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.getAllApiArtifactsForDevPortalSql(roles);
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -1925,7 +1928,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchAPIsByContentForDevPortal(String org, String searchContent, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_BY_CONTENT_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchApiByContentForDevPortalSql(roles);
         searchContent = "%" + searchContent.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1936,7 +1939,7 @@ public class PersistenceDAO {
             prepStmt.setInt(4, offset);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
-                   String metadata = rs.getString("metadata");
+                    String metadata = rs.getString("metadata");
                     String type = rs.getString("type");
                     String apiId = rs.getString("api_uuid");
                     ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
@@ -1951,7 +1954,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchAPIsByNameForDevPortal(String org, String name, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_BY_NAME_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchApiByNameForDevPortalSql(roles);
         name = "%" + name.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -1977,7 +1980,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchAPIsByProviderForDevPortal(String org, String provider, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_BY_PROVIDER_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchApiByProviderForDevPortalSql(roles);
         provider = "%" + provider.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2003,7 +2006,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchAPIsByVersionForDevPortal(String org, String version, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_BY_VERSION_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchApiByVersionForDevPortalSql(roles);
         version = "%" + version.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2029,7 +2032,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchAPIsByContextForDevPortal(String org, String context, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_BY_CONTEXT_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchApiByContextForDevPortalSql(roles);
         context = "%" + context.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2055,7 +2058,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchAPIsByStatusForDevPortal(String org, String status, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_BY_STATUS_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchApiByStatusForDevPortalSql(roles);
         status = "%" + status.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2081,7 +2084,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchAPIsByDescriptionForDevPortal(String org, String description, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_BY_DESCRIPTION_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchApiByDescriptionForDevPortalSql(roles);
         description = "%" + description.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2107,7 +2110,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchAPIsByTagsForDevPortal(String org, String tags, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_BY_TAGS_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchApiByTagsForDevPortalSql(roles);
         tags = "%" + tags.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2133,7 +2136,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchAPIsByCategoryForDevPortal(String org, String category, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_BY_API_CATEGORY_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchApiByApiCategoryForDevPortalSql(roles);
         category = "%" + category.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2159,7 +2162,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchAPIsByOtherForDevPortal(String org, String property, String value, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_API_BY_OTHER_FOR_DEV_PORTAL_SQL(property, roles);
+        String query = SQLQuery.searchApiByOtherForDevPortalSql(property, roles);
         value = "%" + value.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2185,7 +2188,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByContentForDevPortal(String org, String searchContent, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_CONTENT_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchContentByContentForDevPortalSql(roles);
         searchContent = "%" + searchContent.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2211,7 +2214,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByNameForDevPortal(String org, String name, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_NAME_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchContentByNameForDevPortalSql(roles);
         name = "%" + name.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2237,7 +2240,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByProviderForDevPortal(String org, String provider, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_PROVIDER_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchContentByProviderForDevPortalSql(roles);
         provider = "%" + provider.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2263,7 +2266,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByVersionForDevPortal(String org, String version, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_VERSION_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchContentByVersionForDevPortalSql(roles);
         version = "%" + version.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2289,7 +2292,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByContextForDevPortal(String org, String context, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_CONTEXT_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchContentByContextForDevPortalSql(roles);
         context = "%" + context.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2315,7 +2318,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByStatusForDevPortal(String org, String status, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_STATUS_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchContentByStatusForDevPortalSql(roles);
         status = "%" + status.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2341,7 +2344,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByDescriptionForDevPortal(String org, String description, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_DESCRIPTION_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchContentByDescriptionForDevPortalSql(roles);
         description = "%" + description.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2367,7 +2370,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByTagsForDevPortal(String org, String tags, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_TAGS_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchContentByTagsForDevPortalSql(roles);
         tags = "%" + tags.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2393,7 +2396,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByCategoryForDevPortal(String org, String category, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_API_CATEGORY_FOR_DEV_PORTAL_SQL(roles);
+        String query = SQLQuery.searchContentByApiCategoryForDevPortalSql(roles);
         category = "%" + category.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2419,7 +2422,7 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByOtherForDevPortal(String org, String property, String value, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQueryBuilder.SEARCH_CONTENT_BY_OTHER_FOR_DEV_PORTAL_SQL(property, roles);
+        String query = SQLQuery.searchContentByOtherForDevPortalSql(property, roles);
         value = "%" + value.toLowerCase() + "%";
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
@@ -2446,7 +2449,7 @@ public class PersistenceDAO {
     public String getAssociatedType(String name, String apiId) throws APIManagementException {
         String type = null;
         try (Connection connection = PersistanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_ARTIFACT_TYPE_BY_UUID_SQL)) {
+             PreparedStatement prepStmt = connection.prepareStatement(SQLQuery.getGetArtifactTypeByUUIDSQL())) {
             prepStmt.setString(1, apiId);
             prepStmt.setString(2, name);
             try (ResultSet rs = prepStmt.executeQuery()) {
@@ -2462,7 +2465,7 @@ public class PersistenceDAO {
 
     public boolean isAPIExists(String apiUUID, String name) throws APIManagementException {
         boolean exists = false;
-        String query = SQLConstants.CHECK_API_EXISTS_SQL;
+        String query = SQLQuery.getCheckAPIExistsSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -2482,7 +2485,7 @@ public class PersistenceDAO {
 
     public String getAPIUUIDByRevisionUUID(String org, String revisionUUID) throws APIManagementException {
         String apiUUID = null;
-        String query = SQLConstants.GET_API_UUID_BY_REVISION_UUID_SQL;
+        String query = SQLQuery.getGetAsyncAPIDefinitionByUUIDSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -2501,7 +2504,7 @@ public class PersistenceDAO {
 
     public String getApiProductByUUID(String org, String apiProductUUID) throws APIManagementException {
         String apiProductMetadata = null;
-        String query = SQLConstants.GET_API_PRODUCT_SQL;
+        String query = SQLQuery.getGetAPIProductSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -2521,7 +2524,7 @@ public class PersistenceDAO {
     public Set<Tag> getAllTags(String org) throws APIManagementException {
         Set<Tag> tags = new HashSet<>();
         List<String> tagNames = new ArrayList<>();
-        String query = SQLConstants.GET_ALL_TAGS_SQL;
+        String query = SQLQuery.getGetAllTagsSQL();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -2562,7 +2565,7 @@ public class PersistenceDAO {
     public String getSecuritySchemeByUUID(String apiId, String name) throws APIManagementException{
         String securityScheme = null;
         try (Connection connection = PersistanceDBUtil.getConnection();
-             PreparedStatement prepStmt = connection.prepareStatement(SQLConstants.GET_SECURITY_SCHEME_BY_UUID_SQL)) {
+             PreparedStatement prepStmt = connection.prepareStatement(SQLQuery.getGetSecuritySchemeByUUIDSQL())) {
             prepStmt.setString(1, apiId);
             prepStmt.setString(2, name);
             try (ResultSet rs = prepStmt.executeQuery()) {
