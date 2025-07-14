@@ -32,9 +32,26 @@ public class URLMapping {
     private String authScheme;
     private String httpMethod;
     private String urlPattern;
+    private String description;
+    private String shemaDefinition;
     private List<String> scopes = new ArrayList<>();
     private Set<OperationPolicy> operationPolicies = new HashSet<>();
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getShemaDefinition() {
+        return shemaDefinition;
+    }
+
+    public void setShemaDefinition(String shemaDefinition) {
+        this.shemaDefinition = shemaDefinition;
+    }
 
     public String getHttpMethod() {
 

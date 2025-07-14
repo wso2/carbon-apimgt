@@ -393,6 +393,7 @@ public class APIKeyValidator {
                 return verbInfoList;
             }
         } else {
+            // This block won't get executed for MCP Servers and GraphQL APIs
             API selectedApi = Utils.getSelectedAPI(synCtx);
             Resource selectedResource = null;
             String resourceString;

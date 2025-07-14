@@ -31,6 +31,8 @@ public class APIMgtGatewayConstants {
     public static final String RESOURCE = "api.ut.resource";
     public static final String API_STATUS = "api.ut.status";
     public static final String HTTP_METHOD = "api.ut.HTTP_METHOD";
+    public static final String MCP_METHOD = "api.ut.MCP_METHOD";
+    public static final String MCP_REQUEST_BODY = "MCP_REQUEST_BODY";
     public static final String HOST_NAME = "api.ut.hostName";
     public static final String API_PUBLISHER = "api.ut.apiPublisher";
     public static final String OPEN_API_OBJECT = "OPEN_API_OBJECT";

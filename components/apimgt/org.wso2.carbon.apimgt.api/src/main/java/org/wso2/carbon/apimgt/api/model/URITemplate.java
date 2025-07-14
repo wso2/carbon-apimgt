@@ -55,6 +55,25 @@ public class URITemplate implements Serializable{
     private ExistingAPIOperationMapping existingAPIOperationMapping = null;
     private BackendAPIOperationMapping backendAPIOperationMapping = null;
 
+    private String description;
+    private String shemaDefinition;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getShemaDefinition() {
+        return shemaDefinition;
+    }
+
+    public void setShemaDefinition(String shemaDefinition) {
+        this.shemaDefinition = shemaDefinition;
+    }
+
     public ConditionGroupDTO[] getConditionGroups() {
         return conditionGroups;
     }

@@ -50,6 +50,7 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.mvel2.util.Make;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionType;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -622,6 +623,17 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 log.debug("Skipping GraphQL subscription handshake request.");
             }
             return true;
+        }
+
+        String apiType = (String) messageContext.getProperty(APIMgtGatewayConstants.API_TYPE);
+        if (APIConstants.ApiTypes.MCP_SERVER.name().equalsIgnoreCase(apiType)) {
+            String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
+            if (StringUtils.isNotEmpty(mcpMethod) && !APIConstants.MCP.METHOD_TOOL_CALL.equalsIgnoreCase(mcpMethod)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping MCP call request throttling.");
+                }
+                return true;
+            }
         }
 
         if (ServiceReferenceHolder.getInstance().getThrottleDataPublisher() == null) {

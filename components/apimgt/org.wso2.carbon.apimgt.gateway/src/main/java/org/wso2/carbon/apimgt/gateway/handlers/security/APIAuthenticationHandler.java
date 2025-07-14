@@ -16,7 +16,9 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
+import com.google.gson.JsonObject;
 import io.swagger.v3.oas.models.OpenAPI;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
@@ -35,11 +37,13 @@ import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWTConfigurationDto;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.common.gateway.dto.ExtensionType;
+import org.wso2.carbon.apimgt.gateway.exception.McpException;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.ext.listener.ExtensionListenerUtil;
 import org.wso2.carbon.apimgt.gateway.handlers.security.apikey.ApiKeyAuthenticator;
@@ -49,6 +53,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.security.basicauth.BasicAuthAuthe
 import org.wso2.carbon.apimgt.gateway.handlers.security.oauth.OAuthAuthenticator;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
@@ -168,9 +173,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
      * @param apiType API Type
      */
     public void setApiType(String apiType) {
-        // Since we currently support only Product APIs as the alternative, set the value to "PRODUCT_API" only if
-        // the same value is provided as the type. Else the default value will remain as "API".
-        if (APIConstants.ApiTypes.PRODUCT_API.name().equalsIgnoreCase(apiType)) {
+        // Since we currently support Product APIs and MCP Servers as alternatives, set the value to "PRODUCT_API" only
+        // if the same value is provided as the type. Else the default value will remain as "API".
+        if (APIConstants.ApiTypes.PRODUCT_API.name().equalsIgnoreCase(apiType) ||
+                APIConstants.ApiTypes.MCP_SERVER.name().equalsIgnoreCase(apiType)){
             this.apiType = apiType;
         }
     }
@@ -439,6 +445,15 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
 
             messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
+            if (APIConstants.ApiTypes.MCP_SERVER.name().equalsIgnoreCase(apiType) &&
+                    isNoAuthMCPRequest(buildMCPRequest(messageContext))) {
+                    log.debug("Skipping authentication for MCP request"
+                            + ", method: " + messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
+                    // TODO: Check if we need to handle same as the no auth case for REST
+                    return true;
+                }
+
+
             if (ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
                 if (!isAuthenticatorsInitialized) {
                     initializeAuthenticators();
@@ -504,6 +519,8 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 }
 
                 handleAuthFailure(messageContext, e);
+        } catch (McpException e) {
+            // TODO: Handle MCP specific errors
         } finally {
             if (TelemetryUtil.telemetryEnabled()) {
                 TelemetryUtil.finishSpan(keySpan);
@@ -557,6 +574,62 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
         authContext.setApplicationId(clientIP); //Set clientIp as application ID in unauthenticated scenario
         authContext.setConsumerKey(null);
         APISecurityUtils.setAuthenticationContext(messageContext, authContext, securityContextHeader);
+    }
+
+    /**
+     * This method is used to set API related parameters to the message context.
+     *
+     * @param messageContext The message context to which the parameters are set
+     * @return MCP Method involved with the request
+     */
+    private String buildMCPRequest(MessageContext messageContext) throws McpException {
+        if (log.isDebugEnabled()) {
+            log.debug("Handling MCP request");
+        }
+        String messageBody;
+        try {
+            RelayUtils.buildMessage(((Axis2MessageContext) messageContext).getAxis2MessageContext());
+            SOAPEnvelope messageEnvelop = messageContext.getEnvelope();
+            if (messageEnvelop != null && messageEnvelop.getBody() != null) {
+                messageBody = String.valueOf(messageEnvelop.getBody());
+            } else {
+                //TODO: Handle error
+                messageBody = "Empty Message";
+            }
+        } catch (Exception e) {
+            //TODO: Handle error
+            messageBody = "Malformed Message";
+        }
+        JsonObject requestObject =  MCPUtils.parseAndValidateRequest(messageBody);
+        String method = requestObject.get(APIConstants.MCP.RpcConstants.METHOD).getAsString();
+        messageContext.setProperty(APIMgtGatewayConstants.MCP_METHOD, method);
+        messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY, requestObject);
+        // TODO: Add elected resource - tool that is invoked
+        return method;
+    }
+
+    private boolean isNoAuthMCPRequest(String method) throws McpException {
+
+        switch (method) {
+            case APIConstants.MCP.METHOD_INITIALIZE:
+            case APIConstants.MCP.METHOD_PING:
+            case APIConstants.MCP.METHOD_NOTIFICATION_INITIALIZED:
+                return true;
+
+            case APIConstants.MCP.METHOD_TOOL_LIST:
+            case APIConstants.MCP.METHOD_TOOL_CALL:
+            case APIConstants.MCP.METHOD_RESOURCES_LIST:
+            case APIConstants.MCP.METHOD_RESOURCE_TEMPLATE_LIST:
+            case APIConstants.MCP.METHOD_PROMPTS_LIST:
+                return false;
+
+            default:
+                throw new McpException(
+                        APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_CODE,
+                        APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_MESSAGE,
+                        "Method not found"
+                );
+        }
     }
 
     protected void stopMetricTimer(Timer.Context context) {
