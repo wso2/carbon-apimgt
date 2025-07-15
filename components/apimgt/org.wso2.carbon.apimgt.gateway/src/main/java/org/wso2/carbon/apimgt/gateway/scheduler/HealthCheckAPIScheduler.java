@@ -55,7 +55,6 @@ public class HealthCheckAPIScheduler {
             log.info("Gateway registered. GWID: " + configuredGWID);
         } else {
             log.error("Initial Gateway registration failed. Will retry on next run.");
-            return;
         }
         scheduler.scheduleAtFixedRate(new HealthCheckAPITask(), 30, NOTIFY_INTERVAL, TimeUnit.SECONDS);
     }

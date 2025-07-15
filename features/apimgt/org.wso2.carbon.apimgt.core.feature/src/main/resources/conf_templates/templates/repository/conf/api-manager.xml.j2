@@ -416,10 +416,10 @@
 
     <!-- Gateway Instances Cleanup Configuration -->
     <GatewayCleanupConfiguration>
-        <Enabled>{{apim.gateway_cleanup.enabled}}</Enabled>
-        <ExpireTimeSeconds>{{apim.gateway_cleanup.expire_time_seconds}}</ExpireTimeSeconds>
-        <DataRetentionPeriodSeconds>{{apim.gateway_cleanup.data_retention_period_seconds}}</DataRetentionPeriodSeconds>
-        <CleanupIntervalSeconds>{{apim.gateway_cleanup.cleanup_interval_seconds}}</CleanupIntervalSeconds>
+        <Enabled>{{apim.gateway_cleanup.enabled | default(false)}}</Enabled>
+        <ExpireTimeSeconds>{{apim.gateway_cleanup.expire_time_seconds | default(60)}}</ExpireTimeSeconds>
+        <DataRetentionPeriodSeconds>{{apim.gateway_cleanup.data_retention_period_seconds | default(120)}}</DataRetentionPeriodSeconds>
+        <CleanupIntervalSeconds>{{apim.gateway_cleanup.cleanup_interval_seconds | default(60)}}</CleanupIntervalSeconds>
     </GatewayCleanupConfiguration>
 
     <!--
