@@ -3370,4 +3370,6 @@ public final class APIConstants {
     }
 
     public static final String SYNAPSE_API_NAME_PREFIX = "prod";
+
+    public static final String GATEWAY_CLEANUP_CONFIGURATION = "GatewayCleanupConfiguration";
 }

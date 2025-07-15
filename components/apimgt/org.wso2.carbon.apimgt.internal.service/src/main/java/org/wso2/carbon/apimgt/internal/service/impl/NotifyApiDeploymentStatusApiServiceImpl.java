@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.internal.service.impl;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.internal.service.*;
 import org.wso2.carbon.apimgt.internal.service.dto.*;
+import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -23,14 +24,6 @@ import javax.ws.rs.core.SecurityContext;
 
 public class NotifyApiDeploymentStatusApiServiceImpl implements NotifyApiDeploymentStatusApiService {
 
-    private static final String SELECT_GATEWAY = "SELECT 1 FROM AM_GW_INSTANCES WHERE GATEWAY_ID = ?";
-    private static final String SELECT_DEPLOYMENT =
-            "SELECT 1 FROM AM_GW_REVISION_DEPLOYMENT WHERE GATEWAY_ID = ? AND API_ID = ?";
-    private static final String INSERT_DEPLOYMENT =
-            "INSERT INTO AM_GW_REVISION_DEPLOYMENT (GATEWAY_ID, API_ID, STATUS, ACTION, REVISION_ID) VALUES (?, ?, ?, ?, ?)";
-    private static final String UPDATE_DEPLOYMENT =
-            "UPDATE AM_GW_REVISION_DEPLOYMENT SET STATUS = ?, ACTION = ?, REVISION_ID = ? WHERE GATEWAY_ID = ? AND API_ID = ?";
-
     public Response notifyApiDeploymentStatusPost(
             GatewayDeploymentStatusAcknowledgmentDTO gatewayDeploymentStatusAcknowledgmentDTO,
             MessageContext messageContext) {
@@ -40,56 +33,23 @@ public class NotifyApiDeploymentStatusApiServiceImpl implements NotifyApiDeploym
         String action = gatewayDeploymentStatusAcknowledgmentDTO.getAction().toString();
         String revisionId = gatewayDeploymentStatusAcknowledgmentDTO.getRevisionId();
 
-        try (Connection conn = APIMgtDBUtil.getConnection()) {
-            // Check if gateway exists
-            try (PreparedStatement ps = conn.prepareStatement(SELECT_GATEWAY)) {
-                ps.setString(1, gatewayId);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (!rs.next()) {
-                        ErrorDTO errorObject = new ErrorDTO();
-                        errorObject.setCode(404);
-                        errorObject.setMessage("Gateway not found");
-                        errorObject.setFields("gatewayId");
-                        return Response.status(Response.Status.NOT_FOUND).entity(errorObject).build();
-                    }
-                }
+        try {
+            GatewayManagementDAO dao = GatewayManagementDAO.getInstance();
+            // Use DAO methods for gateway and deployment checks/updates
+            if (!dao.gatewayExists(gatewayId)) {
+                ErrorDTO errorObject = new ErrorDTO();
+                errorObject.setCode(404);
+                errorObject.setMessage("Gateway not found");
+                errorObject.setFields("gatewayId");
+                return Response.status(Response.Status.NOT_FOUND).entity(errorObject).build();
             }
-
-            // Check if deployment entry exists
-            boolean exists;
-            try (PreparedStatement ps = conn.prepareStatement(SELECT_DEPLOYMENT)) {
-                ps.setString(1, gatewayId);
-                ps.setString(2, apiId);
-                try (ResultSet rs = ps.executeQuery()) {
-                    exists = rs.next();
-                }
-            }
-
-            if (exists) {
-                // Update existing entry
-                try (PreparedStatement ps = conn.prepareStatement(UPDATE_DEPLOYMENT)) {
-                    ps.setString(1, status);
-                    ps.setString(2, action);
-                    ps.setString(3, revisionId);
-                    ps.setString(4, gatewayId);
-                    ps.setString(5, apiId);
-                    ps.executeUpdate();
-                }
+            if (dao.deploymentExists(gatewayId, apiId)) {
+                dao.updateDeployment(gatewayId, apiId, status, action, revisionId);
             } else {
-                // Insert new entry
-                try (PreparedStatement ps = conn.prepareStatement(INSERT_DEPLOYMENT)) {
-                    ps.setString(1, gatewayId);
-                    ps.setString(2, apiId);
-                    ps.setString(3, status);
-                    ps.setString(4, action);
-                    ps.setString(5, revisionId);
-                    ps.executeUpdate();
-                }
+                dao.insertDeployment(gatewayId, apiId, status, action, revisionId);
             }
-
-            // Success response
             return Response.ok().entity("{\"status\":\"success\"}").build();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             ErrorDTO errorObject = new ErrorDTO();
             errorObject.setCode(500);
             errorObject.setMessage("Database error: " + e.getMessage());

@@ -61,6 +61,7 @@ import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
@@ -82,6 +83,7 @@ import org.wso2.carbon.apimgt.impl.observers.KeyMgtConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.TenantLoadMessageSender;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
+import org.wso2.carbon.apimgt.impl.scheduler.GatewayCleanupScheduler;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
@@ -332,6 +334,16 @@ public class APIManagerComponent {
                 }
             }
             bundleContext.registerService(ScopeValidator.class, new SystemScopesIssuer(), null);
+            
+            // Start Gateway Cleanup Scheduler if enabled
+            GatewayCleanupConfiguration cleanupConfig = configuration.getGatewayCleanupConfiguration();
+            if (cleanupConfig != null && cleanupConfig.isEnabled()) {
+                try {
+                    GatewayCleanupScheduler.getInstance().start();
+                } catch (Exception e) {
+                    log.error("Error while starting Gateway cleanup scheduler", e);
+                }
+            }
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {
@@ -344,6 +356,16 @@ public class APIManagerComponent {
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("Deactivating API manager component");
+        }
+
+        // Stop Gateway Cleanup Scheduler
+        GatewayCleanupConfiguration cleanupConfig = configuration.getGatewayCleanupConfiguration();
+        if (cleanupConfig != null && cleanupConfig.isEnabled()) {
+            try {
+                GatewayCleanupScheduler.getInstance().stop();
+            } catch (Exception e) {
+                log.error("Error while stopping Gateway cleanup scheduler", e);
+            }
         }
 
         registration.unregister();
