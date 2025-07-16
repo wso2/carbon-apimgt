@@ -51,6 +51,8 @@ public class Environment implements Serializable {
     private String displayName;
     private String description;
     private boolean isReadOnly;
+    private boolean isWriteOnly = false;
+    private int apiDiscoveryScheduledWindow = 60;
     private List<VHost> vhosts = new ArrayList<>();
     private String provider;
     private String gatewayType;
@@ -334,5 +336,21 @@ public class Environment implements Serializable {
     public int hashCode() {
         int result = type.hashCode();
         return  31 * result + getName().hashCode();
+    }
+
+    public boolean isWriteOnly() {
+        return isWriteOnly;
+    }
+
+    public void setWriteOnly(boolean writeOnly) {
+        isWriteOnly = writeOnly;
+    }
+
+    public int getApiDiscoveryScheduledWindow() {
+        return apiDiscoveryScheduledWindow;
+    }
+
+    public void setApiDiscoveryScheduledWindow(int apiDiscoveryScheduledWindow) {
+        this.apiDiscoveryScheduledWindow = apiDiscoveryScheduledWindow;
     }
 }

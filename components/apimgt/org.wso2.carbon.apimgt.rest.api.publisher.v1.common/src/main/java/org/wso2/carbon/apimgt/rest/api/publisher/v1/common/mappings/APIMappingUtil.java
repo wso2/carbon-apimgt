@@ -535,8 +535,8 @@ public class APIMappingUtil {
                     org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().
                     getExternalGatewayConnectorConfiguration(model.getGatewayType());
             if (gatewayConfiguration != null) {
-                GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation()).
-                        getDeclaredConstructor().newInstance();
+                GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration
+                                .getGatewayDeployerImplementation()).getDeclaredConstructor().newInstance();
                 if (deployer != null) {
                     deployer.transformAPI(model);
                 }
@@ -1432,13 +1432,18 @@ public class APIMappingUtil {
                 transports.add(APIConstants.HTTPS_PROTOCOL);
 
                 dto.setTransport(transports);
+            } else {
+                dto.setTransport(Arrays.asList(model.getTransports().split(",")));
             }
-            dto.setTransport(Arrays.asList(model.getTransports().split(",")));
         }
         if (StringUtils.isEmpty(model.getTransports())) {
             dto.setVisibility(APIDTO.VisibilityEnum.PUBLIC);
         }
-        dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
+        if (model.getVisibility() != null) {
+            dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
+        } else {
+            dto.setVisibility(APIDTO.VisibilityEnum.PUBLIC);
+        }
         if (model.getVisibleRoles() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleRoles().split(",")));
         }
@@ -1676,7 +1681,6 @@ public class APIMappingUtil {
     }
 
     private static APIDTO.VisibilityEnum mapVisibilityFromAPItoDTO(String visibility) {
-
         switch (visibility) { //public, private,controlled, restricted
             case APIConstants.API_GLOBAL_VISIBILITY:
                 return APIDTO.VisibilityEnum.PUBLIC;

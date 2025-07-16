@@ -62,6 +62,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
+import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
@@ -331,6 +332,7 @@ public class APIManagerComponent {
                     bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
                 }
             }
+            GatewayHolder.initializeFederatedGatewayAPIDiscovery(tenantDomain);
             bundleContext.registerService(ScopeValidator.class, new SystemScopesIssuer(), null);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);

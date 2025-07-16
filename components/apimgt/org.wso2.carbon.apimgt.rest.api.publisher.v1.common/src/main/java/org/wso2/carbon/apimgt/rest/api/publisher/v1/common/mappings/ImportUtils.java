@@ -580,6 +580,39 @@ public class ImportUtils {
         }
     }
 
+
+    /**
+     * This method imports an API.
+     *
+     * @param importInfo                     Location of the extracted folder of the API
+     * @param importedApiDTO                 API DTO of the importing API
+     *                                       (This will not be null when importing dependent APIs with API Products)
+     * @param preserveProvider               Decision to keep or replace the provider
+     * @param overwrite                      Whether to update the API or not
+     * @param tokenScopes                    Scopes of the token
+     * @param dependentAPIParamsConfigObject Params configuration of an API (this will not be null if a dependent API
+     *                                       of an
+     *                                       API product wants to override the parameters)
+     * @param organization                   Identifier of an Organization
+     * @throws APIManagementException If there is an error in importing an API
+     * @@return Imported API
+     */
+    public static ImportedAPIDTO importApi(InputStream importInfo, APIDTO importedApiDTO, Boolean preserveProvider,
+                                           Boolean rotateRevision, Boolean overwrite,
+                                           Boolean preservePortalConfigurations, Boolean dependentAPIFromProduct,
+                                           String[] tokenScopes, JsonObject dependentAPIParamsConfigObject,
+                                           String organization)
+            throws APIManagementException {
+        try {
+            String extractedFolderPath = getArchivePathOfExtractedDirectory(importInfo);
+            return importApi(extractedFolderPath, importedApiDTO, preserveProvider, rotateRevision, overwrite,
+                    preservePortalConfigurations, dependentAPIFromProduct, tokenScopes, dependentAPIParamsConfigObject,
+                    organization);
+        } catch (APIImportExportException e) {
+            throw new APIManagementException(e);
+        }
+    }
+
     /**
      * This method will extract out the API policies from the URL template.
      *

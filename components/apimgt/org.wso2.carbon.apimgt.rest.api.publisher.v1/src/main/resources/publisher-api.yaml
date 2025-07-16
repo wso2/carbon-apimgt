@@ -10812,6 +10812,10 @@ components:
           pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\[\]\/]*$)'
           type: string
           example: PizzaShackAPI
+        displayName:
+          minLength: 1
+          type: string
+          example: Pizza Shack API
         description:
           maxLength: 32766
           type: string
@@ -11326,6 +11330,13 @@ components:
             wso2/apk
             AWS
           default: wso2/synapse
+        isInitiatedFromGateway:
+          type: boolean
+          description: |
+            Whether the API is initiated from the gateway or not. This is used to identify
+            whether the API is created from the publisher or discovered from the gateway.
+          example: false
+          default: false
         asyncTransportProtocols:
           type: array
           description: |

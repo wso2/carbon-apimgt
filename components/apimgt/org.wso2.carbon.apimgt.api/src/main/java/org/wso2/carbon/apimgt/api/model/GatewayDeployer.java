@@ -20,9 +20,6 @@ package org.wso2.carbon.apimgt.api.model;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-import java.util.List;
-
-
 /**
  * This Interface is  providing functionality of external gateway specific core operations.
  * You can implement deploy/undeploy  API methods by implementing this interface.
@@ -80,11 +77,4 @@ public interface GatewayDeployer {
      */
     void transformAPI(API api) throws APIManagementException;
 
-    /**
-     * This method is used to discover APIs from the external gateway.
-     * It can be used to discover APIs that are not managed by WSO2 API Manager.
-     *
-     * @throws APIManagementException if error occurs when discovering APIs
-     */
-    List<String> discoverAPIs() throws APIManagementException;
 }

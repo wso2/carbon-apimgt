@@ -28,12 +28,18 @@ import java.util.List;
 public interface GatewayAgentConfiguration {
 
     /**
-     * This method returns the Gateway Deployer implementation class name
+     * Get the implementation class of the external gateway deployer
      *
-     * @return gateway deployer implementation class name
+     * @return String implementation class name
      */
-    String getImplementation();
+    String getGatewayDeployerImplementation();
 
+    /**
+     * Get the implementation class of the external gateway discovery agent
+     *
+     * @return String implementation class name
+     */
+    String getDiscoveryImplementation();
     /**
      * Get vendor type of the external gateway
      *

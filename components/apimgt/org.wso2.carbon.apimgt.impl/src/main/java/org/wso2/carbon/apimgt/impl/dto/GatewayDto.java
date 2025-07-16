@@ -18,11 +18,13 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
+import org.wso2.carbon.apimgt.api.model.FederatedAPIDiscovery;
 import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 
 public class GatewayDto {
     private String name;
     private GatewayDeployer gatewayDeployer;
+    private FederatedAPIDiscovery federatedAPIDiscovery;
 
     public String getName() {
         return name;
@@ -39,4 +41,11 @@ public class GatewayDto {
     public void setGatewayDeployer(GatewayDeployer gatewayDeployer) {
         this.gatewayDeployer = gatewayDeployer;
     }
+    public FederatedAPIDiscovery getFederatedAPIDiscovery() {
+        return federatedAPIDiscovery;
+    }
+    public void setFederatedAPIDiscovery(FederatedAPIDiscovery federatedAPIDiscovery) {
+        this.federatedAPIDiscovery = federatedAPIDiscovery;
+    }
+
 }

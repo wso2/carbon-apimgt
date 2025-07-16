@@ -91,7 +91,6 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
-import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
@@ -3645,7 +3644,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
             boolean isExternalGateway = false;
             GatewayDeployer gatewayDeployer = null;
-            if (gatewayConfiguration != null && StringUtils.isNotEmpty(gatewayConfiguration.getImplementation())) {
+            if (gatewayConfiguration != null && StringUtils.isNotEmpty(gatewayConfiguration.getGatewayDeployerImplementation())) {
                 gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain, environmentName);
                 isExternalGateway = true;
             }
