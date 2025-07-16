@@ -2246,7 +2246,7 @@
         <reflection.version>0.9.11</reflection.version>
         <woodstox-core.version>6.2.1</woodstox-core.version>
         <apache.commons.version>2.8.0</apache.commons.version>
-        <apache.commons.lang3.version>3.17.0</apache.commons.lang3.version>
+        <apache.commons.lang3.version>3.18.0</apache.commons.lang3.version>
         <io.swagger.codegen.version>2.4.11</io.swagger.codegen.version>
         <openapi-codegen-maven-plugin.version>4.3.1</openapi-codegen-maven-plugin.version>
 
