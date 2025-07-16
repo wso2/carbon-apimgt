@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.KeyManagerWellKnownResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.TokenValidationDTO;
+import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -353,6 +354,11 @@ public class KeyManagerMappingUtil {
         }
         if (StringUtils.isNotEmpty(keyManagerDTO.getScopesClaim())) {
             additionalProperties.put(APIConstants.KeyManager.SCOPES_CLAIM, keyManagerDTO.getScopesClaim());
+        }
+        //if username is not there in additional properties (this is possible when MTLS authentication is selected)
+        // Add username of the loggedIn user, since currently it's required, for authorization of DCR call in IS side
+        if (!additionalProperties.containsKey(APIConstants.KeyManager.USERNAME)) {
+            additionalProperties.put(APIConstants.KeyManager.USERNAME, RestApiCommonUtil.getLoggedInUsername());
         }
         keyManagerConfigurationDTO.setAdditionalProperties(additionalProperties);
         return keyManagerConfigurationDTO;
