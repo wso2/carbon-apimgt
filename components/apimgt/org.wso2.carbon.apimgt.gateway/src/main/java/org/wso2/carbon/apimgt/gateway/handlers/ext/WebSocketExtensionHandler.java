@@ -80,11 +80,6 @@ public class WebSocketExtensionHandler extends AbstractHandler {
                     handleResourceNotFound(messageContext, Arrays.asList(allAPIResources));
                     return false;
                 }
-                if (selectedResource == null) {
-                    onResourceNotFoundError(messageContext, HttpStatus.SC_NOT_FOUND,
-                            APIMgtGatewayConstants.RESOURCE_NOT_FOUND_ERROR_MSG);
-                    return false;
-                }
             }
 
             String resourceString = selectedResource.getDispatcherHelper().getString();
