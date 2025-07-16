@@ -316,7 +316,7 @@ public class XMLSchemaValidator extends AbstractMediator {
             return firstElement.toString();
 
         } catch (OMException e) {
-            throw new XMLStreamException(APIMgtGatewayConstants.INVALID_XML_FORMAT_MSG, e);
+            throw new XMLStreamException(APIMgtGatewayConstants.INVALID_XML_FORMAT_MSG);
         }
     }
 }
