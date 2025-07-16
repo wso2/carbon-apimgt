@@ -243,7 +243,7 @@ public class PersistenceDAO {
             } else {
                 prepStmt.setString(1, org);
                 prepStmt.setString(2, apiUuid);
-                prepStmt.setString(3, "%" + searchQuery.toLowerCase() + "%");
+                prepStmt.setString(3, searchQuery.toLowerCase());
                 prepStmt.setInt(4, start);
                 prepStmt.setInt(5, offset);
             }
@@ -1023,7 +1023,7 @@ public class PersistenceDAO {
         int apiCount = 0;
         String query = SQLQuery.searchApiByContentSql(roles);
         String countQuery = SQLQuery.searchApiByContentCountSql(roles);
-        searchQuery = "%" + searchQuery.toLowerCase() + "%";
+        searchQuery = searchQuery.toLowerCase();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -1393,7 +1393,7 @@ public class PersistenceDAO {
     public List<ContentSearchResult> searchContentByContent(String org, String searchContent, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
         String query = SQLQuery.searchContentByContentSql(roles);
-        searchContent = "%" + searchContent.toLowerCase() + "%";
+        searchContent = searchContent.toLowerCase();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -1653,7 +1653,7 @@ public class PersistenceDAO {
     public List<String> searchAPIProductsByContent(String org, String searchContent, int start, int offset, String[] roles) throws APIManagementException {
         List<String> apiProductResults = new ArrayList<>();
         String query = SQLQuery.searchApiProductByContentSql(roles);
-        searchContent = "%" + searchContent.toLowerCase() + "%";
+        searchContent = searchContent.toLowerCase();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -1929,7 +1929,7 @@ public class PersistenceDAO {
     public List<ContentSearchResult> searchAPIsByContentForDevPortal(String org, String searchContent, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
         String query = SQLQuery.searchApiByContentForDevPortalSql(roles);
-        searchContent = "%" + searchContent.toLowerCase() + "%";
+        searchContent = searchContent.toLowerCase();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -2189,7 +2189,7 @@ public class PersistenceDAO {
     public List<ContentSearchResult> searchContentByContentForDevPortal(String org, String searchContent, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
         String query = SQLQuery.searchContentByContentForDevPortalSql(roles);
-        searchContent = "%" + searchContent.toLowerCase() + "%";
+        searchContent = searchContent.toLowerCase();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
