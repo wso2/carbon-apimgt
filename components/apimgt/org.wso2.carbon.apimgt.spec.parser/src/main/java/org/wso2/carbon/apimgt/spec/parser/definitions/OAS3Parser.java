@@ -62,7 +62,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
-import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -76,10 +75,9 @@ import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
-import org.wso2.carbon.apimgt.api.model.OperationProxyMapping;
+import org.wso2.carbon.apimgt.api.model.ApiOperationMapping;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
-import org.wso2.carbon.apimgt.api.model.TargetURITemplate;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 
 import java.util.ArrayList;
@@ -2474,22 +2472,45 @@ public class OAS3Parser extends APIDefinition {
     }
 
     @Override
-    public Set<URITemplate> generateMCPTools(BackendEndpoint backendEndpoint,
-                                             String mcpFeatureType, boolean isBackend,
+    public Set<URITemplate> generateMCPTools(String backendApiDefinition,
+                                             String backendId,
+                                             String mcpFeatureType,
+                                             String mcpSubtype,
                                              Set<URITemplate> uriTemplates) {
 
-        OpenAPI backendAPIDefinition = getFullResolvedOpenAPI(backendEndpoint.getBackendApiDefinition());
+        OpenAPI backendAPIDefinition = getFullResolvedOpenAPI(backendApiDefinition);
         Set<URITemplate> tools = new HashSet<>();
 
         for (URITemplate uriTemplate : uriTemplates) {
-            String target = uriTemplate.getUriTemplate();
-            String verb = uriTemplate.getHTTPVerb();
-            OperationMatch match = findMatchingOperation(backendAPIDefinition, target, verb);
-            if (match != null) {
-                URITemplate template = populateURITemplate(
-                        new URITemplate(), match, mcpFeatureType, isBackend,
-                        backendEndpoint.getBackendId(), backendAPIDefinition);
-                tools.add(template);
+            if (mcpFeatureType.equalsIgnoreCase(uriTemplate.getHttpVerb())) {
+                BackendOperation backendOperation;
+                if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)
+                        && uriTemplate.getBackendOperationMapping() != null
+                        && uriTemplate.getBackendOperationMapping().getBackendOperation() != null) {
+                    BackendOperationMapping mapping = uriTemplate.getBackendOperationMapping();
+                    backendOperation = mapping.getBackendOperation();
+                } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)
+                        && uriTemplate.getApiOperationMapping() != null
+                        && uriTemplate.getApiOperationMapping().getBackendOperation() != null) {
+                    ApiOperationMapping mapping = uriTemplate.getApiOperationMapping();
+                    backendOperation = mapping.getBackendOperation();
+                } else {
+                    log.warn("URITemplate does not have backend or API operation mapping: " + uriTemplate);
+                    continue;
+                }
+                OperationMatch match = findMatchingOperation(backendAPIDefinition, backendOperation.getTarget(),
+                        backendOperation.getVerb());
+                if (match != null) {
+                    URITemplate toolTemplate = populateURITemplate(
+                            new URITemplate(),
+                            match,
+                            mcpFeatureType,
+                            uriTemplate.getBackendOperationMapping() != null,
+                            backendId,
+                            backendAPIDefinition
+                    );
+                    tools.add(toolTemplate);
+                }
             }
         }
         return tools;
@@ -2578,17 +2599,15 @@ public class OAS3Parser extends APIDefinition {
 
             uriTemplate.setBackendOperationMapping(backendOperationMap);
         } else {
-            TargetURITemplate targetTemplate = new TargetURITemplate(
-                    match.path,
-                    match.method.toString(),
-                    backendId,
-                    StringUtils.EMPTY,
-                    StringUtils.EMPTY,
-                    StringUtils.EMPTY);
+            BackendOperation backendOperation = new BackendOperation();
+            backendOperation.setVerb(match.method.toString());
+            backendOperation.setTarget(match.path);
 
-            OperationProxyMapping proxyMapping = new OperationProxyMapping();
-            proxyMapping.setTarget(targetTemplate);
-            uriTemplate.setOperationProxyMapping(proxyMapping);
+            ApiOperationMapping apiOperationMap = new ApiOperationMapping();
+            apiOperationMap.setApiUuid(backendId);
+            apiOperationMap.setBackendOperation(backendOperation);
+
+            uriTemplate.setApiOperationMapping(apiOperationMap);
         }
         return uriTemplate;
     }

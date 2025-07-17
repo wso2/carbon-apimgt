@@ -565,8 +565,6 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
         public static final String MCP_DEFAULT_FEATURE_TYPE = "tool";
         public static final String MCP_DEFAULT_BACKEND_ENDPOINT_NAME = "default";
-        public static final String MCP_RESOURCES_MCP = "/mcp";
-        public static final String MCP_RESOURCES_WELL_KNOWN = "/.well-known/oauth-authorization-server";
 
         public static final String OPENAI_EMBEDDING_PROVIDER_TYPE = "openai";
         public static final String AZURE_OPENAI_EMBEDDING_PROVIDER_TYPE = "azure-openai";
@@ -2207,6 +2205,8 @@ public final class APIConstants {
             "C"};
     public static final String API_SUBTYPE_DEFAULT = "DEFAULT";
     public static final String API_SUBTYPE_AI_API = "AIAPI";
+    public static final String API_SUBTYPE_DIRECT_ENDPOINT = "DIRECT_ENDPOINT";
+    public static final String API_SUBTYPE_EXISTING_API = "EXISTING_API";
     public static final String API_PRODUCT_REVISION = "Current";
     public static class AdvancedThrottleConstants {
 

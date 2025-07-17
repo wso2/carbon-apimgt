@@ -1999,8 +1999,8 @@ public class OAS2Parser extends APIDefinition {
     }
 
     @Override
-    public Set<URITemplate> generateMCPTools(BackendEndpoint backendEndpoint,
-                                             String mcpFeatureType, boolean isBackend, Set<URITemplate> uriTemplates) {
+    public Set<URITemplate> generateMCPTools(String backendApiDefinition, String backendId,
+                                             String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates) {
 
         return null;
     }

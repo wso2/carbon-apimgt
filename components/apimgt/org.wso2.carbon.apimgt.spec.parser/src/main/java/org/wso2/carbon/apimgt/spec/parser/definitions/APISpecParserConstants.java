@@ -220,4 +220,7 @@ public final class APISpecParserConstants {
         HEAD,
         OPTIONS
     }
+
+    public static final String API_SUBTYPE_DIRECT_ENDPOINT = "DIRECT_ENDPOINT";
+    public static final String API_SUBTYPE_EXISTING_API = "EXISTING_API";
 }

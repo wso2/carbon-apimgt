@@ -6276,30 +6276,15 @@ public class ApiMgtDAO {
                         uriTemplate.setId(uriMappingId);
                     }
                 }
-
-                if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
-                    BackendOperationMapping mapping = uriTemplate.getBackendOperationMapping();
-                    if (mapping != null) {
-                        addBackendOperationMappingPrepStmt.setInt(1, uriMappingId);
-                        addBackendOperationMappingPrepStmt.setString(2,
-                                mapping.getBackendId());
-                        addBackendOperationMappingPrepStmt.setString(3,
-                                mapping.getBackendOperation().getTarget());
-                        addBackendOperationMappingPrepStmt.setString(4,
-                                mapping.getBackendOperation().getVerb());
-                        addBackendOperationMappingPrepStmt.addBatch();
-                    }
-
-//                    if (uriTemplate.getProxyMapping() != null) {
-//                        OperationProxyMapping proxyMapping = uriTemplate.getProxyMapping();
-//                        int targetURLTemplateId = getURLTemplateId(proxyMapping.getTarget().getId(),
-//                                proxyMapping.getTarget().getTarget(), proxyMapping.getTarget().getVerb(), connection);
-//
-//                        addProxyOperationMappingPrepStmt.setInt(1, uriMappingId);
-//                        addProxyOperationMappingPrepStmt.setInt(2, targetURLTemplateId);
-//                        addProxyOperationMappingPrepStmt.setInt(3, apiId);
-//                        addProxyOperationMappingPrepStmt.addBatch();
-//                    }
+                if (uriTemplate.getBackendOperationMapping() != null) {
+                    addBackendOperationMappingPrepStmt.setInt(1, uriMappingId);
+                    addBackendOperationMappingPrepStmt.setString(2,
+                            uriTemplate.getBackendOperationMapping().getBackendId());
+                    addBackendOperationMappingPrepStmt.setString(3,
+                            uriTemplate.getBackendOperationMapping().getBackendOperation().getTarget());
+                    addBackendOperationMappingPrepStmt.setString(4,
+                            uriTemplate.getBackendOperationMapping().getBackendOperation().getVerb());
+                    addBackendOperationMappingPrepStmt.addBatch();
                 }
             } // end URITemplate list iteration
             uriScopeMappingPrepStmt.executeBatch();
@@ -19143,24 +19128,26 @@ public class ApiMgtDAO {
                 List<BackendEndpoint> backendEndpoints = getBackendEndpoints(apiId);
                 PreparedStatement insertBackendEndpointsStatement = connection
                         .prepareStatement(SQLConstants.APIEndpointsSQLConstants.ADD_AM_API_BACKEND_REVISION_SQL);
-                for (BackendEndpoint backendEndpoint : backendEndpoints) {
-                    String backendId = UUID.randomUUID().toString();
-                    backendEndpoint.setBackendId(backendId);
-                    insertBackendEndpointsStatement.setString(1,
-                            backendEndpoint.getBackendId());
-                    insertBackendEndpointsStatement.setString(2,
-                            backendEndpoint.getBackendName());
-                    insertBackendEndpointsStatement.setBinaryStream(3,
-                            new ByteArrayInputStream(backendEndpoint.getEndpointConfig().getBytes()));
-                    insertBackendEndpointsStatement.setBinaryStream(4,
-                            new ByteArrayInputStream(backendEndpoint.getBackendApiDefinition().getBytes()));
-                    insertBackendEndpointsStatement.setInt(5,
-                            apiId);
-                    insertBackendEndpointsStatement.setString(6,
-                            apiRevision.getRevisionUUID());
-                    insertBackendEndpointsStatement.addBatch();
+                if (!backendEndpoints.isEmpty()) {
+                    for (BackendEndpoint backendEndpoint : backendEndpoints) {
+                        String backendId = UUID.randomUUID().toString();
+                        backendEndpoint.setBackendId(backendId);
+                        insertBackendEndpointsStatement.setString(1,
+                                backendEndpoint.getBackendId());
+                        insertBackendEndpointsStatement.setString(2,
+                                backendEndpoint.getBackendName());
+                        insertBackendEndpointsStatement.setBinaryStream(3,
+                                new ByteArrayInputStream(backendEndpoint.getEndpointConfig().getBytes()));
+                        insertBackendEndpointsStatement.setBinaryStream(4,
+                                new ByteArrayInputStream(backendEndpoint.getBackendApiDefinition().getBytes()));
+                        insertBackendEndpointsStatement.setInt(5,
+                                apiId);
+                        insertBackendEndpointsStatement.setString(6,
+                                apiRevision.getRevisionUUID());
+                        insertBackendEndpointsStatement.addBatch();
+                    }
+                    insertBackendEndpointsStatement.executeBatch();
                 }
-                insertBackendEndpointsStatement.executeBatch();
 
                 // Adding to AM_API_URL_MAPPING table
                 PreparedStatement getURLMappingsStatement = connection
@@ -19202,15 +19189,20 @@ public class ApiMgtDAO {
                             uriTemplate.setId(rs.getInt(9));
                         }
 
-                        BackendOperation backendOperation = new BackendOperation();
-                        backendOperation.setTarget(rs.getString(10));
-                        backendOperation.setVerb(rs.getString(11));
+                        String target = rs.getString(10);
+                        String verb = rs.getString(11);
 
-                        BackendOperationMapping backendOperationMapping = new BackendOperationMapping();
-                        backendOperationMapping.setBackendId(backendEndpoints.get(0).getBackendId());
-                        backendOperationMapping.setBackendOperation(backendOperation);
-                        uriTemplate.setBackendOperationMapping(backendOperationMapping);
+                        if (StringUtils.isNotEmpty(target) && StringUtils.isNotEmpty(verb) &&
+                                !backendEndpoints.isEmpty()) {
+                            BackendOperation backendOperation = new BackendOperation();
+                            backendOperation.setTarget(target);
+                            backendOperation.setVerb(verb);
 
+                            BackendOperationMapping backendOperationMapping = new BackendOperationMapping();
+                            backendOperationMapping.setBackendId(backendEndpoints.get(0).getBackendId());
+                            backendOperationMapping.setBackendOperation(backendOperation);
+                            uriTemplate.setBackendOperationMapping(backendOperationMapping);
+                        }
                         urlMappingList.add(uriTemplate);
                     }
                 }
@@ -19314,15 +19306,17 @@ public class ApiMgtDAO {
                             urlMapping.setId(revisionedURLMappingId);
                         }
                     }
-                    addBackendOperationMappingPrepStmt.setInt(1,
-                            urlMapping.getId());
-                    addBackendOperationMappingPrepStmt.setString(2,
-                            urlMapping.getBackendOperationMapping().getBackendId());
-                    addBackendOperationMappingPrepStmt.setString(3,
-                            urlMapping.getBackendOperationMapping().getBackendOperation().getTarget());
-                    addBackendOperationMappingPrepStmt.setString(4,
-                            urlMapping.getBackendOperationMapping().getBackendOperation().getVerb());
-                    addBackendOperationMappingPrepStmt.addBatch();
+                    if (urlMapping.getBackendOperationMapping() != null) {
+                        addBackendOperationMappingPrepStmt.setInt(1,
+                                urlMapping.getId());
+                        addBackendOperationMappingPrepStmt.setString(2,
+                                urlMapping.getBackendOperationMapping().getBackendId());
+                        addBackendOperationMappingPrepStmt.setString(3,
+                                urlMapping.getBackendOperationMapping().getBackendOperation().getTarget());
+                        addBackendOperationMappingPrepStmt.setString(4,
+                                urlMapping.getBackendOperationMapping().getBackendOperation().getVerb());
+                        addBackendOperationMappingPrepStmt.addBatch();
+                    }
                 }
                 insertScopeResourceMappingStatement.executeBatch();
                 insertProductResourceMappingStatement.executeBatch();
@@ -20174,11 +20168,13 @@ public class ApiMgtDAO {
 
                 List<BackendEndpoint> backendEndpoints = getBackendEndpointRevisions(connection, apiId,
                         apiRevision.getRevisionUUID());
-                for (BackendEndpoint backendEndpoint: backendEndpoints) {
-                    String backendId = UUID.randomUUID().toString();
-                    backendEndpoint.setBackendId(backendId);
+                if (!backendEndpoints.isEmpty()) {
+                    for (BackendEndpoint backendEndpoint : backendEndpoints) {
+                        String backendId = UUID.randomUUID().toString();
+                        backendEndpoint.setBackendId(backendId);
+                    }
+                    addBackendEndpoints(connection, apiId, backendEndpoints);
                 }
-                addBackendEndpoints(connection, apiId, backendEndpoints);
 
                 // Restoring to AM_API_ENDPOINTS_TABLE
                 List<APIEndpointInfo> apiEndpointInfoList = getAPIEndpoints(apiRevision.getRevisionUUID(),
@@ -22126,7 +22122,7 @@ public class ApiMgtDAO {
 
     private void updateBackendEndpoint(Connection connection, int apiId, BackendEndpoint backendEndpoint)
             throws SQLException {
-        String query = SQLConstants.UPDATE_AM_API_BACKEND_REVISION_SQL;
+        String query = SQLConstants.UPDATE_AM_API_BACKEND_SQL;
 
         try (PreparedStatement getBackendPrepStmt = connection.prepareStatement(query)) {
             getBackendPrepStmt.setString(1, backendEndpoint.getEndpointConfig());

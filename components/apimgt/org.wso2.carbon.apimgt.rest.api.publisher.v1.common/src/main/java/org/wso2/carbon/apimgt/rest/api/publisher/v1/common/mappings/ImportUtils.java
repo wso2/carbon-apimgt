@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -402,7 +403,7 @@ public class ImportUtils {
                     extractedAPIPolicies, currentTenantDomain);
 
             // Handle API Endpoints if endpoints file is defined
-            populateAPIWithEndpoints(importedApi.getUuid(), apiProvider, extractedFolderPath, organization);
+            populateAPIWithEndpoints(importedApi, apiProvider, extractedFolderPath, organization);
 
             // Update Custom Backend Data if endpoint type is selected to "custom_backend"
             Map endpointConf = (Map) importedApiDTO.getEndpointConfig();
@@ -747,46 +748,68 @@ public class ImportUtils {
     /**
      * This method is used to populate the API with endpoints.
      *
-     * @param apiUUID             API UUID
+     * @param api                 API object
      * @param provider            API Provider
      * @param extractedFolderPath Extracted folder path of the API project
      * @param organization        Organization
      * @throws APIManagementException If an error occurs while populating the API with endpoints
      */
-    public static void populateAPIWithEndpoints(String apiUUID, APIProvider provider, String extractedFolderPath,
-            String organization) throws APIManagementException {
+    public static void populateAPIWithEndpoints(API api, APIProvider provider, String extractedFolderPath,
+                                                String organization) throws APIManagementException {
 
+        String apiUUID = api.getUuid();
         try {
             // Retrieve endpoints from artifact
             String jsonContent = getFileContentAsJson(
                     extractedFolderPath + ImportExportConstants.API_ENDPOINTS_FILE_LOCATION);
-            if (jsonContent != null) {
-                // Retrieving the field "data"
+            if (jsonContent == null) {
+                return;
+            } else {
                 JsonElement endpointsJson = new JsonParser().parse(jsonContent).getAsJsonObject()
                         .get(APIConstants.DATA);
-                if (endpointsJson != null) {
-                    JsonArray endpoints = endpointsJson.getAsJsonArray();
-                    for (JsonElement endpointElement : endpoints) {
-                        JsonObject endpointObj = endpointElement.getAsJsonObject();
-                        APIEndpointInfo apiEndpointInfo = new Gson().fromJson(endpointObj, APIEndpointInfo.class);
-                        String endpointUUID = apiEndpointInfo.getId();
-                        try {
-                            String createdEndpointUUID = provider.addAPIEndpoint(apiUUID, apiEndpointInfo,
-                                    organization);
-                            if (log.isDebugEnabled()) {
-                                log.debug("API Endpoint with UUID: " + createdEndpointUUID +
-                                        " has been added to the API");
-                            }
-                        } catch (APIManagementException e) {
-                            throw new APIManagementException("Error while adding API Endpoint with ID: " + endpointUUID,
-                                    e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINT, endpointUUID));
-                        }
-                    }
-                } else {
+                if (endpointsJson == null || endpointsJson.isJsonNull()) {
                     if (log.isDebugEnabled()) {
                         log.debug("No API endpoints found in the API endpoints file");
                     }
+                } else {
+                        // Retrieving the field "data"
+                        JsonArray endpoints = endpointsJson.getAsJsonArray();
+                        for (JsonElement endpointElement : endpoints) {
+                            JsonObject endpointObj = endpointElement.getAsJsonObject();
+                            if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
+                                BackendEndpoint backendEndpoint =
+                                        new Gson().fromJson(endpointObj, BackendEndpoint.class);
+                                String endpointUUID = backendEndpoint.getBackendId();
+                                //TODO: PASAN
+//                                try {
+//                                    String createdEndpointUUID = provider.addAPIEndpoint(apiUUID, backendEndpoint);
+//                                } catch (APIManagementException e) {
+//                                    throw new APIManagementException(
+//                                            "Error while adding API Endpoint with ID: " + endpointUUID,
+//                                            e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINT,
+//                                            endpointUUID));
+//                                }
+                            } else {
+                                APIEndpointInfo apiEndpointInfo =
+                                        new Gson().fromJson(endpointObj, APIEndpointInfo.class);
+                                String endpointUUID = apiEndpointInfo.getId();
+                                try {
+                                    String createdEndpointUUID = provider.addAPIEndpoint(apiUUID, apiEndpointInfo,
+                                            organization);
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("API Endpoint with UUID: " + createdEndpointUUID +
+                                                " has been added to the API");
+                                    }
+                                } catch (APIManagementException e) {
+                                    throw new APIManagementException(
+                                            "Error while adding API Endpoint with ID: " + endpointUUID,
+                                            e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINT,
+                                            endpointUUID));
+                                }
+                            }
+                        }
                 }
+
             }
         } catch (IOException e) {
             throw new APIManagementException("Error while reading API endpoints from path: " + extractedFolderPath, e,

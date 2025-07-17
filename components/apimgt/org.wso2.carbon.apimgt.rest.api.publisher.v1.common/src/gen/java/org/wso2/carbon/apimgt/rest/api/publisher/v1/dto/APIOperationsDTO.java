@@ -41,7 +41,7 @@ public class APIOperationsDTO   {
     private String description = null;
     private APIOperationPoliciesDTO operationPolicies = null;
     private BackendOperationMappingDTO backendOperationMapping = null;
-    private APIOperationMappingDTO operationProxyMapping = null;
+    private APIOperationMappingDTO apiOperationMapping = null;
 
   /**
    **/
@@ -319,20 +319,20 @@ public class APIOperationsDTO   {
 
   /**
    **/
-  public APIOperationsDTO operationProxyMapping(APIOperationMappingDTO operationProxyMapping) {
-    this.operationProxyMapping = operationProxyMapping;
+  public APIOperationsDTO apiOperationMapping(APIOperationMappingDTO apiOperationMapping) {
+    this.apiOperationMapping = apiOperationMapping;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("operationProxyMapping")
-  public APIOperationMappingDTO getOperationProxyMapping() {
-    return operationProxyMapping;
+  @JsonProperty("apiOperationMapping")
+  public APIOperationMappingDTO getApiOperationMapping() {
+    return apiOperationMapping;
   }
-  public void setOperationProxyMapping(APIOperationMappingDTO operationProxyMapping) {
-    this.operationProxyMapping = operationProxyMapping;
+  public void setApiOperationMapping(APIOperationMappingDTO apiOperationMapping) {
+    this.apiOperationMapping = apiOperationMapping;
   }
 
 
@@ -361,12 +361,12 @@ public class APIOperationsDTO   {
         Objects.equals(description, apIOperations.description) &&
         Objects.equals(operationPolicies, apIOperations.operationPolicies) &&
         Objects.equals(backendOperationMapping, apIOperations.backendOperationMapping) &&
-        Objects.equals(operationProxyMapping, apIOperations.operationProxyMapping);
+        Objects.equals(apiOperationMapping, apIOperations.apiOperationMapping);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds, amznResourceName, amznResourceTimeout, amznResourceContentEncode, payloadSchema, uriMapping, schemaDefinition, description, operationPolicies, backendOperationMapping, operationProxyMapping);
+    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds, amznResourceName, amznResourceTimeout, amznResourceContentEncode, payloadSchema, uriMapping, schemaDefinition, description, operationPolicies, backendOperationMapping, apiOperationMapping);
   }
 
   @Override
@@ -390,7 +390,7 @@ public class APIOperationsDTO   {
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    operationPolicies: ").append(toIndentedString(operationPolicies)).append("\n");
     sb.append("    backendOperationMapping: ").append(toIndentedString(backendOperationMapping)).append("\n");
-    sb.append("    operationProxyMapping: ").append(toIndentedString(operationProxyMapping)).append("\n");
+    sb.append("    apiOperationMapping: ").append(toIndentedString(apiOperationMapping)).append("\n");
     sb.append("}");
     return sb.toString();
   }

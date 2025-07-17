@@ -271,17 +271,19 @@ public abstract class APIDefinition {
     public abstract String getType();
 
     /**
-     * Generates MCP tool URITemplates by matching operations in the backend API definition.
+     * Generates MCP URITemplates based on the API definition.
      *
-     * @param backendEndpoint backend definition and config
-     * @param mcpFeatureType  MCP feature type to assign
-     * @param isBackend       whether tools are for backend
-     * @param uriTemplates    existing URI templates to match
-     * @return set of generated MCP tool URITemplates
+     * @param backendApiDefinition API definition of the backend.
+     * @param backendId            Backend ID. It can be either backend endpoints ID or API UUID.
+     * @param mcpFeatureType       MCP feature type to filter generation
+     * @param mcpSubtype           MCP Subtype
+     * @param uriTemplates         URI templates to generate
+     * @return generated set of MCP URITemplates
      */
-    public abstract Set<URITemplate> generateMCPTools(BackendEndpoint backendEndpoint,
+    public abstract Set<URITemplate> generateMCPTools(String backendApiDefinition,
+                                                      String backendId,
                                                       String mcpFeatureType,
-                                                      boolean isBackend,
+                                                      String mcpSubtype,
                                                       Set<URITemplate> uriTemplates);
 
     /**

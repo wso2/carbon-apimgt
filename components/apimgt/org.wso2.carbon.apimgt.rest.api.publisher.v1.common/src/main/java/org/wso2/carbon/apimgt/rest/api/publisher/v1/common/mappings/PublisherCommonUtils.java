@@ -75,6 +75,7 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -1624,6 +1625,13 @@ public class PublisherCommonUtils {
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
             apiToAdd.setSwaggerDefinition(apiDefinition);
+            //TODO: PASAN
+            String backendApiUuid = apiDto.getOperations().get(0).getId();
+            String backendApiDefinition = apiProvider.getOpenAPIDefinition(backendApiUuid, organization);
+            Set<URITemplate> uriTemplates = generateMCPFeatures(apiDto.getSubtypeConfiguration().getSubtype(),
+                    backendApiDefinition, backendApiUuid, apiToAdd.getUriTemplates());
+//            apiToAdd.setUriTemplates(uriTemplates);
+//            apiToAdd.getBackendEndpoints().add(backendEndpoint);
             artifactType = ArtifactType.API;
         } else {
             AsyncApiParser asyncApiParser = new AsyncApiParser();
@@ -1682,6 +1690,26 @@ public class PublisherCommonUtils {
         }
         return apiToAdd;
     }
+
+//    /**
+//     * Generates MCP feature URITemplates from the given backend endpoint.
+//     *
+//     * @param backendEndpoint the backend endpoint with configuration
+//     * @param uriTemplates    existing URI templates as context
+//     * @return a set of generated URITemplates for MCP features
+//     * @throws APIManagementException if endpoint config is missing or generation fails
+//     */
+//    public static Set<URITemplate> generateMCPFeatures(BackendEndpoint backendEndpoint, Set<URITemplate> uriTemplates)
+//            throws APIManagementException {
+//
+//        APIDefinition parser = new OAS3Parser();
+//        Set<URITemplate> mcpTools = parser.generateMCPTools(backendEndpoint, APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE
+//                , true, uriTemplates);
+//        if (mcpTools == null) {
+//            throw new APIManagementException("Failed to generate MCP feature.");
+//        }
+//        return mcpTools;
+//    }
 
     /**
      * Validate endpoint configurations of {@link APIDTO} for web socket endpoints.
@@ -3898,5 +3926,28 @@ public class PublisherCommonUtils {
             default:
                 return null;
         }
+    }
+
+    /**
+     * Generate MCP features for the given API definition.
+     *
+     * @param apiSubtype    Subtype of the API (e.g., REST, WS, etc.)
+     * @param apiDefinition API definition in string format
+     * @param apiUuid       Unique identifier of the API
+     * @param uriTemplates  Set of URI templates associated with the API
+     * @return Set of URITemplate objects representing the generated MCP features
+     * @throws APIManagementException if there is an error while generating MCP features
+     */
+    public static Set<URITemplate> generateMCPFeatures(String apiSubtype, String apiDefinition, String apiUuid,
+                                                       Set<URITemplate> uriTemplates)
+            throws APIManagementException {
+
+        APIDefinition parser = new OAS3Parser();
+        Set<URITemplate> mcpTools = parser.generateMCPTools(apiDefinition,
+                apiUuid, APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE, apiSubtype, uriTemplates);
+        if (mcpTools == null) {
+            throw new APIManagementException("Failed to generate MCP feature.");
+        }
+        return mcpTools;
     }
 }

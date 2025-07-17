@@ -18,29 +18,28 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
-public class OperationProxyMapping {
+public class ApiOperationMapping {
 
-    private String schema = null;
-    private TargetURITemplate target = null;
+    private String apiUuid = null;
+    private BackendOperation backendOperation = null;
 
-    public String getSchema() {
+    public String getApiUuid() {
 
-        return schema;
+        return apiUuid;
     }
 
-    public void setSchema(String schema) {
+    public void setApiUuid(String apiUuid) {
 
-        this.schema = schema;
+        this.apiUuid = apiUuid;
     }
 
-    public TargetURITemplate getTarget() {
+    public BackendOperation getBackendOperation() {
 
-        return target;
+        return backendOperation;
     }
 
-    public void setTarget(TargetURITemplate target) {
+    public void setBackendOperation(BackendOperation backendOperation) {
 
-        this.target = target;
+        this.backendOperation = backendOperation;
     }
-
 }

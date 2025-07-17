@@ -8526,9 +8526,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         List<BackendEndpoint> backendEndpoints = apiMgtDAO.getBackendEndpoints(apiId);
         if (!backendEndpoints.isEmpty()) {
             APIDefinition parser = new OAS3Parser();
-            Set<URITemplate> mcpTools = parser.updateMCPTools(backendEndpoints.get(0),
-                    APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE
-                    , true, api.getUriTemplates());
+            Set<URITemplate> mcpTools = null;
+            if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
+                mcpTools = parser.updateMCPTools(backendEndpoints.get(0),
+                        APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE
+                        , true, api.getUriTemplates());
+            } else if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
+                mcpTools = parser.updateMCPTools(backendEndpoints.get(0),
+                        APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE
+                        , false, api.getUriTemplates());
+            }
             if (mcpTools == null) {
                 throw new APIManagementException("Failed to generate MCP tools.");
             }

@@ -1907,13 +1907,14 @@ public class APIMappingUtil {
             URITemplate template = new URITemplate();
 
             String uriTempVal = operation.getTarget();
+            String httpVerb = operation.getVerb();
 
-            if (StringUtils.isEmpty(uriTempVal)) {
+            if (StringUtils.isEmpty(uriTempVal)
+                    && !APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE.equalsIgnoreCase(httpVerb)) {
                 String errMsg = "Resource URI template value (target) is not specified for the operation/resource";
                 throw new APIManagementException(errMsg, ExceptionCodes.RESOURCE_URI_TEMPLATE_NOT_DEFINED);
             }
 
-            String httpVerb = operation.getVerb();
             List<String> scopeList = operation.getScopes();
             if (scopeList != null) {
                 for (String scopeKey : scopeList) {

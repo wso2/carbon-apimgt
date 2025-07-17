@@ -18,10 +18,6 @@
 
 package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.v3.parser.core.models.ParseOptions;
-import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.apache.http.client.HttpClient;
 import software.amazon.awssdk.core.exception.SdkClientException;
@@ -110,7 +106,6 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -720,7 +715,8 @@ public class ApisApiServiceImplUtils {
             APIDefinition parser = new OAS3Parser();
             definitionToAdd = parser.generateAPIDefinition(swaggerData);
 
-            Set<URITemplate> uriTemplates = generateMCPFeatures(backendEndpoint, apiToAdd.getUriTemplates());
+            Set<URITemplate> uriTemplates = generateMCPFeatures(apiToAdd.getSubtype(), backendEndpoint,
+                    apiToAdd.getUriTemplates());
             apiToAdd.setUriTemplates(uriTemplates);
             apiToAdd.getBackendEndpoints().add(backendEndpoint);
         } else {
@@ -768,23 +764,20 @@ public class ApisApiServiceImplUtils {
     }
 
     /**
-     * Generates MCP feature URITemplates from the given backend endpoint.
+     * Generate MCP features for the given subtype and backend endpoint.
      *
-     * @param backendEndpoint the backend endpoint with configuration
-     * @param uriTemplates    existing URI templates as context
-     * @return a set of generated URITemplates for MCP features
-     * @throws APIManagementException if endpoint config is missing or generation fails
+     * @param subtype         The subtype of the API.
+     * @param backendEndpoint The backend endpoint containing the API definition.
+     * @param uriTemplates    The set of URI templates to be used.
+     * @return Set of URITemplate representing the generated MCP features.
+     * @throws APIManagementException If an error occurs while generating MCP features.
      */
-    public static Set<URITemplate> generateMCPFeatures(BackendEndpoint backendEndpoint, Set<URITemplate> uriTemplates)
+    public static Set<URITemplate> generateMCPFeatures(String subtype, BackendEndpoint backendEndpoint, Set<URITemplate> uriTemplates)
             throws APIManagementException {
 
-        if (backendEndpoint.getEndpointConfig() == null || backendEndpoint.getEndpointConfig().isEmpty()) {
-            throw new APIManagementException("Backend operation mapping is not available.",
-                    ExceptionCodes.BACKEND_OPERATION_MAPPING_NOT_FOUND);
-        }
         APIDefinition parser = new OAS3Parser();
-        Set<URITemplate> mcpTools = parser.generateMCPTools(backendEndpoint, APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE
-                , true, uriTemplates);
+        Set<URITemplate> mcpTools = parser.generateMCPTools(backendEndpoint.getBackendApiDefinition(),
+                backendEndpoint.getBackendId(), APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE, subtype, uriTemplates);
         if (mcpTools == null) {
             throw new APIManagementException("Failed to generate MCP feature.");
         }
