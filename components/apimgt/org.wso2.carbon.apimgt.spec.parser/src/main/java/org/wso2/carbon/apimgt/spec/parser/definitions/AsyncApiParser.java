@@ -1938,7 +1938,7 @@ public class AsyncApiParser extends APIDefinition {
         aaiDocument.info = aaiDocument.createInfo();
         aaiDocument.info.title = api.getId().getName();
         aaiDocument.info.version = api.getId().getVersion();
-        if (!APISpecParserConstants.API_TYPE_WEBSUB.equals(api.getType())) {
+        if (!APISpecParserConstants.API_TYPE_WEBSUB.equals(api.getType()) && !APISpecParserConstants.API_TYPE_WS.equals(api.getType())) {
             JSONObject endpointConfig = new JSONObject(api.getEndpointConfig());
 
             if (endpointConfig.has(APISpecParserConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {

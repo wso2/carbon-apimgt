@@ -29,6 +29,8 @@ public class WebSocketApiConstants {
     public static final String URL_SEPARATOR = "/";
     public static final String DEFAULT_RESOURCE_NAME = "/_default_resource_of_api_";
     public static final String WS_SSL_CHANNEL_HANDLER_NAME = "ssl";
+    public static final String SOURCE_HANDSHAKE_PRESENT = "websocket.source.handshake.present";
+    public static final String TARGET_ENDPOINT_ADDRESS = "ENDPOINT_ADDRESS";
 
     //Constants for Websocket frame error codes and messages
     public static class FrameErrorConstants {

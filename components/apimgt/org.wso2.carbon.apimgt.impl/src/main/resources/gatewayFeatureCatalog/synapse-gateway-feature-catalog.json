@@ -59,7 +59,8 @@
         "loadBalanceAndFailoverConfigurations",
         "endpointSecurity",
         "typePRODUCTION",
-        "typeSANDBOX"
+        "typeSANDBOX",
+        "ws"
       ],
       "endpointSecurity": [
         "basicAuth",
