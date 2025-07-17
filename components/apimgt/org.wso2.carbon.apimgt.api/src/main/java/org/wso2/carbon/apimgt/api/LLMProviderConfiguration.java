@@ -24,7 +24,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.apache.commons.lang3.StringUtils;
 
 public class LLMProviderConfiguration {
 
@@ -42,19 +45,60 @@ public class LLMProviderConfiguration {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String authQueryParameter;
 
-    public LLMProviderConfiguration() {}
+    @JsonProperty("authenticationConfiguration")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    LLMProviderAuthenticationConfiguration authenticationConfiguration;
+
+    public LLMProviderConfiguration() {
+    }
 
     @JsonCreator
     public LLMProviderConfiguration(
             @JsonProperty("connectorType") String connectorType,
             @JsonProperty("metadata") List<LLMProviderMetadata> metadata,
             @JsonProperty("authHeader") String authHeader,
-            @JsonProperty("authQueryParameter") String authQueryParameter) {
+            @JsonProperty("authQueryParameter") String authQueryParameter,
+            @JsonProperty("authenticationConfiguration")
+            LLMProviderAuthenticationConfiguration authenticationConfiguration) {
 
         this.connectorType = connectorType;
         this.metadata = metadata;
         this.authHeader = authHeader;
         this.authQueryParameter = authQueryParameter;
+        this.authenticationConfiguration = authenticationConfiguration;
+    }
+
+    public void setAuthQueryParameter(String authQueryParameter) {
+        this.authQueryParameter = authQueryParameter;
+    }
+
+    public LLMProviderAuthenticationConfiguration getAuthenticationConfiguration() {
+        if (authenticationConfiguration == null) {
+            LLMProviderAuthenticationConfiguration authenticationConfiguration =
+                    new LLMProviderAuthenticationConfiguration();
+            if (StringUtils.isNotEmpty(authQueryParameter) || StringUtils.isNotEmpty(authHeader)) {
+                authenticationConfiguration.setEnabled(true);
+                authenticationConfiguration.setType(APIConstants.AIAPIConstants.API_KEY_AUTHENTICATION_TYPE);
+                Map<String,Object> parameters = new HashMap<>();
+                if (StringUtils.isNotEmpty(authHeader)) {
+                    parameters.put(APIConstants.AIAPIConstants.API_KEY_HEADER_ENABLED, true);
+                    parameters.put(APIConstants.AIAPIConstants.API_KEY_HEADER_NAME, authHeader);
+                }else if (StringUtils.isNotEmpty(authQueryParameter)){
+                    parameters.put(APIConstants.AIAPIConstants.API_KEY_QUERY_PARAMETER_ENABLED, true);
+                    parameters.put(APIConstants.AIAPIConstants.API_KEY_QUERY_PARAMETER_NAME, authQueryParameter);
+                }
+                authenticationConfiguration.setParameters(parameters);
+            } else {
+                authenticationConfiguration.setEnabled(false);
+            }
+            return authenticationConfiguration;
+        }
+        return authenticationConfiguration;
+    }
+
+    public void setAuthenticationConfiguration(
+            LLMProviderAuthenticationConfiguration authenticationConfiguration) {
+        this.authenticationConfiguration = authenticationConfiguration;
     }
 
     public String getConnectorType() {

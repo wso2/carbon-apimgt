@@ -28,6 +28,12 @@ public class SimplifiedEndpoint {
     private String apiKeyIdentifier;
     private String apiKeyValue;
     private String apiKeyIdentifierType;
+    private String authenticationType;
+    private String accessKey;
+    private String secretKey;
+    private String region;
+    private String service;
+    private String endpoint;
     private String deploymentStage;
     private static final String PRODUCTION = "PRODUCTION";
     private static final String SANDBOX = "SANDBOX";
@@ -65,14 +71,21 @@ public class SimplifiedEndpoint {
         EndpointSecurityDTO endpointSecurity = PRODUCTION.equals(deploymentStage)
                 ? securityConfig.getProduction()
                 : securityConfig.getSandbox();
-
+        EndpointConfigDTO.EndpointDetails endpointDetails =
+                PRODUCTION.equals(deploymentStage) ? config.getProductionEndpoints() : config.getSandboxEndpoints();
         this.endpointSecurityEnabled = endpointSecurity != null &&
                 endpointSecurity.isEnabled();
 
         if (this.endpointSecurityEnabled) {
+            this.authenticationType = endpointSecurity.getType();
             this.apiKeyIdentifier = endpointSecurity.getApiKeyIdentifier();
             this.apiKeyValue = endpointSecurity.getApiKeyValue();
             this.apiKeyIdentifierType = endpointSecurity.getApiKeyIdentifierType();
+            this.accessKey = endpointSecurity.getAccessKey();
+            this.secretKey = endpointSecurity.getSecretKey();
+            this.region = endpointSecurity.getRegion();
+            this.service = endpointSecurity.getService();
+            this.endpoint = endpointDetails.getUrl();
         }
     }
 
@@ -111,6 +124,78 @@ public class SimplifiedEndpoint {
         return endpointSecurityEnabled;
     }
 
+    public void setEndpointUuid(String endpointUuid) {
+        this.endpointUuid = endpointUuid;
+    }
+
+    public boolean isEndpointSecurityEnabled() {
+        return endpointSecurityEnabled;
+    }
+
+    public void setEndpointSecurityEnabled(boolean endpointSecurityEnabled) {
+        this.endpointSecurityEnabled = endpointSecurityEnabled;
+    }
+
+    public void setEndpointName(String endpointName) {
+        this.endpointName = endpointName;
+    }
+
+    public void setApiKeyIdentifier(String apiKeyIdentifier) {
+        this.apiKeyIdentifier = apiKeyIdentifier;
+    }
+
+    public void setApiKeyValue(String apiKeyValue) {
+        this.apiKeyValue = apiKeyValue;
+    }
+
+    public void setApiKeyIdentifierType(String apiKeyIdentifierType) {
+        this.apiKeyIdentifierType = apiKeyIdentifierType;
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public void setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(String service) {
+        this.service = service;
+    }
+
+    public String getEndpoint() {
+        return endpoint;
+    }
+
+    public void setEndpoint(String endpoint) {
+        this.endpoint = endpoint;
+    }
+
+    public void setDeploymentStage(String deploymentStage) {
+        this.deploymentStage = deploymentStage;
+    }
+
     /**
      * Returns a string representation of the simplified endpoint.
      *
@@ -118,15 +203,20 @@ public class SimplifiedEndpoint {
      */
     @Override
     public String toString() {
-
-        return "SimplifiedEndpointDTO{" +
-                "  endpointUuid='" + endpointUuid + '\'' +
+        return "SimplifiedEndpoint{" +
+                "endpointUuid='" + endpointUuid + '\'' +
                 ", endpointSecurityEnabled=" + endpointSecurityEnabled +
                 ", endpointName='" + endpointName + '\'' +
-                ", apiKeyIdentifier='" + apiKeyIdentifier + '\'' +
-                ", apiKeyValue='" + apiKeyValue + '\'' +
-                ", apiKeyIdentifierType='" + apiKeyIdentifierType + '\'' +
+                ", endpoint='" + endpoint + '\'' +
                 ", deploymentStage='" + deploymentStage + '\'' +
                 '}';
+    }
+
+    public String getAuthenticationType() {
+        return authenticationType;
+    }
+
+    public void setAuthenticationType(String authenticationType) {
+        this.authenticationType = authenticationType;
     }
 }

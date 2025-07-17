@@ -9321,7 +9321,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: string
+                  $ref: '#/components/schemas/LLMModel'
       security:
         - OAuth2Security:
             - apim:llm_provider_read
@@ -12778,6 +12778,18 @@ components:
             $ref: '#/components/schemas/APIEndpoint'
         pagination:
           $ref: '#/components/schemas/Pagination'
+    LLMModel:
+      title: LLM Model
+      type: object
+      properties:
+        values:
+          type: array
+          items:
+            type: string
+            example: "gpt-4o"
+        vendor:
+          type: string
+          example: OpenAI
     LLMProviderResponse:
       title: LLMProviderResponse
       type: object
@@ -12851,12 +12863,33 @@ components:
       title: LLMProviderEndpointConfiguration
       type: object
       properties:
+        authenticationConfiguration:
+          $ref: '#/components/schemas/LLMProviderEndpointAuthenticationConfiguration'
         authHeader:
           type: string
           example: Authorization
+          deprecated: true
         authQueryParameter:
           type: string
           example: ApiKey
+          deprecated: true
+    LLMProviderEndpointAuthenticationConfiguration:
+      title: LLMProviderEndpointAuthenticationConfiguration
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          description: Whether the authentication configuration is enabled or not
+          default: false
+        type:
+          type: string
+          description: Type of the authentication configuration
+          example: apiKey
+        parameters:
+          type: object
+          description: |
+            Parameters required for the authentication configuration. The parameters are different based on the type of the authentication configuration.
+          example: {"headerEnabled": true,"headerName":"Authorization"}
     AdditionalProperty:
       title: Additional Gateway Properties
       type: object

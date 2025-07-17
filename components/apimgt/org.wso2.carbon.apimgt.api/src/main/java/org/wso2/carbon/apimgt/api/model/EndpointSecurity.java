@@ -49,6 +49,11 @@ public class EndpointSecurity {
 
     private String apiKeyIdentifierType = null;
 
+    private String accessKey = null;
+    private String secretKey = null;
+    private String region = null;
+    private String service = null;
+
     private String customParameters = null;
 
     private Map additionalProperties = new HashMap();
@@ -274,6 +279,38 @@ public class EndpointSecurity {
 
     public void setProxyConfigType(TokenEndpointConnectionConfigType proxyConfigType) {
         this.proxyConfigType = proxyConfigType;
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public void setAccessKey(String accessKey) {
+        this.accessKey = accessKey;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        this.secretKey = secretKey;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(String service) {
+        this.service = service;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

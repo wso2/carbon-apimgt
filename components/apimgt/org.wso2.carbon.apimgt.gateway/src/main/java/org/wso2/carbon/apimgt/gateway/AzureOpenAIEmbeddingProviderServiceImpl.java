@@ -43,7 +43,6 @@ import java.nio.charset.StandardCharsets;
  * This service interacts with the Azure OpenAI API to generate embeddings for given input text.
  */
 public class AzureOpenAIEmbeddingProviderServiceImpl implements EmbeddingProviderService {
-
     private HttpClient httpClient;
     private String azureApiKey;
     // e.g., https://<resource>.openai.azure.com/openai/deployments/<dep-id>/embeddings?api-version=2024-02-15-preview

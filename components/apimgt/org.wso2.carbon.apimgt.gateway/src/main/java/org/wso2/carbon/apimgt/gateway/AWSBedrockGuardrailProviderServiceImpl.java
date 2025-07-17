@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.gateway;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collections;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
@@ -38,6 +39,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import org.wso2.carbon.apimgt.impl.utils.AWSUtil;
 
 /**
  * AWS Bedrock Guardrail Provider Service.
@@ -132,14 +134,12 @@ public class AWSBedrockGuardrailProviderServiceImpl implements GuardrailProvider
             Map<String, String> authHeaders;
             if (roleArn != null && !roleArn.isEmpty() && roleRegion != null && !roleRegion.isEmpty()) {
                 // Generate AWS authentication headers using AssumeRole
-                authHeaders = APIUtil.generateAWSSignatureUsingAssumeRole(
+                authHeaders = AWSUtil.generateAWSSignatureUsingAssumeRole(
                         host, APIConstants.HTTP_POST, service, uri, "", body, accessKey,
-                        secretKey, region, sessionToken, roleArn, roleRegion, roleExternalId
-                );
+                        secretKey, region, sessionToken, roleArn, roleRegion, roleExternalId, Collections.emptyMap());
             } else {
-                authHeaders = APIUtil.generateAWSSignature(host, APIConstants.HTTP_POST, service, uri,
-                        "", body, accessKey, secretKey, region, sessionToken
-                );
+                authHeaders = AWSUtil.generateAWSSignature(host, APIConstants.HTTP_POST, service, uri,
+                        "", body, accessKey, secretKey, region, sessionToken, Collections.emptyMap());
             }
             for (Map.Entry<String, String> header : authHeaders.entrySet()) {
                 post.setHeader(header.getKey(), header.getValue());
