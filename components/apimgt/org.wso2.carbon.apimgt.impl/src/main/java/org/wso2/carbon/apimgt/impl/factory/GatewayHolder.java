@@ -86,7 +86,8 @@ public class GatewayHolder {
 
                     GatewayAgentConfiguration gatewayAgentConfiguration = ServiceReferenceHolder.getInstance().
                             getExternalGatewayConnectorConfiguration(environment.getGatewayType());
-                    if (gatewayAgentConfiguration != null) {
+                    if (gatewayAgentConfiguration != null &&
+                            gatewayAgentConfiguration.getDiscoveryImplementation() != null) {
                         try {
                             FederatedAPIDiscovery federatedAPIDiscovery =
                                     (FederatedAPIDiscovery) Class.forName(gatewayAgentConfiguration

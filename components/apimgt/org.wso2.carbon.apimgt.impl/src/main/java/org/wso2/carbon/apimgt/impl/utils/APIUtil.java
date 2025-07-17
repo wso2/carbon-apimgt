@@ -12024,8 +12024,8 @@ public final class APIUtil {
         GatewayAgentConfiguration gatewayConfiguration = org.wso2.carbon.apimgt.impl.internal.
                 ServiceReferenceHolder.getInstance().
                 getExternalGatewayConnectorConfiguration(environment.getGatewayType());
-        if (gatewayConfiguration != null) {
-            FederatedAPIDiscovery federatedAPIDiscovery = null;
+        if (gatewayConfiguration != null && gatewayConfiguration.getDiscoveryImplementation() != null) {
+            FederatedAPIDiscovery federatedAPIDiscovery;
             if (StringUtils.isNotEmpty(gatewayConfiguration.getDiscoveryImplementation())) {
                 try {
                     federatedAPIDiscovery = (FederatedAPIDiscovery)
