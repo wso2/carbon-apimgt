@@ -55,7 +55,9 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1357,7 +1359,8 @@ public class SubscriptionValidationDAO {
                         String policyVersion = resultSet.getString("POLICY_VERSION");
                         String operationPolicyDirection = resultSet.getString("OPERATION_POLICY_DIRECTION");
                         String operationPolicyID = resultSet.getString("OPERATION_POLICY_UUID");
-                        String parameters = resultSet.getString("OPERATION_PARAMS");
+                        String parameters = APIMgtDBUtil.getStringFromInputStream(resultSet.getBinaryStream("OPERATION_PARAMS"));
+
                         URLMapping urlMapping = null;
                         if (StringUtils.isNotEmpty(httpMethod) && StringUtils.isNotEmpty(urlPattern)) {
                             urlMapping = api.getResource(urlPattern, httpMethod);
@@ -1401,8 +1404,9 @@ public class SubscriptionValidationDAO {
                     String apiPolicyUUID = resultSet.getString("API_POLICY_UUID");
 
                     // We get parameters of the policies separately. However, this can be retrieved from the AM_API_OPERATION_POLICY_MAPPING as it contains both API and Operation Policies
-                    String operationParameters = resultSet.getString("OPERATION_PARAMS");
-                    String apiParams = resultSet.getString("API_PARAMS");
+                    String operationParameters = APIMgtDBUtil.getStringFromInputStream(resultSet.getBinaryStream("OPERATION_PARAMS"));
+                    String apiParams = APIMgtDBUtil.getStringFromInputStream(resultSet.getBinaryStream("API_PARAMS"));
+
                     URLMapping urlMapping = null;
                     if (StringUtils.isNotEmpty(httpMethod) && StringUtils.isNotEmpty(urlPattern)) {
                         urlMapping = api.getResource(urlPattern, httpMethod);

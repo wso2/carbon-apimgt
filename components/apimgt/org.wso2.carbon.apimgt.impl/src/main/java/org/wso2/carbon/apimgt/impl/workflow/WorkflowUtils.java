@@ -46,13 +46,13 @@ import org.wso2.carbon.apimgt.impl.utils.LifeCycleUtils;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
+import java.util.ArrayList;
+import java.util.Objects;
+import java.util.Collections;
 /**
  * This class used to handle notifications in Workflow.
  */
@@ -72,6 +72,22 @@ public class WorkflowUtils {
             appWFDto.setApplication(application);
             ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.APPLICATION_CREATE.name(),
+                    appWFDto.getTenantId(), orgId, appWFDto.getApplication().getId(),
+                    appWFDto.getApplication().getUUID(),
+                    appWFDto.getApplication().getName(), appWFDto.getApplication().getTokenType(),
+                    appWFDto.getApplication().getTier(), appWFDto.getApplication().getGroupId(),
+                    appWFDto.getApplication().getApplicationAttributes(), application.getSubscriber().getName());
+            APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE.equals(wfType)) {
+            String applicationId = workflowDTO.getWorkflowReference();
+            int appId = Integer.parseInt(applicationId);
+            ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
+            Application application = apiMgtDAO.getApplicationById(appId);
+            String orgId = application.getOrganization();
+            ApplicationWorkflowDTO appWFDto = (ApplicationWorkflowDTO) workflowDTO;
+            appWFDto.setApplication(application);
+            ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
+                    System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(),
                     appWFDto.getTenantId(), orgId, appWFDto.getApplication().getId(),
                     appWFDto.getApplication().getUUID(),
                     appWFDto.getApplication().getName(), appWFDto.getApplication().getTokenType(),
@@ -348,5 +364,85 @@ public class WorkflowUtils {
             String errorMsg = "Could not get workflow details for workflow reference id " + externalWorkflowRef;
             log.error(errorMsg, e);
         }
+    }
+
+    /**
+     * Construct a record with the current and the expected value for a given application attribute.
+     * @param attributeName
+     * @param current
+     * @param expected
+     */
+    protected static Map<String, String> constructApplicationUpdateRecord(String attributeName, String current, String expected) {
+        return Map.of(
+                "attributeName", attributeName,
+                "current", current == null ? "" : current,
+                "expected", expected == null ? "" : expected
+        );
+    }
+
+    /**
+     * Identify newly added, removed and changed custom properties of an application.
+     * @param oldMap
+     * @param newMap
+     */
+    protected static List<Map<String, String>> extractCustomAttributeDiffs(Map<String, String> oldMap, Map<String,
+            String> newMap) {
+
+        List<Map<String, String>> attribChanges = new ArrayList<>();
+        for (String key : newMap.keySet()) {
+            if (!oldMap.containsKey(key)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Added key: " + key + ", value: " + newMap.get(key));
+                }
+
+                attribChanges.add(constructApplicationUpdateRecord(key, "N/A", newMap.get(key)));
+            } else if (!Objects.equals(oldMap.get(key), newMap.get(key))) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Changed key: " + key + ", from: " + oldMap.get(key) + " to: " + newMap.get(key));
+                }
+                attribChanges.add(constructApplicationUpdateRecord(key, oldMap.get(key), newMap.get(key)));
+            }
+        }
+
+        for (String key : oldMap.keySet()) {
+            if (!newMap.containsKey(key)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Removed key: " + key + ", value was: " + oldMap.get(key));
+                }
+
+                attribChanges.add(constructApplicationUpdateRecord(key, oldMap.get(key), "Removed"));
+            }
+        }
+
+        return attribChanges;
+    }
+
+    /**
+     * Compare the current and the new value for a given attribute (ie: Application Name) and add it to the list
+     * if there is a difference.
+     * @param diffs
+     * @param label
+     * @param oldValue
+     * @param newValue
+     */
+    protected static void compareAndAddToApplicationUpdateDiffs (
+            List<Map<String, String>> diffs,
+            String label,
+            String oldValue,
+            String newValue
+    ) {
+        if (!Objects.equals(oldValue, newValue)) {
+            diffs.add(constructApplicationUpdateRecord(label, oldValue, newValue));
+        }
+    }
+
+    /**
+     * Get the readable status (Private or Shared) of the 'share with organization' setting of the application
+     * @param org
+     */
+    protected static String getShareWithOrganizationStatus(String org) {
+        return APIConstants.DEFAULT_APP_SHARING_KEYWORD.equals(org)
+                ? APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_DISABLED
+                : APIConstants.APP_SHARING_WITH_THE_ORGANIZATION_ENABLED;
     }
 }

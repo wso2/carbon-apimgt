@@ -66,6 +66,8 @@ public class WorkflowMappingUtil {
             workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.APPLICATION_CREATION);
         } else if (workflow.getWorkflowType().equals("AM_APPLICATION_DELETION")) {
             workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.APPLICATION_DELETION);
+        } else if (workflow.getWorkflowType().equals("AM_APPLICATION_UPDATE")) {
+            workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.APPLICATION_UPDATE);
         } else if (workflow.getWorkflowType().equals("AM_SUBSCRIPTION_CREATION")) {
             workflowInfoDTO.setWorkflowType(WorkflowInfoDTO.WorkflowTypeEnum.SUBSCRIPTION_CREATION);
         } else if (workflow.getWorkflowType().equals("AM_SUBSCRIPTION_DELETION")) {

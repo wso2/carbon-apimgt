@@ -24,7 +24,6 @@ import org.wso2.carbon.apimgt.api.model.Application;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.ExpiredJWTCleaner;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
 import org.wso2.carbon.apimgt.impl.publishers.RevocationRequestPublisher;
@@ -32,6 +31,7 @@ import org.wso2.carbon.apimgt.notification.event.ConsumerAppRevocationEvent;
 import org.wso2.carbon.apimgt.notification.event.Event;
 import org.wso2.carbon.apimgt.notification.event.SubjectEntityRevocationEvent;
 import org.wso2.carbon.apimgt.notification.event.TokenRevocationEvent;
+import org.wso2.carbon.apimgt.notification.internal.ServiceReferenceHolder;
 
 import java.util.Properties;
 

@@ -101,12 +101,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Objects;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 public class ApplicationsApiServiceImpl implements ApplicationsApiService {
     private static final Log log = LogFactory.getLog(ApplicationsApiServiceImpl.class);
-    public static final String SP_NAME_APPLICATION = "sp.name.application";
 
     boolean orgWideAppUpdateEnabled = Boolean.getBoolean(APIConstants.ORGANIZATION_WIDE_APPLICATION_UPDATE_ENABLED);
 
@@ -481,7 +481,10 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
             if (oldApplication == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
-
+            if (Objects.equals(oldApplication.getStatus(), APIConstants.ApplicationStatus.UPDATE_PENDING)) {
+                RestApiUtil.handleConflict("Application is in UPDATE PENDING state " +
+                        "and cannot be updated until the pending update is resolved.", log);
+            }
             if (!orgWideAppUpdateEnabled && !RestAPIStoreUtils.isUserOwnerOfApplication(oldApplication)) {
                 RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_APPLICATION, applicationId, log);
             }
@@ -588,7 +591,7 @@ public class ApplicationsApiServiceImpl implements ApplicationsApiService {
         apiConsumer.updateApplication(application);
 
         // Added to use the application name as part of sp name instead of application UUID when specified
-        String applicationSpNameProp = System.getProperty(SP_NAME_APPLICATION);
+        String applicationSpNameProp = System.getProperty(APIConstants.KeyManager.SP_NAME_APPLICATION);
         boolean applicationSpName = Boolean.parseBoolean(applicationSpNameProp);
         //If application name is renamed, need to update SP app as well
         if (applicationSpName && !application.getName().equals(oldApplication.getName())) {

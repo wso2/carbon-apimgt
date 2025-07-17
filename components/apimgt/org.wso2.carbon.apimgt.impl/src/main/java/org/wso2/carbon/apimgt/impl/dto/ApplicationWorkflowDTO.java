@@ -27,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.Application;
 
 public class ApplicationWorkflowDTO extends WorkflowDTO {
 	private Application application;
+	private Application existingApplication;
 	private String userName;
 
 	public Application getApplication() {
@@ -35,6 +36,14 @@ public class ApplicationWorkflowDTO extends WorkflowDTO {
 
 	public void setApplication(Application application) {
 		this.application = application;
+	}
+
+	public Application getExistingApplication() {
+		return existingApplication;
+	}
+
+	public void setExistingApplication(Application existingApplication) {
+		this.existingApplication = existingApplication;
 	}
 
 	public String getUserName() {

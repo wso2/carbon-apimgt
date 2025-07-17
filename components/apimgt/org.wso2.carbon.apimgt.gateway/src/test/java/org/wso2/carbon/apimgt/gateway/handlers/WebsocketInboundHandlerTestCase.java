@@ -51,7 +51,7 @@ import org.wso2.carbon.apimgt.gateway.handlers.streaming.websocket.WebSocketUtil
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContext;
 import org.wso2.carbon.apimgt.gateway.inbound.InboundMessageContextDataHolder;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundProcessorResponseDTO;
-import org.wso2.carbon.apimgt.gateway.inbound.websocket.InboundWebSocketProcessor;
+import org.wso2.carbon.apimgt.gateway.inbound.websocket.WebSocketProcessor;
 import org.wso2.carbon.apimgt.gateway.inbound.websocket.utils.InboundWebsocketProcessorUtil;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.utils.APIMgtGoogleAnalyticsUtils;
@@ -84,13 +84,13 @@ public class WebsocketInboundHandlerTestCase {
     private static final String APPLICATION_CONSUMER_KEY = "NdYZFnAfUa7uST1giZrmIq8he8Ya";
     private String SUPER_TENANT_DOMAIN = "carbon.super";
     private ChannelHandlerContext channelHandlerContext;
-    private InboundWebSocketProcessor inboundWebSocketProcessor;
+    private WebSocketProcessor inboundWebSocketProcessor;
     private WebsocketInboundHandler websocketInboundHandler;
     private org.wso2.carbon.apimgt.keymgt.model.entity.API websocketAPI;
 
     @Before
     public void setup() throws Exception {
-        inboundWebSocketProcessor = Mockito.mock(InboundWebSocketProcessor.class);
+        inboundWebSocketProcessor = Mockito.mock(WebSocketProcessor.class);
         channelHandlerContext = Mockito.mock(ChannelHandlerContext.class);
         Channel channel = Mockito.mock(Channel.class);
         Attribute attribute = Mockito.mock(Attribute.class);
@@ -119,7 +119,7 @@ public class WebsocketInboundHandlerTestCase {
             }
 
             @Override
-            public InboundWebSocketProcessor initializeWebSocketProcessor() {
+            public WebSocketProcessor initializeWebSocketProcessor() {
                 return inboundWebSocketProcessor;
             }
         };

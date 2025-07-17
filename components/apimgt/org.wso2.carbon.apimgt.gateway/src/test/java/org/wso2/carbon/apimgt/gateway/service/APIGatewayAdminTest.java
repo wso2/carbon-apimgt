@@ -26,6 +26,7 @@ import org.mockito.Mockito;
 import org.wso2.carbon.apimgt.gateway.utils.EndpointAdminServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.RESTAPIAdminServiceProxy;
 import org.wso2.carbon.apimgt.gateway.utils.SequenceAdminServiceProxy;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.rest.api.APIData;
 import org.wso2.carbon.rest.api.ResourceData;
 
@@ -35,8 +36,8 @@ public class APIGatewayAdminTest {
     String version = "1.0.0";
     String config = "abcdef";
     String tenantDomain = "carbon.super";
-    String apiName = name + ":v" + version;
-    String apiDefaultName = name;
+    String apiName = APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + name + ":v" + version;
+    String apiDefaultName = APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + name;
 
     @Test
     public void addApiForTenant() throws Exception {
