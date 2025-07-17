@@ -542,7 +542,9 @@ public class ImportUtils {
 
                 //Once the new revision successfully created, artifacts will be deployed in mentioned gateway
                 //environments
-                apiProvider.deployAPIRevision(importedAPIUuid, revisionId, apiRevisionDeployments, organization);
+                if (!importedApi.isInitiatedFromGateway()) {
+                    apiProvider.deployAPIRevision(importedAPIUuid, revisionId, apiRevisionDeployments, organization);
+                }
                 if (log.isDebugEnabled()) {
                     log.debug("API: " + importedApi.getId().getApiName() + "_" + importedApi.getId().getVersion() +
                             " was deployed in " + apiRevisionDeployments.size() + " gateway environments.");
