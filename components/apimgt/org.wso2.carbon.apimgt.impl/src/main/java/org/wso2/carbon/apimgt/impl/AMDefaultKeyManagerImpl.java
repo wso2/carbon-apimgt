@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonArray;
 import feign.Feign;
 import feign.Response;
 import feign.auth.BasicAuthRequestInterceptor;
@@ -86,6 +87,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * This class holds the key manager implementation considering WSO2 as the identity provider
@@ -103,6 +106,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
     private RevokeClient revokeClient;
 
     private Boolean kmAdminAsAppOwner = false;
+    private Boolean enableApplicationScopes = false;
 
     @Override
     public OAuthApplicationInfo createApplication(OAuthAppRequest oauthAppRequest) throws APIManagementException {
@@ -382,6 +386,29 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                         }
                     }
                 }
+            }
+        }
+
+        if (additionalProperties.containsKey(APIConstants.KeyManager.APPLICATION_SCOPES)) {
+            // Check whether the application scopes feature is enabled in the key manager
+            if (enableApplicationScopes) {
+                Object scopesObject = additionalProperties.get(APIConstants.KeyManager.APPLICATION_SCOPES);
+                if (scopesObject instanceof List) {
+                    try {
+                        List<String> applicationScopes = new ArrayList<>();
+                        for (Object scope : (List<?>) scopesObject) {
+                            if (scope instanceof String) {
+                                applicationScopes.add((String) scope);
+                            }
+                        }
+                        clientInfo.setApplicationScopes(applicationScopes);
+                    } catch (ClassCastException e) {
+                        log.error("Error while parsing application scopes", e);
+                    }
+                }
+            } else {
+                // If application scopes feature is disabled, empty application scopes will be sent in DCR call
+                clientInfo.setApplicationScopes(new ArrayList<>());
             }
         }
 
@@ -740,6 +767,10 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         additionalProperties.put(APIConstants.KeyManager.PKCE_SUPPORT_PLAIN, appResponse.getPkceSupportPlain());
         additionalProperties.put(APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS,
                 appResponse.getBypassClientCredentials());
+        if (enableApplicationScopes) {
+            additionalProperties.put(APIConstants.KeyManager.APPLICATION_SCOPES,
+                    appResponse.getApplicationScopes());
+        }
 
         oAuthApplicationInfo.addParameter(APIConstants.JSON_ADDITIONAL_PROPERTIES, additionalProperties);
         return oAuthApplicationInfo;
@@ -772,6 +803,11 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
         Object kmAdminAsAppOwnerParameter = configuration.getParameter(APIConstants.KeyManager.KM_ADMIN_AS_APP_OWNER);
         if (kmAdminAsAppOwnerParameter != null) {
             kmAdminAsAppOwner = (boolean) kmAdminAsAppOwnerParameter;
+        }
+        Object enableApplicationScopesParameter = configuration.getParameter(
+                APIConstants.KeyManager.ENABLE_APPLICATION_SCOPES);
+        if (enableApplicationScopesParameter instanceof Boolean) {
+            enableApplicationScopes = (boolean) enableApplicationScopesParameter;
         }
 
         String dcrEndpoint;
@@ -1384,31 +1420,42 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
                         .parse((String) additionalProperties);
                 for (Map.Entry<String, JsonElement> entry : additionalPropertiesJson.entrySet()) {
                     String additionalProperty = entry.getValue().getAsString();
-                    if (StringUtils.isNotBlank(additionalProperty) && !StringUtils
-                            .equals(additionalProperty, APIConstants.KeyManager.NOT_APPLICABLE_VALUE)) {
-                        try {
-                            if (APIConstants.KeyManager.PKCE_MANDATORY.equals(entry.getKey()) ||
-                                    APIConstants.KeyManager.PKCE_SUPPORT_PLAIN.equals(entry.getKey()) ||
-                                    APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS.equals(entry.getKey())) {
-
-                                if (!(additionalProperty.equalsIgnoreCase(Boolean.TRUE.toString()) ||
-                                        additionalProperty.equalsIgnoreCase(Boolean.FALSE.toString()))) {
-                                    String errMsg = "Application configuration values cannot have negative values.";
-                                    throw new APIManagementException(errMsg, ExceptionCodes
-                                            .from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
-                                }
-                            } else {
-                                Long longValue = Long.parseLong(additionalProperty);
-                                if (longValue < 0) {
-                                    String errMsg = "Application configuration values cannot have negative values.";
+                    if (entry.getValue().isJsonArray()) {
+                        if (APIConstants.KeyManager.APPLICATION_SCOPES.equals(entry.getKey())) {
+                            JsonArray scopes = entry.getValue().getAsJsonArray();
+                            for (JsonElement scope : scopes) {
+                                if (StringUtils.isBlank(scope.getAsString())) {
+                                    String errMsg = "Application scopes items cannot be empty.";
                                     throw new APIManagementException(errMsg, ExceptionCodes
                                             .from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
                                 }
                             }
-                        } catch (NumberFormatException e) {
-                            String errMsg = "Application configuration values cannot have string values.";
-                            throw new APIManagementException(errMsg, ExceptionCodes
-                                    .from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
+                        }
+                    } else {
+                        if (StringUtils.isNotBlank(additionalProperty) && !StringUtils.equals(additionalProperty,
+                                APIConstants.KeyManager.NOT_APPLICABLE_VALUE)) {
+                            try {
+                                if (APIConstants.KeyManager.PKCE_MANDATORY.equals(entry.getKey()) || APIConstants.KeyManager.PKCE_SUPPORT_PLAIN.equals(
+                                        entry.getKey()) || APIConstants.KeyManager.BYPASS_CLIENT_CREDENTIALS.equals(
+                                        entry.getKey())) {
+
+                                    if (!(additionalProperty.equalsIgnoreCase(
+                                            Boolean.TRUE.toString()) || additionalProperty.equalsIgnoreCase(Boolean.FALSE.toString()))) {
+                                        String errMsg = "Application configuration values cannot have negative values.";
+                                        throw new APIManagementException(errMsg, ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
+                                    }
+                                } else {
+                                    Long longValue = Long.parseLong(additionalProperty);
+                                    if (longValue < 0) {
+                                        String errMsg = "Application configuration values cannot have negative values.";
+                                        throw new APIManagementException(errMsg, ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
+                                    }
+                                }
+                            } catch (NumberFormatException e) {
+                                String errMsg = "Application configuration values cannot have string values.";
+                                throw new APIManagementException(errMsg, ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES,
+                                        errMsg));
+                            }
                         }
                     }
                 }
