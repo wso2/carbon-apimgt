@@ -73,6 +73,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
+import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -225,6 +226,7 @@ public class APIManagerConfiguration {
     private final GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = new GatewayArtifactSynchronizerProperties();;
 
     private JSONArray customProperties = new JSONArray();
+    private GatewayNotificationConfiguration gatewayNotificationConfiguration = new GatewayNotificationConfiguration();
 
     /**
      * Returns the configuration of the Identity Provider.
@@ -709,6 +711,8 @@ public class APIManagerConfiguration {
                 setAPIMGovernanceConfigurations(element);
             } else if (APIConstants.GATEWAY_CLEANUP_CONFIGURATION.equals(localName)) {
                 setGatewayCleanupConfiguration(element);
+            } else if ("GatewayNotificationConfiguration".equals(localName)) {
+                setGatewayNotificationConfiguration(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -2944,5 +2948,27 @@ public class APIManagerConfiguration {
     // Ensure this getter exists:
     public GatewayCleanupConfiguration getGatewayCleanupConfiguration() {
         return gatewayCleanupConfiguration;
+    }
+
+    private void setGatewayNotificationConfiguration(org.apache.axiom.om.OMElement omElement) {
+        javax.xml.namespace.QName enabledQName = new javax.xml.namespace.QName("Enabled");
+        javax.xml.namespace.QName intervalQName = new javax.xml.namespace.QName("NotifyIntervalSeconds");
+        javax.xml.namespace.QName gwidQName = new javax.xml.namespace.QName("ConfiguredGWID");
+        org.apache.axiom.om.OMElement enabledElem = omElement.getFirstChildWithName(enabledQName);
+        if (enabledElem != null) {
+            gatewayNotificationConfiguration.setEnabled(Boolean.parseBoolean(enabledElem.getText()));
+        }
+        org.apache.axiom.om.OMElement intervalElem = omElement.getFirstChildWithName(intervalQName);
+        if (intervalElem != null) {
+            gatewayNotificationConfiguration.setNotifyIntervalSeconds(Integer.parseInt(intervalElem.getText()));
+        }
+        org.apache.axiom.om.OMElement gwidElem = omElement.getFirstChildWithName(gwidQName);
+        if (gwidElem != null) {
+            gatewayNotificationConfiguration.setConfiguredGWID(gwidElem.getText());
+        }
+    }
+
+    public GatewayNotificationConfiguration getGatewayNotificationConfiguration() {
+        return gatewayNotificationConfiguration;
     }
 }

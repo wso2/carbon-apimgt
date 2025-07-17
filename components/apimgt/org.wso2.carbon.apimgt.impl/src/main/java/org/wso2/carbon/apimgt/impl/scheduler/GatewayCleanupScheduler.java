@@ -71,7 +71,7 @@ public class GatewayCleanupScheduler {
         
         try {
             // Get configuration from APIManagerConfiguration
-            configuration = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
+            configuration = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration()
                 .getGatewayCleanupConfiguration();

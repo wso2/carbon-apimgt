@@ -11455,17 +11455,6 @@ components:
           readOnly: true
           type: string
           format: date-time
-        gatewayDeploymentStatus:
-          readOnly: true
-          example: PENDING
-          default: PENDING
-          enum:
-            - PENDING
-            - PATIALLY_DEPLOYED
-            - DEPLOYED
-            - UNDEPLOYED
-            - DEPLOYMENT_FAILED
-            - UNDEPLOYMENT_FAILED
         liveGatewayCount:
           readOnly: true
           type: integer
