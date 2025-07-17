@@ -93,6 +93,11 @@ public class DefaultKeyManagerConnectorConfiguration implements KeyManagerConnec
                 "Public client", "checkbox", "Allow authentication without the client secret."
                 , String.valueOf(false), false, false, Collections.EMPTY_LIST, false);
         applicationConfigurationsList.add(configurationDtoBypassClientCredentials);
+
+        ConfigurationDto configurationDtoApplicationScopes = new ConfigurationDto(
+                APIConstants.KeyManager.APPLICATION_SCOPES, "Application Scope(s)", "select", "Add Application Scopes",
+                APIConstants.KeyManager.EMPTY_VALUE, false, false, Collections.EMPTY_LIST, true);
+        applicationConfigurationsList.add(configurationDtoApplicationScopes);
         return applicationConfigurationsList;
     }
 
