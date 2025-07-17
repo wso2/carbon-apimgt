@@ -818,16 +818,20 @@ public class APIManagerConfiguration {
         if (tenantSharingEnabledElement != null) {
             tenantSharingConfiguration.setIsEnabled(Boolean.parseBoolean(tenantSharingEnabledElement.getText()));
         }
-
         OMElement reservedUserNameElement =
                 element.getFirstChildWithName(new QName(APIConstants.TenantSharingConfigs.RESERVED_USER_NAME));
         if (reservedUserNameElement != null) {
-            tenantSharingConfiguration.setReservedUserName(reservedUserNameElement.getText());;
+            tenantSharingConfiguration.setReservedUserName(reservedUserNameElement.getText());
         }
         OMElement reservedUserPasswordElement =
                 element.getFirstChildWithName(new QName(APIConstants.TenantSharingConfigs.RESERVED_USER_PASSWORD));
         if (reservedUserPasswordElement != null) {
-            tenantSharingConfiguration.setReservedUserPassword(reservedUserPasswordElement.getText());;
+            tenantSharingConfiguration.setReservedUserPassword(reservedUserPasswordElement.getText());
+        }
+        OMElement identityServerBaseUrlElement =
+                element.getFirstChildWithName(new QName(APIConstants.TenantSharingConfigs.IDENTITY_SERVER_BASE_URL));
+        if (identityServerBaseUrlElement != null) {
+            tenantSharingConfiguration.setIdentityServerBaseUrl(identityServerBaseUrlElement.getText());
         }
     }
 
