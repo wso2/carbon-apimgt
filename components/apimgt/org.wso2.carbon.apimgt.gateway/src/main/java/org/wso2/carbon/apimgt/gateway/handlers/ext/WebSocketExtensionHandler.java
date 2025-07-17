@@ -40,6 +40,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 
 /**
  * This class handles WebSocket requests in the inbound flow of the API Gateway. It identifies the API and resource,
@@ -52,6 +53,7 @@ public class WebSocketExtensionHandler extends AbstractHandler {
 
     @MethodStats
     public boolean handleRequest(MessageContext messageContext) {
+        String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
         try {
             API selectedApi = Utils.getSelectedAPI(messageContext);
             Resource selectedResource = null;
@@ -82,6 +84,10 @@ public class WebSocketExtensionHandler extends AbstractHandler {
                 }
             }
 
+            if (selectedResource == null) {
+                handleResourceNotFound(messageContext, Collections.emptyList());
+                return false;
+            }
             String resourceString = selectedResource.getDispatcherHelper().getString();
             messageContext.setProperty(APIConstants.API_ELECTED_RESOURCE, resourceString);
             if (!Boolean.TRUE.equals(messageContext.getProperty(WebSocketApiConstants.SOURCE_HANDSHAKE_PRESENT))) {
@@ -93,26 +99,26 @@ public class WebSocketExtensionHandler extends AbstractHandler {
                 return true;
             } else {
                 // For WebSocket handshakes, handle the request mediation
-                return mediate(messageContext);
+                return mediate(apiName, messageContext);
             }
         } catch (Exception e) {
-            log.error("Error occurred while identifying the resource in WebSocketTopicDispatcher", e);
+            String resourcePath = (String) messageContext.getProperty(RESTConstants.REST_SUB_REQUEST_PATH);
+            log.error("Error occurred while processing WebSocket request for API: " + apiName + ", Resource: " + resourcePath, e);
             throw e;
         }
     }
 
     @MethodStats
-    public boolean mediate(MessageContext messageContext) {
+    public boolean mediate(String apiName, MessageContext messageContext) {
         try {
             Map localRegistry = messageContext.getConfiguration().getLocalRegistry();
-            String apiName = (String) messageContext.getProperty(RESTConstants.SYNAPSE_REST_API);
             Object sequence = localRegistry.get(apiName + "--" + DIRECTION_IN);
             if (sequence instanceof Mediator) {
                 return ((Mediator) sequence).mediate(messageContext);
             }
             return true;
         } catch (Exception e) {
-            log.error("Error during post-request processing", e);
+             log.error("Error during WebSocket mediation for API: " + apiName, e);
             throw e;
         }
     }
