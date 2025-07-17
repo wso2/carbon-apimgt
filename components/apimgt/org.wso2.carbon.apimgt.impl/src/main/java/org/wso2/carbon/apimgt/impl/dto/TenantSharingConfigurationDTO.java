@@ -4,8 +4,9 @@ public class TenantSharingConfigurationDTO {
     private boolean isEnabled;
     private String reservedUserName;
     private String reservedUserPassword;
+    private String identityServerBaseUrl;
 
-    public boolean isIsEnabled() {
+    public boolean getIsEnabled() {
         return isEnabled;
     }
 
@@ -29,4 +30,11 @@ public class TenantSharingConfigurationDTO {
         this.reservedUserPassword = reservedUserPassword;
     }
 
+    public String getIdentityServerBaseUrl() {
+        return identityServerBaseUrl;
+    }
+
+    public void setIdentityServerBaseUrl(String identityServerBaseUrl) {
+        this.identityServerBaseUrl = identityServerBaseUrl;
+    }
 }
