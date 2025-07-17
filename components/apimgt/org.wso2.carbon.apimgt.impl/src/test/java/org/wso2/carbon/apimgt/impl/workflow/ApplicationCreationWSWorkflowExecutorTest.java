@@ -18,11 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.workflow;
 
-import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axis2.client.ServiceClient;
-import org.apache.axis2.context.ConfigurationContext;
-import org.apache.axis2.description.AxisService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,7 +46,7 @@ import java.util.UUID;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ServiceReferenceHolder.class, ApiMgtDAO.class, ApplicationCreationWSWorkflowExecutor.class,
-		AXIOMUtil.class})
+		AXIOMUtil.class, })
 public class ApplicationCreationWSWorkflowExecutorTest {
 
 	private ApplicationCreationWSWorkflowExecutor applicationCreationWSWorkflowExecutor;
@@ -85,14 +82,15 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		Application app = Mockito.mock(Application.class);
 		PowerMockito.doReturn(app).when(apiMgtDAO)
 				.getApplicationById(Integer.parseInt(workflowDTO.getWorkflowReference()));
-		PowerMockito.doNothing().when(apiMgtDAO).updateApplicationStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()),
-				APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+		PowerMockito.doNothing().when(apiMgtDAO)
+				.updateApplicationStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.ApplicationStatus.APPLICATION_APPROVED);
 
 		applicationCreationWSWorkflowExecutor.complete(workflowDTO);
-		Mockito.verify(apiMgtDAO, Mockito.times(1)).updateApplicationStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()),
-				APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+		Mockito.verify(apiMgtDAO, Mockito.times(1))
+				.updateApplicationStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+
 	}
 
 	@Test
@@ -105,14 +103,14 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		Application app = Mockito.mock(Application.class);
 		PowerMockito.doReturn(app).when(apiMgtDAO)
 				.getApplicationById(Integer.parseInt(workflowDTO.getWorkflowReference()));
-		PowerMockito.doNothing().when(apiMgtDAO).updateApplicationStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()),
-				APIConstants.ApplicationStatus.APPLICATION_REJECTED);
+		PowerMockito.doNothing().when(apiMgtDAO)
+				.updateApplicationStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.ApplicationStatus.APPLICATION_REJECTED);
 
 		applicationCreationWSWorkflowExecutor.complete(workflowDTO);
-		Mockito.verify(apiMgtDAO, Mockito.times(1)).updateApplicationStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()),
-				APIConstants.ApplicationStatus.APPLICATION_REJECTED);
+		Mockito.verify(apiMgtDAO, Mockito.times(1))
+				.updateApplicationStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.ApplicationStatus.APPLICATION_REJECTED);
 	}
 
 	@Test
@@ -125,14 +123,14 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		Application app = Mockito.mock(Application.class);
 		PowerMockito.doReturn(app).when(apiMgtDAO)
 				.getApplicationById(Integer.parseInt(workflowDTO.getWorkflowReference()));
-		PowerMockito.doNothing().when(apiMgtDAO).updateApplicationStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()),
-				APIConstants.ApplicationStatus.APPLICATION_CREATED);
+		PowerMockito.doNothing().when(apiMgtDAO)
+				.updateApplicationStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.ApplicationStatus.APPLICATION_CREATED);
 
 		applicationCreationWSWorkflowExecutor.complete(workflowDTO);
-		Mockito.verify(apiMgtDAO, Mockito.times(1)).updateApplicationStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()),
-				APIConstants.ApplicationStatus.APPLICATION_CREATED);
+		Mockito.verify(apiMgtDAO, Mockito.times(1))
+				.updateApplicationStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.ApplicationStatus.APPLICATION_CREATED);
 	}
 
 	@Test(expected = WorkflowException.class)
@@ -141,13 +139,14 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		workflowDTO.setWorkflowReference("1");
 		workflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
 		workflowDTO.setStatus(WorkflowStatus.REJECTED);
-		PowerMockito.doThrow(new APIManagementException("")).when(apiMgtDAO).updateSubscriptionStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.REJECTED);
+		PowerMockito.doThrow(new APIManagementException("")).when(apiMgtDAO)
+				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.SubscriptionStatus.REJECTED);
 
 		applicationCreationWSWorkflowExecutor.complete(workflowDTO);
 
 	}
-	
+
 	@Test(expected = WorkflowException.class)
 	public void testWorkflowCompleteException() throws APIManagementException, WorkflowException {
 		WorkflowDTO workflowDTO = new WorkflowDTO();
@@ -159,12 +158,12 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		//application is not in DB for the given id
 		PowerMockito.doReturn(null).when(apiMgtDAO)
 				.getApplicationById(Integer.parseInt(workflowDTO.getWorkflowReference()));
-		PowerMockito.doNothing().when(apiMgtDAO).updateApplicationStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()),
-				APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+		PowerMockito.doNothing().when(apiMgtDAO)
+				.updateApplicationStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.ApplicationStatus.APPLICATION_APPROVED);
 
 		applicationCreationWSWorkflowExecutor.complete(workflowDTO);
-		
+
 	}
 
 	@Test(expected = WorkflowException.class)
@@ -178,14 +177,15 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		//application is not in DB for the given id
 		PowerMockito.doReturn(app).when(apiMgtDAO)
 				.getApplicationById(Integer.parseInt(workflowDTO.getWorkflowReference()));
-		PowerMockito.doThrow(new APIManagementException("Error occurred when updating the status of the Application " +
-				"creation process")).when(apiMgtDAO).updateApplicationStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()),
-				APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+		PowerMockito.doThrow(new APIManagementException(
+						"Error occurred when updating the status of the Application " + "creation process")).when(apiMgtDAO)
+				.updateApplicationStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+
 		applicationCreationWSWorkflowExecutor.complete(workflowDTO);
 
 	}
-	
+
 	@Test(expected = WorkflowException.class)
 	public void testWorkflowCompleteExceptionWhenReadingDB() throws APIManagementException, WorkflowException {
 		WorkflowDTO workflowDTO = new WorkflowDTO();
@@ -197,36 +197,39 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 
 		PowerMockito.doThrow(new APIManagementException("")).when(apiMgtDAO)
 				.getApplicationById(Integer.parseInt(workflowDTO.getWorkflowReference()));
-		PowerMockito.doNothing().when(apiMgtDAO).updateApplicationStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()),
-				APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+		PowerMockito.doNothing().when(apiMgtDAO)
+				.updateApplicationStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.ApplicationStatus.APPLICATION_APPROVED);
 
 		applicationCreationWSWorkflowExecutor.complete(workflowDTO);
-		
+
 	}
 
 	@Test(expected = WorkflowException.class)
-	public void testWorkflowCompleteExceptionWhenUpdatingApplication() throws APIManagementException, WorkflowException {
+	public void testWorkflowCompleteExceptionWhenUpdatingApplication()
+			throws APIManagementException, WorkflowException {
 		WorkflowDTO workflowDTO = new WorkflowDTO();
 		workflowDTO.setWorkflowReference("1");
 		workflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
 		workflowDTO.setStatus(WorkflowStatus.APPROVED);
 
-		PowerMockito.doThrow(new APIManagementException("")).when(apiMgtDAO).updateApplicationStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()),
-				APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+		PowerMockito.doThrow(new APIManagementException("")).when(apiMgtDAO)
+				.updateApplicationStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.ApplicationStatus.APPLICATION_APPROVED);
 
 		applicationCreationWSWorkflowExecutor.complete(workflowDTO);
-		
+
 	}
+
 	@Test(expected = WorkflowException.class)
 	public void testWorkflowApproveException() throws APIManagementException, WorkflowException {
 		WorkflowDTO workflowDTO = new WorkflowDTO();
 		workflowDTO.setWorkflowReference("1");
 		workflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
 		workflowDTO.setStatus(WorkflowStatus.APPROVED);
-		PowerMockito.doThrow(new APIManagementException("")).when(apiMgtDAO).updateSubscriptionStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.UNBLOCKED);
+		PowerMockito.doThrow(new APIManagementException("")).when(apiMgtDAO)
+				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.SubscriptionStatus.UNBLOCKED);
 
 		applicationCreationWSWorkflowExecutor.complete(workflowDTO);
 
@@ -244,15 +247,15 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 
 		applicationCreationWSWorkflowExecutor.complete(workflowDTO);
 		// shouldn't update status
-		Mockito.verify(apiMgtDAO, Mockito.never()).updateApplicationStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()),
-				APIConstants.ApplicationStatus.APPLICATION_CREATED);
-		Mockito.verify(apiMgtDAO, Mockito.never()).updateApplicationStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()),
-				APIConstants.ApplicationStatus.APPLICATION_APPROVED);
-		Mockito.verify(apiMgtDAO, Mockito.never()).updateApplicationStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()),
-				APIConstants.ApplicationStatus.APPLICATION_REJECTED);
+		Mockito.verify(apiMgtDAO, Mockito.never())
+				.updateApplicationStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.ApplicationStatus.APPLICATION_CREATED);
+		Mockito.verify(apiMgtDAO, Mockito.never())
+				.updateApplicationStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.ApplicationStatus.APPLICATION_APPROVED);
+		Mockito.verify(apiMgtDAO, Mockito.never())
+				.updateApplicationStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.ApplicationStatus.APPLICATION_REJECTED);
 	}
 
 	@Test
@@ -273,7 +276,7 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		}
 
 	}
-	
+
 	@Test(expected = WorkflowException.class)
 	public void testWorkflowCleanupTaskException() throws Exception {
 		WorkflowDTO workflowDTO = new WorkflowDTO();
@@ -292,20 +295,20 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		ServiceReferenceHolderMockCreator serviceRefMock = new ServiceReferenceHolderMockCreator(-1234);
 		ServiceReferenceHolderMockCreator.initContextService();
 		PowerMockito.mockStatic(AXIOMUtil.class);
-		PowerMockito.when(AXIOMUtil.stringToOM(Mockito.anyString())).thenThrow(new XMLStreamException("Error " +
-				"converting String to OMElement"));
+		PowerMockito.when(AXIOMUtil.stringToOM(Mockito.anyString()))
+				.thenThrow(new XMLStreamException("Error " + "converting String to OMElement"));
 		applicationCreationWSWorkflowExecutor.cleanUpPendingTask(workflowDTO.getExternalWorkflowReference());
 	}
 
 	@Test
 	public void testWorkflowExecute() throws Exception {
-		ApplicationWorkflowDTO workflowDTO = new ApplicationWorkflowDTO();       
+		ApplicationWorkflowDTO workflowDTO = new ApplicationWorkflowDTO();
 
 		Application application = new Application("TestAPP", new Subscriber(null));
-		
+
 		application.setTier("Gold");
 		application.setCallbackUrl("www.wso2.com");
-		application.setDescription("Description");	
+		application.setDescription("Description");
 		workflowDTO.setApplication(application);
 		workflowDTO.setTenantDomain("wso2");
 		workflowDTO.setUserName("admin");
@@ -313,8 +316,9 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		workflowDTO.setWorkflowReference("1");
 		workflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
 
-		PowerMockito.doNothing().when(apiMgtDAO).updateSubscriptionStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.REJECTED);
+		PowerMockito.doNothing().when(apiMgtDAO)
+				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.SubscriptionStatus.REJECTED);
 
 		ServiceReferenceHolderMockCreator serviceRefMock = new ServiceReferenceHolderMockCreator(-1234);
 		ServiceReferenceHolderMockCreator.initContextService();
@@ -333,8 +337,8 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 	public void testWorkflowExecuteFailWhenMessageProcessingFailed() throws Exception {
 		ApplicationWorkflowDTO workflowDTO = new ApplicationWorkflowDTO();
 		PowerMockito.mockStatic(AXIOMUtil.class);
-		PowerMockito.when(AXIOMUtil.stringToOM(Mockito.anyString())).thenThrow(new XMLStreamException("Error " +
-				"converting String to OMElement"));
+		PowerMockito.when(AXIOMUtil.stringToOM(Mockito.anyString()))
+				.thenThrow(new XMLStreamException("Error " + "converting String to OMElement"));
 		Application application = new Application("TestAPP", new Subscriber(null));
 
 		application.setTier("Gold");
@@ -347,8 +351,9 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		workflowDTO.setWorkflowReference("1");
 		workflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
 
-		PowerMockito.doNothing().when(apiMgtDAO).updateSubscriptionStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.REJECTED);
+		PowerMockito.doNothing().when(apiMgtDAO)
+				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.SubscriptionStatus.REJECTED);
 
 		ServiceReferenceHolderMockCreator serviceRefMock = new ServiceReferenceHolderMockCreator(-1234);
 		ServiceReferenceHolderMockCreator.initContextService();
@@ -365,20 +370,21 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 	@Test
 	public void testWorkflowExecuteWithLimitedParam() throws Exception {
 		//application without a callback url 
-		ApplicationWorkflowDTO workflowDTO = new ApplicationWorkflowDTO();       
+		ApplicationWorkflowDTO workflowDTO = new ApplicationWorkflowDTO();
 
 		Application application = new Application("TestAPP", new Subscriber(null));
-		
+
 		application.setTier("Gold");
-		application.setDescription("Description");	
+		application.setDescription("Description");
 		workflowDTO.setApplication(application);
 		workflowDTO.setTenantDomain("wso2");
 		workflowDTO.setUserName("admin");
 		workflowDTO.setWorkflowReference("1");
 		workflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
 
-		PowerMockito.doNothing().when(apiMgtDAO).updateSubscriptionStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.REJECTED);
+		PowerMockito.doNothing().when(apiMgtDAO)
+				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.SubscriptionStatus.REJECTED);
 
 		ServiceReferenceHolderMockCreator serviceRefMock = new ServiceReferenceHolderMockCreator(-1234);
 		ServiceReferenceHolderMockCreator.initContextService();
@@ -392,16 +398,16 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		}
 
 	}
-	
+
 	@Test(expected = WorkflowException.class)
 	public void testWorkflowExecuteException() throws Exception {
-		ApplicationWorkflowDTO workflowDTO = new ApplicationWorkflowDTO();       
+		ApplicationWorkflowDTO workflowDTO = new ApplicationWorkflowDTO();
 
 		Application application = new Application("TestAPP", new Subscriber(null));
-		
+
 		application.setTier("Gold");
 		application.setCallbackUrl("www.wso2.com");
-		application.setDescription("Description");	
+		application.setDescription("Description");
 		workflowDTO.setApplication(application);
 		workflowDTO.setTenantDomain("wso2");
 		workflowDTO.setUserName("admin");
@@ -409,8 +415,9 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		workflowDTO.setWorkflowReference("1");
 		workflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
 
-		PowerMockito.doNothing().when(apiMgtDAO).updateSubscriptionStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.REJECTED);
+		PowerMockito.doNothing().when(apiMgtDAO)
+				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.SubscriptionStatus.REJECTED);
 
 		ServiceReferenceHolderMockCreator serviceRefMock = new ServiceReferenceHolderMockCreator(-1234);
 		ServiceReferenceHolderMockCreator.initContextService();
@@ -421,13 +428,13 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 
 	@Test
 	public void testWorkflowExecuteWithoutExecutorParam() throws Exception {
-		ApplicationWorkflowDTO workflowDTO = new ApplicationWorkflowDTO();       
+		ApplicationWorkflowDTO workflowDTO = new ApplicationWorkflowDTO();
 
 		Application application = new Application("TestAPP", new Subscriber(null));
-		
+
 		application.setTier("Gold");
 		application.setCallbackUrl("www.wso2.com");
-		application.setDescription("Description");	
+		application.setDescription("Description");
 		workflowDTO.setApplication(application);
 		workflowDTO.setTenantDomain("wso2");
 		workflowDTO.setUserName("admin");
@@ -435,8 +442,9 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		workflowDTO.setWorkflowReference("1");
 		workflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
 
-		PowerMockito.doNothing().when(apiMgtDAO).updateSubscriptionStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.REJECTED);
+		PowerMockito.doNothing().when(apiMgtDAO)
+				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.SubscriptionStatus.REJECTED);
 
 		ServiceReferenceHolderMockCreator serviceRefMock = new ServiceReferenceHolderMockCreator(-1234);
 		ServiceReferenceHolderMockCreator.initContextService();
@@ -503,13 +511,13 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 
 	@Test
 	public void testWorkflowExecuteWithDifferentMediatype() throws Exception {
-		ApplicationWorkflowDTO workflowDTO = new ApplicationWorkflowDTO();       
+		ApplicationWorkflowDTO workflowDTO = new ApplicationWorkflowDTO();
 
 		Application application = new Application("TestAPP", new Subscriber(null));
-		
+
 		application.setTier("Gold");
 		application.setCallbackUrl("www.wso2.com");
-		application.setDescription("Description");	
+		application.setDescription("Description");
 		workflowDTO.setApplication(application);
 		workflowDTO.setTenantDomain("wso2");
 		workflowDTO.setUserName("admin");
@@ -517,8 +525,9 @@ public class ApplicationCreationWSWorkflowExecutorTest {
 		workflowDTO.setWorkflowReference("1");
 		workflowDTO.setExternalWorkflowReference(UUID.randomUUID().toString());
 
-		PowerMockito.doNothing().when(apiMgtDAO).updateSubscriptionStatus(
-				Integer.parseInt(workflowDTO.getWorkflowReference()), APIConstants.SubscriptionStatus.REJECTED);
+		PowerMockito.doNothing().when(apiMgtDAO)
+				.updateSubscriptionStatus(Integer.parseInt(workflowDTO.getWorkflowReference()),
+						APIConstants.SubscriptionStatus.REJECTED);
 
 		ServiceReferenceHolderMockCreator serviceRefMock = new ServiceReferenceHolderMockCreator(-1234);
 		ServiceReferenceHolderMockCreator.initContextService();

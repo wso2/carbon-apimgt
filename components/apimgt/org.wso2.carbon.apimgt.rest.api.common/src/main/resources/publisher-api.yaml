@@ -8681,8 +8681,276 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v4/api-products/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state/pending-tasks"'
       operationId: deleteAPIProductLifecycleStatePendingTasks
 
+  ######################################################
+  # The "Portal Notifications" resource APIs
+  ######################################################
+  /notifications:
+    get:
+      tags:
+        - Notifications
+      summary: Get notifications
+      description: |
+        Retrieves all notifications for the user.
+      parameters:
+        - $ref: '#/components/parameters/sortOrder'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/offset'
+      responses:
+        200:
+          description: |
+            OK.
+            List of Notifications are returned.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationList'
+              example:
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:notifications_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://127.0.0.1:9443/api/am/publisher/v4/notifications"'
+      operationId: getNotifications
+
+
+    delete:
+      tags:
+        - Notifications
+      summary: Delete all notifications
+      description: |
+        This operation can be used to delete all the notifications of a user.
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully deleted.
+          content: {}
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:notifications_manage
+            - apim:notifications_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+              "https://127.0.0.1:9443/api/am/publisher/v4/notifications"'
+      operationId: deleteNotifications
+
+    patch:
+      tags:
+        - Notifications
+      summary: Mark all Notifications as Read.
+      description: |
+        Mark all notifications as read.
+      requestBody:
+        description: |
+          Request body for marking all notifications as read.
+        content:
+          application/json:
+            schema:
+              title: Patch all notifications request
+              type: object
+              properties:
+                read:
+                  type: boolean
+                  description: |
+                    Indicates whether the notifications should be marked as read.
+                  example: true
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated Notifications.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationList'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:notifications_manage
+            - apim:notifications_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PATCH -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+                -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/publisher/v4/notifications"'
+      operationId: markAllNotificationsAsRead
+
+
+  /notifications/{notificationId}:
+    patch:
+      tags:
+        - Notifications
+      summary: Mark a Notification as Read.
+      description: |
+        Mark a specific notification as read.
+      parameters:
+        - $ref: '#/components/parameters/notificationId'
+      requestBody:
+        description: |
+          Request body for marking a notification as read.
+        content:
+          application/json:
+            schema:
+              title: Patch notification request
+              type: object
+              properties:
+                read:
+                  type: boolean
+                  description: |
+                    Indicates whether the notification should be marked as read.
+                  example: true
+        required: true
+      responses:
+        200:
+          description: |
+            OK.
+            Successful response with updated Notification.
+          headers:
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:notifications_manage
+            - apim:notifications_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X PATCH -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            -H "Content-Type: application/json" -d @data.json "https://localhost:9443/api/am/publisher/v4/notifications/863aef13-dab4-48b4-bf58-7363cd29601a"'
+      operationId: markNotificationAsReadById
+
+
+    delete:
+      tags:
+        - Notifications
+      summary: Delete a Notification
+      description: |
+        This operation can be used to delete a specific notification of a user.
+      parameters:
+        - $ref: '#/components/parameters/notificationId'
+      responses:
+        200:
+          description: |
+            OK.
+            Resource successfully deleted.
+          content: { }
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - OAuth2Security:
+            - apim:notifications_manage
+            - apim:notifications_view
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://localhost:9443/api/am/publisher/v4/notifications/863aef13-dab4-48b4-bf58-7363cd29601a"'
+      operationId: deleteNotificationById
+
+
 components:
   schemas:
+    # "Portal Notification Components"
+    Notification:
+      title: Notification object with basic Notification details.
+      type: object
+      properties:
+        notificationId:
+          type: string
+          example: 863aef13-dab4-48b4-bf58-7363cd29601a
+        notificationType:
+          type: string
+          enum:
+            - API_STATE_CHANGE
+            - API_PRODUCT_STATE_CHANGE
+            - API_REVISION_DEPLOYMENT
+          example:
+        comments:
+          type: string
+          example: Application creation is rejected due to some reason.
+        createdTime:
+          type: string
+          example: 2021-02-11 09:57:25
+        isRead:
+          type: boolean
+          example: false
+    NotificationList:
+      title: Notification List
+      type: object
+      properties:
+        count:
+          type: integer
+          description: |
+            Number of Notifications returned.
+          example: 1
+        list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Notification'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        unreadCount:
+          type: integer
+          description: |
+            Number of Unread Notifications returned.
+          example: 5
     Comment:
       title: Comment
       required:
@@ -12637,6 +12905,15 @@ components:
             moreInfo: ""
             error: []
   parameters:
+    notificationId:
+      name: notificationId
+      in: path
+      description: |
+        **NOTIFICATION ID** consisting of the **UUID** of the NOTIFICATION
+      required: true
+      schema:
+        type: string
+        example: 863aef13-dab4-48b4-bf58-7363cd29601a
     replyLimit:
       name: replyLimit
       in: query
@@ -13127,3 +13404,6 @@ components:
             apim:tier_manage: View, update and delete throttling policies
             apim:api_list_view: View, Retrieve API list
             apim:api_definition_view: View, Retrieve API definition
+            apim:notifications_manage: Manage notifications
+            apim:notifications_view: View notifications
+

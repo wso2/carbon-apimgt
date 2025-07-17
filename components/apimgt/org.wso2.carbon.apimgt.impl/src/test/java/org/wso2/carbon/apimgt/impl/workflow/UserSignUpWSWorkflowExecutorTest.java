@@ -58,7 +58,7 @@ import javax.xml.stream.XMLStreamException;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ServiceReferenceHolder.class, UserSignUpWSWorkflowExecutor.class, ApiMgtDAO.class, APIUtil.class,
-        AXIOMUtil.class, SelfSignUpUtil.class, CarbonUtils.class})
+        AXIOMUtil.class, SelfSignUpUtil.class, CarbonUtils.class, })
 public class UserSignUpWSWorkflowExecutorTest {
 
     private UserSignUpWSWorkflowExecutor userSignUpWSWorkflowExecutor;
@@ -182,8 +182,9 @@ public class UserSignUpWSWorkflowExecutorTest {
         PowerMockito.doNothing().when(apiMgtDAO).updateWorkflowStatus(workflowDTO);
         Mockito.when(userStoreManager.isExistingUser(testUsername)).thenReturn(true);
         Mockito.when(userStoreManager.isExistingRole(signUpRole)).thenReturn(true);
-        PowerMockito.doNothing().when(userStoreManager).updateRoleListOfUser(testUsername, null, new String[]{
-                signUpRole});
+        PowerMockito.doNothing().when(userStoreManager)
+                .updateRoleListOfUser(testUsername, null, new String[] { signUpRole });
+
         //Set workflow status to be approved
         workflowDTO.setStatus(WorkflowStatus.APPROVED);
         try {
@@ -228,8 +229,8 @@ public class UserSignUpWSWorkflowExecutorTest {
         }
 
         //Test failure to complete workflow execution, when error has been occurred while retrieving signup config
-        PowerMockito.when(SelfSignUpUtil.getSignupConfiguration(tenantDomain)).thenThrow(new APIManagementException
-                ("Error occurred while retrieving signup configuration"));
+        PowerMockito.when(SelfSignUpUtil.getSignupConfiguration(tenantDomain))
+                .thenThrow(new APIManagementException("Error occurred while retrieving signup configuration"));
         try {
             userSignUpWSWorkflowExecutor.complete(workflowDTO);
             Assert.fail("Expected WorkflowException has not been thrown when signup role is not existing");

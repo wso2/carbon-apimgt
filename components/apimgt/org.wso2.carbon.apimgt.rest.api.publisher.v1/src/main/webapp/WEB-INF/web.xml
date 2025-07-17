@@ -52,7 +52,8 @@
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.KeyManagersApi,
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.OperationPoliciesApi,
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.LinterCustomRulesApi,
-                org.wso2.carbon.apimgt.rest.api.publisher.v1.GatewayPoliciesApi
+                org.wso2.carbon.apimgt.rest.api.publisher.v1.GatewayPoliciesApi,
+                org.wso2.carbon.apimgt.rest.api.publisher.v1.NotificationsApi
             </param-value>
         </init-param>
         <init-param>

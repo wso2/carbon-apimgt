@@ -1729,6 +1729,8 @@ public final class APIConstants {
     public static final String DEPLOY_AS_A_PROTOTYPE = "Deploy as a Prototype";
     public static final String REPUBLISH = "Re-Publish";
 
+    public static final String RETIRE = "Retire";
+
     public static final String API_SPEC_TYPE_REST = "api_spec";
     public static final String API_SPEC_TYPE_GRAPHQL = "sdl_schema";
     public static final String API_SPEC_TYPE_ASYNC = "async_spec";
@@ -3153,4 +3155,24 @@ public final class APIConstants {
 
     //Property for enabling tenant aware sub claims when invoking APIs with API key
     public static final String ENABLE_TENANT_AWARE_SUB_CLAIM= "enable.tenant.aware.subclaim";
+
+    public static class PortalNotifications {
+        public static final String ACTION = "action";
+        public static final String ACTION_META = "Action";
+        public static final String API_NAME = "apiName";
+        public static final String API_VERSION = "apiVersion";
+        public static final String API_CONTEXT = "apiContext";
+        public static final String API_CONTEXT_META = "ApiContext";
+        public static final String API_PROVIDER = "ApiProvider";
+        public static final String APPLICATION_NAME = "applicationName";
+        public static final String REQUESTED_TIER = "requestedTier";
+        public static final String REVISION_ID = "revisionId";
+        public static final String COMMENT = "comment";
+        public static final String STATUS_APPROVED = "approved";
+        public static final String STATUS_REJECTED = "rejected";
+        public static final String PUBLISHER_PORTAL = "publisher";
+        public static final String DEV_PORTAL = "devportal";
+        public static final String DEFAULT_CLAIM = "http://wso2.org/claims/organization";
+        public static final String APPROVED = "APPROVED";
+    }
 }

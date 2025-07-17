@@ -54,6 +54,7 @@ import org.wso2.carbon.apimgt.impl.factory.KeyManagerHolder;
 import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.ApplicationEvent;
+import org.wso2.carbon.apimgt.impl.dao.NotificationDAO;
 import org.wso2.carbon.apimgt.impl.utils.*;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowStatus;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
@@ -82,6 +83,7 @@ public abstract class AbstractAPIManager implements APIManager {
     // API definitions from swagger v2.0
     protected Log log = LogFactory.getLog(getClass());
     protected ApiMgtDAO apiMgtDAO;
+    protected NotificationDAO notificationDAO;
     protected EnvironmentSpecificAPIPropertyDAO environmentSpecificAPIPropertyDAO;
     protected ScopesDAO scopesDAO;
     protected int tenantId = MultitenantConstants.INVALID_TENANT_ID; //-1 the issue does not occur.;
@@ -105,6 +107,7 @@ public abstract class AbstractAPIManager implements APIManager {
     public AbstractAPIManager(String username, String organization) throws APIManagementException {
 
         apiMgtDAO = ApiMgtDAO.getInstance();
+        notificationDAO = NotificationDAO.getInstance();
         scopesDAO = ScopesDAO.getInstance();
         environmentSpecificAPIPropertyDAO = EnvironmentSpecificAPIPropertyDAO.getInstance();
 

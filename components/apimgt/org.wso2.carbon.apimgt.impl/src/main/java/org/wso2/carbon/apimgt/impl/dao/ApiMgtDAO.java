@@ -2628,6 +2628,7 @@ public class ApiMgtDAO {
                 int appId = result.getInt("APPLICATION_ID");
                 String subStatus = result.getString("SUB_STATUS");
                 String subsCreateState = result.getString("SUBS_CREATE_STATE");
+                String subsOrganization = APIUtil.getTenantDomainFromTenantId(result.getInt("SUB_TENANT_ID"));
                 String key = userId + "::" + application;
                 UserApplicationAPIUsage usage = userApplicationUsages.get(key);
                 if (usage == null) {
@@ -2642,6 +2643,7 @@ public class ApiMgtDAO {
                 SubscribedAPI apiSubscription = new SubscribedAPI(new Subscriber(userId), apiId);
                 apiSubscription.setSubStatus(subStatus);
                 apiSubscription.setSubCreatedStatus(subsCreateState);
+                apiSubscription.setOrganization(subsOrganization);
                 apiSubscription.setUUID(result.getString("SUB_UUID"));
                 apiSubscription.setTier(new Tier(result.getString("SUB_TIER_ID")));
                 Application applicationObj = new Application(result.getString("APP_UUID"));
@@ -5769,6 +5771,7 @@ public class ApiMgtDAO {
                 workflowDTO.setTenantId(rs.getInt("TENANT_ID"));
                 workflowDTO.setWorkflowDescription(rs.getString("WF_STATUS_DESC"));
                 InputStream metadataBlob = rs.getBinaryStream("WF_METADATA");
+                InputStream propertiesBlob = rs.getBinaryStream("WF_PROPERTIES");
 
                 if (metadataBlob != null) {
                     String metadata = APIMgtDBUtil.getStringFromInputStream(metadataBlob);
@@ -5778,6 +5781,16 @@ public class ApiMgtDAO {
                 } else {
                     JSONObject metadataJson = new JSONObject();
                     workflowDTO.setMetadata(metadataJson);
+                }
+
+                if (propertiesBlob != null) {
+                    String properties = APIMgtDBUtil.getStringFromInputStream(propertiesBlob);
+                    Gson propertiesGson = new Gson();
+                    JSONObject propertiesJson = propertiesGson.fromJson(properties, JSONObject.class);
+                    workflowDTO.setProperties(propertiesJson);
+                } else {
+                    JSONObject propertiesJson = new JSONObject();
+                    workflowDTO.setProperties(propertiesJson);
                 }
             }
         } catch (SQLException e) {
@@ -8706,6 +8719,9 @@ public class ApiMgtDAO {
                 workflowDTO.setDomainList(rs.getString("ALLOWED_DOMAINS"));
                 workflowDTO.setValidityTime(rs.getLong("VALIDITY_PERIOD"));
                 String tenantDomain = MultitenantUtils.getTenantDomain(subscriber.getName());
+                if (multiGroupAppSharingEnabled && StringUtils.isEmpty(application.getGroupId())) {
+                        application.setGroupId(getGroupId(conn, application.getId()));
+                }
                 String keyManagerUUID = rs.getString("KEY_MANAGER");
                 workflowDTO.setKeyManager(keyManagerUUID);
                 KeyManagerConfigurationDTO keyManagerConfigurationByUUID = getKeyManagerConfigurationByUUID(conn,

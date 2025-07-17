@@ -24,12 +24,14 @@ import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Workflow;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
+import org.wso2.carbon.apimgt.impl.systemNotifications.AbstractWFNotifier;
+import org.wso2.carbon.apimgt.impl.systemNotifications.WFNotifierFactory;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowConstants;
 import org.wso2.carbon.apimgt.impl.workflow.WorkflowException;
@@ -74,12 +76,13 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             String status = "CREATED";
             String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             APIAdmin apiAdmin = new APIAdminImpl();
-            workflow = apiAdmin.getworkflowReferenceByExternalWorkflowReferenceID(externalWorkflowRef, status, tenantDomain);
+            workflow = apiAdmin.getworkflowReferenceByExternalWorkflowReferenceID(externalWorkflowRef, status,
+                    tenantDomain);
             workflowinfoDTO = WorkflowMappingUtil.fromWorkflowsToInfoDTO(workflow);
             return Response.ok().entity(workflowinfoDTO).build();
         } catch (APIManagementException e) {
-            RestApiUtil.handleInternalServerError("Error while retrieving workflow request by the " +
-                    "external workflow reference. ", e, log);
+            RestApiUtil.handleInternalServerError(
+                    "Error while retrieving workflow request by the " + "external workflow reference. ", e, log);
         }
         return null;
     }
@@ -90,12 +93,13 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
      * @param limit        maximum number of workflow returns
      * @param offset       starting index
      * @param accept       accept header value
-     * @param workflowType is the the type of the workflow request. (e.g: Application Creation, Application Subscription etc.)
+     * @param workflowType is the the type of the workflow request. (e.g: Application Creation, Application Subscription
+     *                     etc.)
      * @return
      */
     @Override
     public Response workflowsGet(Integer limit, Integer offset, String accept, String workflowType,
-                                 MessageContext messageContext) throws APIManagementException {
+            MessageContext messageContext) throws APIManagementException {
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
         String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
@@ -104,7 +108,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             Workflow[] workflows;
             String status = "CREATED";
             APIAdmin apiAdmin = new APIAdminImpl();
-            if(workflowType != null) {
+            if (workflowType != null) {
                 if (workflowType.equals("APPLICATION_CREATION")) {
                     workflowType = "AM_APPLICATION_CREATION";
                 } else if (workflowType.equals("SUBSCRIPTION_CREATION")) {
@@ -125,8 +129,7 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
             }
             workflows = apiAdmin.getworkflows(workflowType, status, tenantDomain);
             workflowListDTO = WorkflowMappingUtil.fromWorkflowsToDTO(workflows, limit, offset);
-            WorkflowMappingUtil.setPaginationParams(workflowListDTO, limit, offset,
-                    workflows.length);
+            WorkflowMappingUtil.setPaginationParams(workflowListDTO, limit, offset, workflows.length);
             return Response.ok().entity(workflowListDTO).build();
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error while retrieving workflow requests. ", e, log);
@@ -138,13 +141,13 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
      * This is used to update the workflow status
      *
      * @param workflowReferenceId workflow reference id that is unique to each workflow
-     * @param body                body should contain the status, optionally can contain a
-     *                            description and an attributes object
+     * @param body                body should contain the status, optionally can contain a description and an attributes
+     *                            object
      * @return
      */
     @Override
     public Response workflowsUpdateWorkflowStatusPost(String workflowReferenceId, WorkflowDTO body,
-                                                      MessageContext messageContext) {
+            MessageContext messageContext) {
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         boolean isTenantFlowStarted = false;
         String username = RestApiCommonUtil.getLoggedInUsername();
@@ -187,10 +190,14 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
                 workflowDTO.setAttributes(body.getAttributes());
             }
 
+            if (body.getComments() != null) {
+                workflowDTO.setComments(body.getComments());
+            }
+
             String workflowType = workflowDTO.getWorkflowType();
 
-            if (WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(workflowType) &&
-                    WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
+            if (WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(
+                    workflowType) && WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
                 APIConsumer apiConsumer = APIManagerFactory.getInstance().getAPIConsumer(username);
                 int applicationId = Integer.parseInt(workflowDTO.getWorkflowReference());
                 apiConsumer.cleanupPendingTasksForApplicationDeletion(applicationId);
@@ -198,6 +205,13 @@ public class WorkflowsApiServiceImpl implements WorkflowsApiService {
 
             WorkflowExecutor workflowExecutor = WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
             workflowExecutor.complete(workflowDTO);
+
+            AbstractWFNotifier notifier = WFNotifierFactory.getNotifier(workflowDTO.getWorkflowType());
+            if (notifier != null) {
+                notifier.sendNotifications(notifier.prepareNotification(workflowDTO));
+            }
+
+
             if (WorkflowStatus.APPROVED.equals(workflowDTO.getStatus())) {
                 WorkflowUtils.sendNotificationAfterWFComplete(workflowDTO, workflowType);
 
