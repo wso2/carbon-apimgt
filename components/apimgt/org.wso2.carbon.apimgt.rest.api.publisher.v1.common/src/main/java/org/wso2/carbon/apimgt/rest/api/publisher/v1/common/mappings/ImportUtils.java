@@ -597,7 +597,7 @@ public class ImportUtils {
      *                                       API product wants to override the parameters)
      * @param organization                   Identifier of an Organization
      * @throws APIManagementException If there is an error in importing an API
-     * @@return Imported API
+     * @return Imported API
      */
     public static ImportedAPIDTO importApi(InputStream importInfo, APIDTO importedApiDTO, Boolean preserveProvider,
                                            Boolean rotateRevision, Boolean overwrite,
