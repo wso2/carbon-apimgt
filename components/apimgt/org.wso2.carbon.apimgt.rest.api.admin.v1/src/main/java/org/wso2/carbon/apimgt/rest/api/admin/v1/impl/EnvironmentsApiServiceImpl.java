@@ -22,12 +22,16 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayInstantDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayInstantListDTO;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
@@ -64,12 +68,28 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         Environment environment = apiAdmin.getEnvironment(organization, environmentId);
-        if (environment != null) {
-            EnvironmentDTO environmentDTO = EnvironmentMappingUtil.fromEnvToEnvDTO(environment);
-            return Response.ok().entity(environmentDTO).build();
+        if (environment == null) {
+            throw new APIManagementException("Requested Gateway Environment not found",
+                                             ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND);
         }
-        throw new APIManagementException("Requested Gateway Environment not found",
-                                         ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND);
+
+        GatewayManagementDAO dao = GatewayManagementDAO.getInstance();
+        List<GatewayManagementDAO.GatewayInstanceInfo> instances =
+                dao.getGatewayInstancesByEnvironment(environment.getName());
+
+        List<GatewayInstantDTO> gatewayList = new ArrayList<>();
+        for (GatewayManagementDAO.GatewayInstanceInfo info : instances) {
+            GatewayInstantDTO dto = new GatewayInstantDTO();
+            dto.setGatewayID(info.gatewayId);
+            dto.setLastActive(info.lastUpdated.toInstant().toString());
+            dto.setStatus(info.status);
+            gatewayList.add(dto);
+        }
+        GatewayInstantListDTO listDTO = new GatewayInstantListDTO();
+        listDTO.setCount(gatewayList.size());
+        listDTO.setList(gatewayList);
+
+        return Response.ok().entity(listDTO).build();
     }
 
     @Override

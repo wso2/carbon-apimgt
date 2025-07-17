@@ -12,7 +12,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LiveGatewayListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayInstantListDTO;
 
 import java.util.List;
 

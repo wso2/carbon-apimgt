@@ -3,7 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LiveGatewayListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayInstantListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.EnvironmentsApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -59,14 +59,14 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
     @Path("/{environmentId}/gateways")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get Live Gateways in a Gatway Environment", notes = "Retrieve list of live gateways in the gatway environment. ", response = LiveGatewayListDTO.class, authorizations = {
+    @ApiOperation(value = "Get Gateway instants in a Gatway Environment", notes = "Retrieve list of gateway instants in the gatway environment. ", response = GatewayInstantListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
             @AuthorizationScope(scope = "apim:environment_manage", description = "Manage gateway environments")
         })
     }, tags={ "Environments",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. List of live gateways in the gatway environment returned ", response = LiveGatewayListDTO.class),
+        @ApiResponse(code = 200, message = "OK. List of gateway instants in the gatway environment returned ", response = GatewayInstantListDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response environmentsEnvironmentIdGatewaysGet(@ApiParam(value = "Environment UUID (or Environment name defined in config) ",required=true) @PathParam("environmentId") String environmentId) throws APIManagementException{

@@ -25,8 +25,13 @@ import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * DAO class for Gateway Instance and Deployment operations.
@@ -52,13 +57,17 @@ public class GatewayManagementDAO {
     private static final String SELECT_DEPLOYMENT_SQL =
             "SELECT 1 FROM AM_GW_REVISION_DEPLOYMENT WHERE GATEWAY_ID = ? AND API_ID = ?";
     private static final String INSERT_DEPLOYMENT_SQL =
-            "INSERT INTO AM_GW_REVISION_DEPLOYMENT (GATEWAY_ID, API_ID, STATUS, ACTION, REVISION_ID) VALUES (?, ?, ?, ?, ?)";
+            "INSERT INTO AM_GW_REVISION_DEPLOYMENT (GATEWAY_ID, API_ID, STATUS, ACTION, REVISION_ID, LAST_UPDATED) VALUES (?, ?, ?, ?, ?, ?)";
     private static final String UPDATE_DEPLOYMENT_SQL =
-            "UPDATE AM_GW_REVISION_DEPLOYMENT SET STATUS = ?, ACTION = ?, REVISION_ID = ? WHERE GATEWAY_ID = ? AND API_ID = ?";
+            "UPDATE AM_GW_REVISION_DEPLOYMENT SET STATUS = ?, ACTION = ?, REVISION_ID = ?, LAST_UPDATED = ? WHERE GATEWAY_ID = ? AND API_ID = ?";
     private static final String UPDATE_GATEWAY_HEARTBEAT_SQL =
             "UPDATE AM_GW_INSTANCES SET LAST_UPDATED=?, STATUS=? WHERE GATEWAY_ID=?";
-    private static final String UPDATE_GATEWAY_INSTANCE_SQL_FULL =
+    private static final String UPDATE_GATEWAY_INSTANCE_SQL =
             "UPDATE AM_GW_INSTANCES SET ENV_LABELS=?, LAST_UPDATED=?, GW_PROPERTIES=?, STATUS=? WHERE GATEWAY_ID=?";
+    private static final String SELECT_GATEWAYS_BY_ENV_SQL =
+            "SELECT GATEWAY_ID, LAST_UPDATED, STATUS FROM AM_GW_INSTANCES WHERE " +
+                    "(ENV_LABELS = ? OR ENV_LABELS LIKE ? OR ENV_LABELS LIKE ? OR ENV_LABELS LIKE ?) " +
+                    "AND (STATUS = 'ACTIVE' OR STATUS = 'EXPIRED')";
 
     private GatewayManagementDAO() {
         // Private constructor for singleton
@@ -209,6 +218,7 @@ public class GatewayManagementDAO {
             ps.setString(3, status);
             ps.setString(4, action);
             ps.setString(5, revisionId);
+            ps.setTimestamp(6, new Timestamp(System.currentTimeMillis()));
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new APIManagementException("Error inserting deployment", e);
@@ -221,8 +231,9 @@ public class GatewayManagementDAO {
             ps.setString(1, status);
             ps.setString(2, action);
             ps.setString(3, revisionId);
-            ps.setString(4, gatewayId);
-            ps.setString(5, apiId);
+            ps.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+            ps.setString(5, gatewayId);
+            ps.setString(6, apiId);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new APIManagementException("Error updating deployment", e);
@@ -244,7 +255,7 @@ public class GatewayManagementDAO {
     public void updateGatewayInstance(String gatewayId, String envLabels, Timestamp lastUpdated, byte[] gwProperties)
             throws APIManagementException {
         try (Connection connection = APIMgtDBUtil.getConnection();
-             PreparedStatement ps = connection.prepareStatement(UPDATE_GATEWAY_INSTANCE_SQL_FULL)) {
+             PreparedStatement ps = connection.prepareStatement(UPDATE_GATEWAY_INSTANCE_SQL)) {
             ps.setString(1, envLabels);
             ps.setTimestamp(2, lastUpdated);
             ps.setBytes(3, gwProperties);
@@ -254,5 +265,41 @@ public class GatewayManagementDAO {
         } catch (SQLException e) {
             throw new APIManagementException("Error updating gateway instance", e);
         }
+    }
+
+    /**
+     * Get gateway instances by environment label and status (ACTIVE/EXPIRED).
+     *
+     * @param environmentId Environment label to filter
+     * @return List of GatewayInstanceInfo for ACTIVE and EXPIRED gateway instances
+     * @throws APIManagementException if DB error
+     */
+    public List<GatewayInstanceInfo> getGatewayInstancesByEnvironment(String environmentId) throws APIManagementException {
+        List<GatewayInstanceInfo> result = new ArrayList<>();
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement ps = connection.prepareStatement(SELECT_GATEWAYS_BY_ENV_SQL)) {
+            ps.setString(1, environmentId);
+            ps.setString(2, environmentId + ",%");
+            ps.setString(3, "%," + environmentId + ",%");
+            ps.setString(4, "%," + environmentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    GatewayInstanceInfo info = new GatewayInstanceInfo();
+                    info.gatewayId = rs.getString("GATEWAY_ID");
+                    info.lastUpdated = rs.getTimestamp("LAST_UPDATED");
+                    info.status = rs.getString("STATUS");
+                    result.add(info);
+                }
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error fetching gateway instances by environment", e);
+        }
+        return result;
+    }
+
+    public static class GatewayInstanceInfo {
+        public String gatewayId;
+        public java.sql.Timestamp lastUpdated;
+        public String status;
     }
 }

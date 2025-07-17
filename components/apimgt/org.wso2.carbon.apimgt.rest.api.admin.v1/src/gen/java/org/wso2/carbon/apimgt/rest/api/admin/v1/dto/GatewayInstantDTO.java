@@ -18,14 +18,15 @@ import javax.validation.Valid;
 
 
 
-public class LiveGatewayDTO   {
+public class GatewayInstantDTO   {
   
     private String gatewayID = null;
     private String lastActive = null;
+    private String status = null;
 
   /**
    **/
-  public LiveGatewayDTO gatewayID(String gatewayID) {
+  public GatewayInstantDTO gatewayID(String gatewayID) {
     this.gatewayID = gatewayID;
     return this;
   }
@@ -42,7 +43,7 @@ public class LiveGatewayDTO   {
 
   /**
    **/
-  public LiveGatewayDTO lastActive(String lastActive) {
+  public GatewayInstantDTO lastActive(String lastActive) {
     this.lastActive = lastActive;
     return this;
   }
@@ -57,6 +58,23 @@ public class LiveGatewayDTO   {
     this.lastActive = lastActive;
   }
 
+  /**
+   **/
+  public GatewayInstantDTO status(String status) {
+    this.status = status;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "ACTIVE", value = "")
+  @JsonProperty("status")
+  public String getStatus() {
+    return status;
+  }
+  public void setStatus(String status) {
+    this.status = status;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -66,23 +84,25 @@ public class LiveGatewayDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    LiveGatewayDTO liveGateway = (LiveGatewayDTO) o;
-    return Objects.equals(gatewayID, liveGateway.gatewayID) &&
-        Objects.equals(lastActive, liveGateway.lastActive);
+    GatewayInstantDTO gatewayInstant = (GatewayInstantDTO) o;
+    return Objects.equals(gatewayID, gatewayInstant.gatewayID) &&
+        Objects.equals(lastActive, gatewayInstant.lastActive) &&
+        Objects.equals(status, gatewayInstant.status);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(gatewayID, lastActive);
+    return Objects.hash(gatewayID, lastActive, status);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class LiveGatewayDTO {\n");
+    sb.append("class GatewayInstantDTO {\n");
     
     sb.append("    gatewayID: ").append(toIndentedString(gatewayID)).append("\n");
     sb.append("    lastActive: ").append(toIndentedString(lastActive)).append("\n");
+    sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("}");
     return sb.toString();
   }

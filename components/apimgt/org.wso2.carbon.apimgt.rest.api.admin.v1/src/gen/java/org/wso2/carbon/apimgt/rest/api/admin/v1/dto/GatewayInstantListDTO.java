@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LiveGatewayDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayInstantDTO;
 import javax.validation.constraints.*;
 
 
@@ -21,21 +21,21 @@ import javax.validation.Valid;
 
 
 
-public class LiveGatewayListDTO   {
+public class GatewayInstantListDTO   {
   
     private Integer count = null;
-    private List<LiveGatewayDTO> list = new ArrayList<LiveGatewayDTO>();
+    private List<GatewayInstantDTO> list = new ArrayList<GatewayInstantDTO>();
 
   /**
-   * Number of Live Gateways returned. 
+   * Number of Gateway instants returned. 
    **/
-  public LiveGatewayListDTO count(Integer count) {
+  public GatewayInstantListDTO count(Integer count) {
     this.count = count;
     return this;
   }
 
   
-  @ApiModelProperty(example = "1", value = "Number of Live Gateways returned. ")
+  @ApiModelProperty(example = "1", value = "Number of Gateway instants returned. ")
   @JsonProperty("count")
   public Integer getCount() {
     return count;
@@ -46,7 +46,7 @@ public class LiveGatewayListDTO   {
 
   /**
    **/
-  public LiveGatewayListDTO list(List<LiveGatewayDTO> list) {
+  public GatewayInstantListDTO list(List<GatewayInstantDTO> list) {
     this.list = list;
     return this;
   }
@@ -55,10 +55,10 @@ public class LiveGatewayListDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("list")
-  public List<LiveGatewayDTO> getList() {
+  public List<GatewayInstantDTO> getList() {
     return list;
   }
-  public void setList(List<LiveGatewayDTO> list) {
+  public void setList(List<GatewayInstantDTO> list) {
     this.list = list;
   }
 
@@ -71,9 +71,9 @@ public class LiveGatewayListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    LiveGatewayListDTO liveGatewayList = (LiveGatewayListDTO) o;
-    return Objects.equals(count, liveGatewayList.count) &&
-        Objects.equals(list, liveGatewayList.list);
+    GatewayInstantListDTO gatewayInstantList = (GatewayInstantListDTO) o;
+    return Objects.equals(count, gatewayInstantList.count) &&
+        Objects.equals(list, gatewayInstantList.list);
   }
 
   @Override
@@ -84,7 +84,7 @@ public class LiveGatewayListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class LiveGatewayListDTO {\n");
+    sb.append("class GatewayInstantListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");
