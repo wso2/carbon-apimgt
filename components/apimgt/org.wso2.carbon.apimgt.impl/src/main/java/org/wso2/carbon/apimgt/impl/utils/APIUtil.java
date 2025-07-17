@@ -9829,6 +9829,11 @@ public final class APIUtil {
                                     .concat(APIConstants.KeyManager.DEFAULT_JWKS_ENDPOINT));
                 }
             }
+            if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                    .containsKey(APIConstants.KeyManager.ENABLE_APPLICATION_SCOPES)) {
+                keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.ENABLE_APPLICATION_SCOPES,
+                        APIUtil.isApplicationScopesEnabledForResidentKM());
+            }
             String defaultKeyManagerType =
                     apiManagerConfiguration.getFirstProperty(APIConstants.DEFAULT_KEY_MANAGER_TYPE);
             if (StringUtils.isNotEmpty(defaultKeyManagerType)) {
@@ -10298,6 +10303,18 @@ public final class APIUtil {
                 apiManagerConfiguration.getFirstProperty(APIConstants.API_DEVPORTAL_ENABLE_CROSS_TENANT_SUBSCRIPTION);
         if (StringUtils.isNotEmpty(crossTenantSubscriptionProperty)) {
             return Boolean.parseBoolean(crossTenantSubscriptionProperty);
+        }
+        return false;
+    }
+
+    public static boolean isApplicationScopesEnabledForResidentKM() {
+
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration();
+        String enableApplicationScopesResidentKM =
+                apiManagerConfiguration.getFirstProperty(APIConstants.ENABLE_APPLICATION_SCOPES_RESIDENT_KM);
+        if (StringUtils.isNotEmpty(enableApplicationScopesResidentKM)) {
+            return Boolean.parseBoolean(enableApplicationScopesResidentKM);
         }
         return false;
     }
