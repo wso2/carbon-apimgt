@@ -2874,6 +2874,11 @@ public final class APIConstants {
         public static final String ENABLE = "Enable";
         public static final String USERNAME = "Username";
         public static final String PASSWORD = "Password";
+
+        public static final String IS7_AUTHENTICATION = "Authentication";
+        public static final String IS7_MTLS = "Mutual-TLS";
+        public static final String IS7_IDENTITY_USER = "IdentityUser";
+
         public static final String KM_ADMIN_AS_APP_OWNER = "km_admin_as_app_owner";
         public static final String SELF_VALIDATE_JWT = "self_validate_jwt";
         public static final String CLAIM_MAPPING = "claim_mappings";
@@ -3417,6 +3422,15 @@ public final class APIConstants {
     public static final String ORG_BASED_ACCESS_CONTROL_ENABLE = "Enable";
     public static final String ORG_BASED_ACCESS_CONTROL_ORG_NAME_CLAIM = "OrganizationNameLocalClaim";
     public static final String ORG_BASED_ACCESS_CONTROL_ORG_ID_CLAIM = "OrganizationIDLocalClaim";
+    public static final String SKIP_CREATE_RESIDENT_KM = "SkipCreateResidentKM";
+
+    public static class TenantSharingConfigs {
+        public static final String TENANT_SHARING_CONFIGS = "TenantSharingConfigs";
+        public static final String ENABLE = "Enable";
+        public static final String RESERVED_USER_NAME = "ReservedUserName";
+        public static final String RESERVED_USER_PASSWORD = "ReservedUserPassword";
+        public static final String IDENTITY_SERVER_BASE_URL = "IdentityServerBaseUrl";
+    }
 
     public static class TransactionCounter {
 
