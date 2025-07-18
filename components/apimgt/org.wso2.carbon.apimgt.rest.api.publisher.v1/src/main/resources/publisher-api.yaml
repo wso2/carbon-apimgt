@@ -11467,6 +11467,12 @@ components:
           description: |
             The number of gateways in which the API revision is deployed in the gateway environment
           example: 1
+        failedGatewayCount:
+          readOnly: true
+          type: integer
+          description: |
+            The number of gateways in which the API revision is deployed in the gateway environment
+          example: 1
     AuditReport:
       title: Resource for Audit Report
       type: object

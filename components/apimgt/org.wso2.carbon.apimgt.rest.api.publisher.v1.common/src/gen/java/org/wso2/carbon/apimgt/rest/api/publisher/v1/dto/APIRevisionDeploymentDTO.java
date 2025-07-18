@@ -59,44 +59,9 @@ return null;
     private Boolean displayOnDevportal = true;
     private java.util.Date deployedTime = null;
     private java.util.Date successDeployedTime = null;
-
-    @XmlType(name="GatewayDeploymentStatusEnum")
-    @XmlEnum(String.class)
-    public enum GatewayDeploymentStatusEnum {
-        PENDING("PENDING"),
-        PATIALLY_DEPLOYED("PATIALLY_DEPLOYED"),
-        DEPLOYED("DEPLOYED"),
-        UNDEPLOYED("UNDEPLOYED"),
-        DEPLOYMENT_FAILED("DEPLOYMENT_FAILED"),
-        UNDEPLOYMENT_FAILED("UNDEPLOYMENT_FAILED");
-        private String value;
-
-        GatewayDeploymentStatusEnum (String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static GatewayDeploymentStatusEnum fromValue(String v) {
-            for (GatewayDeploymentStatusEnum b : GatewayDeploymentStatusEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-return null;
-        }
-    }
-    private GatewayDeploymentStatusEnum gatewayDeploymentStatus = GatewayDeploymentStatusEnum.PENDING;
     private Integer liveGatewayCount = null;
     private Integer deployedGatewayCount = null;
+    private Integer failedGatewayCount = null;
 
   /**
    **/
@@ -218,23 +183,6 @@ return null;
   }
 
   /**
-   **/
-  public APIRevisionDeploymentDTO gatewayDeploymentStatus(GatewayDeploymentStatusEnum gatewayDeploymentStatus) {
-    this.gatewayDeploymentStatus = gatewayDeploymentStatus;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "PENDING", value = "")
-  @JsonProperty("gatewayDeploymentStatus")
-  public GatewayDeploymentStatusEnum getGatewayDeploymentStatus() {
-    return gatewayDeploymentStatus;
-  }
-  public void setGatewayDeploymentStatus(GatewayDeploymentStatusEnum gatewayDeploymentStatus) {
-    this.gatewayDeploymentStatus = gatewayDeploymentStatus;
-  }
-
-  /**
    * The number of gateways that are currenty live in the gateway environment 
    **/
   public APIRevisionDeploymentDTO liveGatewayCount(Integer liveGatewayCount) {
@@ -270,6 +218,24 @@ return null;
     this.deployedGatewayCount = deployedGatewayCount;
   }
 
+  /**
+   * The number of gateways in which the API revision is deployed in the gateway environment 
+   **/
+  public APIRevisionDeploymentDTO failedGatewayCount(Integer failedGatewayCount) {
+    this.failedGatewayCount = failedGatewayCount;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1", value = "The number of gateways in which the API revision is deployed in the gateway environment ")
+  @JsonProperty("failedGatewayCount")
+  public Integer getFailedGatewayCount() {
+    return failedGatewayCount;
+  }
+  public void setFailedGatewayCount(Integer failedGatewayCount) {
+    this.failedGatewayCount = failedGatewayCount;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -287,14 +253,14 @@ return null;
         Objects.equals(displayOnDevportal, apIRevisionDeployment.displayOnDevportal) &&
         Objects.equals(deployedTime, apIRevisionDeployment.deployedTime) &&
         Objects.equals(successDeployedTime, apIRevisionDeployment.successDeployedTime) &&
-        Objects.equals(gatewayDeploymentStatus, apIRevisionDeployment.gatewayDeploymentStatus) &&
         Objects.equals(liveGatewayCount, apIRevisionDeployment.liveGatewayCount) &&
-        Objects.equals(deployedGatewayCount, apIRevisionDeployment.deployedGatewayCount);
+        Objects.equals(deployedGatewayCount, apIRevisionDeployment.deployedGatewayCount) &&
+        Objects.equals(failedGatewayCount, apIRevisionDeployment.failedGatewayCount);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(revisionUuid, name, status, vhost, displayOnDevportal, deployedTime, successDeployedTime, gatewayDeploymentStatus, liveGatewayCount, deployedGatewayCount);
+    return Objects.hash(revisionUuid, name, status, vhost, displayOnDevportal, deployedTime, successDeployedTime, liveGatewayCount, deployedGatewayCount, failedGatewayCount);
   }
 
   @Override
@@ -309,9 +275,9 @@ return null;
     sb.append("    displayOnDevportal: ").append(toIndentedString(displayOnDevportal)).append("\n");
     sb.append("    deployedTime: ").append(toIndentedString(deployedTime)).append("\n");
     sb.append("    successDeployedTime: ").append(toIndentedString(successDeployedTime)).append("\n");
-    sb.append("    gatewayDeploymentStatus: ").append(toIndentedString(gatewayDeploymentStatus)).append("\n");
     sb.append("    liveGatewayCount: ").append(toIndentedString(liveGatewayCount)).append("\n");
     sb.append("    deployedGatewayCount: ").append(toIndentedString(deployedGatewayCount)).append("\n");
+    sb.append("    failedGatewayCount: ").append(toIndentedString(failedGatewayCount)).append("\n");
     sb.append("}");
     return sb.toString();
   }
