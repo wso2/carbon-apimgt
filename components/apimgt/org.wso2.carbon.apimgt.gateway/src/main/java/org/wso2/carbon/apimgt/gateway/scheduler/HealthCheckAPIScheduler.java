@@ -27,8 +27,8 @@ import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 /**
  * This class is responsible for scheduling notify API calls every 300 seconds
@@ -38,17 +38,19 @@ public class HealthCheckAPIScheduler {
     private static int NOTIFY_INTERVAL = 30; // Default, will be overridden by config
     private static boolean heartbeatEnabled = true;
     private static String configuredGWID = ""; // Start with empty, will be set at runtime or config
-    private ScheduledExecutorService scheduler;
     private final HealthCheckAPIClient healthCheckAPIClient;
     GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
+    GatewayNotificationConfiguration config;
+    private ScheduledExecutorService scheduler;
 
     public HealthCheckAPIScheduler() {
         scheduler = Executors.newSingleThreadScheduledExecutor();
         healthCheckAPIClient = new HealthCheckAPIClient();
-        GatewayNotificationConfiguration config = ServiceReferenceHolder.getInstance()
-            .getAPIManagerConfigurationService()
-            .getAPIManagerConfiguration()
-            .getGatewayNotificationConfiguration();
+        config = org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getGatewayNotificationConfiguration();
+        gatewayArtifactSynchronizerProperties =
+                org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder.getInstance()
+                        .getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
         if (config != null) {
             heartbeatEnabled = config.isEnabled();
             NOTIFY_INTERVAL = config.getNotifyIntervalSeconds();
@@ -66,18 +68,23 @@ public class HealthCheckAPIScheduler {
         if (log.isDebugEnabled()) {
             log.debug("Executing Gateway registration logic .......");
         }
-        String registrationPayload = buildRegistrationPayload(configuredGWID);
-        String response = healthCheckAPIClient.notifyGateway(registrationPayload);
-        String gwidFromResponse = healthCheckAPIClient.extractGatewayIdFromResponse(response);
-        String status = healthCheckAPIClient.extractStatusFromResponse(response);
-        if (gwidFromResponse != null && !gwidFromResponse.isEmpty() && "REGISTERED".equals(status)) {
-            configuredGWID = gwidFromResponse;
-            DataHolder.getInstance().setConfiguredGWID(gwidFromResponse);
-            log.info("Gateway registered. GWID: " + configuredGWID);
-        } else {
-            log.error("Initial Gateway registration failed. Will retry on next run.");
+        try {
+            String registrationPayload = buildRegistrationPayload(configuredGWID);
+            String response = healthCheckAPIClient.notifyGateway(registrationPayload);
+            String gwidFromResponse = healthCheckAPIClient.extractGatewayIdFromResponse(response);
+            String status = healthCheckAPIClient.extractStatusFromResponse(response);
+            if (gwidFromResponse != null && !gwidFromResponse.isEmpty() && "REGISTERED".equals(status)) {
+                configuredGWID = gwidFromResponse;
+                DataHolder.getInstance().setConfiguredGWID(gwidFromResponse);
+                log.info("Gateway registered. GWID: " + configuredGWID);
+            } else {
+                log.error("Initial Gateway registration failed. Will retry on next run.");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            scheduler.scheduleAtFixedRate(new HealthCheckAPITask(), 30, NOTIFY_INTERVAL, TimeUnit.SECONDS);
         }
-        scheduler.scheduleAtFixedRate(new HealthCheckAPITask(), 30, NOTIFY_INTERVAL, TimeUnit.SECONDS);
     }
 
     public void stop() {
@@ -98,6 +105,27 @@ public class HealthCheckAPIScheduler {
         }
     }
 
+    private String buildRegistrationPayload(String gwid) {
+        long millis = java.time.Instant.now().toEpochMilli();
+        // if gwid is null or empty we generate a new one using random UUID
+        if (gwid == null || gwid.isEmpty()) {
+            gwid = java.util.UUID.randomUUID().toString();
+        }
+        String gatewayLabelsStr = "\""+String.join("\",\"", gatewayArtifactSynchronizerProperties.getGatewayLabels())+"\"";
+        String ipAddress = APIUtil.getHostAddress();
+
+        return "{" + "\"payloadType\": \"register\"," + "\"gatewayProperties\": {\"ipAddress\": \"" + ipAddress + "\"},"
+                + "\"environmentLabels\": [" + gatewayLabelsStr + "]," + "\"gatewayId\": \"" + gwid + "\","
+                + "\"timeStamp\": " + millis + "}";
+    }
+
+    private String buildHeartbeatPayload(String gwid) {
+        long millis = java.time.Instant.now().toEpochMilli();
+        // Example: { "payloadType": "heartbeat", "gatewayId": "...", "timeStamp": ..., "gatewayProperties": {...}, "environmentLabels": [...] }
+        return "{" + "\"payloadType\": \"heartbeat\"," + "\"gatewayId\": \"" + gwid + "\"," + "\"timeStamp\": " + millis
+                + "}";
+    }
+
     private class HealthCheckAPITask implements Runnable {
         @Override
         public void run() {
@@ -108,7 +136,7 @@ public class HealthCheckAPIScheduler {
                 String heartbeatPayload = buildHeartbeatPayload(configuredGWID);
                 String response = healthCheckAPIClient.notifyGateway(heartbeatPayload);
                 String status = healthCheckAPIClient.extractStatusFromResponse(response);
-                if ("RE-REGISTER".equals(status)) {
+                if ("RE_REGISTER".equals(status)) {
                     // GWID not found or not acknowledged, re-register
                     log.warn("Gateway heartbeat not acknowledged. Re-registering gateway.");
                     String registrationPayload = buildRegistrationPayload(configuredGWID);
@@ -134,32 +162,5 @@ public class HealthCheckAPIScheduler {
                 log.error("Error occurred while executing Gateway HealthCheck/Registration logic", e);
             }
         }
-    }
-    private String buildRegistrationPayload(String gwid) {
-        long millis = java.time.Instant.now().toEpochMilli();
-        // if gwid is null or empty we generate a new one using random UUID
-        if (gwid == null || gwid.isEmpty()) {
-            gwid = java.util.UUID.randomUUID().toString();
-        }
-        String gatewayLabelsStr = String.join(",", gatewayArtifactSynchronizerProperties.getGatewayLabels());
-        String ipAddress = APIUtil.getHostAddress();
-
-        return "{" +
-                "\"payloadType\": \"register\"," +
-                "\"gatewayProperties\": {\"ipAddress\": \"" + ipAddress + "\"}," +
-                "\"environmentLabels\": [" + gatewayLabelsStr + "]," +
-                "\"gatewayId\": \"" + gwid + "\"," +
-                "\"timeStamp\": " + millis +
-                "}";
-    }
-
-    private String buildHeartbeatPayload(String gwid) {
-        long millis = java.time.Instant.now().toEpochMilli();
-        // Example: { "payloadType": "heartbeat", "gatewayId": "...", "timeStamp": ..., "gatewayProperties": {...}, "environmentLabels": [...] }
-        return "{" +
-                "\"payloadType\": \"heartbeat\"," +
-                "\"gatewayId\": \"" + gwid + "\"," +
-                "\"timeStamp\": " + millis +
-                "}";
     }
 }

@@ -1837,7 +1837,7 @@
       </Hashing>
 
     <GatewayNotificationConfiguration>
-        <Enabled>{{apim.gateway_notification.enabled | default(false)}}</Enabled>
+        <Enabled>{{apim.gateway_notification.enabled | default(true)}}</Enabled>
         <NotifyIntervalSeconds>{{apim.gateway_notification.notify_interval_seconds | default(30)}}</NotifyIntervalSeconds>
         <ConfiguredGWID>{{apim.gateway_notification.configured_gwid | default('')}}</ConfiguredGWID>
     </GatewayNotificationConfiguration>

@@ -46,6 +46,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
 public final class APIMgtDBUtil {
 
@@ -283,6 +284,10 @@ public final class APIMgtDBUtil {
                 apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                 apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
                 apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
+                
+                // Calculate gateway deployment statistics for this revision and environment
+                calculateGatewayDeploymentStats(apiRevisionDeployment, revisionUuid, environmentName);
+                
                 apiRevisionDeploymentList.add(apiRevisionDeployment);
                 uniqueSet.put(uniqueKey, apiRevisionDeployment);
             } else {
@@ -301,6 +306,64 @@ public final class APIMgtDBUtil {
         return  apiRevisionDeploymentList;
     }
 
+    /**
+     * Calculate gateway deployment statistics for a given revision UUID filtered by environment
+     *
+     * @param apiRevisionDeployment the deployment object to update
+     * @param revisionUuid the revision UUID
+     * @param environmentName the environment name to filter by
+     * @throws APIManagementException if database operations fail
+     */
+    private static void calculateGatewayDeploymentStats(APIRevisionDeployment apiRevisionDeployment, 
+                                                       String revisionUuid, String environmentName) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet resultSet = null;
+        
+        try {
+            connection = APIMgtDBUtil.getConnection();
+            
+            // Query to get deployment statistics and latest success timestamp filtered by environment
+            // Join with AM_GW_INSTANCES to filter by environment labels similar to getGatewayInstancesByEnvironment
+            String query = "SELECT " +
+                    "SUM(CASE WHEN grd.STATUS = 'SUCCESS' THEN 1 ELSE 0 END) AS DEPLOYED_COUNT, " +
+                    "SUM(CASE WHEN grd.STATUS = 'FAILED' THEN 1 ELSE 0 END) AS FAILED_COUNT, " +
+                    "MAX(CASE WHEN grd.STATUS = 'SUCCESS' THEN grd.LAST_UPDATED END) AS LATEST_SUCCESS_TIME " +
+                    "FROM AM_GW_REVISION_DEPLOYMENT grd " +
+                    "INNER JOIN AM_GW_INSTANCES gwi ON grd.GATEWAY_ID = gwi.GATEWAY_ID " +
+                    "WHERE grd.REVISION_ID = ? " +
+                    "AND (gwi.ENV_LABELS = ? OR gwi.ENV_LABELS LIKE ? OR gwi.ENV_LABELS LIKE ? OR gwi.ENV_LABELS LIKE ?)";
+            
+            ps = connection.prepareStatement(query);
+            ps.setString(1, revisionUuid);
+            ps.setString(2, environmentName);
+            ps.setString(3, environmentName + ",%");
+            ps.setString(4, "%," + environmentName + ",%");
+            ps.setString(5, "%," + environmentName);
+            
+            resultSet = ps.executeQuery();
+            
+            if (resultSet.next()) {
+                int deployedCount = resultSet.getInt("DEPLOYED_COUNT");
+                int failedCount = resultSet.getInt("FAILED_COUNT");
+                Timestamp latestSuccessTime = resultSet.getTimestamp("LATEST_SUCCESS_TIME");
+                
+                apiRevisionDeployment.setDeployedGatewayCount(deployedCount);
+                apiRevisionDeployment.setFailedGatewayCount(failedCount);
+                
+                // Update successDeployedTime with the latest successful deployment time if available
+                if (latestSuccessTime != null) {
+                    apiRevisionDeployment.setSuccessDeployedTime(latestSuccessTime.toString());
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Error while calculating gateway deployment statistics for revision: " + revisionUuid +
+                              " and environment: " + environmentName, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, resultSet);
+        }
+    }
+    
     /**
      * Converts a JSON Object String to a String Map
      *
