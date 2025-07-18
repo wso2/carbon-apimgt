@@ -1198,7 +1198,7 @@ public class APIAdminImpl implements APIAdmin {
                             kmConfig.getAdditionalProperties().get(MUTUAL_TLS).equals(TENANT_WIDE_CERTIFICATE)) {
                         ResponseCode responseCode = certificateMgtUtils.removeCertificateFromTrustStore(
                                 getTenantCertAlias(kmConfig));
-                        if (responseCode.getResponseCode() != ResponseCode.SUCCESS.getResponseCode()) {
+                        if (ResponseCode.SUCCESS.getResponseCode() != responseCode.getResponseCode()) {
                             log.error("Error while removing tenant-wide certificate from truststore. ");
                             throw new APIManagementException("Error while removing tenant-wide certificate " +
                                     "from truststore. ");

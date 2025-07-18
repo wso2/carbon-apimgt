@@ -2874,6 +2874,11 @@ public final class APIConstants {
         public static final String ENABLE = "Enable";
         public static final String USERNAME = "Username";
         public static final String PASSWORD = "Password";
+
+        public static final String IS7_AUTHENTICATION = "Authentication";
+        public static final String IS7_MTLS = "Mutual-TLS";
+        public static final String IS7_IDENTITY_USER = "IdentityUser";
+
         public static final String KM_ADMIN_AS_APP_OWNER = "km_admin_as_app_owner";
         public static final String SELF_VALIDATE_JWT = "self_validate_jwt";
         public static final String CLAIM_MAPPING = "claim_mappings";
