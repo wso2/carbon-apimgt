@@ -869,7 +869,8 @@ public class ExportUtils {
 
         String apiUuid = api.getUuid();
         try {
-            if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
+            if (APIConstants.API_TYPE_MCP.equals(api.getType())
+                    && APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
                 List<BackendEndpoint> backendEndpoints = apiProvider.getMCPServerEndpoints(apiUuid);
                 List<BackendEndpointDTO> backendEndpointDTOList = new ArrayList<>();
                 for (BackendEndpoint backendEndpoint : backendEndpoints) {

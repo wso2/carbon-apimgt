@@ -699,9 +699,8 @@ public class ApisApiServiceImplUtils {
                 apiToAdd.setApiSecurity(service.getSecurityType().toString());
             }
         }
-        APIDefinition apiDefinition = validationResponse.getParser();
         SwaggerData swaggerData;
-        String definitionToAdd = null;
+        String definitionToAdd;
 
         if (APIConstants.API_TYPE_MCP.equals(apiToAdd.getType())) {
             BackendEndpoint backendEndpoint = new BackendEndpoint();
@@ -716,10 +715,11 @@ public class ApisApiServiceImplUtils {
             definitionToAdd = parser.generateAPIDefinition(swaggerData);
 
             Set<URITemplate> uriTemplates = generateMCPFeatures(apiToAdd.getSubtype(), backendEndpoint,
-                    apiToAdd.getUriTemplates());
+                    apiToAdd.getUriTemplates(), parser);
             apiToAdd.setUriTemplates(uriTemplates);
             apiToAdd.getBackendEndpoints().add(backendEndpoint);
         } else {
+            APIDefinition apiDefinition = validationResponse.getParser();
             definitionToAdd = validationResponse.getJsonContent();
             if (syncOperations) {
                 validateScopes(apiToAdd, apiProvider, username);
@@ -764,19 +764,21 @@ public class ApisApiServiceImplUtils {
     }
 
     /**
-     * Generate MCP features for the given subtype and backend endpoint.
+     * Generates MCP feature URI templates for a given subtype.
      *
-     * @param subtype         The subtype of the API.
-     * @param backendEndpoint The backend endpoint containing the API definition.
-     * @param uriTemplates    The set of URI templates to be used.
-     * @return Set of URITemplate representing the generated MCP features.
-     * @throws APIManagementException If an error occurs while generating MCP features.
+     * @param subtype         MCP feature subtype
+     * @param backendEndpoint Backend endpoint with API definition
+     * @param uriTemplates    Existing URI templates
+     * @param parser          API definition parser
+     * @return Generated MCP URI templates
+     * @throws APIManagementException if generation fails
      */
-    public static Set<URITemplate> generateMCPFeatures(String subtype, BackendEndpoint backendEndpoint, Set<URITemplate> uriTemplates)
+    public static Set<URITemplate> generateMCPFeatures(String subtype, BackendEndpoint backendEndpoint,
+                                                       Set<URITemplate> uriTemplates,
+                                                       APIDefinition parser)
             throws APIManagementException {
 
-        APIDefinition parser = new OAS3Parser();
-        Set<URITemplate> mcpTools = parser.generateMCPTools(backendEndpoint.getBackendApiDefinition(),
+        Set<URITemplate> mcpTools = parser.generateMCPTools(backendEndpoint.getBackendApiDefinition(), null,
                 backendEndpoint.getBackendId(), APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE, subtype, uriTemplates);
         if (mcpTools == null) {
             throw new APIManagementException("Failed to generate MCP feature.");

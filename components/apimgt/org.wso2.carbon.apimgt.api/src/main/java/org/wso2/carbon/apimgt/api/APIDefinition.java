@@ -19,6 +19,7 @@ package org.wso2.carbon.apimgt.api;
 
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.Scope;
@@ -274,29 +275,33 @@ public abstract class APIDefinition {
      * Generates MCP URITemplates based on the API definition.
      *
      * @param backendApiDefinition API definition of the backend.
+     * @param refApiId             Reference API identifier.
      * @param backendId            Backend ID. It can be either backend endpoints ID or API UUID.
      * @param mcpFeatureType       MCP feature type to filter generation
      * @param mcpSubtype           MCP Subtype
      * @param uriTemplates         URI templates to generate
-     * @return generated set of MCP URITemplates
+     * @return generated set of MCP tool URITemplates
      */
     public abstract Set<URITemplate> generateMCPTools(String backendApiDefinition,
-                                                      String backendId,
+                                                      APIIdentifier refApiId, String backendId,
                                                       String mcpFeatureType,
                                                       String mcpSubtype,
                                                       Set<URITemplate> uriTemplates);
 
     /**
-     * Updates MCP URITemplates based on the backend API definition.
+     * Updates MCP tool-related URI templates by resolving and matching backend operations.
      *
-     * @param backendEndpoint backend API definition and config
-     * @param mcpFeatureType  MCP feature type to filter updates
-     * @param isBackend       whether tools are for backend
-     * @param uriTemplates    URI templates to update
-     * @return updated set of MCP URITemplates
+     * @param backendApiDefinition OpenAPI definition of the backend API as a string
+     * @param refApiId             Identifier of the reference API
+     * @param backendId            Backend identifier
+     * @param mcpFeatureType       HTTP verb (e.g., GET) to filter templates
+     * @param mcpSubtype           MCP subtype (e.g., direct endpoint or existing API)
+     * @param uriTemplates         Set of existing URI templates to process
+     * @return Updated set of URI templates with resolved operation details
      */
-    public abstract Set<URITemplate> updateMCPTools(BackendEndpoint backendEndpoint,
+    public abstract Set<URITemplate> updateMCPTools(String backendApiDefinition,
+                                                    APIIdentifier refApiId, String backendId,
                                                     String mcpFeatureType,
-                                                    boolean isBackend,
+                                                    String mcpSubtype,
                                                     Set<URITemplate> uriTemplates);
 }

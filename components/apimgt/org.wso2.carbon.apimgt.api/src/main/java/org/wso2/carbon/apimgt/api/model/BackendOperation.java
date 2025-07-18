@@ -21,6 +21,7 @@ import java.io.Serializable;
 
 public class BackendOperation implements Serializable {
 
+    private int refUriMappingId;
     private String target;
     private String verb;
 
@@ -46,5 +47,15 @@ public class BackendOperation implements Serializable {
     public void setVerb(String verb) {
 
         this.verb = verb;
+    }
+
+    public int getRefUriMappingId() {
+
+        return refUriMappingId;
+    }
+
+    public void setRefUriMappingId(int refUriMappingId) {
+
+        this.refUriMappingId = refUriMappingId;
     }
 }

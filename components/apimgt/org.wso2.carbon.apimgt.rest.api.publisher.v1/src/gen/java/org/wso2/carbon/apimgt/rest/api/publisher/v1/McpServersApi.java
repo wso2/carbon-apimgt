@@ -658,7 +658,7 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:api_publish", description = "Publish API"),
             @AuthorizationScope(scope = "apim:api_import_export", description = "Import and export APIs related operations")
         })
-    }, tags={ "API Endpoints",  })
+    }, tags={ "MCP Server Endpoints",  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Updated API Endpoint is returned. ", response = BackendEndpointDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),

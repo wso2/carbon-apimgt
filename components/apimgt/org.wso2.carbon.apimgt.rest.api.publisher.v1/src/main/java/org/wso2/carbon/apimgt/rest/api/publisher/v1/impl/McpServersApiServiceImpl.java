@@ -211,7 +211,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("User is not authorized to access the MCP server",
                         e, log);
@@ -269,7 +269,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             return Response.ok().entity(documentDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving document : "
                         + documentId + " of API " + apiId, e, log);
@@ -324,7 +324,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while retrieving document : " + documentId + " of API " + apiId, e, log);
@@ -368,7 +368,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             return Response.ok().entity(documentListDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while retrieving documents of API : " + apiId, e, log);
@@ -404,7 +404,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             return Response.ok().entity(backendEndpointDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while retrieving resource paths of API : " + apiId, e, log);
@@ -445,7 +445,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             return Response.ok().entity(backendEndpointDTOList).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while retrieving endpoints of MCP server: " + apiId, e, log);
@@ -484,7 +484,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving the lifecycle "
                         + "events of API : " + apiId, e, log);
@@ -620,7 +620,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil
                         .handleAuthorizationFailure("Authorization failure while retrieving swagger of API :"
@@ -885,7 +885,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil
                         .handleAuthorizationFailure("Authorization failure while adding documents of API : " + apiId, e,
@@ -974,7 +974,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while adding content to the document: " + documentId + " of API "
@@ -1023,7 +1023,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while updating the lifecycle of API " + apiId, e, log);
@@ -1300,11 +1300,11 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                         + " on organization " + organization, log);
                 return null;
             }
-            PublisherCommonUtils.clearArtifactComplianceInfo(apiId, RestApiConstants.RESOURCE_MCP_SERVER, organization);
+            PublisherCommonUtils.clearArtifactComplianceInfo(apiId, RestApiConstants.RESOURCE_MCP, organization);
             return Response.ok().build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting MCP server: "
                         + apiId, e, log);
@@ -1350,7 +1350,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while deleting : " + documentId + " of API " + apiId, e, log);
@@ -1415,24 +1415,12 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         api.setOrganization(organization);
         APIDTO apiDto = APIMappingUtil.fromAPItoDTO(api, apiProvider);
 
-        Map endpointConfigMap = (Map) apiDto.getEndpointConfig();
-        if (endpointConfigMap != null && !APIConstants.WSO2_SYNAPSE_GATEWAY.equals(apiDto.getGatewayType())
-                && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                endpointConfigMap.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("Cannot Deploy a MCP server with a Custom Sequence to APK Gateway: " + apiId).build();
-        }
         if (apiDto.getLifeCycleStatus().equals(APIConstants.RETIRED)) {
             String errorMessage = "Deploying MCP server revisions is not supported for retired APIs. ApiId: " + apiId;
             throw new APIManagementException(errorMessage,
                     ExceptionCodes.from(ExceptionCodes.RETIRED_API_REVISION_DEPLOYMENT_UNSUPPORTED, apiId));
         }
-        if (apiDto != null && apiDto.getAdvertiseInfo() != null && Boolean.TRUE.equals(
-                apiDto.getAdvertiseInfo().isAdvertised())) {
-            String errorMessage = "Deploying MCP server revisions is not supported for third party APIs: " + apiId;
-            throw new APIManagementException(errorMessage,
-                    ExceptionCodes.from(ExceptionCodes.THIRD_PARTY_API_REVISION_DEPLOYMENT_UNSUPPORTED, apiId));
-        }
+
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
         List<APIRevisionDeployment> apiRevisionDeployments = new ArrayList<>();
         for (APIRevisionDeploymentDTO apiRevisionDeploymentDTO : apIRevisionDeploymentDTOList) {
@@ -1500,7 +1488,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                         "attachment; filename=\"" + file.getName() + "\"").build();
             } catch (APIImportExportException e) {
-                throw new APIManagementException("Error while exporting " + RestApiConstants.RESOURCE_API, e);
+                throw new APIManagementException("Error while exporting " + RestApiConstants.RESOURCE_MCP, e);
             }
         } else {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -1606,7 +1594,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                         .getErrorCode() == ExceptionCodes.GLOBAL_MEDIATION_POLICIES_NOT_FOUND.getErrorCode()) {
                     RestApiUtil.handleResourceNotFoundError(e.getErrorHandler().getErrorDescription(), e, log);
                 } else {
-                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, apiId, e, log);
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
                 }
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while updating MCP server: "
@@ -1692,7 +1680,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while updating document : " + documentId + " of API "
@@ -1725,13 +1713,12 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         BackendEndpoint backendEndpoint = apiProvider.getMCPServerEndpoint(apiId, endpointId);
 
         if (backendEndpoint == null) {
-            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, apiId, log);
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, log);
         } else {
             backendEndpoint.setEndpointConfig(backendEndpointDTO.getEndpointConfig());
         }
         apiProvider.updateMCPServerEndpoint(apiId, backendEndpoint);
-        BackendEndpoint updatedBackendEndpoint = apiProvider.getMCPServerEndpoint(apiId, endpointId);
-        return Response.ok().entity(APIMappingUtil.fromBackendEndpointToDTO(updatedBackendEndpoint, organization,
+        return Response.ok().entity(APIMappingUtil.fromBackendEndpointToDTO(backendEndpoint, organization,
                 false)).build();
     }
 
@@ -1912,7 +1899,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId, e, log);
             } else {

@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import org.wso2.carbon.apimgt.api.model.ApiOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
@@ -26,6 +27,7 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicySpecAttribute;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.OperationPolicyComparator;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendOperationMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDTO;
@@ -156,6 +158,23 @@ public class OperationPolicyMappingUtil {
         backendOperationMapping.setBackendId(backendOperationMappingDTO.getBackendId());
 
         return backendOperationMapping;
+    }
+
+    public static ApiOperationMapping fromDTOToAPIOperationMapping(
+            APIOperationMappingDTO apiOperationMappingDTO) {
+
+        ApiOperationMapping apiOperationMapping = new ApiOperationMapping();
+
+        BackendOperation backendOperation = new BackendOperation();
+        backendOperation.setTarget(apiOperationMappingDTO.getBackendOperation().getTarget());
+        backendOperation.setVerb(apiOperationMappingDTO.getBackendOperation().getVerb());
+        apiOperationMapping.setBackendOperation(backendOperation);
+
+        apiOperationMapping.setApiUuid(apiOperationMappingDTO.getApiId());
+        apiOperationMapping.setApiName(apiOperationMappingDTO.getApiName());
+        apiOperationMapping.setApiVersion(apiOperationMappingDTO.getApiVersion());
+
+        return apiOperationMapping;
     }
 
     public static OperationPolicyDataListDTO fromOperationPolicyDataListToDTO(

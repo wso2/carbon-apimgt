@@ -15303,12 +15303,24 @@ components:
       title: API Operation Mapping
       type: object
       properties:
-        id:
+        apiId:
           type: string
           description: |
             UUID of the targetAPI
           readOnly: true
           example: 01234567-0123-0123-0123-012345678901
+        apiName:
+          maxLength: 150
+          minLength: 1
+          pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\[\]\/]*$)'
+          type: string
+          example: PizzaShackAPI
+        apiVersion:
+          maxLength: 30
+          minLength: 1
+          type: string
+          pattern: '^[^~!@#;:%^*()+={}|\\<>"'',&/$\[\]\s+\/]+$'
+          example: 1.0.0
         backendOperation:
           $ref: '#/components/schemas/BackendOperation'
     BackendOperation:

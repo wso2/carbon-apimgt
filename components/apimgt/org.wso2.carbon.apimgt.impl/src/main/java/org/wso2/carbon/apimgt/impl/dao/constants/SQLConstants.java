@@ -1568,8 +1568,8 @@ public class SQLConstants {
             "INSERT INTO AM_API_BACKEND_OPERATION_MAPPING (URL_MAPPING_ID, BACKEND_ID, TARGET, VERB) " +
                     "VALUES (?,?,?,?)";
 
-    public static final String ADD_AM_API_PROXY_OPERATION_MAPPING_SQL =
-            "INSERT INTO AM_API_PROXY_MAPPING (URL_MAPPING_ID, REF_URL_MAPPING_ID, API_ID) VALUES (?, ?, ?)";
+    public static final String ADD_AM_API_OPERATION_MAPPING_SQL =
+            "INSERT INTO AM_API_OPERATION_MAPPING (URL_MAPPING_ID, REF_URL_MAPPING_ID) VALUES (?, ?)";
 
     public static final String GET_APPLICATION_BY_NAME_PREFIX =
             " SELECT " +
@@ -1769,6 +1769,9 @@ public class SQLConstants {
 
     public static final String REMOVE_FROM_AM_API_BACKEND_OPERATION_MAPPING_SQL =
             "DELETE FROM AM_API_BACKEND_OPERATION_MAPPING WHERE URL_MAPPING_ID = ? AND BACKEND_ID = ?";
+
+    public static final String REMOVE_FROM_AM_API_OPERATION_MAPPING_SQL =
+            "DELETE FROM AM_API_OPERATION_MAPPING WHERE URL_MAPPING_ID = ?";
 
     public static final String GET_API_LIST_SQL_BY_ORG = "SELECT API.API_ID, API.API_UUID,API.API_NAME," +
             "API.API_VERSION,API.API_PROVIDER FROM AM_API API WHERE API.ORGANIZATION = ?";
@@ -4044,11 +4047,12 @@ public class SQLConstants {
         public static final String GET_URL_MAPPINGS_WITH_SCOPE_PRODUCT_AND_BACKEND =
                 "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, " +
                         "AUM.SCHEMA_DEFINITION, AUM.DESCRIPTION, " +
-                        "ARSM.SCOPE_NAME, PROD_MAP.API_ID, BACK_MAP.TARGET, BACK_MAP.VERB " +
+                        "ARSM.SCOPE_NAME, PROD_MAP.API_ID, BACK_MAP.TARGET, BACK_MAP.VERB, API_MAP.REF_URL_MAPPING_ID " +
                         "FROM AM_API_URL_MAPPING AUM " +
                         "LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
                         "LEFT JOIN AM_API_PRODUCT_MAPPING PROD_MAP ON AUM.URL_MAPPING_ID = PROD_MAP.URL_MAPPING_ID " +
                         "LEFT JOIN AM_API_BACKEND_OPERATION_MAPPING BACK_MAP ON AUM.URL_MAPPING_ID = BACK_MAP.URL_MAPPING_ID " +
+                        "LEFT JOIN AM_API_OPERATION_MAPPING API_MAP ON AUM.URL_MAPPING_ID = API_MAP.URL_MAPPING_ID " +
                         "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID IS NULL";
 
         public static final String GET_REVISIONED_URL_MAPPINGS_ID = "SELECT URL_MAPPING_ID FROM AM_API_URL_MAPPING " +
@@ -4181,14 +4185,16 @@ public class SQLConstants {
                 "DELETE FROM AM_API_URL_MAPPING WHERE REVISION_UUID = ?";
         public static final String GET_URL_MAPPINGS_WITH_SCOPE_PRODUCT_AND_BACKEND_BY_REVISION_UUID =
                 "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, " +
-                "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, ARSM.SCOPE_NAME, PROD_MAP.API_ID , " +
-                "BACK_MAP.TARGET, BACK_MAP.VERB " +
+                "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, AUM.SCHEMA_DEFINITION, AUM.DESCRIPTION, " +
+                "ARSM.SCOPE_NAME, PROD_MAP.API_ID , " +
+                "BACK_MAP.TARGET, BACK_MAP.VERB, API_MAP.REF_URL_MAPPING_ID " +
                 "FROM AM_API_URL_MAPPING AUM LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
                 "LEFT JOIN AM_API_PRODUCT_MAPPING PROD_MAP ON AUM.URL_MAPPING_ID = PROD_MAP.URL_MAPPING_ID " +
                 "LEFT JOIN AM_API_BACKEND_OPERATION_MAPPING BACK_MAP ON AUM.URL_MAPPING_ID = BACK_MAP.URL_MAPPING_ID " +
+                "LEFT JOIN AM_API_OPERATION_MAPPING API_MAP ON AUM.URL_MAPPING_ID = API_MAP.URL_MAPPING_ID " +
                 "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID = ?";
         public static final String INSERT_URL_MAPPINGS_CURRENT_API = "INSERT INTO AM_API_URL_MAPPING(API_ID, HTTP_METHOD," +
-                " AUTH_SCHEME, URL_PATTERN, THROTTLING_TIER) VALUES(?,?,?,?,?)";
+                " AUTH_SCHEME, URL_PATTERN, THROTTLING_TIER, SCHEMA_DEFINITION, DESCRIPTION) VALUES(?,?,?,?,?,?,?)";
         public static final String GET_CURRENT_API_URL_MAPPINGS_ID = "SELECT URL_MAPPING_ID FROM AM_API_URL_MAPPING " +
                 "WHERE API_ID = ? AND REVISION_UUID IS NULL AND HTTP_METHOD = ? AND AUTH_SCHEME = ? AND URL_PATTERN = ? " +
                 "AND THROTTLING_TIER = ? ";
@@ -4606,33 +4612,69 @@ public class SQLConstants {
 
         public static final String GET_BACKEND_OPERATION_MAPPING_FOR_API_REVISION_SQL =
                 " SELECT " +
-                        " AUM.URL_MAPPING_ID, AUM.URL_PATTERN, AUM.HTTP_METHOD," +
-                        " B.BACKEND_ID, BOM.TARGET, BOM.VERB" +
+                        " BOM.BACKEND_ID, BOM.TARGET, BOM.VERB" +
                         " FROM " +
                         " AM_API_URL_MAPPING AUM " +
                         " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
                         " INNER JOIN AM_API_BACKEND_OPERATION_MAPPING BOM ON AUM.URL_MAPPING_ID = BOM.URL_MAPPING_ID" +
-                        " INNER JOIN AM_API_BACKEND B ON B.BACKEND_ID = BOM.BACKEND_ID " +
                         " WHERE " +
-                        " API.API_ID = ? " +
+                        " API.API_UUID = ? " +
                         " AND AUM.URL_MAPPING_ID = ? " +
                         " AND AUM.REVISION_UUID = ? " +
                         " ORDER BY AUM.URL_MAPPING_ID ASC ";
 
         public static final String GET_BACKEND_OPERATION_MAPPING_OF_API_SQL =
                 " SELECT " +
-                        " AUM.URL_MAPPING_ID, AUM.URL_PATTERN, AUM.HTTP_METHOD," +
-                        " B.BACKEND_ID, BOM.TARGET, BOM.VERB " +
+                        " BOM.BACKEND_ID, BOM.TARGET, BOM.VERB " +
                         " FROM " +
                         " AM_API_URL_MAPPING AUM " +
                         " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
                         " INNER JOIN AM_API_BACKEND_OPERATION_MAPPING BOM ON AUM.URL_MAPPING_ID = BOM.URL_MAPPING_ID" +
-                        " INNER JOIN AM_API_BACKEND B ON BOM.BACKEND_ID = B.BACKEND_ID " +
                         " WHERE " +
-                        " API.API_ID = ? " +
+                        " API.API_UUID = ? " +
                         " AND AUM.URL_MAPPING_ID = ? " +
                         " AND AUM.REVISION_UUID IS NULL " +
                         " ORDER BY AUM.URL_MAPPING_ID ASC ";
+
+        public static final String GET_API_OPERATION_MAPPING_OF_API_SQL =
+                "SELECT " +
+                        "   AUM.URL_MAPPING_ID, " +
+                        "   REF.URL_PATTERN AS TARGET, " +
+                        "   REF.HTTP_METHOD AS VERB, " +
+                        "   REF_API.API_UUID AS REF_API_UUID, " +
+                        "   REF_API.API_NAME AS REF_API_NAME, " +
+                        "   REF_API.API_VERSION AS REF_API_VERSION " +
+                        " FROM " +
+                        "   AM_API_URL_MAPPING AUM " +
+                        "INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+                        "INNER JOIN AM_API_OPERATION_MAPPING AOM ON AUM.URL_MAPPING_ID = AOM.URL_MAPPING_ID " +
+                        "INNER JOIN AM_API_URL_MAPPING REF ON AOM.REF_URL_MAPPING_ID = REF.URL_MAPPING_ID " +
+                        "INNER JOIN AM_API REF_API ON REF.API_ID = REF_API.API_ID " +
+                        "WHERE " +
+                        "   API.API_UUID = ? " +
+                        "   AND AUM.URL_MAPPING_ID = ? " +
+                        "   AND AUM.REVISION_UUID IS NULL " +
+                        "ORDER BY AUM.URL_MAPPING_ID ASC";
+
+        public static final String GET_API_OPERATION_MAPPING_FOR_API_REVISION_SQL =
+                "SELECT " +
+                        "   AUM.URL_MAPPING_ID, " +
+                        "   REF.URL_PATTERN AS TARGET, " +
+                        "   REF.HTTP_METHOD AS VERB, " +
+                        "   REF_API.API_UUID AS REF_API_UUID, " +
+                        "   REF_API.API_NAME AS REF_API_NAME, " +
+                        "   REF_API.API_VERSION AS REF_API_VERSION " +
+                        " FROM " +
+                        "   AM_API_URL_MAPPING AUM " +
+                        "INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+                        "INNER JOIN AM_API_OPERATION_MAPPING AOM ON AUM.URL_MAPPING_ID = AOM.URL_MAPPING_ID " +
+                        "INNER JOIN AM_API_URL_MAPPING REF ON AOM.REF_URL_MAPPING_ID = REF.URL_MAPPING_ID " +
+                        "INNER JOIN AM_API REF_API ON REF.API_ID = REF_API.API_ID " +
+                        "WHERE " +
+                        "   API.API_UUID = ? " +
+                        "   AND AUM.URL_MAPPING_ID = ? " +
+                        "   AND AUM.REVISION_UUID = ? " +
+                        "ORDER BY AUM.URL_MAPPING_ID ASC";
     }
 
     public static final String ADD_AM_API_BACKEND_SQL = "INSERT INTO AM_API_BACKEND (BACKEND_ID, BACKEND_NAME, " +

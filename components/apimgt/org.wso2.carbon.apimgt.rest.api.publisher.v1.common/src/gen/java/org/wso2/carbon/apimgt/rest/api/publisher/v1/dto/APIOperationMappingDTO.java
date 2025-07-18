@@ -21,25 +21,61 @@ import javax.validation.Valid;
 
 public class APIOperationMappingDTO   {
   
-    private String id = null;
+    private String apiId = null;
+    private String apiName = null;
+    private String apiVersion = null;
     private BackendOperationDTO backendOperation = null;
 
   /**
    * UUID of the targetAPI 
    **/
-  public APIOperationMappingDTO id(String id) {
-    this.id = id;
+  public APIOperationMappingDTO apiId(String apiId) {
+    this.apiId = apiId;
     return this;
   }
 
   
   @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the targetAPI ")
-  @JsonProperty("id")
-  public String getId() {
-    return id;
+  @JsonProperty("apiId")
+  public String getApiId() {
+    return apiId;
   }
-  public void setId(String id) {
-    this.id = id;
+  public void setApiId(String apiId) {
+    this.apiId = apiId;
+  }
+
+  /**
+   **/
+  public APIOperationMappingDTO apiName(String apiName) {
+    this.apiName = apiName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "PizzaShackAPI", value = "")
+  @JsonProperty("apiName")
+ @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\[\\]/]*$)") @Size(min=1,max=150)  public String getApiName() {
+    return apiName;
+  }
+  public void setApiName(String apiName) {
+    this.apiName = apiName;
+  }
+
+  /**
+   **/
+  public APIOperationMappingDTO apiVersion(String apiVersion) {
+    this.apiVersion = apiVersion;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1.0.0", value = "")
+  @JsonProperty("apiVersion")
+ @Pattern(regexp="^[^~!@#;:%^*()+={}|\\\\<>\"',&/$\\[\\]\\s+/]+$") @Size(min=1,max=30)  public String getApiVersion() {
+    return apiVersion;
+  }
+  public void setApiVersion(String apiVersion) {
+    this.apiVersion = apiVersion;
   }
 
   /**
@@ -70,13 +106,15 @@ public class APIOperationMappingDTO   {
       return false;
     }
     APIOperationMappingDTO apIOperationMapping = (APIOperationMappingDTO) o;
-    return Objects.equals(id, apIOperationMapping.id) &&
+    return Objects.equals(apiId, apIOperationMapping.apiId) &&
+        Objects.equals(apiName, apIOperationMapping.apiName) &&
+        Objects.equals(apiVersion, apIOperationMapping.apiVersion) &&
         Objects.equals(backendOperation, apIOperationMapping.backendOperation);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, backendOperation);
+    return Objects.hash(apiId, apiName, apiVersion, backendOperation);
   }
 
   @Override
@@ -84,7 +122,9 @@ public class APIOperationMappingDTO   {
     StringBuilder sb = new StringBuilder();
     sb.append("class APIOperationMappingDTO {\n");
     
-    sb.append("    id: ").append(toIndentedString(id)).append("\n");
+    sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
+    sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
+    sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
     sb.append("    backendOperation: ").append(toIndentedString(backendOperation)).append("\n");
     sb.append("}");
     return sb.toString();

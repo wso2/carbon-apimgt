@@ -64,7 +64,7 @@ public final class RestApiConstants {
 
     public static final String RESOURCE = "resource";
     public static final String RESOURCE_API = "API";
-    public static final String RESOURCE_MCP_SERVER = "MCP";
+    public static final String RESOURCE_MCP = "MCP";
     public static final String RESOURCE_API_PRODUCT = "API Product";
     public static final String RESOURCE_PRODUCT_DOCUMENTATION = "product documentation";
     public static final String RESOURCE_RATING = "Rating";

@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.api.model;
 public class ApiOperationMapping {
 
     private String apiUuid = null;
+    private String apiName = null;
+    private String apiVersion = null;
     private BackendOperation backendOperation = null;
 
     public String getApiUuid() {
@@ -41,5 +43,25 @@ public class ApiOperationMapping {
     public void setBackendOperation(BackendOperation backendOperation) {
 
         this.backendOperation = backendOperation;
+    }
+
+    public String getApiName() {
+
+        return apiName;
+    }
+
+    public void setApiName(String apiName) {
+
+        this.apiName = apiName;
+    }
+
+    public String getApiVersion() {
+
+        return apiVersion;
+    }
+
+    public void setApiVersion(String apiVersion) {
+
+        this.apiVersion = apiVersion;
     }
 }

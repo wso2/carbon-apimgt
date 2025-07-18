@@ -69,6 +69,7 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APISearchResult;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
+import org.wso2.carbon.apimgt.api.model.ApiOperationMapping;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
@@ -622,7 +623,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         addLocalScopes(api.getId().getApiName(), api.getUriTemplates(), api.getOrganization());
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        if (api.getBackendEndpoints() != null) {
+        if (api.getBackendEndpoints() != null && !api.getBackendEndpoints().isEmpty()) {
             addBackendEndpoints(apiId, api.getBackendEndpoints());
         }
         addURITemplates(apiId, api, tenantId);
@@ -1262,7 +1263,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 oldLocalScopesItr.remove();
             }
         }
-        apiMgtDAO.removeBackendOperationMapping(oldURITemplates);
+        if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
+            if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
+                apiMgtDAO.removeBackendOperationMapping(oldURITemplates);
+            } else if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
+                apiMgtDAO.removeApiOperationMapping(oldURITemplates);
+            }
+        }
         validateAndUpdateURITemplates(api, tenantId);
         apiMgtDAO.updateURITemplates(api, tenantId);
         if (log.isDebugEnabled()) {
@@ -2847,7 +2854,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiMgtDAO.deleteAIConfiguration(api.getUuid());
         }
         if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
-            apiMgtDAO.removeBackendOperationMapping(uriTemplates);
+            if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
+                apiMgtDAO.removeBackendOperationMapping(uriTemplates);
+            } else if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
+                apiMgtDAO.removeApiOperationMapping(uriTemplates);
+            }
         }
         apiMgtDAO.deleteAPI(api.getUuid());
         if (log.isDebugEnabled()) {
@@ -8515,32 +8526,99 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Updates the given API's URI templates by generating MCP tools based on its associated backend endpoints.
+     * Updates MCP tools (URI templates) for the given API based on its subtype.
      *
-     * @param api   the {@link API} object to be updated
-     * @param apiId the unique identifier of the API
-     * @throws APIManagementException if MCP tools cannot be generated or a database access error occurs
+     * @param api   API to update.
+     * @param apiId Internal API ID.
+     * @throws APIManagementException If tool generation fails.
      */
     private void updateMCPTools(API api, int apiId) throws APIManagementException {
 
-        List<BackendEndpoint> backendEndpoints = apiMgtDAO.getBackendEndpoints(apiId);
-        if (!backendEndpoints.isEmpty()) {
-            APIDefinition parser = new OAS3Parser();
-            Set<URITemplate> mcpTools = null;
-            if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
-                mcpTools = parser.updateMCPTools(backendEndpoints.get(0),
-                        APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE
-                        , true, api.getUriTemplates());
-            } else if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
-                mcpTools = parser.updateMCPTools(backendEndpoints.get(0),
-                        APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE
-                        , false, api.getUriTemplates());
+        APIDefinition parser = new OAS3Parser();
+        Set<URITemplate> updatedTemplates;
+
+        if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
+            List<BackendEndpoint> backendEndpoints = apiMgtDAO.getBackendEndpoints(apiId);
+            if (backendEndpoints.isEmpty()) {
+                throw new APIManagementException("No backend endpoints found for direct endpoint API subtype.");
             }
-            if (mcpTools == null) {
-                throw new APIManagementException("Failed to generate MCP tools.");
+
+            BackendEndpoint backendEndpoint = backendEndpoints.get(0);
+            updatedTemplates = parser.updateMCPTools(
+                    backendEndpoint.getBackendApiDefinition(),
+                    null,
+                    backendEndpoint.getBackendId(),
+                    APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE,
+                    api.getSubtype(),
+                    api.getUriTemplates()
+            );
+
+        } else if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
+            Set<URITemplate> uriTemplates = api.getUriTemplates();
+            if (uriTemplates.isEmpty()) {
+                throw new APIManagementException("No URI templates defined for existing API subtype.");
             }
-            api.setUriTemplates(mcpTools);
+
+            URITemplate template = uriTemplates.iterator().next();
+            ApiOperationMapping mapping = template.getApiOperationMapping();
+            if (mapping == null) {
+                throw new APIManagementException("API operation mapping is missing in the URI template.");
+            }
+
+            API refApi = fetchReferencedApi(mapping);
+            updatedTemplates = parser.updateMCPTools(
+                    refApi.getSwaggerDefinition(),
+                    refApi.getId(),
+                    null,
+                    APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE,
+                    api.getSubtype(),
+                    uriTemplates
+            );
+        } else {
+            throw new APIManagementException("Unsupported API subtype: " + api.getSubtype() + " for API Type MCP");
         }
+
+        if (updatedTemplates == null) {
+            throw new APIManagementException("Failed to generate MCP tools.");
+        }
+
+        api.setUriTemplates(updatedTemplates);
     }
 
+    /**
+     * Finds referenced API using UUID or name+version.
+     *
+     * @param mapping Operation mapping with reference info.
+     * @return Referenced API.
+     * @throws APIManagementException If lookup fails.
+     */
+    private API fetchReferencedApi(ApiOperationMapping mapping) throws APIManagementException {
+
+        String uuid = mapping.getApiUuid();
+        String name = mapping.getApiName();
+        String version = mapping.getApiVersion();
+
+        try {
+            if (uuid != null && !uuid.isEmpty()) {
+                return getAPIbyUUID(uuid, organization);
+            }
+
+            if (name != null && !name.isEmpty() && version != null && !version.isEmpty()) {
+                String query = "name:" + name + " version:" + version;
+                Map<String, Object> searchResult = searchPaginatedAPIs(query, organization, 0, 1);
+
+                if (!searchResult.isEmpty()) {
+                    return (API) searchResult.get(0);
+                }
+
+                throw new APIManagementException("Referenced API not found for name=" + name + ", version=" + version,
+                        ExceptionCodes.API_NOT_FOUND);
+            }
+
+            throw new APIManagementException("Insufficient information to locate referenced API.");
+        } catch (IndexOutOfBoundsException e) {
+            throw new APIManagementException("Referenced API search returned no results for: " + name + " " + version,
+                    e);
+        }
+    }
 }

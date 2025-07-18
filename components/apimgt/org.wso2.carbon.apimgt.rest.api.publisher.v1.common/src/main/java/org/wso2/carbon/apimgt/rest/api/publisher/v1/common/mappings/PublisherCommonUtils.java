@@ -75,7 +75,6 @@ import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -779,6 +778,7 @@ public class PublisherCommonUtils {
         }
 
         apiToUpdate.setOrganization(originalAPI.getOrganization());
+        apiToUpdate.setSubtype(originalAPI.getSubtype());
         return apiToUpdate;
     }
 
@@ -1523,7 +1523,7 @@ public class PublisherCommonUtils {
      * @throws CryptoException        Error while encrypting
      */
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username,
-                                                           String organization, OrganizationInfo orgInfo)
+                                                    String organization, OrganizationInfo orgInfo)
             throws APIManagementException, CryptoException, ParseException {
         String name = apiDto.getName();
         ArtifactType artifactType = null;
@@ -1625,13 +1625,50 @@ public class PublisherCommonUtils {
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
             String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
             apiToAdd.setSwaggerDefinition(apiDefinition);
-            //TODO: PASAN
-            String backendApiUuid = apiDto.getOperations().get(0).getId();
-            String backendApiDefinition = apiProvider.getOpenAPIDefinition(backendApiUuid, organization);
-            Set<URITemplate> uriTemplates = generateMCPFeatures(apiDto.getSubtypeConfiguration().getSubtype(),
-                    backendApiDefinition, backendApiUuid, apiToAdd.getUriTemplates());
-//            apiToAdd.setUriTemplates(uriTemplates);
-//            apiToAdd.getBackendEndpoints().add(backendEndpoint);
+            if (APIConstants.API_TYPE_MCP.equals(apiToAdd.getType())
+                    && APIConstants.API_SUBTYPE_EXISTING_API.equals(apiToAdd.getSubtype())
+                    && !apiDto.getOperations().isEmpty()) {
+
+                APIOperationsDTO operationDto = apiDto.getOperations().get(0);
+                if (operationDto != null && operationDto.getApiOperationMapping() != null) {
+                    String backendApiUuid = operationDto.getApiOperationMapping().getApiId();
+                    String backendApiName = operationDto.getApiOperationMapping().getApiName();
+                    String backendApiVersion = operationDto.getApiOperationMapping().getApiVersion();
+                    API refApi = null;
+
+                    try {
+                        if (backendApiUuid != null && !backendApiUuid.isEmpty()) {
+                            refApi = apiProvider.getAPIbyUUID(backendApiUuid, organization);
+                        } else if (backendApiName != null && !backendApiName.isEmpty()
+                                && backendApiVersion != null && !backendApiVersion.isEmpty()) {
+                            String query = "name:" + backendApiName + " version:" + backendApiVersion;
+                            Map<String, Object> searchResult =
+                                    apiProvider.searchPaginatedAPIs(query, organization, 0, 1);
+                            if (!searchResult.isEmpty()) {
+                                refApi = (API) searchResult.get(0);
+                            }
+                        }
+
+                        if (refApi == null) {
+                            throw new APIManagementException(
+                                    "Referenced API not found: " + backendApiName + " " + backendApiVersion,
+                                    ExceptionCodes.API_NOT_FOUND);
+                        }
+
+                        String backendApiDefinition = refApi.getSwaggerDefinition();
+                        String subtype = apiDto.getSubtypeConfiguration().getSubtype();
+                        Set<URITemplate> uriTemplates = generateMCPFeatures(
+                                subtype, backendApiDefinition, apiToAdd.getUriTemplates(), refApi.getId(), oasParser);
+                        apiToAdd.setUriTemplates(uriTemplates);
+
+                    } catch (IndexOutOfBoundsException e) {
+                        throw new APIManagementException(
+                                "Referenced API search returned no results: " + backendApiName + " " +
+                                        backendApiVersion,
+                                e);
+                    }
+                }
+            }
             artifactType = ArtifactType.API;
         } else {
             AsyncApiParser asyncApiParser = new AsyncApiParser();
@@ -1690,26 +1727,6 @@ public class PublisherCommonUtils {
         }
         return apiToAdd;
     }
-
-//    /**
-//     * Generates MCP feature URITemplates from the given backend endpoint.
-//     *
-//     * @param backendEndpoint the backend endpoint with configuration
-//     * @param uriTemplates    existing URI templates as context
-//     * @return a set of generated URITemplates for MCP features
-//     * @throws APIManagementException if endpoint config is missing or generation fails
-//     */
-//    public static Set<URITemplate> generateMCPFeatures(BackendEndpoint backendEndpoint, Set<URITemplate> uriTemplates)
-//            throws APIManagementException {
-//
-//        APIDefinition parser = new OAS3Parser();
-//        Set<URITemplate> mcpTools = parser.generateMCPTools(backendEndpoint, APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE
-//                , true, uriTemplates);
-//        if (mcpTools == null) {
-//            throw new APIManagementException("Failed to generate MCP feature.");
-//        }
-//        return mcpTools;
-//    }
 
     /**
      * Validate endpoint configurations of {@link APIDTO} for web socket endpoints.
@@ -2102,6 +2119,8 @@ public class PublisherCommonUtils {
             apiToAdd.setAiConfiguration(new Gson().fromJson(
                     body.getSubtypeConfiguration().getConfiguration().toString(), AIConfiguration.class));
             apiToAdd.setSubtype(APIConstants.API_SUBTYPE_AI_API);
+        } else if (body.getSubtypeConfiguration() != null && body.getSubtypeConfiguration().getSubtype() != null) {
+            apiToAdd.setSubtype(body.getSubtypeConfiguration().getSubtype());
         } else {
             apiToAdd.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
         }
@@ -3929,22 +3948,23 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Generate MCP features for the given API definition.
+     * Generate MCP features for an API if it is an MCP type with existing API subtype.
      *
-     * @param apiSubtype    Subtype of the API (e.g., REST, WS, etc.)
-     * @param apiDefinition API definition in string format
-     * @param apiUuid       Unique identifier of the API
-     * @param uriTemplates  Set of URI templates associated with the API
-     * @return Set of URITemplate objects representing the generated MCP features
+     * @param apiSubtype    API subtype
+     * @param apiDefinition API definition
+     * @param uriTemplates  URI templates of the API
+     * @param refApiId      Reference API Identifier
+     * @param parser        APIDefinition parser
+     * @return Set of URITemplate containing MCP features
      * @throws APIManagementException if there is an error while generating MCP features
      */
-    public static Set<URITemplate> generateMCPFeatures(String apiSubtype, String apiDefinition, String apiUuid,
-                                                       Set<URITemplate> uriTemplates)
+    private static Set<URITemplate> generateMCPFeatures(String apiSubtype, String apiDefinition,
+                                                        Set<URITemplate> uriTemplates, APIIdentifier refApiId,
+                                                        APIDefinition parser)
             throws APIManagementException {
 
-        APIDefinition parser = new OAS3Parser();
-        Set<URITemplate> mcpTools = parser.generateMCPTools(apiDefinition,
-                apiUuid, APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE, apiSubtype, uriTemplates);
+        Set<URITemplate> mcpTools = parser.generateMCPTools(apiDefinition, refApiId, null,
+                APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE, apiSubtype, uriTemplates);
         if (mcpTools == null) {
             throw new APIManagementException("Failed to generate MCP feature.");
         }

@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
+import org.wso2.carbon.apimgt.api.model.ApiOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
@@ -94,6 +95,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsTokenBasedThrot
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMetadataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
@@ -523,12 +525,18 @@ public class APIMappingUtil {
             String asyncTransports = StringUtils.join(dto.getAsyncTransportProtocols(), ',');
             model.setAsyncTransportProtocols(asyncTransports);
         }
-        if (dto.getSubtypeConfiguration() != null && dto.getSubtypeConfiguration().getSubtype() != null
-                && APIConstants.API_SUBTYPE_AI_API.equals(dto.getSubtypeConfiguration().getSubtype())
-                && dto.getSubtypeConfiguration().getConfiguration() != null) {
-            model.setSubtype(APIConstants.API_SUBTYPE_AI_API);
-            model.setAiConfiguration(new Gson().fromJson(dto.getSubtypeConfiguration().getConfiguration().toString(),
-                    AIConfiguration.class));
+        if (dto.getSubtypeConfiguration() != null && dto.getSubtypeConfiguration().getSubtype() != null) {
+            if (APIConstants.API_SUBTYPE_AI_API.equals(dto.getSubtypeConfiguration().getSubtype())
+                    && dto.getSubtypeConfiguration().getConfiguration() != null) {
+                model.setSubtype(APIConstants.API_SUBTYPE_AI_API);
+                model.setAiConfiguration(
+                        new Gson().fromJson(dto.getSubtypeConfiguration().getConfiguration().toString(),
+                                AIConfiguration.class));
+            } else if (APIConstants.API_TYPE_MCP.equals(dto.getSubtypeConfiguration().getSubtype())) {
+                model.setSubtype(dto.getSubtypeConfiguration().getSubtype());
+            } else {
+                model.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
+            }
         } else {
             model.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
         }
@@ -1978,6 +1986,10 @@ public class APIMappingUtil {
                     template.setBackendOperationMapping(OperationPolicyMappingUtil
                             .fromDTOToBackendOperationMapping(operation.getBackendOperationMapping()));
                 }
+                if (operation.getApiOperationMapping() != null) {
+                    template.setApiOperationMapping(OperationPolicyMappingUtil
+                            .fromDTOToAPIOperationMapping(operation.getApiOperationMapping()));
+                }
                 uriTemplates.add(template);
             } else {
                 final String errorMessageEndClause = " operation Type  '" + httpVerb + "' provided" + " for operation" +
@@ -2513,20 +2525,37 @@ public class APIMappingUtil {
 
         operationsDTO.setDescription(uriTemplate.getDescription());
         operationsDTO.setSchemaDefinition(uriTemplate.getSchemaDefinition());
-        BackendOperationMapping mapping = uriTemplate.getBackendOperationMapping();
-        if (mapping != null) {
-            BackendOperation operation = mapping.getBackendOperation();
+        BackendOperationMapping backendOperationMapping = uriTemplate.getBackendOperationMapping();
+        if (backendOperationMapping != null) {
+            BackendOperation operation = backendOperationMapping.getBackendOperation();
 
             BackendOperationDTO operationDTO = new BackendOperationDTO();
             operationDTO.setVerb(operation.getVerb());
             operationDTO.setTarget(operation.getTarget());
 
             BackendOperationMappingDTO mappingDTO = new BackendOperationMappingDTO();
-            mappingDTO.setBackendId(mapping.getBackendId());
+            mappingDTO.setBackendId(backendOperationMapping.getBackendId());
             mappingDTO.setBackendOperation(operationDTO);
 
             operationsDTO.setBackendOperationMapping(mappingDTO);
         }
+        ApiOperationMapping apiOperationMapping = uriTemplate.getApiOperationMapping();
+        if (apiOperationMapping != null) {
+            BackendOperation operation = apiOperationMapping.getBackendOperation();
+
+            BackendOperationDTO operationDTO = new BackendOperationDTO();
+            operationDTO.setVerb(operation.getVerb());
+            operationDTO.setTarget(operation.getTarget());
+
+            APIOperationMappingDTO mappingDTO = new APIOperationMappingDTO();
+            mappingDTO.setApiId(apiOperationMapping.getApiUuid());
+            mappingDTO.setApiName(apiOperationMapping.getApiName());
+            mappingDTO.setApiVersion(apiOperationMapping.getApiVersion());
+            mappingDTO.setBackendOperation(operationDTO);
+
+            operationsDTO.setApiOperationMapping(mappingDTO);
+        }
+
         return operationsDTO;
     }
 
