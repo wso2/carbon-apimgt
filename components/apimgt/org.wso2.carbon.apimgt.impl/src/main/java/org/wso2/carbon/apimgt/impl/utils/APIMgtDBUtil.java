@@ -319,10 +319,10 @@ public final class APIMgtDBUtil {
         Connection connection = null;
         PreparedStatement ps = null;
         ResultSet resultSet = null;
-        
+
         try {
             connection = APIMgtDBUtil.getConnection();
-            
+
             // Query to get deployment statistics and latest success timestamp filtered by environment
             // Join with AM_GW_INSTANCES to filter by environment labels similar to getGatewayInstancesByEnvironment
             String query = "SELECT " +
@@ -333,29 +333,48 @@ public final class APIMgtDBUtil {
                     "INNER JOIN AM_GW_INSTANCES gwi ON grd.GATEWAY_ID = gwi.GATEWAY_ID " +
                     "WHERE grd.REVISION_ID = ? " +
                     "AND (gwi.ENV_LABELS = ? OR gwi.ENV_LABELS LIKE ? OR gwi.ENV_LABELS LIKE ? OR gwi.ENV_LABELS LIKE ?)";
-            
+
             ps = connection.prepareStatement(query);
             ps.setString(1, revisionUuid);
             ps.setString(2, environmentName);
             ps.setString(3, environmentName + ",%");
             ps.setString(4, "%," + environmentName + ",%");
             ps.setString(5, "%," + environmentName);
-            
+
             resultSet = ps.executeQuery();
-            
+
             if (resultSet.next()) {
                 int deployedCount = resultSet.getInt("DEPLOYED_COUNT");
                 int failedCount = resultSet.getInt("FAILED_COUNT");
                 Timestamp latestSuccessTime = resultSet.getTimestamp("LATEST_SUCCESS_TIME");
-                
+
                 apiRevisionDeployment.setDeployedGatewayCount(deployedCount);
                 apiRevisionDeployment.setFailedGatewayCount(failedCount);
-                
+
                 // Update successDeployedTime with the latest successful deployment time if available
                 if (latestSuccessTime != null) {
                     apiRevisionDeployment.setSuccessDeployedTime(latestSuccessTime.toString());
                 }
             }
+
+            closeAllConnections(ps, null, resultSet);
+
+            String liveCountQuery = "SELECT COUNT(*) AS LIVE_COUNT FROM AM_GW_INSTANCES " +
+                    "WHERE ENV_LABELS = ? OR ENV_LABELS LIKE ? OR ENV_LABELS LIKE ? OR ENV_LABELS LIKE ?";
+
+            ps = connection.prepareStatement(liveCountQuery);
+            ps.setString(1, environmentName);
+            ps.setString(2, environmentName + ",%");
+            ps.setString(3, "%," + environmentName + ",%");
+            ps.setString(4, "%," + environmentName);
+
+            resultSet = ps.executeQuery();
+
+            if (resultSet.next()) {
+                int liveCount = resultSet.getInt("LIVE_COUNT");
+                apiRevisionDeployment.setLiveGatewayCount(liveCount);
+            }
+
         } catch (SQLException e) {
             log.error("Error while calculating gateway deployment statistics for revision: " + revisionUuid +
                               " and environment: " + environmentName, e);

@@ -120,7 +120,7 @@ public class APIRevisionDeployment implements Serializable {
         return liveGatewayCount;
     }
 
-    public void setLiveGatewayCount(Integer liveGatewayCount) {
+    public void setLiveGatewayCount(int liveGatewayCount) {
         this.liveGatewayCount = liveGatewayCount;
     }
 }
