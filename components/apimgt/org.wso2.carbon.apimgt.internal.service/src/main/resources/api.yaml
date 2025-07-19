@@ -1123,6 +1123,87 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /notify-gateway:
+    post:
+      summary: Gateway Register or Heartbeat
+      tags:
+        - Gateway Lifecycle
+      description: |
+        Accepts a payload indicating either a gateway registration or a heartbeat update.
+        The `type` field distinguishes the operation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotifyGatewayPayload'
+      responses:
+        '200':
+          description: Successful response for registration or heartbeat.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotifyGatewayStatusResponse'
+        '400':
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error while processing gateway status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /notify-api-deployment-status:
+    post:
+      tags:
+        - Gateway Monitoring
+      summary: Acknowledge an API Revision Deployment
+      description: |
+        This endpoint is invoked by the Gateway to notify the Control Plane about the status of an API revision deployment or undeployment.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GatewayDeploymentStatusAcknowledgment'
+      responses:
+        '200':
+          description: Deployment acknowledgement received successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+        '400':
+          description: Malformed deployment acknowledgment payload.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error while processing deployment status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     SynapseAttributes:
@@ -2168,6 +2249,94 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EndpointCertificate'
+    NotifyGatewayPayload:
+      type: object
+      required:
+        - payloadType
+      properties:
+        payloadType:
+          type: string
+          enum:
+            - REGISTER
+            - HEARTBEAT
+          description: |
+            Indicates the type of payload.
+            - "REGISTER": Gateway registration payload
+            - "HEARTBEAT": Heartbeat update payload
+          example: REGISTER
+        gatewayProperties:
+          $ref: '#/components/schemas/GatewayProperties'
+        environmentLabels:
+          type: array
+          description: A list of environments this gateway supports.
+          items:
+            type: string
+          example: ["default", "production", "sandbox"]
+        gatewayId:
+          type: string
+          description: The unique identifier assigned to the newly registered gateway.
+        timeStamp:
+          type: integer
+          description: The timestamp when the heartbeat was generated.
+          format: int64
+    NotifyGatewayStatusResponse:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          description: Response status
+          enum:
+            - REGISTERED
+            - ACKNOWLEDGED
+            - RE-REGISTERED
+          example: REGISTERED
+        gatewayId:
+          type: string
+          description: Returned if registration was successful.
+          example: "ID_1"
+    GatewayProperties:
+      type: object
+      description: Technical properties of the gateway instance.
+      properties:
+        ipAddress:
+          type: string
+          format: ipv4
+          description: The IP address of the gateway instance.
+          example: "192.168.1.100"
+    GatewayDeploymentStatusAcknowledgment:
+      type: object
+      required:
+        - gatewayId
+        - apiId
+        - deploymentStatus
+      properties:
+        gatewayId:
+          type: string
+          description: The unique identifier assigned to the newly registered gateway.
+        apiId:
+          type: string
+          description: Unique identifier of the deployed API.
+          example: "3c2240f2-33f1-4c6d-936e-74172ea864ab"
+        deploymentStatus:
+          type: string
+          description: The final status of the deployment action.
+          enum: [SUCCESS, FAILURE]
+        action:
+          type: string
+          description: The action performed by the gateway.
+          enum: [DEPLOY, UNDEPLOY]
+        revisionId:
+          type: string
+          description: Unique identifier of the API revision that was deployed or undeployed.
+          example: "f46c7962-cd36-4aa6-b804-8d66ad6a0dc4"
+        errorCode:
+          type: integer
+          description: A unique code identifying the error, present only if deploymentStatus is 'FAILURE'.
+        errorMessage:
+          type: string
+          description: A descriptive error message, present only if deploymentStatus is 'FAILURE'.
 
   parameters:
     requestedTenant:
