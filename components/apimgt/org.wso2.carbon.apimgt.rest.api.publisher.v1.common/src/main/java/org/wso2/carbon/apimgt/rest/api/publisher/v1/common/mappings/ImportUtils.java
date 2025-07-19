@@ -196,6 +196,7 @@ public class ImportUtils {
         int tenantId = 0;
         JsonArray deploymentInfoArray = null;
         JsonObject paramsConfigObject;
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
         importedApiDTO = ImportUtils.getImportAPIDto(extractedFolderPath, importedApiDTO, preserveProvider,
                 RestApiCommonUtil.getLoggedInUsername());
@@ -239,6 +240,23 @@ public class ImportUtils {
                     }
                 }
             }
+            if (deploymentInfoArray == null && !isAdvertiseOnlyAPI(importedApiDTO)) {
+                //If the params have not overwritten the deployment environments, yaml file will be read
+                deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, dependentAPIFromProduct);
+            }
+            List<APIRevisionDeployment> apiRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
+                    tenantDomain, apiProvider, organization);
+
+            if (importedApiDTO.isIsInitiatedFromGateway() &&
+                    ApiMgtDAO.getInstance().isApiNameExist(importedApiDTO.getName(), organization, organization)) {
+                if (!apiRevisionDeployments.isEmpty()) {
+                    importedApiDTO.name(importedApiDTO.getName() + "-" + apiRevisionDeployments.get(0).getDeployment());
+                } else {
+                    importedApiDTO.name(importedApiDTO.getName() + "-" + UUID.randomUUID().toString().
+                            replace("-", "").substring(0, 4));
+                }
+            }
+
 
             String apiType = importedApiDTO.getType().toString();
             boolean asyncAPI = PublisherCommonUtils.isStreamingAPI(importedApiDTO);
@@ -427,6 +445,7 @@ public class ImportUtils {
             String primarySandboxEndpointId = importedApiDTO.getPrimarySandboxEndpointId();
             importedApi.setPrimaryProductionEndpointId(primaryProductionEndpointId);
             importedApi.setPrimarySandboxEndpointId(primarySandboxEndpointId);
+            importedApi.setInitiatedFromGateway(importedApiDTO.isIsInitiatedFromGateway());
 
             apiProvider.updateAPI(importedApi, oldAPI);
 
@@ -462,7 +481,6 @@ public class ImportUtils {
                     .equals(importedApi.getType().toLowerCase(), APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
                 List<SOAPToRestSequence> sequences = getSOAPToRESTSequences(extractedFolderPath);
                 if (sequences != null && !sequences.isEmpty()) {
-                    String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
                     apiProvider.updateSoapToRestSequences(tenantDomain, importedApi.getUuid(), sequences);
                 }
             }
@@ -493,13 +511,7 @@ public class ImportUtils {
                 addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
             }
             addAPIWsdl(extractedFolderPath, importedApi, apiProvider);
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            if (deploymentInfoArray == null && !isAdvertiseOnlyAPI(importedApiDTO)) {
-                //If the params have not overwritten the deployment environments, yaml file will be read
-                deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, dependentAPIFromProduct);
-            }
-            List<APIRevisionDeployment> apiRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
-                    tenantDomain, apiProvider, organization);
+
             if (apiRevisionDeployments.size() > 0 && !StringUtils.equals(currentStatus, APIStatus.RETIRED.toString())) {
                 String importedAPIUuid = importedApi.getUuid();
                 APIRevision apiRevision = new APIRevision();
@@ -544,6 +556,8 @@ public class ImportUtils {
                 //environments
                 if (!importedApi.isInitiatedFromGateway()) {
                     apiProvider.deployAPIRevision(importedAPIUuid, revisionId, apiRevisionDeployments, organization);
+                } else {
+                    ApiMgtDAO.getInstance().addAPIRevisionDeployment(revisionId, apiRevisionDeployments);
                 }
                 if (log.isDebugEnabled()) {
                     log.debug("API: " + importedApi.getId().getApiName() + "_" + importedApi.getId().getVersion() +

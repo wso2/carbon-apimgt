@@ -373,6 +373,7 @@ return null;
   }
 
   /**
+   * Human-friendly name shown in UI. Length limited to DB column size.
    **/
   public APIDTO displayName(String displayName) {
     this.displayName = displayName;
@@ -380,7 +381,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "Pizza Shack API", value = "")
+  @ApiModelProperty(example = "Pizza Shack API", value = "Human-friendly name shown in UI. Length limited to DB column size.")
   @JsonProperty("displayName")
  @Size(min=1)  public String getDisplayName() {
     return displayName;

@@ -92,6 +92,7 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
         try {
         this.validatePermissions(gatewayVisibilityPermissionConfigurationDTO);
         apiAdmin.updateEnvironment(organization, env);
+        APIUtil.validateAndScheduleFederatedGatewayAPIDiscovery(env, organization);
         location = new URI(RestApiConstants.RESOURCE_PATH_ENVIRONMENT + "/" + environmentId);
         } catch (URISyntaxException e) {
             String errorMessage = "Error while updating Environment : " + environmentId;

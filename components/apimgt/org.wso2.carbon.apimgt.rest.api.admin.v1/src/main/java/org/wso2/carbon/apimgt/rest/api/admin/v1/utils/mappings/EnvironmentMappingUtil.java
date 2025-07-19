@@ -144,7 +144,9 @@ public class EnvironmentMappingUtil {
         env.setDescription(envDTO.getDescription());
         env.setProvider(envDTO.getProvider());
         env.setGatewayType(envDTO.getGatewayType());
-        env.setReadOnly(false);
+        env.setReadOnly(envDTO.isIsReadOnly());
+        env.setWriteOnly(envDTO.isIsWriteOnly());
+        env.setApiDiscoveryScheduledWindow(envDTO.getApiDiscoveryScheduledWindow());
         env.setVhosts(envDTO.getVhosts().stream().map(EnvironmentMappingUtil::fromVHostDtoToVHost)
                 .collect(Collectors.toList()));
         env.setAdditionalProperties(fromAdditionalPropertiesDTOToAdditionalProperties

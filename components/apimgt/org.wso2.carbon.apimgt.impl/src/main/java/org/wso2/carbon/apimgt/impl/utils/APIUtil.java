@@ -65,7 +65,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.xerces.util.SecurityManager;
 import org.everit.json.schema.Schema;
@@ -311,6 +310,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11052,7 +11052,7 @@ public final class APIUtil {
 
     public static void initializeVelocityContext(VelocityEngine velocityEngine) {
         velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
-        velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING, "bc");
+        velocityEngine.setProperty(RuntimeConstants.OLD_SPACE_GOBBLING, "bc");
         velocityEngine.setProperty("runtime.conversion.handler", "none");
     }
 
@@ -12033,8 +12033,16 @@ public final class APIUtil {
                                     .getDeclaredConstructor().newInstance();
                     federatedAPIDiscovery.init(environment,
                             getDiscoveredAPIsFromFederatedGateway(environment, organization), organization);
-                    federatedAPIDiscovery.scheduleDiscovery(environment.getName(),
-                            environment.getApiDiscoveryScheduledWindow());
+                    if (environment.isWriteOnly()) {
+                       ScheduledFuture<?> scheduledFuture = federatedAPIDiscovery
+                               .getScheduledDiscoveryTask(environment.getName());
+                       if (scheduledFuture != null) {
+                           federatedAPIDiscovery.shutdown();
+                       }
+                    } else {
+                        federatedAPIDiscovery.scheduleDiscovery(environment.getName(),
+                                environment.getApiDiscoveryScheduledWindow());
+                    }
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException |
                          NoSuchMethodException | InvocationTargetException | APIManagementException e) {
                     log.error("Error while loading federated API discovery for environment "

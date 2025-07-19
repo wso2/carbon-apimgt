@@ -60,7 +60,6 @@ public abstract class FederatedAPIDiscovery {
     /**
      * Discovers and invokes createAPI method for each API in the federated environment.
      *
-     * @return List of discovered APIs.
      */
     public abstract void discoverAPI();
 
@@ -86,6 +85,24 @@ public abstract class FederatedAPIDiscovery {
      * Shuts down the scheduler service.
      */
     public void shutdown() {
+        log.debug("Shutting down federated API discovery");
+        for (ScheduledFuture<?> task : scheduledDiscoveryTasks.values()) {
+            if (!task.isCancelled()) {
+                task.cancel(false);
+            }
+        }
         scheduledExecutorService.shutdown();
+        try {
+            if (!scheduledExecutorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                scheduledExecutorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            log.error("Error while shutting down federated API discovery scheduler", e);
+            scheduledExecutorService.shutdownNow();
+        }
+    }
+
+    public ScheduledFuture<?> getScheduledDiscoveryTask(String environmentName) {
+        return scheduledDiscoveryTasks.get(environmentName);
     }
 }
