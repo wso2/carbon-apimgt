@@ -65,7 +65,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.DeprecatedRuntimeConstants;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.xerces.util.SecurityManager;
 import org.everit.json.schema.Schema;
@@ -112,6 +111,7 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.FederatedAPIDiscovery;
 import org.wso2.carbon.apimgt.api.model.GatewayAPIValidationResult;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayConfiguration;
@@ -170,8 +170,10 @@ import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.CorrelationConfigDAO;
+import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
 import org.wso2.carbon.apimgt.impl.dto.APIKeyValidationInfoDTO;
+import org.wso2.carbon.apimgt.impl.dto.APIRuntimeArtifactDto;
 import org.wso2.carbon.apimgt.impl.dto.APISubscriptionInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.ConditionDto;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
@@ -248,6 +250,7 @@ import org.wso2.carbon.user.mgt.UserMgtConstants;
 import org.wso2.carbon.utils.CarbonUtils;
 import org.wso2.carbon.utils.NetworkUtils;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -307,6 +310,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -476,7 +480,7 @@ public final class APIUtil {
     /**
      * This method used to retrieve the api resource dependencies
      *
-     * @param api      api object
+     * @param api api object
      * @throws APIManagementException
      */
     public static void updateAPIProductDependencies(API api) throws APIManagementException {
@@ -2157,9 +2161,10 @@ public final class APIUtil {
      */
     public static boolean isPortalConfigurationOnlyModeEnabled() {
         // checking if API Read Only Mode is enabled in api-manager.xml
-        String isPortalConfigurationOnlyModeEnabled = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
-                        getAPIManagerConfiguration().getFirstProperty(
-                                APIConstants.API_PUBLISHER_ENABLE_PORTAL_CONFIGURATION_ONLY_MODE);
+        String isPortalConfigurationOnlyModeEnabled = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().
+                getAPIManagerConfiguration().getFirstProperty(
+                        APIConstants.API_PUBLISHER_ENABLE_PORTAL_CONFIGURATION_ONLY_MODE);
         if (StringUtils.isNotEmpty(isPortalConfigurationOnlyModeEnabled)) {
             return Boolean.parseBoolean(isPortalConfigurationOnlyModeEnabled);
         }
@@ -2214,7 +2219,7 @@ public final class APIUtil {
      * Returns an unfiltered map of API availability tiers as defined in the underlying governance
      * registry.
      *
-     * @return Map<String ,   Tier> an unfiltered Map of tier names and Tier objects - possibly empty
+     * @return Map<String, Tier> an unfiltered Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getAllTiers() throws APIManagementException {
@@ -2226,7 +2231,7 @@ public final class APIUtil {
      * Returns an unfiltered map of API availability tiers of the tenant as defined in the underlying governance
      * registry.
      *
-     * @return Map<String ,   Tier> an unfiltered Map of tier names and Tier objects - possibly empty
+     * @return Map<String, Tier> an unfiltered Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, Tier> getAllTiers(int tenantId) throws APIManagementException {
@@ -2510,15 +2515,16 @@ public final class APIUtil {
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().
                     getTenantId(tenantDomain);
 
-                org.wso2.carbon.user.api.AuthorizationManager manager =
-                        ServiceReferenceHolder.getInstance()
-                                .getRealmService()
-                                .getTenantUserRealm(tenantId)
-                                .getAuthorizationManager();
-                authorized =
-                        manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange), permission,
-                                CarbonConstants.UI_PERMISSION_ACTION);
-            if (APIConstants.Permissions.APIM_ADMIN.equals(permission) || APIConstants.Permissions.API_CREATE.equals(permission)
+            org.wso2.carbon.user.api.AuthorizationManager manager =
+                    ServiceReferenceHolder.getInstance()
+                            .getRealmService()
+                            .getTenantUserRealm(tenantId)
+                            .getAuthorizationManager();
+            authorized =
+                    manager.isUserAuthorized(MultitenantUtils.getTenantAwareUsername(userNameWithoutChange), permission,
+                            CarbonConstants.UI_PERMISSION_ACTION);
+            if (APIConstants.Permissions.APIM_ADMIN.equals(permission) ||
+                    APIConstants.Permissions.API_CREATE.equals(permission)
                     || APIConstants.Permissions.API_PUBLISH.equals(permission)) {
                 String cacheKey = userNameWithoutChange + ":" + permission;
                 addToRolesCache(APIConstants.API_PUBLISHER_ADMIN_PERMISSION_CACHE, cacheKey, authorized ? 1 : 2);
@@ -3058,8 +3064,8 @@ public final class APIUtil {
      * This method is used to validate the endpoint configuration for API
      *
      * @param endpointConfigObject Endpoint Configuration of the API
-     * @param apiType API Type
-     * @param apiName Name of the API
+     * @param apiType              API Type
+     * @param apiName              Name of the API
      * @throws APIManagementException Throws an error if endpoint configuration is not valid
      */
     public static void validateAPIEndpointConfig(Object endpointConfigObject, String apiType, String apiName)
@@ -3276,7 +3282,7 @@ public final class APIUtil {
             }
 
             ServiceReferenceHolder.getInstance().getApimConfigService().addSelfSighupConfig(organization, IOUtils.toString(inputStream));
-        } catch (IOException  e) {
+        } catch (IOException e) {
             throw new APIManagementException("Error while reading Self signup configuration file content", e);
         }
     }
@@ -3305,14 +3311,14 @@ public final class APIUtil {
         }
     }
 
-    private static JsonElement getFileBaseTenantConfig() throws APIManagementException{
+    private static JsonElement getFileBaseTenantConfig() throws APIManagementException {
         try {
             byte[] localTenantConfFileData = getLocalTenantConfFileData();
             String tenantConfDataStr = new String(localTenantConfFileData, Charset.defaultCharset());
             JsonParser jsonParser = new JsonParser();
             return jsonParser.parse(tenantConfDataStr);
         } catch (IOException e) {
-            throw new APIManagementException("Error while retrieving file base tenant-config" , e);
+            throw new APIManagementException("Error while retrieving file base tenant-config", e);
         }
     }
 
@@ -3339,7 +3345,6 @@ public final class APIUtil {
         }
         return data;
     }
-
 
 
     /**
@@ -3468,7 +3473,7 @@ public final class APIUtil {
         return APIManagerAnalyticsConfiguration.getInstance().isAnalyticsEnabled();
     }
 
-    public static List<String> getGatewayTypes () {
+    public static List<String> getGatewayTypes() {
         // Get the gateway types from the deployment.toml
         List<String> gatewayTypesList = new ArrayList<>();
         if (gatewayTypes != null && !gatewayTypes.isEmpty()) {
@@ -3480,7 +3485,8 @@ public final class APIUtil {
     public static GatewayFeatureCatalog getGatewayFeatureCatalog() throws APIManagementException {
 
         Gson gson = new Gson();
-        Type type = new TypeToken<Map<String, Object>>() {}.getType();
+        Type type = new TypeToken<Map<String, Object>>() {
+        }.getType();
         Map<String, Object> gatewayConfigsMap = new HashMap<>();
         Map<String, List<String>> apiData = new HashMap<>();
         JsonObject synapseConfigJSON = null;
@@ -3576,7 +3582,7 @@ public final class APIUtil {
         if (config != null) {
 
             LinkedTreeMap<String, Object> supportedFeaturesMap = new Gson().fromJson(
-                    (JsonObject)config.getSupportedFeatures(), LinkedTreeMap.class);
+                    (JsonObject) config.getSupportedFeatures(), LinkedTreeMap.class);
             gatewayConfigsMap.put(config.getGatewayType(), supportedFeaturesMap);
 
             List<String> types = config.getSupportedAPITypes();
@@ -3915,8 +3921,9 @@ public final class APIUtil {
 
     /**
      * Update available tiers in the DevPortalAPIInfo according to the organization.
-     * @param devPortalAPIInfo  DevPortalAPIInfo object
-     * @param organization      Organization ID
+     *
+     * @param devPortalAPIInfo DevPortalAPIInfo object
+     * @param organization     Organization ID
      */
     public static void updateAvailableTiersByOrganization(DevPortalAPIInfo devPortalAPIInfo, String organization) {
 
@@ -4216,7 +4223,7 @@ public final class APIUtil {
         }
         return resourceQuotaLimiter;
     }
-    
+
     public static int getInternalOrganizationId(String organization) throws APIManagementException {
         return getOrganizationResolver().getInternalId(organization);
     }
@@ -4536,8 +4543,9 @@ public final class APIUtil {
 
     /**
      * Build OMElement from input stream with securely configured parser.
+     *
      * @param inputStream Input Stream
-     * @return  OMElement
+     * @return OMElement
      * @throws APIManagementException XMLStreamException while parsing the inputStream
      */
     public static OMElement buildSecuredOMElement(InputStream inputStream) throws APIManagementException {
@@ -4692,7 +4700,7 @@ public final class APIUtil {
      */
     public static boolean isSequenceDefined(String sequence) {
 
-        return sequence != null && !"none".equals(sequence) && !StringUtils.isEmpty(sequence) ;
+        return sequence != null && !"none".equals(sequence) && !StringUtils.isEmpty(sequence);
     }
 
     /**
@@ -4844,8 +4852,8 @@ public final class APIUtil {
             if (config.containsKey("sandbox_endpoints")) {
                 return true;
             }
-            if (StringUtils.equals(config.get("endpoint_type").toString(),"graphql")) {
-                JSONObject httpConfig =(JSONObject) parser.parse(config.get("http").toString());
+            if (StringUtils.equals(config.get("endpoint_type").toString(), "graphql")) {
+                JSONObject httpConfig = (JSONObject) parser.parse(config.get("http").toString());
                 if (httpConfig.containsKey("sandbox_endpoints")) {
                     return true;
                 }
@@ -4868,8 +4876,8 @@ public final class APIUtil {
             if (config.containsKey("production_endpoints")) {
                 return true;
             }
-            if (StringUtils.equals(config.get("endpoint_type").toString(),"graphql")) {
-                JSONObject httpConfig =(JSONObject) parser.parse(config.get("http").toString());
+            if (StringUtils.equals(config.get("endpoint_type").toString(), "graphql")) {
+                JSONObject httpConfig = (JSONObject) parser.parse(config.get("http").toString());
                 if (httpConfig.containsKey("production_endpoints")) {
                     return true;
                 }
@@ -5387,7 +5395,7 @@ public final class APIUtil {
             userName = MultitenantUtils.getTenantAwareUsername(userName);
             registryType = ServiceReferenceHolder
                     .getInstance().
-                            getRegistryService().getGovernanceUserRegistry(userName, tenantId);
+                    getRegistryService().getGovernanceUserRegistry(userName, tenantId);
             if (registryType.resourceExists(resourceUrl)) {
                 apiDocResource = registryType.get(resourceUrl);
                 inStream = apiDocResource.getContentStream();
@@ -5452,7 +5460,7 @@ public final class APIUtil {
      * This method is used to check if gateway environment is allowed for user
      *
      * @param environment gateway environment
-     * @param username  username of the logged-in user
+     * @param username    username of the logged-in user
      * @return boolean returns if the gateway environment is allowed for the logged-in user
      * @throws APIManagementException if error occurred
      */
@@ -5944,7 +5952,7 @@ public final class APIUtil {
     /**
      * Return a http client instance
      *
-     * @param url      - server url
+     * @param url - server url
      * @return
      */
 
@@ -6102,7 +6110,6 @@ public final class APIUtil {
     }
 
 
-
     /**
      * Returns the tenant-conf.json in JSONObject format for the given tenant(id) from the registry.
      *
@@ -6118,14 +6125,14 @@ public final class APIUtil {
             return (JSONObject) tenantConfigCache.get(cacheName);
         } else {
             String tenantConfig =
-             ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(organization);
-            if (StringUtils.isNotEmpty(tenantConfig)){
+                    ServiceReferenceHolder.getInstance().getApimConfigService().getTenantConfig(organization);
+            if (StringUtils.isNotEmpty(tenantConfig)) {
                 try {
                     JSONObject jsonObject = (JSONObject) new JSONParser().parse(tenantConfig);
                     tenantConfigCache.put(cacheName, jsonObject);
                     return jsonObject;
                 } catch (ParseException e) {
-                    throw new APIManagementException("Error occurred while converting to json",e);
+                    throw new APIManagementException("Error occurred while converting to json", e);
                 }
             }
             return new JSONObject();
@@ -6182,7 +6189,7 @@ public final class APIUtil {
      */
     @SuppressWarnings("unchecked")
     public static Map<String, String> getRESTAPIScopesForTenantWithoutRoleMappings(String tenantDomain)
-            throws APIManagementException{
+            throws APIManagementException {
         return APIUtil.getRESTAPIScopesFromConfig(APIUtil.getTenantRESTAPIScopesConfig(tenantDomain), null);
     }
 
@@ -6421,7 +6428,7 @@ public final class APIUtil {
 
     public static String getWebsubSubscriptionConfigurationJsonFromDto(
             WebsubSubscriptionConfiguration websubSubscriptionConfiguration) {
-            return new Gson().toJson(websubSubscriptionConfiguration);
+        return new Gson().toJson(websubSubscriptionConfiguration);
     }
 
     public static String getWsUriMappingJsonFromDto(Map<String, String> mappings) {
@@ -6785,7 +6792,7 @@ public final class APIUtil {
         long[] eventCountSubPolicyValues = new long[]{50000, 25000, 5000, 10000, Integer.MAX_VALUE};
         String[] eventCountSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD,
                 APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER, APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE,
-                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS,  APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED};
+                APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS, APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED};
         String[] eventCountSubPolicyDescriptions = new String[]{
                 APIConstants.DEFAULT_SUB_POLICY_ASYNC_GOLD_DESC, APIConstants.DEFAULT_SUB_POLICY_ASYNC_SILVER_DESC,
                 APIConstants.DEFAULT_SUB_POLICY_ASYNC_BRONZE_DESC,
@@ -6837,7 +6844,7 @@ public final class APIUtil {
 
         //Adding AI API Quota based subscription level policies
         long[] totalTokenCountValues = new long[]{50000, 10000, 1000};
-        long[] aiPolicyRequestCount =  new long[]{500, 100, 10};
+        long[] aiPolicyRequestCount = new long[]{500, 100, 10};
         String[] aiApiQuotaSubPolicyNames = new String[]{APIConstants.DEFAULT_SUB_POLICY_AI_GOLD,
                 APIConstants.DEFAULT_SUB_POLICY_AI_SILVER, APIConstants.DEFAULT_SUB_POLICY_AI_BRONZE};
         String[] aiApiQuotaSubPolicyDescriptions = new String[]{
@@ -6887,7 +6894,7 @@ public final class APIUtil {
             SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantId);
             deployRetrievedSubscriptionPolicy(tenantId, retrievedPolicy);
         }
-        
+
         long tenThousandPerMinTier = defualtLimits.containsKey(APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN) ?
                 defualtLimits.get(APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN) : 10000;
         long twentyThousandPerMinTier = defualtLimits.containsKey(
@@ -7132,12 +7139,12 @@ public final class APIUtil {
                     RequestCountLimit countLimit = (RequestCountLimit) limit;
                     tier.setRequestsPerMin(countLimit.getRequestCount());
                     tier.setRequestCount(countLimit.getRequestCount());
-                } else if (limit instanceof BandwidthLimit){
+                } else if (limit instanceof BandwidthLimit) {
                     BandwidthLimit bandwidthLimit = (BandwidthLimit) limit;
                     tier.setRequestsPerMin(bandwidthLimit.getDataAmount());
                     tier.setRequestCount(bandwidthLimit.getDataAmount());
                     tier.setBandwidthDataUnit(bandwidthLimit.getDataUnit());
-                } else if (limit instanceof AIAPIQuotaLimit){
+                } else if (limit instanceof AIAPIQuotaLimit) {
                     AIAPIQuotaLimit AIAPIQuotaLimit = (AIAPIQuotaLimit) limit;
                     tier.setRequestsPerMin(AIAPIQuotaLimit.getRequestCount());
                     tier.setRequestCount(AIAPIQuotaLimit.getRequestCount());
@@ -7640,7 +7647,7 @@ public final class APIUtil {
         }
 
         return Caching.getCacheManager(
-                cacheManagerName).createCacheBuilder(cacheName).
+                        cacheManagerName).createCacheBuilder(cacheName).
                 setExpiry(CacheConfiguration.ExpiryType.MODIFIED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
                         modifiedExp)).
                 setExpiry(CacheConfiguration.ExpiryType.ACCESSED, new CacheConfiguration.Duration(TimeUnit.SECONDS,
@@ -7778,6 +7785,7 @@ public final class APIUtil {
         return false;
 
     }
+
     /**
      * Used to check whether Provisioning Out-of-Band OAuth Clients feature is enabled
      *
@@ -7924,7 +7932,7 @@ public final class APIUtil {
      * config is not available in tenant registry
      *
      * @param organization The organization
-     * @param property The configuration to get from tenant registry or api-manager.xml
+     * @param property     The configuration to get from tenant registry or api-manager.xml
      * @return The configuration read from tenant registry or api-manager.xml
      * @throws APIManagementException Throws if the registry resource doesn't exist
      *                                or the content cannot be parsed to JSON
@@ -7943,8 +7951,8 @@ public final class APIUtil {
     /**
      * This method is used to get the authorization configurations from the tenant registry
      *
-     * @param organization  organization.
-     * @param property The configuration to get from tenant registry
+     * @param organization organization.
+     * @param property     The configuration to get from tenant registry
      * @return The configuration read from tenant registry or else null
      * @throws APIManagementException Throws if the registry resource doesn't exist
      *                                or the content cannot be parsed to JSON
@@ -8162,8 +8170,7 @@ public final class APIUtil {
         return toKeyManagerConfiguration(keyManagerConfigurationDTO);
     }
 
-    public static KeyManagerConfiguration toKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
-    {
+    public static KeyManagerConfiguration toKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
 
         KeyManagerConfiguration keyManagerConfiguration = new KeyManagerConfiguration();
         keyManagerConfiguration.setName(keyManagerConfigurationDTO.getName());
@@ -8963,8 +8970,8 @@ public final class APIUtil {
     /**
      * Get the workflow status information for the given api for the given workflow type
      *
-     * @param uuid Api uuid
-     * @param workflowType  workflow type
+     * @param uuid         Api uuid
+     * @param workflowType workflow type
      * @return WorkflowDTO
      * @throws APIManagementException
      */
@@ -9051,7 +9058,7 @@ public final class APIUtil {
      */
     public static String getMaskedToken(String token) {
         StringBuilder maskedTokenBuilder = new StringBuilder();
-        if (token != null){
+        if (token != null) {
             int allowedVisibleLen = Math.min(token.length() / MIN_VISIBLE_LEN_RATIO, MAX_VISIBLE_LEN);
             if (token.length() > MAX_LEN) {
                 maskedTokenBuilder.append("...");
@@ -9204,14 +9211,14 @@ public final class APIUtil {
         String skipRolesByRegex = config.getFirstProperty(APIConstants.SKIP_ROLES_BY_REGEX);
         return skipRolesByRegex;
     }
-    
+
     public static Map<String, Object> getUserProperties(String userNameWithoutChange) throws APIManagementException {
         Map<String, Object> properties = new HashMap<String, Object>();
         if (APIUtil.hasPermission(userNameWithoutChange, APIConstants.Permissions.APIM_ADMIN)) {
             properties.put(APIConstants.USER_CTX_PROPERTY_ISADMIN, true);
         }
         properties.put(APIConstants.USER_CTX_PROPERTY_SKIP_ROLES, APIUtil.getSkipRolesByRegex());
-        
+
         if (APIUtil.areOrganizationsRegistered()) {
             properties.put(APIConstants.USER_CTX_PROPERTY_ORGS_AVAILABLE, true);
         }
@@ -9742,7 +9749,7 @@ public final class APIUtil {
                     apiManagerConfiguration.getFirstProperty(APIConstants.KEYMANAGER_SERVERURL));
             keyManagerUrl =
                     (String) keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.AUTHSERVER_URL);
-            if (StringUtils.isNotEmpty(keyManagerUrl)){
+            if (StringUtils.isNotEmpty(keyManagerUrl)) {
                 openIdConnectConfigurations = APIUtil.getOpenIdConnectConfigurations(
                         keyManagerUrl.split("/" + APIConstants.SERVICES_URL_RELATIVE_PATH)[0]
                                 .concat(getTenantAwareContext(keyManagerConfigurationDTO.getOrganization()))
@@ -9784,7 +9791,7 @@ public final class APIUtil {
             keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.TOKEN_ENDPOINT,
                     keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.TOKEN_URL));
             keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.REVOKE_ENDPOINT,
-                        keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.REVOKE_URL));
+                    keyManagerConfigurationDTO.getAdditionalProperties().get(APIConstants.REVOKE_URL));
             if (!keyManagerConfigurationDTO.getAdditionalProperties().containsKey(
                     APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD)) {
                 keyManagerConfigurationDTO.addProperty(APIConstants.IDENTITY_OAUTH2_FIELD_VALIDITY_PERIOD,
@@ -9918,7 +9925,7 @@ public final class APIUtil {
     /**
      * Get scopes attached to the API.
      *
-     * @param id   API uuid
+     * @param id           API uuid
      * @param organization Organization
      * @return Scope key to Scope object mapping
      * @throws APIManagementException if an error occurs while getting scope attached to API
@@ -10139,10 +10146,10 @@ public final class APIUtil {
 
         //append original role to the role mapping list
         Set<Map.Entry<String, JsonElement>> roleMappingEntries = newRoleMappingJson.entrySet();
-        for (Map.Entry<String, JsonElement> entry: roleMappingEntries) {
+        for (Map.Entry<String, JsonElement> entry : roleMappingEntries) {
             List<String> currentRoles = Arrays.asList(String.valueOf(entry.getValue()).split(","));
             boolean isOriginalRoleAlreadyInRoles = false;
-            for (String role: currentRoles) {
+            for (String role : currentRoles) {
                 if (role.equals(entry.getKey())) {
                     isOriginalRoleAlreadyInRoles = true;
                     break;
@@ -10189,6 +10196,7 @@ public final class APIUtil {
     /**
      * Copy of the getAPI(GovernanceArtifact artifact, Registry registry) method with reduced DB calls for api
      * publisher list view listing.
+     *
      * @param artifact
      * @param registry
      * @return
@@ -10356,7 +10364,7 @@ public final class APIUtil {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
     public static String getUUIDFromIdentifier(APIIdentifier identifier, String organization)
-            throws APIManagementException{
+            throws APIManagementException {
         if (organization != null) {
             return ApiMgtDAO.getInstance().getUUIDFromIdentifier(identifier, organization);
         } else {
@@ -10384,7 +10392,7 @@ public final class APIUtil {
      * @return API Product Identifier
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static APIProductIdentifier getAPIProductIdentifierFromUUID(String uuid) throws APIManagementException{
+    public static APIProductIdentifier getAPIProductIdentifierFromUUID(String uuid) throws APIManagementException {
         return ApiMgtDAO.getInstance().getAPIProductIdentifierFromUUID(uuid);
     }
 
@@ -10395,7 +10403,7 @@ public final class APIUtil {
      * @return API Identifier
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      */
-    public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException{
+    public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException {
         return ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
     }
     
@@ -10517,11 +10525,12 @@ public final class APIUtil {
             String[] definedTypesArr = supportedTypes.trim().split("\\s*,\\s*");
             list = Arrays.asList(definedTypesArr);
         } else {
-            String[] defaultType = { "pdf", "txt", "doc", "docx", "xls", "xlsx", "odt", "ods", "json", "yaml", "md" };
+            String[] defaultType = {"pdf", "txt", "doc", "docx", "xls", "xlsx", "odt", "ods", "json", "yaml", "md"};
             list = Arrays.asList(defaultType);
         }
         return list.contains(fileType.toLowerCase());
     }
+
     public static void validateRestAPIScopes(String tenantConfig) throws APIManagementException {
         JsonObject fileBaseTenantConfig = (JsonObject) getFileBaseTenantConfig();
         Set<String> fileBaseScopes = getRestAPIScopes(fileBaseTenantConfig);
@@ -10557,11 +10566,12 @@ public final class APIUtil {
         }
         return scopes;
     }
-    public static Schema retrieveTenantConfigJsonSchema(){
+
+    public static Schema retrieveTenantConfigJsonSchema() {
         return tenantConfigJsonSchema;
     }
 
-    public static Schema retrieveOperationPolicySpecificationJsonSchema(){
+    public static Schema retrieveOperationPolicySpecificationJsonSchema() {
         return operationPolicySpecSchema;
     }
 
@@ -10604,7 +10614,7 @@ public final class APIUtil {
             // check database if configs is enabled.
             try {
                 return ApiMgtDAO.getInstance().areOrganizationsRegistered();
-            } catch(APIManagementException e) {
+            } catch (APIManagementException e) {
                 log.error("Error while checking existance of organization", e);
                 return false;
             }
@@ -10722,7 +10732,7 @@ public final class APIUtil {
      * @throws APIManagementException If an error occurs while reading, throws an error
      */
     public static String getCustomBackendSequence(String extractedFolderPath, String customBackendFileName,
-            String fileExtension) throws APIManagementException {
+                                                  String fileExtension) throws APIManagementException {
         if (!StringUtils.isEmpty(customBackendFileName) && !customBackendFileName.contains(fileExtension)) {
             customBackendFileName = customBackendFileName + fileExtension;
         }
@@ -10785,11 +10795,11 @@ public final class APIUtil {
      * @throws APIManagementException Throws if an error occurs when reading the file
      */
     public static String getCustomBackendSequenceFromFile(String extractedFolderPath, String sequenceName,
-            String fileExtension) throws APIManagementException {
+                                                          String fileExtension) throws APIManagementException {
 
         String customBackendContent = null;
         try {
-            if(!StringUtils.isEmpty(sequenceName) && !sequenceName.contains(".xml")) {
+            if (!StringUtils.isEmpty(sequenceName) && !sequenceName.contains(".xml")) {
                 sequenceName = sequenceName + fileExtension;
             }
             String fileName = extractedFolderPath + File.separator + sequenceName;
@@ -11040,9 +11050,9 @@ public final class APIUtil {
         return apiUUID + "-" + endpointType;
     }
 
-    public static void initializeVelocityContext(VelocityEngine velocityEngine){
+    public static void initializeVelocityContext(VelocityEngine velocityEngine) {
         velocityEngine.setProperty(RuntimeConstants.OLD_CHECK_EMPTY_OBJECTS, false);
-        velocityEngine.setProperty(DeprecatedRuntimeConstants.OLD_SPACE_GOBBLING,"bc");
+        velocityEngine.setProperty(RuntimeConstants.OLD_SPACE_GOBBLING, "bc");
         velocityEngine.setProperty("runtime.conversion.handler", "none");
     }
 
@@ -11055,7 +11065,7 @@ public final class APIUtil {
     public static String setSubscriptionValidationStatusBeforeInsert(Set<Tier> tiers) {
         if (tiers != null && tiers.size() == 1) {
             Tier tier = tiers.iterator().next();
-            if(tier.getName().contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
+            if (tier.getName().contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
                 return "DISABLED";
             }
         }
@@ -11071,7 +11081,7 @@ public final class APIUtil {
      */
     public static String setGatewayVendorBeforeInsertion(String gatewayVendorType, String gatewayType) {
 
-        return !APIConstants.WSO2_SYNAPSE_GATEWAY.equals(gatewayType) ? gatewayType: gatewayVendorType;
+        return !APIConstants.WSO2_SYNAPSE_GATEWAY.equals(gatewayType) ? gatewayType : gatewayVendorType;
     }
 
     /**
@@ -11129,7 +11139,7 @@ public final class APIUtil {
      *
      * @return code verifier
      */
-    public static String generateCodeVerifier () {
+    public static String generateCodeVerifier() {
         SecureRandom secureRandom = new SecureRandom();
         byte[] codeVerifier = new byte[32];
         secureRandom.nextBytes(codeVerifier);
@@ -11292,7 +11302,8 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs while invoking the AI service
      */
     private static CloseableHttpResponse executeAIRequest(HttpRequestBase request, String endpoint,
-        String tokenEndpoint, String key, String requestId, String payload) throws APIManagementException {
+                                                          String tokenEndpoint, String key, String requestId,
+                                                          String payload) throws APIManagementException {
         try {
             if (tokenEndpoint != null) {
                 if (tokenGenerator == null) {
@@ -11343,10 +11354,10 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs while invoking the AI service
      */
     public static String invokeAIService(String endpoint, String tokenEndpoint, String key, String resource,
-            String payload, String requestId) throws APIManagementException {
+                                         String payload, String requestId) throws APIManagementException {
         HttpPost preparePost = new HttpPost(endpoint + resource);
         try (CloseableHttpResponse response = executeAIRequest(preparePost, endpoint,
-                tokenEndpoint, key, requestId, payload)){
+                tokenEndpoint, key, requestId, payload)) {
             int statusCode = response.getStatusLine().getStatusCode();
             String responseStr = EntityUtils.toString(response.getEntity());
             if (statusCode == HttpStatus.SC_CREATED) {
@@ -11358,7 +11369,7 @@ public final class APIUtil {
             } else if (statusCode == HttpStatus.SC_TOO_MANY_REQUESTS) {
                 throw new APIManagementException("You have exceeded your quota. Please contact administrator.",
                         ExceptionCodes.AI_SERVICE_QUOTA_EXCEEDED);
-            } else if (statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR){
+            } else if (statusCode == HttpStatus.SC_INTERNAL_SERVER_ERROR) {
                 org.json.JSONObject responseJson = new org.json.JSONObject(responseStr);
                 if (responseJson.has("detail")) {
                     String errorMsg = (String) responseJson.get("detail");
@@ -11389,7 +11400,8 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs while retrieving API count
      */
     public static CloseableHttpResponse getMarketplaceChatApiCount(String endpoint, String tokenEndpoint,
-            String key, String resource) throws APIManagementException {
+                                                                   String key, String resource)
+            throws APIManagementException {
         HttpGet apiCountGet = new HttpGet(endpoint + resource);
         try {
             return executeAIRequest(apiCountGet, endpoint,
@@ -11410,7 +11422,7 @@ public final class APIUtil {
      * @throws APIManagementException if an error occurs while deleting the API
      */
     public static void marketplaceAssistantDeleteService(String endpoint, String tokenEndpoint, String key,
-            String resource, String uuid) throws APIManagementException {
+                                                         String resource, String uuid) throws APIManagementException {
         String resourceWithPathParam = endpoint + resource + "/{uuid}";
         resourceWithPathParam = resourceWithPathParam.replace("{uuid}", uuid);
         HttpDelete prepareDelete = new HttpDelete(resourceWithPathParam);
@@ -11591,7 +11603,7 @@ public final class APIUtil {
      * @return true if the transaction counter is enabled, false otherwise
      */
     public static boolean getTransactionCounterEnable() {
-       return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration().getTransactionCounterProperties();
     }
 
@@ -11674,7 +11686,9 @@ public final class APIUtil {
     }
 
     public static synchronized String getOrganizationIdFromExternalReference(String referenceId,
-            String organizationName, String rootOrganization) throws APIManagementException {
+                                                                             String organizationName,
+                                                                             String rootOrganization)
+            throws APIManagementException {
         String organizationId = null;
         OrganizationDetailsDTO orgDetails = ApiMgtDAO.getInstance().getOrganizationDetalsByExternalOrgId(referenceId,
                 rootOrganization);
@@ -11719,8 +11733,8 @@ public final class APIUtil {
                     ServiceReferenceHolder.getInstance().
                     getExternalGatewayConnectorConfiguration(api.getGatewayType());
             if (gatewayConfiguration != null) {
-                GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation())
-                        .getDeclaredConstructor().newInstance();
+                GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration
+                                .getGatewayDeployerImplementation()).getDeclaredConstructor().newInstance();
                 if (deployer != null) {
                     GatewayAPIValidationResult errorList = null;
                     errorList = deployer.validateApi(api);
@@ -12004,5 +12018,49 @@ public final class APIUtil {
         SecretKeySpec secretKeySpec = new SecretKeySpec(key, APIConstants.HMAC_SHA_256);
         mac.init(secretKeySpec);
         return mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static void validateAndScheduleFederatedGatewayAPIDiscovery(Environment environment, String organization) {
+        GatewayAgentConfiguration gatewayConfiguration = org.wso2.carbon.apimgt.impl.internal.
+                ServiceReferenceHolder.getInstance().
+                getExternalGatewayConnectorConfiguration(environment.getGatewayType());
+        if (gatewayConfiguration != null && gatewayConfiguration.getDiscoveryImplementation() != null) {
+            FederatedAPIDiscovery federatedAPIDiscovery;
+            if (StringUtils.isNotEmpty(gatewayConfiguration.getDiscoveryImplementation())) {
+                try {
+                    federatedAPIDiscovery = (FederatedAPIDiscovery)
+                            Class.forName(gatewayConfiguration.getDiscoveryImplementation())
+                                    .getDeclaredConstructor().newInstance();
+                    federatedAPIDiscovery.init(environment,
+                            getDiscoveredAPIsFromFederatedGateway(environment, organization), organization);
+                    if (environment.isWriteOnly()) {
+                       ScheduledFuture<?> scheduledFuture = federatedAPIDiscovery
+                               .getScheduledDiscoveryTask(environment.getName());
+                       if (scheduledFuture != null) {
+                           federatedAPIDiscovery.shutdown();
+                       }
+                    } else {
+                        federatedAPIDiscovery.scheduleDiscovery(environment.getName(),
+                                environment.getApiDiscoveryScheduledWindow());
+                    }
+                } catch (ClassNotFoundException | IllegalAccessException | InstantiationException |
+                         NoSuchMethodException | InvocationTargetException | APIManagementException e) {
+                    log.error("Error while loading federated API discovery for environment "
+                            + environment.getName(), e);
+                }
+            }
+        }
+    }
+
+    public static List<String> getDiscoveredAPIsFromFederatedGateway(Environment environment, String organization) throws APIManagementException {
+        GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
+        List<String> apisDeployedInGateway = new ArrayList<>();
+        List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = gatewayArtifactsMgtDAO
+                .retrieveGatewayArtifactsByLabel(new String[]{environment.getName()}, organization);
+
+        for (APIRuntimeArtifactDto apiRuntimeArtifactDto: apiRuntimeArtifactDtoList) {
+            apisDeployedInGateway.add(apiRuntimeArtifactDto.getName() + ":" + apiRuntimeArtifactDto.getVersion());
+        }
+        return apisDeployedInGateway;
     }
 }

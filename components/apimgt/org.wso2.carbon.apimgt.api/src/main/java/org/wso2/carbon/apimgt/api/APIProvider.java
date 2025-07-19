@@ -2175,7 +2175,7 @@ public interface APIProvider extends APIManager {
      * @param organization Organization
      * @param apiId        API ID
      * @param sequences    list of SOAPToRestSequence.
-     * @throws APIPersistenceException
+     * @throws APIManagementException
      */
     void updateSoapToRestSequences(String organization, String apiId, List<SOAPToRestSequence> sequences)
             throws APIManagementException;
@@ -2203,8 +2203,8 @@ public interface APIProvider extends APIManager {
      * 
      * Retrieves list of organizations available for the given parent organization.
      * 
-     * @param parentOrgId parent organization id
-     * @param tenantDomain super domain
+     * @param orgId parent organization id
+     * @param superOrganization super domain
      * @return organization list
      */
     List<OrganizationDetailsDTO> getOrganizations(String orgId, String superOrganization) throws APIManagementException;

@@ -70,8 +70,6 @@ import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.deployer.GatewayConfigurationService;
-import org.wso2.carbon.apimgt.impl.deployer.GatewayConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;

@@ -3752,7 +3752,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
             boolean isExternalGateway = false;
             GatewayDeployer gatewayDeployer = null;
-            if (gatewayConfiguration != null && StringUtils.isNotEmpty(gatewayConfiguration.getImplementation())) {
+            if (gatewayConfiguration != null && StringUtils.isNotEmpty(gatewayConfiguration.getGatewayDeployerImplementation())) {
                 gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain, environmentName);
                 isExternalGateway = true;
             }
