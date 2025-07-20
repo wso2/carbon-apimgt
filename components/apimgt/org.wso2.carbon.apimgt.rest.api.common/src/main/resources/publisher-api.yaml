@@ -11455,6 +11455,24 @@ components:
           readOnly: true
           type: string
           format: date-time
+        liveGatewayCount:
+          readOnly: true
+          type: integer
+          description: |
+            The number of gateways that are currenty live in the gateway environment
+          example: 1
+        deployedGatewayCount:
+          readOnly: true
+          type: integer
+          description: |
+            The number of gateways in which the API revision is deployed in the gateway environment
+          example: 1
+        failedGatewayCount:
+          readOnly: true
+          type: integer
+          description: |
+            The number of gateways in which the API revision is deployed in the gateway environment
+          example: 1
     AuditReport:
       title: Resource for Audit Report
       type: object
