@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
+import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
 import org.wso2.carbon.apimgt.impl.dto.LoadingTenants;
 import org.wso2.carbon.apimgt.impl.dto.OrgAccessControl;
@@ -72,6 +73,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.securevault.SecretResolver;
 import org.wso2.securevault.SecretResolverFactory;
 import org.wso2.securevault.commons.MiscellaneousUtil;
+import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
 
 import java.io.File;
 import java.io.IOException;
@@ -142,6 +144,7 @@ public class APIManagerConfiguration {
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
+    private GatewayCleanupConfiguration gatewayCleanupConfiguration = new GatewayCleanupConfiguration();
     private RedisConfig redisConfig = new RedisConfig();
     private OrgAccessControl orgAccessControl = new OrgAccessControl();
     public OrgAccessControl getOrgAccessControl() {
@@ -223,6 +226,7 @@ public class APIManagerConfiguration {
     private final GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = new GatewayArtifactSynchronizerProperties();;
 
     private JSONArray customProperties = new JSONArray();
+    private GatewayNotificationConfiguration gatewayNotificationConfiguration = new GatewayNotificationConfiguration();
 
     /**
      * Returns the configuration of the Identity Provider.
@@ -705,6 +709,10 @@ public class APIManagerConfiguration {
                 }
             } else if (APIConstants.APIMGovernance.GOVERNANCE_CONFIG.equals(localName)) {
                 setAPIMGovernanceConfigurations(element);
+            } else if (APIConstants.GatewayNotification.GATEWAY_CLEANUP_CONFIGURATION.equals(localName)) {
+                setGatewayCleanupConfiguration(element);
+            } else if (APIConstants.GatewayNotification.GATEWAY_NOTIFICATION_CONFIGURATION.equals(localName)) {
+                setGatewayNotificationConfiguration(element);
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -2911,5 +2919,56 @@ public class APIManagerConfiguration {
      */
     public APIMGovernanceConfigDTO getAPIMGovernanceConfigurationDto() {
         return apimGovConfigurationDto;
+    }
+
+    // Add this method to parse GatewayCleanupConfiguration
+    private void setGatewayCleanupConfiguration(org.apache.axiom.om.OMElement omElement) {
+        javax.xml.namespace.QName enabledQName = new javax.xml.namespace.QName(APIConstants.GatewayNotification.GATEWAY_CLEANUP_ENABLED);
+        javax.xml.namespace.QName expireQName = new javax.xml.namespace.QName(APIConstants.GatewayNotification.EXPIRE_TIME_SECONDS);
+        javax.xml.namespace.QName retentionQName = new javax.xml.namespace.QName(APIConstants.GatewayNotification.DATA_RETENTION_PERIOD_SECONDS);
+        javax.xml.namespace.QName intervalQName = new javax.xml.namespace.QName(APIConstants.GatewayNotification.CLEANUP_INTERVAL_SECONDS);
+        OMElement enabledElem = omElement.getFirstChildWithName(enabledQName);
+        if (enabledElem != null) {
+            gatewayCleanupConfiguration.setEnabled(Boolean.parseBoolean(enabledElem.getText()));
+        }
+        OMElement expireElem = omElement.getFirstChildWithName(expireQName);
+        if (expireElem != null) {
+            gatewayCleanupConfiguration.setExpireTimeSeconds(Integer.parseInt(expireElem.getText()));
+        }
+        OMElement retentionElem = omElement.getFirstChildWithName(retentionQName);
+        if (retentionElem != null) {
+            gatewayCleanupConfiguration.setDataRetentionPeriodSeconds(Integer.parseInt(retentionElem.getText()));
+        }
+        OMElement intervalElem = omElement.getFirstChildWithName(intervalQName);
+        if (intervalElem != null) {
+            gatewayCleanupConfiguration.setCleanupIntervalSeconds(Integer.parseInt(intervalElem.getText()));
+        }
+    }
+
+    // Ensure this getter exists:
+    public GatewayCleanupConfiguration getGatewayCleanupConfiguration() {
+        return gatewayCleanupConfiguration;
+    }
+
+    private void setGatewayNotificationConfiguration(org.apache.axiom.om.OMElement omElement) {
+        javax.xml.namespace.QName enabledQName = new javax.xml.namespace.QName(APIConstants.GatewayNotification.GATEWAY_NOTIFICATION_ENABLED);
+        javax.xml.namespace.QName intervalQName = new javax.xml.namespace.QName(APIConstants.GatewayNotification.NOTIFY_INTERVAL_SECONDS);
+        javax.xml.namespace.QName gwidQName = new javax.xml.namespace.QName(APIConstants.GatewayNotification.CONFIGURED_GWID);
+        org.apache.axiom.om.OMElement enabledElem = omElement.getFirstChildWithName(enabledQName);
+        if (enabledElem != null) {
+            gatewayNotificationConfiguration.setEnabled(Boolean.parseBoolean(enabledElem.getText()));
+        }
+        org.apache.axiom.om.OMElement intervalElem = omElement.getFirstChildWithName(intervalQName);
+        if (intervalElem != null) {
+            gatewayNotificationConfiguration.setNotifyIntervalSeconds(Integer.parseInt(intervalElem.getText()));
+        }
+        org.apache.axiom.om.OMElement gwidElem = omElement.getFirstChildWithName(gwidQName);
+        if (gwidElem != null) {
+            gatewayNotificationConfiguration.setConfiguredGWID(gwidElem.getText());
+        }
+    }
+
+    public GatewayNotificationConfiguration getGatewayNotificationConfiguration() {
+        return gatewayNotificationConfiguration;
     }
 }

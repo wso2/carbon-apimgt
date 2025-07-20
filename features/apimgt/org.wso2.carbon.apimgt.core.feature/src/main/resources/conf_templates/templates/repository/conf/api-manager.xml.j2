@@ -414,6 +414,14 @@
         <DefaultRequestTimout>{{apim.ai.default_request_timeout}}</DefaultRequestTimout>
     </AiConfiguration>
 
+    <!-- Gateway Instances Cleanup Configuration -->
+    <GatewayCleanupConfiguration>
+        <Enabled>{{apim.gateway_cleanup.enabled}}</Enabled>
+        <ExpireTimeSeconds>{{apim.gateway_cleanup.expire_time_seconds}}</ExpireTimeSeconds>
+        <DataRetentionPeriodSeconds>{{apim.gateway_cleanup.data_retention_period_seconds}}</DataRetentionPeriodSeconds>
+        <CleanupIntervalSeconds>{{apim.gateway_cleanup.cleanup_interval_seconds}}</CleanupIntervalSeconds>
+    </GatewayCleanupConfiguration>
+
     <!--
         Configurations relevant to enable rate limit feature.
         This enables to use resources considering subscription levels.
@@ -1827,4 +1835,10 @@
       <Hashing>
         <HashingAlgorithm>{{apim.hashing.hashing_algorithm}}</HashingAlgorithm>
       </Hashing>
+
+    <GatewayNotificationConfiguration>
+        <Enabled>{{apim.gateway_notification.enabled}}</Enabled>
+        <NotifyIntervalSeconds>{{apim.gateway_notification.notify_interval_seconds}}</NotifyIntervalSeconds>
+        <ConfiguredGWID>{{apim.gateway_notification.configured_gwid}}</ConfiguredGWID>
+    </GatewayNotificationConfiguration>
 </APIManager>
