@@ -54,6 +54,9 @@ public class DataHolder {
 
     private boolean isAllGatewayPoliciesDeployed = false;
     private boolean tenantsProvisioned = false;
+    // Add field for configuredGWID
+    private String configuredGWID;
+
     private DataHolder() {
     }
 
@@ -392,6 +395,15 @@ public class DataHolder {
     public synchronized void releaseCache(String apiKey) {
 
         apiSuspendedEndpoints.remove(apiKey);
+    }
+
+    // Add getter and setter for configuredGWID
+    public String getConfiguredGWID() {
+        return configuredGWID;
+    }
+
+    public void setConfiguredGWID(String configuredGWID) {
+        this.configuredGWID = configuredGWID;
     }
 
 }

@@ -3370,4 +3370,37 @@ public final class APIConstants {
     }
 
     public static final String SYNAPSE_API_NAME_PREFIX = "prod";
+    
+    // Constants related to Gateway Notifications  
+    public static class GatewayNotification {
+        public static final String PAYLOAD_TYPE = "payloadType";
+        public static final String PAYLOAD_TYPE_REGISTER = "REGISTER";
+        public static final String PAYLOAD_TYPE_HEARTBEAT = "HEARTBEAT";
+        public static final String GATEWAY_ID = "gatewayId";
+        public static final String ENVIRONMENT_LABELS = "environmentLabels";
+        public static final String GATEWAY_PROPERTIES = "gatewayProperties";
+        public static final String TIMESTAMP = "timeStamp";
+        
+        public static final String STATUS_REGISTERED = "REGISTERED";
+        public static final String STATUS_ACKNOWLEDGED = "ACKNOWLEDGED";
+        public static final String STATUS_RE_REGISTER = "RE_REGISTER";
+        
+        public static final String ERROR_INVALID_PAYLOAD = "Invalid payload: payloadType is required.";
+        public static final String ERROR_INVALID_PAYLOAD_TYPE = "Invalid payloadType: ";
+        public static final String ERROR_DATABASE_REGISTRATION = "Database error during registration: ";
+        public static final String ERROR_DATABASE_HEARTBEAT = "Database error during heartbeat: ";
+
+        public static final String GATEWAY_CLEANUP_CONFIGURATION = "GatewayCleanupConfiguration";
+        public static final String GATEWAY_CLEANUP_ENABLED = "enabled";
+        public static final String EXPIRE_TIME_SECONDS = "expire_time_seconds";
+        public static final String DATA_RETENTION_PERIOD_SECONDS = "data_retention_period_seconds";
+        public static final String CLEANUP_INTERVAL_SECONDS = "cleanup_interval_seconds";
+
+
+        public static final String GATEWAY_NOTIFICATION_CONFIGURATION = "GatewayNotificationConfiguration";
+        public static final String GATEWAY_NOTIFICATION_ENABLED = "enabled";
+        public static final String NOTIFY_INTERVAL_SECONDS = "notify_interval_seconds";
+        public static final String CONFIGURED_GWID = "configured_gwid";
+
+    }
 }

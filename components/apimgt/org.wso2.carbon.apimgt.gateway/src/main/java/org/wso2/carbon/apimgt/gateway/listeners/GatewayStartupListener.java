@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.LLMProviderManager;
 import org.wso2.carbon.apimgt.gateway.TenancyLoader;
+import org.wso2.carbon.apimgt.gateway.health.GatewayHealthMonitor;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
@@ -99,6 +100,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     private String tenantsRootPath = CarbonBaseUtils.getCarbonHome() + File.separator + "repository" + File.separator
             + "tenants" + File.separator;
     private String synapseDeploymentPath = "synapse-configs" + File.separator + "default";
+    private GatewayHealthMonitor gatewayHealthMonitor;
 
     public GatewayStartupListener() {
 
@@ -254,6 +256,10 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                 LLMProviderManager.getInstance()
                         .initializeLLMProviderConfigurations(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             });
+
+            // Initialize and start gateway health monitor
+            gatewayHealthMonitor = new GatewayHealthMonitor();
+            gatewayHealthMonitor.start();
         } else {
             log.info("Running on migration enabled mode: Stopped at Gateway Startup listener completed");
         }
@@ -382,6 +388,9 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         if (jmsTransportHandlerForEventHub != null) {
             log.debug("Unsubscribe from JMS Events...");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
+        }
+        if (gatewayHealthMonitor != null) {
+            gatewayHealthMonitor.stop();
         }
     }
 
@@ -564,6 +573,9 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         if (jmsTransportHandlerForEventHub != null) {
             log.debug("Unsubscribe from JMS Events...");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
+        }
+        if (gatewayHealthMonitor != null) {
+            gatewayHealthMonitor.stop();
         }
     }
 
