@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.utils.DeploymentStatusNotifierRunnable;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.TenantUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -58,6 +59,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -74,7 +78,18 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
             .getAPIManagerConfiguration().getEventHubConfigurationDto();
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
             .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
+    // Existing deployment thread pool
     ExecutorService executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "DeploymentThread"));
+
+    // Add job-queue-backed thread pool for deployment status notification
+    private static final int DEPLOYMENT_STATUS_MIN_THREAD = 1;
+    private static final int DEPLOYMENT_STATUS_MAX_THREAD = 4;
+    private static final long DEPLOYMENT_STATUS_KEEP_ALIVE = 60000L;
+    private static final int DEPLOYMENT_STATUS_JOB_QUEUE_SIZE = 100;
+    private static final ThreadPoolExecutor deploymentStatusNotifierExecutor =
+            new ThreadPoolExecutor(DEPLOYMENT_STATUS_MIN_THREAD, DEPLOYMENT_STATUS_MAX_THREAD,
+                    DEPLOYMENT_STATUS_KEEP_ALIVE, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<>(DEPLOYMENT_STATUS_JOB_QUEUE_SIZE));
 
     public GatewayJMSMessageListener() {
     }
@@ -183,7 +198,21 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                                     startTenantFlow(tenantDomain);
                                     tenantFlowStarted = true;
                                     inMemoryApiDeployer.deployAPI(gatewayEvent);
+                                    // If the API is deployed we send /notify-api-deployment-status call with successfully deployed status
+                                    String apiRevisionId =
+                                            DataHolder.getInstance().getTenantAPIMap().get(gatewayEvent.getTenantDomain()).get(gatewayEvent.getContext()).getRevisionId();
+                                    deploymentStatusNotifierExecutor.submit(
+                                        new DeploymentStatusNotifierRunnable(
+                                            gatewayEvent.getUuid(), apiRevisionId, true, "DEPLOY", null, null
+                                        )
+                                    );
                                 } catch (ArtifactSynchronizerException e) {
+                                    // If exception occurs while deploying artifacts /notify-api-deployment-status call with failed status
+                                    deploymentStatusNotifierExecutor.submit(
+                                            new DeploymentStatusNotifierRunnable(
+                                                    gatewayEvent.getUuid(), null, false, "DEPLOY", e.getErrorHandler().getErrorCode(), e.getMessage()
+                                            )
+                                    );
                                     log.error("Error in deploying artifacts for " + gatewayEvent.getUuid() +
                                             "in the Gateway");
                                 } finally {
@@ -198,7 +227,21 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
                                     startTenantFlow(tenantDomain);
                                     tenantFlowStarted = true;
                                     inMemoryApiDeployer.unDeployAPI(gatewayEvent);
+                                    // If the API is undeploy we send /notify-api-deployment-status call with
+                                    // successfully undeploy status
+                                    deploymentStatusNotifierExecutor.submit(
+                                        new DeploymentStatusNotifierRunnable(
+                                                gatewayEvent.getUuid(), null, true, "UNDEPLOY", null, null
+                                        )
+                                    );
                                 } catch (ArtifactSynchronizerException e) {
+                                    // If exception occurs while undeploying artifacts /notify-api-deployment-status
+                                    // call with failed status
+                                    deploymentStatusNotifierExecutor.submit(
+                                        new DeploymentStatusNotifierRunnable(
+                                                gatewayEvent.getUuid(), null, false, "UNDEPLOY", e.getErrorHandler().getErrorCode(), e.getMessage()
+                                        )
+                                    );
                                     log.error("Error in undeploying artifacts");
                                 } finally {
                                     if (tenantFlowStarted) {
