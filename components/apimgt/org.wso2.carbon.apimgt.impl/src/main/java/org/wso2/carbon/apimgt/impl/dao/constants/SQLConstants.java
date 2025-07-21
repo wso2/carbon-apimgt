@@ -4211,6 +4211,20 @@ public class SQLConstants {
                 "SELECT AUM.HTTP_METHOD, AUM.URL_PATTERN, ARSM.SCOPE_NAME, ARSM.URL_MAPPING_ID " +
                 "FROM AM_API_RESOURCE_SCOPE_MAPPING ARSM LEFT JOIN AM_API_URL_MAPPING AUM " +
                 "ON ARSM.URL_MAPPING_ID = AUM.URL_MAPPING_ID WHERE AUM.REVISION_UUID = ?";
+
+        public static final String GATEWAY_DEPLOYMENT_STATS_QUERY =
+                "SELECT " +
+                        "SUM(CASE WHEN grd.STATUS = 'SUCCESS' THEN 1 ELSE 0 END) AS DEPLOYED_COUNT, " +
+                        "SUM(CASE WHEN grd.STATUS = 'FAILED' THEN 1 ELSE 0 END) AS FAILED_COUNT, " +
+                        "MAX(CASE WHEN grd.STATUS = 'SUCCESS' THEN grd.LAST_UPDATED END) AS LATEST_SUCCESS_TIME " +
+                        "FROM AM_GW_REVISION_DEPLOYMENT grd " +
+                        "INNER JOIN AM_GW_INSTANCES gwi ON grd.GATEWAY_ID = gwi.GATEWAY_ID " +
+                        "WHERE grd.REVISION_ID = ? " +
+                        "AND (gwi.ENV_LABELS = ? OR gwi.ENV_LABELS LIKE ? OR gwi.ENV_LABELS LIKE ? OR gwi.ENV_LABELS LIKE ?)";
+
+        public static final String GATEWAY_LIVE_COUNT_QUERY ="SELECT COUNT(*) AS LIVE_COUNT FROM AM_GW_INSTANCES " +
+                "WHERE ENV_LABELS = ? OR ENV_LABELS LIKE ? OR ENV_LABELS LIKE ? OR ENV_LABELS LIKE ?";
+
     }
 
     /**

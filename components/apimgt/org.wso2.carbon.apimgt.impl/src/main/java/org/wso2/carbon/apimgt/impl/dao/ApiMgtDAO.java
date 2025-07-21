@@ -19695,13 +19695,152 @@ public class ApiMgtDAO {
             }
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
-                return APIMgtDBUtil.mergeRevisionDeploymentDTOs(rs);
+                return mergeRevisionDeploymentDTOs(rs);
             }
         } catch (SQLException e) {
             handleException("Failed to get API Revision deployment mapping details for api uuid: " +
                     apiUUID, e);
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * Handle connection rollback logic. Rethrow original exception so that it can be handled centrally.
+     * @param rs result set
+     * @throws SQLException sql exception
+     * @throws APIManagementException api management exception
+     */
+    public List<APIRevisionDeployment> mergeRevisionDeploymentDTOs(ResultSet rs) throws APIManagementException,
+            SQLException {
+        List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
+        Map<String, APIRevisionDeployment> uniqueSet = new HashMap<>();
+        while (rs.next()) {
+            APIRevisionDeployment apiRevisionDeployment;
+            String environmentName = rs.getString("NAME");
+
+            // If the gateway defined in the deployment.toml file has been decommissioned, ignore all revision
+            // deployments for that gateway
+            if (StringUtils.isEmpty(rs.getString("VHOST"))) {
+                Map<String, Environment> readOnlyEnvironments = APIUtil.getReadOnlyEnvironments();
+                if (readOnlyEnvironments.get(environmentName) == null) {
+                    continue;
+                }
+            }
+            String vhost = VHostUtils.resolveIfNullToDefaultVhost(environmentName,
+                    rs.getString("VHOST"));
+            String revisionUuid = rs.getString("REVISION_UUID");
+            String uniqueKey = (environmentName != null ? environmentName : "") +
+                    (vhost != null ? vhost : "") + (revisionUuid != null ? revisionUuid : "");
+            String revisionStatus = rs.getString("REVISION_STATUS");
+            org.wso2.carbon.apimgt.api.WorkflowStatus status = null;
+            if (revisionStatus != null) {
+                switch (revisionStatus) {
+                case "CREATED":
+                    status = org.wso2.carbon.apimgt.api.WorkflowStatus.CREATED;
+                    break;
+                case "APPROVED":
+                    status = org.wso2.carbon.apimgt.api.WorkflowStatus.APPROVED;
+                    break;
+                case "REJECTED":
+                    status = org.wso2.carbon.apimgt.api.WorkflowStatus.REJECTED;
+                    break;
+                default:
+                    // Handle the case where revisionStatus is not one of the expected values
+                    break;
+                }
+            }
+            if (!uniqueSet.containsKey(uniqueKey)) {
+                apiRevisionDeployment = new APIRevisionDeployment();
+                apiRevisionDeployment.setDeployment(environmentName);
+                apiRevisionDeployment.setVhost(vhost);
+                apiRevisionDeployment.setRevisionUUID(revisionUuid);
+                apiRevisionDeployment.setStatus(status);
+                apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+                apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
+                apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
+                
+                calculateGatewayDeploymentStats(apiRevisionDeployment, revisionUuid, environmentName);
+                
+                apiRevisionDeploymentList.add(apiRevisionDeployment);
+                uniqueSet.put(uniqueKey, apiRevisionDeployment);
+            } else {
+                apiRevisionDeployment = uniqueSet.get(uniqueKey);
+                if (!apiRevisionDeployment.isDisplayOnDevportal()) {
+                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+                }
+                if (apiRevisionDeployment.getDeployedTime() == null) {
+                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
+                }
+                if (apiRevisionDeployment.getSuccessDeployedTime() == null) {
+                    apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
+                }
+            }
+        }
+        return  apiRevisionDeploymentList;
+    }
+
+    /**
+     * Calculate gateway deployment statistics for a given revision UUID filtered by environment
+     *
+     * @param apiRevisionDeployment the deployment object to update
+     * @param revisionUuid the revision UUID
+     * @param environmentName the environment name to filter by
+     * @throws APIManagementException if database operations fail
+     */
+    private void calculateGatewayDeploymentStats(APIRevisionDeployment apiRevisionDeployment, 
+                                                       String revisionUuid, String environmentName) throws APIManagementException {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet resultSet = null;
+
+        try {
+            connection = APIMgtDBUtil.getConnection();
+
+            ps = connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GATEWAY_DEPLOYMENT_STATS_QUERY);
+            ps.setString(1, revisionUuid);
+            ps.setString(2, environmentName);
+            ps.setString(3, environmentName + ",%");
+            ps.setString(4, "%," + environmentName + ",%");
+            ps.setString(5, "%," + environmentName);
+
+            resultSet = ps.executeQuery();
+
+            if (resultSet.next()) {
+                int deployedCount = resultSet.getInt("DEPLOYED_COUNT");
+                int failedCount = resultSet.getInt("FAILED_COUNT");
+                Timestamp latestSuccessTime = resultSet.getTimestamp("LATEST_SUCCESS_TIME");
+
+                apiRevisionDeployment.setDeployedGatewayCount(deployedCount);
+                apiRevisionDeployment.setFailedGatewayCount(failedCount);
+
+                // Update successDeployedTime with the latest successful deployment time if available
+                if (latestSuccessTime != null) {
+                    apiRevisionDeployment.setSuccessDeployedTime(latestSuccessTime.toString());
+                }
+            }
+
+            APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
+
+
+            ps = connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GATEWAY_LIVE_COUNT_QUERY);
+            ps.setString(1, environmentName);
+            ps.setString(2, environmentName + ",%");
+            ps.setString(3, "%," + environmentName + ",%");
+            ps.setString(4, "%," + environmentName);
+
+            resultSet = ps.executeQuery();
+
+            if (resultSet.next()) {
+                int liveCount = resultSet.getInt("LIVE_COUNT");
+                apiRevisionDeployment.setLiveGatewayCount(liveCount);
+            }
+
+        } catch (SQLException e) {
+            log.error("Error while calculating gateway deployment statistics for revision: " + revisionUuid +
+                              " and environment: " + environmentName, e);
+        } finally {
+            APIMgtDBUtil.closeAllConnections(ps, connection, resultSet);
+        }
     }
 
     /**
