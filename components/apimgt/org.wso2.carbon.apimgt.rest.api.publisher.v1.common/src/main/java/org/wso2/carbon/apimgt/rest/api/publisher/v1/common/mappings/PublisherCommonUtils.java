@@ -1695,6 +1695,13 @@ public class PublisherCommonUtils {
         boolean isValidSandboxUrl = true;
         if (api.getEndpointConfig() != null) {
             Map endpointConfig = (Map) api.getEndpointConfig();
+
+            // Skip validation if endpoint type is default to support dynamic endpoints
+            String endpointType = (String) endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE);
+            if (APIConstants.ENDPOINT_TYPE_DEFAULT.equalsIgnoreCase(endpointType)) {
+                return true;
+            }
+
             if (endpointConfig.containsKey(APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)) {
                 String prodEndpointUrl = String.valueOf(((Map) endpointConfig.get(
                         APIConstants.ENDPOINT_PRODUCTION_ENDPOINTS)).get(APIConstants.API_DATA_URL));
@@ -1709,8 +1716,10 @@ public class PublisherCommonUtils {
                         || sandboxEndpointUrl.startsWith(APIConstants.WSS_PROTOCOL_URL_PREFIX);
                 containsEndpoint = true;
             }
+            return containsEndpoint && isValidProdUrl && isValidSandboxUrl;
+        } else {
+            return true;
         }
-        return containsEndpoint && isValidProdUrl && isValidSandboxUrl;
     }
 
     /**
@@ -2207,6 +2216,8 @@ public class PublisherCommonUtils {
         if (uriTemplates == null || uriTemplates.isEmpty()) {
             throw new APIManagementException(ExceptionCodes.NO_RESOURCES_FOUND);
         }
+        //set existing operation policies to URI templates
+        apiProvider.setOperationPoliciesToURITemplates(apiId, uriTemplates);
         existingAPI.setUriTemplates(uriTemplates);
 
         // Update ws uri mapping

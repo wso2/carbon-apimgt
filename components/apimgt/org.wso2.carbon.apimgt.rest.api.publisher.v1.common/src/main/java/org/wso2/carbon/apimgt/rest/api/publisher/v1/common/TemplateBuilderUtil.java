@@ -354,6 +354,11 @@ public class TemplateBuilderUtil {
             }
         }
 
+        if (APIConstants.APITransportType.WS.toString().equals(api.getType())) {
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.WebSocketExtensionHandler",
+                    Collections.emptyMap());
+        }
+
         return vtb;
     }
 
