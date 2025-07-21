@@ -1826,7 +1826,8 @@
       {% endif %}
 
       <TenantSharingConfigs>
-          <Enable>{{apim.tenant_sharing.enable}}</Enable>
+          <EnableTenantSync>{{apim.tenant_sharing.enable_tenant_sync}}</EnableTenantSync>
+          <AutoConfigureKeyManager>{{apim.tenant_sharing.auto_configure_key_manager_of_current_type}}</AutoConfigureKeyManager>
           <ReservedUserName>{{apim.tenant_sharing.reserved_user_name}}</ReservedUserName>
           <ReservedUserPassword>{{apim.tenant_sharing.reserved_user_password}}</ReservedUserPassword>
           <IdentityServerBaseUrl>{{apim.tenant_sharing.identity_server_base_url}}</IdentityServerBaseUrl>

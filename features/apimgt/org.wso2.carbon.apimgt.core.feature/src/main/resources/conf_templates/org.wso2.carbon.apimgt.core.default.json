@@ -230,7 +230,8 @@
   "apim.transaction_counter.service_username": "$ref{super_admin.username}",
   "apim.transaction_counter.service_password": "$ref{super_admin.password}",
   "apim.transaction_counter.service_url": "https://localhost:${mgt.transport.https.port}/internal/data/v1/transaction-records",
-  "apim.tenant_sharing.enable": false,
+  "apim.tenant_sharing.enable_tenant_sync": false,
+  "apim.tenant_sharing.auto_configure_key_manager_of_current_type": false,
   "apim.tenant_sharing.reserved_user_name": "$ref{super_admin.username}",
   "apim.tenant_sharing.reserved_user_password": "$ref{super_admin.password}",
   "apim.tenant_sharing.identity_server_base_url": "https://localhost:9444"

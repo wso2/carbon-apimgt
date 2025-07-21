@@ -3426,7 +3426,8 @@ public final class APIConstants {
 
     public static class TenantSharingConfigs {
         public static final String TENANT_SHARING_CONFIGS = "TenantSharingConfigs";
-        public static final String ENABLE = "Enable";
+        public static final String ENABLE_TENANT_SYNC = "EnableTenantSync";
+        public static final String AUTO_CONFIGURE_KEY_MANAGER = "AutoConfigureKeyManager";
         public static final String RESERVED_USER_NAME = "ReservedUserName";
         public static final String RESERVED_USER_PASSWORD = "ReservedUserPassword";
         public static final String IDENTITY_SERVER_BASE_URL = "IdentityServerBaseUrl";

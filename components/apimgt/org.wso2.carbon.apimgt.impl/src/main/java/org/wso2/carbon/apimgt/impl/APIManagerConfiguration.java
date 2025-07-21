@@ -813,10 +813,16 @@ public class APIManagerConfiguration {
     }
 
     private void setTenantSharingConfiguration(OMElement element) {
-        OMElement tenantSharingEnabledElement =
-                element.getFirstChildWithName(new QName(APIConstants.TenantSharingConfigs.ENABLE));
-        if (tenantSharingEnabledElement != null) {
-            tenantSharingConfiguration.setIsEnabled(Boolean.parseBoolean(tenantSharingEnabledElement.getText()));
+        OMElement tenantSyncEnabledElement =
+                element.getFirstChildWithName(new QName(APIConstants.TenantSharingConfigs.ENABLE_TENANT_SYNC));
+        if (tenantSyncEnabledElement != null) {
+            tenantSharingConfiguration.setIsTenantSyncEnabled(Boolean.parseBoolean(tenantSyncEnabledElement.getText()));
+        }
+        OMElement autoConfigureKeyManagerElement =
+                element.getFirstChildWithName(new QName(APIConstants.TenantSharingConfigs.AUTO_CONFIGURE_KEY_MANAGER));
+        if (autoConfigureKeyManagerElement != null) {
+            tenantSharingConfiguration.setAutoConfigureKeyManagerOfCurrentType(
+                    Boolean.parseBoolean(autoConfigureKeyManagerElement.getText()));
         }
         OMElement reservedUserNameElement =
                 element.getFirstChildWithName(new QName(APIConstants.TenantSharingConfigs.RESERVED_USER_NAME));
