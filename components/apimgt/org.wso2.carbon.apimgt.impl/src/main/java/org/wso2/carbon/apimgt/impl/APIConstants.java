@@ -920,6 +920,7 @@ public final class APIConstants {
             "EnableKeyManagerConfigurationRetriever";
     public static final String DEFAULT_KEY_MANAGER_TYPE = API_KEY_VALIDATOR + "DefaultKeyManagerType";
     public static final String KEY_VALIDATION_HANDLER_CLASSNAME = API_KEY_VALIDATOR + "KeyValidationHandlerClassName";
+    public static final String SKIP_CREATE_RESIDENT_KEY_MANAGER = API_KEY_VALIDATOR + "SkipCreateResidentKeyManager";
     // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";
     public static final String KEY_MANAGER_CLIENT = API_KEY_MANAGER + "KeyManagerClientImpl";
@@ -3422,7 +3423,6 @@ public final class APIConstants {
     public static final String ORG_BASED_ACCESS_CONTROL_ENABLE = "Enable";
     public static final String ORG_BASED_ACCESS_CONTROL_ORG_NAME_CLAIM = "OrganizationNameLocalClaim";
     public static final String ORG_BASED_ACCESS_CONTROL_ORG_ID_CLAIM = "OrganizationIDLocalClaim";
-    public static final String SKIP_CREATE_RESIDENT_KM = "SkipCreateResidentKM";
 
     public static class TenantSharingConfigs {
         public static final String TENANT_SHARING_CONFIGS = "TenantSharingConfigs";

@@ -490,6 +490,7 @@
       <EnableLightWeightAPIKeyGeneration>{{apim.key_manager.enable_lightweight_apikey_generation}}</EnableLightWeightAPIKeyGeneration>
       {% endif %}
       <AllowSubscriptionValidationDisabling>{{apim.key_manager.allow_subscription_validation_disabling}}</AllowSubscriptionValidationDisabling>
+      <SkipCreateResidentKeyManager>{{apim.key_manager.skip_create_resident_key_manager}}</SkipCreateResidentKeyManager>
     </APIKeyValidator>
 
 
@@ -1830,8 +1831,6 @@
           <ReservedUserPassword>{{apim.tenant_sharing.reserved_user_password}}</ReservedUserPassword>
           <IdentityServerBaseUrl>{{apim.tenant_sharing.identity_server_base_url}}</IdentityServerBaseUrl>
       </TenantSharingConfigs>
-
-      <SkipCreateResidentKM>{{apim.skip_create_resident_km}}</SkipCreateResidentKM>
 
       <Hashing>
         <HashingAlgorithm>{{apim.hashing.hashing_algorithm}}</HashingAlgorithm>

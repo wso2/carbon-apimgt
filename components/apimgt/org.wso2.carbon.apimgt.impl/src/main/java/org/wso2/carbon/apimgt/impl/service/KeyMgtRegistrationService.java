@@ -52,7 +52,7 @@ public final class KeyMgtRegistrationService {
         APIManagerConfigurationService apiManagerConfigurationService =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService();
         boolean skipCreateResidentKm = Boolean.parseBoolean(apiManagerConfigurationService.getAPIManagerConfiguration()
-                .getFirstProperty(APIConstants.SKIP_CREATE_RESIDENT_KM));
+                .getFirstProperty(APIConstants.SKIP_CREATE_RESIDENT_KEY_MANAGER));
         synchronized (KeyMgtRegistrationService.class.getName().concat(organization)) {
             ApiMgtDAO instance = ApiMgtDAO.getInstance();
             if (instance.getKeyManagerConfigurationByName(organization, APIConstants.KeyManager.DEFAULT_KEY_MANAGER) ==
