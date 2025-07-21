@@ -6834,7 +6834,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             Set<String> targetEnvironments = Collections.singleton(environment);
             Map<String, String> gatewayVhosts = Collections.singletonMap(environment, newDeployment.getVhost());
 
-            if (!deploymentsToRemove.isEmpty()) {
+            if (!deploymentsToRemove.isEmpty() && !skipDeployToGateway) {
                 apiMgtDAO.removeAPIRevisionDeployment(apiId, deploymentsToRemove);
                 removeFromGateway(api, deploymentsToRemove, targetEnvironments);
             }
