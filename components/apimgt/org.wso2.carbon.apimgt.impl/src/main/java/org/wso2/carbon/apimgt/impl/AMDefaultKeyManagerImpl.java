@@ -1441,7 +1441,7 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
 
                                     if (!(additionalProperty.equalsIgnoreCase(
                                             Boolean.TRUE.toString()) || additionalProperty.equalsIgnoreCase(Boolean.FALSE.toString()))) {
-                                        String errMsg = "Application configuration values cannot have negative values.";
+                                        String errMsg = "Boolean configuration values must be 'true' or 'false'.";
                                         throw new APIManagementException(errMsg, ExceptionCodes.from(ExceptionCodes.INVALID_APPLICATION_ADDITIONAL_PROPERTIES, errMsg));
                                     }
                                 } else {
