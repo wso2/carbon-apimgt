@@ -10521,6 +10521,9 @@ components:
         name:
           type: string
           example: CalculatorAPI
+        displayName:
+          type: string
+          example: Calculator API
         description:
           type: string
           example: A calculator API that supports basic operations
@@ -10633,6 +10636,13 @@ components:
         egress:
           type: boolean
           description: Whether the API is EGRESS or not
+          default: false
+          example: true
+        initiatedFromGateway:
+          type: boolean
+          description: |
+            Whether the API is initiated from the gateway or not.
+            This is used to identify whether the API is created from the Publisher or from the Gateway.
           default: false
           example: true
     APIMetadata:
@@ -11338,7 +11348,7 @@ components:
             wso2/apk
             AWS
           default: wso2/synapse
-        isInitiatedFromGateway:
+        initiatedFromGateway:
           type: boolean
           description: |
             Whether the API is initiated from the gateway or not. This is used to identify

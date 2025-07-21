@@ -5280,16 +5280,22 @@ components:
           type: boolean
           example: false
           default: false
-        isWriteOnly:
-          type: boolean
-          example: false
-          default: false
+          deprecated: true
+        mode:
+          type: string
+          enum:
+            - READ_ONLY
+            - READ_WRITE
+            - WRITE_ONLY
+          example: READ_WRITE
+          default: READ_WRITE
           description: |
-            This indicates whether the environment is write-only. If true, APIs in the environment cannot be discovered.
-            This is useful for environments that are used for API publishing only.
+            The mode of the environment. This indicates whether the environment is in read-only or read-write mode.
+            **READ_ONLY:** The environment is in read-only mode. API cannot be deployed, only discovery is possible.
+            **READ_WRITE:** The environment is in read-write mode. APIs can be deployed and discovered.
+            **WRITE_ONLY:** The environment is in write-only mode/ APIs only can be deployed.
         apiDiscoveryScheduledWindow:
           type: integer
-          minimum: 1
           description: |
             The time window in minutes to schedule the API discovery task.
             This is used to discover APIs from the API Gateway and update the API list in the environment.

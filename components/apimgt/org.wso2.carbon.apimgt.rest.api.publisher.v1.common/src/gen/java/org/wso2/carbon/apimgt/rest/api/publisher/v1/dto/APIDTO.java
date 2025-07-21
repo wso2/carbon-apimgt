@@ -332,7 +332,7 @@ return null;
     private AdvertiseInfoDTO advertiseInfo = null;
     private String gatewayVendor = null;
     private String gatewayType = "wso2/synapse";
-    private Boolean isInitiatedFromGateway = false;
+    private Boolean initiatedFromGateway = false;
     private List<String> asyncTransportProtocols = new ArrayList<String>();
     private Boolean egress = false;
 
@@ -1489,19 +1489,19 @@ return null;
   /**
    * Whether the API is initiated from the gateway or not. This is used to identify whether the API is created from the publisher or discovered from the gateway. 
    **/
-  public APIDTO isInitiatedFromGateway(Boolean isInitiatedFromGateway) {
-    this.isInitiatedFromGateway = isInitiatedFromGateway;
+  public APIDTO initiatedFromGateway(Boolean initiatedFromGateway) {
+    this.initiatedFromGateway = initiatedFromGateway;
     return this;
   }
 
   
   @ApiModelProperty(example = "false", value = "Whether the API is initiated from the gateway or not. This is used to identify whether the API is created from the publisher or discovered from the gateway. ")
-  @JsonProperty("isInitiatedFromGateway")
-  public Boolean isIsInitiatedFromGateway() {
-    return isInitiatedFromGateway;
+  @JsonProperty("initiatedFromGateway")
+  public Boolean isInitiatedFromGateway() {
+    return initiatedFromGateway;
   }
-  public void setIsInitiatedFromGateway(Boolean isInitiatedFromGateway) {
-    this.isInitiatedFromGateway = isInitiatedFromGateway;
+  public void setInitiatedFromGateway(Boolean initiatedFromGateway) {
+    this.initiatedFromGateway = initiatedFromGateway;
   }
 
   /**
@@ -1615,14 +1615,14 @@ return null;
         Objects.equals(advertiseInfo, API.advertiseInfo) &&
         Objects.equals(gatewayVendor, API.gatewayVendor) &&
         Objects.equals(gatewayType, API.gatewayType) &&
-        Objects.equals(isInitiatedFromGateway, API.isInitiatedFromGateway) &&
+        Objects.equals(initiatedFromGateway, API.initiatedFromGateway) &&
         Objects.equals(asyncTransportProtocols, API.asyncTransportProtocols) &&
         Objects.equals(egress, API.egress);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, type, audience, audiences, transport, tags, policies, organizationPolicies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, visibleOrganizations, mediationPolicies, apiPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, endpointConfig, primaryProductionEndpointId, primarySandboxEndpointId, endpointImplementationType, subtypeConfiguration, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, isInitiatedFromGateway, asyncTransportProtocols, egress);
+    return Objects.hash(id, name, displayName, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, type, audience, audiences, transport, tags, policies, organizationPolicies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, visibleOrganizations, mediationPolicies, apiPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, endpointConfig, primaryProductionEndpointId, primarySandboxEndpointId, endpointImplementationType, subtypeConfiguration, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, initiatedFromGateway, asyncTransportProtocols, egress);
   }
 
   @Override
@@ -1695,7 +1695,7 @@ return null;
     sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
-    sb.append("    isInitiatedFromGateway: ").append(toIndentedString(isInitiatedFromGateway)).append("\n");
+    sb.append("    initiatedFromGateway: ").append(toIndentedString(initiatedFromGateway)).append("\n");
     sb.append("    asyncTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
     sb.append("    egress: ").append(toIndentedString(egress)).append("\n");
     sb.append("}");

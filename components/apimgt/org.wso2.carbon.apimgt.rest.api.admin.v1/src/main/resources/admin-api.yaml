@@ -5280,10 +5280,20 @@ components:
           type: boolean
           example: false
           default: false
-        isWriteOnly:
-          type: boolean
-          example: false
-          default: false
+          deprecated: true
+        mode:
+          type: string
+          enum:
+            - READ_ONLY
+            - READ_WRITE
+            - WRITE_ONLY
+          example: READ_WRITE
+          default: READ_WRITE
+          description: |
+            The mode of the environment. This indicates whether the environment is in read-only or read-write mode.
+            **READ_ONLY:** The environment is in read-only mode. API cannot be deployed, only discovery is possible.
+            **READ_WRITE:** The environment is in read-write mode. APIs can be deployed and discovered.
+            **WRITE_ONLY:** The environment is in write-only mode/ APIs only can be deployed.
         apiDiscoveryScheduledWindow:
           type: integer
           description: |

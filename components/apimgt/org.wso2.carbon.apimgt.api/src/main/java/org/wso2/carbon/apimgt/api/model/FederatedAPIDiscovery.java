@@ -76,9 +76,14 @@ public abstract class FederatedAPIDiscovery {
             scheduledDiscoveryTasks.get(environmentName).cancel(false);
         }
         log.debug("Scheduling federated API discovery for " + environmentName);
-        ScheduledFuture<?> newTask = scheduledExecutorService.scheduleAtFixedRate(this::discoverAPI,
-                0, interval, TimeUnit.MINUTES);
-        scheduledDiscoveryTasks.put(environmentName, newTask);
+        try {
+            ScheduledFuture<?> newTask = scheduledExecutorService.scheduleAtFixedRate(this::discoverAPI,
+                    0, interval, TimeUnit.MINUTES);
+            scheduledDiscoveryTasks.put(environmentName, newTask);
+        } catch (Exception e) {
+            log.error("Error while scheduling federated API discovery for " + environmentName +
+                    ". Hence APIs will not discover from this environment", e);
+        }
     }
 
     /**

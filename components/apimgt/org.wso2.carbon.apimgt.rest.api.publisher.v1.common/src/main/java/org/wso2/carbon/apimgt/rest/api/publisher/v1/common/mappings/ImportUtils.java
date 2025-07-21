@@ -247,7 +247,7 @@ public class ImportUtils {
             List<APIRevisionDeployment> apiRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
                     tenantDomain, apiProvider, organization);
 
-            if (importedApiDTO.isIsInitiatedFromGateway() &&
+            if (importedApiDTO.isInitiatedFromGateway() && !overwrite &&
                     ApiMgtDAO.getInstance().isApiNameExist(importedApiDTO.getName(), organization, organization)) {
                 if (!apiRevisionDeployments.isEmpty()) {
                     importedApiDTO.name(importedApiDTO.getName() + "-" + apiRevisionDeployments.get(0).getDeployment());
@@ -445,7 +445,7 @@ public class ImportUtils {
             String primarySandboxEndpointId = importedApiDTO.getPrimarySandboxEndpointId();
             importedApi.setPrimaryProductionEndpointId(primaryProductionEndpointId);
             importedApi.setPrimarySandboxEndpointId(primarySandboxEndpointId);
-            importedApi.setInitiatedFromGateway(importedApiDTO.isIsInitiatedFromGateway());
+            importedApi.setInitiatedFromGateway(importedApiDTO.isInitiatedFromGateway());
 
             apiProvider.updateAPI(importedApi, oldAPI);
 
@@ -554,11 +554,8 @@ public class ImportUtils {
 
                 //Once the new revision successfully created, artifacts will be deployed in mentioned gateway
                 //environments
-                if (!importedApi.isInitiatedFromGateway()) {
-                    apiProvider.deployAPIRevision(importedAPIUuid, revisionId, apiRevisionDeployments, organization);
-                } else {
-                    ApiMgtDAO.getInstance().addAPIRevisionDeployment(revisionId, apiRevisionDeployments);
-                }
+                apiProvider.deployAPIRevision(importedAPIUuid, revisionId, apiRevisionDeployments, organization,
+                        importedApi.isInitiatedFromGateway());
                 if (log.isDebugEnabled()) {
                     log.debug("API: " + importedApi.getId().getApiName() + "_" + importedApi.getId().getVersion() +
                             " was deployed in " + apiRevisionDeployments.size() + " gateway environments.");

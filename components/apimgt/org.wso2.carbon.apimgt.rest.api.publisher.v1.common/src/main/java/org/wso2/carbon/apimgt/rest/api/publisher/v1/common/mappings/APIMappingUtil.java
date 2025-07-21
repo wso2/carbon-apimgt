@@ -838,6 +838,7 @@ public class APIMappingUtil {
         apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         apiInfoDTO.setEgress(api.isEgress() == 1); // true -1, false - 0
         apiInfoDTO.setSubtype(api.getSubtype());
+        apiInfoDTO.setInitiatedFromGateway(api.isInitiatedFromGateway());
         return apiInfoDTO;
     }
 

@@ -1582,13 +1582,14 @@ public class APIAdminImpl implements APIAdmin {
     private void maskValues(Environment environment) {
         GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
                 .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
-
-        Map<String, String> additionalProperties = environment.getAdditionalProperties();
-        List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
-        for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
-            if (connectionConfiguration.isMask()) {
-                additionalProperties.replace(connectionConfiguration.getName(),
-                        APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+        if (gatewayConfiguration != null) {
+            Map<String, String> additionalProperties = environment.getAdditionalProperties();
+            List<ConfigurationDto> connectionConfigurations = gatewayConfiguration.getConnectionConfigurations();
+            for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
+                if (connectionConfiguration.isMask()) {
+                    additionalProperties.replace(connectionConfiguration.getName(),
+                            APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+                }
             }
         }
     }

@@ -116,6 +116,7 @@ import org.wso2.carbon.apimgt.api.model.GatewayAPIValidationResult;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
+import org.wso2.carbon.apimgt.api.model.GatewayMode;
 import org.wso2.carbon.apimgt.api.model.GatewayPortalConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayFeatureCatalog;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -12033,7 +12034,8 @@ public final class APIUtil {
                                     .getDeclaredConstructor().newInstance();
                     federatedAPIDiscovery.init(environment,
                             getDiscoveredAPIsFromFederatedGateway(environment, organization), organization);
-                    if (environment.isWriteOnly()) {
+                    if (environment.getMode().equals(GatewayMode.WRITE_ONLY)) {
+                        log.info("Federated API discovery is disabled for environment: " + environment.getName());
                        ScheduledFuture<?> scheduledFuture = federatedAPIDiscovery
                                .getScheduledDiscoveryTask(environment.getName());
                        if (scheduledFuture != null) {

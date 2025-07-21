@@ -5835,6 +5835,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.setEgress(apiInfo.isEgress());
         api.setStatus(apiInfo.getStatus());
         api.setSubtype(apiInfo.getApiSubtype());
+        api.setInitiatedFromGateway(apiInfo.isInitiatedFromGateway());
     }
 
     private void populateApiInfo(APIProduct apiProduct) throws APIManagementException {
@@ -6574,34 +6575,73 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Adds a new APIRevisionDeployment to an existing API
+     * Adds a new APIRevisionDeployment to an existing API.
      *
      * @param apiId                  API UUID
      * @param apiRevisionUUID        API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
-     * @param organization           identifier of the organization
-     * @throws APIManagementException if failed to add APIRevision
+     * @param organization           Organization identifier
+     * @throws APIManagementException if deployment fails
      */
     @Override
     public void deployAPIRevision(String apiId, String apiRevisionUUID,
                                   List<APIRevisionDeployment> apiRevisionDeployments, String organization)
             throws APIManagementException {
+        deployAPIRevisionInternal(apiId, apiRevisionUUID, apiRevisionDeployments, organization, false);
+    }
+
+    /**
+     * Adds a new APIRevisionDeployment to an existing API, optionally initiated from a gateway.
+     *
+     * @param apiId                  API UUID
+     * @param apiRevisionUUID        API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization           Organization identifier
+     * @param isInitiatedFromGateway Indicates if call was initiated from a gateway
+     * @throws APIManagementException if deployment fails
+     */
+    @Override
+    public void deployAPIRevision(String apiId, String apiRevisionUUID,
+                                  List<APIRevisionDeployment> apiRevisionDeployments, String organization,
+                                  boolean isInitiatedFromGateway)
+            throws APIManagementException {
+        deployAPIRevisionInternal(apiId, apiRevisionUUID, apiRevisionDeployments, organization, isInitiatedFromGateway);
+    }
+
+    /**
+     * Internal method to deploy an API revision.
+     *
+     * @param apiId                  API UUID
+     * @param apiRevisionUUID        API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization           Organization identifier
+     * @param isInitiatedFromGateway Indicates if call was initiated from a gateway
+     * @throws APIManagementException if deployment fails
+     */
+    private void deployAPIRevisionInternal(String apiId, String apiRevisionUUID,
+                                           List<APIRevisionDeployment> apiRevisionDeployments, String organization,
+                                           boolean isInitiatedFromGateway)
+            throws APIManagementException {
+
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
+        if (apiIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve API for UUID: " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+        }
+
         if (organization == null) {
             String tenantDomain = getTenantDomain(apiIdentifier);
             if (tenantDomain != null) {
                 organization = tenantDomain;
             }
         }
-        if (apiIdentifier == null) {
-            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
-                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
-        }
+
         APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionUUID);
         if (apiRevision == null) {
-            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
-                    + apiRevisionUUID, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionUUID));
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve API Revision for UUID: " + apiRevisionUUID,
+                    ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionUUID));
         }
+
         int revisionId = apiRevision.getId();
         API api = getLightweightAPIByUUID(apiId, organization);
         api.setRevisionedApiId(apiRevision.getRevisionUUID());
@@ -6610,141 +6650,235 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.getId().setUuid(apiId);
         api.setOrganization(organization);
 
-        // If there are pending deployments, get the details of those deployments
-        List<APIRevisionDeployment> currentPendingDeployments = apiMgtDAO.getAPIRevisionDeploymentsByWorkflowStatusAndApiUUID(
-                apiId, String.valueOf(WorkflowStatus.CREATED));
-        Set<APIRevisionDeployment> matchingRevisions = new HashSet<>();
-        for (APIRevisionDeployment pendingRevision : apiRevisionDeployments) {
-            // Set the displayOnDevportal to false for the pending revisions
-            pendingRevision.setDisplayOnDevportal(false);
-            if (StringUtils.isEmpty(pendingRevision.getRevisionUUID())) {
-                pendingRevision.setRevisionUUID(apiRevisionUUID);
-            }
-            for (APIRevisionDeployment currentRevision : currentPendingDeployments) {
-                if (pendingRevision.getDeployment().equals(currentRevision.getDeployment())) {
-                    matchingRevisions.add(currentRevision);
-                }
-            }
+        if (!isInitiatedFromGateway) {
+            handlePendingDeployments(apiId, apiRevisionUUID, apiRevisionDeployments);
         }
-        // Remove pending deployments
-        if (!matchingRevisions.isEmpty()) {
-            WorkflowExecutor apiRevisionDeploymentExecutor = getWorkflowExecutor(
-                    WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
-            apiMgtDAO.removeAPIRevisionDeployment(apiId, matchingRevisions);
-            for (APIRevisionDeployment matchingRevision : matchingRevisions) {
-                WorkflowDTO matchingWFDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(
-                        matchingRevision.getRevisionUUID(), WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
-                try {
-                    apiRevisionDeploymentExecutor.cleanUpPendingTask(matchingWFDTO.getExternalWorkflowReference());
-                } catch (WorkflowException e) {
-                    log.error("Unable to clean pending task for workflow reference id "
-                            + matchingWFDTO.getExternalWorkflowReference(), e);
-                }
-            }
-        }
+
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, apiRevisionDeployments);
 
-        WorkflowExecutor revisionDeploymentWFExecutor = getWorkflowExecutor(
-                WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
-
-        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
+        for (APIRevisionDeployment deployment : apiRevisionDeployments) {
             apiMgtDAO.updateAPIRevisionDeploymentStatus(apiRevisionUUID,
-                    APIConstants.APIRevisionStatus.API_REVISION_CREATED, apiRevisionDeployment.getDeployment());
-            APIRevisionWorkflowDTO revisionWFDto = new APIRevisionWorkflowDTO();
-            try {
-                revisionWFDto.setAPIRevision(apiRevision);
-                revisionWFDto.setExternalWorkflowReference(revisionDeploymentWFExecutor.generateUUID());
-                revisionWFDto.setWorkflowReference(apiRevisionUUID);
-                revisionWFDto.setWorkflowType(WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
-                revisionWFDto.setCallbackUrl(revisionDeploymentWFExecutor.getCallbackURL());
-                revisionWFDto.setStatus(WorkflowStatus.CREATED);
-                revisionWFDto.setTenantDomain(organization);
-                revisionWFDto.setTenantId(tenantId);
-                revisionWFDto.setCreatedTime(System.currentTimeMillis());
-                revisionWFDto.setUserName(userNameWithoutChange);
-                revisionWFDto.setApiName(apiIdentifier.getApiName());
-                revisionWFDto.setApiVersion(apiIdentifier.getVersion());
-                revisionWFDto.setApiProvider(apiIdentifier.getProviderName());
-                revisionWFDto.setEnvironment(apiRevisionDeployment.getDeployment());
-                revisionWFDto.setRevisionId(String.valueOf(revisionId));
-                revisionDeploymentWFExecutor.execute(revisionWFDto);
-            } catch (WorkflowException e) {
-                log.error("Unable to execute Revision Deployment Workflow for revision: " + apiRevisionUUID, e);
-                handleException("Unable to execute Revision Deployment Workflow for revision: " + apiRevisionUUID, e);
-            }
+                    APIConstants.APIRevisionStatus.API_REVISION_CREATED, deployment.getDeployment());
 
-            WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflow(revisionWFDto.getExternalWorkflowReference());
-            // only send the notification if approved
-            // wfDTO is null when simple wf executor is used because wf state is not stored in the db.
-            if (wfDTO == null || WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
-                apiRevisionDeployment.setDisplayOnDevportal(true);
-                apiMgtDAO.updateAPIRevisionDeployment(apiId, Collections.singleton(apiRevisionDeployment));
+            if (!isInitiatedFromGateway) {
+                executeRevisionWorkflow(apiIdentifier, apiRevisionUUID, revisionId, organization, apiRevision,
+                        deployment);
+            } else {
+                apiMgtDAO.updateAPIRevisionDeployment(apiId, Collections.singleton(deployment));
                 resumeDeployedAPIRevision(apiId, organization, apiRevisionUUID, String.valueOf(revisionId),
-                        apiRevisionDeployment.getDeployment());
+                        deployment.getDeployment(), true);
             }
         }
     }
 
     /**
-     * Resume API revision deployment process
+     * Handles pending deployments by removing existing ones and updating new deployments.
      *
-     * @param apiId        API Id using for the revision deployment
-     * @param organization organization identifier
-     * @param revisionUUID revision UUID
-     * @param revisionId   revision number
-     * @param environment  environment the deployment is happening
+     * @param apiId              API UUID
+     * @param apiRevisionUUID    API Revision UUID
+     * @param newDeployments     List of new APIRevisionDeployment objects
+     * @throws APIManagementException if an error occurs while handling pending deployments
+     */
+    private void handlePendingDeployments(String apiId, String apiRevisionUUID,
+                                          List<APIRevisionDeployment> newDeployments)
+            throws APIManagementException {
+
+        List<APIRevisionDeployment> existingPending = apiMgtDAO.getAPIRevisionDeploymentsByWorkflowStatusAndApiUUID(
+                apiId, String.valueOf(WorkflowStatus.CREATED));
+        Set<APIRevisionDeployment> toRemove = new HashSet<>();
+
+        for (APIRevisionDeployment newDeployment : newDeployments) {
+            newDeployment.setDisplayOnDevportal(false);
+            if (StringUtils.isEmpty(newDeployment.getRevisionUUID())) {
+                newDeployment.setRevisionUUID(apiRevisionUUID);
+            }
+
+            for (APIRevisionDeployment existing : existingPending) {
+                if (existing.getDeployment().equals(newDeployment.getDeployment())) {
+                    toRemove.add(existing);
+                }
+            }
+        }
+
+        if (!toRemove.isEmpty()) {
+            WorkflowExecutor executor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
+            apiMgtDAO.removeAPIRevisionDeployment(apiId, toRemove);
+
+            for (APIRevisionDeployment removed : toRemove) {
+                WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(
+                        removed.getRevisionUUID(), WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
+                try {
+                    executor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
+                } catch (WorkflowException e) {
+                    log.error("Unable to clean pending task for workflow reference id "
+                            + wfDTO.getExternalWorkflowReference(), e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Execute the revision deployment workflow.
+     *
+     * @param apiIdentifier      API Identifier
+     * @param apiRevisionUUID    API Revision UUID
+     * @param revisionId         Revision ID
+     * @param organization       Organization identifier
+     * @param apiRevision        API Revision object
+     * @param deployment         API Revision Deployment object
+     * @throws APIManagementException if workflow execution fails
+     */
+    private void executeRevisionWorkflow(APIIdentifier apiIdentifier, String apiRevisionUUID, int revisionId,
+                                         String organization, APIRevision apiRevision, APIRevisionDeployment deployment)
+            throws APIManagementException {
+
+        WorkflowExecutor executor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
+        APIRevisionWorkflowDTO workflowDTO = new APIRevisionWorkflowDTO();
+
+        try {
+            workflowDTO.setAPIRevision(apiRevision);
+            workflowDTO.setExternalWorkflowReference(executor.generateUUID());
+            workflowDTO.setWorkflowReference(apiRevisionUUID);
+            workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
+            workflowDTO.setCallbackUrl(executor.getCallbackURL());
+            workflowDTO.setStatus(WorkflowStatus.CREATED);
+            workflowDTO.setTenantDomain(organization);
+            workflowDTO.setTenantId(tenantId);
+            workflowDTO.setCreatedTime(System.currentTimeMillis());
+            workflowDTO.setUserName(userNameWithoutChange);
+            workflowDTO.setApiName(apiIdentifier.getApiName());
+            workflowDTO.setApiVersion(apiIdentifier.getVersion());
+            workflowDTO.setApiProvider(apiIdentifier.getProviderName());
+            workflowDTO.setEnvironment(deployment.getDeployment());
+            workflowDTO.setRevisionId(String.valueOf(revisionId));
+
+            executor.execute(workflowDTO);
+
+            WorkflowDTO persisted = apiMgtDAO.retrieveWorkflow(workflowDTO.getExternalWorkflowReference());
+            if (persisted == null || WorkflowStatus.APPROVED.equals(persisted.getStatus())) {
+                deployment.setDisplayOnDevportal(true);
+                apiMgtDAO.updateAPIRevisionDeployment(apiIdentifier.getUUID(), Collections.singleton(deployment));
+                resumeDeployedAPIRevision(apiIdentifier.getUUID(), organization, apiRevisionUUID,
+                        String.valueOf(revisionId), deployment.getDeployment());
+            }
+
+        } catch (WorkflowException e) {
+            log.error("Unable to execute Revision Deployment Workflow for revision: " + apiRevisionUUID, e);
+            handleException("Unable to execute Revision Deployment Workflow for revision: " + apiRevisionUUID, e);
+        }
+    }
+
+
+    /**
+     * Resume API revision deployment process.
+     *
+     * @param apiId        API Id used for the revision deployment
+     * @param organization Organization identifier
+     * @param revisionUUID Revision UUID
+     * @param revisionId   Revision number
+     * @param environment  Deployment environment
      */
     @Override
     public void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID,
                                           String revisionId, String environment) {
+        resumeDeployedAPIRevisionInternal(apiId, organization, revisionUUID, revisionId, environment, false);
+    }
 
+    /**
+     * Resume API revision deployment process, with flag to indicate if it's initiated from gateway.
+     *
+     * @param apiId                 API Id used for the revision deployment
+     * @param organization          Organization identifier
+     * @param revisionUUID          Revision UUID
+     * @param revisionId            Revision number
+     * @param environment           Deployment environment
+     * @param isInitiatedFromGateway Whether the call originated from a gateway
+     */
+    @Override
+    public void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID,
+                                          String revisionId, String environment, boolean isInitiatedFromGateway) {
+        if (isInitiatedFromGateway) {
+            resumeDeployedAPIRevisionInternal(apiId, organization, revisionUUID, revisionId, environment, true);
+        } else {
+            resumeDeployedAPIRevision(apiId, organization, revisionUUID, revisionId, environment);
+        }
+    }
+
+    /**
+     * Internal method to resume API revision deployment.
+     *
+     * @param apiId                 API Id used for the revision deployment
+     * @param organization          Organization identifier
+     * @param revisionUUID          Revision UUID
+     * @param revisionId            Revision number
+     * @param environment           Deployment environment
+     * @param skipDeployToGateway   Flag to skip deployment to gateway
+     */
+    private void resumeDeployedAPIRevisionInternal(String apiId, String organization, String revisionUUID,
+                                                   String revisionId, String environment, boolean skipDeployToGateway) {
         try {
             APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
             APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
-            APIRevisionDeployment apiRevisionDeployment = getAPIRevisionDeployment(environment, revisionUUID);
+            APIRevisionDeployment newDeployment = getAPIRevisionDeployment(environment, revisionUUID);
             API api = getLightweightAPIByUUID(apiId, organization);
+
             api.setRevisionedApiId(apiId);
             api.setRevisionId(Integer.parseInt(revisionId));
-            List<APIRevisionDeployment> currentApiRevisionDeploymentList = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(
-                    apiId);
 
-            Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
-            for (APIRevisionDeployment currentAPIRevisionDeployment : currentApiRevisionDeploymentList) {
-                if (StringUtils.equalsIgnoreCase(currentAPIRevisionDeployment.getDeployment(), environment)
-                        && !currentAPIRevisionDeployment.getRevisionUUID().equals(revisionUUID)) {
-                    environmentsToRemove.add(currentAPIRevisionDeployment);
-                }
+            List<APIRevisionDeployment> existingDeployments = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
+            Set<APIRevisionDeployment> deploymentsToRemove = existingDeployments.stream()
+                    .filter(d -> StringUtils.equalsIgnoreCase(d.getDeployment(), environment)
+                            && !d.getRevisionUUID().equals(revisionUUID))
+                    .collect(Collectors.toSet());
+
+            Set<String> targetEnvironments = Collections.singleton(environment);
+            Map<String, String> gatewayVhosts = Collections.singletonMap(environment, newDeployment.getVhost());
+
+            if (!deploymentsToRemove.isEmpty()) {
+                apiMgtDAO.removeAPIRevisionDeployment(apiId, deploymentsToRemove);
+                removeFromGateway(api, deploymentsToRemove, targetEnvironments);
             }
 
-            Set<String> environmentToPublish = Collections.singleton(environment);
-            Map<String, String> gatewayVhosts = new HashMap<>();
-            gatewayVhosts.put(environment, apiRevisionDeployment.getVhost());
-            if (!environmentsToRemove.isEmpty()) {
-                apiMgtDAO.removeAPIRevisionDeployment(apiId, environmentsToRemove);
-                removeFromGateway(api, environmentsToRemove, environmentToPublish);
-            }
-            GatewayArtifactsMgtDAO.getInstance()
-                    .addAndRemovePublishedGatewayLabels(apiId, revisionUUID, environmentToPublish, gatewayVhosts,
-                            environmentsToRemove);
+            GatewayArtifactsMgtDAO.getInstance().addAndRemovePublishedGatewayLabels(
+                    apiId, revisionUUID, targetEnvironments, gatewayVhosts, deploymentsToRemove);
 
-            // TODO remove this to organization once the microgateway can build gateway based on organization.
-            gatewayManager.deployToGateway(api, organization, environmentToPublish);
-
-            String publishedDefaultVersion = getPublishedDefaultVersion(apiIdentifier);
-            String defaultVersion = getDefaultVersion(apiIdentifier);
-            apiMgtDAO.updateDefaultAPIPublishedVersion(apiIdentifier);
-            if (publishedDefaultVersion != null) {
-                if (apiIdentifier.getVersion().equals(defaultVersion)) {
-                    api.setAsPublishedDefaultVersion(true);
-                }
-                if (api.isPublishedDefaultVersion() && !apiIdentifier.getVersion().equals(publishedDefaultVersion)) {
-                    APIIdentifier previousDefaultVersionIdentifier = new APIIdentifier(api.getId().getProviderName(),
-                            api.getId().getApiName(), publishedDefaultVersion);
-                    sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier, organization);
-                }
+            // Skip deployToGateway only if explicitly called from the gateway
+            if (!skipDeployToGateway) {
+                gatewayManager.deployToGateway(api, organization, targetEnvironments);
+                updatePublishedDefaultVersionIfRequired(apiIdentifier, api, organization);
             }
+
         } catch (APIManagementException e) {
-            log.error("Error while getting API info from API: " + apiId, e);
+            log.error("Error while resuming API revision deployment for API ID: " + apiId, e);
+        }
+    }
+
+    /**
+     * Updates the published default version of an API if required.
+     * @param apiIdentifier
+     * @param api
+     * @param organization
+     * @throws APIManagementException
+     */
+    private void updatePublishedDefaultVersionIfRequired(APIIdentifier apiIdentifier, API api, String organization)
+            throws APIManagementException {
+        String publishedDefaultVersion = getPublishedDefaultVersion(apiIdentifier);
+        String currentDefaultVersion = getDefaultVersion(apiIdentifier);
+        apiMgtDAO.updateDefaultAPIPublishedVersion(apiIdentifier);
+
+        if (publishedDefaultVersion != null) {
+            if (apiIdentifier.getVersion().equals(currentDefaultVersion)) {
+                api.setAsPublishedDefaultVersion(true);
+            }
+
+            if (api.isPublishedDefaultVersion() && !apiIdentifier.getVersion().equals(publishedDefaultVersion)) {
+                APIIdentifier previousDefault = new APIIdentifier(
+                        api.getId().getProviderName(),
+                        api.getId().getApiName(),
+                        publishedDefaultVersion
+                );
+                sendUpdateEventToPreviousDefaultVersion(previousDefault, organization);
+            }
         }
     }
 

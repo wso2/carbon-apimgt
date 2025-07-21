@@ -10286,7 +10286,7 @@ public class ApiMgtDAO {
                                 .isEgress(resultSet.getInt("IS_EGRESS"))
                                 .isRevision(apiRevision != null)
                                 .organization(resultSet.getString("ORGANIZATION"))
-                                .isInitiatedFromGateway(resultSet.getInt("IS_INITIATED_FROM_GW"))
+                                .isInitiatedFromGateway(resultSet.getInt("INITIATED_FROM_GW"))
                                 .displayName(resultSet.getString("API_DISPLAY_NAME"));
                         if (apiRevision != null) {
                             apiInfoBuilder = apiInfoBuilder.apiTier(getAPILevelTier(connection,

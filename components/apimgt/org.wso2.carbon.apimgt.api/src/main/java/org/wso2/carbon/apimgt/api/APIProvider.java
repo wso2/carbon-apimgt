@@ -1355,7 +1355,20 @@ public interface APIProvider extends APIManager {
      * @param organization           Identifier of an organization
      * @throws APIManagementException if failed to add APIRevision
      */
-    void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments, String organization) throws APIManagementException;
+    void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments,
+                           String organization) throws APIManagementException;
+
+    /**
+     * Adds a new APIRevisionDeployment to an existing API
+     *
+     * @param apiId                  API UUID
+     * @param apiRevisionId          API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization           Identifier of an organization
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments,
+                           String organization, boolean isInitiatedFromGateway) throws APIManagementException;
 
     /**
      * Adds a new DeployedAPIRevision to an existing API
@@ -2001,6 +2014,18 @@ public interface APIProvider extends APIManager {
      */
     void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID, String revisionId,
                                    String environment);
+
+    /**
+     * Resume API revision deployment process
+     *
+     * @param apiId        API Id using for the revision deployment
+     * @param organization organization identifier
+     * @param revisionUUID revision UUID
+     * @param revisionId   revision number
+     * @param environment  environment the deployment is happening
+     */
+    void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID, String revisionId,
+                                   String environment, boolean isInitiatedFromGateway);
 
     /***
      * Cleanup pending or rejected revision workflows

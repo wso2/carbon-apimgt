@@ -1678,7 +1678,7 @@ public class PublisherCommonUtils {
             updatedOrganizationTiers.removeIf(tier -> tier.getOrganizationID().equals(orgInfo.getOrganizationId()));
             apiToAdd.setAvailableTiersForOrganizations(updatedOrganizationTiers);
         }
-        apiToAdd.setInitiatedFromGateway(apiDto.isIsInitiatedFromGateway());
+        apiToAdd.setInitiatedFromGateway(apiDto.isInitiatedFromGateway());
         return apiToAdd;
     }
 
@@ -2077,7 +2077,7 @@ public class PublisherCommonUtils {
             apiToAdd.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
         }
         apiToAdd.setEgress(body.isEgress() ? 1 : 0);
-        apiToAdd.setInitiatedFromGateway(body.isIsInitiatedFromGateway());
+        apiToAdd.setInitiatedFromGateway(body.isInitiatedFromGateway());
         return apiToAdd;
     }
 

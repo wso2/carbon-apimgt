@@ -41,7 +41,7 @@ public class APIInfo {
     private String organization;
     private int isEgress;
     private String displayName;
-    private boolean isInitiatedFromGateway;
+    private boolean initiatedFromGateway;
 
     private APIInfo() {
 
@@ -236,10 +236,10 @@ public class APIInfo {
         this.displayName = displayName;
     }
     public boolean isInitiatedFromGateway() {
-        return isInitiatedFromGateway;
+        return initiatedFromGateway;
     }
-    public void setIsInitiatedFromGateway(boolean isInitiatedFromGateway) {
-        this.isInitiatedFromGateway = isInitiatedFromGateway;
+    public void setIsInitiatedFromGateway(boolean initiatedFromGateway) {
+        this.initiatedFromGateway = initiatedFromGateway;
     }
 
     public static class Builder {
@@ -263,7 +263,7 @@ public class APIInfo {
         private String organization;
         private int isEgress;
         private String displayName;
-        private boolean isInitiatedFromGateway;
+        private boolean initiatedFromGateway;
 
         public Builder id(String id) {
 
@@ -367,7 +367,7 @@ public class APIInfo {
         }
 
         public Builder isInitiatedFromGateway(int initiatedFromGateway) {
-            this.isInitiatedFromGateway = initiatedFromGateway == 1;
+            this.initiatedFromGateway = initiatedFromGateway == 1;
             return this;
         }
 
@@ -393,7 +393,7 @@ public class APIInfo {
             apiInfo.organization = organization;
             apiInfo.isEgress = isEgress;
             apiInfo.displayName = displayName;
-            apiInfo.isInitiatedFromGateway = isInitiatedFromGateway;
+            apiInfo.initiatedFromGateway = initiatedFromGateway;
             return apiInfo;
         }
 
