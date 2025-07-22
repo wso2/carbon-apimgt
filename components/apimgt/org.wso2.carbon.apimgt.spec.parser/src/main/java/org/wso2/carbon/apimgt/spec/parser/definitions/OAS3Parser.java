@@ -2476,7 +2476,7 @@ public class OAS3Parser extends APIDefinition {
     public Set<URITemplate> generateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
                                              String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates) {
 
-        OpenAPI backendDefinition = getFullResolvedOpenAPI(backendApiDefinition);
+        OpenAPI backendDefinition = getOpenAPI(backendApiDefinition);
         Set<URITemplate> generatedTools = new HashSet<>();
 
         for (URITemplate template : uriTemplates) {
@@ -2529,7 +2529,7 @@ public class OAS3Parser extends APIDefinition {
                                            String mcpSubtype,
                                            Set<URITemplate> uriTemplates) {
 
-        OpenAPI backendDefinition = getFullResolvedOpenAPI(backendApiDefinition);
+        OpenAPI backendDefinition = getOpenAPI(backendApiDefinition);
         Set<URITemplate> updatedTools = new HashSet<>();
 
         for (URITemplate template : uriTemplates) {
@@ -2664,21 +2664,6 @@ public class OAS3Parser extends APIDefinition {
             }
         }
         return null;
-    }
-
-    /**
-     * This method returns the full resolved OpenAPI object from the given OAS definition.
-     *
-     * @param oasDefinition OpenAPI definition as String
-     * @return Resolved OpenAPI object
-     */
-    private OpenAPI getFullResolvedOpenAPI(String oasDefinition) {
-
-        ParseOptions options = new ParseOptions();
-        options.setResolve(true);
-        options.setResolveFully(true);
-        options.setFlatten(true);
-        return new OpenAPIV3Parser().readContents(oasDefinition, null, options).getOpenAPI();
     }
 
     private Map<String, Object> buildUnifiedInputSchema(List<Parameter> parameters, RequestBody requestBody,

@@ -2253,13 +2253,15 @@ public class APIMappingUtil {
                 infoDTO.setDescription(modelInfo.getDescription());
                 infoDTO.setEndpoints(modelInfo.getEndpoints());
                 List<APIOperationsDTO> apiOperationsDTO = new ArrayList<>();
-                for (URITemplate uriTemplate : modelInfo.getUriTemplates()) {
-                    APIOperationsDTO apiOperations = new APIOperationsDTO();
-                    apiOperations.setVerb(uriTemplate.getHTTPVerb());
-                    apiOperations.setTarget(uriTemplate.getUriTemplate());
-                    apiOperationsDTO.add(apiOperations);
+                if (modelInfo.getUriTemplates() != null && !modelInfo.getUriTemplates().isEmpty()) {
+                    for (URITemplate uriTemplate : modelInfo.getUriTemplates()) {
+                        APIOperationsDTO apiOperations = new APIOperationsDTO();
+                        apiOperations.setVerb(uriTemplate.getHTTPVerb());
+                        apiOperations.setTarget(uriTemplate.getUriTemplate());
+                        apiOperationsDTO.add(apiOperations);
+                    }
+                    infoDTO.setOperations(apiOperationsDTO);
                 }
-                infoDTO.setOperations(apiOperationsDTO);
                 responseDTO.setInfo(infoDTO);
             }
             if (returnContent) {

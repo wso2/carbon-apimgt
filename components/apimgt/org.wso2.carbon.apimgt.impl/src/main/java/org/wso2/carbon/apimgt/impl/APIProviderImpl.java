@@ -36,6 +36,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
@@ -161,6 +162,7 @@ import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
+import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
@@ -8534,7 +8536,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void updateMCPTools(API api, int apiId) throws APIManagementException {
 
-        APIDefinition parser = new OAS3Parser();
         Set<URITemplate> updatedTemplates;
 
         if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
@@ -8544,10 +8545,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             BackendEndpoint backendEndpoint = backendEndpoints.get(0);
-            updatedTemplates = parser.updateMCPTools(
-                    backendEndpoint.getBackendApiDefinition(),
+
+            String backendApiDefinition = backendEndpoint.getBackendApiDefinition();
+            String backendId = backendEndpoint.getBackendId();
+            APIDefinitionValidationResponse validationResponse =
+                    ApisApiServiceImplUtils.validateOpenAPIDefinition(null, null,
+                            backendApiDefinition, null, true);
+
+            updatedTemplates = validationResponse.getParser().updateMCPTools(
+                    backendApiDefinition,
                     null,
-                    backendEndpoint.getBackendId(),
+                    backendId,
                     APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE,
                     api.getSubtype(),
                     api.getUriTemplates()
@@ -8566,9 +8574,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
 
             API refApi = fetchReferencedApi(mapping);
-            updatedTemplates = parser.updateMCPTools(
-                    refApi.getSwaggerDefinition(),
-                    refApi.getId(),
+
+            String backendApiDefinition = refApi.getSwaggerDefinition();
+            APIIdentifier redApiId = refApi.getId();
+            APIDefinitionValidationResponse validationResponse =
+                    ApisApiServiceImplUtils.validateOpenAPIDefinition(null, null,
+                            backendApiDefinition, null, true);
+
+            updatedTemplates = validationResponse.getParser().updateMCPTools(
+                    backendApiDefinition,
+                    redApiId,
                     null,
                     APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE,
                     api.getSubtype(),

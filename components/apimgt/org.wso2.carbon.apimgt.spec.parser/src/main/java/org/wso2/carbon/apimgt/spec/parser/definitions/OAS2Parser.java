@@ -32,10 +32,12 @@ import com.google.gson.JsonParser;
 import io.swagger.inflector.examples.ExampleBuilder;
 import io.swagger.inflector.examples.models.Example;
 import io.swagger.inflector.processors.JsonNodeExampleSerializer;
+import io.swagger.models.ComposedModel;
 import io.swagger.models.Contact;
 import io.swagger.models.HttpMethod;
 import io.swagger.models.Info;
 import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
 import io.swagger.models.Operation;
 import io.swagger.models.Path;
 import io.swagger.models.RefModel;
@@ -49,18 +51,38 @@ import io.swagger.models.auth.BasicAuthDefinition;
 import io.swagger.models.auth.In;
 import io.swagger.models.auth.OAuth2Definition;
 import io.swagger.models.auth.SecuritySchemeDefinition;
+import io.swagger.models.parameters.AbstractSerializableParameter;
+import io.swagger.models.parameters.BodyParameter;
+import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.RefParameter;
+import io.swagger.models.properties.ArrayProperty;
+import io.swagger.models.properties.IntegerProperty;
+import io.swagger.models.properties.ObjectProperty;
+import io.swagger.models.properties.Property;
+import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.models.properties.RefProperty;
+import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.ObjectSchema;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -71,7 +93,10 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
+import org.wso2.carbon.apimgt.api.model.ApiOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
@@ -91,6 +116,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -672,6 +698,7 @@ public class OAS2Parser extends APIDefinition {
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         SwaggerParser parser = new SwaggerParser();
+        Set<URITemplate> uriTemplates = null;
         SwaggerDeserializationResult parseAttemptForV2 = parser.readWithInfo(apiDefinition);
         if (CollectionUtils.isNotEmpty(parseAttemptForV2.getMessages())) {
             for (String message : parseAttemptForV2.getMessages()) {
@@ -696,9 +723,8 @@ public class OAS2Parser extends APIDefinition {
             // Check whether the given OpenAPI definition contains empty resource paths
             // We are checking this manually since the Swagger parser does not throw an error for this
             // Which is a known issue of Swagger 2.0 parser
-            Set<URITemplate> uriTemplates = null;
             uriTemplates = getURITemplates(apiDefinition);
-            if (uriTemplates.size() == 0) {
+            if (uriTemplates.isEmpty()) {
                 validationResponse.setValid(false);
                 OASParserUtil.addErrorToValidationResponse(validationResponse,
                         "Empty resource paths found in the swagger definition");
@@ -748,7 +774,7 @@ public class OAS2Parser extends APIDefinition {
                     validationResponse, apiDefinition, swagger.getSwagger(),
                     title, version, swagger.getBasePath(), description,
                     (swagger.getHost() == null || swagger.getHost().isEmpty()) ? null :
-                            new ArrayList<String>(Arrays.asList(swagger.getHost())), null
+                            new ArrayList<String>(Arrays.asList(swagger.getHost())), new ArrayList<>(uriTemplates)
             );
             validationResponse.setParser(this);
             if (returnJsonContent) {
@@ -2003,7 +2029,50 @@ public class OAS2Parser extends APIDefinition {
     public Set<URITemplate> generateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
                                              String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates) {
 
-        return null;
+        Swagger backendDefinition = getSwagger(backendApiDefinition);
+        Set<URITemplate> generatedTools = new HashSet<>();
+
+        for (URITemplate template : uriTemplates) {
+            if (!mcpFeatureType.equalsIgnoreCase(template.getHttpVerb())) {
+                continue;
+            }
+
+            BackendOperation backendOperation = null;
+
+            if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
+                BackendOperationMapping mapping = template.getBackendOperationMapping();
+                if (mapping != null && mapping.getBackendOperation() != null) {
+                    backendOperation = mapping.getBackendOperation();
+                }
+            } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
+                ApiOperationMapping mapping = template.getApiOperationMapping();
+                if (mapping != null && mapping.getBackendOperation() != null) {
+                    backendOperation = mapping.getBackendOperation();
+                }
+            }
+
+            if (backendOperation == null) {
+                log.warn("URITemplate does not have valid backend or API operation mapping: " + template);
+                continue;
+            }
+
+            OperationMatch match =
+                    findMatchingOperation(backendDefinition, backendOperation.getTarget(), backendOperation.getVerb());
+            if (match != null) {
+                URITemplate toolTemplate = populateURITemplate(
+                        new URITemplate(),
+                        match,
+                        mcpFeatureType,
+                        template.getBackendOperationMapping() != null,
+                        backendDefinition,
+                        backendId,
+                        refApiId
+                );
+                generatedTools.add(toolTemplate);
+            }
+        }
+
+        return generatedTools;
     }
 
     @Override
@@ -2013,6 +2082,286 @@ public class OAS2Parser extends APIDefinition {
                                            String mcpSubtype,
                                            Set<URITemplate> uriTemplates) {
 
+        Swagger backendDefinition = getSwagger(backendApiDefinition);
+        Set<URITemplate> updatedTools = new HashSet<>();
+
+        for (URITemplate template : uriTemplates) {
+            if (!mcpFeatureType.equalsIgnoreCase(template.getHttpVerb())) {
+                continue;
+            }
+            if (template.getSchemaDefinition() == null || template.getSchemaDefinition().isEmpty()) {
+
+                BackendOperation backendOperation = null;
+
+                if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
+                    BackendOperationMapping mapping = template.getBackendOperationMapping();
+                    if (mapping != null && mapping.getBackendOperation() != null) {
+                        backendOperation = mapping.getBackendOperation();
+                    }
+                } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
+                    ApiOperationMapping mapping = template.getApiOperationMapping();
+                    if (mapping != null && mapping.getBackendOperation() != null) {
+                        backendOperation = mapping.getBackendOperation();
+                    }
+                }
+
+                if (backendOperation == null) {
+                    log.warn("URITemplate does not have valid backend or API operation mapping: " + template);
+                    continue;
+                }
+
+                OperationMatch match =
+                        findMatchingOperation(backendDefinition, backendOperation.getTarget(), backendOperation.getVerb());
+
+                if (match != null) {
+                    URITemplate populated = populateURITemplate(template, match, mcpFeatureType,
+                            template.getBackendOperationMapping() != null,
+                            backendDefinition, backendId, refApiId);
+                    updatedTools.add(populated);
+                    continue;
+                }
+            }
+            updatedTools.add(template);
+        }
+        return updatedTools;
+    }
+
+    /**
+     * Populates a URITemplate with details from a matched OpenAPI operation.
+     * Sets the template’s name, description, HTTP verb, JSON schema, and backend or proxy mappings.
+     *
+     * @param uriTemplate          the URITemplate to populate
+     * @param match                the matched OpenAPI operation details
+     * @param mcpFeatureType       the MCP feature type (used as the HTTP verb)
+     * @param isBackend            whether this is a backend operation
+     * @param backendId            the backend ID to associate
+     * @param backendAPIDefinition the backend OpenAPI definition
+     * @param refApiId
+     * @return the populated URITemplate
+     */
+    private URITemplate populateURITemplate(URITemplate uriTemplate, OperationMatch match, String mcpFeatureType,
+                                            boolean isBackend, Swagger backendAPIDefinition, String backendId,
+                                            APIIdentifier refApiId) {
+
+        if (uriTemplate.getUriTemplate() == null || uriTemplate.getUriTemplate().isEmpty()) {
+            String operationId = Optional.ofNullable(match.operation.getOperationId())
+                    .orElseGet(() -> match.method.toString().toLowerCase() +
+                            match.path.replaceAll("/+$", "")
+                                    .replaceAll("\\{([^/}]+)\\}", "by_$1")
+                                    .replace("/", "_"));
+            uriTemplate.setUriTemplate(operationId);
+        }
+
+        if (uriTemplate.getDescription() == null || uriTemplate.getDescription().isEmpty()) {
+            String description = Optional.ofNullable(match.operation.getDescription())
+                    .filter(desc -> !desc.isEmpty())
+                    .orElse(match.operation.getSummary());
+            uriTemplate.setDescription(description);
+        }
+
+        uriTemplate.setHTTPVerb(mcpFeatureType);
+
+        try {
+            String jsonSchema = getObjectMapper()
+                    .writeValueAsString(buildUnifiedInputSchema(
+                            match.operation.getParameters(),
+                            backendAPIDefinition));
+            uriTemplate.setSchemaDefinition(jsonSchema);
+        } catch (JsonProcessingException e) {
+            log.error("Error generating JSON schema for operation: " + uriTemplate.getUriTemplate(), e);
+        }
+
+        BackendOperation backendOperation = new BackendOperation();
+        backendOperation.setVerb(match.method.toString());
+        backendOperation.setTarget(match.path);
+
+        if (isBackend) {
+            BackendOperationMapping backendOperationMap = new BackendOperationMapping();
+            backendOperationMap.setBackendId(backendId);
+            backendOperationMap.setBackendOperation(backendOperation);
+            uriTemplate.setBackendOperationMapping(backendOperationMap);
+        } else {
+            ApiOperationMapping apiOperationMap = new ApiOperationMapping();
+            apiOperationMap.setApiUuid(refApiId.getUUID());
+            apiOperationMap.setApiName(refApiId.getApiName());
+            apiOperationMap.setApiVersion(refApiId.getVersion());
+            apiOperationMap.setBackendOperation(backendOperation);
+            uriTemplate.setApiOperationMapping(apiOperationMap);
+        }
+
+        return uriTemplate;
+    }
+
+    private ObjectMapper getObjectMapper() {
+
+        return new ObjectMapper()
+                .enable(SerializationFeature.INDENT_OUTPUT)
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    }
+
+    private OperationMatch findMatchingOperation(Swagger swagger, String target, String verb) {
+
+        for (Map.Entry<String, Path> pathEntry : swagger.getPaths().entrySet()) {
+            for (Map.Entry<HttpMethod, Operation> opEntry : pathEntry.getValue().getOperationMap().entrySet()) {
+                if (pathEntry.getKey().equals(target) &&
+                        opEntry.getKey().toString().equalsIgnoreCase(verb)) {
+                    return new OperationMatch(pathEntry.getKey(), opEntry.getKey(), opEntry.getValue());
+                }
+            }
+        }
         return null;
+    }
+
+    private Map<String, Object> buildUnifiedInputSchema(List<Parameter> parameters, Swagger swagger) {
+
+        Map<String, Object> root = new LinkedHashMap<>();
+        root.put("type", "object");
+
+        Map<String, Object> props = new LinkedHashMap<>();
+        List<String> requiredFields = new ArrayList<>();
+
+        if (parameters != null) {
+            for (Parameter param : parameters) {
+
+                if (param instanceof BodyParameter) {
+                    BodyParameter bodyParam = (BodyParameter) param;
+                    Model rawModel = bodyParam.getSchema();
+                    Model resolvedModel = resolveModel(rawModel, swagger);
+
+                    Map<String, Object> requestBodyNode = new LinkedHashMap<>();
+                    requestBodyNode.put("type", "object");
+                    requestBodyNode.put("contentType", "application/json");
+
+                    if (resolvedModel instanceof ModelImpl) {
+                        ModelImpl modelImpl = (ModelImpl) resolvedModel;
+                        if (modelImpl.getProperties() != null) {
+                            requestBodyNode.put("properties", modelImpl.getProperties());
+                        }
+                        if (modelImpl.getRequired() != null) {
+                            requestBodyNode.put("required", modelImpl.getRequired());
+                        }
+                    }
+
+                    props.put("requestBody", requestBodyNode);
+                    requiredFields.add("requestBody");
+
+                } else if (param instanceof AbstractSerializableParameter) {
+                    AbstractSerializableParameter<?> serialParam = (AbstractSerializableParameter<?>) param;
+
+                    String name = serialParam.getIn() + "_" + serialParam.getName();
+                    Map<String, Object> paramSchema = new LinkedHashMap<>();
+
+                    paramSchema.put("type", serialParam.getType());
+                    if (serialParam.getFormat() != null) paramSchema.put("format", serialParam.getFormat());
+                    if (serialParam.getEnum() != null) paramSchema.put("enum", serialParam.getEnum());
+                    if (serialParam.getDefault() != null) paramSchema.put("default", serialParam.getDefault());
+                    if (param.getDescription() != null) paramSchema.put("description", param.getDescription());
+
+                    props.put(name, paramSchema);
+                    if (Boolean.TRUE.equals(serialParam.getRequired())) {
+                        requiredFields.add(name);
+                    }
+                }
+            }
+        }
+
+        root.put("properties", props);
+        if (!requiredFields.isEmpty()) {
+            root.put("required", requiredFields);
+        }
+
+        return root;
+    }
+
+    private Model resolveModel(Model model, Swagger swagger) {
+
+        if (model == null) return null;
+
+        while (model instanceof RefModel) {
+            String ref = ((RefModel) model).getSimpleRef();
+            Model resolved = swagger.getDefinitions().get(ref);
+            if (resolved == null || resolved == model) break;
+            model = resolved;
+        }
+
+        if (model instanceof ComposedModel) {
+            ComposedModel composed = (ComposedModel) model;
+            ModelImpl merged = new ModelImpl();
+            Map<String, Property> mergedProps = new LinkedHashMap<>();
+            List<String> mergedRequired = new ArrayList<>();
+
+            if (composed.getAllOf() != null) {
+                for (Model part : composed.getAllOf()) {
+                    Model resolvedPart = resolveModel(part, swagger);
+                    if (resolvedPart instanceof ModelImpl) {
+                        ModelImpl impl = (ModelImpl) resolvedPart;
+                        if (impl.getProperties() != null) mergedProps.putAll(impl.getProperties());
+                        if (impl.getRequired() != null) mergedRequired.addAll(impl.getRequired());
+                    }
+                }
+            }
+
+            merged.setProperties(mergedProps);
+            merged.setRequired(mergedRequired);
+            return merged;
+        }
+
+        if (model instanceof ModelImpl && model.getProperties() != null) {
+            Map<String, Property> resolvedProps = new LinkedHashMap<>();
+            for (Map.Entry<String, Property> entry : model.getProperties().entrySet()) {
+                resolvedProps.put(entry.getKey(), resolveProperty(entry.getValue(), swagger));
+            }
+            model.setProperties(resolvedProps);
+        }
+
+        return model;
+    }
+
+    private Property resolveProperty(Property property, Swagger swagger) {
+
+        if (property instanceof RefProperty) {
+            String ref = ((RefProperty) property).getSimpleRef();
+            Model refModel = swagger.getDefinitions().get(ref);
+            if (refModel instanceof ModelImpl) {
+                ModelImpl impl = (ModelImpl) resolveModel(refModel, swagger);
+                ObjectProperty objProp = new ObjectProperty();
+                if (impl.getProperties() != null) {
+                    Map<String, Property> nested = new LinkedHashMap<>();
+                    for (Map.Entry<String, Property> entry : impl.getProperties().entrySet()) {
+                        nested.put(entry.getKey(), resolveProperty(entry.getValue(), swagger));
+                    }
+                    objProp.setProperties(nested);
+                }
+                return objProp;
+            }
+        } else if (property instanceof ArrayProperty) {
+            ArrayProperty array = (ArrayProperty) property;
+            array.setItems(resolveProperty(array.getItems(), swagger));
+            return array;
+        } else if (property instanceof ObjectProperty) {
+            ObjectProperty obj = (ObjectProperty) property;
+            if (obj.getProperties() != null) {
+                Map<String, Property> resolved = new LinkedHashMap<>();
+                for (Map.Entry<String, Property> entry : obj.getProperties().entrySet()) {
+                    resolved.put(entry.getKey(), resolveProperty(entry.getValue(), swagger));
+                }
+                obj.setProperties(resolved);
+            }
+            return obj;
+        }
+
+        return property;
+    }
+
+    private static class OperationMatch {
+        String path;
+        HttpMethod method;
+        Operation operation;
+
+        OperationMatch(String path, HttpMethod method, Operation operation) {
+            this.path = path;
+            this.method = method;
+            this.operation = operation;
+        }
     }
 }

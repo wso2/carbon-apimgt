@@ -1622,12 +1622,14 @@ public class PublisherCommonUtils {
             } else {
                 oasParser = new OAS3Parser();
             }
+
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
-            String apiDefinition = oasParser.generateAPIDefinition(swaggerData);
-            apiToAdd.setSwaggerDefinition(apiDefinition);
+            String apiDefinition;
             if (APIConstants.API_TYPE_MCP.equals(apiToAdd.getType())
                     && APIConstants.API_SUBTYPE_EXISTING_API.equals(apiToAdd.getSubtype())
                     && !apiDto.getOperations().isEmpty()) {
+
+                apiDefinition = new OAS3Parser().generateAPIDefinition(swaggerData);
 
                 APIOperationsDTO operationDto = apiDto.getOperations().get(0);
                 if (operationDto != null && operationDto.getApiOperationMapping() != null) {
@@ -1645,7 +1647,13 @@ public class PublisherCommonUtils {
                             Map<String, Object> searchResult =
                                     apiProvider.searchPaginatedAPIs(query, organization, 0, 1);
                             if (!searchResult.isEmpty()) {
-                                refApi = (API) searchResult.get(0);
+                                Object result = searchResult.get("apis");
+                                if (result instanceof List && !((List<?>) result).isEmpty()) {
+                                    Object apiObj = ((List<?>) result).get(0);
+                                    if (apiObj instanceof API) {
+                                        refApi = (API) apiObj;
+                                    }
+                                }
                             }
                         }
 
@@ -1657,18 +1665,20 @@ public class PublisherCommonUtils {
 
                         String backendApiDefinition = refApi.getSwaggerDefinition();
                         String subtype = apiDto.getSubtypeConfiguration().getSubtype();
+
                         Set<URITemplate> uriTemplates = generateMCPFeatures(
                                 subtype, backendApiDefinition, apiToAdd.getUriTemplates(), refApi.getId(), oasParser);
                         apiToAdd.setUriTemplates(uriTemplates);
 
                     } catch (IndexOutOfBoundsException e) {
-                        throw new APIManagementException(
-                                "Referenced API search returned no results: " + backendApiName + " " +
-                                        backendApiVersion,
-                                e);
+                        throw new APIManagementException("Referenced API search returned no results: "
+                                + backendApiName + " " + backendApiVersion, e);
                     }
                 }
+            } else {
+                apiDefinition = oasParser.generateAPIDefinition(swaggerData);
             }
+            apiToAdd.setSwaggerDefinition(apiDefinition);
             artifactType = ArtifactType.API;
         } else {
             AsyncApiParser asyncApiParser = new AsyncApiParser();

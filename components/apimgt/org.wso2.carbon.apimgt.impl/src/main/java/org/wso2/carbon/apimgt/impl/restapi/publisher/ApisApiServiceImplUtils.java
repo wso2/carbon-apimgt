@@ -701,7 +701,7 @@ public class ApisApiServiceImplUtils {
         }
         SwaggerData swaggerData;
         String definitionToAdd;
-
+        APIDefinition apiDefinition = validationResponse.getParser();
         if (APIConstants.API_TYPE_MCP.equals(apiToAdd.getType())) {
             BackendEndpoint backendEndpoint = new BackendEndpoint();
             backendEndpoint.setBackendId(UUID.randomUUID().toString());
@@ -711,15 +711,13 @@ public class ApisApiServiceImplUtils {
             apiToAdd.setEndpointConfig(null);
 
             swaggerData = new SwaggerData(apiToAdd);
-            APIDefinition parser = new OAS3Parser();
-            definitionToAdd = parser.generateAPIDefinition(swaggerData);
+            definitionToAdd = new OAS3Parser().generateAPIDefinition(swaggerData);
 
             Set<URITemplate> uriTemplates = generateMCPFeatures(apiToAdd.getSubtype(), backendEndpoint,
-                    apiToAdd.getUriTemplates(), parser);
+                    apiToAdd.getUriTemplates(), apiDefinition);
             apiToAdd.setUriTemplates(uriTemplates);
             apiToAdd.getBackendEndpoints().add(backendEndpoint);
         } else {
-            APIDefinition apiDefinition = validationResponse.getParser();
             definitionToAdd = validationResponse.getJsonContent();
             if (syncOperations) {
                 validateScopes(apiToAdd, apiProvider, username);
@@ -774,8 +772,7 @@ public class ApisApiServiceImplUtils {
      * @throws APIManagementException if generation fails
      */
     public static Set<URITemplate> generateMCPFeatures(String subtype, BackendEndpoint backendEndpoint,
-                                                       Set<URITemplate> uriTemplates,
-                                                       APIDefinition parser)
+                                                       Set<URITemplate> uriTemplates, APIDefinition parser)
             throws APIManagementException {
 
         Set<URITemplate> mcpTools = parser.generateMCPTools(backendEndpoint.getBackendApiDefinition(), null,
