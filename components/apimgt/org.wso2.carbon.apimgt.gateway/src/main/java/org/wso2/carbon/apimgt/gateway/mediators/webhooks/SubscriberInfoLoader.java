@@ -42,7 +42,9 @@ import org.wso2.carbon.apimgt.keymgt.model.entity.Application;
 import org.wso2.carbon.apimgt.keymgt.model.entity.GroupId;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -58,6 +60,7 @@ public class SubscriberInfoLoader extends AbstractMediator {
                 getProperty(APIConstants.Webhooks.SUBSCRIBERS_LIST_PROPERTY);
         int index = (Integer) messageContext.getProperty(APIConstants.CLONED_ITERATION_INDEX_PROPERTY);
         WebhooksDTO subscriber = subscribersList.get(index - 1);
+        removeSignatureHeaderFromTransportHeaders(messageContext);
         if (subscriber != null) {
             boolean canProceed = handleThrottle(subscriber, messageContext);
             if (!canProceed) {
@@ -74,6 +77,22 @@ public class SubscriberInfoLoader extends AbstractMediator {
             messageContext.setProperty(APIMgtGatewayConstants.SUBSCRIBER_LINK_HEADER_PROPERTY, linkHeader);
         }
         return true;
+    }
+
+    private void removeSignatureHeaderFromTransportHeaders(MessageContext messageContext) {
+        String signatureHeaderName = (String) messageContext.getProperty(APIConstants.Webhooks.SIGNATURE_HEADER_NAME_PROPERTY);
+        if (signatureHeaderName != null && !signatureHeaderName.isEmpty()) {
+            org.apache.axis2.context.MessageContext axisCtx = ((Axis2MessageContext) messageContext).
+                    getAxis2MessageContext();
+            if (axisCtx!=null) {
+                Object headers = axisCtx.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+                Map transportHeaders = (Map) headers;
+                if (transportHeaders != null) {
+                    transportHeaders.keySet().removeIf(key -> key instanceof String && ((String) key).toLowerCase()
+                            .startsWith(signatureHeaderName.toLowerCase()));
+                }
+            }
+        }
     }
 
     private boolean handleThrottle(WebhooksDTO subscriber, MessageContext messageContext) {
