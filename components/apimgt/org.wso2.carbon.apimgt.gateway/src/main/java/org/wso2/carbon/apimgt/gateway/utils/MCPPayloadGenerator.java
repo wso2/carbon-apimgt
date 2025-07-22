@@ -2,8 +2,12 @@ package org.wso2.carbon.apimgt.gateway.utils;
 
 import com.google.gson.*;
 import org.wso2.carbon.apimgt.api.model.mcp.MCPResponse;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.gateway.mcp.response.McpError;
+import org.wso2.carbon.apimgt.gateway.mcp.response.McpErrorResponse;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import java.util.List;
 import java.util.Map;
 
 public class MCPPayloadGenerator {
@@ -50,27 +54,27 @@ public class MCPPayloadGenerator {
         return gson.toJson(responseObject);
     }
 
-    public static String generateToolListPayload(Object id, List<ExtendedOperation> extendedOperations) {
-        MCPResponse response = new MCPResponse(id);
-        JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
-        JsonObject result = new JsonObject();
-        JsonArray toolsArray = new JsonArray();
-        for (ExtendedOperation extendedOperation : extendedOperations) {
-            JsonObject toolObject = new JsonObject();
-            toolObject.addProperty(APIConstants.MCP.TOOL_NAME_KEY, extendedOperation.getName());
-            toolObject.addProperty(APIConstants.MCP.TOOL_DESC_KEY, extendedOperation.getDescription());
-            String schema = extendedOperation.getSchema();
-            if (schema != null) {
-                JsonObject schemaObject = gson.fromJson(schema, JsonObject.class);
-                toolObject.add("inputSchema", sanitizeInputSchema(schemaObject));
-            }
-            toolsArray.add(toolObject);
-        }
-        result.add("tools", toolsArray);
-        responseObject.add(APIConstants.MCP.RESULT_KEY, result);
-
-        return gson.toJson(responseObject);
-    }
+//    public static String generateToolListPayload(Object id, List<ExtendedOperation> extendedOperations) {
+//        MCPResponse response = new MCPResponse(id);
+//        JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
+//        JsonObject result = new JsonObject();
+//        JsonArray toolsArray = new JsonArray();
+//        for (ExtendedOperation extendedOperation : extendedOperations) {
+//            JsonObject toolObject = new JsonObject();
+//            toolObject.addProperty(APIConstants.MCP.TOOL_NAME_KEY, extendedOperation.getName());
+//            toolObject.addProperty(APIConstants.MCP.TOOL_DESC_KEY, extendedOperation.getDescription());
+//            String schema = extendedOperation.getSchema();
+//            if (schema != null) {
+//                JsonObject schemaObject = gson.fromJson(schema, JsonObject.class);
+//                toolObject.add("inputSchema", sanitizeInputSchema(schemaObject));
+//            }
+//            toolsArray.add(toolObject);
+//        }
+//        result.add("tools", toolsArray);
+//        responseObject.add(APIConstants.MCP.RESULT_KEY, result);
+//
+//        return gson.toJson(responseObject);
+//    }
 
     private static JsonObject sanitizeInputSchema(JsonObject inputObject) {
         if (inputObject == null || inputObject.isEmpty()) {
@@ -110,34 +114,34 @@ public class MCPPayloadGenerator {
 
 
     // not relevant to On prem MCP
-    public static JsonObject generateTransformationRequestPayload(String toolName, String vHost, String args,
-                                                                  ExtendedOperation extendedOperation,
-                                                                  String authParam) {
-        StringBuilder sb = new StringBuilder("https://");
-        JsonObject payload = new JsonObject();
-        payload.addProperty(APIConstants.MCP.PAYLOAD_TOOL_NAME, toolName);
-        payload.addProperty(APIConstants.MCP.PAYLOAD_SCHEMA, extendedOperation.getSchema());
-
-        JsonObject apiInfo = new JsonObject();
-        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_API_NAME, extendedOperation.getApiName());
-        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_CONTEXT, extendedOperation.getApiContext());
-        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_VERSION, extendedOperation.getApiVersion());
-        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_PATH, extendedOperation.getApiTarget());
-        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_VERB, extendedOperation.getApiVerb());
-        if (!authParam.isEmpty()) {
-            apiInfo.addProperty(APIConstants.MCP.PAYLOAD_AUTH, authParam);
-        }
-        if ("localhost".equals(vHost)) {
-            sb.append("router").append(":").append("9095");
-        } else {
-            sb.append(vHost);
-        }
-        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_ENDPOINT, sb.toString());
-        payload.add("api", apiInfo);
-
-        payload.addProperty(APIConstants.MCP.ARGUMENTS_KEY, args);
-        return payload;
-    }
+//    public static JsonObject generateTransformationRequestPayload(String toolName, String vHost, String args,
+//                                                                  ExtendedOperation extendedOperation,
+//                                                                  String authParam) {
+//        StringBuilder sb = new StringBuilder("https://");
+//        JsonObject payload = new JsonObject();
+//        payload.addProperty(APIConstants.MCP.PAYLOAD_TOOL_NAME, toolName);
+//        payload.addProperty(APIConstants.MCP.PAYLOAD_SCHEMA, extendedOperation.getSchema());
+//
+//        JsonObject apiInfo = new JsonObject();
+//        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_API_NAME, extendedOperation.getApiName());
+//        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_CONTEXT, extendedOperation.getApiContext());
+//        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_VERSION, extendedOperation.getApiVersion());
+//        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_PATH, extendedOperation.getApiTarget());
+//        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_VERB, extendedOperation.getApiVerb());
+//        if (!authParam.isEmpty()) {
+//            apiInfo.addProperty(APIConstants.MCP.PAYLOAD_AUTH, authParam);
+//        }
+//        if ("localhost".equals(vHost)) {
+//            sb.append("router").append(":").append("9095");
+//        } else {
+//            sb.append(vHost);
+//        }
+//        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_ENDPOINT, sb.toString());
+//        payload.add("api", apiInfo);
+//
+//        payload.addProperty(APIConstants.MCP.ARGUMENTS_KEY, args);
+//        return payload;
+//    }
 
     public static String generateMCPResponsePayload(Object id, boolean isError, String body) {
         MCPResponse response = new MCPResponse(id);

@@ -297,7 +297,7 @@ public class APIKeyValidationService {
             if("MCP".equals(api.getApiType())) {
                 // TODO: Replace these with actual values from the URL Mapping when the backend id done
                 template.setDescription("Use this tool to get the menu items of restaurant");
-                template.setShemaDefinition("{\n" +
+                template.setSchemaDefinition("{\n" +
                         "  \"type\": \"object\",\n" +
                         "  \"properties\": {\n" +
                         "    \"menuItems\": {\n" +

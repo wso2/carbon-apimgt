@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.gateway.exception;
 
+import org.wso2.carbon.apimgt.gateway.utils.MCPPayloadGenerator;
+
 /**
  * This class is used to throw MCP related errors
  */
@@ -46,6 +48,6 @@ public class McpException extends Exception {
     }
 
     public String toJsonRpcErrorPayload() {
-        return PayloadGenerator.getErrorResponse(errorCode, errorMessage, data);
+        return MCPPayloadGenerator.getErrorResponse(errorCode, errorMessage, data);
     }
 }

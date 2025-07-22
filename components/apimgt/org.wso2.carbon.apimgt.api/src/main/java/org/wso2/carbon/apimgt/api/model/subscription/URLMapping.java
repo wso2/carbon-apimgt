@@ -33,7 +33,7 @@ public class URLMapping {
     private String httpMethod;
     private String urlPattern;
     private String description;
-    private String shemaDefinition;
+    private String schemaDefinition;
     private List<String> scopes = new ArrayList<>();
     private Set<OperationPolicy> operationPolicies = new HashSet<>();
 
@@ -45,12 +45,12 @@ public class URLMapping {
         this.description = description;
     }
 
-    public String getShemaDefinition() {
-        return shemaDefinition;
+    public String getSchemaDefinition() {
+        return schemaDefinition;
     }
 
-    public void setShemaDefinition(String shemaDefinition) {
-        this.shemaDefinition = shemaDefinition;
+    public void setSchemaDefinition(String shemaDefinition) {
+        this.schemaDefinition = shemaDefinition;
     }
 
     public String getHttpMethod() {
