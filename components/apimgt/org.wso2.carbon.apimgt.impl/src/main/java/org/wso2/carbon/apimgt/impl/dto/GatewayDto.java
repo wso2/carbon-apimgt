@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
-import org.wso2.carbon.apimgt.api.model.FederatedAPIDiscovery;
+import org.wso2.carbon.apimgt.api.FederatedAPIDiscovery;
 import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 
 public class GatewayDto {

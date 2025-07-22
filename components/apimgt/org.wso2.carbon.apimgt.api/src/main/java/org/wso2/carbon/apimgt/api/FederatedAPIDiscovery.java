@@ -18,11 +18,11 @@
  *
  */
 
-package org.wso2.carbon.apimgt.api.model;
+package org.wso2.carbon.apimgt.api;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.Environment;
 
 import java.util.List;
 import java.util.Map;
