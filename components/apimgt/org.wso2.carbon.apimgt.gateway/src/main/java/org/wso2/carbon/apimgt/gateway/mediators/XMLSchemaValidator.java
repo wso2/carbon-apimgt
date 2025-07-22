@@ -68,9 +68,6 @@ public class XMLSchemaValidator extends AbstractMediator {
      * @return A boolean value.True if successful and false if not.
      */
     public boolean mediate(MessageContext messageContext) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("XML validation mediator is activated...");
-        }
         InputStream inputStreamSchema;
         InputStream inputStreamXml;
         Boolean xmlValidationStatus;
@@ -90,6 +87,10 @@ public class XMLSchemaValidator extends AbstractMediator {
             contentType = axis2MC.getProperty(ThreatProtectorConstants.SOAP_CONTENT_TYPE).toString();
         }
         apiContext = messageContext.getProperty(ThreatProtectorConstants.API_CONTEXT).toString();
+        if (logger.isDebugEnabled()) {
+            logger.debug("XML schema validation mediator is activated... API Context: "
+                    + apiContext + ", Request Method: " + requestMethod);
+        }
         if (!APIConstants.SupportedHTTPVerbs.GET.name().equalsIgnoreCase(requestMethod) &&
                 (ThreatProtectorConstants.APPLICATION_XML.equals(contentType) ||
                         ThreatProtectorConstants.TEXT_XML.equals(contentType))) {
@@ -116,11 +117,13 @@ public class XMLSchemaValidator extends AbstractMediator {
                     }
                 }
             } catch (APIMThreatAnalyzerException e) {
-                logger.error(APIMgtGatewayConstants.BAD_REQUEST, e);
+                logger.error("APIMThreatAnalyzerException occurred while analyzing the XML payload: "
+                        + APIMgtGatewayConstants.BAD_REQUEST, e);
                 isValid = GatewayUtils.handleThreat(messageContext, ThreatProtectorConstants.HTTP_SC_CODE, e.getMessage());
 
             } catch (IOException | XMLStreamException e) {
-                logger.error(APIMgtGatewayConstants.BAD_REQUEST, e);
+                logger.error("Error occurred while processing the XML payload: "
+                        + APIMgtGatewayConstants.BAD_REQUEST, e);
                 isValid = GatewayUtils.handleThreat(messageContext, APIMgtGatewayConstants.HTTP_SC_CODE, e.getMessage());
 
             } finally {
@@ -297,20 +300,23 @@ public class XMLSchemaValidator extends AbstractMediator {
             RelayUtils.buildMessage(axis2MC);
             SOAPEnvelope envelope = axis2MC.getEnvelope();
             if (envelope == null) {
+                logger.debug("SOAP envelope is missing in the message");
                 throw new XMLStreamException(APIMgtGatewayConstants.INVALID_XML_FORMAT_MSG);
             }
             SOAPBody body = envelope.getBody();
             if (body == null) {
+                logger.debug("SOAP body is missing in the message");
                 throw new XMLStreamException(APIMgtGatewayConstants.INVALID_XML_FORMAT_MSG);
             }
             OMElement firstElement = body.getFirstElement();
             if (firstElement == null) {
+                logger.debug("First element is missing in the SOAP body");
                 throw new XMLStreamException(APIMgtGatewayConstants.INVALID_XML_FORMAT_MSG);
             }
             return firstElement.toString();
 
         } catch (OMException e) {
-            throw new XMLStreamException(APIMgtGatewayConstants.INVALID_XML_FORMAT_MSG);
+            throw new XMLStreamException(APIMgtGatewayConstants.INVALID_XML_FORMAT_MSG, e);
         }
     }
 }

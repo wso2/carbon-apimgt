@@ -56,9 +56,6 @@ public class JsonSchemaValidator extends AbstractMediator {
      * @return a boolean true if the message content is passed the json schema criteria.
      */
     public boolean mediate(MessageContext messageContext) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("JSON schema validation mediator is activated...");
-        }
         org.apache.axis2.context.MessageContext axis2MC;
         String apiContext;
         String requestMethod;
@@ -77,6 +74,10 @@ public class JsonSchemaValidator extends AbstractMediator {
         apiContext = messageContext.getProperty(ThreatProtectorConstants.API_CONTEXT).toString();
         requestMethod = axis2MC.getProperty(ThreatProtectorConstants.HTTP_REQUEST_METHOD).toString();
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("JSON schema validation mediator is activated... API Context: "
+                    + apiContext + ", Request Method: " + requestMethod);
+        }
         if (!APIConstants.SupportedHTTPVerbs.GET.name().equalsIgnoreCase(requestMethod) &&
                 (ThreatProtectorConstants.APPLICATION_JSON.equals(contentType) ||
                         ThreatProtectorConstants.TEXT_JSON.equals(contentType))) {
