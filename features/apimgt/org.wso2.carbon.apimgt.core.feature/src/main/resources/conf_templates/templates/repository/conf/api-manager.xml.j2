@@ -1826,11 +1826,13 @@
       {% endif %}
 
       <TenantSharingConfigs>
-          <EnableTenantSync>{{apim.tenant_sharing.enable_tenant_sync}}</EnableTenantSync>
-          <AutoConfigureKeyManager>{{apim.tenant_sharing.auto_configure_key_manager_of_current_type}}</AutoConfigureKeyManager>
-          <ReservedUserName>{{apim.tenant_sharing.reserved_user_name}}</ReservedUserName>
-          <ReservedUserPassword>{{apim.tenant_sharing.reserved_user_password}}</ReservedUserPassword>
-          <IdentityServerBaseUrl>{{apim.tenant_sharing.identity_server_base_url}}</IdentityServerBaseUrl>
+        {% for tenant_sharing_config in apim.tenant_sharing %}
+        <TenantSharingConfig type="{{tenant_sharing_config.type}}">
+            {% for key,value in tenant_sharing_config.properties.items() %}
+            <Property name="{{key}}">{{value}}</Property>
+            {% endfor %}
+        </TenantSharingConfig>
+        {% endfor %}
       </TenantSharingConfigs>
 
       <Hashing>

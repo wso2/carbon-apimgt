@@ -2860,6 +2860,7 @@ public final class APIConstants {
         public static final String DEFAULT_KEY_MANAGER_TYPE = "default";
         public static final String DEFAULT_KEY_MANAGER_DESCRIPTION = "This is Resident Key Manager";
         public static final String WSO2_IS_KEY_MANAGER_TYPE = "WSO2-IS";
+        public static final String WSO2_IS7_KEY_MANAGER_TYPE = "WSO2-IS-7";
         public static final String SP_NAME_APPLICATION = "sp.name.application";
 
         public static final String ISSUER = "issuer";
@@ -3424,13 +3425,18 @@ public final class APIConstants {
     public static final String ORG_BASED_ACCESS_CONTROL_ORG_NAME_CLAIM = "OrganizationNameLocalClaim";
     public static final String ORG_BASED_ACCESS_CONTROL_ORG_ID_CLAIM = "OrganizationIDLocalClaim";
 
-    public static class TenantSharingConfigs {
-        public static final String TENANT_SHARING_CONFIGS = "TenantSharingConfigs";
-        public static final String ENABLE_TENANT_SYNC = "EnableTenantSync";
-        public static final String AUTO_CONFIGURE_KEY_MANAGER = "AutoConfigureKeyManager";
-        public static final String RESERVED_USER_NAME = "ReservedUserName";
-        public static final String RESERVED_USER_PASSWORD = "ReservedUserPassword";
-        public static final String IDENTITY_SERVER_BASE_URL = "IdentityServerBaseUrl";
+    public static final String TENANT_SHARING_CONFIGS = "TenantSharingConfigs";
+    public static final String TENANT_SHARING_CONFIG = "TenantSharingConfig";
+    public static final String TENANT_SHARING_CONFIG_TYPE = "type";
+    public static final String TENANT_SHARING_CONFIG_PROPERTY = "Property";
+    public static final String TENANT_SHARING_CONFIG_PROPERTY_KEY = "name";
+
+    public static class IS7TenantSharingConfigs {
+        public static final String ENABLE_TENANT_SYNC = "enable_tenant_sync";
+        public static final String AUTO_CONFIGURE_KEY_MANAGER = "auto_configure_key_manager";
+        public static final String USERNAME = "username";
+        public static final String PASSWORD = "password";
+        public static final String IDENTITY_SERVER_BASE_URL = "identity_server_base_url";
     }
 
     public static class TransactionCounter {
