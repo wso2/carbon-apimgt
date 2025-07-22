@@ -1,49 +1,32 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * This class represents the Tenant Sharing Configuration DTO.
+ */
 public class TenantSharingConfigurationDTO {
-    private boolean isTenantSyncEnabled;
-    private boolean autoConfigureKeyManagerOfCurrentType;
-    private String reservedUserName;
-    private String reservedUserPassword;
-    private String identityServerBaseUrl;
+    private String type;
+    private Map<String, String> properties = new HashMap<>();
 
-    public boolean getIsTenantSyncEnabled() {
-        return isTenantSyncEnabled;
+    public String getType() {
+
+        return type;
     }
 
-    public void setIsTenantSyncEnabled(boolean isTenantSyncEnabled) {
-        this.isTenantSyncEnabled = isTenantSyncEnabled;
+    public void setType(String type) {
+
+        this.type = type;
     }
 
-    public boolean getIsAutoConfigureKeyManagerOfCurrentType() {
-        return autoConfigureKeyManagerOfCurrentType;
+    public Map<String, String> getProperties() {
+
+        return properties;
     }
 
-    public void setAutoConfigureKeyManagerOfCurrentType(boolean autoConfigureKeyManagerOfCurrentType) {
-        this.autoConfigureKeyManagerOfCurrentType = autoConfigureKeyManagerOfCurrentType;
-    }
+    public void setProperties(Map<String, String> properties) {
 
-    public String getReservedUserName() {
-        return reservedUserName;
-    }
-
-    public void setReservedUserName(String reservedUserName) {
-        this.reservedUserName = reservedUserName;
-    }
-
-    public String getReservedUserPassword() {
-        return reservedUserPassword;
-    }
-
-    public void setReservedUserPassword(String reservedUserPassword) {
-        this.reservedUserPassword = reservedUserPassword;
-    }
-
-    public String getIdentityServerBaseUrl() {
-        return identityServerBaseUrl;
-    }
-
-    public void setIdentityServerBaseUrl(String identityServerBaseUrl) {
-        this.identityServerBaseUrl = identityServerBaseUrl;
+        this.properties = properties;
     }
 }
