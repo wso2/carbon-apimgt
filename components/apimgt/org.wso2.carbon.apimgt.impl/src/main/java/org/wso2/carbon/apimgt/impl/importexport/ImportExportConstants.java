@@ -324,4 +324,6 @@ public final class ImportExportConstants {
     // API Endpoints related constants
     public static final String API_ENDPOINTS_TYPE = "endpoints";
     public static final String API_ENDPOINTS_FILE_LOCATION = File.separator + "endpoints";
+
+    public static final String API_NAME_DELIMITER = "-";
 }

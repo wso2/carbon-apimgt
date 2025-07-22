@@ -2846,13 +2846,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public void deleteAPIRevisions(String apiUUID, String organization) throws APIManagementException {
+        boolean isAPIInitiatedFromGateway = apiMgtDAO.getIsAPIInitiatedFromGateway(apiUUID);
         List<APIRevision> apiRevisionList = apiMgtDAO.getRevisionsListByAPIUUID(apiUUID);
         WorkflowExecutor apiRevisionDeploymentWFExecutor = getWorkflowExecutor(
                 WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
         WorkflowDTO wfDTO;
 
         for (APIRevision apiRevision : apiRevisionList) {
-            if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
+            if (!apiRevision.getApiRevisionDeploymentList().isEmpty() && !isAPIInitiatedFromGateway) {
                 undeployAPIRevisionDeployment(apiUUID, apiRevision.getRevisionUUID(),
                         apiRevision.getApiRevisionDeploymentList(), organization);
             }
@@ -8492,6 +8493,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public Map<String, String> getApiThemes(String organization, String apiId) throws APIManagementException {
         return apiMgtDAO.getApiThemes(organization, apiId);
+    }
+
+    @Override
+    public boolean isAPIInitiatedFromGateway(String apiUUID) throws APIManagementException {
+        return apiMgtDAO.getIsAPIInitiatedFromGateway(apiUUID);
     }
 
     @Override

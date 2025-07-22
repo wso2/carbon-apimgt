@@ -18991,6 +18991,30 @@ public class ApiMgtDAO {
     }
 
     /**
+     * Check if the API is a discovered API or Created API from WSO2 APIM
+     * @param apiUUID
+     * @return
+     * @throws APIManagementException
+     */
+    public boolean getIsAPIInitiatedFromGateway(String apiUUID) throws APIManagementException {
+        boolean initiatedFromGateway = false;
+
+        try (Connection connection = APIMgtDBUtil.getConnection();
+             PreparedStatement statement = connection
+                     .prepareStatement(SQLConstants.APIRevisionSqlConstants.GET_IS_API_PROXY_CREATED_FROM_GW)) {
+            statement.setString(1, apiUUID);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    initiatedFromGateway = rs.getInt("INITIATED_FROM_GW") == 1;
+                }
+            }
+        } catch (SQLException e) {
+            handleException("Failed to get is api originated from gateway for API UUID: " + apiUUID, e);
+        }
+        return initiatedFromGateway;
+    }
+
+    /**
      * Get the latest revision UUID from the revision list for a given API
      *
      * @param apiUUID UUID of the API

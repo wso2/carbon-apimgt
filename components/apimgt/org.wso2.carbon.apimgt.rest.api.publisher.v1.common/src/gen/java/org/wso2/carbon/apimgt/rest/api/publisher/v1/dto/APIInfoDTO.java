@@ -123,6 +123,7 @@ return null;
   }
 
   /**
+   * Display name of the API. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. 
    **/
   public APIInfoDTO displayName(String displayName) {
     this.displayName = displayName;
@@ -130,7 +131,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "Calculator API", value = "")
+  @ApiModelProperty(example = "Calculator API", value = "Display name of the API. This is the name that will be displayed in the Publisher and DevPortal. If not provided, the name will be used as the display name. ")
   @JsonProperty("displayName")
   public String getDisplayName() {
     return displayName;

@@ -2286,4 +2286,13 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If a database error occurs.
      */
     Map<String, String> getApiThemes(String organization, String apiId) throws APIManagementException;
+
+    /**
+     * Checks whether the API is initiated from the gateway.
+     *
+     * @param apiUUID Unique identifier of the API
+     * @return true if the API is initiated from the gateway, false otherwise
+     * @throws APIManagementException if an error occurs while checking the API initiation
+     */
+    boolean isAPIInitiatedFromGateway(String apiUUID) throws APIManagementException;
 }
