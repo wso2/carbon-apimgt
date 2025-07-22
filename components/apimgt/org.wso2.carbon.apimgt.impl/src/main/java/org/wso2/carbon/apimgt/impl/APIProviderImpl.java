@@ -1832,7 +1832,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void validateAPIPolicyParameters(API api, String tenantDomain) throws APIManagementException {
 
-        if (APIConstants.API_TYPE_WS.equals(api.getType()) || APIConstants.API_TYPE_SSE.equals(api.getType())
+        if (APIConstants.API_TYPE_SSE.equals(api.getType())
                 || APIConstants.API_TYPE_WEBSUB.equals(api.getType())) {
             if (log.isDebugEnabled()) {
                 log.debug("Operation policies are not allowed for " + api.getType() + " APIs");
