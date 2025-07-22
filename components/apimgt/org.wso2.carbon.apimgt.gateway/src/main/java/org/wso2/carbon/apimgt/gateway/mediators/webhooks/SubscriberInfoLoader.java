@@ -81,6 +81,9 @@ public class SubscriberInfoLoader extends AbstractMediator {
 
     private void removeSignatureHeaderFromTransportHeaders(MessageContext messageContext) {
         String signatureHeaderName = (String) messageContext.getProperty(APIConstants.Webhooks.SIGNATURE_HEADER_NAME_PROPERTY);
+        if (log.isDebugEnabled()) {
+            log.debug("Removing signature header: " + signatureHeaderName);
+        }
         if (signatureHeaderName != null && !signatureHeaderName.isEmpty()) {
             org.apache.axis2.context.MessageContext axisCtx = ((Axis2MessageContext) messageContext).
                     getAxis2MessageContext();
