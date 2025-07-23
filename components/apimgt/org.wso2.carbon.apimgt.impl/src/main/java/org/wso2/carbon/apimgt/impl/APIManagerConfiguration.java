@@ -1402,6 +1402,14 @@ public class APIManagerConfiguration {
                 throttleProperties.setSkipRedeployingPolicies(skipRedeployingPoliciesElement
                         .getText().split(APIConstants.DELEM_COMMA));
             }
+            // Check skip deploy throttle policies
+            OMElement skipDeployingPoliciesElement = throttleConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
+                            .SKIP_DEPLOYING_POLICIES));
+            if (skipDeployingPoliciesElement != null) {
+                throttleProperties.setSkipDeployingPolicies(skipDeployingPoliciesElement
+                        .getText().split(APIConstants.DELEM_COMMA));
+            }
             OMElement enablePolicyDeployElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLE_POLICY_DEPLOYMENT));
             if (enablePolicyDeployElement != null) {

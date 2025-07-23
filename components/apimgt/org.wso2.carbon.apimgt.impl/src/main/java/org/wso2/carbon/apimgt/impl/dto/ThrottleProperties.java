@@ -47,6 +47,7 @@ public class ThrottleProperties {
     private boolean enableJwtConditions = false;
     private boolean enableQueryParamConditions =false;
     private String[] skipRedeployingPolicies = new String[]{};
+    private String[] skipDeployingPolicies = new String[]{};
     private Map<String, Long> defaultThrottleTierLimits = new HashMap<String, Long>();
     private boolean enablePolicyRecreate;
     private TrafficManager trafficManager;
@@ -640,6 +641,13 @@ public class ThrottleProperties {
 
     public void setSkipRedeployingPolicies(String[] skipRedeployingPolicies) {
         this.skipRedeployingPolicies = skipRedeployingPolicies;
+    }
+    public String[] getSkipDeployingPolicies() {
+        return skipDeployingPolicies;
+    }
+
+    public void setSkipDeployingPolicies(String[] skipDeployingPolicies) {
+        this.skipDeployingPolicies = skipDeployingPolicies;
     }
 }
 
