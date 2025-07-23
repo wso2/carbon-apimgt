@@ -31,8 +31,6 @@ public class APIMgtGatewayConstants {
     public static final String RESOURCE = "api.ut.resource";
     public static final String API_STATUS = "api.ut.status";
     public static final String HTTP_METHOD = "api.ut.HTTP_METHOD";
-    public static final String MCP_METHOD = "api.ut.MCP_METHOD";
-    public static final String MCP_REQUEST_BODY = "MCP_REQUEST_BODY";
     public static final String HOST_NAME = "api.ut.hostName";
     public static final String API_PUBLISHER = "api.ut.apiPublisher";
     public static final String OPEN_API_OBJECT = "OPEN_API_OBJECT";
@@ -205,5 +203,14 @@ public class APIMgtGatewayConstants {
     public static final String SHOULD_ALLOW_ACCESS_VALIDATION = "shouldAllowValidation";
 
     public static final String INCLUDE_TOKEN_INFO_IN_MSG_CTX= "includeTokenInfoInMsgCtx";
+
+    /**
+     * MCP related Constants
+     */
+    public static final String MCP_METHOD = "api.ut.MCP_METHOD";
+    public static final String MCP_REQUEST_BODY = "MCP_REQUEST_BODY";
+    public static final String MCP_NO_AUTH_REQUEST = "MCP_NO_AUTH_REQUEST";
+    public static final String MCP_RESOURCE= "/mcp";
+    public static final String MCP_WELL_KNOWN_RESOURCE = "/.well-known/oauth-authorization-server";
 }
 

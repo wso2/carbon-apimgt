@@ -21,33 +21,18 @@ package org.wso2.carbon.apimgt.gateway.exception;
 import org.wso2.carbon.apimgt.gateway.utils.MCPPayloadGenerator;
 
 /**
- * This class is used to throw MCP related errors
+ * This class is used to throw MCP related errors with an ID.
  */
-public class McpException extends Exception {
-    private final int errorCode;
-    private final String errorMessage;
-    private final Object data;
+public class McpExceptionWithId extends McpException {
+    private Object id;
 
-    public McpException(int errorCode, String errorMessage, Object data) {
-        super(errorMessage);
-        this.errorCode = errorCode;
-        this.errorMessage = errorMessage;
-        this.data = data;
+    public McpExceptionWithId(Object id, int errorCode, String errorMessage, Object data) {
+        super(errorCode, errorMessage, data);
+        this.id = id;
     }
 
-    public int getErrorCode() {
-        return errorCode;
-    }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
-
-    public Object getData() {
-        return data;
-    }
-
+    @Override
     public String toJsonRpcErrorPayload() {
-        return MCPPayloadGenerator.getErrorResponse(errorCode, errorMessage, data);
+        return MCPPayloadGenerator.getErrorResponse(id, getErrorCode(), getErrorMessage(), getData());
     }
 }

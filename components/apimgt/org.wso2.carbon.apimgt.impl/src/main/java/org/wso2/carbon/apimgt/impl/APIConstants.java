@@ -491,6 +491,7 @@ public final class APIConstants {
     public static final String API_KEY_HEADER = "ApiKeyHeader";
     public static final String API_SECURITY = "APISecurity";
     public static final String API_LEVEL_POLICY = "APILevelPolicy";
+    public static final String API_TYPE_PROP = "ApiType";
     public static final String CERTIFICATE_INFORMATION = "CertificateInformation";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
     public static final String API_KEY_HEADER_DEFAULT = "ApiKey";
@@ -3484,7 +3485,12 @@ public final class APIConstants {
         public static final String PROTOCOL_VERSION_KEY = "protocolVersion";
         public static final String PROTOCOL_VERSION_2024_NOVEMBER = "2024-11-05";
         public static final String PROTOCOL_VERSION_2025_MARCH = "2025-03-26";
+        public static final String PROTOCOL_VERSION_2025_JUNE = "2025-06-18";
+        // TODO : Update to latest MCP protocol version
         public static final List<String> SUPPORTED_PROTOCOL_VERSIONS = Arrays.asList(PROTOCOL_VERSION_2025_MARCH);
+        public static final String PROTOCOL_VERSION_REQUESTED = "requested";
+        public static final String PROTOCOL_VERSION_SUPPORTED = "supported";
+        public static final String PROTOCOL_MISMATCH_ERROR = "Unsupported protocol version";
         public static final String PARAMS_KEY = "params";
         public static final String TOOL_NAME_KEY = "name";
         public static final String TOOL_DESC_KEY = "description";
