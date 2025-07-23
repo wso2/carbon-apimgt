@@ -2503,7 +2503,7 @@ paths:
           source: 'curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://localhost:9443/api/am/publisher/v4/apis/e93fb282-b456-48fc-8981-003fb89086ae/comments/d4cf1704-5d09-491c-bc48-4d19ce6ea9b4/replies"'
 
-  /mcp-servers/import-mcp-server:
+  /mcp-servers/create-from-openapi:
     post:
       tags:
         - MCP Servers
@@ -2513,7 +2513,7 @@ paths:
         either `url` or `file` to specify the definition.
 
         Specify additionalProperties with **at least** API's name, version, context and endpointConfig.
-      operationId: importMCPServerDefinition
+      operationId: createMCPServerFromOpenAPI
       requestBody:
         content:
           multipart/form-data:
@@ -2561,8 +2561,8 @@ paths:
           $ref: '#/components/responses/UnsupportedMediaType'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file=@openapi.json 
@@ -2583,7 +2583,7 @@ paths:
       parameters:
         - name: openAPIVersion
           in: query
-          description: Open api version
+          description: Open API version
           schema:
             type: string
             default: v3
@@ -2629,8 +2629,8 @@ paths:
           $ref: '#/components/responses/UnsupportedMediaType'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2641,7 +2641,7 @@ paths:
       tags:
         - MCP Servers
       summary: |
-        Retrieve/Search MCP servers
+        Retrieve/Search MCP Servers
       description: |
         This operation provides you a list of available MCP servers qualifying under a given search condition.
 
@@ -2707,17 +2707,17 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-            - apim:api_import_export
-            - apim:api_list_view
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
+            - apim:mcp_server_import_export
+            - apim:mcp_server_list_view
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers"'
       operationId: getAllMCPServers
 
-  /mcp-servers/{apiId}:
+  /mcp-servers/{mcpServerId}:
     get:
       tags:
         - MCP Servers
@@ -2726,14 +2726,14 @@ paths:
         Using this operation, you can retrieve complete details of a single API. You need to provide the Id of the API 
         to retrieve it.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/requestedTenant'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
           description: |
             OK.
-            Requested API is returned
+            Requested MCP Server is returned
           headers:
             ETag:
               description: |
@@ -2766,10 +2766,9 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
-            - apim:api_import_export
-            - apim:api_product_import_export
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
+            - apim:mcp_server_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2779,12 +2778,12 @@ paths:
     put:
       tags:
         - MCP Servers
-      summary: Update an API
+      summary: Update a MCP Server
       description: |
         This operation can be used to update an existing MCP Server.
         But the properties `name`, `version`, `context`, `provider`, `state` will not be changed by this operation.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/If-Match'
       requestBody:
         description: API object that needs to be added
@@ -2836,9 +2835,9 @@ paths:
           $ref: '#/components/responses/PreconditionFailed'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
-            - apim:api_publish
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+            - apim:mcp_server_publish
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT 
@@ -2849,11 +2848,11 @@ paths:
     delete:
       tags:
         - MCP Servers
-      summary: Delete an MCP server API
+      summary: Delete a MCP Server
       description: |
-        This operation can be used to delete an MCP server API by providing the Id of the API.
+        This operation can be used to delete a MCP server by providing the Id of the MCP server.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/If-Match'
       responses:
         200:
@@ -2871,25 +2870,24 @@ paths:
           $ref: '#/components/responses/PreconditionFailed'
       security:
         - OAuth2Security:
-            - apim:api_delete
-            - apim:api_manage
-            - apim:api_import_export
+            - apim:mcp_server_delete
+            - apim:mcp_server_manage
+            - apim:mcp_server_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/7a2298c4-c905-403f-8fac-38c73301631f"'
       operationId: deleteMCPServer
 
-  /mcp-servers/{apiId}/revisions:
+  /mcp-servers/{mcpServerId}/revisions:
     get:
       tags:
         - MCP Server Revisions
       summary: List Revisions
       description: |
         List available revisions of a MCP server.
-      operationId: getMCPServerRevisions
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - name: query
           in: query
           schema:
@@ -2907,25 +2905,25 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_create
-            - apim:api_manage
-            - apim:api_publish
-            - apim:api_import_export
+            - apim:mcp_server_view
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+            - apim:mcp_server_publish
+            - apim:mcp_server_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions?query=deployed:true"'
+      operationId: getMCPServerRevisions
 
     post:
       tags:
         - MCP Server Revisions
-      summary: Create API Revision
+      summary: Create MCP Server Revision
       description: |
-        Create a new API revision
-      operationId: createMCPServerRevision
+        Create a new MCP Server revision
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
       requestBody:
         description: API object that needs to be added
         content:
@@ -2949,26 +2947,27 @@ paths:
           $ref: '#/components/responses/PreconditionFailed'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
-            - apim:api_publish
-            - apim:api_import_export
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+            - apim:mcp_server_publish
+            - apim:mcp_server_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             -H "Content-Type: application/json" -d @data.json
             "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions"'
+      operationId: createMCPServerRevision
 
-  /mcp-servers/{apiId}/revisions/{revisionId}:
+  /mcp-servers/{mcpServerId}/revisions/{revisionId}:
     get:
       tags:
         - MCP Server Revisions
-      summary: Retrieve revision of a MCP server.
+      summary: Retrieve revision of a MCP Server.
       description: |
         Retrieve a revision of a MCP server
       operationId: getMCPServerRevision
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/revisionId'
       responses:
         200:
@@ -2983,10 +2982,10 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_create
-            - apim:api_manage
-            - apim:api_publish
+            - apim:mcp_server_view
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+            - apim:mcp_server_publish
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -2994,12 +2993,11 @@ paths:
     delete:
       tags:
         - MCP Server Revisions
-      summary: Delete MCP server Revision
+      summary: Delete a MCP Server Revision
       description: |
         Delete a revision of a MCP server.
-      operationId: deleteMCPServerRevision
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/revisionId'
       responses:
         200:
@@ -3018,25 +3016,26 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
-            - apim:api_publish
-            - apim:api_import_export
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+            - apim:mcp_server_publish
+            - apim:mcp_server_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/revisions/e0824883-3e86-403a-aec1-22bbc454eb7c"'
+      operationId: deleteMCPServerRevision
 
-  /mcp-servers/{apiId}/restore-revision:
+  /mcp-servers/{mcpServerId}/restore-revision:
     post:
       tags:
         - MCP Server Revisions
-      summary: Restore MCP server revision
+      summary: Restore a MCP Server Revision
       description: |
         Restore a revision to the current MCP server
       operationId: restoreMCPServerRevision
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/revisionId-Q'
       responses:
         201:
@@ -3051,23 +3050,23 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
-            - apim:api_publish
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+            - apim:mcp_server_publish
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
             "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/restore-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
 
-  /mcp-servers/{apiId}/endpoints:
+  /mcp-servers/{mcpServerId}/endpoints:
     get:
       tags:
         - MCP Server Endpoints
-      summary: Get a list of backend details of an MCP server
+      summary: Get a list of backend details of a MCP Server
       description: |
         This operation can be used to get a list of backend endpoints of a MCP server by the API UUID.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
       responses:
         200:
           description: |
@@ -3089,26 +3088,26 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_create
-            - apim:api_manage
-            - apim:api_publish
-            - apim:api_import_export
+            - apim:mcp_server_view
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+            - apim:mcp_server_publish
+            - apim:mcp_server_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/96077508-fd01-4fae-bc64-5de0e2baf43c/endpoints"'
       operationId: getMCPServerEndpoints
 
-  /mcp-servers/{apiId}/endpoints/{endpointId}:
+  /mcp-servers/{mcpServerId}/endpoints/{endpointId}:
     get:
       tags:
         - MCP Server Endpoints
-      summary: Get a backend details of an MCP server
+      summary: Get backend details of a MCP Server
       description: |
         This operation can be used to get an endpoint of an API by UUID.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/endpointId'
       responses:
         200:
@@ -3131,11 +3130,11 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_create
-            - apim:api_manage
-            - apim:api_publish
-            - apim:api_import_export
+            - apim:mcp_server_view
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+            - apim:mcp_server_publish
+            - apim:mcp_server_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3145,11 +3144,11 @@ paths:
     put:
       tags:
         - MCP Server Endpoints
-      summary: Update a backend details of an MCP server
+      summary: Update a backend details of a MCP Server
       description: |
-        This operation can be used to update a API endpoint.
+        This operation can be used to update a MCP server endpoint.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/endpointId'
       requestBody:
         description: API Endpoint object with updated details
@@ -3182,10 +3181,10 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
-            - apim:api_publish
-            - apim:api_import_export
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+            - apim:mcp_server_publish
+            - apim:mcp_server_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3193,16 +3192,15 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/96077508-fd01-4fae-bc64-5de0e2baf43c/endpoints/13092607-ed01-4fa1-bc64-5da0e2abe92c"'
       operationId: updateMCPServerEndpoint
 
-  /mcp-servers/{apiId}/deploy-revision:
+  /mcp-servers/{mcpServerId}/deploy-revision:
     post:
       tags:
         - MCP Server Revisions
       summary: Deploy Revision
       description: |
-        Deploy a revision
-      operationId: deployMCPServerRevision
+        Deploy a revision of a MCP server.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/revisionId-Q'
       requestBody:
         description: Deployment object that needs to be added
@@ -3229,24 +3227,24 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
-            - apim:api_publish
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+            - apim:mcp_server_publish
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json
                 "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/deploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+      operationId: deployMCPServerRevision
 
-  /mcp-servers/{apiId}/undeploy-revision:
+  /mcp-servers/{mcpServerId}/undeploy-revision:
     post:
       tags:
         - MCP Server Revisions
-      summary: UnDeploy Revision
+      summary: UnDeploy Revision of a MCP Server
       description: |
-        UnDeploy a revision
-      operationId: undeployMCPServerRevision
+        UnDeploy a revision of a MCP server.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/revisionId-Q'
         - $ref: '#/components/parameters/revisionNum-Q'
         - name: allEnvironments
@@ -3282,20 +3280,21 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
-            - apim:api_publish
-            - apim:api_import_export
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+            - apim:mcp_server_publish
+            - apim:mcp_server_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -H "Content-Type: application/json" -d @data.json
                 "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/undeploy-revision?revisionId=e0824883-3e86-403a-aec1-22bbc454eb7c"'
+      operationId: undeployMCPServerRevision
 
   /mcp-servers/copy-api:
     post:
       tags:
         - MCP Servers
-      summary: Create a New MCP server Version
+      summary: Create a New MCP Server Version
       description: |
         This operation can be used to create a new version of an existing MCP server. The new version is specified as 
         `newVersion` query parameter. New MCP server will be in `CREATED` state.
@@ -3342,8 +3341,8 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3364,7 +3363,8 @@ paths:
         For example, to Publish an MCP server, `action` should be `Publish`. Note that the `Re-publish` action is 
         available only after calling `Block`.
 
-        Some actions supports providing additional paramters which should be provided as `lifecycleChecklist` parameter. Please see parameters table for more information.
+        Some actions supports providing additional parameters which should be provided as `lifecycleChecklist` 
+        parameter. Please see parameters table for more information.
       parameters:
         - name: action
           in: query
@@ -3437,24 +3437,24 @@ paths:
           $ref: '#/components/responses/PreconditionFailed'
       security:
         - OAuth2Security:
-            - apim:api_publish
-            - apim:api_manage
-            - apim:api_import_export
+            - apim:mcp_server_publish
+            - apim:mcp_server_manage
+            - apim:mcp_server_import_export
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/change-lifecycle?apiId=890a4f4d-09eb-4877-a323-57f6ce2ed79b&action=Publish"'
       operationId: changeMCPServerLifecycle
 
-  /mcp-servers/{apiId}/lifecycle-history:
+  /mcp-servers/{mcpServerId}/lifecycle-history:
     get:
       tags:
         - MCP Server Lifecycle
-      summary: Get Lifecycle State Change History of the MCP Server.
+      summary: Get Lifecycle State Change History of a MCP Server
       description: |
-        This operation can be used to retrieve Lifecycle state change history of the MCP server.
+        This operation can be used to retrieve Lifecycle state change history of a MCP server.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
@@ -3486,24 +3486,24 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_publish
-            - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_publish
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-history"'
       operationId: getMCPServerLifecycleHistory
 
-  /mcp-servers/{apiId}/lifecycle-state:
+  /mcp-servers/{mcpServerId}/lifecycle-state:
     get:
       tags:
         - MCP Server Lifecycle
-      summary: Get Lifecycle State Data of the MCP server.
+      summary: Get Lifecycle State Data of a MCP server.
       description: |
-        This operation can be used to retrieve Lifecycle state data of the MCP server.
+        This operation can be used to retrieve Lifecycle state data of a MCP server.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
         200:
@@ -3542,25 +3542,25 @@ paths:
           $ref: '#/components/responses/PreconditionFailed'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_publish
-            - apim:api_create
-            - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_publish
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/890a4f4d-09eb-4877-a323-57f6ce2ed79b/lifecycle-state"'
       operationId: getMCPServerLifecycleState
 
-  /mcp-servers/{apiId}/swagger:
+  /mcp-servers/{mcpServerId}/swagger:
     get:
       tags:
         - MCP Servers
-      summary: Get Swagger Definition
+      summary: Get Swagger Definition of a MCP Server
       description: |
         This operation can be used to retrieve the swagger definition of a MCP server.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/Accept'
         - $ref: '#/components/parameters/If-None-Match'
       responses:
@@ -3576,7 +3576,7 @@ paths:
                 type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time.
+                Date and time the resource has been modified the last time.
                 Used by caches, or in conditional requests (Will be supported in future).
               schema:
                 type: string
@@ -3597,25 +3597,25 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_publish
-            - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_publish
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/api-products/5bca47e1-8233-46a5-9295-525dca337f33/swagger"'
       operationId: getMCPServerSwagger
 
-  /mcp-servers/{apiId}/documents:
+  /mcp-servers/{mcpServerId}/documents:
     get:
       tags:
         - MCP Server Documents
       summary: Get a List of Documents of a MCP Server
       description: |
-        This operation can be used to retrive a list of documents belonging to a MCP server by providing the ID of 
+        This operation can be used to retrieve a list of documents belonging to a MCP server by providing the ID of 
         the MCP server.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/offset'
         - $ref: '#/components/parameters/Accept'
@@ -3651,9 +3651,9 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_publish
-            - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_publish
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3669,7 +3669,7 @@ paths:
         of a document. To add the actual content we need to use **Upload the content of an MCP server document ** MCP
         server once we obtain a document Id by this operation.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
       requestBody:
         description: Document object that needs to be added
         content:
@@ -3710,15 +3710,15 @@ paths:
           $ref: '#/components/responses/UnsupportedMediaType'
       security:
         - OAuth2Security:
-            - apim:api_publish
-            - apim:api_manage
+            - apim:mcp_server_publish
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/5bca47e1-8233-46a5-9295-525dca337f33/documents"'
       operationId: addMCPServerDocument
 
-  /mcp-servers/{apiId}/documents/{documentId}:
+  /mcp-servers/{mcpServerId}/documents/{documentId}:
     get:
       tags:
         - MCP Server Documents
@@ -3726,7 +3726,7 @@ paths:
       description: |
         This operation can be used to retrieve a particular document's metadata associated with a MCP server.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/documentId'
         - $ref: '#/components/parameters/Accept'
         - $ref: '#/components/parameters/If-None-Match'
@@ -3768,9 +3768,9 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_publish
-            - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_publish
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3784,7 +3784,7 @@ paths:
       description: |
         This operation can be used to update metadata of an MCP server's document.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/documentId'
         - $ref: '#/components/parameters/If-Match'
       requestBody:
@@ -3808,7 +3808,7 @@ paths:
                 type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time.
+                Date and time the resource has been modified the last time.
                 Used by caches, or in conditional requests (Will be supported in future).
               schema:
                 type: string
@@ -3834,8 +3834,8 @@ paths:
           $ref: '#/components/responses/PreconditionFailed'
       security:
         - OAuth2Security:
-            - apim:api_publish
-            - apim:api_manage
+            - apim:mcp_server_publish
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3849,7 +3849,7 @@ paths:
       description: |
         This operation can be used to delete a document associated with a MCP server.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/documentId'
         - $ref: '#/components/parameters/If-Match'
       responses:
@@ -3864,21 +3864,21 @@ paths:
           $ref: '#/components/responses/PreconditionFailed'
       security:
         - OAuth2Security:
-            - apim:api_publish
-            - apim:api_manage
+            - apim:mcp_server_publish
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X DELETE -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers/5bca47e1-8233-46a5-9295-525dca337f33/documents/83312daf-0d8a-427b-8f72-12755b7901d3"'
       operationId: deleteMCPServerDocument
 
-  /mcp-servers/{apiId}/documents/{documentId}/content:
+  /mcp-servers/{mcpServerId}/documents/{documentId}/content:
     get:
       tags:
         - MCP Server Documents
-      summary: Get the Content of an MCP Server Document
+      summary: Get the Content of a MCP Server Document
       description: |
-        This operation can be used to retrive the content of an MCP server's document.
+        This operation can be used to retrieve the content of a MCP server's document.
 
         The document can be of 3 types. In each cases responses are different.
 
@@ -3892,7 +3892,7 @@ paths:
         3. **URL type**:
             The client will recieve the URL of the document as the Location header with the response with - `303 See Other`
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/documentId'
         - $ref: '#/components/parameters/Accept'
         - $ref: '#/components/parameters/If-None-Match'
@@ -3923,7 +3923,7 @@ paths:
         303:
           description: |
             See Other.
-            Source can be retrived from the URL specified at the Location header.
+            Source can be retrieved from the URL specified at the Location header.
           headers:
             Location:
               description: |
@@ -3942,9 +3942,9 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_publish
-            - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_publish
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -3956,14 +3956,14 @@ paths:
         - MCP Server Documents
       summary: Upload the Content of a MCP Server Document
       description: |
-        Thid operation can be used to upload a file or add inline content to a MCP server document.
+        This operation can be used to upload a file or add inline content to a MCP server document.
 
         **IMPORTANT:**
         * Either **file** or **inlineContent** form data parameters should be specified at one time.
         * Document's source type should be **FILE** in order to upload a file to the document using **file** parameter.
         * Document's source type should be **INLINE** in order to add inline content to the document using **inlineContent** parameter.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/documentId'
         - $ref: '#/components/parameters/If-Match'
       requestBody:
@@ -3992,7 +3992,7 @@ paths:
                 type: string
             Last-Modified:
               description: |
-                Date and time the resource has been modifed the last time.
+                Date and time the resource has been modified the last time.
                 Used by caches, or in conditional requests (Will be supported in future).
               schema:
                 type: string
@@ -4018,8 +4018,8 @@ paths:
           $ref: '#/components/responses/PreconditionFailed'
       security:
         - OAuth2Security:
-            - apim:api_publish
-            - apim:api_manage
+            - apim:mcp_server_publish
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4030,7 +4030,7 @@ paths:
     post:
       tags:
         - Import Export
-      summary: Import a MCP server
+      summary: Import a MCP Server
       description: |
         This operation can be used to import a MCP server.
       parameters:
@@ -4106,7 +4106,7 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_import_export
+            - apim:mcp_server_import_export
             - apim:admin
       x-code-samples:
         - lang: Curl
@@ -4208,11 +4208,11 @@ paths:
           $ref: '#/components/responses/InternalServerError'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_publish
-            - apim:api_create
-            - apim:api_import_export
-            - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_publish
+            - apim:mcp_server_create
+            - apim:mcp_server_import_export
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4220,7 +4220,7 @@ paths:
           > exportAPI.zip'
       operationId: exportMCPServer
 
-  /mcp-servers/{apiId}/subscription-policies:
+  /mcp-servers/{mcpServerId}/subscription-policies:
     get:
       tags:
         - MCP Servers
@@ -4233,7 +4233,7 @@ paths:
         `X-WSO2-Tenant` header can be used to retrive MCP server subscription throttling policies that belongs to a 
         different tenant domain. If not specified super tenant will be used. If Authorization header is present in the request, the user's tenant associated with the access token will be used.
       parameters:
-        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/mcpServerId'
         - $ref: '#/components/parameters/requestedTenant'
         - $ref: '#/components/parameters/If-None-Match'
         - $ref: '#/components/parameters/isAiApi'
@@ -4271,8 +4271,8 @@ paths:
           $ref: '#/components/responses/NotAcceptable'
       security:
         - OAuth2Security:
-            - apim:api_view
-            - apim:api_manage
+            - apim:mcp_server_view
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4283,7 +4283,7 @@ paths:
     post:
       tags:
         - Validation
-      summary: Validate an OpenAPI Definition
+      summary: Validate an OpenAPI Definition of a API
       description: |
         This operation can be used to validate an OpenAPI definition and retrieve a summary. Provide either `url`
         or `file` to specify the definition.
@@ -4332,8 +4332,8 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4346,7 +4346,7 @@ paths:
         - Validation
       summary: Check Whether Given Endpoint URL is Valid
       description: |
-        Using this operation, it is possible check whether the given MCP server url is a valid url
+        Using this operation, it is possible check whether the given MCP server URL is a valid url
       parameters:
         - name: endpointUrl
           in: query
@@ -4380,8 +4380,8 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -4433,8 +4433,8 @@ paths:
           $ref: '#/components/responses/NotFound'
       security:
         - OAuth2Security:
-            - apim:api_create
-            - apim:api_manage
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
       x-code-samples:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
@@ -17036,6 +17036,14 @@ components:
       required: true
       schema:
         type: string
+    mcpServerId:
+      name: mcpServerId
+      in: path
+      description: |
+        **MCP Server ID** consisting of the **UUID** of the MCP Server.
+      required: true
+      schema:
+        type: string
     endpointId:
       name: endpointId
       in: path
@@ -17483,3 +17491,10 @@ components:
             apim:gov_policy_read: Retrieve governance policies
             apim:gov_result_read: Retrieve governance results
             apim:gov_rule_read: Retrieve governance rules
+            apim:mcp_server_view: View MCP Server
+            apim:mcp_server_list_view: View, Retrieve MCP Server list
+            apim:mcp_server_create: Create MCP Server
+            apim:mcp_server_delete: Delete MCP Server
+            apim:mcp_server_publish: Publish MCP Server
+            apim:mcp_server_manage: Manage all MCP Server related operations
+            apim:mcp_server_import_export: Import and export MCP Server related operations

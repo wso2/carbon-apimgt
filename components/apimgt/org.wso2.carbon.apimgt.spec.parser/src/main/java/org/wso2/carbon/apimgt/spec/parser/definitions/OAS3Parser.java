@@ -2608,15 +2608,17 @@ public class OAS3Parser extends APIDefinition {
 
         uriTemplate.setHTTPVerb(mcpFeatureType);
 
-        try {
-            String jsonSchema = getObjectMapper()
-                    .writeValueAsString(buildUnifiedInputSchema(
-                            match.operation.getParameters(),
-                            match.operation.getRequestBody(),
-                            backendAPIDefinition));
-            uriTemplate.setSchemaDefinition(jsonSchema);
-        } catch (JsonProcessingException e) {
-            log.error("Error generating JSON schema for operation: " + uriTemplate.getUriTemplate(), e);
+        if (uriTemplate.getSchemaDefinition() == null || uriTemplate.getSchemaDefinition().isEmpty()) {
+            try {
+                String jsonSchema = getObjectMapper()
+                        .writeValueAsString(buildUnifiedInputSchema(
+                                match.operation.getParameters(),
+                                match.operation.getRequestBody(),
+                                backendAPIDefinition));
+                uriTemplate.setSchemaDefinition(jsonSchema);
+            } catch (JsonProcessingException e) {
+                log.error("Error generating JSON schema for operation: " + uriTemplate.getUriTemplate(), e);
+            }
         }
 
         if (isBackend) {

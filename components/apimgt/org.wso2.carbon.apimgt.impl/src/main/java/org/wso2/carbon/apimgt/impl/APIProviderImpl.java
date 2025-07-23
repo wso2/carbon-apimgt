@@ -237,6 +237,8 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
@@ -1037,11 +1039,24 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
             migrateMediationPoliciesOfAPI(api, tenantDomain, false);
         }
-
-        //get product resource mappings on API before updating the API. Update uri templates on api will remove all
-        //product mappings as well.
         List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
         if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
+            Set<URITemplate> existingTemplates = existingAPI.getUriTemplates();
+            for (URITemplate uriTemplate : api.getUriTemplates()) {
+                if (!APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE.equals(uriTemplate.getHTTPVerb())) {
+                    continue;
+                }
+                Optional<URITemplate> matchingTemplate = existingTemplates.stream()
+                        .filter(existing ->
+                                APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE.equals(existing.getHTTPVerb())
+                                        && Objects.equals(existing.getUriTemplate(), uriTemplate.getUriTemplate()))
+                        .findFirst();
+                if (matchingTemplate.isPresent()) {
+                    uriTemplate.setSchemaDefinition(matchingTemplate.get().getSchemaDefinition());
+                } else {
+                    uriTemplate.setSchemaDefinition(StringUtils.EMPTY);
+                }
+            }
             updateMCPTools(api, existingAPI.getId().getId());
         }
         updateAPI(api, tenantId, userNameWithoutChange);

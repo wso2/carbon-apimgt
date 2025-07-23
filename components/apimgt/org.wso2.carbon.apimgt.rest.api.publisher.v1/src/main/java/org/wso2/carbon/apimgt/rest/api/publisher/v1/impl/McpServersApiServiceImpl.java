@@ -166,7 +166,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                     File zippedResponse = GZIPUtils.constructZippedResponse(apiListDTO);
                     return Response.ok().entity(zippedResponse)
                             .header("Content-Disposition", "attachment")
-                                    .header("Content-Encoding", "gzip").build();
+                            .header("Content-Encoding", "gzip").build();
                 } catch (APIManagementException e) {
                     RestApiUtil.handleInternalServerError(e.getMessage(), e, log);
                 }
@@ -184,7 +184,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * Retrieves the MCP server API details for a given API UUID.
      * Validates that the API is of type MCP and applies organization-specific visibility and policy filters.
      *
-     * @param apiId          the UUID of the API
+     * @param mcpServerId    the UUID of the MCP Server
      * @param xWSO2Tenant    the tenant identifier from request header
      * @param ifNoneMatch    the ETag header value for conditional requests
      * @param messageContext the message context of the request
@@ -192,7 +192,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException if an error occurs during API retrieval or authorization
      */
     @Override
-    public Response getMCPServer(String apiId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext)
+    public Response getMCPServer(String mcpServerId, String xWSO2Tenant, String ifNoneMatch,
+                                 MessageContext messageContext)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
@@ -200,23 +201,23 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         OrganizationInfo organizationInfo = RestApiUtil.getOrganizationInfo(messageContext);
         APIDTO apiToReturn = null;
         try {
-            API api = apiProvider.getAPIbyUUID(apiId, organization);
+            API api = apiProvider.getAPIbyUUID(mcpServerId, organization);
             if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
                 api.setOrganization(organization);
                 apiToReturn = APIMappingUtil.fromAPItoDTO(api, apiProvider);
             } else {
-                String errorMessage = "Error while retrieving MCP server : " + apiId + ". Incorrect API type. " +
+                String errorMessage = "Error while retrieving MCP server : " + mcpServerId + ". Incorrect API type. " +
                         "Expected type: " + APIConstants.API_TYPE_MCP + ", but found: " + api.getType();
                 RestApiUtil.handleBadRequest(errorMessage, log);
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("User is not authorized to access the MCP server",
                         e, log);
             } else {
-                String errorMessage = "Error while retrieving MCP server : " + apiId;
+                String errorMessage = "Error while retrieving MCP server : " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -243,7 +244,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param apiId
+     * @param mcpServerId
      * @param documentId
      * @param accept
      * @param ifNoneMatch
@@ -252,7 +253,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response getMCPServerDocument(String apiId, String documentId, String accept, String ifNoneMatch,
+    public Response getMCPServerDocument(String mcpServerId, String documentId, String accept, String ifNoneMatch,
                                          MessageContext messageContext) throws APIManagementException {
 
         Documentation documentation;
@@ -260,7 +261,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-            documentation = apiProvider.getDocumentation(apiId, documentId, organization);
+            documentation = apiProvider.getDocumentation(mcpServerId, documentId, organization);
             if (documentation == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
             }
@@ -269,10 +270,10 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             return Response.ok().entity(documentDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving document : "
-                        + documentId + " of API " + apiId, e, log);
+                        + documentId + " of API " + mcpServerId, e, log);
             } else {
                 String errorMessage = "Error while retrieving document : " + documentId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -282,7 +283,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param apiId
+     * @param mcpServerId
      * @param documentId
      * @param accept
      * @param ifNoneMatch
@@ -291,14 +292,16 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response getMCPServerDocumentContent(String apiId, String documentId, String accept, String ifNoneMatch,
+    public Response getMCPServerDocumentContent(String mcpServerId, String documentId, String accept,
+                                                String ifNoneMatch,
                                                 MessageContext messageContext) throws APIManagementException {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-            DocumentationContent docContent = apiProvider.getDocumentationContent(apiId, documentId, organization);
+            DocumentationContent docContent =
+                    apiProvider.getDocumentationContent(mcpServerId, documentId, organization);
             if (docContent == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId);
                 return null;
@@ -324,12 +327,13 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving document : " + documentId + " of API " + apiId, e, log);
+                        "Authorization failure while retrieving document : " + documentId + " of API " + mcpServerId, e,
+                        log);
             } else {
-                String errorMessage = "Error while retrieving document " + documentId + " of the API " + apiId;
+                String errorMessage = "Error while retrieving document " + documentId + " of the API " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (URISyntaxException e) {
@@ -340,7 +344,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param apiId
+     * @param mcpServerId
      * @param limit
      * @param offset
      * @param accept
@@ -350,7 +354,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response getMCPServerDocuments(String apiId, Integer limit, Integer offset, String accept,
+    public Response getMCPServerDocuments(String mcpServerId, Integer limit, Integer offset, String accept,
                                           String ifNoneMatch, MessageContext messageContext)
             throws APIManagementException {
 
@@ -360,20 +364,20 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            List<Documentation> allDocumentation = apiProvider.getAllDocumentation(apiId, organization);
+            List<Documentation> allDocumentation = apiProvider.getAllDocumentation(mcpServerId, organization);
             DocumentListDTO documentListDTO = DocumentationMappingUtil.fromDocumentationListToDTO(allDocumentation,
                     offset, limit);
             DocumentationMappingUtil
-                    .setPaginationParams(documentListDTO, apiId, offset, limit, allDocumentation.size());
+                    .setPaginationParams(documentListDTO, mcpServerId, offset, limit, allDocumentation.size());
             return Response.ok().entity(documentListDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving documents of API : " + apiId, e, log);
+                        "Authorization failure while retrieving documents of API : " + mcpServerId, e, log);
             } else {
-                String msg = "Error while retrieving documents of API " + apiId;
+                String msg = "Error while retrieving documents of API " + mcpServerId;
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         }
@@ -383,33 +387,33 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     /**
      * Retrieves a specific MCP server endpoint for the given API.
      *
-     * @param apiId          UUID of the API.
+     * @param mcpServerId    UUID of the API.
      * @param endpointId     UUID of the backend endpoint.
      * @param messageContext Message context with request details.
      * @return HTTP Response containing the backend endpoint DTO.
      * @throws APIManagementException if an error occurs while retrieving the endpoint.
      */
     @Override
-    public Response getMCPServerEndpoint(String apiId, String endpointId, MessageContext messageContext)
+    public Response getMCPServerEndpoint(String mcpServerId, String endpointId, MessageContext messageContext)
             throws APIManagementException {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            CommonUtils.validateAPIExistence(apiId);
+            CommonUtils.validateAPIExistence(mcpServerId);
 
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            BackendEndpoint backendEndpoint = apiProvider.getMCPServerEndpoint(apiId, endpointId);
+            BackendEndpoint backendEndpoint = apiProvider.getMCPServerEndpoint(mcpServerId, endpointId);
             BackendEndpointDTO backendEndpointDTO = APIMappingUtil.fromBackendEndpointToDTO(backendEndpoint,
                     organization, false);
             return Response.ok().entity(backendEndpointDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving resource paths of API : " + apiId, e, log);
+                        "Authorization failure while retrieving resource paths of API : " + mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while retrieving endpoint of API : " + apiId;
+                String errorMessage = "Error while retrieving endpoint of API : " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -419,38 +423,39 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     /**
      * Retrieves all MCP server endpoints for the given API.
      *
-     * @param apiId          UUID of the API.
+     * @param mcpServerId    UUID of the API.
      * @param messageContext Message context with request details.
      * @return HTTP Response containing a list of backend endpoint DTOs.
      * @throws APIManagementException if an error occurs while retrieving the endpoints.
      */
     @Override
-    public Response getMCPServerEndpoints(String apiId, MessageContext messageContext) throws APIManagementException {
+    public Response getMCPServerEndpoints(String mcpServerId, MessageContext messageContext)
+            throws APIManagementException {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            CommonUtils.validateAPIExistence(apiId);
+            CommonUtils.validateAPIExistence(mcpServerId);
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            List<BackendEndpoint> backendEndpointList = apiProvider.getMCPServerEndpoints(apiId);
+            List<BackendEndpoint> backendEndpointList = apiProvider.getMCPServerEndpoints(mcpServerId);
             List<BackendEndpointDTO> backendEndpointDTOList = new ArrayList<>();
             for (BackendEndpoint endpoint : backendEndpointList) {
                 try {
                     BackendEndpointDTO dto = APIMappingUtil.fromBackendEndpointToDTO(endpoint, organization, false);
                     backendEndpointDTOList.add(dto);
                 } catch (APIManagementException e) {
-                    String errorMessage = "Error while mapping backend endpoint to DTO for MCP Server: " + apiId;
+                    String errorMessage = "Error while mapping backend endpoint to DTO for MCP Server: " + mcpServerId;
                     RestApiUtil.handleInternalServerError(errorMessage, e, log);
                 }
             }
             return Response.ok().entity(backendEndpointDTOList).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving endpoints of MCP server: " + apiId, e, log);
+                        "Authorization failure while retrieving endpoints of MCP server: " + mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while retrieving endpoints of MCP server: " + apiId;
+                String errorMessage = "Error while retrieving endpoints of MCP server: " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -458,25 +463,25 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param apiId
+     * @param mcpServerId
      * @param ifNoneMatch
      * @param messageContext
      * @return
      * @throws APIManagementException
      */
     @Override
-    public Response getMCPServerLifecycleHistory(String apiId, String ifNoneMatch, MessageContext messageContext)
+    public Response getMCPServerLifecycleHistory(String mcpServerId, String ifNoneMatch, MessageContext messageContext)
             throws APIManagementException {
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             API api;
-            APIRevision apiRevision = apiProvider.checkAPIUUIDIsARevisionUUID(apiId);
+            APIRevision apiRevision = apiProvider.checkAPIUUIDIsARevisionUUID(mcpServerId);
             if (apiRevision != null && apiRevision.getApiUUID() != null) {
                 api = apiProvider.getAPIbyUUID(apiRevision.getApiUUID(), organization);
             } else {
-                api = apiProvider.getAPIbyUUID(apiId, organization);
+                api = apiProvider.getAPIbyUUID(mcpServerId, organization);
             }
             return Response.ok().entity(PublisherCommonUtils.getLifecycleHistoryDTO(api.getUuid(), apiProvider))
                     .build();
@@ -484,12 +489,12 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving the lifecycle "
-                        + "events of API : " + apiId, e, log);
+                        + "events of API : " + mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while retrieving the lifecycle events of API : " + apiId;
+                String errorMessage = "Error while retrieving the lifecycle events of API : " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -497,32 +502,32 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param apiId
+     * @param mcpServerId
      * @param ifNoneMatch
      * @param messageContext
      * @return
      * @throws APIManagementException
      */
     @Override
-    public Response getMCPServerLifecycleState(String apiId, String ifNoneMatch, MessageContext messageContext)
+    public Response getMCPServerLifecycleState(String mcpServerId, String ifNoneMatch, MessageContext messageContext)
             throws APIManagementException {
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        LifecycleStateDTO lifecycleStateDTO = getLifecycleState(apiId, organization);
+        LifecycleStateDTO lifecycleStateDTO = getLifecycleState(mcpServerId, organization);
         return Response.ok().entity(lifecycleStateDTO).build();
     }
 
     /**
      * Deletes a specific MCP server revision.
      *
-     * @param apiId          UUID of the API.
+     * @param mcpServerId    UUID of the API.
      * @param revisionId     UUID of the revision to be deleted.
      * @param messageContext Message context with request details.
      * @return HTTP Response indicating the result of the deletion operation.
      * @throws APIManagementException if an error occurs while deleting the revision.
      */
     @Override
-    public Response getMCPServerRevision(String apiId, String revisionId, MessageContext messageContext)
+    public Response getMCPServerRevision(String mcpServerId, String revisionId, MessageContext messageContext)
             throws APIManagementException {
 
         ErrorDTO errorObject = new ErrorDTO();
@@ -536,34 +541,34 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     /**
      * Retrieves all revisions of a specific MCP server.
      *
-     * @param apiId          UUID of the API.
+     * @param mcpServerId    UUID of the API.
      * @param query          Query string to filter revisions.
      * @param messageContext Message context with request details.
      * @return HTTP Response containing a list of APIRevisionListDTO objects.
      * @throws APIManagementException if an error occurs while retrieving the revisions.
      */
     @Override
-    public Response getMCPServerRevisions(String apiId, String query, MessageContext messageContext)
+    public Response getMCPServerRevisions(String mcpServerId, String query, MessageContext messageContext)
             throws APIManagementException {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             APIRevisionListDTO apiRevisionListDTO;
-            List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
+            List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(mcpServerId);
             List<APIRevision> apiRevisionsList = ApisApiServiceImplUtils.filterAPIRevisionsByDeploymentStatus(query,
                     apiRevisions);
             apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisionsList);
             return Response.ok().entity(apiRevisionListDTO).build();
         } catch (APIManagementException e) {
             String errorMessage =
-                    "Error while retrieving API Revision for MCP server: " + apiId + " - " + e.getMessage();
+                    "Error while retrieving API Revision for MCP server: " + mcpServerId + " - " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
 
     /**
-     * @param apiId
+     * @param mcpServerId
      * @param xWSO2Tenant
      * @param ifNoneMatch
      * @param isAiApi
@@ -573,13 +578,13 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response getMCPServerSubscriptionPolicies(String apiId, String xWSO2Tenant, String ifNoneMatch,
+    public Response getMCPServerSubscriptionPolicies(String mcpServerId, String xWSO2Tenant, String ifNoneMatch,
                                                      Boolean isAiApi, String organizationID,
                                                      MessageContext messageContext) throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        API api = apiProvider.getAPIbyUUID(apiId, organization);
+        API api = apiProvider.getAPIbyUUID(mcpServerId, organization);
         api.setOrganization(organization);
         APIDTO apiInfo = APIMappingUtil.fromAPItoDTO(api, apiProvider);
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl().getThrottlingPolicyList(
@@ -596,7 +601,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param apiId
+     * @param mcpServerId
      * @param accept
      * @param ifNoneMatch
      * @param messageContext
@@ -604,29 +609,30 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response getMCPServerSwagger(String apiId, String accept, String ifNoneMatch, MessageContext messageContext)
+    public Response getMCPServerSwagger(String mcpServerId, String accept, String ifNoneMatch,
+                                        MessageContext messageContext)
             throws APIManagementException {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //this will fail if user does not have access to the API or the API does not exist
-            API api = apiProvider.getAPIbyUUID(apiId, organization);
+            API api = apiProvider.getAPIbyUUID(mcpServerId, organization);
             api.setOrganization(organization);
-            String updatedDefinition = RestApiCommonUtil.retrieveSwaggerDefinition(apiId, api, apiProvider);
+            String updatedDefinition = RestApiCommonUtil.retrieveSwaggerDefinition(mcpServerId, api, apiProvider);
             return Response.ok().entity(updatedDefinition).header("Content-Disposition",
                     "attachment; filename=\"" + "swagger.json" + "\"").build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil
                         .handleAuthorizationFailure("Authorization failure while retrieving swagger of API :"
-                                + apiId, e, log);
+                                + mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while retrieving swagger of API : " + apiId;
+                String errorMessage = "Error while retrieving swagger of API : " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -647,7 +653,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response importMCPServer(InputStream fileInputStream, Attachment fileDetail, Boolean preserveProvider,
+    public Response importMCPServer(InputStream fileInputStream, Attachment fileDetail,
+                                    Boolean preserveProvider,
                                     Boolean rotateRevision, Boolean overwrite, Boolean preservePortalConfigurations,
                                     Boolean dryRun, String accept, MessageContext messageContext)
             throws APIManagementException {
@@ -694,8 +701,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @return Response containing the created APIDTO or an error response
      * @throws APIManagementException if an error occurs during import or validation
      */
-    public Response importMCPServerDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
-                                              String additionalProperties, MessageContext messageContext)
+    public Response createMCPServerFromOpenAPI(InputStream fileInputStream, Attachment fileDetail, String url,
+                                               String additionalProperties, MessageContext messageContext)
             throws APIManagementException {
 
         if (StringUtils.isBlank(additionalProperties)) {
@@ -772,24 +779,24 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     /**
      * Restores an MCP server API revision to the specified API.
      *
-     * @param apiId          UUID of the API to which the revision should be restored.
+     * @param mcpServerId    UUID of the API to which the revision should be restored.
      * @param revisionId     UUID of the revision to restore.
      * @param messageContext Message context with request details.
      * @return HTTP Response containing the restored API DTO.
      * @throws APIManagementException if an error occurs while restoring the revision.
      */
     @Override
-    public Response restoreMCPServerRevision(String apiId, String revisionId, MessageContext messageContext)
+    public Response restoreMCPServerRevision(String mcpServerId, String revisionId, MessageContext messageContext)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
+        APIInfo apiInfo = CommonUtils.validateAPIExistence(mcpServerId);
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-        apiProvider.restoreAPIRevision(apiId, revisionId, organization);
+        apiProvider.restoreAPIRevision(mcpServerId, revisionId, organization);
 
-        API api = apiProvider.getAPIbyUUID(apiId, organization);
+        API api = apiProvider.getAPIbyUUID(mcpServerId, organization);
         api.setOrganization(organization);
         APIDTO apiToReturn = APIMappingUtil.fromAPItoDTO(api, apiProvider);
 
@@ -800,7 +807,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     /**
      * Undeploys a specific revision of an MCP server.
      *
-     * @param apiId                        UUID of the API.
+     * @param mcpServerId                  UUID of the API.
      * @param revisionId                   UUID of the revision to be undeployed.
      * @param revisionNumber               Revision number for the API.
      * @param allEnvironments              Flag indicating whether to undeploy from all environments.
@@ -810,23 +817,24 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException if an error occurs while undeploying the revision.
      */
     @Override
-    public Response undeployMCPServerRevision(String apiId, String revisionId, String revisionNumber,
+    public Response undeployMCPServerRevision(String mcpServerId, String revisionId, String revisionNumber,
                                               Boolean allEnvironments,
                                               List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                               MessageContext messageContext)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
+        APIInfo apiInfo = CommonUtils.validateAPIExistence(mcpServerId);
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
         if (revisionId == null && revisionNumber != null) {
-            revisionId = apiProvider.getAPIRevisionUUID(revisionNumber, apiId);
+            revisionId = apiProvider.getAPIRevisionUUID(revisionNumber, mcpServerId);
             if (revisionId == null) {
                 throw new APIManagementException(
-                        "No revision found for revision number " + revisionNumber + " of MCP server with UUID " + apiId,
+                        "No revision found for revision number " + revisionNumber + " of MCP server with UUID " +
+                                mcpServerId,
                         ExceptionCodes.from(ExceptionCodes.REVISION_NOT_FOUND_FOR_REVISION_NUMBER, revisionNumber));
             }
         }
@@ -845,7 +853,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 apiRevisionDeployments.add(apiRevisionDeployment);
             }
         }
-        apiProvider.undeployAPIRevisionDeployment(apiId, revisionId, apiRevisionDeployments, organization);
+        apiProvider.undeployAPIRevisionDeployment(mcpServerId, revisionId, apiRevisionDeployments, organization);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse =
                 apiProvider.getAPIRevisionDeploymentList(revisionId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
@@ -857,27 +865,28 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param apiId
+     * @param mcpServerId
      * @param documentDTO
      * @param messageContext
      * @return
      * @throws APIManagementException
      */
     @Override
-    public Response addMCPServerDocument(String apiId, DocumentDTO documentDTO, MessageContext messageContext)
+    public Response addMCPServerDocument(String mcpServerId, DocumentDTO documentDTO, MessageContext messageContext)
             throws APIManagementException {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //validate if api exists
-            APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
+            APIInfo apiInfo = CommonUtils.validateAPIExistence(mcpServerId);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            Documentation documentation = PublisherCommonUtils.addDocumentationToAPI(documentDTO, apiId, organization);
+            Documentation documentation =
+                    PublisherCommonUtils.addDocumentationToAPI(documentDTO, mcpServerId, organization);
             DocumentDTO newDocumentDTO = DocumentationMappingUtil.fromDocumentationToDTO(documentation);
             String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENTS_DOCUMENT_ID
-                    .replace(RestApiConstants.APIID_PARAM, apiId)
+                    .replace(RestApiConstants.MCP_SERVER_ID_PARAM, mcpServerId)
                     .replace(RestApiConstants.DOCUMENTID_PARAM, documentation.getId());
             URI uri = new URI(uriString);
             return Response.created(uri).entity(newDocumentDTO).build();
@@ -885,25 +894,26 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil
-                        .handleAuthorizationFailure("Authorization failure while adding documents of API : " + apiId, e,
+                        .handleAuthorizationFailure(
+                                "Authorization failure while adding documents of API : " + mcpServerId, e,
                                 log);
             } else {
                 throw new APIManagementException(
-                        "Error while adding a new document to API " + apiId + " : " + e.getMessage(), e);
+                        "Error while adding a new document to API " + mcpServerId + " : " + e.getMessage(), e);
             }
         } catch (URISyntaxException e) {
             String errorMessage =
-                    "Error while retrieving location for document " + documentDTO.getName() + " of API " + apiId;
+                    "Error while retrieving location for document " + documentDTO.getName() + " of API " + mcpServerId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
 
     /**
-     * @param apiId
+     * @param mcpServerId
      * @param documentId
      * @param ifMatch
      * @param fileInputStream
@@ -914,7 +924,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response addMCPServerDocumentContent(String apiId, String documentId, String ifMatch,
+    public Response addMCPServerDocumentContent(String mcpServerId, String documentId, String ifMatch,
                                                 InputStream fileInputStream, Attachment fileDetail,
                                                 String inlineContent, MessageContext messageContext)
             throws APIManagementException {
@@ -923,7 +933,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             //validate if api exists
-            APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
+            APIInfo apiInfo = CommonUtils.validateAPIExistence(mcpServerId);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
             if (fileInputStream != null && inlineContent != null) {
@@ -931,7 +941,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             }
 
             //retrieves the document and send 404 if not found
-            Documentation documentation = apiProvider.getDocumentation(apiId, documentId, organization);
+            Documentation documentation = apiProvider.getDocumentation(mcpServerId, documentId, organization);
             if (documentation == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
                 return null;
@@ -944,7 +954,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 }
                 String filename = fileDetail.getContentDisposition().getFilename();
                 if (APIUtil.isSupportedFileType(filename)) {
-                    RestApiPublisherUtils.attachFileToDocument(apiId, documentation, fileInputStream, fileDetail,
+                    RestApiPublisherUtils.attachFileToDocument(mcpServerId, documentation, fileInputStream, fileDetail,
                             organization);
                 } else {
                     RestApiUtil.handleBadRequest("Unsupported extension type of document file: " + filename, log);
@@ -956,29 +966,27 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                             "or MARKDOWN", log);
                 }
                 PublisherCommonUtils
-                        .addDocumentationContent(documentation, apiProvider, apiId, documentId, organization,
+                        .addDocumentationContent(documentation, apiProvider, mcpServerId, documentId, organization,
                                 inlineContent);
             } else {
                 RestApiUtil.handleBadRequest("Either 'file' or 'inlineContent' should be specified", log);
             }
 
             //retrieving the updated doc and the URI
-            Documentation updatedDoc = apiProvider.getDocumentation(apiId, documentId, organization);
+            Documentation updatedDoc = apiProvider.getDocumentation(mcpServerId, documentId, organization);
             DocumentDTO documentDTO = DocumentationMappingUtil.fromDocumentationToDTO(updatedDoc);
             String uriString = RestApiConstants.RESOURCE_PATH_DOCUMENT_CONTENT
-                    .replace(RestApiConstants.APIID_PARAM, apiId)
+                    .replace(RestApiConstants.MCP_SERVER_ID_PARAM, mcpServerId)
                     .replace(RestApiConstants.DOCUMENTID_PARAM, documentId);
             URI uri = new URI(uriString);
             return Response.created(uri).entity(documentDTO).build();
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while adding content to the document: " + documentId + " of API "
-                                + apiId, e, log);
+                                + mcpServerId, e, log);
             } else if (e.getErrorHandler() != ExceptionCodes.INTERNAL_ERROR) {
                 throw e;
             } else {
@@ -995,7 +1003,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
     /**
      * @param action
-     * @param apiId
+     * @param mcpServerId
      * @param lifecycleChecklist
      * @param ifMatch
      * @param messageContext
@@ -1003,30 +1011,26 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response changeMCPServerLifecycle(String action, String apiId, String lifecycleChecklist, String ifMatch,
+    public Response changeMCPServerLifecycle(String action, String mcpServerId, String lifecycleChecklist,
+                                             String ifMatch,
                                              MessageContext messageContext) throws APIManagementException {
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            ApiTypeWrapper apiWrapper = new ApiTypeWrapper(apiProvider.getAPIbyUUID(apiId, organization));
+            ApiTypeWrapper apiWrapper = new ApiTypeWrapper(apiProvider.getAPIbyUUID(mcpServerId, organization));
             APIStateChangeResponse stateChangeResponse = PublisherCommonUtils.changeApiOrApiProductLifecycle(action,
                     apiWrapper, lifecycleChecklist, organization);
-
-            //returns the current lifecycle state
-            LifecycleStateDTO stateDTO = getLifecycleState(apiId, organization); // todo try to prevent this call
-
+            LifecycleStateDTO stateDTO = getLifecycleState(mcpServerId, organization);
             WorkflowResponseDTO workflowResponseDTO = APIMappingUtil
                     .toWorkflowResponseDTO(stateDTO, stateChangeResponse);
             return Response.ok().entity(workflowResponseDTO).build();
         } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while updating the lifecycle of API " + apiId, e, log);
+                        "Authorization failure while updating the lifecycle of API " + mcpServerId, e, log);
             } else {
                 throw e;
             }
@@ -1077,35 +1081,36 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * Creates a new revision for an MCP server.
      * Validates the API existence, checks governance compliance, and adds the new revision.
      *
-     * @param apiId          UUID of the API to create a revision for.
+     * @param mcpServerId    UUID of the MCP Server to create a revision for.
      * @param apIRevisionDTO DTO containing the revision details.
      * @param messageContext Message context of the request.
      * @return HTTP Response containing the created APIRevisionDTO or an error response.
      * @throws APIManagementException if an error occurs while creating the revision.
      */
     @Override
-    public Response createMCPServerRevision(String apiId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext)
+    public Response createMCPServerRevision(String mcpServerId, APIRevisionDTO apIRevisionDTO,
+                                            MessageContext messageContext)
             throws APIManagementException {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
-            APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
-            API api = apiProvider.getAPIbyUUID(apiId, organization);
+            APIInfo apiInfo = CommonUtils.validateAPIExistence(mcpServerId);
+            API api = apiProvider.getAPIbyUUID(mcpServerId, organization);
             api.setOrganization(organization);
             APIDTO apiDto = APIMappingUtil.fromAPItoDTO(api, apiProvider);
 
             if (apiDto != null && apiDto.getAdvertiseInfo() != null && apiDto.getAdvertiseInfo().isAdvertised()) {
                 throw new APIManagementException(
-                        "Creating API Revisions is not supported for third party APIs: " + apiId,
-                        ExceptionCodes.from(ExceptionCodes.THIRD_PARTY_API_REVISION_CREATION_UNSUPPORTED, apiId));
+                        "Creating API Revisions is not supported for third party APIs: " + mcpServerId,
+                        ExceptionCodes.from(ExceptionCodes.THIRD_PARTY_API_REVISION_CREATION_UNSUPPORTED, mcpServerId));
             }
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
             APIRevision apiRevision = new APIRevision();
-            apiRevision.setApiUUID(apiId);
+            apiRevision.setApiUUID(mcpServerId);
             apiRevision.setDescription(apIRevisionDTO.getDescription());
-            Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiId,
+            Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(mcpServerId,
                     APIMGovernableState.API_DEPLOY, ArtifactType.API, organization, null, null);
 
             if (!complianceResult.isEmpty()
@@ -1120,14 +1125,14 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS
                     + "/" + createdApiRevisionDTO.getApiInfo().getId() + "/"
                     + RestApiConstants.RESOURCE_PATH_REVISIONS + "/" + createdApiRevisionDTO.getId());
-            PublisherCommonUtils.checkGovernanceComplianceAsync(apiId, APIMGovernableState.API_DEPLOY,
+            PublisherCommonUtils.checkGovernanceComplianceAsync(mcpServerId, APIMGovernableState.API_DEPLOY,
                     ArtifactType.API, organization);
             return Response.created(createdApiUri).entity(createdApiRevisionDTO).build();
         } catch (APIManagementException e) {
             if (e instanceof APIComplianceException) {
                 throw e;
             }
-            String errorMessage = "Error while adding new revision for MCP server: " + apiId;
+            String errorMessage = "Error while adding new revision for MCP server: " + mcpServerId;
             if ((e.getErrorHandler()
                     .getErrorCode() == ExceptionCodes.THIRD_PARTY_API_REVISION_CREATION_UNSUPPORTED.getErrorCode())
                     ||
@@ -1138,7 +1143,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             }
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving created revision location for MCP server: "
-                    + apiId;
+                    + mcpServerId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -1146,7 +1151,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
     /**
      * @param newVersion
-     * @param apiId
+     * @param mcpServerId
      * @param defaultVersion
      * @param serviceVersion
      * @param messageContext
@@ -1154,7 +1159,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response createNewMCPServerVersion(String newVersion, String apiId, Boolean defaultVersion,
+    public Response createNewMCPServerVersion(String newVersion, String mcpServerId, Boolean defaultVersion,
                                               String serviceVersion, MessageContext messageContext)
             throws APIManagementException {
 
@@ -1162,23 +1167,24 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         APIDTO newVersionedApi = new APIDTO();
         ServiceEntry service = new ServiceEntry();
         try {
-            APIIdentifier apiIdentifierFromTable = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
-            if (apiIdentifierFromTable == null) {
+            APIIdentifier mcpServerIdentifierFromTable =
+                    APIMappingUtil.getAPIIdentifierFromUUID(mcpServerId);
+            if (mcpServerIdentifierFromTable == null) {
                 throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
-                        + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
-                        apiId));
+                        + mcpServerId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND,
+                        mcpServerId));
             }
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             int tenantId = APIUtil.getInternalOrganizationId(organization);
-            API existingAPI = apiProvider.getAPIbyUUID(apiId, organization);
+            API existingAPI = apiProvider.getAPIbyUUID(mcpServerId, organization);
             if (existingAPI == null) {
-                throw new APIMgtResourceNotFoundException("API not found for id " + apiId,
-                        ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+                throw new APIMgtResourceNotFoundException("API not found for id " + mcpServerId,
+                        ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, mcpServerId));
             }
             //Get all existing versions of API
-            Set<String> apiVersions = apiProvider.getAPIVersions(apiIdentifierFromTable.getProviderName(),
-                    apiIdentifierFromTable.getApiName(), organization);
+            Set<String> apiVersions = apiProvider.getAPIVersions(mcpServerIdentifierFromTable.getProviderName(),
+                    mcpServerIdentifierFromTable.getApiName(), organization);
             if (apiVersions.contains(newVersion)) {
                 throw new APIMgtResourceAlreadyExistsException(
                         "Version " + newVersion + " exists for api " + existingAPI.getId().getApiName(),
@@ -1203,7 +1209,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                                     null, service, organization);
                 }
             } else {
-                API versionedAPI = apiProvider.createNewAPIVersion(apiId, newVersion, defaultVersion, organization);
+                API versionedAPI =
+                        apiProvider.createNewAPIVersion(mcpServerId, newVersion, defaultVersion, organization);
                 newVersionedApi = APIMappingUtil.fromAPItoDTO(versionedAPI);
             }
             //This URI used to set the location header of the POST response
@@ -1214,12 +1221,13 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
         } catch (APIManagementException e) {
             if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("Authorization failure while copying API : " + apiId, e, log);
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while copying API : " + mcpServerId, e,
+                        log);
             } else {
                 throw e;
             }
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving API location of " + apiId;
+            String errorMessage = "Error while retrieving API location of " + mcpServerId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -1229,14 +1237,14 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * Deletes a specific MCP server by its UUID.
      * Validates the API existence, checks for active subscriptions, and deletes the API.
      *
-     * @param apiId          UUID of the API to be deleted.
+     * @param mcpServerId    UUID of the API to be deleted.
      * @param ifMatch        ETag value for optimistic concurrency control.
      * @param messageContext Message context of the request.
      * @return HTTP Response indicating the result of the deletion operation.
      * @throws APIManagementException if an error occurs while deleting the MCP server.
      */
     @Override
-    public Response deleteMCPServer(String apiId, String ifMatch, MessageContext messageContext)
+    public Response deleteMCPServer(String mcpServerId, String ifMatch, MessageContext messageContext)
             throws APIManagementException {
 
         try {
@@ -1248,16 +1256,18 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             APIManagementException error = null;
             APIInfo apiInfo = null;
             try {
-                apiInfo = CommonUtils.validateAPIExistence(apiId);
+                apiInfo = CommonUtils.validateAPIExistence(mcpServerId);
                 if (APIConstants.API_TYPE_MCP.equals(apiInfo.getApiType())) {
                     isAPIExistDB = true;
                 } else {
-                    String errorMessage = "Error while validating MCP server existence for deleting API : " + apiId +
-                            " on organization " + organization + ". API is not of type MCP";
+                    String errorMessage =
+                            "Error while validating MCP server existence for deleting API : " + mcpServerId +
+                                    " on organization " + organization + ". API is not of type MCP";
                     RestApiUtil.handleBadRequest(errorMessage, log);
                 }
             } catch (APIManagementException e) {
-                log.error("Error while validating API existence for deleting MCP server " + apiId + " on organization "
+                log.error("Error while validating API existence for deleting MCP server " + mcpServerId +
+                        " on organization "
                         + organization);
                 error = e;
             }
@@ -1265,7 +1275,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             if (isAPIExistDB) {
                 validateAPIOperationsPerLC(apiInfo.getStatus().toString());
                 try {
-                    List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(apiId, organization);
+                    List<SubscribedAPI> apiUsages = apiProvider.getAPIUsageByAPIId(mcpServerId, organization);
                     if (apiUsages != null && !apiUsages.isEmpty()) {
                         List<SubscribedAPI> filteredUsages = new ArrayList<>();
                         for (SubscribedAPI usage : apiUsages) {
@@ -1275,41 +1285,41 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                             }
                         }
                         if (!filteredUsages.isEmpty()) {
-                            RestApiUtil.handleConflict("Cannot remove the MCP server: " + apiId
+                            RestApiUtil.handleConflict("Cannot remove the MCP server: " + mcpServerId
                                     + " as active subscriptions exist", log);
                         }
                     }
                 } catch (APIManagementException e) {
                     log.error("Error while checking active subscriptions for deleting MCP server "
-                            + apiId + " on organization " + organization);
+                            + mcpServerId + " on organization " + organization);
                     error = e;
                 }
             }
             boolean isDeleted = false;
             try {
-                apiProvider.deleteAPI(apiId, organization);
+                apiProvider.deleteAPI(mcpServerId, organization);
                 isDeleted = true;
             } catch (APIManagementException e) {
-                log.error("Error while deleting MCP server: " + apiId + "on organization " + organization, e);
+                log.error("Error while deleting MCP server: " + mcpServerId + "on organization " + organization, e);
             }
 
             if (error != null) {
                 throw error;
             } else if (!isDeleted) {
-                RestApiUtil.handleInternalServerError("Error while deleting MCP server: " + apiId
+                RestApiUtil.handleInternalServerError("Error while deleting MCP server: " + mcpServerId
                         + " on organization " + organization, log);
                 return null;
             }
-            PublisherCommonUtils.clearArtifactComplianceInfo(apiId, RestApiConstants.RESOURCE_MCP, organization);
+            PublisherCommonUtils.clearArtifactComplianceInfo(mcpServerId, RestApiConstants.RESOURCE_MCP, organization);
             return Response.ok().build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting MCP server: "
-                        + apiId, e, log);
+                        + mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while deleting MCP server : " + apiId;
+                String errorMessage = "Error while deleting MCP server : " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -1317,7 +1327,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param apiId
+     * @param mcpServerId
      * @param documentId
      * @param ifMatch
      * @param messageContext
@@ -1325,7 +1335,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response deleteMCPServerDocument(String apiId, String documentId, String ifMatch,
+    public Response deleteMCPServerDocument(String mcpServerId, String documentId, String ifMatch,
                                             MessageContext messageContext) throws APIManagementException {
 
         Documentation documentation;
@@ -1334,28 +1344,29 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
 
             //validate if api exists
-            APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
+            APIInfo apiInfo = CommonUtils.validateAPIExistence(mcpServerId);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
             //this will fail if user does not have access to the API or the API does not exist
-            //APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId, organization);
-            documentation = apiProvider.getDocumentation(apiId, documentId, organization);
+            //mcpServerIdentifier mcpServerIdentifier = APIMappingUtil.getmcpServerIdentifierFromUUID(mcpServerId,
+            // organization);
+            documentation = apiProvider.getDocumentation(mcpServerId, documentId, organization);
             if (documentation == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
             }
-            apiProvider.removeDocumentation(apiId, documentId, organization);
+            apiProvider.removeDocumentation(mcpServerId, documentId, organization);
             return Response.ok().build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while deleting : " + documentId + " of API " + apiId, e, log);
+                        "Authorization failure while deleting : " + documentId + " of API " + mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
+                String errorMessage = "Error while retrieving API : " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -1366,23 +1377,23 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * Deletes a specific revision of an MCP server.
      * Validates the API existence, checks governance compliance, and deletes the revision.
      *
-     * @param apiId          UUID of the API.
+     * @param mcpServerId    UUID of the API.
      * @param revisionId     UUID of the revision to be deleted.
      * @param messageContext Message context of the request.
      * @return HTTP Response containing the updated list of APIRevisionDTO objects or an error response.
      * @throws APIManagementException if an error occurs while deleting the revision.
      */
     @Override
-    public Response deleteMCPServerRevision(String apiId, String revisionId, MessageContext messageContext)
+    public Response deleteMCPServerRevision(String mcpServerId, String revisionId, MessageContext messageContext)
             throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
+        APIInfo apiInfo = CommonUtils.validateAPIExistence(mcpServerId);
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-        apiProvider.deleteAPIRevision(apiId, revisionId, organization);
-        List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(apiId);
+        apiProvider.deleteAPIRevision(mcpServerId, revisionId, organization);
+        List<APIRevision> apiRevisions = apiProvider.getAPIRevisions(mcpServerId);
         APIRevisionListDTO apiRevisionListDTO = APIMappingUtil.fromListAPIRevisiontoDTO(apiRevisions);
         return Response.ok().entity(apiRevisionListDTO).build();
     }
@@ -1391,7 +1402,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * Deploys a specific revision of an MCP server to the specified environments.
      * Validates the API existence, checks governance compliance, and deploys the revision.
      *
-     * @param apiId                        UUID of the API.
+     * @param mcpServerId                  UUID of the API.
      * @param revisionId                   UUID of the revision to be deployed.
      * @param apIRevisionDeploymentDTOList List of APIRevisionDeploymentDTO objects for deployment.
      * @param messageContext               Message context of the request.
@@ -1399,7 +1410,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException if an error occurs while deploying the revision.
      */
     @Override
-    public Response deployMCPServerRevision(String apiId, String revisionId,
+    public Response deployMCPServerRevision(String mcpServerId, String revisionId,
                                             List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTOList,
                                             MessageContext messageContext)
             throws APIManagementException {
@@ -1408,17 +1419,18 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         if (revisionId.isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Revision Id is not provided").build();
         }
-        APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
+        APIInfo apiInfo = CommonUtils.validateAPIExistence(mcpServerId);
         validateAPIOperationsPerLC(apiInfo.getStatus().toString());
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        API api = apiProvider.getAPIbyUUID(apiId, organization);
+        API api = apiProvider.getAPIbyUUID(mcpServerId, organization);
         api.setOrganization(organization);
         APIDTO apiDto = APIMappingUtil.fromAPItoDTO(api, apiProvider);
 
         if (apiDto.getLifeCycleStatus().equals(APIConstants.RETIRED)) {
-            String errorMessage = "Deploying MCP server revisions is not supported for retired APIs. ApiId: " + apiId;
+            String errorMessage =
+                    "Deploying MCP server revisions is not supported for retired APIs. mcpServerId: " + mcpServerId;
             throw new APIManagementException(errorMessage,
-                    ExceptionCodes.from(ExceptionCodes.RETIRED_API_REVISION_DEPLOYMENT_UNSUPPORTED, apiId));
+                    ExceptionCodes.from(ExceptionCodes.RETIRED_API_REVISION_DEPLOYMENT_UNSUPPORTED, mcpServerId));
         }
 
         Map<String, Environment> environments = APIUtil.getEnvironments(organization);
@@ -1432,27 +1444,28 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                             environments, environment, displayOnDevportal, vhost, true);
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
-        Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiId,
+        Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(mcpServerId,
                 APIMGovernableState.API_DEPLOY, ArtifactType.API, organization, null, null);
         if (!complianceResult.isEmpty()
                 && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
                 && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
             throw new APIComplianceException(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
-        apiProvider.deployAPIRevision(apiId, revisionId, apiRevisionDeployments, organization);
-        List<APIRevisionDeployment> apiRevisionDeploymentsResponse = apiProvider.getAPIRevisionsDeploymentList(apiId);
+        apiProvider.deployAPIRevision(mcpServerId, revisionId, apiRevisionDeployments, organization);
+        List<APIRevisionDeployment> apiRevisionDeploymentsResponse =
+                apiProvider.getAPIRevisionsDeploymentList(mcpServerId);
         List<APIRevisionDeploymentDTO> apiRevisionDeploymentDTOS = new ArrayList<>();
         for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeploymentsResponse) {
             apiRevisionDeploymentDTOS.add(APIMappingUtil.fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
         }
         Response.Status status = Response.Status.CREATED;
-        PublisherCommonUtils.checkGovernanceComplianceAsync(apiId, APIMGovernableState.API_DEPLOY,
+        PublisherCommonUtils.checkGovernanceComplianceAsync(mcpServerId, APIMGovernableState.API_DEPLOY,
                 ArtifactType.API, organization);
         return Response.status(status).entity(apiRevisionDeploymentDTOS).build();
     }
 
     /**
-     * @param apiId
+     * @param mcpServerId
      * @param name
      * @param version
      * @param revisionNumber
@@ -1467,7 +1480,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response exportMCPServer(String apiId, String name, String version, String revisionNumber,
+    public Response exportMCPServer(String mcpServerId, String name, String version, String revisionNumber,
                                     String providerName, String format, Boolean preserveStatus, Boolean latestRevision,
                                     String gatewayEnvironment, Boolean preserveCredentials,
                                     MessageContext messageContext) throws APIManagementException {
@@ -1482,7 +1495,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 String organization = RestApiUtil.getValidatedOrganization(messageContext);
                 ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
                 File file = importExportAPI
-                        .exportAPI(apiId, name, version, revisionNumber, providerName, preserveStatus, exportFormat,
+                        .exportAPI(mcpServerId, name, version, revisionNumber, providerName, preserveStatus,
+                                exportFormat,
                                 Boolean.TRUE, preserveCredentials, latestRevision, StringUtils.EMPTY,
                                 organization);
                 return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
@@ -1492,18 +1506,19 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             }
         } else {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            if (StringUtils.isEmpty(apiId) && (StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(version))) {
-                APIIdentifier apiIdentifier = new APIIdentifier(providerName, name, version);
-                apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
-                if (StringUtils.isEmpty(apiId)) {
+            if (StringUtils.isEmpty(mcpServerId) && (StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(version))) {
+                APIIdentifier mcpServerIdentifier = new APIIdentifier(providerName, name, version);
+                mcpServerId = APIUtil.getUUIDFromIdentifier(mcpServerIdentifier, organization);
+                if (StringUtils.isEmpty(mcpServerId)) {
                     throw new APIManagementException("API not found for the given name: " + name + ", and version : "
                             + version, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, name + "-" + version));
                 }
             }
             RuntimeArtifactDto runtimeArtifactDto = null;
             if (StringUtils.isNotEmpty(organization)) {
-                runtimeArtifactDto = RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(apiId, gatewayEnvironment,
-                        APIConstants.API_GATEWAY_TYPE_ENVOY, organization);
+                runtimeArtifactDto =
+                        RuntimeArtifactGeneratorUtil.generateRuntimeArtifact(mcpServerId, gatewayEnvironment,
+                                APIConstants.API_GATEWAY_TYPE_ENVOY, organization);
             }
             if (runtimeArtifactDto != null) {
                 if (runtimeArtifactDto.isFile()) {
@@ -1528,7 +1543,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * Updates an existing MCP server with the provided APIDTO.
      * Validates the API existence, checks governance compliance, and updates the API.
      *
-     * @param apiId          UUID of the API to be updated.
+     * @param mcpServerId    UUID of the API to be updated.
      * @param body           APIDTO containing the updated API details.
      * @param ifMatch        ETag value for optimistic concurrency control.
      * @param messageContext Message context of the request.
@@ -1536,7 +1551,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException if an error occurs while updating the MCP server.
      */
     @Override
-    public Response updateMCPServer(String apiId, APIDTO body, String ifMatch, MessageContext messageContext)
+    public Response updateMCPServer(String mcpServerId, APIDTO body, String ifMatch, MessageContext messageContext)
             throws APIManagementException {
 
         String[] tokenScopes =
@@ -1546,7 +1561,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             OrganizationInfo organizationInfo = RestApiUtil.getOrganizationInfo(messageContext);
-            CommonUtils.validateAPIExistence(apiId);
+            CommonUtils.validateAPIExistence(mcpServerId);
             if (!PublisherCommonUtils.validateEndpointConfigs(body)) {
                 throw new APIManagementException("Invalid endpoint configs detected",
                         ExceptionCodes.INVALID_ENDPOINT_CONFIG);
@@ -1567,7 +1582,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             }
 
             APIProvider apiProvider = RestApiCommonUtil.getProvider(username);
-            API originalAPI = apiProvider.getAPIbyUUID(apiId, organization);
+            API originalAPI = apiProvider.getAPIbyUUID(mcpServerId, organization);
             originalAPI.setOrganization(organization);
 
             validateAPIOperationsPerLC(originalAPI.getStatus());
@@ -1594,29 +1609,29 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                         .getErrorCode() == ExceptionCodes.GLOBAL_MEDIATION_POLICIES_NOT_FOUND.getErrorCode()) {
                     RestApiUtil.handleResourceNotFoundError(e.getErrorHandler().getErrorDescription(), e, log);
                 } else {
-                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
                 }
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while updating MCP server: "
-                        + apiId, e, log);
+                        + mcpServerId, e, log);
             } else {
                 throw e;
             }
         } catch (FaultGatewaysException e) {
-            String errorMessage = "Error while updating MCP server: " + apiId;
+            String errorMessage = "Error while updating MCP server: " + mcpServerId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (CryptoException e) {
-            String errorMessage = "Error while encrypting the secret key of MCP server: " + apiId;
+            String errorMessage = "Error while encrypting the secret key of MCP server: " + mcpServerId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (ParseException e) {
-            String errorMessage = "Error while parsing endpoint config of MCP server: " + apiId;
+            String errorMessage = "Error while parsing endpoint config of MCP server: " + mcpServerId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
 
     /**
-     * @param apiId
+     * @param mcpServerId
      * @param documentId
      * @param documentDTO
      * @param ifMatch
@@ -1625,19 +1640,20 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException
      */
     @Override
-    public Response updateMCPServerDocument(String apiId, String documentId, DocumentDTO documentDTO, String ifMatch,
+    public Response updateMCPServerDocument(String mcpServerId, String documentId, DocumentDTO documentDTO,
+                                            String ifMatch,
                                             MessageContext messageContext) throws APIManagementException {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             //validate if api exists
-            APIInfo apiInfo = CommonUtils.validateAPIExistence(apiId);
+            APIInfo apiInfo = CommonUtils.validateAPIExistence(mcpServerId);
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
             String sourceUrl = documentDTO.getSourceUrl();
-            Documentation oldDocument = apiProvider.getDocumentation(apiId, documentId, organization);
+            Documentation oldDocument = apiProvider.getDocumentation(mcpServerId, documentId, organization);
 
             //validation checks for existence of the document
             if (documentDTO.getType() == null) {
@@ -1661,7 +1677,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             if (documentDTO.getType() == DocumentDTO.TypeEnum.OTHER
                     && documentDTO.getOtherTypeName() != null
                     &&
-                    apiProvider.isAnotherOverviewDocumentationExist(apiId, documentId, documentDTO.getOtherTypeName(),
+                    apiProvider.isAnotherOverviewDocumentationExist(mcpServerId, documentId,
+                            documentDTO.getOtherTypeName(),
                             organization)) {
                 RestApiUtil.handleBadRequest("Requested other document type _overview already exists", log);
                 return null;
@@ -1673,20 +1690,20 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             Documentation newDocumentation = DocumentationMappingUtil.fromDTOtoDocumentation(documentDTO);
             newDocumentation.setFilePath(oldDocument.getFilePath());
             newDocumentation.setId(documentId);
-            newDocumentation = apiProvider.updateDocumentation(apiId, newDocumentation, organization);
+            newDocumentation = apiProvider.updateDocumentation(mcpServerId, newDocumentation, organization);
 
             return Response.ok().entity(DocumentationMappingUtil.fromDocumentationToDTO(newDocumentation)).build();
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while updating document : " + documentId + " of API "
-                                + apiId, e, log);
+                                + mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while updating the document " + documentId + " for API : " + apiId;
+                String errorMessage = "Error while updating the document " + documentId + " for API : " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -1697,27 +1714,28 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * Retrieves a specific endpoint of an MCP server by its ID.
      * Validates the API existence and retrieves the endpoint details.
      *
-     * @param apiId          UUID of the API.
+     * @param mcpServerId    UUID of the API.
      * @param endpointId     ID of the endpoint to be retrieved.
      * @param messageContext Message context of the request.
      * @return HTTP Response containing the BackendEndpointDTO or an error response.
      * @throws APIManagementException if an error occurs while retrieving the endpoint.
      */
     @Override
-    public Response updateMCPServerEndpoint(String apiId, String endpointId, BackendEndpointDTO backendEndpointDTO,
+    public Response updateMCPServerEndpoint(String mcpServerId, String endpointId,
+                                            BackendEndpointDTO backendEndpointDTO,
                                             MessageContext messageContext) throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        CommonUtils.validateAPIExistence(apiId);
+        CommonUtils.validateAPIExistence(mcpServerId);
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        BackendEndpoint backendEndpoint = apiProvider.getMCPServerEndpoint(apiId, endpointId);
+        BackendEndpoint backendEndpoint = apiProvider.getMCPServerEndpoint(mcpServerId, endpointId);
 
         if (backendEndpoint == null) {
-            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, log);
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, log);
         } else {
             backendEndpoint.setEndpointConfig(backendEndpointDTO.getEndpointConfig());
         }
-        apiProvider.updateMCPServerEndpoint(apiId, backendEndpoint);
+        apiProvider.updateMCPServerEndpoint(mcpServerId, backendEndpoint);
         return Response.ok().entity(APIMappingUtil.fromBackendEndpointToDTO(backendEndpoint, organization,
                 false)).build();
     }
@@ -1766,13 +1784,13 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
     /**
      * @param endpointUrl
-     * @param apiId
+     * @param mcpServerId
      * @param messageContext
      * @return
      * @throws APIManagementException
      */
     @Override
-    public Response validateMCPServerEndpoint(String endpointUrl, String apiId, MessageContext messageContext)
+    public Response validateMCPServerEndpoint(String endpointUrl, String mcpServerId, MessageContext messageContext)
             throws APIManagementException {
 
         ApiEndpointValidationResponseDTO apiEndpointValidationResponseDTO = new ApiEndpointValidationResponseDTO();
@@ -1876,32 +1894,33 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     /**
      * Retrieves API Lifecycle state information
      *
-     * @param apiId        API Id
+     * @param mcpServerId  API Id
      * @param organization organization
      * @return API Lifecycle state information
      */
-    private LifecycleStateDTO getLifecycleState(String apiId, String organization) throws APIManagementException {
+    private LifecycleStateDTO getLifecycleState(String mcpServerId, String organization) throws APIManagementException {
 
         try {
-            APIIdentifier apiIdentifier;
-            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(apiId) != null) {
-                apiIdentifier = APIMappingUtil.getAPIInfoFromUUID(apiId, organization).getId();
-                apiIdentifier.setUuid(apiId);
+            APIIdentifier mcpServerIdentifier;
+            if (ApiMgtDAO.getInstance().checkAPIUUIDIsARevisionUUID(mcpServerId) != null) {
+                mcpServerIdentifier = APIMappingUtil.getAPIInfoFromUUID(mcpServerId, organization).getId();
+                mcpServerIdentifier.setUuid(mcpServerId);
             } else {
-                apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiId);
+                mcpServerIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(mcpServerId);
             }
-            if (apiIdentifier == null) {
+            if (mcpServerIdentifier == null) {
                 throw new APIManagementException("Error while getting the api identifier for the API:" +
-                        apiId, ExceptionCodes.from(ExceptionCodes.INVALID_API_ID, apiId));
+                        mcpServerId, ExceptionCodes.from(ExceptionCodes.INVALID_API_ID, mcpServerId));
             }
-            return PublisherCommonUtils.getLifecycleStateInformation(apiIdentifier, organization);
+            return PublisherCommonUtils.getLifecycleStateInformation(mcpServerIdentifier, organization);
         } catch (APIManagementException e) {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + apiId, e, log);
+                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + mcpServerId, e,
+                        log);
             } else {
                 throw e;
             }
@@ -1909,6 +1928,13 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         return null;
     }
 
+    /**
+     * Creates a new {@link APIDTO} instance based on an existing {@link API} and a specified new version.
+     *
+     * @param existingAPI the existing API object to copy basic details from
+     * @param newVersion  the new version string to assign to the created APIDTO
+     * @return a new {@link APIDTO} with name, context, and version set
+     */
     private APIDTO createAPIDTO(API existingAPI, String newVersion) {
 
         APIDTO apidto = new APIDTO();
