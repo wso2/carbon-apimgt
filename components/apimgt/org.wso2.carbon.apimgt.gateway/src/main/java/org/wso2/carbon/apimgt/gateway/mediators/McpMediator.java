@@ -71,7 +71,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
 
         McpResponseDto mcpResponse = McpRequestProcessor.processRequest(matchedAPI, new Gson().toJson(requestBody),
                 additionalHeaders);
-        if (APIConstants.MCP.METHOD_INITIALIZE.equals(mcpMethod) ) {
+        if (APIConstants.MCP.METHOD_INITIALIZE.equals(mcpMethod) || APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod)) {
             messageContext.setProperty("MCP_PROCESSED", "true");
         }
 

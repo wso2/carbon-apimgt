@@ -71,27 +71,29 @@ public class MCPPayloadGenerator {
         return data;
     }
 
-//    public static String generateToolListPayload(Object id, List<ExtendedOperation> extendedOperations) {
-//        MCPResponse response = new MCPResponse(id);
-//        JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
-//        JsonObject result = new JsonObject();
-//        JsonArray toolsArray = new JsonArray();
-//        for (ExtendedOperation extendedOperation : extendedOperations) {
-//            JsonObject toolObject = new JsonObject();
-//            toolObject.addProperty(APIConstants.MCP.TOOL_NAME_KEY, extendedOperation.getName());
-//            toolObject.addProperty(APIConstants.MCP.TOOL_DESC_KEY, extendedOperation.getDescription());
-//            String schema = extendedOperation.getSchema();
-//            if (schema != null) {
-//                JsonObject schemaObject = gson.fromJson(schema, JsonObject.class);
-//                toolObject.add("inputSchema", sanitizeInputSchema(schemaObject));
-//            }
-//            toolsArray.add(toolObject);
-//        }
-//        result.add("tools", toolsArray);
-//        responseObject.add(APIConstants.MCP.RESULT_KEY, result);
-//
-//        return gson.toJson(responseObject);
-//    }
+    public static String generateToolListPayload(Object id, List<URLMapping> extendedOperations, boolean isThridParty) {
+        MCPResponse response = new MCPResponse(id);
+        JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
+        JsonObject result = new JsonObject();
+        JsonArray toolsArray = new JsonArray();
+        if (!isThridParty) {
+            for (URLMapping extendedOperation : extendedOperations) {
+                JsonObject toolObject = new JsonObject();
+                toolObject.addProperty(APIConstants.MCP.TOOL_NAME_KEY, extendedOperation.getUrlPattern());
+                toolObject.addProperty(APIConstants.MCP.TOOL_DESC_KEY, extendedOperation.getDescription());
+                String schema = extendedOperation.getSchemaDefinition();
+                if (schema != null) {
+                    JsonObject schemaObject = gson.fromJson(schema, JsonObject.class);
+                    toolObject.add("inputSchema", sanitizeInputSchema(schemaObject));
+                }
+                toolsArray.add(toolObject);
+            }
+            result.add("tools", toolsArray);
+            responseObject.add(APIConstants.MCP.RESULT_KEY, result);
+        }
+
+        return gson.toJson(responseObject);
+    }
 
     private static JsonObject sanitizeInputSchema(JsonObject inputObject) {
         if (inputObject == null || inputObject.isEmpty()) {
@@ -108,8 +110,13 @@ public class MCPPayloadGenerator {
         // remove the header, query, and path prefixes from the required fields
         for (JsonElement element : requiredArray) {
             String requiredField = element.getAsString();
-            String newRequiredField = requiredField.split("_", 2)[1];
-            sanitizedArray.add(newRequiredField);
+            String sanitizedRequiredField;
+            if (!"requestBody".equalsIgnoreCase(requiredField)) {
+                sanitizedRequiredField = requiredField.split("_", 2)[1];
+            } else {
+                sanitizedRequiredField = requiredField;
+            }
+            sanitizedArray.add(sanitizedRequiredField);
         }
         inputObject.add(APIConstants.MCP.REQUIRED_KEY, sanitizedArray);
 

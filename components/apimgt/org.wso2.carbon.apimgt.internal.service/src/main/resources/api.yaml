@@ -1855,6 +1855,10 @@ components:
           type: array
           items:
             type: string
+        description:
+          type: string
+        schemaDefinition:
+          type: string
         operationPolicies:
           type: array
           items:

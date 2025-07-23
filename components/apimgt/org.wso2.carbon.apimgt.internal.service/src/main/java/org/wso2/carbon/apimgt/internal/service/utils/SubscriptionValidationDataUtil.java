@@ -92,6 +92,8 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setThrottlingPolicy(urlMapping.getThrottlingPolicy());
                 urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
                 urlMappingDTO.setScopes(urlMapping.getScopes());
+                urlMappingDTO.setDescription(urlMapping.getDescription());
+                urlMappingDTO.setSchemaDefinition(urlMapping.getSchemaDefinition());
                 List<OperationPolicyDTO> operationPolicyDTOList = new ArrayList<>();
                 for (OperationPolicy operationPolicy : urlMapping.getOperationPolicies()) {
                     OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
@@ -155,6 +157,8 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setThrottlingPolicy(urlMapping.getThrottlingPolicy());
                 urlMappingDTO.setUrlPattern(urlMapping.getUrlPattern());
                 urlMappingDTO.setScopes(urlMapping.getScopes());
+                urlMappingDTO.setDescription(urlMapping.getDescription());
+                urlMappingDTO.setSchemaDefinition(urlMapping.getSchemaDefinition());
                 List<OperationPolicyDTO> operationPolicyDTOList = new ArrayList<>();
                 for (OperationPolicy operationPolicy : urlMapping.getOperationPolicies()) {
                     OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();

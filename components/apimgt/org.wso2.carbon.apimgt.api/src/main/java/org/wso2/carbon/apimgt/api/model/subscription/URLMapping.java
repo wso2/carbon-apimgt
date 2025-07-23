@@ -135,6 +135,8 @@ public class URLMapping {
                 ", httpMethod ='" + httpMethod + '\'' +
                 ", urlPattern ='" + urlPattern + '\'' +
                 ", operationPolicies ='" + operationPolicies + '\'' +
+                ", description ='" + description + '\'' +
+                ", schemaDefinition ='" + schemaDefinition + '\'' +
                 '}';
     }
 }

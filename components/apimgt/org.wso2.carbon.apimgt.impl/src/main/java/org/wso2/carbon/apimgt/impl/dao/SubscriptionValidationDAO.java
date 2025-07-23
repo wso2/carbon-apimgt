@@ -1318,6 +1318,8 @@ public class SubscriptionValidationDAO {
                     String urlPattern = resultSet.getString("URL_PATTERN");
                     String throttlingTier = resultSet.getString("THROTTLING_TIER");
                     String scopeName = resultSet.getString("SCOPE_NAME");
+                    String description = resultSet.getString("DESCRIPTION");
+                    String schemaDefinition = resultSet.getString("SCHEMA_DEFINITION");
                     URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
                     if (urlMapping == null) {
                         urlMapping = new URLMapping();
@@ -1325,6 +1327,8 @@ public class SubscriptionValidationDAO {
                         urlMapping.setHttpMethod(httpMethod);
                         urlMapping.setThrottlingPolicy(throttlingTier);
                         urlMapping.setUrlPattern(urlPattern);
+                        urlMapping.setDescription(description);
+                        urlMapping.setSchemaDefinition(schemaDefinition);
                     }
                     if (StringUtils.isNotEmpty(scopeName)) {
                         urlMapping.addScope(scopeName);

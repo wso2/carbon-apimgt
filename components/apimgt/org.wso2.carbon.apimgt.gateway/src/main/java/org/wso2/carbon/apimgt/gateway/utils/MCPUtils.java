@@ -91,7 +91,7 @@ public class MCPUtils {
                 validateInitializeRequest(id, requestObject);
                 return handleMcpInitialize(id, matchedMcpApi);
             } else if (APIConstants.MCP.METHOD_TOOL_LIST.equals(method)) {
-
+                return handleMcpToolList(id, matchedMcpApi, false);
             } else if (APIConstants.MCP.METHOD_TOOL_CALL.equals(method)) {
 
             } else if (APIConstants.MCP.METHOD_PING.equals(method)) {
@@ -141,6 +141,12 @@ public class MCPUtils {
         return new McpResponseDto(MCPPayloadGenerator
                 .getInitializeResponse(id, name, version, description, false),
                 200, null);
+    }
+
+    public static McpResponseDto handleMcpToolList(Object id, API matchedApi, boolean isThirdParty) {
+        return new McpResponseDto(
+                MCPPayloadGenerator.generateToolListPayload(id, matchedApi.getUrlMappings(),
+                        isThirdParty), 200, null);
     }
 
     private static void throwMissingJsonRpcError() throws McpException {
