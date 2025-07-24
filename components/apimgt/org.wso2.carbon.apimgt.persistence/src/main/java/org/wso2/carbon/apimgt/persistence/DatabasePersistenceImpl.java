@@ -827,6 +827,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                     DocumentSearchContent docContent = new DocumentSearchContent();
                     Documentation doc = DatabasePersistenceUtil.jsonToDocument(jsonObject);
                     String apiId = result.getApiId();
+                    String docId = result.getUuid();
 
                     if (apiId != null) {
                         DevPortalAPI devAPI = this.getDevPortalAPI(org, apiId);
@@ -835,7 +836,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                         docContent.setApiVersion(devAPI.getVersion());
                         docContent.setApiUUID(devAPI.getId());
                         docContent.setDocType(doc.getType());
-                        docContent.setId(doc.getId());
+                        docContent.setId(docId);
                         docContent.setSourceType(doc.getSourceType());
                         docContent.setVisibility(doc.getVisibility());
                         docContent.setName(doc.getName());

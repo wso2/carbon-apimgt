@@ -2192,21 +2192,21 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByContentForDevPortal(String org, String searchContent, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQuery.searchContentByContentForDevPortalSql(roles);
+        String query = SQLQuery.searchContentByContentForDevPortalSql(roles, searchContent);
         searchContent = searchContent.toLowerCase();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
-            prepStmt.setString(1, searchContent);
-            prepStmt.setString(2, org);
-            prepStmt.setInt(3, start);
-            prepStmt.setInt(4, offset);
+            prepStmt.setString(1, org);
+            prepStmt.setInt(2, start);
+            prepStmt.setInt(3, offset);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
                     String metadata = rs.getString("metadata");
                     String type = rs.getString("type");
                     String apiId = rs.getString("api_uuid");
-                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    String uuid = rs.getString("uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId, uuid);
                     apiResults.add(contentSearchResult);
                 }
             }

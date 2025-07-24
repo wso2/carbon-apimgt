@@ -1230,19 +1230,43 @@ public class Oracle implements SQLQueryInterface {
     }
 
     @Override
-    public String searchContentByContentForDevPortalSql(String[] roles) {
-        return "SELECT a1.* FROM AM_ARTIFACT_DATA a1 " +
+    public String searchContentByContentForDevPortalSql(String[] roles, String searchContent) {
+        List<String> searchTerms = List.of(searchContent.split(" "));
+
+        String searchQuery;
+
+        if (searchTerms.size() > 1) {
+            StringBuilder queryBuilder = new StringBuilder();
+            for (String term : searchTerms) {
+                queryBuilder.append("FUZZY(").append(term).append(")").append(" AND ");
+            }
+            queryBuilder.setLength(queryBuilder.length() - 5); // Remove the last " AND "
+            searchQuery = queryBuilder.toString();
+        } else {
+            searchQuery = "FUZZY(" + searchContent + ")";
+        }
+
+        return "SELECT a1.metadata, a1.api_uuid, a1.type, a1.uuid " +
+                "FROM AM_ARTIFACT_DATA a1 " +
                 "JOIN (" +
-                    "SELECT DISTINCT API_UUID FROM AM_ARTIFACT_DATA " +
-                    "WHERE CONTAINS(METADATA, ?) > 0 " +
-                    "AND (" +
-                        getRoleConditionForDevPortal(roles) +
-                    ") " +
+                "SELECT API_UUID " +
+                "FROM ( " +
+                "SELECT DISTINCT API_UUID " +
+                "FROM AM_ARTIFACT_DATA " +
+                "WHERE CONTAINS(METADATA, '" + searchQuery + "') > 0 " +
+                ") metadata_uuids " +
+                "INTERSECT " +
+                "SELECT DISTINCT API_UUID " +
+                "FROM AM_ARTIFACT_DATA " +
+                "WHERE TYPE = 'API' " +
+                "AND API_STATUS = 'published' " +
+                "AND (" +
+                getRoleConditionForDevPortal(roles) +
+                ") " +
                 ") filtered_api " +
                 "ON a1.API_UUID = filtered_api.API_UUID " +
                 "WHERE a1.ORG_NAME = ? " +
                 "AND TYPE != 'THUMBNAIL' " +
-                "AND API_STATUS = 'published' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 

@@ -494,7 +494,7 @@ public interface SQLQueryInterface {
      * @param roles User roles for access control
      * @return SQL query string
      */
-    String searchContentByContentForDevPortalSql(String[] roles);
+    String searchContentByContentForDevPortalSql(String[] roles, String searchContent);
 
     /**
      * Returns SQL query to search API Products by content for Dev Portal.
