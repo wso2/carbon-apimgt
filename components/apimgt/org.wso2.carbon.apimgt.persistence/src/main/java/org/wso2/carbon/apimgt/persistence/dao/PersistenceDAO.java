@@ -99,6 +99,7 @@ public class PersistenceDAO {
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
             prepStmt.setString(1, tenantDomain);
+            prepStmt.setString(2, tenantDomain);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 if (rs.next()) {
                     count = rs.getInt("TOTAL_API_COUNT");
@@ -136,6 +137,7 @@ public class PersistenceDAO {
              PreparedStatement countStmt = connection.prepareStatement(countQuery)) {
             connection.setAutoCommit(false);
             countStmt.setString(1, org);
+            countStmt.setString(2, org);
             try (ResultSet rs = countStmt.executeQuery()) {
                 if (rs.next()) {
                     totalCount = rs.getInt("TOTAL_API_COUNT");
@@ -282,9 +284,10 @@ public class PersistenceDAO {
         return count;
     }
 
-    public void addDocumentationFile(String docId, String apiId, ResourceFile resourceFile) throws APIManagementException {
+    public void addDocumentationFile(String docId, String apiId, ResourceFile resourceFile, String fileTextContent) throws APIManagementException {
         String query = SQLQuery.getAddDocumentationFileSQL();
         String metadataQuery = SQLQuery.getAddMetadataForFileSQL();
+
         try (Connection connection = PersistanceDBUtil.getConnection()) {
             connection.setAutoCommit(false);
             // Read stream to byte array
@@ -307,7 +310,8 @@ public class PersistenceDAO {
             try (PreparedStatement prepStmt = connection.prepareStatement(metadataQuery)) {
                 prepStmt.setString(1, resourceFile.getContentType());
                 prepStmt.setString(2, resourceFile.getName());
-                prepStmt.setString(3, docId);
+                prepStmt.setString(3, fileTextContent);
+                prepStmt.setString(4, docId);
                 prepStmt.execute();
             }
             connection.commit();
@@ -1392,21 +1396,21 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByContent(String org, String searchContent, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQuery.searchContentByContentSql(roles);
+        String query = SQLQuery.searchContentByContentSql(roles, searchContent);
         searchContent = searchContent.toLowerCase();
         try (Connection connection = PersistanceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
-            prepStmt.setString(1, searchContent);
-            prepStmt.setString(2, org);
-            prepStmt.setInt(3, start);
-            prepStmt.setInt(4, offset);
+            prepStmt.setString(1, org);
+            prepStmt.setInt(2, start);
+            prepStmt.setInt(3, offset);
             try (ResultSet rs = prepStmt.executeQuery()) {
                 while (rs.next()) {
                     String metadata = rs.getString("metadata");
                     String type = rs.getString("type");
                     String apiId = rs.getString("api_uuid");
-                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId);
+                    String uuid = rs.getString("uuid");
+                    ContentSearchResult contentSearchResult = new ContentSearchResult(metadata, type, apiId, uuid);
                     apiResults.add(contentSearchResult);
                 }
             }

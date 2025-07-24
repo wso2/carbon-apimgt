@@ -4,6 +4,14 @@ public class ContentSearchResult {
     private String metadata;
     private String type;
     private String apiId;
+    private String uuid;
+
+    public ContentSearchResult(String metadata, String type, String apiId, String uuid) {
+        this.metadata = metadata;
+        this.type = type;
+        this.apiId = apiId;
+        this.uuid = uuid;
+    }
 
     public ContentSearchResult(String metadata, String type, String apiId) {
         this.metadata = metadata;
@@ -33,5 +41,13 @@ public class ContentSearchResult {
 
     public void setApiId(String apiId) {
         this.apiId = apiId;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }

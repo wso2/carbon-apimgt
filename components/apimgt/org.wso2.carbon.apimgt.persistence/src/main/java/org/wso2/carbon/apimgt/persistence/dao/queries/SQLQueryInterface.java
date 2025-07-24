@@ -331,7 +331,7 @@ public interface SQLQueryInterface {
      * @param roles User roles for access control
      * @return SQL query string
      */
-    String searchContentByContentSql(String[] roles);
+    String searchContentByContentSql(String[] roles, String searchContent);
 
 
     /**

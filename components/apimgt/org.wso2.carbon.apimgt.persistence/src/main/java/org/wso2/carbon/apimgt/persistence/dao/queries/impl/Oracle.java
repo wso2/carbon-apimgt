@@ -2,6 +2,8 @@ package org.wso2.carbon.apimgt.persistence.dao.queries.impl;
 
 import org.wso2.carbon.apimgt.persistence.dao.queries.SQLQueryInterface;
 
+import java.util.List;
+
 public class Oracle implements SQLQueryInterface {
     private static String getRoleConditionForPublisher(String[] roles) {
         StringBuilder roleCondition = new StringBuilder();
@@ -78,7 +80,8 @@ public class Oracle implements SQLQueryInterface {
                     "METADATA = JSON_TRANSFORM( " +
                     "METADATA, " +
                     "SET '$.fileType' = ?, " +
-                    "SET '$.fileName' = ?) " +
+                    "SET '$.fileName' = ?, " +
+                    "SET '$.textContent' = ? ) " +
                     "WHERE UUID = ? ";
 
     private static final String ADD_DOCUMENTATION_CONTENT_SQL =
@@ -539,7 +542,7 @@ public class Oracle implements SQLQueryInterface {
 
     @Override
     public String getAllApiArtifactSql(String[] roles) {
-        return "SELECT * FROM AM_ARTIFACT_DATA " +
+        return "SELECT METADATA FROM AM_ARTIFACT_DATA " +
                 "WHERE ORG_NAME = ? " +
                 "AND TYPE = 'API' " +
                 "AND (" + getRoleConditionForPublisher(roles) + ") " +
@@ -549,10 +552,18 @@ public class Oracle implements SQLQueryInterface {
 
     @Override
     public String getAllApiCountSql(String[] roles) {
-        return "SELECT COUNT(*) AS TOTAL_API_COUNT FROM AM_ARTIFACT_DATA " +
-                "WHERE ORG_NAME = ? " +
-                "AND type = 'API' " +
-                "AND (" + getRoleConditionForPublisher(roles) + ")";
+        return "SELECT COUNT(UUID) AS TOTAL_API_COUNT FROM ( " +
+                    "SELECT UUID FROM AM_ARTIFACT_DATA " +
+                    "WHERE TYPE = 'API' " +
+                    "AND ORG_NAME = ? " +
+                    "AND ACCESS_CONTROL = 'all' " +
+                    "UNION ALL " +
+                    "SELECT UUID FROM AM_ARTIFACT_DATA " +
+                    "WHERE TYPE = 'API' " +
+                    "AND ORG_NAME = ? " +
+                    "AND ACCESS_ROLES IS NOT NULL " +
+                    "AND (" + getRoleConditionForPublisher(roles) + ") " +
+                ")";
     }
 
     @Override
@@ -746,11 +757,34 @@ public class Oracle implements SQLQueryInterface {
     }
 
     @Override
-    public String searchContentByContentSql(String[] roles) {
-        return "SELECT a1.* FROM AM_ARTIFACT_DATA a1 " +
+    public String searchContentByContentSql(String[] roles, String searchContent) {
+        List<String> searchTerms = List.of(searchContent.split(" "));
+        String searchQuery;
+
+        if (searchTerms.size() > 1) {
+            StringBuilder queryBuilder = new StringBuilder();
+            for (String term : searchTerms) {
+                queryBuilder.append("FUZZY(").append(term).append(")").append(" AND ");
+            }
+            queryBuilder.setLength(queryBuilder.length() - 5); // Remove the last " AND "
+            searchQuery = queryBuilder.toString();
+        } else {
+            searchQuery = "FUZZY(" + searchContent + ")";
+        }
+
+        return "SELECT a1.metadata, a1.api_uuid, a1.type, a1.uuid " +
+                "FROM AM_ARTIFACT_DATA a1 " +
                 "JOIN (" +
-                    "SELECT DISTINCT API_UUID FROM AM_ARTIFACT_DATA " +
-                    "WHERE CONTAINS(METADATA, ?) > 0 " +
+                    "SELECT API_UUID " +
+                    "FROM ( " +
+                        "SELECT DISTINCT API_UUID " +
+                        "FROM AM_ARTIFACT_DATA " +
+                        "WHERE CONTAINS(METADATA, '" + searchQuery + "') > 0 " +
+                    ") metadata_uuids " +
+                    "INTERSECT " +
+                    "SELECT DISTINCT API_UUID " +
+                    "FROM AM_ARTIFACT_DATA " +
+                    "WHERE TYPE = 'API' " +
                     "AND (" +
                         getRoleConditionForPublisher(roles) +
                     ") " +

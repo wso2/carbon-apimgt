@@ -8,24 +8,34 @@ import com.google.gson.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.poi.hwpf.HWPFDocument;
+import org.apache.poi.hwpf.extractor.WordExtractor;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.pdfbox.pdmodel.PDDocument;
+import org.pdfbox.util.PDFTextStripper;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.persistence.APIConstants;
 import org.wso2.carbon.apimgt.persistence.dto.*;
 import org.wso2.carbon.apimgt.persistence.dto.OrganizationTiers;
+import org.wso2.carbon.apimgt.persistence.dto.ResourceFile;
 import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -629,6 +639,76 @@ public class DatabasePersistenceUtil {
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }
+    }
+
+    public static String getTextFromInputStream(ResourceFile resourceFile) throws IOException {
+        InputStream inputStream = resourceFile.getContent();
+        String fileType = resourceFile.getContentType();
+
+        switch (fileType.toLowerCase()) {
+            case APIConstants.DOCUMENTATION_PDF_CONTENT_TYPE:
+                return extractTextFromPdf(inputStream);
+            case APIConstants.DOCUMENTATION_DOCX_CONTENT_TYPE:
+                return extractTextFromDocx(inputStream);
+            case APIConstants.DOCUMENTATION_DOC_CONTENT_TYPE:
+                return extractTextFromDoc(inputStream);
+            case APIConstants.DOCUMENTATION_INLINE_CONTENT_TYPE:
+                return extractTextFromPlainText(inputStream);
+            default:
+                throw new UnsupportedOperationException("Unsupported file type: " + fileType);
+        }
+    }
+
+    private static String extractTextFromPdf(InputStream inputStream) throws IOException {
+        // You'll need Apache PDFBox dependency
+        try {
+            PDDocument document = PDDocument.load(inputStream);
+            PDFTextStripper stripper = new PDFTextStripper();
+            String text = stripper.getText(document);
+            document.close();
+            return text;
+        } catch (Exception e) {
+            throw new IOException("Failed to extract text from PDF", e);
+        }
+    }
+
+    private static String extractTextFromDocx(InputStream inputStream) throws IOException {
+        // You'll need Apache POI dependency
+        try {
+            XWPFDocument document = new XWPFDocument(inputStream);
+            XWPFWordExtractor extractor = new XWPFWordExtractor(document);
+            String text = extractor.getText();
+            document.close();
+            return text;
+        } catch (Exception e) {
+            throw new IOException("Failed to extract text from DOCX", e);
+        }
+    }
+
+    private static String extractTextFromDoc(InputStream inputStream) throws IOException {
+        // You'll need Apache POI-HWPF dependency
+        try {
+            HWPFDocument document = new HWPFDocument(inputStream);
+            WordExtractor extractor = new WordExtractor(document);
+            String text = extractor.getText();
+            document.close();
+            return text;
+        } catch (Exception e) {
+            throw new IOException("Failed to extract text from DOC", e);
+        }
+    }
+
+    private static String extractTextFromPlainText(InputStream inputStream) {
+        StringBuilder content = new StringBuilder();
+        try (Scanner scanner = new Scanner(inputStream, Charset.forName("UTF-8"))) {
+            while (scanner.hasNextLine()) {
+                content.append(scanner.nextLine());
+                if (scanner.hasNextLine()) {
+                    content.append(System.lineSeparator());
+                }
+            }
+        }
+        return content.toString();
     }
 }
 

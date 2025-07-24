@@ -20,6 +20,9 @@ import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.utils.*;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.*;
@@ -682,6 +685,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                     DocumentSearchContent docContent = new DocumentSearchContent();
                     Documentation doc = DatabasePersistenceUtil.jsonToDocument(jsonObject);
                     String apiId = result.getApiId();
+                    String docId = result.getUuid();
 
                     if (apiId != null) {
                         PublisherAPI pubAPI = this.getPublisherAPI(org, apiId);
@@ -690,7 +694,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                         docContent.setApiVersion(pubAPI.getVersion());
                         docContent.setApiUUID(pubAPI.getId());
                         docContent.setDocType(doc.getType());
-                        docContent.setId(doc.getId());
+                        docContent.setId(docId);
                         docContent.setSourceType(doc.getSourceType());
                         docContent.setVisibility(doc.getVisibility());
                         docContent.setName(doc.getName());
@@ -1123,15 +1127,45 @@ public class DatabasePersistenceImpl implements APIPersistence {
     public DocumentContent addDocumentationContent(Organization org, String apiId, String docId, DocumentContent content) throws DocumentationPersistenceException {
         try {
             if (DocumentContent.ContentSourceType.FILE.equals(content.getSourceType())) {
-                persistenceDAO.addDocumentationFile(docId, apiId, content.getResourceFile());
+                byte[] fileBytes = getBytes(content);
+
+                // Create a new InputStream for getTextFromInputStream
+                try (InputStream textStream = new ByteArrayInputStream(fileBytes)) {
+                    String fileTextContent = DatabasePersistenceUtil.getTextFromInputStream(new ResourceFile(textStream, content.getResourceFile().getContentType()));
+
+                    // Create another InputStream for addDocumentationFile
+                    try (InputStream fileStream = new ByteArrayInputStream(fileBytes)) {
+                        ResourceFile resourceFile = new ResourceFile(fileStream, content.getResourceFile().getContentType());
+                        resourceFile.setName(content.getResourceFile().getName());
+                        persistenceDAO.addDocumentationFile(docId, apiId, resourceFile, fileTextContent);
+                    }
+                }
             } else {
                 String contentString = content.getTextContent();
                 persistenceDAO.addDocumentationContent(docId, apiId, contentString);
             }
         } catch (APIManagementException e) {
             throw new DocumentationPersistenceException("Error while adding documentation content", e);
+        } catch (IOException e) {
+            throw new DocumentationPersistenceException("Error while reading documentation content", e);
         }
         return null;
+    }
+
+    private static byte[] getBytes(DocumentContent content) throws IOException {
+        InputStream originalStream = content.getResourceFile().getContent();
+        byte[] fileBytes;
+
+        // Read the input stream into a byte array
+        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+            byte[] temp = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = originalStream.read(temp)) != -1) {
+                buffer.write(temp, 0, bytesRead);
+            }
+            fileBytes = buffer.toByteArray();
+        }
+        return fileBytes;
     }
 
     @Override
