@@ -10,7 +10,7 @@ import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDT
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.*;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApiService;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
 

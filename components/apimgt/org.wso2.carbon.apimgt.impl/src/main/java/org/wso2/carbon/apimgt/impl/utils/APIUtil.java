@@ -84,6 +84,7 @@ import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.LoginPostExecutor;
 import org.wso2.carbon.apimgt.api.NewPostLoginExecutor;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
@@ -111,12 +112,10 @@ import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationType;
 import org.wso2.carbon.apimgt.api.model.EndpointSecurity;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.FederatedAPIDiscovery;
 import org.wso2.carbon.apimgt.api.model.GatewayAPIValidationResult;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
-import org.wso2.carbon.apimgt.api.model.GatewayMode;
 import org.wso2.carbon.apimgt.api.model.GatewayPortalConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayFeatureCatalog;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -311,7 +310,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.UUID;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -499,8 +497,8 @@ public final class APIUtil {
     /**
      * This method is used to execute an HTTP request
      *
-     * @param method       HttpRequest Type
-     * @param httpClient   HttpClient
+     * @param method     HttpRequest Type
+     * @param httpClient HttpClient
      * @return HTTPResponse
      * @throws IOException
      */
@@ -539,8 +537,8 @@ public final class APIUtil {
      * Use {@link #executeHTTPRequestWithRetries(HttpRequestBase, HttpClient, long, int, double)}
      * to execute HTTP request with custom retry parameters.
      *
-     * @param method       HttpRequest Type
-     * @param httpClient   HttpClient
+     * @param method     HttpRequest Type
+     * @param httpClient HttpClient
      * @return CloseableHttpResponse
      */
     public static CloseableHttpResponse executeHTTPRequestWithRetries(HttpRequestBase method, HttpClient httpClient)
@@ -555,14 +553,14 @@ public final class APIUtil {
     /**
      * This method is used to execute an HTTP request with custom retry parameters.
      *
-     * @param method       HttpRequest Type
-     * @param httpClient   HttpClient
-     * @param retryDuration Duration between retry in milliseconds
-     * @param maxRetryCount Maximum number of retries
+     * @param method                 HttpRequest Type
+     * @param httpClient             HttpClient
+     * @param retryDuration          Duration between retry in milliseconds
+     * @param maxRetryCount          Maximum number of retries
      * @param retryProgressionFactor Progression factor for retry duration
-     * @throws IOException             if an I/O error occurs
-     * @throws APIManagementException if a processing error occurs
      * @return CloseableHttpResponse
+     * @throws IOException            if an I/O error occurs
+     * @throws APIManagementException if a processing error occurs
      */
     public static CloseableHttpResponse executeHTTPRequestWithRetries(
             HttpRequestBase method, HttpClient httpClient, long retryDuration, int maxRetryCount,
@@ -1485,6 +1483,7 @@ public final class APIUtil {
 
     /**
      * Utility method to get the introspection query for GraphQL
+     *
      * @return introspection query
      * @throws APIManagementException
      */
@@ -1493,7 +1492,7 @@ public final class APIUtil {
         try (InputStream fileStream = APIUtil.class.getClassLoader().getResourceAsStream(introspectionQueryFilePath)) {
             if (fileStream == null) {
                 throw new APIManagementException(
-                    "Graphql introspection query file not found: " + introspectionQueryFilePath);
+                        "Graphql introspection query file not found: " + introspectionQueryFilePath);
             }
             return IOUtils.toString(fileStream, StandardCharsets.UTF_8);
         } catch (IOException e) {
@@ -1651,7 +1650,7 @@ public final class APIUtil {
     /**
      * Utility method to get documentation path of the revision
      *
-     * @param apiUUID  API UUID
+     * @param apiUUID    API UUID
      * @param revisionId revision id
      * @return Doc path
      */
@@ -2152,7 +2151,7 @@ public final class APIUtil {
         // checking if Doc visibility levels enabled in api-manager.xml
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().
                 getAPIManagerConfiguration().getFirstProperty(
-                APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS).equals("true");
+                        APIConstants.API_PUBLISHER_ENABLE_API_DOC_VISIBILITY_LEVELS).equals("true");
     }
 
     /**
@@ -2293,7 +2292,7 @@ public final class APIUtil {
      * Returns a map of API availability tiers of the tenant as defined in the underlying governance
      * registry.
      *
-     * @param tierType type of the tiers
+     * @param tierType     type of the tiers
      * @param organization identifier of the organization
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
@@ -2316,7 +2315,7 @@ public final class APIUtil {
      * Result will contains all the tiers including unauthenticated tier which is
      * filtered out in   getTiers}
      *
-     * @param registry registry
+     * @param registry     registry
      * @param tierLocation registry location of tiers config
      * @return Map<String, Tier> containing all available tiers
      * @throws RegistryException      when registry action fails
@@ -3571,7 +3570,7 @@ public final class APIUtil {
     }
 
     private static void processExternalGatewayFeatureCatalogs(Map<String, Object> gatewayConfigsMap,
-        Map<String, List<String>> apiData, GatewayAgentConfiguration gatewayConfiguration) {
+                                                              Map<String, List<String>> apiData, GatewayAgentConfiguration gatewayConfiguration) {
 
         GatewayPortalConfiguration config = null;
         try {
@@ -8582,6 +8581,7 @@ public final class APIUtil {
 
     /**
      * Get gateway environments defined in the configuration: api-manager.xml
+     *
      * @return map of configured environments against environment name
      */
     public static Map<String, Environment> getReadOnlyEnvironments() {
@@ -8591,6 +8591,7 @@ public final class APIUtil {
 
     /**
      * Get default (first) vhost of the given read only environment
+     *
      * @param environmentName name of the read only environment
      * @return default vhost of environment
      */
@@ -10407,7 +10408,7 @@ public final class APIUtil {
     public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException {
         return ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
     }
-    
+
     public static String getconvertedId(Identifier apiId) {
         String id = null;
         if (apiId instanceof APIIdentifier) {
@@ -10506,6 +10507,7 @@ public final class APIUtil {
 
     /**
      * Check whether the file type is supported.
+     *
      * @param filename name
      * @return true if supported
      */
@@ -10604,9 +10606,10 @@ public final class APIUtil {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getOrgAccessControl().isEnabled();
     }
-    
+
     /**
      * Check whether organizations are available in the system
+     *
      * @return
      */
     public static boolean areOrganizationsRegistered() {
@@ -10623,6 +10626,7 @@ public final class APIUtil {
         }
         return false;
     }
+
     /**
      * Get registered API Definition Parsers as a Map
      *
@@ -10648,6 +10652,7 @@ public final class APIUtil {
         }
         return false;
     }
+
     public static Tier findTier(Collection<Tier> tiers, String tierName) {
         for (Tier tier : tiers) {
             if (tier.getName() != null && tierName != null && tier.getName().equals(tierName)) {
@@ -10753,10 +10758,9 @@ public final class APIUtil {
     /**
      * Read the operation policy definition from the provided path and return the definition object
      *
-     * @param extractedFolderPath   Location of the policy definition
-     * @param definitionFileName    Name of the policy file
-     * @param fileExtension         Since there can be both synapse and choreo connect definitons, fileExtension is used
-     *
+     * @param extractedFolderPath Location of the policy definition
+     * @param definitionFileName  Name of the policy file
+     * @param fileExtension       Since there can be both synapse and choreo connect definitons, fileExtension is used
      * @return OperationPolicyDefinition
      */
     public static OperationPolicyDefinition getOperationPolicyDefinitionFromFile(String extractedFolderPath,
@@ -10820,7 +10824,7 @@ public final class APIUtil {
     /**
      * Check whether there exists a file for the provided location
      *
-     * @param fileLocation   Location of the file
+     * @param fileLocation Location of the file
      * @return True if file exists
      */
     public static boolean checkFileExistence(String fileLocation) {
@@ -10833,7 +10837,7 @@ public final class APIUtil {
      * Get the validated policy specification object from a provided policy string. Validation is done against the
      * policy schema
      *
-     * @param policySpecAsString  Policy specification as a string
+     * @param policySpecAsString Policy specification as a string
      * @return OperationPolicySpecification object
      * @throws APIManagementException If the policy schema validation fails
      */
@@ -10864,7 +10868,7 @@ public final class APIUtil {
     /**
      * Export the policy attribute object of the specification as a string
      *
-     * @param policySpecification  Policy specification
+     * @param policySpecification Policy specification
      * @return policy attributes string
      * @throws APIManagementException If the policy schema validation fails
      */
@@ -10884,7 +10888,7 @@ public final class APIUtil {
      * Return the hash value of the provided policy. To generate the hash, policy Specification and the
      * two definitions are used
      *
-     * @param policyData  Operation policy data
+     * @param policyData Operation policy data
      * @return hash
      */
     public static String getHashOfOperationPolicy(OperationPolicyData policyData)
@@ -10911,7 +10915,7 @@ public final class APIUtil {
     /**
      * Return the hash of the policy definition string
      *
-     * @param policyDefinition  Operation policy definition
+     * @param policyDefinition Operation policy definition
      * @return hash of the definition content
      */
     public static String getHashOfOperationPolicyDefinition(OperationPolicyDefinition policyDefinition)
@@ -11149,6 +11153,7 @@ public final class APIUtil {
 
     /**
      * Generate code challenge for PKCE
+     *
      * @param codeVerifier verifier
      * @return code challenge
      */
@@ -11160,7 +11165,7 @@ public final class APIUtil {
         byte[] digest = messageDigest.digest();
         return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
     }
-    
+
     /**
      * This method is used to get the default API level policy in a given tenant space
      *
@@ -11234,8 +11239,8 @@ public final class APIUtil {
     /**
      * This method is used to check whether a given policy is configured as default or not in a given tenant domain
      *
-     * @param policyName policy name
-     * @param policyLevel policy level
+     * @param policyName   policy name
+     * @param policyLevel  policy level
      * @param tenantDomain tenant domain name
      * @return default Subscription level policy for a given tenant
      */
@@ -11262,7 +11267,7 @@ public final class APIUtil {
      * Get configured value of a property in a given tenant domain
      *
      * @param propertyName property name
-     * @param tenantId tenant ID
+     * @param tenantId     tenant ID
      * @return default Subscription level policy for a given tenant
      */
     private static String getTenantConfigPropertyValue(String propertyName, int tenantId)
@@ -11471,6 +11476,7 @@ public final class APIUtil {
 
     /**
      * This method will generate the hash value of the given byte[] payload
+     *
      * @param payload
      * @return
      * @throws APIManagementException
@@ -11535,7 +11541,7 @@ public final class APIUtil {
      * This method is used to verify the hash values of the service catalog entries
      *
      * @param existingService existing service catalog entry
-     * @param newService new service catalog entry
+     * @param newService      new service catalog entry
      * @return true if the hash values are equal
      */
     public static boolean verifyHashValues(ServiceEntry existingService, ServiceEntry newService)
@@ -11571,7 +11577,6 @@ public final class APIUtil {
     }
 
     /**
-     *
      * @param hashValue
      * @return
      */
@@ -11616,7 +11621,7 @@ public final class APIUtil {
      * If the property is not set, it returns false by default.
      *
      * @return {true} if organization-wide application updates are enabled;
-     *         {false} otherwise.
+     * {false} otherwise.
      */
     public static Boolean isOrgWideAppUpdateEnabled() {
 
@@ -11735,7 +11740,7 @@ public final class APIUtil {
                     getExternalGatewayConnectorConfiguration(api.getGatewayType());
             if (gatewayConfiguration != null) {
                 GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration
-                                .getGatewayDeployerImplementation()).getDeclaredConstructor().newInstance();
+                        .getGatewayDeployerImplementation()).getDeclaredConstructor().newInstance();
                 if (deployer != null) {
                     GatewayAPIValidationResult errorList = null;
                     errorList = deployer.validateApi(api);
@@ -11812,7 +11817,7 @@ public final class APIUtil {
      * @param sessionToken The AWS session token, if using temporary credentials (can be null or empty).
      * @return A {@code Map<String, String>} AWS S4 Auth headers.
      * @throws APIManagementException If an error occurs during the signature generation process, such as
-     * problems with hashing or HMAC calculation.
+     *                                problems with hashing or HMAC calculation.
      */
     public static Map<String, String> generateAWSSignature(
             String host, String method, String service, String uri, String queryString, String payload,
@@ -12022,35 +12027,11 @@ public final class APIUtil {
     }
 
     public static void validateAndScheduleFederatedGatewayAPIDiscovery(Environment environment, String organization) {
-        GatewayAgentConfiguration gatewayConfiguration = org.wso2.carbon.apimgt.impl.internal.
-                ServiceReferenceHolder.getInstance().
-                getExternalGatewayConnectorConfiguration(environment.getGatewayType());
-        if (gatewayConfiguration != null && gatewayConfiguration.getDiscoveryImplementation() != null) {
-            FederatedAPIDiscovery federatedAPIDiscovery;
-            if (StringUtils.isNotEmpty(gatewayConfiguration.getDiscoveryImplementation())) {
-                try {
-                    federatedAPIDiscovery = (FederatedAPIDiscovery)
-                            Class.forName(gatewayConfiguration.getDiscoveryImplementation())
-                                    .getDeclaredConstructor().newInstance();
-                    federatedAPIDiscovery.init(environment,
-                            getDiscoveredAPIsFromFederatedGateway(environment, organization), organization);
-                    if (environment.getMode().equals(GatewayMode.WRITE_ONLY)) {
-                        log.info("Federated API discovery is disabled for environment: " + environment.getName());
-                       ScheduledFuture<?> scheduledFuture = federatedAPIDiscovery
-                               .getScheduledDiscoveryTask(environment.getName());
-                       if (scheduledFuture != null) {
-                           federatedAPIDiscovery.shutdown();
-                       }
-                    } else {
-                        federatedAPIDiscovery.scheduleDiscovery(environment.getName(),
-                                environment.getApiDiscoveryScheduledWindow());
-                    }
-                } catch (ClassNotFoundException | IllegalAccessException | InstantiationException |
-                         NoSuchMethodException | InvocationTargetException | APIManagementException e) {
-                    log.error("Error while loading federated API discovery for environment "
-                            + environment.getName(), e);
-                }
-            }
+        FederatedAPIDiscoveryService federatedAPIDiscoveryService = ServiceReferenceHolder
+                .getInstance().getFederatedAPIDiscoveryService();
+
+        if (environment.getType().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+            federatedAPIDiscoveryService.scheduleDiscovery(environment, organization);
         }
     }
 
@@ -12060,7 +12041,7 @@ public final class APIUtil {
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = gatewayArtifactsMgtDAO
                 .retrieveGatewayArtifactsByLabel(new String[]{environment.getName()}, organization);
 
-        for (APIRuntimeArtifactDto apiRuntimeArtifactDto: apiRuntimeArtifactDtoList) {
+        for (APIRuntimeArtifactDto apiRuntimeArtifactDto : apiRuntimeArtifactDtoList) {
             apisDeployedInGateway.add(apiRuntimeArtifactDto.getName() + ":" + apiRuntimeArtifactDto.getVersion());
         }
         return apisDeployedInGateway;

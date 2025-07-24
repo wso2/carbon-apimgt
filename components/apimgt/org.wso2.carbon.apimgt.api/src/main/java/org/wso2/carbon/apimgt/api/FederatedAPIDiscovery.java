@@ -2,7 +2,7 @@
  *
  * Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,94 +20,29 @@
 
 package org.wso2.carbon.apimgt.api;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Environment;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-
-
 
 /**
- * This abstract class defines the contract for federated API discovery.
- * Subclasses should implement logic to discover APIs from a federated environment
- * based on the provided environment details.
+ * This interface provides functionality to discover APIs from a federated environment.
  */
-public abstract class FederatedAPIDiscovery {
-
-    private static Log log = LogFactory.getLog(FederatedAPIDiscovery.class);
-    private static final Map<String, ScheduledFuture<?>> scheduledDiscoveryTasks = new ConcurrentHashMap<>();
+public interface FederatedAPIDiscovery {
 
 
-    private final ScheduledExecutorService scheduledExecutorService =
-            Executors.newScheduledThreadPool(10, r -> new Thread(r,
-                    "FederatedDiscoveryThread - " + getClass().getName()));
     /**
-     * Initializes the federated API discovery with the given environment.
+     * Initializes the FederatedAPIDiscovery with the given environment and organization.
      *
-     * @param environment The environment in which the discovery will take place.
-     * @throws APIManagementException If an error occurs during initialization.
+     * @param environment   The environment from which APIs will be discovered.
+     * @param organization  The organization for which the discovery is being performed.
+     * @throws APIManagementException if an error occurs during initialization.
      */
-    public abstract void init(Environment environment, List<String> apisDeployedInGatewayEnv, String organization)
-            throws APIManagementException;
+    void init(Environment environment, String organization) throws APIManagementException;
 
     /**
-     * Discovers and invokes createAPI method for each API in the federated environment.
-     *
+     * Discovers APIs from the federated environment.
+     * This method should be called to initiate the discovery process.
      */
-    public abstract void discoverAPI();
-
-    /**
-     * Schedules periodic discovery at a fixed interval.
-     *
-     * @param interval Interval between executions.
-     */
-    public void scheduleDiscovery(String environmentName, long interval) {
-        log.debug("Scheduling federated API discovery every " + interval + " minutes. Class "
-                + getClass().getName());
-        if (scheduledDiscoveryTasks.containsKey(environmentName)) {
-            log.debug("Cancel already scheduled federated API discovery for " + environmentName);
-            scheduledDiscoveryTasks.get(environmentName).cancel(false);
-        }
-        log.debug("Scheduling federated API discovery for " + environmentName);
-        try {
-            ScheduledFuture<?> newTask = scheduledExecutorService.scheduleAtFixedRate(this::discoverAPI,
-                    0, interval, TimeUnit.MINUTES);
-            scheduledDiscoveryTasks.put(environmentName, newTask);
-        } catch (Exception e) {
-            log.error("Error while scheduling federated API discovery for " + environmentName +
-                    ". Hence APIs will not discover from this environment", e);
-        }
-    }
-
-    /**
-     * Shuts down the scheduler service.
-     */
-    public void shutdown() {
-        log.debug("Shutting down federated API discovery");
-        for (ScheduledFuture<?> task : scheduledDiscoveryTasks.values()) {
-            if (!task.isCancelled()) {
-                task.cancel(false);
-            }
-        }
-        scheduledExecutorService.shutdown();
-        try {
-            if (!scheduledExecutorService.awaitTermination(60, TimeUnit.SECONDS)) {
-                scheduledExecutorService.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            log.error("Error while shutting down federated API discovery scheduler", e);
-            scheduledExecutorService.shutdownNow();
-        }
-    }
-
-    public ScheduledFuture<?> getScheduledDiscoveryTask(String environmentName) {
-        return scheduledDiscoveryTasks.get(environmentName);
-    }
+    List<API> discoverAPI();
 }

@@ -38,8 +38,10 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
@@ -62,7 +64,6 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
-import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactSaver;
@@ -332,7 +333,7 @@ public class APIManagerComponent {
                     bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
                 }
             }
-            GatewayHolder.initializeFederatedGatewayAPIDiscovery(tenantDomain);
+            initializeAPIDiscoveryTasks(tenantDomain);
             bundleContext.registerService(ScopeValidator.class, new SystemScopesIssuer(), null);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
@@ -1080,6 +1081,24 @@ public class APIManagerComponent {
                 .withSSLContext(sslContext, hostnameVerifier).build());
     }
 
+    void initializeAPIDiscoveryTasks(String organization) {
+        try {
+            Map<String, Environment> environments = APIUtil.getEnvironments(organization);
+            FederatedAPIDiscoveryService federatedAPIDiscoveryService = ServiceReferenceHolder
+                    .getInstance().getFederatedAPIDiscoveryService();
+
+            environments.forEach((name, environment) -> {
+                if (environment.getType().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+                    federatedAPIDiscoveryService.scheduleDiscovery(environment, organization);
+                }
+            });
+
+            ServiceReferenceHolder.getInstance().getFederatedAPIDiscoveryService();
+        } catch (APIManagementException e) {
+            log.error("Error while initializing API Discovery tasks for tenant " + organization, e);
+        }
+    }
+
     /**
      * Populate list of NonProxyHosts for given nonProxyHostsString through APIManagerConfiguration
      *
@@ -1103,5 +1122,18 @@ public class APIManagerComponent {
 
     protected void unsetWorkflowTaskService(WorkflowTaskService workflowTaskService) {
         ServiceReferenceHolder.getInstance().setWorkflowTaskService(null);
+    }
+
+    @Reference(
+            name = "apim.gateway.federation.service",
+            service = org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetFederatedAPIDiscovery")
+    protected void setFederatedAPIDiscovery(FederatedAPIDiscoveryService federatedAPIDiscoveryService) {
+        ServiceReferenceHolder.getInstance().setFederatedAPIDiscovery(federatedAPIDiscoveryService);
+    }
+    protected void unsetFederatedAPIDiscovery(FederatedAPIDiscoveryService federatedAPIDiscoveryService) {
+        ServiceReferenceHolder.getInstance().setFederatedAPIDiscovery(null);
     }
 }

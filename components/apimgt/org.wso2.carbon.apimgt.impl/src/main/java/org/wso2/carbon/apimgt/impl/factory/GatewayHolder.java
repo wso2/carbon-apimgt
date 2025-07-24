@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.api.FederatedAPIDiscovery;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
@@ -70,48 +69,5 @@ public class GatewayHolder {
             }
         }
         return null;
-    }
-
-    public static void initializeFederatedGatewayAPIDiscovery(String organization) {
-        try {
-            Map<String, Environment> environmentMap = APIUtil.getEnvironments(organization);
-            environmentMap.forEach((gatewayName, environment) -> {
-                // environment fetched from DB might have encrypted properties, hence need to decrypt before
-                // initializing the deployer
-                try {
-                    APIAdminImpl apiAdmin = new APIAdminImpl();
-                    Environment resolvedEnvironment = apiAdmin.getEnvironmentWithoutPropertyMasking(organization,
-                            environment.getUuid());
-                    resolvedEnvironment = apiAdmin.decryptGatewayConfigurationValues(resolvedEnvironment);
-
-                    GatewayAgentConfiguration gatewayAgentConfiguration = ServiceReferenceHolder.getInstance().
-                            getExternalGatewayConnectorConfiguration(environment.getGatewayType());
-                    if (gatewayAgentConfiguration != null &&
-                            gatewayAgentConfiguration.getDiscoveryImplementation() != null) {
-                        try {
-                            FederatedAPIDiscovery federatedAPIDiscovery =
-                                    (FederatedAPIDiscovery) Class.forName(gatewayAgentConfiguration
-                                            .getDiscoveryImplementation()).getDeclaredConstructor().newInstance();
-                            federatedAPIDiscovery.init(resolvedEnvironment,
-                                    APIUtil.getDiscoveredAPIsFromFederatedGateway(environment, organization),
-                                    organization);
-                            federatedAPIDiscovery.scheduleDiscovery(environment.getName(), resolvedEnvironment.
-                                    getApiDiscoveryScheduledWindow());
-                        } catch (ClassNotFoundException | NoSuchMethodException | InstantiationException |
-                                 IllegalAccessException | InvocationTargetException e) {
-                            log.error("Error while loading federated API discovery for " + gatewayName, e);
-                        }
-                    }
-                } catch (APIManagementException e) {
-                    log.error("Error while loading environments for tenant " + organization, e);
-                }
-            });
-        } catch (APIManagementException e) {
-            log.error("Error while fetching environments for tenant " + organization, e);
-        }
-    }
-
-    private static OrganizationGatewayDto getTenantGatewayDtoFromMap(String organization) {
-        return organizationWiseMap.get(organization);
     }
 }
