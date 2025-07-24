@@ -21,6 +21,7 @@ package org.wso2.carbon.apimgt.api.model;
 import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIConstants;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 
 import java.io.Serializable;
@@ -177,6 +178,7 @@ public class Environment implements Serializable {
         this.uuid = uuid;
     }
 
+    @UsedByMigrationClient
     public String getName() {
         return name;
     }

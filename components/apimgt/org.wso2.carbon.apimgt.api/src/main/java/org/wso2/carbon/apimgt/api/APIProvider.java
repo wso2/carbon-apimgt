@@ -1272,6 +1272,7 @@ public interface APIProvider extends APIManager {
      * @return APIProduct product
      * @throws APIManagementException
      */
+    @UsedByMigrationClient
     APIProduct getAPIProductbyUUID(String uuid, String requestedTenantDomain) throws APIManagementException;
     /**
      * Delete API Product

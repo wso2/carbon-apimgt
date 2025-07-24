@@ -35,6 +35,7 @@ public class APIDefinitionValidationResponse {
     private ArrayList<ErrorHandler> errorItems = new ArrayList<>();
     private boolean isInit = false;
 
+    @UsedByMigrationClient
     public boolean isValid() {
         return isValid;
     }
@@ -63,6 +64,7 @@ public class APIDefinitionValidationResponse {
         this.errorItems = errorItems;
     }
 
+    @UsedByMigrationClient
     public ArrayList<ErrorHandler> getErrorItems() {
         return errorItems;
     }
@@ -136,6 +138,7 @@ public class APIDefinitionValidationResponse {
         public void setEndpoints(List<String> endpoints) { this.endpoints = endpoints; }
     }
 
+    @UsedByMigrationClient
     public APIDefinition getParser() {
         return parser;
     }

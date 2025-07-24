@@ -39,6 +39,7 @@ import org.wso2.carbon.apimgt.api.APIMgtAuthorizationFailedException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.dto.CertificateMetadataDTO;
 import org.wso2.carbon.apimgt.api.dto.ClientCertificateDTO;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -360,6 +361,7 @@ public class ExportUtils {
      * @throws APIImportExportException If an error occurs while retrieving image from the registry or storing in the
      *                                  archive directory
      */
+    @UsedByMigrationClient
     public static void addThumbnailToArchive(String archivePath, Identifier identifier, APIProvider apiProvider,
             String currentUuid) throws APIImportExportException, APIManagementException {
 
@@ -458,6 +460,7 @@ public class ExportUtils {
      *                                  registry or storing in the archive directory
      * @throws APIManagementException   If an error occurs while retrieving document details
      */
+    @UsedByMigrationClient
     public static void addDocumentationToArchive(String archivePath, Identifier identifier,
                                                  ExportFormat exportFormat, APIProvider apiProvider, String type)
             throws APIImportExportException, APIManagementException {
@@ -914,6 +917,7 @@ public class ExportUtils {
      * @param apiProvider  API Provider
      * @throws APIImportExportException If an error occurs while exporting gateway environments
      */
+    @UsedByMigrationClient
     public static void addGatewayEnvironmentsToArchive(String archivePath, String apiID,
                                                        ExportFormat exportFormat, APIProvider apiProvider)
             throws APIManagementException {
@@ -1189,6 +1193,7 @@ public class ExportUtils {
      * @param organization Organization
      * @throws APIImportExportException If an error occurs when writing to file or retrieving certificate metadata
      */
+    @UsedByMigrationClient
     public static void addClientCertificatesToArchive(String archivePath, Identifier identifier, int tenantId,
             APIProvider provider, ExportFormat exportFormat, String organization)
             throws APIImportExportException {
@@ -1319,6 +1324,7 @@ public class ExportUtils {
      * @throws APIImportExportException If an error occurs while creating the directory or extracting the archive
      * @throws APIManagementException   If an error occurs while retrieving API related resources
      */
+    @UsedByMigrationClient
     public static void addDependentAPIsToArchive(String archivePath, APIProductDTO apiProductDtoToReturn,
                                                  ExportFormat exportFormat, APIProvider provider, String userName,
                                                  Boolean isStatusPreserved, boolean preserveDocs,

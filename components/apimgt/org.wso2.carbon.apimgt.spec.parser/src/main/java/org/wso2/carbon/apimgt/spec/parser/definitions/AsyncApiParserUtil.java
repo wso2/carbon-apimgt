@@ -14,6 +14,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ErrorItem;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 
 import java.io.IOException;
 import java.net.URL;
@@ -25,6 +26,7 @@ public class AsyncApiParserUtil {
     private static final Log log = LogFactory.getLog(AsyncApiParserUtil.class);
     private static final String PATH_SEPARATOR = "/";
 
+    @UsedByMigrationClient
     public static APIDefinitionValidationResponse validateAsyncAPISpecification(
             String schemaToBeValidated, boolean returnJSONContent) throws APIManagementException {
 

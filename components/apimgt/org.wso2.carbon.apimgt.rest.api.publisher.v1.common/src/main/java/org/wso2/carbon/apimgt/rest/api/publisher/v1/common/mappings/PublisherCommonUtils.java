@@ -64,6 +64,7 @@ import org.wso2.carbon.apimgt.api.ErrorHandler;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.TokenBasedThrottlingCountHolder;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
@@ -2520,6 +2521,7 @@ public class PublisherCommonUtils {
      * @return GraphQLValidationResponseDTO
      * @throws APIManagementException when error occurred while validating GraphQL schema
      */
+    @UsedByMigrationClient
     public static GraphQLValidationResponseDTO validateGraphQLSchema(String filename, String schema, String url,
                                                                      Boolean useIntrospection)
             throws APIManagementException {

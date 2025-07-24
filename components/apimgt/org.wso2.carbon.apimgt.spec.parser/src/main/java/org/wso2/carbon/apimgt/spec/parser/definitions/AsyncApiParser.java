@@ -28,6 +28,7 @@ import org.osgi.service.component.annotations.Component;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
@@ -1933,6 +1934,7 @@ public class AsyncApiParser extends APIDefinition {
         return null;
     }
 
+    @UsedByMigrationClient
     public String generateAsyncAPIDefinition(API api) throws APIManagementException {
         Aai20Document aaiDocument = new Aai20Document();
         aaiDocument.info = aaiDocument.createInfo();

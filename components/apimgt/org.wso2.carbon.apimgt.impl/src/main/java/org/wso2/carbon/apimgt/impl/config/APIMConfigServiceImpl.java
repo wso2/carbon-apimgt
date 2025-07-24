@@ -32,6 +32,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIConstants.ConfigType;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
@@ -175,6 +176,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     }
 
     @Override
+    @UsedByMigrationClient
     public void addTenantConfig(String organization, String tenantConfig) throws APIManagementException {
 
         if (organization == null) {
@@ -184,6 +186,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     }
 
     @Override
+    @UsedByMigrationClient
     public String getTenantConfig(String organization) throws APIManagementException {
 
         if (organization == null) {
@@ -262,6 +265,7 @@ public class APIMConfigServiceImpl implements APIMConfigService {
     }
 
     @Override
+    @UsedByMigrationClient
     public void updateTenantConfig(String organization, String tenantConfig) throws APIManagementException {
 
         if (organization == null) {

@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -82,6 +84,7 @@ public class ThrottleProperties {
         this.policyDeployer = policyDeployer;
     }
 
+    @UsedByMigrationClient
     public boolean isEnableUnlimitedTier() {
         return enableUnlimitedTier;
     }

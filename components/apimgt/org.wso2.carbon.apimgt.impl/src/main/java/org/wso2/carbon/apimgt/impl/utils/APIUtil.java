@@ -167,6 +167,7 @@ import org.wso2.carbon.apimgt.impl.ExternalGatewayAPIValidationException;
 import org.wso2.carbon.apimgt.impl.IDPConfiguration;
 import org.wso2.carbon.apimgt.impl.PasswordResolverFactory;
 import org.wso2.carbon.apimgt.impl.RESTAPICacheConfiguration;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.CorrelationConfigDAO;
@@ -679,6 +680,7 @@ public final class APIUtil {
         return false;
     }
 
+    @UsedByMigrationClient
     public static API getAPI(GovernanceArtifact artifact)
             throws APIManagementException {
 
@@ -1546,6 +1548,7 @@ public final class APIUtil {
      * @param identifier APIIdentifier
      * @return API path
      */
+    @UsedByMigrationClient
     public static String getAPIPath(APIIdentifier identifier) {
 
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR +
@@ -1746,6 +1749,7 @@ public final class APIUtil {
      * @return GenericArtifactManager
      * @throws APIManagementException if failed to initialized GenericArtifactManager
      */
+    @UsedByMigrationClient
     public static GenericArtifactManager getArtifactManager(Registry registry, String key) throws APIManagementException {
 
         GenericArtifactManager artifactManager = null;
@@ -2254,6 +2258,7 @@ public final class APIUtil {
      * @return a Map of tier names and Tier objects - possibly empty
      * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
+    @UsedByMigrationClient
     public static Map<String, Tier> getAdvancedSubsriptionTiers() throws APIManagementException {
 
         return getAdvancedSubsriptionTiers(MultitenantConstants.SUPER_TENANT_ID);
@@ -2908,6 +2913,7 @@ public final class APIUtil {
      * @param input inputString
      * @return String modifiedString
      */
+    @UsedByMigrationClient
     public static String replaceEmailDomain(String input) {
 
         if (input != null && input.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR)) {
@@ -2976,6 +2982,7 @@ public final class APIUtil {
      * @param input inputString
      * @return String modifiedString
      */
+    @UsedByMigrationClient
     public static String replaceEmailDomainBack(String input) {
 
         if (input != null && input.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
@@ -3188,7 +3195,7 @@ public final class APIUtil {
      * Load the External API Store Configuration  to the registry
      *
      * @param organization
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
 
     public static void loadTenantExternalStoreConfig(String organization) throws APIManagementException {
@@ -3942,6 +3949,7 @@ public final class APIUtil {
         }
     }
 
+    @UsedByMigrationClient
     public static List<Tenant> getAllTenantsWithSuperTenant() throws UserStoreException {
 
         Tenant[] tenants = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager().getAllTenants();
@@ -4216,7 +4224,8 @@ public final class APIUtil {
         }
         return resourceQuotaLimiter;
     }
-    
+
+    @UsedByMigrationClient
     public static int getInternalOrganizationId(String organization) throws APIManagementException {
         return getOrganizationResolver().getInternalId(organization);
     }
@@ -4249,7 +4258,7 @@ public final class APIUtil {
             return true;
         }
 
-        org.wso2.carbon.user.api.UserStoreManager userStoreManager;
+        UserStoreManager userStoreManager;
         try {
             RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
             int tenantId = ServiceReferenceHolder.getInstance().getRealmService().getTenantManager()
@@ -4262,7 +4271,7 @@ public final class APIUtil {
                     return false;
                 }
             }
-        } catch (org.wso2.carbon.user.api.UserStoreException e) {
+        } catch (UserStoreException e) {
             log.error("Error when getting the list of roles", e);
             return false;
         }
@@ -4301,7 +4310,7 @@ public final class APIUtil {
      * Create API Definition in JSON
      *
      * @param api API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if failed to generate the content and save
+     * @throws APIManagementException if failed to generate the content and save
      * @deprecated
      */
 
@@ -4416,6 +4425,7 @@ public final class APIUtil {
      * @param userName user name
      * @return tenantId
      */
+    @UsedByMigrationClient
     public static int getTenantId(String userName) {
         //get tenant domain from user name
         String tenantDomain = MultitenantUtils.getTenantDomain(userName);
@@ -4451,6 +4461,7 @@ public final class APIUtil {
      * @param organization Organization
      * @return tenantId
      */
+    @UsedByMigrationClient
     public static int getInternalIdFromTenantDomainOrOrganization(String organization) {
         RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
         if (realmService == null || organization == null) {
@@ -4470,6 +4481,7 @@ public final class APIUtil {
      * @param tenantId tenant Id
      * @return tenantId
      */
+    @UsedByMigrationClient
     public static String getTenantDomainFromTenantId(int tenantId) {
 
         RealmService realmService = ServiceReferenceHolder.getInstance().getRealmService();
@@ -4827,6 +4839,7 @@ public final class APIUtil {
         return result.toString();
     }
 
+    @UsedByMigrationClient
     public static void loadTenantRegistry(int tenantId) throws RegistryException {
 
         TenantRegistryLoader tenantRegistryLoader = APIManagerComponent.getTenantRegistryLoader();
@@ -5282,6 +5295,7 @@ public final class APIUtil {
      * @param path            default path of the registry
      * @return mounted path or path
      */
+    @UsedByMigrationClient
     public static String getMountedPath(RegistryContext registryContext, String path) {
 
         if (registryContext != null && path != null) {
@@ -5301,7 +5315,7 @@ public final class APIUtil {
      * Returns a map of gateway / store domains for the tenant
      *
      * @return a Map of domain names for tenant
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException if an error occurs when loading tiers from the registry
+     * @throws APIManagementException if an error occurs when loading tiers from the registry
      */
     public static Map<String, String> getDomainMappings(String tenantDomain, String appType)
             throws APIManagementException {
@@ -6216,6 +6230,7 @@ public final class APIUtil {
      * @param roleMappings JSON Configuration object with role mappings
      * @return Map of scopes which contains scope names and associated role list
      */
+    @UsedByMigrationClient
     public static Map<String, String> getRESTAPIScopesFromConfig(JSONObject scopesConfig, JSONObject roleMappings) {
 
         Map<String, String> scopes = new HashMap<String, String>();
@@ -6398,12 +6413,14 @@ public final class APIUtil {
      * @param jsonString json representation of CORS configuration
      * @return CORSConfiguration Object
      */
+    @UsedByMigrationClient
     public static CORSConfiguration getCorsConfigurationDtoFromJson(String jsonString) {
 
         return new Gson().fromJson(jsonString, CORSConfiguration.class);
 
     }
 
+    @UsedByMigrationClient
     public static WebsubSubscriptionConfiguration getWebsubSubscriptionConfigurationDtoFromJson(String jsonString) {
         return new Gson().fromJson(jsonString, WebsubSubscriptionConfiguration.class);
     }
@@ -6887,7 +6904,7 @@ public final class APIUtil {
             SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(policyName, tenantId);
             deployRetrievedSubscriptionPolicy(tenantId, retrievedPolicy);
         }
-        
+
         long tenThousandPerMinTier = defualtLimits.containsKey(APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN) ?
                 defualtLimits.get(APIConstants.DEFAULT_API_POLICY_TEN_THOUSAND_REQ_PER_MIN) : 10000;
         long twentyThousandPerMinTier = defualtLimits.containsKey(
@@ -7046,6 +7063,7 @@ public final class APIUtil {
      *
      * @return condition of enable unlimited tier
      */
+    @UsedByMigrationClient
     public static boolean isEnabledUnlimitedTier() {
 
         ThrottleProperties throttleProperties = ServiceReferenceHolder.getInstance()
@@ -7724,6 +7742,7 @@ public final class APIUtil {
      *
      * @return returns true if ENABLE_MULTIPLE_GROUPID is set to True
      */
+    @UsedByMigrationClient
     public static boolean isMultiGroupAppSharingEnabled() {
 
         if (multiGrpAppSharing == null) {
@@ -9211,7 +9230,7 @@ public final class APIUtil {
             properties.put(APIConstants.USER_CTX_PROPERTY_ISADMIN, true);
         }
         properties.put(APIConstants.USER_CTX_PROPERTY_SKIP_ROLES, APIUtil.getSkipRolesByRegex());
-        
+
         if (APIUtil.areOrganizationsRegistered()) {
             properties.put(APIConstants.USER_CTX_PROPERTY_ORGS_AVAILABLE, true);
         }
@@ -9602,7 +9621,7 @@ public final class APIUtil {
                 return true;
             } else {
                 try {
-                    org.json.simple.JSONObject tenantConfig = getTenantConfig(tenantDomain);
+                    JSONObject tenantConfig = getTenantConfig(tenantDomain);
                     Object value = tenantConfig.get(APIConstants.API_TENANT_CONF_ENABLE_RECOMMENDATION_KEY);
                     return Boolean.parseBoolean(value.toString());
                 } catch (APIManagementException e) {
@@ -9983,6 +10002,7 @@ public final class APIUtil {
     }
 
 
+    @UsedByMigrationClient
     public static String getX509certificateContent(String certificate) {
         String content = certificate.replaceAll(APIConstants.BEGIN_CERTIFICATE_STRING, "")
                 .replaceAll(APIConstants.END_CERTIFICATE_STRING, "");
@@ -10138,8 +10158,8 @@ public final class APIUtil {
         existingTenantConfObject = new JsonParser().parse(existingTenantConf).getAsJsonObject();
 
         //append original role to the role mapping list
-        Set<Map.Entry<String, JsonElement>> roleMappingEntries = newRoleMappingJson.entrySet();
-        for (Map.Entry<String, JsonElement> entry: roleMappingEntries) {
+        Set<Entry<String, JsonElement>> roleMappingEntries = newRoleMappingJson.entrySet();
+        for (Entry<String, JsonElement> entry: roleMappingEntries) {
             List<String> currentRoles = Arrays.asList(String.valueOf(entry.getValue()).split(","));
             boolean isOriginalRoleAlreadyInRoles = false;
             for (String role: currentRoles) {
@@ -10353,7 +10373,7 @@ public final class APIUtil {
      * @param identifier
      * @param organization identifier of the organization
      * @return String uuid string
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public static String getUUIDFromIdentifier(APIIdentifier identifier, String organization)
             throws APIManagementException{
@@ -10370,7 +10390,7 @@ public final class APIUtil {
      * @param identifier
      * @param organization
      * @return String uuid string
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public static String getUUIDFromIdentifier(APIProductIdentifier identifier, String organization)
             throws APIManagementException {
@@ -10382,8 +10402,9 @@ public final class APIUtil {
      *
      * @param uuid UUID of the API
      * @return API Product Identifier
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
+    @UsedByMigrationClient
     public static APIProductIdentifier getAPIProductIdentifierFromUUID(String uuid) throws APIManagementException{
         return ApiMgtDAO.getInstance().getAPIProductIdentifierFromUUID(uuid);
     }
@@ -10393,7 +10414,7 @@ public final class APIUtil {
      *
      * @param uuid UUID of the API
      * @return API Identifier
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public static APIIdentifier getAPIIdentifierFromUUID(String uuid) throws APIManagementException{
         return ApiMgtDAO.getInstance().getAPIIdentifierFromUUID(uuid);
@@ -10593,7 +10614,7 @@ public final class APIUtil {
         return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
                 .getOrgAccessControl().isEnabled();
     }
-    
+
     /**
      * Check whether organizations are available in the system
      * @return
@@ -11149,7 +11170,7 @@ public final class APIUtil {
         byte[] digest = messageDigest.digest();
         return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(digest);
     }
-    
+
     /**
      * This method is used to get the default API level policy in a given tenant space
      *
