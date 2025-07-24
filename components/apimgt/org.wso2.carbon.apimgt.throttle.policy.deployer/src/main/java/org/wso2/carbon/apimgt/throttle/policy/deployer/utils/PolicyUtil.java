@@ -49,6 +49,7 @@ import org.wso2.carbon.event.processor.core.exception.ExecutionPlanConfiguration
 import org.wso2.carbon.event.processor.core.exception.ExecutionPlanDependencyValidationException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -156,7 +157,13 @@ public class PolicyUtil {
      * Deploy all the throttle policies retrieved from the database in the Traffic Manager.
      */
     public static void deployAllPolicies() {
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIMConfiguration();
         PolicyRetriever policyRetriever = new PolicyRetriever();
+        List<String> skipPolicyNames = new ArrayList<>();
+        if (apiManagerConfiguration.getThrottleProperties().getSkipDeployingPolicies() != null) {
+            skipPolicyNames = Arrays.asList(apiManagerConfiguration.getThrottleProperties().getSkipDeployingPolicies());
+        }
         try {
             // Deploy all the policies retrieved from the database
             SubscriptionPolicyList subscriptionPolicies = new SubscriptionPolicyList();
@@ -169,7 +176,10 @@ public class PolicyUtil {
             // Undeploy all existing policies
             undeployAllPolicies();
             for (SubscriptionPolicy subscriptionPolicy : subscriptionPolicies.getList()) {
-                if (!(APIConstants.UNLIMITED_TIER.equalsIgnoreCase(subscriptionPolicy.getName())
+                String policyFileName = subscriptionPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_SUB +
+                        "_" + subscriptionPolicy.getName();
+                if (shouldDeployPolicy(policyFileName, skipPolicyNames) &&
+                        !(APIConstants.UNLIMITED_TIER.equalsIgnoreCase(subscriptionPolicy.getName())
                         || APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED.
                         equalsIgnoreCase(subscriptionPolicy.getName())
                         || APIConstants.DEFAULT_SUB_POLICY_ASYNC_WH_UNLIMITED.
@@ -178,21 +188,45 @@ public class PolicyUtil {
                 }
             }
             for (ApplicationPolicy applicationPolicy : applicationPolicies.getList()) {
-                if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(applicationPolicy.getName())) {
+                String policyFileName = applicationPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_APP +
+                        "_" + applicationPolicy.getName();
+                if (shouldDeployPolicy(policyFileName, skipPolicyNames) &&
+                        !APIConstants.UNLIMITED_TIER.equalsIgnoreCase(applicationPolicy.getName())) {
                     deployPolicy(applicationPolicy, null);
                 }
             }
             for (ApiPolicy apiPolicy : apiPolicies.getList()) {
-                if (!APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiPolicy.getName())) {
+                String policyFileName = apiPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_API +
+                        "_" + apiPolicy.getName();
+                if (shouldDeployPolicy(policyFileName, skipPolicyNames) &&
+                        !APIConstants.UNLIMITED_TIER.equalsIgnoreCase(apiPolicy.getName())) {
                     deployPolicy(apiPolicy, null);
                 }
             }
             for (GlobalPolicy globalPolicy : globalPolicies.getList()) {
-                deployPolicy(globalPolicy, null);
+                String policyFileName = globalPolicy.getTenantDomain() + "_" + PolicyConstants.POLICY_LEVEL_GLOBAL +
+                        "_" + globalPolicy.getName();
+                if (shouldDeployPolicy(policyFileName, skipPolicyNames)) {
+                    deployPolicy(globalPolicy, null);
+                }
             }
         } catch (ThrottlePolicyDeployerException e) {
             log.error("Error in retrieving throttle policies", e);
         }
+    }
+
+    /***
+     * Utility method to determine if a policy should be skipped
+     * @param policyFileName Name of the policy file
+     * @param skipPolicyNames List of policy file names to be skipped deploying
+     * @return true or false
+     */
+    private static boolean shouldDeployPolicy(String policyFileName,
+                                              List<String> skipPolicyNames) {
+        if (!skipPolicyNames.isEmpty()) {
+            return !skipPolicyNames.contains(policyFileName);
+        }
+        return true;
     }
 
     /**

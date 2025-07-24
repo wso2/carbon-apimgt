@@ -11,6 +11,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 
 import org.apache.cxf.jaxrs.ext.MessageContext;
@@ -78,8 +79,9 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
             throws APIManagementException {
         JSONObject newScopeRoleJson = SystemScopesMappingUtil.createJsonObjectOfScopeMapping(body);
         APIUtil.updateTenantConfOfRoleScopeMapping(newScopeRoleJson, RestApiCommonUtil.getLoggedInUsername());
-        Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenantWithoutRoleMappings(MultitenantUtils
-                .getTenantDomain(RestApiCommonUtil.getLoggedInUsername()));
+        String tenantDomain = MultitenantUtils.getTenantDomain(RestApiCommonUtil.getLoggedInUsername());
+        CacheProvider.getRESTAPIScopeCache().remove(tenantDomain);
+        Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenantWithoutRoleMappings(tenantDomain);
         ScopeListDTO scopeListDTO = SystemScopesMappingUtil.fromScopeListToScopeListDTO(scopeRoleMapping);
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ROLES_FOR_SCOPE, APIConstants.AuditLogConstants.ROLES_FOR_SCOPE_INFO,
                 APIConstants.AuditLogConstants.UPDATED, RestApiCommonUtil.getLoggedInUsername());
