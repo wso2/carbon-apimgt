@@ -3451,4 +3451,45 @@ public final class APIConstants {
     }
 
     public static final String SYNAPSE_API_NAME_PREFIX = "prod";
+    
+    // Constants related to Gateway Notifications  
+    public static class GatewayNotification {
+        public static final String PAYLOAD_TYPE = "payloadType";
+        public static final String PAYLOAD_TYPE_REGISTER = "REGISTER";
+        public static final String PAYLOAD_TYPE_HEARTBEAT = "HEARTBEAT";
+        public static final String GATEWAY_ID = "gatewayId";
+        public static final String ENVIRONMENT_LABELS = "environmentLabels";
+        public static final String GATEWAY_PROPERTIES = "gatewayProperties";
+        public static final String TIMESTAMP = "timeStamp";
+        public static final String GATEWAY_NOTIFICATION_ENDPOINT = INTERNAL_WEB_APP_EP + "/notify-gateway";
+        
+        public static final String STATUS_REGISTERED = "REGISTERED";
+        public static final String STATUS_ACKNOWLEDGED = "ACKNOWLEDGED";
+        public static final String STATUS_RE_REGISTER = "RE_REGISTER";
+        
+        public static final String ERROR_INVALID_PAYLOAD = "Invalid payload: payloadType is required.";
+        public static final String ERROR_INVALID_PAYLOAD_TYPE = "Invalid payloadType: ";
+        public static final String ERROR_DATABASE_REGISTRATION = "Database error during registration: ";
+        public static final String ERROR_HEARTBEAT_REGISTREATION = "Error during registering heartbeat: ";
+        public static final String ERROR_GATEWAY_NOT_FOUND = "Gateway not found for ID: ";
+
+        public static final String GATEWAY_NOTIFICATION_CONFIGURATION = "GatewayNotificationConfiguration";
+        public static final String HEARTBEAT = "Heartbeat";
+        public static final String DEPLOYMENT_ACKNOWLEDGEMENT = "DeploymentAcknowledgement";
+        public static final String GATEWAY_CLEANUP = "GatewayCleanup";
+        public static final String GATEWAY_NOTIFICATION_ENABLED = "Enabled";
+        public static final String NOTIFY_INTERVAL_SECONDS = "NotifyIntervalSeconds";
+        public static final String GATEWAY_IDENTIFIER = "GatewayID";
+        public static final String BATCH_SIZE = "BatchSize";
+        public static final String BATCH_INTERVAL_MILLIS = "BatchIntervalMillis";
+        public static final String REGISTRATION = "Registration";
+        public static final String MAX_RETRY_COUNT = "MaxRetryCount";
+        public static final String RETRY_DURATION = "RetryDuration";
+        public static final String RETRY_PROGRESSION_FACTOR = "RetryProgressionFactor";
+        
+        // Cleanup specific constants
+        public static final String EXPIRE_TIME_SECONDS = "ExpireTimeSeconds";
+        public static final String DATA_RETENTION_PERIOD_SECONDS = "DataRetentionPeriodSeconds";
+        public static final String CLEANUP_INTERVAL_SECONDS = "CleanupIntervalSeconds";
+    }
 }
