@@ -1044,7 +1044,10 @@ public class APIAdminImpl implements APIAdmin {
     private String getTenantWideCertificateValue(Object certificateObject) {
         if (certificateObject instanceof Map) {
             Map<String, String> certificateMap = (Map<String, String>) certificateObject;
-            return certificateMap.get("value").toString();
+            Object value = certificateMap.get("value");
+            if (value != null) {
+                return value.toString();
+            }
         }
         return null;
     }
@@ -1060,7 +1063,7 @@ public class APIAdminImpl implements APIAdmin {
         if (isUpdate && (responseCode.getResponseCode() == ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE
                 .getResponseCode())) {
             try {
-                responseCode = certificateMgtUtils.updateCertificate(certificate.toString(), alias);
+                responseCode = certificateMgtUtils.updateCertificate(certificate, alias);
             } catch (CertificateManagementException e) {
                 throw new APIManagementException(e);
             }
