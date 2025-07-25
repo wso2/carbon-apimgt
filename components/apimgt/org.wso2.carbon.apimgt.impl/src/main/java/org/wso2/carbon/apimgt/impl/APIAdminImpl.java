@@ -1044,7 +1044,10 @@ public class APIAdminImpl implements APIAdmin {
     private String getTenantWideCertificateValue(Object certificateObject) {
         if (certificateObject instanceof Map) {
             Map<String, String> certificateMap = (Map<String, String>) certificateObject;
-            return certificateMap.get("value").toString();
+            Object value = certificateMap.get("value");
+            if (value != null) {
+                return value.toString();
+            }
         }
         return null;
     }
