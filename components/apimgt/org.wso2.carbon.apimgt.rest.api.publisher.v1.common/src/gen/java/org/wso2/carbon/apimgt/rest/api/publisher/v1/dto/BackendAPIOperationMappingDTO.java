@@ -19,32 +19,32 @@ import javax.validation.Valid;
 
 
 
-public class BackendOperationMappingDTO   {
+public class BackendAPIOperationMappingDTO   {
   
-    private String backendId = null;
+    private String backendAPIId = null;
     private BackendOperationDTO backendOperation = null;
 
   /**
-   * Backend ID
+   * Backend API UUID
    **/
-  public BackendOperationMappingDTO backendId(String backendId) {
-    this.backendId = backendId;
+  public BackendAPIOperationMappingDTO backendAPIId(String backendAPIId) {
+    this.backendAPIId = backendAPIId;
     return this;
   }
 
   
-  @ApiModelProperty(example = "1", value = "Backend ID")
-  @JsonProperty("backendId")
-  public String getBackendId() {
-    return backendId;
+  @ApiModelProperty(example = "a29ff7d8-8057-4e88-94a4-f583dd968c6a", value = "Backend API UUID")
+  @JsonProperty("backendAPIId")
+  public String getBackendAPIId() {
+    return backendAPIId;
   }
-  public void setBackendId(String backendId) {
-    this.backendId = backendId;
+  public void setBackendAPIId(String backendAPIId) {
+    this.backendAPIId = backendAPIId;
   }
 
   /**
    **/
-  public BackendOperationMappingDTO backendOperation(BackendOperationDTO backendOperation) {
+  public BackendAPIOperationMappingDTO backendOperation(BackendOperationDTO backendOperation) {
     this.backendOperation = backendOperation;
     return this;
   }
@@ -69,22 +69,22 @@ public class BackendOperationMappingDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    BackendOperationMappingDTO backendOperationMapping = (BackendOperationMappingDTO) o;
-    return Objects.equals(backendId, backendOperationMapping.backendId) &&
-        Objects.equals(backendOperation, backendOperationMapping.backendOperation);
+    BackendAPIOperationMappingDTO backendAPIOperationMapping = (BackendAPIOperationMappingDTO) o;
+    return Objects.equals(backendAPIId, backendAPIOperationMapping.backendAPIId) &&
+        Objects.equals(backendOperation, backendAPIOperationMapping.backendOperation);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(backendId, backendOperation);
+    return Objects.hash(backendAPIId, backendOperation);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class BackendOperationMappingDTO {\n");
+    sb.append("class BackendAPIOperationMappingDTO {\n");
     
-    sb.append("    backendId: ").append(toIndentedString(backendId)).append("\n");
+    sb.append("    backendAPIId: ").append(toIndentedString(backendAPIId)).append("\n");
     sb.append("    backendOperation: ").append(toIndentedString(backendOperation)).append("\n");
     sb.append("}");
     return sb.toString();

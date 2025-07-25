@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
-import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
+import org.wso2.carbon.apimgt.api.model.BackendAPI;
 import org.apache.http.client.HttpClient;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -699,55 +699,61 @@ public class ApisApiServiceImplUtils {
                 apiToAdd.setApiSecurity(service.getSecurityType().toString());
             }
         }
-        SwaggerData swaggerData;
+
         String definitionToAdd;
         APIDefinition apiDefinition = validationResponse.getParser();
+        String definition = validationResponse.getJsonContent();
+        definition = OASParserUtil.preProcess(definition);
+        int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
+        String defaultAPILevelPolicy = APIUtil.getDefaultAPILevelPolicy(tenantId);
+
         if (APIConstants.API_TYPE_MCP.equals(apiToAdd.getType())) {
-            BackendEndpoint backendEndpoint = new BackendEndpoint();
-            backendEndpoint.setBackendId(UUID.randomUUID().toString());
-            backendEndpoint.setBackendName(APIConstants.AI.MCP_DEFAULT_BACKEND_ENDPOINT_NAME);
-            backendEndpoint.setBackendApiDefinition(validationResponse.getJsonContent());
-            backendEndpoint.setEndpointConfig(apiToAdd.getEndpointConfig());
+
+            Set<Scope> scopes = apiDefinition.getScopes(definition);
+            apiToAdd.setScopes(scopes);
+
+            String backendApiId = UUID.randomUUID().toString();
+            Set<URITemplate> uriTemplates = generateMCPFeatures(
+                    apiToAdd.getSubtype(), definition, backendApiId, apiToAdd.getUriTemplates(), apiDefinition);
+
+            applyDefaultThrottlingAndAuth(uriTemplates, defaultAPILevelPolicy);
+            apiToAdd.setUriTemplates(uriTemplates);
+
+            validateScopes(apiToAdd, apiProvider, username);
+            SwaggerData swaggerData = new SwaggerData(apiToAdd);
+            String backendApiDefinition = apiDefinition.generateAPIDefinitionForBackendAPI(swaggerData, definition);
+
+            BackendAPI backendAPI =
+                    createDefaultBackendAPI(backendApiId, backendApiDefinition, apiToAdd.getEndpointConfig());
+
+            apiToAdd.getBackendAPIs().add(backendAPI);
             apiToAdd.setEndpointConfig(null);
 
             swaggerData = new SwaggerData(apiToAdd);
             definitionToAdd = new OAS3Parser().generateAPIDefinition(swaggerData);
 
-            Set<URITemplate> uriTemplates = generateMCPFeatures(apiToAdd.getSubtype(), backendEndpoint,
-                    apiToAdd.getUriTemplates(), apiDefinition);
-            apiToAdd.setUriTemplates(uriTemplates);
-            apiToAdd.getBackendEndpoints().add(backendEndpoint);
         } else {
-            definitionToAdd = validationResponse.getJsonContent();
             if (syncOperations) {
                 validateScopes(apiToAdd, apiProvider, username);
-                swaggerData = new SwaggerData(apiToAdd);
-                definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
-            }
-            definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
-            Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
-            int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
-            String defaultAPILevelPolicy = APIUtil.getDefaultAPILevelPolicy(tenantId);
-            for (URITemplate uriTemplate : uriTemplates) {
-                if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
-                    uriTemplate.setThrottlingTier(defaultAPILevelPolicy);
-                }
-                if (StringUtils.isEmpty(uriTemplate.getAuthType())) {
-                    uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
-                }
+                SwaggerData swaggerData = new SwaggerData(apiToAdd);
+                definition = apiDefinition.populateCustomManagementInfo(definition, swaggerData);
             }
 
-            Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
+            Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definition);
+            applyDefaultThrottlingAndAuth(uriTemplates, defaultAPILevelPolicy);
+
+            Set<Scope> scopes = apiDefinition.getScopes(definition);
             apiToAdd.setUriTemplates(uriTemplates);
             apiToAdd.setScopes(scopes);
-            //Set extensions from API definition to API object
-            apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd);
+            apiToAdd = OASParserUtil.setExtensionsToAPI(definition, apiToAdd);
+
             if (!syncOperations) {
                 validateScopes(apiToAdd, apiProvider, username);
-                swaggerData = new SwaggerData(apiToAdd);
-                definitionToAdd = apiDefinition
-                        .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
+                SwaggerData swaggerData = new SwaggerData(apiToAdd);
+                definition = apiDefinition.populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
             }
+
+            definitionToAdd = definition;
         }
 
         // adding the definition
@@ -762,21 +768,60 @@ public class ApisApiServiceImplUtils {
     }
 
     /**
-     * Generates MCP feature URI templates for a given subtype.
+     * Applies default throttling tier and authentication type to the given set of URI templates,
+     * if they are not already defined.
      *
-     * @param subtype         MCP feature subtype
-     * @param backendEndpoint Backend endpoint with API definition
-     * @param uriTemplates    Existing URI templates
-     * @param parser          API definition parser
-     * @return Generated MCP URI templates
+     * @param uriTemplates          the set of URI templates to update
+     * @param defaultThrottlingTier the default throttling policy to apply when none is set
+     */
+    private static void applyDefaultThrottlingAndAuth(Set<URITemplate> uriTemplates, String defaultThrottlingTier) {
+
+        for (URITemplate uriTemplate : uriTemplates) {
+            if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
+                uriTemplate.setThrottlingTier(defaultThrottlingTier);
+            }
+            if (StringUtils.isEmpty(uriTemplate.getAuthType())) {
+                uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+            }
+        }
+    }
+
+    /**
+     * Creates and initializes a BackendAPI instance with the given parameters.
+     *
+     * @param backendApiId         unique identifier for the backend API
+     * @param backendApiDefinition OpenAPI definition for the backend API
+     * @param endpointConfig       endpoint configuration from the main API
+     * @return configured BackendAPI instance
+     */
+    private static BackendAPI createDefaultBackendAPI(String backendApiId, String backendApiDefinition,
+                                                      String endpointConfig) {
+
+        BackendAPI backendAPI = new BackendAPI();
+        backendAPI.setBackendApiId(backendApiId);
+        backendAPI.setBackendApiName(APIConstants.AI.MCP_DEFAULT_BACKEND_API_NAME);
+        backendAPI.setApiDefinition(backendApiDefinition);
+        backendAPI.setEndpointConfig(endpointConfig);
+        return backendAPI;
+    }
+
+    /**
+     * Generates MCP feature URI templates for a backend API.
+     *
+     * @param subtype              MCP feature subtype
+     * @param backendApiDefinition API definition string
+     * @param backendApiId         backend API ID
+     * @param uriTemplates         existing URI templates
+     * @param parser               parser to generate MCP tools
+     * @return generated MCP feature templates
      * @throws APIManagementException if generation fails
      */
-    public static Set<URITemplate> generateMCPFeatures(String subtype, BackendEndpoint backendEndpoint,
+    public static Set<URITemplate> generateMCPFeatures(String subtype, String backendApiDefinition, String backendApiId,
                                                        Set<URITemplate> uriTemplates, APIDefinition parser)
             throws APIManagementException {
 
-        Set<URITemplate> mcpTools = parser.generateMCPTools(backendEndpoint.getBackendApiDefinition(), null,
-                backendEndpoint.getBackendId(), APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE, subtype, uriTemplates);
+        Set<URITemplate> mcpTools = parser.generateMCPTools(backendApiDefinition, null,
+                backendApiId, APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE, subtype, uriTemplates);
         if (mcpTools == null) {
             throw new APIManagementException("Failed to generate MCP feature.");
         }

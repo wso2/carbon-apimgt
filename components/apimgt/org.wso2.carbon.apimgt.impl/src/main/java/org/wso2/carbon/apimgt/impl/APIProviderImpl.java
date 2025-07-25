@@ -36,7 +36,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
@@ -70,9 +69,8 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APISearchResult;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
-import org.wso2.carbon.apimgt.api.model.ApiOperationMapping;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
+import org.wso2.carbon.apimgt.api.model.BackendAPI;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
@@ -162,7 +160,6 @@ import org.wso2.carbon.apimgt.impl.publishers.WSO2APIPublisher;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderDetailsExtractor;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommenderEventPublisher;
-import org.wso2.carbon.apimgt.impl.restapi.publisher.ApisApiServiceImplUtils;
 import org.wso2.carbon.apimgt.impl.token.ApiKeyGenerator;
 import org.wso2.carbon.apimgt.impl.token.ClaimsRetriever;
 import org.wso2.carbon.apimgt.impl.token.InternalAPIKeyGenerator;
@@ -237,8 +234,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
@@ -627,8 +622,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         addLocalScopes(api.getId().getApiName(), api.getUriTemplates(), api.getOrganization());
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        if (api.getBackendEndpoints() != null && !api.getBackendEndpoints().isEmpty()) {
-            addBackendEndpoints(apiId, api.getBackendEndpoints());
+        if (api.getBackendAPIs() != null && !api.getBackendAPIs().isEmpty()) {
+            addBackendAPIs(api.getUuid(), api.getBackendAPIs(), api.getOrganization());
         }
         addURITemplates(apiId, api, tenantId);
         addAPIPolicies(api, tenantDomain);
@@ -662,9 +657,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
     }
 
-    private void addBackendEndpoints(int apiId, List<BackendEndpoint> backendEndpoints)
+    /**
+     * Adds backend APIs to the API.
+     *
+     * @param apiUuid      UUID of the API
+     * @param backendAPIS  List of BackendAPI objects to be added
+     * @param organization Organization identifier
+     * @throws APIManagementException if an error occurs while adding the backend APIs
+     */
+    private void addBackendAPIs(String apiUuid, List<BackendAPI> backendAPIS, String organization)
             throws APIManagementException {
-        apiMgtDAO.addBackendEndpoints(apiId, backendEndpoints);
+
+        apiMgtDAO.addBackendAPIs(apiUuid, backendAPIS, organization);
     }
 
     /**
@@ -1040,25 +1044,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             migrateMediationPoliciesOfAPI(api, tenantDomain, false);
         }
         List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
-        if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
-            Set<URITemplate> existingTemplates = existingAPI.getUriTemplates();
-            for (URITemplate uriTemplate : api.getUriTemplates()) {
-                if (!APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE.equals(uriTemplate.getHTTPVerb())) {
-                    continue;
-                }
-                Optional<URITemplate> matchingTemplate = existingTemplates.stream()
-                        .filter(existing ->
-                                APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE.equals(existing.getHTTPVerb())
-                                        && Objects.equals(existing.getUriTemplate(), uriTemplate.getUriTemplate()))
-                        .findFirst();
-                if (matchingTemplate.isPresent()) {
-                    uriTemplate.setSchemaDefinition(matchingTemplate.get().getSchemaDefinition());
-                } else {
-                    uriTemplate.setSchemaDefinition(StringUtils.EMPTY);
-                }
-            }
-            updateMCPTools(api, existingAPI.getId().getId());
-        }
         updateAPI(api, tenantId, userNameWithoutChange);
         updateProductResourceMappings(api, organization, productResources);
 
@@ -8396,7 +8381,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
     @Override
-    public BackendEndpoint getMCPServerEndpoint(String uuid, String backendId)
+    public BackendAPI getMCPServerEndpoint(String uuid, String backendId, String organization)
             throws APIManagementException {
 
         String currentApiUuid;
@@ -8406,16 +8391,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             currentApiUuid = uuid;
         }
-        int apiId = apiMgtDAO.getAPIID(currentApiUuid);
         if (apiRevision != null) {
-            return apiMgtDAO.getBackendEndpointRevision(apiId, apiRevision.getRevisionUUID(), backendId);
+            return apiMgtDAO.getBackendAPIRevision(currentApiUuid, apiRevision.getRevisionUUID(), backendId,
+                    organization);
         } else {
-            return apiMgtDAO.getBackendEndpoint(apiId, backendId);
+            return apiMgtDAO.getBackendAPI(currentApiUuid, backendId, organization);
         }
     }
 
     @Override
-    public List<BackendEndpoint> getMCPServerEndpoints(String uuid) throws APIManagementException {
+    public List<BackendAPI> getMCPServerBackendAPIs(String uuid, String organization) throws APIManagementException {
 
         String currentApiUuid;
         APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
@@ -8424,19 +8409,25 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } else {
             currentApiUuid = uuid;
         }
-        int apiId = apiMgtDAO.getAPIID(currentApiUuid);
         if (apiRevision != null) {
-            return apiMgtDAO.getBackendEndpointRevisions(apiId, apiRevision.getRevisionUUID());
+            return apiMgtDAO.getBackendAPIRevisions(currentApiUuid, apiRevision.getRevisionUUID(), organization);
         } else {
-            return apiMgtDAO.getBackendEndpoints(apiId);
+            return apiMgtDAO.getBackendAPIs(currentApiUuid, organization);
         }
     }
 
     @Override
-    public void updateMCPServerEndpoint(String uuid, BackendEndpoint backendEndpoint) throws APIManagementException {
+    public void updateMCPServerBackendAPI(String apiUuid, BackendAPI backendAPI, String organization)
+            throws APIManagementException {
 
-        int apiId = apiMgtDAO.getAPIID(uuid);
-        apiMgtDAO.updateBackendEndpoints(apiId, backendEndpoint);
+        apiMgtDAO.updateBackendAPI(apiUuid, backendAPI, organization);
+    }
+
+    @Override
+    public List<API> getMCPServersUsedByAPI(String apiUuid, String organization) throws APIManagementException{
+
+        int apiId = apiMgtDAO.getAPIID(apiUuid);
+        return apiMgtDAO.getMCPServersUsedByAPI(apiId, organization);
     }
 
     @Override
@@ -8539,116 +8530,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String sandboxEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
                     APIConstants.APIEndpoint.SANDBOX, revisionUuid, organization);
             api.setPrimarySandboxEndpointId(sandboxEndpointId);
-        }
-    }
-
-    /**
-     * Updates MCP tools (URI templates) for the given API based on its subtype.
-     *
-     * @param api   API to update.
-     * @param apiId Internal API ID.
-     * @throws APIManagementException If tool generation fails.
-     */
-    private void updateMCPTools(API api, int apiId) throws APIManagementException {
-
-        Set<URITemplate> updatedTemplates;
-
-        if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
-            List<BackendEndpoint> backendEndpoints = apiMgtDAO.getBackendEndpoints(apiId);
-            if (backendEndpoints.isEmpty()) {
-                throw new APIManagementException("No backend endpoints found for direct endpoint API subtype.");
-            }
-
-            BackendEndpoint backendEndpoint = backendEndpoints.get(0);
-
-            String backendApiDefinition = backendEndpoint.getBackendApiDefinition();
-            String backendId = backendEndpoint.getBackendId();
-            APIDefinitionValidationResponse validationResponse =
-                    ApisApiServiceImplUtils.validateOpenAPIDefinition(null, null,
-                            backendApiDefinition, null, true);
-
-            updatedTemplates = validationResponse.getParser().updateMCPTools(
-                    backendApiDefinition,
-                    null,
-                    backendId,
-                    APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE,
-                    api.getSubtype(),
-                    api.getUriTemplates()
-            );
-
-        } else if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
-            Set<URITemplate> uriTemplates = api.getUriTemplates();
-            if (uriTemplates.isEmpty()) {
-                throw new APIManagementException("No URI templates defined for existing API subtype.");
-            }
-
-            URITemplate template = uriTemplates.iterator().next();
-            ApiOperationMapping mapping = template.getApiOperationMapping();
-            if (mapping == null) {
-                throw new APIManagementException("API operation mapping is missing in the URI template.");
-            }
-
-            API refApi = fetchReferencedApi(mapping);
-
-            String backendApiDefinition = refApi.getSwaggerDefinition();
-            APIIdentifier redApiId = refApi.getId();
-            APIDefinitionValidationResponse validationResponse =
-                    ApisApiServiceImplUtils.validateOpenAPIDefinition(null, null,
-                            backendApiDefinition, null, true);
-
-            updatedTemplates = validationResponse.getParser().updateMCPTools(
-                    backendApiDefinition,
-                    redApiId,
-                    null,
-                    APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE,
-                    api.getSubtype(),
-                    uriTemplates
-            );
-        } else {
-            throw new APIManagementException("Unsupported API subtype: " + api.getSubtype() + " for API Type MCP");
-        }
-
-        if (updatedTemplates == null) {
-            throw new APIManagementException("Failed to generate MCP tools.");
-        }
-
-        api.setUriTemplates(updatedTemplates);
-    }
-
-    /**
-     * Finds referenced API using UUID or name+version.
-     *
-     * @param mapping Operation mapping with reference info.
-     * @return Referenced API.
-     * @throws APIManagementException If lookup fails.
-     */
-    private API fetchReferencedApi(ApiOperationMapping mapping) throws APIManagementException {
-
-        String uuid = mapping.getApiUuid();
-        String name = mapping.getApiName();
-        String version = mapping.getApiVersion();
-
-        try {
-            if (uuid != null && !uuid.isEmpty()) {
-                return getAPIbyUUID(uuid, organization);
-            }
-
-            if (name != null && !name.isEmpty() && version != null && !version.isEmpty()) {
-                String query = "name:" + name + " version:" + version;
-                Map<String, Object> searchResult = searchPaginatedAPIs(query, organization, 0, 1);
-
-                if (!searchResult.isEmpty()) {
-                    return (API) searchResult.get(0);
-                }
-
-                throw new APIManagementException("Referenced API not found for name=" + name + ", version=" + version,
-                        ExceptionCodes.API_NOT_FOUND);
-            }
-
-            throw new APIManagementException("Insufficient information to locate referenced API.");
-        } catch (IndexOutOfBoundsException e) {
-            throw new APIManagementException("Referenced API search returned no results for: " + name + " " + version,
-                    e);
         }
     }
 }

@@ -6,9 +6,9 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendOperationMappingDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendAPIOperationMappingDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExistingAPIOperationMappingDTO;
 import javax.validation.constraints.*;
 
 
@@ -40,8 +40,8 @@ public class APIOperationsDTO   {
     private String schemaDefinition = null;
     private String description = null;
     private APIOperationPoliciesDTO operationPolicies = null;
-    private BackendOperationMappingDTO backendOperationMapping = null;
-    private APIOperationMappingDTO apiOperationMapping = null;
+    private BackendAPIOperationMappingDTO backendAPIOperationMapping = null;
+    private ExistingAPIOperationMappingDTO existingAPIOperationMapping = null;
 
   /**
    **/
@@ -301,38 +301,38 @@ public class APIOperationsDTO   {
 
   /**
    **/
-  public APIOperationsDTO backendOperationMapping(BackendOperationMappingDTO backendOperationMapping) {
-    this.backendOperationMapping = backendOperationMapping;
+  public APIOperationsDTO backendAPIOperationMapping(BackendAPIOperationMappingDTO backendAPIOperationMapping) {
+    this.backendAPIOperationMapping = backendAPIOperationMapping;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("backendOperationMapping")
-  public BackendOperationMappingDTO getBackendOperationMapping() {
-    return backendOperationMapping;
+  @JsonProperty("backendAPIOperationMapping")
+  public BackendAPIOperationMappingDTO getBackendAPIOperationMapping() {
+    return backendAPIOperationMapping;
   }
-  public void setBackendOperationMapping(BackendOperationMappingDTO backendOperationMapping) {
-    this.backendOperationMapping = backendOperationMapping;
+  public void setBackendAPIOperationMapping(BackendAPIOperationMappingDTO backendAPIOperationMapping) {
+    this.backendAPIOperationMapping = backendAPIOperationMapping;
   }
 
   /**
    **/
-  public APIOperationsDTO apiOperationMapping(APIOperationMappingDTO apiOperationMapping) {
-    this.apiOperationMapping = apiOperationMapping;
+  public APIOperationsDTO existingAPIOperationMapping(ExistingAPIOperationMappingDTO existingAPIOperationMapping) {
+    this.existingAPIOperationMapping = existingAPIOperationMapping;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("apiOperationMapping")
-  public APIOperationMappingDTO getApiOperationMapping() {
-    return apiOperationMapping;
+  @JsonProperty("existingAPIOperationMapping")
+  public ExistingAPIOperationMappingDTO getExistingAPIOperationMapping() {
+    return existingAPIOperationMapping;
   }
-  public void setApiOperationMapping(APIOperationMappingDTO apiOperationMapping) {
-    this.apiOperationMapping = apiOperationMapping;
+  public void setExistingAPIOperationMapping(ExistingAPIOperationMappingDTO existingAPIOperationMapping) {
+    this.existingAPIOperationMapping = existingAPIOperationMapping;
   }
 
 
@@ -360,13 +360,13 @@ public class APIOperationsDTO   {
         Objects.equals(schemaDefinition, apIOperations.schemaDefinition) &&
         Objects.equals(description, apIOperations.description) &&
         Objects.equals(operationPolicies, apIOperations.operationPolicies) &&
-        Objects.equals(backendOperationMapping, apIOperations.backendOperationMapping) &&
-        Objects.equals(apiOperationMapping, apIOperations.apiOperationMapping);
+        Objects.equals(backendAPIOperationMapping, apIOperations.backendAPIOperationMapping) &&
+        Objects.equals(existingAPIOperationMapping, apIOperations.existingAPIOperationMapping);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds, amznResourceName, amznResourceTimeout, amznResourceContentEncode, payloadSchema, uriMapping, schemaDefinition, description, operationPolicies, backendOperationMapping, apiOperationMapping);
+    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds, amznResourceName, amznResourceTimeout, amznResourceContentEncode, payloadSchema, uriMapping, schemaDefinition, description, operationPolicies, backendAPIOperationMapping, existingAPIOperationMapping);
   }
 
   @Override
@@ -389,8 +389,8 @@ public class APIOperationsDTO   {
     sb.append("    schemaDefinition: ").append(toIndentedString(schemaDefinition)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    operationPolicies: ").append(toIndentedString(operationPolicies)).append("\n");
-    sb.append("    backendOperationMapping: ").append(toIndentedString(backendOperationMapping)).append("\n");
-    sb.append("    apiOperationMapping: ").append(toIndentedString(apiOperationMapping)).append("\n");
+    sb.append("    backendAPIOperationMapping: ").append(toIndentedString(backendAPIOperationMapping)).append("\n");
+    sb.append("    existingAPIOperationMapping: ").append(toIndentedString(existingAPIOperationMapping)).append("\n");
     sb.append("}");
     return sb.toString();
   }

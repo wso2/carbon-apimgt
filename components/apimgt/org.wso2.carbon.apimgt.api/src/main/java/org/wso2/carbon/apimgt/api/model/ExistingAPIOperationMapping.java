@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
-public class ApiOperationMapping {
+public class ExistingAPIOperationMapping {
 
     private String apiUuid = null;
     private String apiName = null;

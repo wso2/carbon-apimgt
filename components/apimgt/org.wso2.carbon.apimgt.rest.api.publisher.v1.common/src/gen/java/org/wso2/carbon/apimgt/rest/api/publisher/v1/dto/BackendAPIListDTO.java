@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendEndpointDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendAPIDTO;
 import javax.validation.constraints.*;
 
 
@@ -21,15 +21,15 @@ import javax.validation.Valid;
 
 
 
-public class BackendEndpointListDTO   {
+public class BackendAPIListDTO   {
   
     private Integer count = null;
-    private List<BackendEndpointDTO> list = new ArrayList<BackendEndpointDTO>();
+    private List<BackendAPIDTO> list = new ArrayList<BackendAPIDTO>();
 
   /**
    * Number of backends returned. 
    **/
-  public BackendEndpointListDTO count(Integer count) {
+  public BackendAPIListDTO count(Integer count) {
     this.count = count;
     return this;
   }
@@ -46,7 +46,7 @@ public class BackendEndpointListDTO   {
 
   /**
    **/
-  public BackendEndpointListDTO list(List<BackendEndpointDTO> list) {
+  public BackendAPIListDTO list(List<BackendAPIDTO> list) {
     this.list = list;
     return this;
   }
@@ -55,10 +55,10 @@ public class BackendEndpointListDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("list")
-  public List<BackendEndpointDTO> getList() {
+  public List<BackendAPIDTO> getList() {
     return list;
   }
-  public void setList(List<BackendEndpointDTO> list) {
+  public void setList(List<BackendAPIDTO> list) {
     this.list = list;
   }
 
@@ -71,9 +71,9 @@ public class BackendEndpointListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    BackendEndpointListDTO backendEndpointList = (BackendEndpointListDTO) o;
-    return Objects.equals(count, backendEndpointList.count) &&
-        Objects.equals(list, backendEndpointList.list);
+    BackendAPIListDTO backendAPIList = (BackendAPIListDTO) o;
+    return Objects.equals(count, backendAPIList.count) &&
+        Objects.equals(list, backendAPIList.list);
   }
 
   @Override
@@ -84,7 +84,7 @@ public class BackendEndpointListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class BackendEndpointListDTO {\n");
+    sb.append("class BackendAPIListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");

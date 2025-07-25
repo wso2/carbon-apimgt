@@ -57,32 +57,18 @@ import io.swagger.models.parameters.Parameter;
 import io.swagger.models.parameters.PathParameter;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.IntegerProperty;
 import io.swagger.models.properties.ObjectProperty;
 import io.swagger.models.properties.Property;
-import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.models.properties.RefProperty;
-import io.swagger.models.properties.StringProperty;
 import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.DeserializationUtils;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
-import io.swagger.v3.oas.models.OpenAPI;
-import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.Paths;
-import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.media.ObjectSchema;
-import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.parameters.RequestBody;
-import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.v3.parser.core.models.ParseOptions;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -93,10 +79,9 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
-import org.wso2.carbon.apimgt.api.model.ApiOperationMapping;
-import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
+import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
-import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
@@ -576,7 +561,9 @@ public class OAS2Parser extends APIDefinition {
                 new KeyManagerConfigurationDTO());
         updateLegacyScopesFromSwagger(swagger, swaggerData);
         for (SwaggerData.Resource resource : swaggerData.getResources()) {
-            addOrUpdatePathToSwagger(swagger, resource);
+            if (!APISpecParserConstants.HTTP_VERB_TOOL.equalsIgnoreCase(resource.getVerb())) {
+                addOrUpdatePathToSwagger(swagger, resource);
+            }
         }
 
         return getSwaggerJsonString(swagger);
@@ -801,7 +788,8 @@ public class OAS2Parser extends APIDefinition {
                     validationResponse, apiDefinition, swagger.getSwagger(),
                     title, version, swagger.getBasePath(), description,
                     (swagger.getHost() == null || swagger.getHost().isEmpty()) ? null :
-                            new ArrayList<String>(Arrays.asList(swagger.getHost())), new ArrayList<>(uriTemplates)
+                            new ArrayList<String>(Arrays.asList(swagger.getHost())), uriTemplates != null ?
+                            new ArrayList<>(uriTemplates) : new ArrayList<>()
             );
             validationResponse.setParser(this);
             if (returnJsonContent) {
@@ -844,6 +832,138 @@ public class OAS2Parser extends APIDefinition {
         Swagger swagger = getSwagger(oasDefinition);
         removePublisherSpecificInfo(swagger);
         return generateAPIDefinition(swaggerData, swagger);
+    }
+
+    @Override
+    public String generateAPIDefinitionForBackendAPI(SwaggerData swaggerData, String oasDefinition)
+            throws APIManagementException {
+
+        Swagger swaggerObj = getSwagger(oasDefinition);
+        Map<String, Map<String, SwaggerData.Resource>> resourceMap = getResourceMapWithBackendOperations(swaggerData);
+
+        cleanUpSwaggerPaths(swaggerObj, resourceMap);
+        addNewPathsToSwagger(swaggerObj, resourceMap);
+
+        updateSwaggerSecurityDefinition(swaggerObj, swaggerData, "https://test.com",
+                new KeyManagerConfigurationDTO());
+        updateLegacyScopesFromSwagger(swaggerObj, swaggerData);
+        updateSwaggerInfo(swaggerObj, swaggerData);
+
+        return getSwaggerJsonString(swaggerObj);
+    }
+
+    /**
+     * Clean up Swagger paths based on the resource map
+     *
+     * @param swaggerObj  Swagger object to update
+     * @param resourceMap Map of resources with backend operations
+     */
+    private void cleanUpSwaggerPaths(Swagger swaggerObj,
+                                     Map<String, Map<String, SwaggerData.Resource>> resourceMap) {
+
+        Iterator<Map.Entry<String, Path>> pathIterator = swaggerObj.getPaths().entrySet().iterator();
+        while (pathIterator.hasNext()) {
+            Map.Entry<String, Path> pathEntry = pathIterator.next();
+            String path = pathEntry.getKey();
+            Path pathItem = pathEntry.getValue();
+
+            Map<String, SwaggerData.Resource> pathResources = resourceMap.get(path);
+            if (pathResources == null) {
+                pathIterator.remove();
+                continue;
+            }
+
+            for (Map.Entry<HttpMethod, Operation> opEntry : pathItem.getOperationMap().entrySet()) {
+                HttpMethod httpMethod = opEntry.getKey();
+                Operation operation = opEntry.getValue();
+
+                SwaggerData.Resource matchedResource =
+                        findMatchingBackendResource(pathResources, path, httpMethod.name());
+                if (matchedResource != null) {
+                    updateOperationManagedInfo(matchedResource, operation);
+                }
+            }
+        }
+    }
+
+    /**
+     * Add new paths to the Swagger object based on the resource map
+     *
+     * @param swaggerObj  Swagger object to update
+     * @param resourceMap Map of resources with backend operations
+     */
+    private void addNewPathsToSwagger(Swagger swaggerObj,
+                                      Map<String, Map<String, SwaggerData.Resource>> resourceMap) {
+
+        for (Map.Entry<String, Map<String, SwaggerData.Resource>> entry : resourceMap.entrySet()) {
+            String path = entry.getKey();
+            if (swaggerObj.getPath(path) == null) {
+                for (SwaggerData.Resource resource : entry.getValue().values()) {
+                    addOrUpdatePathToSwagger(swaggerObj, resource);
+                }
+            }
+        }
+    }
+
+    /**
+     * Get a map of resources with backend operations
+     *
+     * @param swaggerData Swagger data
+     * @return Map of resources with backend operations
+     */
+    private Map<String, Map<String, SwaggerData.Resource>> getResourceMapWithBackendOperations(
+            SwaggerData swaggerData) {
+
+        Map<String, Map<String, SwaggerData.Resource>> map = new HashMap<>();
+        for (SwaggerData.Resource resource : swaggerData.getResources()) {
+            if (!APISpecParserConstants.HTTP_VERB_TOOL.equalsIgnoreCase(resource.getVerb())) {
+                continue;
+            }
+            if (resource.getBackendAPIOperationMapping() == null) {
+                continue;
+            }
+            String path = resource.getBackendAPIOperationMapping().getBackendOperation().getTarget();
+            String verb = resource.getBackendAPIOperationMapping().getBackendOperation().getVerb().toUpperCase();
+            map.computeIfAbsent(path, k -> new HashMap<>()).put(verb, resource);
+        }
+        return map;
+    }
+
+    /**
+     * Find a matching backend resource for the given path and method
+     *
+     * @param pathResources Map of resources for the path
+     * @param path          Path to match
+     * @param method        HTTP method to match
+     * @return Matching resource or null if not found
+     */
+    private SwaggerData.Resource findMatchingBackendResource(Map<String, SwaggerData.Resource> pathResources,
+                                                             String path, String method) {
+
+        SwaggerData.Resource resource = pathResources.get(method.toUpperCase());
+        if (resource == null || resource.getBackendAPIOperationMapping() == null) {
+            return null;
+        }
+        String mappedPath = resource.getBackendAPIOperationMapping().getBackendOperation().getTarget();
+        String mappedVerb = resource.getBackendAPIOperationMapping().getBackendOperation().getVerb();
+        return (mappedPath.equalsIgnoreCase(path) && mappedVerb.equalsIgnoreCase(method)) ? resource : null;
+    }
+
+    /**
+     * Update the Swagger object with the API information
+     *
+     * @param swaggerObj  Swagger object to update
+     * @param swaggerData API data to use for updating
+     */
+    private void updateSwaggerInfo(Swagger swaggerObj, SwaggerData swaggerData) {
+
+        Info info = swaggerObj.getInfo();
+        if (info == null) {
+            info = new Info();
+            swaggerObj.setInfo(info);
+        }
+        info.setTitle(swaggerData.getTitle());
+        info.setVersion(swaggerData.getVersion());
     }
 
     /**
@@ -2124,12 +2244,12 @@ public class OAS2Parser extends APIDefinition {
             BackendOperation backendOperation = null;
 
             if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
-                BackendOperationMapping mapping = template.getBackendOperationMapping();
+                BackendAPIOperationMapping mapping = template.getBackendOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
             } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
-                ApiOperationMapping mapping = template.getApiOperationMapping();
+                ExistingAPIOperationMapping mapping = template.getExistingAPIOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
@@ -2144,10 +2264,9 @@ public class OAS2Parser extends APIDefinition {
                     findMatchingOperation(backendDefinition, backendOperation.getTarget(), backendOperation.getVerb());
             if (match != null) {
                 URITemplate toolTemplate = populateURITemplate(
-                        new URITemplate(),
+                        template,
                         match,
                         mcpFeatureType,
-                        template.getBackendOperationMapping() != null,
                         backendDefinition,
                         backendId,
                         refApiId
@@ -2173,38 +2292,35 @@ public class OAS2Parser extends APIDefinition {
             if (!mcpFeatureType.equalsIgnoreCase(template.getHttpVerb())) {
                 continue;
             }
-            if (template.getSchemaDefinition() == null || template.getSchemaDefinition().isEmpty()) {
 
-                BackendOperation backendOperation = null;
+            BackendOperation backendOperation = null;
 
-                if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
-                    BackendOperationMapping mapping = template.getBackendOperationMapping();
-                    if (mapping != null && mapping.getBackendOperation() != null) {
-                        backendOperation = mapping.getBackendOperation();
-                    }
-                } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
-                    ApiOperationMapping mapping = template.getApiOperationMapping();
-                    if (mapping != null && mapping.getBackendOperation() != null) {
-                        backendOperation = mapping.getBackendOperation();
-                    }
+            if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
+                BackendAPIOperationMapping mapping = template.getBackendOperationMapping();
+                if (mapping != null && mapping.getBackendOperation() != null) {
+                    backendOperation = mapping.getBackendOperation();
                 }
-
-                if (backendOperation == null) {
-                    log.warn("URITemplate does not have valid backend or API operation mapping: " + template);
-                    continue;
+            } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
+                ExistingAPIOperationMapping mapping = template.getExistingAPIOperationMapping();
+                if (mapping != null && mapping.getBackendOperation() != null) {
+                    backendOperation = mapping.getBackendOperation();
                 }
+            }
 
-                OperationMatch match =
-                        findMatchingOperation(backendDefinition, backendOperation.getTarget(),
-                                backendOperation.getVerb());
+            if (backendOperation == null) {
+                log.warn("URITemplate does not have valid backend or API operation mapping: " + template);
+                continue;
+            }
 
-                if (match != null) {
-                    URITemplate populated = populateURITemplate(template, match, mcpFeatureType,
-                            template.getBackendOperationMapping() != null,
-                            backendDefinition, backendId, refApiId);
-                    updatedTools.add(populated);
-                    continue;
-                }
+            OperationMatch match =
+                    findMatchingOperation(backendDefinition, backendOperation.getTarget(),
+                            backendOperation.getVerb());
+
+            if (match != null) {
+                URITemplate populated = populateURITemplate(template, match, mcpFeatureType, backendDefinition,
+                        backendId, refApiId);
+                updatedTools.add(populated);
+                continue;
             }
             updatedTools.add(template);
         }
@@ -2218,15 +2334,13 @@ public class OAS2Parser extends APIDefinition {
      * @param uriTemplate          the URITemplate to populate
      * @param match                the matched OpenAPI operation details
      * @param mcpFeatureType       the MCP feature type (used as the HTTP verb)
-     * @param isBackend            whether this is a backend operation
      * @param backendId            the backend ID to associate
      * @param backendAPIDefinition the backend OpenAPI definition
      * @param refApiId
      * @return the populated URITemplate
      */
     private URITemplate populateURITemplate(URITemplate uriTemplate, OperationMatch match, String mcpFeatureType,
-                                            boolean isBackend, Swagger backendAPIDefinition, String backendId,
-                                            APIIdentifier refApiId) {
+                                            Swagger backendAPIDefinition, String backendId, APIIdentifier refApiId) {
 
         if (uriTemplate.getUriTemplate() == null || uriTemplate.getUriTemplate().isEmpty()) {
             String operationId = Optional.ofNullable(match.operation.getOperationId())
@@ -2262,18 +2376,18 @@ public class OAS2Parser extends APIDefinition {
         backendOperation.setVerb(match.method.toString());
         backendOperation.setTarget(match.path);
 
-        if (isBackend) {
-            BackendOperationMapping backendOperationMap = new BackendOperationMapping();
-            backendOperationMap.setBackendId(backendId);
+        if (uriTemplate.getBackendOperationMapping() != null) {
+            BackendAPIOperationMapping backendOperationMap = new BackendAPIOperationMapping();
+            backendOperationMap.setBackendApiId(backendId);
             backendOperationMap.setBackendOperation(backendOperation);
             uriTemplate.setBackendOperationMapping(backendOperationMap);
-        } else {
-            ApiOperationMapping apiOperationMap = new ApiOperationMapping();
+        } else if (uriTemplate.getExistingAPIOperationMapping() != null){
+            ExistingAPIOperationMapping apiOperationMap = new ExistingAPIOperationMapping();
             apiOperationMap.setApiUuid(refApiId.getUUID());
             apiOperationMap.setApiName(refApiId.getApiName());
             apiOperationMap.setApiVersion(refApiId.getVersion());
             apiOperationMap.setBackendOperation(backendOperation);
-            uriTemplate.setApiOperationMapping(apiOperationMap);
+            uriTemplate.setExistingAPIOperationMapping(apiOperationMap);
         }
 
         return uriTemplate;

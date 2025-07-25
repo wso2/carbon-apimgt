@@ -21,7 +21,6 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -286,7 +285,7 @@ public abstract class APIDefinition {
                                                       APIIdentifier refApiId, String backendId,
                                                       String mcpFeatureType,
                                                       String mcpSubtype,
-                                                      Set<URITemplate> uriTemplates);
+                                                      Set<URITemplate> uriTemplates) throws APIManagementException;
 
     /**
      * Updates MCP tool-related URI templates by resolving and matching backend operations.
@@ -303,5 +302,16 @@ public abstract class APIDefinition {
                                                     APIIdentifier refApiId, String backendId,
                                                     String mcpFeatureType,
                                                     String mcpSubtype,
-                                                    Set<URITemplate> uriTemplates);
+                                                    Set<URITemplate> uriTemplates) throws APIManagementException;
+
+    /**
+     * Populate definition with wso2 APIM specific information
+     *
+     * @param apiDefinition OAS definition
+     * @param swaggerData   API
+     * @return Generated OAS definition
+     * @throws APIManagementException If an error occurred
+     */
+    public abstract String generateAPIDefinitionForBackendAPI(SwaggerData swaggerData, String apiDefinition)
+            throws APIManagementException;
 }

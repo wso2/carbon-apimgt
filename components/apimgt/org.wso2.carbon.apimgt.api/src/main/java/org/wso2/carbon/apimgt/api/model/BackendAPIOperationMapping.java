@@ -18,19 +18,19 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
-public class BackendOperationMapping {
+public class BackendAPIOperationMapping {
 
-    private String backendId = null;
+    private String backendApiId = null;
     private BackendOperation backendOperation = null;
 
-    public String getBackendId() {
+    public String getBackendApiId() {
 
-        return backendId;
+        return backendApiId;
     }
 
-    public void setBackendId(String backendId) {
+    public void setBackendApiId(String backendApiId) {
 
-        this.backendId = backendId;
+        this.backendApiId = backendApiId;
     }
 
     public BackendOperation getBackendOperation() {

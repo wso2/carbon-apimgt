@@ -32,7 +32,6 @@ import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
-import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -1700,6 +1699,11 @@ public class AsyncApiParser extends APIDefinition {
             }
         }
         return scopeSet;
+    }
+
+    public String generateAPIDefinitionForBackendAPI(SwaggerData swaggerData, String oasDefinition) {
+
+        return null;
     }
 
     @Override

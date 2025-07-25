@@ -30,6 +30,7 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
+import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
@@ -40,6 +41,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.io.File;
@@ -101,8 +103,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
         apiIdentifier = api.getId();
         apiIdentifier.setUuid(exportAPIUUID);
-        return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
-                preserveDocs, originalDevPortalUrl, organization, preserveCredentials);
+        return ExportUtils.exportAPI(apiProvider, apiIdentifier, new APIDTOWrapper(apiDtoToReturn), api, userName,
+                format, preserveStatus, preserveDocs, originalDevPortalUrl, organization, preserveCredentials);
     }
 
     @Override
@@ -122,10 +124,16 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         API api = apiProvider.getAPIbyUUID(revisionUUID, organization);
         api.setUuid(apiId);
         apiIdentifier.setUuid(apiId);
-        APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
-        return ExportUtils.exportApi(apiProvider, apiIdentifier, apiDtoToReturn, api, userName, format, preserveStatus,
-                preserveDocs, StringUtils.EMPTY, organization, preserveCredentials);
-
+        if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
+            MCPServerDTO mcpServerDtoToReturn = APIMappingUtil.fromAPItoMCPServerDTO(api, preserveCredentials,
+                    apiProvider);
+            return ExportUtils.exportAPI(apiProvider, apiIdentifier, new APIDTOWrapper(mcpServerDtoToReturn), api,
+                    userName, format, preserveStatus, preserveDocs, StringUtils.EMPTY, organization, preserveCredentials);
+        } else {
+            APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
+            return ExportUtils.exportAPI(apiProvider, apiIdentifier, new APIDTOWrapper(apiDtoToReturn), api, userName,
+                    format, preserveStatus, preserveDocs, StringUtils.EMPTY, organization, preserveCredentials);
+        }
     }
 
     @Override

@@ -76,6 +76,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.ApisApiService;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.APIDTOWrapper;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
@@ -1013,7 +1014,9 @@ public class ApisApiServiceImpl implements ApisApiService {
                 throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
             }
 
-            API updatedApi = PublisherCommonUtils.updateApi(originalAPI, body, apiProvider, tokenScopes, organizationInfo);
+            API updatedApi =
+                    PublisherCommonUtils.updateApi(originalAPI, new APIDTOWrapper(body), apiProvider, tokenScopes,
+                            organizationInfo);
 
             PublisherCommonUtils.checkGovernanceComplianceAsync(originalAPI.getUuid(), APIMGovernableState.API_UPDATE,
                     ArtifactType.API, originalAPI.getOrganization());
@@ -3282,15 +3285,15 @@ public class ApisApiServiceImpl implements ApisApiService {
             PublisherCommonUtils
                     .encryptEndpointSecurityOAuthCredentials(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
                             StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                            apiDTOFromProperties);
+                            new APIDTOWrapper(apiDTOFromProperties));
             PublisherCommonUtils
                     .encryptEndpointSecurityApiKeyCredentials(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
-                            StringUtils.EMPTY, StringUtils.EMPTY, apiDTOFromProperties);
+                            StringUtils.EMPTY, StringUtils.EMPTY, new APIDTOWrapper(apiDTOFromProperties));
 
             // Import the API and Definition
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIDTO createdApiDTO = RestApiPublisherUtils.importOpenAPIDefinition(fileInputStream, url, inlineApiDefinition,
-                    apiDTOFromProperties, fileDetail, null, organization);
+            APIDTO createdApiDTO = RestApiPublisherUtils.importOpenAPIDefinition(fileInputStream, url,
+                    inlineApiDefinition, apiDTOFromProperties, fileDetail, null, organization);
             if (createdApiDTO != null) {
                 // This URI used to set the location header of the POST response
                 URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
@@ -3437,7 +3440,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.fromValue(implementationType));
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             API apiToAdd = PublisherCommonUtils
-                    .prepareToCreateAPIByDTO(additionalPropertiesAPI, RestApiCommonUtil.getLoggedInUserProvider(),
+                    .prepareToCreateAPIByDTO(new APIDTOWrapper(additionalPropertiesAPI), RestApiCommonUtil.getLoggedInUserProvider(),
                             username, organization);
             apiToAdd.setWsdlUrl(url);
             API createdApi = null;
@@ -3923,8 +3926,8 @@ public class ApisApiServiceImpl implements ApisApiService {
             additionalPropertiesAPI.setType(APIDTO.TypeEnum.GRAPHQL);
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(additionalPropertiesAPI, apiProvider,
-                    RestApiCommonUtil.getLoggedInUsername(), organization);
+            API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(new APIDTOWrapper(additionalPropertiesAPI),
+                    apiProvider, RestApiCommonUtil.getLoggedInUsername(), organization);
 
 
             //Save swagger definition of graphQL
@@ -4757,7 +4760,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             } else if (ServiceEntry.DefinitionType.WSDL1.equals(service.getDefinitionType())) {
                 apiDto.setProvider(RestApiCommonUtil.getLoggedInUsername());
                 apiDto.setType(APIDTO.TypeEnum.fromValue("SOAP"));
-                API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDto,
+                API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(new APIDTOWrapper(apiDto),
                         RestApiCommonUtil.getLoggedInUserProvider(), username, organization);
                 apiToAdd.setServiceInfo("key", service.getServiceKey());
                 apiToAdd.setServiceInfo("md5", service.getMd5());
@@ -4995,10 +4998,20 @@ public class ApisApiServiceImpl implements ApisApiService {
     }
 
     public Response getLabelsOfAPI(String apiId, MessageContext messageContext) throws APIManagementException {
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         List<Label> labelList = apiProvider.getAllLabelsOfApi(apiId);
         LabelListDTO labelListDTO = LabelMappingUtil.fromLabelListToLabelListDTO(labelList);
         return Response.ok().entity(labelListDTO).build();
+    }
+
+    @Override
+    public Response getMCPServerUsage(String apiId, MessageContext messageContext) throws APIManagementException {
+
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        List<API> apiList = apiProvider.getMCPServersUsedByAPI(apiId, organization);
+        return Response.ok().entity(APIMappingUtil.fromAPIListToMCPServerMetadataListDTO(apiList)).build();
     }
 
     public Response attachLabelsToAPI(String apiId, RequestLabelListDTO requestLabelListDTO, MessageContext messageContext) throws APIManagementException {

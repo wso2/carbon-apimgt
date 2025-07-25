@@ -54,6 +54,7 @@ public final class APISpecParserConstants {
     public static final String ENABLED = "Enabled";
     public static final String GRAPHQL_API = "GRAPHQL";
     public static final String MCP_API = "MCP";
+    public static final String HTTP_VERB_TOOL = "TOOL";
     public static final String HTTP_VERB_PUBLISH = "PUBLISH";
     public static final String HTTP_VERB_SUBSCRIBE = "SUBSCRIBE";
     public static final String OAUTH2_DEFAULT_SCOPE = "default";

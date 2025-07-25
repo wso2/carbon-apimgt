@@ -55,7 +55,7 @@ import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStatus;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
+import org.wso2.carbon.apimgt.api.model.BackendAPI;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -777,9 +777,9 @@ public class ImportUtils {
                         for (JsonElement endpointElement : endpoints) {
                             JsonObject endpointObj = endpointElement.getAsJsonObject();
                             if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
-                                BackendEndpoint backendEndpoint =
-                                        new Gson().fromJson(endpointObj, BackendEndpoint.class);
-                                String endpointUUID = backendEndpoint.getBackendId();
+                                BackendAPI backendAPI =
+                                        new Gson().fromJson(endpointObj, BackendAPI.class);
+                                String endpointUUID = backendAPI.getBackendApiId();
                                 //TODO: PASAN
 //                                try {
 //                                    String createdEndpointUUID = provider.addAPIEndpoint(apiUUID, backendEndpoint);

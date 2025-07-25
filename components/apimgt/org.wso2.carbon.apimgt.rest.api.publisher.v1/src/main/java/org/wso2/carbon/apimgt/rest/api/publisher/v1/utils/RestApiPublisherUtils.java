@@ -57,9 +57,11 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.APIDTOWrapper;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
@@ -566,21 +568,98 @@ public class RestApiPublisherUtils {
         return policies;
     }
 
-    public static APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, String inlineDefinition,
-                                           APIDTO apiDTOFromProperties, Attachment fileDetail, ServiceEntry service,
-                                           String organization) throws APIManagementException {
-        // Validate and retrieve the OpenAPI definition
-        Map validationResponseMap = null;
-        boolean isServiceAPI = false;
+    public static List<String> getSubscriptionPoliciesForOrganization(MCPServerDTO apiInfo, String organizationID) {
 
-        if (service != null) {
-            isServiceAPI = true;
+        if (organizationID == null) {
+            return apiInfo.getPolicies();
         }
+        List<String> policies = new ArrayList<>();
+        List<OrganizationPoliciesDTO> organizationPoliciesDTOs = apiInfo.getOrganizationPolicies();
+        if (organizationPoliciesDTOs != null && !organizationPoliciesDTOs.isEmpty()) {
+            for (OrganizationPoliciesDTO organizationPoliciesDTO : organizationPoliciesDTOs) {
+                if (StringUtils.equals(organizationID, organizationPoliciesDTO.getOrganizationID())) {
+                    policies = organizationPoliciesDTO.getPolicies();
+                    break;
+                }
+            }
+        }
+        return policies;
+    }
+
+    /**
+     * Imports an OpenAPI definition and returns a MCPServerDTO object.
+     *
+     * @param definition             InputStream of the OpenAPI definition
+     * @param definitionUrl          URL of the OpenAPI definition
+     * @param inlineDefinition       Inline OpenAPI definition as a string
+     * @param mcpServerDTOProperties Properties for MCPServerDTO
+     * @param fileDetail             Attachment containing file details
+     * @param service                ServiceEntry object if applicable
+     * @param organization           Organization identifier
+     * @return MCPServerDTO object created from the OpenAPI definition
+     * @throws APIManagementException if an error occurs during import
+     */
+    public static MCPServerDTO importOpenAPIDefinition(InputStream definition, String definitionUrl,
+                                                       String inlineDefinition,
+                                                       MCPServerDTO mcpServerDTOProperties, Attachment fileDetail,
+                                                       ServiceEntry service,
+                                                       String organization) throws APIManagementException {
+
+        API api = createApiFromOpenAPIDefinition(definition, definitionUrl, inlineDefinition,
+                new APIDTOWrapper(mcpServerDTOProperties), fileDetail, service, organization);
+        return APIMappingUtil.fromAPItoMCPServerDTO(api);
+    }
+
+    /**
+     * Imports an OpenAPI definition and returns a APIDTO object.
+     *
+     * @param definition           InputStream of the OpenAPI definition
+     * @param definitionUrl        URL of the OpenAPI definition
+     * @param inlineDefinition     Inline OpenAPI definition as a string
+     * @param apiDtoFromProperties Properties for APIDTO
+     * @param fileDetail           Attachment containing file details
+     * @param service              ServiceEntry object if applicable
+     * @param organization         Organization identifier
+     * @return MCPServerDTO object created from the OpenAPI definition
+     * @throws APIManagementException if an error occurs during import
+     */
+    public static APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, String inlineDefinition,
+                                                 APIDTO apiDtoFromProperties, Attachment fileDetail,
+                                                 ServiceEntry service,
+                                                 String organization) throws APIManagementException {
+
+        API api = createApiFromOpenAPIDefinition(definition, definitionUrl, inlineDefinition,
+                new APIDTOWrapper(apiDtoFromProperties), fileDetail, service, organization);
+        return APIMappingUtil.fromAPItoDTO(api);
+    }
+
+    /**
+     * Creates an API object from the provided OpenAPI definition and properties.
+     *
+     * @param definition        InputStream of the OpenAPI definition
+     * @param definitionUrl     URL of the OpenAPI definition
+     * @param inlineDefinition  Inline OpenAPI definition as a string
+     * @param dtoFromProperties Properties for APIDTO or MCPServerDTO
+     * @param fileDetail        Attachment containing file details
+     * @param service           ServiceEntry object if applicable
+     * @param organization      Organization identifier
+     * @return API object created from the OpenAPI definition
+     * @throws APIManagementException if an error occurs during creation
+     */
+    public static API createApiFromOpenAPIDefinition(InputStream definition, String definitionUrl,
+                                                     String inlineDefinition, APIDTOWrapper dtoFromProperties,
+                                                     Attachment fileDetail, ServiceEntry service,
+                                                     String organization) throws APIManagementException {
+
+        Map<String, Object> validationResponseMap;
+        boolean isServiceAPI = (service != null);
+
         try {
             validationResponseMap = validateOpenAPIDefinition(definitionUrl, definition, fileDetail, inlineDefinition,
                     true, isServiceAPI);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
+            return null; // For compiler; unreachable
         }
 
         OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
@@ -593,38 +672,36 @@ public class RestApiPublisherUtils {
             throw RestApiUtil.buildBadRequestException(errorDTO);
         }
 
-        // Only HTTP or WEBHOOK type APIs should be allowed
-        if (!(APIDTO.TypeEnum.HTTP.equals(apiDTOFromProperties.getType())
-                || APIDTO.TypeEnum.WEBHOOK.equals(apiDTOFromProperties.getType())
-                || APIDTO.TypeEnum.MCP.equals(apiDTOFromProperties.getType()))) {
-            throw RestApiUtil.buildBadRequestException(
-                    "The API's type is not supported when importing an OpenAPI definition");
+        // Set description if missing
+        if (validationResponseDTO.getInfo().getDescription() != null && dtoFromProperties.getDescription() == null) {
+            dtoFromProperties.setDescription(validationResponseDTO.getInfo().getDescription());
         }
-        // Import the API and Definition
+
+        // Set API type if service-based and using APIDTO
+        if (isServiceAPI && dtoFromProperties.isAPIDTO()) {
+            dtoFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), null));
+        }
+
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-        // Add description from definition if it is not defined by user
-        if (validationResponseDTO.getInfo().getDescription() != null
-                && apiDTOFromProperties.getDescription() == null) {
-            apiDTOFromProperties.setDescription(validationResponse.getInfo().getDescription());
-        }
-        if (isServiceAPI) {
-            apiDTOFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), null));
-        }
-        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDTOFromProperties, apiProvider,
-                RestApiCommonUtil.getLoggedInUsername(), organization);
-        boolean syncOperations = !apiDTOFromProperties.getOperations().isEmpty();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+
+        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(dtoFromProperties, apiProvider, username, organization);
+        boolean syncOperations = !dtoFromProperties.getOperations().isEmpty();
+
         Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiToAdd.getUuid(),
                 APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
         if (!complianceResult.isEmpty()
-                && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
-                && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+                && Boolean.FALSE.toString().equalsIgnoreCase(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
             throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
+
         API addedAPI = ApisApiServiceImplUtils.importAPIDefinition(apiToAdd, apiProvider, organization,
                 service, validationResponse, isServiceAPI, syncOperations);
+
         PublisherCommonUtils.checkGovernanceComplianceAsync(addedAPI.getUuid(), APIMGovernableState.API_CREATE,
                 ArtifactType.API, organization);
-        return APIMappingUtil.fromAPItoDTO(addedAPI);
+
+        return addedAPI;
     }
 
     /**

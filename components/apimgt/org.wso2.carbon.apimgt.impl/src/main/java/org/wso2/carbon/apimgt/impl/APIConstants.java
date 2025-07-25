@@ -564,7 +564,7 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
         public static final String MCP_DEFAULT_FEATURE_TYPE = "tool";
-        public static final String MCP_DEFAULT_BACKEND_ENDPOINT_NAME = "default";
+        public static final String MCP_DEFAULT_BACKEND_API_NAME = "Default API";
 
         public static final String OPENAI_EMBEDDING_PROVIDER_TYPE = "openai";
         public static final String AZURE_OPENAI_EMBEDDING_PROVIDER_TYPE = "azure-openai";
@@ -1235,6 +1235,11 @@ public final class APIConstants {
 
     public static final String TIER_PERMISSION_ALLOW = "allow";
     public static final String TIER_PERMISSION_DENY = "deny";
+
+
+    public static final String CURRENT_TENANT = "CURRENT_TENANT";
+    public static final String ALL_TENANTS = "ALL_TENANTS";
+    public static final String SPECIFIC_TENANTS = "SPECIFIC_TENANTS";
 
     public static final String SUBSCRIPTION_TO_CURRENT_TENANT = "current_tenant";
     public static final String SUBSCRIPTION_TO_ALL_TENANTS = "all_tenants";
@@ -3361,6 +3366,10 @@ public final class APIConstants {
     public static final String PERMISSION_ALLOW = "ALLOW";
     public static final String PERMISSION_DENY = "DENY";
     public static final String PERMISSION_NOT_RESTRICTED = "PUBLIC";
+
+    public static final String PRIVATE = "PRIVATE";
+    public static final String PUBLIC = "PUBLIC";
+    public static final String RESTRICTED = "RESTRICTED";
 
     // Protocol variables
     public static final String HTTP_TRANSPORT_PROTOCOL_NAME = "http";

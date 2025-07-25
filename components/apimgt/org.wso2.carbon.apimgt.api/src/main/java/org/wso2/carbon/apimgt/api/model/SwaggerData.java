@@ -41,6 +41,7 @@ public class SwaggerData {
         private String amznResourceName;
         private int amznResourceTimeout;
         private boolean amznResourceContentEncoded;
+        private BackendAPIOperationMapping backendAPIOperationMapping;
 
         public String getPath() {
             return path;
@@ -116,6 +117,16 @@ public class SwaggerData {
             this.scopes = scopes;
         }
 
+        public BackendAPIOperationMapping getBackendAPIOperationMapping() {
+
+            return backendAPIOperationMapping;
+        }
+
+        public void setBackendAPIOperationMapping(
+                BackendAPIOperationMapping backendAPIOperationMapping) {
+
+            this.backendAPIOperationMapping = backendAPIOperationMapping;
+        }
     }
 
     private String title;
@@ -155,6 +166,7 @@ public class SwaggerData {
             resource.amznResourceName = uriTemplate.getAmznResourceName();
             resource.amznResourceTimeout = uriTemplate.getAmznResourceTimeout();
             resource.amznResourceContentEncoded = uriTemplate.getAmznResourceContentEncoded();
+            resource.backendAPIOperationMapping = uriTemplate.getBackendOperationMapping();
             resources.add(resource);
         }
 

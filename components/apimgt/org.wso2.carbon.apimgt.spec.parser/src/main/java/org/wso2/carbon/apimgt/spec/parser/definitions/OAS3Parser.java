@@ -72,11 +72,10 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
-import org.wso2.carbon.apimgt.api.model.BackendEndpoint;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
-import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
-import org.wso2.carbon.apimgt.api.model.ApiOperationMapping;
+import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -545,6 +544,18 @@ public class OAS3Parser extends APIDefinition {
     @Override
     public Set<Scope> getScopes(String resourceConfigsJSON) throws APIManagementException {
         OpenAPI openAPI = getOpenAPI(resourceConfigsJSON);
+        return getScopesFromOpenAPI(openAPI);
+    }
+
+    /**
+     * This method returns the scopes from the OpenAPI object.
+     *
+     * @param openAPI OpenAPI object
+     * @return Set of scopes
+     * @throws APIManagementException if an error occurs while retrieving scopes
+     */
+    private Set<Scope> getScopesFromOpenAPI(OpenAPI openAPI) throws APIManagementException {
+
         Map<String, SecurityScheme> securitySchemes;
         SecurityScheme securityScheme;
         OAuthFlows oAuthFlows;
@@ -563,7 +574,8 @@ public class OAS3Parser extends APIDefinition {
                     scope.setDescription(entry.getValue());
                     Map<String, String> scopeBindings;
                     if (oAuthFlow.getExtensions() != null && (scopeBindings =
-                            (Map<String, String>) oAuthFlow.getExtensions().get(APISpecParserConstants.SWAGGER_X_SCOPES_BINDINGS))
+                            (Map<String, String>) oAuthFlow.getExtensions()
+                                    .get(APISpecParserConstants.SWAGGER_X_SCOPES_BINDINGS))
                             != null) {
                         if (scopeBindings.get(scope.getKey()) != null) {
                             scope.setRoles(scopeBindings.get(scope.getKey()));
@@ -691,6 +703,7 @@ public class OAS3Parser extends APIDefinition {
      * @throws APIManagementException if error occurred when generating API Definition
      */
     private String generateAPIDefinition(SwaggerData swaggerData, OpenAPI openAPI) throws APIManagementException {
+
         Set<SwaggerData.Resource> copy = new HashSet<>(swaggerData.getResources());
 
         Iterator<Map.Entry<String, PathItem>> itr = openAPI.getPaths().entrySet().iterator();
@@ -702,8 +715,8 @@ public class OAS3Parser extends APIDefinition {
                 Operation operation = entry.getValue();
                 boolean operationFound = false;
                 for (SwaggerData.Resource resource : swaggerData.getResources()) {
-                    if (pathKey.equalsIgnoreCase(resource.getPath()) && entry.getKey().name()
-                            .equalsIgnoreCase(resource.getVerb())) {
+                    if ((pathKey.equalsIgnoreCase(resource.getPath())
+                            && entry.getKey().name().equalsIgnoreCase(resource.getVerb()))) {
                         //update operations in definition
                         operationFound = true;
                         copy.remove(resource);
@@ -746,6 +759,101 @@ public class OAS3Parser extends APIDefinition {
             preserveResourcePathOrderFromAPI(swaggerData, openAPI);
         }
         return prettifyOAS3ToJson(openAPI);
+    }
+
+    @Override
+    public String generateAPIDefinitionForBackendAPI(SwaggerData swaggerData, String oasDefinition) {
+
+        OpenAPI openAPI = getOpenAPI(oasDefinition);
+        removePublisherSpecificInfo(openAPI);
+        Set<SwaggerData.Resource> unmatchedResources = new HashSet<>(swaggerData.getResources());
+
+        cleanUpPathItems(openAPI, unmatchedResources);
+
+        updateOpenAPIMetadata(openAPI, swaggerData);
+        updateSwaggerSecurityDefinition(openAPI, swaggerData, OPENAPI_DEFAULT_AUTHORIZATION_URL,
+                new KeyManagerConfigurationDTO());
+        updateLegacyScopesFromSwagger(openAPI, swaggerData);
+
+        return prettifyOAS3ToJson(openAPI);
+    }
+
+    /**
+     * Clean up path items in the OpenAPI definition by matching them with the resources from the Swagger data.
+     * If a resource matches a path item, it updates the operation with the resource's managed info.
+     * If a path item has no operations left, it removes that path item.
+     *
+     * @param openAPI            OpenAPI object to be cleaned up
+     * @param unmatchedResources Set of unmatched SwaggerData.Resource objects
+     */
+    private void cleanUpPathItems(OpenAPI openAPI, Set<SwaggerData.Resource> unmatchedResources) {
+
+        Iterator<Map.Entry<String, PathItem>> pathIterator = openAPI.getPaths().entrySet().iterator();
+
+        while (pathIterator.hasNext()) {
+            Map.Entry<String, PathItem> pathEntry = pathIterator.next();
+            String path = pathEntry.getKey();
+            PathItem pathItem = pathEntry.getValue();
+
+            for (Map.Entry<PathItem.HttpMethod, Operation> methodEntry : pathItem.readOperationsMap().entrySet()) {
+                PathItem.HttpMethod httpMethod = methodEntry.getKey();
+                Operation operation = methodEntry.getValue();
+
+                SwaggerData.Resource matchedResource =
+                        findMatchingResource(unmatchedResources, path, httpMethod.name());
+                if (matchedResource != null) {
+                    unmatchedResources.remove(matchedResource);
+                    updateOperationManagedInfo(matchedResource, operation);
+                }
+            }
+
+            if (pathItem.readOperations().isEmpty()) {
+                pathIterator.remove();
+            }
+        }
+    }
+
+    /**
+     * Find a matching resource in the set of resources based on the path and method.
+     *
+     * @param resources Set of SwaggerData.Resource objects
+     * @param path      Path to match
+     * @param method    HTTP method to match
+     * @return Matching SwaggerData.Resource object or null if not found
+     */
+    private SwaggerData.Resource findMatchingResource(Set<SwaggerData.Resource> resources,
+                                                      String path,
+                                                      String method) {
+
+        for (SwaggerData.Resource resource : resources) {
+            if (APISpecParserConstants.HTTP_VERB_TOOL.equalsIgnoreCase(resource.getVerb())
+                    && resource.getBackendAPIOperationMapping() != null) {
+                String mappedMethod = resource.getBackendAPIOperationMapping().getBackendOperation().getVerb();
+                String mappedTarget = resource.getBackendAPIOperationMapping().getBackendOperation().getTarget();
+
+                if (method.equalsIgnoreCase(mappedMethod) && path.equalsIgnoreCase(mappedTarget)) {
+                    return resource;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Update OpenAPI metadata such as title and version.
+     *
+     * @param openAPI     OpenAPI object to be updated
+     * @param swaggerData Swagger data containing the title and version
+     */
+    private void updateOpenAPIMetadata(OpenAPI openAPI, SwaggerData swaggerData) {
+
+        Info info = openAPI.getInfo();
+        if (info == null) {
+            info = new Info();
+            openAPI.setInfo(info);
+        }
+        info.setTitle(swaggerData.getTitle());
+        info.setVersion(swaggerData.getVersion());
     }
 
     /**
@@ -2474,11 +2582,11 @@ public class OAS3Parser extends APIDefinition {
 
     @Override
     public Set<URITemplate> generateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
-                                             String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates) {
+                                             String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates)
+            throws APIManagementException {
 
         OpenAPI backendDefinition = getOpenAPI(backendApiDefinition);
         Set<URITemplate> generatedTools = new HashSet<>();
-
         for (URITemplate template : uriTemplates) {
             if (!mcpFeatureType.equalsIgnoreCase(template.getHttpVerb())) {
                 continue;
@@ -2487,12 +2595,12 @@ public class OAS3Parser extends APIDefinition {
             BackendOperation backendOperation = null;
 
             if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
-                BackendOperationMapping mapping = template.getBackendOperationMapping();
+                BackendAPIOperationMapping mapping = template.getBackendOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
             } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
-                ApiOperationMapping mapping = template.getApiOperationMapping();
+                ExistingAPIOperationMapping mapping = template.getExistingAPIOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
@@ -2507,10 +2615,9 @@ public class OAS3Parser extends APIDefinition {
                     findMatchingOperation(backendDefinition, backendOperation.getTarget(), backendOperation.getVerb());
             if (match != null) {
                 URITemplate toolTemplate = populateURITemplate(
-                        new URITemplate(),
+                        template,
                         match,
                         mcpFeatureType,
-                        template.getBackendOperationMapping() != null,
                         backendDefinition,
                         backendId,
                         refApiId
@@ -2527,7 +2634,7 @@ public class OAS3Parser extends APIDefinition {
                                            APIIdentifier refApiId, String backendId,
                                            String mcpFeatureType,
                                            String mcpSubtype,
-                                           Set<URITemplate> uriTemplates) {
+                                           Set<URITemplate> uriTemplates) throws APIManagementException {
 
         OpenAPI backendDefinition = getOpenAPI(backendApiDefinition);
         Set<URITemplate> updatedTools = new HashSet<>();
@@ -2536,37 +2643,34 @@ public class OAS3Parser extends APIDefinition {
             if (!mcpFeatureType.equalsIgnoreCase(template.getHttpVerb())) {
                 continue;
             }
-            if (template.getSchemaDefinition() == null || template.getSchemaDefinition().isEmpty()) {
 
-                BackendOperation backendOperation = null;
+            BackendOperation backendOperation = null;
 
-                if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
-                    BackendOperationMapping mapping = template.getBackendOperationMapping();
-                    if (mapping != null && mapping.getBackendOperation() != null) {
-                        backendOperation = mapping.getBackendOperation();
-                    }
-                } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
-                    ApiOperationMapping mapping = template.getApiOperationMapping();
-                    if (mapping != null && mapping.getBackendOperation() != null) {
-                        backendOperation = mapping.getBackendOperation();
-                    }
+            if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
+                BackendAPIOperationMapping mapping = template.getBackendOperationMapping();
+                if (mapping != null && mapping.getBackendOperation() != null) {
+                    backendOperation = mapping.getBackendOperation();
                 }
-
-                if (backendOperation == null) {
-                    log.warn("URITemplate does not have valid backend or API operation mapping: " + template);
-                    continue;
+            } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
+                ExistingAPIOperationMapping mapping = template.getExistingAPIOperationMapping();
+                if (mapping != null && mapping.getBackendOperation() != null) {
+                    backendOperation = mapping.getBackendOperation();
                 }
+            }
 
-                OperationMatch match =
-                        findMatchingOperation(backendDefinition, backendOperation.getTarget(), backendOperation.getVerb());
+            if (backendOperation == null) {
+                log.warn("URITemplate does not have valid backend or API operation mapping: " + template);
+                continue;
+            }
 
-                if (match != null) {
-                    URITemplate populated = populateURITemplate(template, match, mcpFeatureType,
-                            template.getBackendOperationMapping() != null,
-                            backendDefinition, backendId, refApiId);
-                    updatedTools.add(populated);
-                    continue;
-                }
+            OperationMatch match = findMatchingOperation(backendDefinition, backendOperation.getTarget(),
+                    backendOperation.getVerb());
+
+            if (match != null) {
+                URITemplate populated = populateURITemplate(template, match, mcpFeatureType, backendDefinition,
+                        backendId, refApiId);
+                updatedTools.add(populated);
+                continue;
             }
             updatedTools.add(template);
         }
@@ -2580,15 +2684,14 @@ public class OAS3Parser extends APIDefinition {
      * @param uriTemplate          the URITemplate to populate
      * @param match                the matched OpenAPI operation details
      * @param mcpFeatureType       the MCP feature type (used as the HTTP verb)
-     * @param isBackend            whether this is a backend operation
      * @param backendId            the backend ID to associate
      * @param backendAPIDefinition the backend OpenAPI definition
      * @param refApiId
      * @return the populated URITemplate
      */
     private URITemplate populateURITemplate(URITemplate uriTemplate, OperationMatch match, String mcpFeatureType,
-                                            boolean isBackend, OpenAPI backendAPIDefinition, String backendId,
-                                            APIIdentifier refApiId) {
+                                            OpenAPI backendAPIDefinition, String backendId, APIIdentifier refApiId)
+            throws APIManagementException {
 
         if (uriTemplate.getUriTemplate() == null || uriTemplate.getUriTemplate().isEmpty()) {
             String operationId = Optional.ofNullable(match.operation.getOperationId())
@@ -2621,28 +2724,81 @@ public class OAS3Parser extends APIDefinition {
             }
         }
 
-        if (isBackend) {
+        if (uriTemplate.getBackendOperationMapping() != null) {
             BackendOperation backendOperation = new BackendOperation();
             backendOperation.setVerb(match.method.toString());
             backendOperation.setTarget(match.path);
 
-            BackendOperationMapping backendOperationMap = new BackendOperationMapping();
-            backendOperationMap.setBackendId(backendId);
+            BackendAPIOperationMapping backendOperationMap = new BackendAPIOperationMapping();
+            backendOperationMap.setBackendApiId(backendId);
             backendOperationMap.setBackendOperation(backendOperation);
 
             uriTemplate.setBackendOperationMapping(backendOperationMap);
-        } else {
+        } else if (uriTemplate.getExistingAPIOperationMapping() != null) {
             BackendOperation backendOperation = new BackendOperation();
             backendOperation.setVerb(match.method.toString());
             backendOperation.setTarget(match.path);
 
-            ApiOperationMapping apiOperationMap = new ApiOperationMapping();
+            ExistingAPIOperationMapping apiOperationMap = new ExistingAPIOperationMapping();
             apiOperationMap.setApiUuid(refApiId.getUUID());
             apiOperationMap.setApiName(refApiId.getApiName());
             apiOperationMap.setApiVersion(refApiId.getVersion());
             apiOperationMap.setBackendOperation(backendOperation);
 
-            uriTemplate.setApiOperationMapping(apiOperationMap);
+            uriTemplate.setExistingAPIOperationMapping(apiOperationMap);
+        }
+        Set<Scope> scopes = getScopesFromOpenAPI(backendAPIDefinition);
+        List<String> opScopes = getScopeOfOperations(OPENAPI_SECURITY_SCHEMA_KEY, match.operation);
+        if (!opScopes.isEmpty()) {
+            if (opScopes.size() == 1) {
+                String firstScope = opScopes.get(0);
+                if (StringUtils.isNoneBlank(firstScope)) {
+                    Scope scope = APISpecParserUtil.findScopeByKey(scopes, firstScope);
+                    if (scope == null) {
+                        throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                    }
+                    uriTemplate.setScope(scope);
+                    uriTemplate.setScopes(scope);
+                }
+            } else {
+                uriTemplate = OASParserUtil.setScopesToTemplate(uriTemplate, opScopes, scopes);
+            }
+        } else if (!getScopeOfOperations("OAuth2Security", match.operation).isEmpty()) {
+            opScopes = getScopeOfOperations("OAuth2Security", match.operation);
+            if (opScopes.size() == 1) {
+                String firstScope = opScopes.get(0);
+                if (StringUtils.isNoneBlank(firstScope)) {
+                    Scope scope = APISpecParserUtil.findScopeByKey(scopes, firstScope);
+                    if (scope == null) {
+                        throw new APIManagementException("Scope '" + firstScope + "' not found.");
+                    }
+                    uriTemplate.setScope(scope);
+                    uriTemplate.setScopes(scope);
+                }
+            } else {
+                uriTemplate = OASParserUtil.setScopesToTemplate(uriTemplate, opScopes, scopes);
+            }
+        }
+        Map<String, Object> extensions = match.operation.getExtensions();
+        if (extensions != null) {
+            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_AUTH_TYPE)) {
+                String scopeKey = (String) extensions.get(APISpecParserConstants.SWAGGER_X_AUTH_TYPE);
+                uriTemplate.setAuthType(scopeKey);
+                uriTemplate.setAuthTypes(scopeKey);
+            } else {
+                uriTemplate.setAuthType("Any");
+                uriTemplate.setAuthTypes("Any");
+            }
+            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER)) {
+                String throttlingTier = (String) extensions.get(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER);
+                uriTemplate.setThrottlingTier(throttlingTier);
+                uriTemplate.setThrottlingTiers(throttlingTier);
+            }
+            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
+                String mediationScript = (String) extensions.get(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT);
+                uriTemplate.setMediationScript(mediationScript);
+                uriTemplate.setMediationScripts(uriTemplate.getHTTPVerb(), mediationScript);
+            }
         }
         return uriTemplate;
     }

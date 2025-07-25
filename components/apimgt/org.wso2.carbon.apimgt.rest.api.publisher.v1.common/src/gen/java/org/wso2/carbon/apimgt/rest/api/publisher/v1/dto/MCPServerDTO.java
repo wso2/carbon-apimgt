@@ -17,14 +17,10 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubtypeConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import javax.validation.constraints.*;
 
 
@@ -39,22 +35,21 @@ import javax.validation.Valid;
 
 
 
-@Scope(name = "apim:api_create", description="", value ="")
-@Scope(name = "apim:api_import_export", description="", value ="")
-@Scope(name = "apim:api_manage", description="", value ="")
-public class APIDTO   {
+@Scope(name = "apim:mcp_server_create", description="", value ="")
+@Scope(name = "apim:mcp_server_import_export", description="", value ="")
+@Scope(name = "apim:mcp_server_manage", description="", value ="")
+public class MCPServerDTO   {
   
     private String id = null;
     private String name = null;
     private String description = null;
     private String context = null;
+    private Object backendAPIEndpointConfig = null;
     private String version = null;
     private String provider = null;
-    @Scope(name = "apim:api_publish", description="", value ="")
-    @Scope(name = "apim:api_manage", description="", value ="")
+    @Scope(name = "apim:mcp_server_publish", description="", value ="")
+    @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private String lifeCycleStatus = null;
-    private WSDLInfoDTO wsdlInfo = null;
-    private String wsdlUrl = null;
     private Boolean responseCachingEnabled = null;
     private Integer cacheTimeout = null;
     private Boolean hasThumbnail = null;
@@ -64,46 +59,6 @@ public class APIDTO   {
     private Integer revisionId = null;
     private Boolean enableSchemaValidation = null;
     private Boolean enableSubscriberVerification = null;
-
-    @XmlType(name="TypeEnum")
-    @XmlEnum(String.class)
-    public enum TypeEnum {
-        HTTP("HTTP"),
-        WS("WS"),
-        SOAPTOREST("SOAPTOREST"),
-        SOAP("SOAP"),
-        GRAPHQL("GRAPHQL"),
-        WEBSUB("WEBSUB"),
-        SSE("SSE"),
-        WEBHOOK("WEBHOOK"),
-        ASYNC("ASYNC"),
-        MCP("MCP");
-        private String value;
-
-        TypeEnum (String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static TypeEnum fromValue(String v) {
-            for (TypeEnum b : TypeEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-return null;
-        }
-    }
-    private TypeEnum type = TypeEnum.HTTP;
 
     @XmlType(name="AudienceEnum")
     @XmlEnum(String.class)
@@ -138,17 +93,17 @@ return null;
     private AudienceEnum audience = null;
     private List<String> audiences = new ArrayList<String>();
     private List<String> transport = new ArrayList<String>();
-    @Scope(name = "apim:api_publish", description="", value ="")
-    @Scope(name = "apim:api_manage", description="", value ="")
+    @Scope(name = "apim:mcp_server_publish", description="", value ="")
+    @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private List<String> tags = new ArrayList<String>();
-    @Scope(name = "apim:api_publish", description="", value ="")
-    @Scope(name = "apim:api_manage", description="", value ="")
+    @Scope(name = "apim:mcp_server_publish", description="", value ="")
+    @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private List<String> policies = new ArrayList<String>();
     @Scope(name = "apim:api_publish", description="", value ="")
     @Scope(name = "apim:api_manage", description="", value ="")
     private List<OrganizationPoliciesDTO> organizationPolicies = new ArrayList<OrganizationPoliciesDTO>();
-    @Scope(name = "apim:api_publish", description="", value ="")
-    @Scope(name = "apim:api_manage", description="", value ="")
+    @Scope(name = "apim:mcp_server_publish", description="", value ="")
+    @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private String apiThrottlingPolicy = null;
     private String authorizationHeader = null;
     private String apiKeyHeader = null;
@@ -186,15 +141,15 @@ return null;
 return null;
         }
     }
-    @Scope(name = "apim:api_publish", description="", value ="")
-    @Scope(name = "apim:api_manage", description="", value ="")
+    @Scope(name = "apim:mcp_server_publish", description="", value ="")
+    @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private VisibilityEnum visibility = VisibilityEnum.PUBLIC;
-    @Scope(name = "apim:api_publish", description="", value ="")
-    @Scope(name = "apim:api_manage", description="", value ="")
+    @Scope(name = "apim:mcp_server_publish", description="", value ="")
+    @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private List<String> visibleRoles = new ArrayList<String>();
     private List<String> visibleTenants = new ArrayList<String>();
-    @Scope(name = "apim:api_publish", description="", value ="")
-    @Scope(name = "apim:api_manage", description="", value ="")
+    @Scope(name = "apim:mcp_server_publish", description="", value ="")
+    @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private List<String> visibleOrganizations = new ArrayList<String>();
     private List<MediationPolicyDTO> mediationPolicies = new ArrayList<MediationPolicyDTO>();
     private APIOperationPoliciesDTO apiPolicies = null;
@@ -230,15 +185,15 @@ return null;
 return null;
         }
     }
-    @Scope(name = "apim:api_publish", description="", value ="")
-    @Scope(name = "apim:api_manage", description="", value ="")
+    @Scope(name = "apim:mcp_server_publish", description="", value ="")
+    @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.CURRENT_TENANT;
     private List<String> subscriptionAvailableTenants = new ArrayList<String>();
-    @Scope(name = "apim:api_publish", description="", value ="")
-    @Scope(name = "apim:api_manage", description="", value ="")
+    @Scope(name = "apim:mcp_server_publish", description="", value ="")
+    @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private List<APIInfoAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIInfoAdditionalPropertiesDTO>();
-    @Scope(name = "apim:api_publish", description="", value ="")
-    @Scope(name = "apim:api_manage", description="", value ="")
+    @Scope(name = "apim:mcp_server_publish", description="", value ="")
+    @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<String, APIInfoAdditionalPropertiesMapDTO>();
     private APIMonetizationInfoDTO monetization = null;
 
@@ -274,77 +229,37 @@ return null;
     }
     private AccessControlEnum accessControl = AccessControlEnum.NONE;
     private List<String> accessControlRoles = new ArrayList<String>();
-    @Scope(name = "apim:api_publish", description="", value ="")
-    @Scope(name = "apim:api_manage", description="", value ="")
+    @Scope(name = "apim:mcp_server_publish", description="", value ="")
+    @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
-    private WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration = null;
     private String workflowStatus = null;
     private String createdTime = null;
     private String lastUpdatedTimestamp = null;
-    @Scope(name = "apim:api_publish", description="", value ="")
-    @Scope(name = "apim:api_manage", description="", value ="")
+    @Scope(name = "apim:mcp_server_publish", description="", value ="")
+    @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private String lastUpdatedTime = null;
-    private Object endpointConfig = null;
-    private String primaryProductionEndpointId = null;
-    private String primarySandboxEndpointId = null;
-
-    @XmlType(name="EndpointImplementationTypeEnum")
-    @XmlEnum(String.class)
-    public enum EndpointImplementationTypeEnum {
-        INLINE("INLINE"),
-        ENDPOINT("ENDPOINT"),
-        MOCKED_OAS("MOCKED_OAS");
-        private String value;
-
-        EndpointImplementationTypeEnum (String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static EndpointImplementationTypeEnum fromValue(String v) {
-            for (EndpointImplementationTypeEnum b : EndpointImplementationTypeEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-return null;
-        }
-    }
-    private EndpointImplementationTypeEnum endpointImplementationType = EndpointImplementationTypeEnum.ENDPOINT;
     private SubtypeConfigurationDTO subtypeConfiguration = null;
     private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
     private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
-    @Scope(name = "apim:api_publish", description="", value ="")
+    @Scope(name = "apim:mcp_server_publish", description="", value ="")
     private List<String> categories = new ArrayList<String>();
     private Object keyManagers = null;
-    private APIServiceInfoDTO serviceInfo = null;
-    private AdvertiseInfoDTO advertiseInfo = null;
     private String gatewayVendor = null;
     private String gatewayType = "wso2/synapse";
-    private List<String> asyncTransportProtocols = new ArrayList<String>();
     private Boolean egress = false;
 
   /**
-   * UUID of the api registry artifact 
+   * UUID of the artifact
    **/
-  public APIDTO id(String id) {
+  public MCPServerDTO id(String id) {
     this.id = id;
     return this;
   }
 
   
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the api registry artifact ")
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the artifact")
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -355,13 +270,13 @@ return null;
 
   /**
    **/
-  public APIDTO name(String name) {
+  public MCPServerDTO name(String name) {
     this.name = name;
     return this;
   }
 
   
-  @ApiModelProperty(example = "PizzaShackAPI", required = true, value = "")
+  @ApiModelProperty(example = "ReadingList", required = true, value = "")
   @JsonProperty("name")
   @NotNull
  @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\[\\]/]*$)") @Size(min=1)  public String getName() {
@@ -373,13 +288,13 @@ return null;
 
   /**
    **/
-  public APIDTO description(String description) {
+  public MCPServerDTO description(String description) {
     this.description = description;
     return this;
   }
 
   
-  @ApiModelProperty(example = "This is a simple API for Pizza Shack online pizza delivery store.", value = "")
+  @ApiModelProperty(example = "This is a simple MCP server for a book store.", value = "")
   @JsonProperty("description")
  @Size(max=32766)  public String getDescription() {
     return description;
@@ -390,13 +305,13 @@ return null;
 
   /**
    **/
-  public APIDTO context(String context) {
+  public MCPServerDTO context(String context) {
     this.context = context;
     return this;
   }
 
   
-  @ApiModelProperty(example = "pizza", required = true, value = "")
+  @ApiModelProperty(example = "books", required = true, value = "")
   @JsonProperty("context")
   @NotNull
  @Size(min=1,max=232)  public String getContext() {
@@ -407,8 +322,27 @@ return null;
   }
 
   /**
+   * Endpoint configuration of the backend API. 
    **/
-  public APIDTO version(String version) {
+  public MCPServerDTO backendAPIEndpointConfig(Object backendAPIEndpointConfig) {
+    this.backendAPIEndpointConfig = backendAPIEndpointConfig;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Endpoint configuration of the backend API. ")
+      @Valid
+  @JsonProperty("backendAPIEndpointConfig")
+  public Object getBackendAPIEndpointConfig() {
+    return backendAPIEndpointConfig;
+  }
+  public void setBackendAPIEndpointConfig(Object backendAPIEndpointConfig) {
+    this.backendAPIEndpointConfig = backendAPIEndpointConfig;
+  }
+
+  /**
+   **/
+  public MCPServerDTO version(String version) {
     this.version = version;
     return this;
   }
@@ -425,15 +359,15 @@ return null;
   }
 
   /**
-   * If the provider value is not given user invoking the api will be used as the provider. 
+   * If the provider value is not given user invoking the MCP Server will be used as the provider.
    **/
-  public APIDTO provider(String provider) {
+  public MCPServerDTO provider(String provider) {
     this.provider = provider;
     return this;
   }
 
   
-  @ApiModelProperty(example = "admin", value = "If the provider value is not given user invoking the api will be used as the provider. ")
+  @ApiModelProperty(example = "admin", value = "If the provider value is not given user invoking the MCP Server will be used as the provider.")
   @JsonProperty("provider")
  @Size(max=200)  public String getProvider() {
     return provider;
@@ -444,7 +378,7 @@ return null;
 
   /**
    **/
-  public APIDTO lifeCycleStatus(String lifeCycleStatus) {
+  public MCPServerDTO lifeCycleStatus(String lifeCycleStatus) {
     this.lifeCycleStatus = lifeCycleStatus;
     return this;
   }
@@ -461,42 +395,7 @@ return null;
 
   /**
    **/
-  public APIDTO wsdlInfo(WSDLInfoDTO wsdlInfo) {
-    this.wsdlInfo = wsdlInfo;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("wsdlInfo")
-  public WSDLInfoDTO getWsdlInfo() {
-    return wsdlInfo;
-  }
-  public void setWsdlInfo(WSDLInfoDTO wsdlInfo) {
-    this.wsdlInfo = wsdlInfo;
-  }
-
-  /**
-   **/
-  public APIDTO wsdlUrl(String wsdlUrl) {
-    this.wsdlUrl = wsdlUrl;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "/apimgt/applicationdata/wsdls/admin--soap1.wsdl", value = "")
-  @JsonProperty("wsdlUrl")
-  public String getWsdlUrl() {
-    return wsdlUrl;
-  }
-  public void setWsdlUrl(String wsdlUrl) {
-    this.wsdlUrl = wsdlUrl;
-  }
-
-  /**
-   **/
-  public APIDTO responseCachingEnabled(Boolean responseCachingEnabled) {
+  public MCPServerDTO responseCachingEnabled(Boolean responseCachingEnabled) {
     this.responseCachingEnabled = responseCachingEnabled;
     return this;
   }
@@ -513,7 +412,7 @@ return null;
 
   /**
    **/
-  public APIDTO cacheTimeout(Integer cacheTimeout) {
+  public MCPServerDTO cacheTimeout(Integer cacheTimeout) {
     this.cacheTimeout = cacheTimeout;
     return this;
   }
@@ -530,7 +429,7 @@ return null;
 
   /**
    **/
-  public APIDTO hasThumbnail(Boolean hasThumbnail) {
+  public MCPServerDTO hasThumbnail(Boolean hasThumbnail) {
     this.hasThumbnail = hasThumbnail;
     return this;
   }
@@ -547,7 +446,7 @@ return null;
 
   /**
    **/
-  public APIDTO isDefaultVersion(Boolean isDefaultVersion) {
+  public MCPServerDTO isDefaultVersion(Boolean isDefaultVersion) {
     this.isDefaultVersion = isDefaultVersion;
     return this;
   }
@@ -564,7 +463,7 @@ return null;
 
   /**
    **/
-  public APIDTO isRevision(Boolean isRevision) {
+  public MCPServerDTO isRevision(Boolean isRevision) {
     this.isRevision = isRevision;
     return this;
   }
@@ -580,15 +479,15 @@ return null;
   }
 
   /**
-   * UUID of the api registry artifact 
+   * UUID of the artifact
    **/
-  public APIDTO revisionedApiId(String revisionedApiId) {
+  public MCPServerDTO revisionedApiId(String revisionedApiId) {
     this.revisionedApiId = revisionedApiId;
     return this;
   }
 
   
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the api registry artifact ")
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the artifact")
   @JsonProperty("revisionedApiId")
   public String getRevisionedApiId() {
     return revisionedApiId;
@@ -599,7 +498,7 @@ return null;
 
   /**
    **/
-  public APIDTO revisionId(Integer revisionId) {
+  public MCPServerDTO revisionId(Integer revisionId) {
     this.revisionId = revisionId;
     return this;
   }
@@ -616,7 +515,7 @@ return null;
 
   /**
    **/
-  public APIDTO enableSchemaValidation(Boolean enableSchemaValidation) {
+  public MCPServerDTO enableSchemaValidation(Boolean enableSchemaValidation) {
     this.enableSchemaValidation = enableSchemaValidation;
     return this;
   }
@@ -633,7 +532,7 @@ return null;
 
   /**
    **/
-  public APIDTO enableSubscriberVerification(Boolean enableSubscriberVerification) {
+  public MCPServerDTO enableSubscriberVerification(Boolean enableSubscriberVerification) {
     this.enableSubscriberVerification = enableSubscriberVerification;
     return this;
   }
@@ -649,33 +548,15 @@ return null;
   }
 
   /**
-   * The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC, MCP
+   * The audience of the MCP Server. Accepted values are PUBLIC, SINGLE
    **/
-  public APIDTO type(TypeEnum type) {
-    this.type = type;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "HTTP", value = "The api creation type to be used. Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL, WEBSUB, SSE, WEBHOOK, ASYNC, MCP")
-  @JsonProperty("type")
-  public TypeEnum getType() {
-    return type;
-  }
-  public void setType(TypeEnum type) {
-    this.type = type;
-  }
-
-  /**
-   * The audience of the API. Accepted values are PUBLIC, SINGLE
-   **/
-  public APIDTO audience(AudienceEnum audience) {
+  public MCPServerDTO audience(AudienceEnum audience) {
     this.audience = audience;
     return this;
   }
 
   
-  @ApiModelProperty(example = "PUBLIC", value = "The audience of the API. Accepted values are PUBLIC, SINGLE")
+  @ApiModelProperty(example = "PUBLIC", value = "The audience of the MCP Server. Accepted values are PUBLIC, SINGLE")
   @JsonProperty("audience")
   public AudienceEnum getAudience() {
     return audience;
@@ -687,7 +568,7 @@ return null;
   /**
    * The audiences of the API for jwt validation. Accepted values are any String values
    **/
-  public APIDTO audiences(List<String> audiences) {
+  public MCPServerDTO audiences(List<String> audiences) {
     this.audiences = audiences;
     return this;
   }
@@ -703,15 +584,15 @@ return null;
   }
 
   /**
-   * Supported transports for the API (http and/or https). 
+   * Supported transports for the MCP Server (http and/or https).
    **/
-  public APIDTO transport(List<String> transport) {
+  public MCPServerDTO transport(List<String> transport) {
     this.transport = transport;
     return this;
   }
 
   
-  @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the API (http and/or https). ")
+  @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the MCP Server (http and/or https).")
   @JsonProperty("transport")
   public List<String> getTransport() {
     return transport;
@@ -722,7 +603,7 @@ return null;
 
   /**
    **/
-  public APIDTO tags(List<String> tags) {
+  public MCPServerDTO tags(List<String> tags) {
     this.tags = tags;
     return this;
   }
@@ -739,7 +620,7 @@ return null;
 
   /**
    **/
-  public APIDTO policies(List<String> policies) {
+  public MCPServerDTO policies(List<String> policies) {
     this.policies = policies;
     return this;
   }
@@ -756,7 +637,7 @@ return null;
 
   /**
    **/
-  public APIDTO organizationPolicies(List<OrganizationPoliciesDTO> organizationPolicies) {
+  public MCPServerDTO organizationPolicies(List<OrganizationPoliciesDTO> organizationPolicies) {
     this.organizationPolicies = organizationPolicies;
     return this;
   }
@@ -773,15 +654,15 @@ return null;
   }
 
   /**
-   * The API level throttling policy selected for the particular API
+   * The API level throttling policy selected.
    **/
-  public APIDTO apiThrottlingPolicy(String apiThrottlingPolicy) {
+  public MCPServerDTO apiThrottlingPolicy(String apiThrottlingPolicy) {
     this.apiThrottlingPolicy = apiThrottlingPolicy;
     return this;
   }
 
   
-  @ApiModelProperty(example = "Unlimited", value = "The API level throttling policy selected for the particular API")
+  @ApiModelProperty(example = "Unlimited", value = "The API level throttling policy selected.")
   @JsonProperty("apiThrottlingPolicy")
   public String getApiThrottlingPolicy() {
     return apiThrottlingPolicy;
@@ -791,15 +672,15 @@ return null;
   }
 
   /**
-   * Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. 
+   * Name of the Authorization header used for invoking the MCP Server. If it is not set,Authorization header name specified in tenant or system level will be used.
    **/
-  public APIDTO authorizationHeader(String authorizationHeader) {
+  public MCPServerDTO authorizationHeader(String authorizationHeader) {
     this.authorizationHeader = authorizationHeader;
     return this;
   }
 
   
-  @ApiModelProperty(example = "Authorization", value = "Name of the Authorization header used for invoking the API. If it is not set, Authorization header name specified in tenant or system level will be used. ")
+  @ApiModelProperty(example = "Authorization", value = "Name of the Authorization header used for invoking the MCP Server. If it is not set,Authorization header name specified in tenant or system level will be used.")
   @JsonProperty("authorizationHeader")
  @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\s+]*$)")  public String getAuthorizationHeader() {
     return authorizationHeader;
@@ -809,15 +690,15 @@ return null;
   }
 
   /**
-   * Name of the API key header used for invoking the API. If it is not set, default value &#x60;apiKey&#x60; will be used. 
+   * Name of the API key header used for invoking the MCP Server. If it is not set, default value&#x60;apiKey&#x60; will be used.
    **/
-  public APIDTO apiKeyHeader(String apiKeyHeader) {
+  public MCPServerDTO apiKeyHeader(String apiKeyHeader) {
     this.apiKeyHeader = apiKeyHeader;
     return this;
   }
 
   
-  @ApiModelProperty(example = "apiKey", value = "Name of the API key header used for invoking the API. If it is not set, default value `apiKey` will be used. ")
+  @ApiModelProperty(example = "apiKey", value = "Name of the API key header used for invoking the MCP Server. If it is not set, default value`apiKey` will be used.")
   @JsonProperty("apiKeyHeader")
  @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\s+]*$)")  public String getApiKeyHeader() {
     return apiKeyHeader;
@@ -827,15 +708,15 @@ return null;
   }
 
   /**
-   * Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. 
+   * Types of API security, the current MCP Server secured with. It can be either OAuth2 or mutual SSLor both. If it is not set OAuth2 will be set as the security.
    **/
-  public APIDTO securityScheme(List<String> securityScheme) {
+  public MCPServerDTO securityScheme(List<String> securityScheme) {
     this.securityScheme = securityScheme;
     return this;
   }
 
   
-  @ApiModelProperty(example = "[\"oauth2\"]", value = "Types of API security, the current API secured with. It can be either OAuth2 or mutual SSL or both. If it is not set OAuth2 will be set as the security for the current API. ")
+  @ApiModelProperty(example = "[\"oauth2\"]", value = "Types of API security, the current MCP Server secured with. It can be either OAuth2 or mutual SSLor both. If it is not set OAuth2 will be set as the security.")
   @JsonProperty("securityScheme")
   public List<String> getSecurityScheme() {
     return securityScheme;
@@ -846,7 +727,7 @@ return null;
 
   /**
    **/
-  public APIDTO maxTps(APIMaxTpsDTO maxTps) {
+  public MCPServerDTO maxTps(APIMaxTpsDTO maxTps) {
     this.maxTps = maxTps;
     return this;
   }
@@ -863,15 +744,15 @@ return null;
   }
 
   /**
-   * The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED.
+   * The visibility level of the API. Accepts one of the following: PUBLIC, PRIVATE, RESTRICTED. 
    **/
-  public APIDTO visibility(VisibilityEnum visibility) {
+  public MCPServerDTO visibility(VisibilityEnum visibility) {
     this.visibility = visibility;
     return this;
   }
 
   
-  @ApiModelProperty(example = "PUBLIC", value = "The visibility level of the API. Accepts one of the following. PUBLIC, PRIVATE, RESTRICTED.")
+  @ApiModelProperty(example = "PUBLIC", value = "The visibility level of the API. Accepts one of the following: PUBLIC, PRIVATE, RESTRICTED. ")
   @JsonProperty("visibility")
   public VisibilityEnum getVisibility() {
     return visibility;
@@ -881,15 +762,15 @@ return null;
   }
 
   /**
-   * The user roles that are able to access the API in Developer Portal
+   * The user roles that are able to access the MCP Server in Developer Portal
    **/
-  public APIDTO visibleRoles(List<String> visibleRoles) {
+  public MCPServerDTO visibleRoles(List<String> visibleRoles) {
     this.visibleRoles = visibleRoles;
     return this;
   }
 
   
-  @ApiModelProperty(example = "[]", value = "The user roles that are able to access the API in Developer Portal")
+  @ApiModelProperty(example = "[]", value = "The user roles that are able to access the MCP Server in Developer Portal")
   @JsonProperty("visibleRoles")
   public List<String> getVisibleRoles() {
     return visibleRoles;
@@ -900,7 +781,7 @@ return null;
 
   /**
    **/
-  public APIDTO visibleTenants(List<String> visibleTenants) {
+  public MCPServerDTO visibleTenants(List<String> visibleTenants) {
     this.visibleTenants = visibleTenants;
     return this;
   }
@@ -916,15 +797,15 @@ return null;
   }
 
   /**
-   * The organizations that are able to access the API in Developer Portal
+   * The organizations that are able to access the MCP server in Developer Portal
    **/
-  public APIDTO visibleOrganizations(List<String> visibleOrganizations) {
+  public MCPServerDTO visibleOrganizations(List<String> visibleOrganizations) {
     this.visibleOrganizations = visibleOrganizations;
     return this;
   }
 
   
-  @ApiModelProperty(example = "[]", value = "The organizations that are able to access the API in Developer Portal")
+  @ApiModelProperty(example = "[]", value = "The organizations that are able to access the MCP server in Developer Portal")
   @JsonProperty("visibleOrganizations")
   public List<String> getVisibleOrganizations() {
     return visibleOrganizations;
@@ -935,7 +816,7 @@ return null;
 
   /**
    **/
-  public APIDTO mediationPolicies(List<MediationPolicyDTO> mediationPolicies) {
+  public MCPServerDTO mediationPolicies(List<MediationPolicyDTO> mediationPolicies) {
     this.mediationPolicies = mediationPolicies;
     return this;
   }
@@ -953,7 +834,7 @@ return null;
 
   /**
    **/
-  public APIDTO apiPolicies(APIOperationPoliciesDTO apiPolicies) {
+  public MCPServerDTO apiPolicies(APIOperationPoliciesDTO apiPolicies) {
     this.apiPolicies = apiPolicies;
     return this;
   }
@@ -970,15 +851,15 @@ return null;
   }
 
   /**
-   * The subscription availability. Accepts one of the following. CURRENT_TENANT, ALL_TENANTS or SPECIFIC_TENANTS.
+   * The subscription availability. Accepts one of the following: CURRENT_TENANT, ALL_TENANTS, or SPECIFIC_TENANTS. 
    **/
-  public APIDTO subscriptionAvailability(SubscriptionAvailabilityEnum subscriptionAvailability) {
+  public MCPServerDTO subscriptionAvailability(SubscriptionAvailabilityEnum subscriptionAvailability) {
     this.subscriptionAvailability = subscriptionAvailability;
     return this;
   }
 
   
-  @ApiModelProperty(example = "CURRENT_TENANT", value = "The subscription availability. Accepts one of the following. CURRENT_TENANT, ALL_TENANTS or SPECIFIC_TENANTS.")
+  @ApiModelProperty(example = "CURRENT_TENANT", value = "The subscription availability. Accepts one of the following: CURRENT_TENANT, ALL_TENANTS, or SPECIFIC_TENANTS. ")
   @JsonProperty("subscriptionAvailability")
   public SubscriptionAvailabilityEnum getSubscriptionAvailability() {
     return subscriptionAvailability;
@@ -989,7 +870,7 @@ return null;
 
   /**
    **/
-  public APIDTO subscriptionAvailableTenants(List<String> subscriptionAvailableTenants) {
+  public MCPServerDTO subscriptionAvailableTenants(List<String> subscriptionAvailableTenants) {
     this.subscriptionAvailableTenants = subscriptionAvailableTenants;
     return this;
   }
@@ -1005,15 +886,15 @@ return null;
   }
 
   /**
-   * Map of custom properties of API
+   * Map of custom properties of MCP Server
    **/
-  public APIDTO additionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
+  public MCPServerDTO additionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
     this.additionalProperties = additionalProperties;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Map of custom properties of API")
+  @ApiModelProperty(value = "Map of custom properties of MCP Server")
       @Valid
   @JsonProperty("additionalProperties")
   public List<APIInfoAdditionalPropertiesDTO> getAdditionalProperties() {
@@ -1025,7 +906,7 @@ return null;
 
   /**
    **/
-  public APIDTO additionalPropertiesMap(Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap) {
+  public MCPServerDTO additionalPropertiesMap(Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap) {
     this.additionalPropertiesMap = additionalPropertiesMap;
     return this;
   }
@@ -1043,7 +924,7 @@ return null;
 
   /**
    **/
-  public APIDTO monetization(APIMonetizationInfoDTO monetization) {
+  public MCPServerDTO monetization(APIMonetizationInfoDTO monetization) {
     this.monetization = monetization;
     return this;
   }
@@ -1060,15 +941,15 @@ return null;
   }
 
   /**
-   * Is the API is restricted to certain set of publishers or creators or is it visible to all the publishers and creators. If the accessControl restriction is none, this API can be modified by all the publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,  based on the restriction. 
+   * Is the MCP server restricted to certain publishers or creators or is it visible to all publishers and creators. If the accessControl restriction is NONE, this can be modified by all publishers and creators. Otherwise, it can only be viewable/modifiable by a specific set of users based on the restriction. 
    **/
-  public APIDTO accessControl(AccessControlEnum accessControl) {
+  public MCPServerDTO accessControl(AccessControlEnum accessControl) {
     this.accessControl = accessControl;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Is the API is restricted to certain set of publishers or creators or is it visible to all the publishers and creators. If the accessControl restriction is none, this API can be modified by all the publishers and creators, if not it can only be viewable/modifiable by certain set of publishers and creators,  based on the restriction. ")
+  @ApiModelProperty(value = "Is the MCP server restricted to certain publishers or creators or is it visible to all publishers and creators. If the accessControl restriction is NONE, this can be modified by all publishers and creators. Otherwise, it can only be viewable/modifiable by a specific set of users based on the restriction. ")
   @JsonProperty("accessControl")
   public AccessControlEnum getAccessControl() {
     return accessControl;
@@ -1080,7 +961,7 @@ return null;
   /**
    * The user roles that are able to view/modify as API publisher or creator.
    **/
-  public APIDTO accessControlRoles(List<String> accessControlRoles) {
+  public MCPServerDTO accessControlRoles(List<String> accessControlRoles) {
     this.accessControlRoles = accessControlRoles;
     return this;
   }
@@ -1097,7 +978,7 @@ return null;
 
   /**
    **/
-  public APIDTO businessInformation(APIBusinessInformationDTO businessInformation) {
+  public MCPServerDTO businessInformation(APIBusinessInformationDTO businessInformation) {
     this.businessInformation = businessInformation;
     return this;
   }
@@ -1115,7 +996,7 @@ return null;
 
   /**
    **/
-  public APIDTO corsConfiguration(APICorsConfigurationDTO corsConfiguration) {
+  public MCPServerDTO corsConfiguration(APICorsConfigurationDTO corsConfiguration) {
     this.corsConfiguration = corsConfiguration;
     return this;
   }
@@ -1133,25 +1014,7 @@ return null;
 
   /**
    **/
-  public APIDTO websubSubscriptionConfiguration(WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration) {
-    this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("websubSubscriptionConfiguration")
-  public WebsubSubscriptionConfigurationDTO getWebsubSubscriptionConfiguration() {
-    return websubSubscriptionConfiguration;
-  }
-  public void setWebsubSubscriptionConfiguration(WebsubSubscriptionConfigurationDTO websubSubscriptionConfiguration) {
-    this.websubSubscriptionConfiguration = websubSubscriptionConfiguration;
-  }
-
-  /**
-   **/
-  public APIDTO workflowStatus(String workflowStatus) {
+  public MCPServerDTO workflowStatus(String workflowStatus) {
     this.workflowStatus = workflowStatus;
     return this;
   }
@@ -1168,7 +1031,7 @@ return null;
 
   /**
    **/
-  public APIDTO createdTime(String createdTime) {
+  public MCPServerDTO createdTime(String createdTime) {
     this.createdTime = createdTime;
     return this;
   }
@@ -1185,7 +1048,7 @@ return null;
 
   /**
    **/
-  public APIDTO lastUpdatedTimestamp(String lastUpdatedTimestamp) {
+  public MCPServerDTO lastUpdatedTimestamp(String lastUpdatedTimestamp) {
     this.lastUpdatedTimestamp = lastUpdatedTimestamp;
     return this;
   }
@@ -1202,7 +1065,7 @@ return null;
 
   /**
    **/
-  public APIDTO lastUpdatedTime(String lastUpdatedTime) {
+  public MCPServerDTO lastUpdatedTime(String lastUpdatedTime) {
     this.lastUpdatedTime = lastUpdatedTime;
     return this;
   }
@@ -1218,78 +1081,8 @@ return null;
   }
 
   /**
-   * Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.  &#x60;Simple REST Endpoint&#x60;    {     \&quot;endpoint_type\&quot;: \&quot;http\&quot;,     \&quot;sandbox_endpoints\&quot;:       {        \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v3/api/\&quot;     },     \&quot;production_endpoints\&quot;:       {        \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v3/api/\&quot;     }   }  &#x60;Loadbalanced Endpoint&#x60;    {     \&quot;endpoint_type\&quot;: \&quot;load_balance\&quot;,     \&quot;algoCombo\&quot;: \&quot;org.apache.synapse.endpoints.algorithms.RoundRobin\&quot;,     \&quot;sessionManagement\&quot;: \&quot;\&quot;,     \&quot;sandbox_endpoints\&quot;:       [                 {           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v3/api/1\&quot;        },                 {           \&quot;endpoint_type\&quot;: \&quot;http\&quot;,           \&quot;template_not_supported\&quot;: false,           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v3/api/2\&quot;        }     ],     \&quot;production_endpoints\&quot;:       [                 {           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v3/api/3\&quot;        },                 {           \&quot;endpoint_type\&quot;: \&quot;http\&quot;,           \&quot;template_not_supported\&quot;: false,           \&quot;url\&quot;: \&quot;https://localhost:9443/am/sample/pizzashack/v3/api/4\&quot;        }     ],     \&quot;sessionTimeOut\&quot;: \&quot;\&quot;,     \&quot;algoClassName\&quot;: \&quot;org.apache.synapse.endpoints.algorithms.RoundRobin\&quot;   }  &#x60;Failover Endpoint&#x60;    {     \&quot;production_failovers\&quot;:[        {           \&quot;endpoint_type\&quot;:\&quot;http\&quot;,           \&quot;template_not_supported\&quot;:false,           \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v3/api/1\&quot;        }     ],     \&quot;endpoint_type\&quot;:\&quot;failover\&quot;,     \&quot;sandbox_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v3/api/2\&quot;     },     \&quot;production_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v3/api/3\&quot;     },     \&quot;sandbox_failovers\&quot;:[        {           \&quot;endpoint_type\&quot;:\&quot;http\&quot;,           \&quot;template_not_supported\&quot;:false,           \&quot;url\&quot;:\&quot;https://localhost:9443/am/sample/pizzashack/v3/api/4\&quot;        }     ]   }  &#x60;Default Endpoint&#x60;    {     \&quot;endpoint_type\&quot;:\&quot;default\&quot;,     \&quot;sandbox_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;default\&quot;     },     \&quot;production_endpoints\&quot;:{        \&quot;url\&quot;:\&quot;default\&quot;     }   }  &#x60;Endpoint from Endpoint Registry&#x60;    {     \&quot;endpoint_type\&quot;: \&quot;Registry\&quot;,     \&quot;endpoint_id\&quot;: \&quot;{registry-name:entry-name:version}\&quot;,   }  &#x60;AWS Lambda as Endpoint&#x60;    {     \&quot;endpoint_type\&quot;:\&quot;awslambda\&quot;,     \&quot;access_method\&quot;:\&quot;role-supplied|stored\&quot;,     \&quot;assume_role\&quot;:true|false,     \&quot;amznAccessKey\&quot;:\&quot;access_method&#x3D;&#x3D;stored?&lt;accessKey&gt;:&lt;empty&gt;\&quot;,     \&quot;amznSecretKey\&quot;:\&quot;access_method&#x3D;&#x3D;stored?&lt;secretKey&gt;:&lt;empty&gt;\&quot;,     \&quot;amznRegion\&quot;:\&quot;access_method&#x3D;&#x3D;stored?&lt;region&gt;:&lt;empty&gt;\&quot;,     \&quot;amznRoleArn\&quot;:\&quot;assume_role&#x3D;&#x3D;true?&lt;roleArn&gt;:&lt;empty&gt;\&quot;,     \&quot;amznRoleSessionName\&quot;:\&quot;assume_role&#x3D;&#x3D;true?&lt;roleSessionName&gt;:&lt;empty&gt;\&quot;,     \&quot;amznRoleRegion\&quot;:\&quot;assume_role&#x3D;&#x3D;true?&lt;roleRegion&gt;:&lt;empty&gt;\&quot;   } 
    **/
-  public APIDTO endpointConfig(Object endpointConfig) {
-    this.endpointConfig = endpointConfig;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "{\"endpoint_type\":\"http\",\"sandbox_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v3/api/\"},\"production_endpoints\":{\"url\":\"https://localhost:9443/am/sample/pizzashack/v3/api/\"}}", value = "Endpoint configuration of the API. This can be used to provide different types of endpoints including Simple REST Endpoints, Loadbalanced and Failover.  `Simple REST Endpoint`    {     \"endpoint_type\": \"http\",     \"sandbox_endpoints\":       {        \"url\": \"https://localhost:9443/am/sample/pizzashack/v3/api/\"     },     \"production_endpoints\":       {        \"url\": \"https://localhost:9443/am/sample/pizzashack/v3/api/\"     }   }  `Loadbalanced Endpoint`    {     \"endpoint_type\": \"load_balance\",     \"algoCombo\": \"org.apache.synapse.endpoints.algorithms.RoundRobin\",     \"sessionManagement\": \"\",     \"sandbox_endpoints\":       [                 {           \"url\": \"https://localhost:9443/am/sample/pizzashack/v3/api/1\"        },                 {           \"endpoint_type\": \"http\",           \"template_not_supported\": false,           \"url\": \"https://localhost:9443/am/sample/pizzashack/v3/api/2\"        }     ],     \"production_endpoints\":       [                 {           \"url\": \"https://localhost:9443/am/sample/pizzashack/v3/api/3\"        },                 {           \"endpoint_type\": \"http\",           \"template_not_supported\": false,           \"url\": \"https://localhost:9443/am/sample/pizzashack/v3/api/4\"        }     ],     \"sessionTimeOut\": \"\",     \"algoClassName\": \"org.apache.synapse.endpoints.algorithms.RoundRobin\"   }  `Failover Endpoint`    {     \"production_failovers\":[        {           \"endpoint_type\":\"http\",           \"template_not_supported\":false,           \"url\":\"https://localhost:9443/am/sample/pizzashack/v3/api/1\"        }     ],     \"endpoint_type\":\"failover\",     \"sandbox_endpoints\":{        \"url\":\"https://localhost:9443/am/sample/pizzashack/v3/api/2\"     },     \"production_endpoints\":{        \"url\":\"https://localhost:9443/am/sample/pizzashack/v3/api/3\"     },     \"sandbox_failovers\":[        {           \"endpoint_type\":\"http\",           \"template_not_supported\":false,           \"url\":\"https://localhost:9443/am/sample/pizzashack/v3/api/4\"        }     ]   }  `Default Endpoint`    {     \"endpoint_type\":\"default\",     \"sandbox_endpoints\":{        \"url\":\"default\"     },     \"production_endpoints\":{        \"url\":\"default\"     }   }  `Endpoint from Endpoint Registry`    {     \"endpoint_type\": \"Registry\",     \"endpoint_id\": \"{registry-name:entry-name:version}\",   }  `AWS Lambda as Endpoint`    {     \"endpoint_type\":\"awslambda\",     \"access_method\":\"role-supplied|stored\",     \"assume_role\":true|false,     \"amznAccessKey\":\"access_method==stored?<accessKey>:<empty>\",     \"amznSecretKey\":\"access_method==stored?<secretKey>:<empty>\",     \"amznRegion\":\"access_method==stored?<region>:<empty>\",     \"amznRoleArn\":\"assume_role==true?<roleArn>:<empty>\",     \"amznRoleSessionName\":\"assume_role==true?<roleSessionName>:<empty>\",     \"amznRoleRegion\":\"assume_role==true?<roleRegion>:<empty>\"   } ")
-      @Valid
-  @JsonProperty("endpointConfig")
-  public Object getEndpointConfig() {
-    return endpointConfig;
-  }
-  public void setEndpointConfig(Object endpointConfig) {
-    this.endpointConfig = endpointConfig;
-  }
-
-  /**
-   **/
-  public APIDTO primaryProductionEndpointId(String primaryProductionEndpointId) {
-    this.primaryProductionEndpointId = primaryProductionEndpointId;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "13092607-ed01-4fa1-bc64-5da0e2abe92c", value = "")
-  @JsonProperty("primaryProductionEndpointId")
-  public String getPrimaryProductionEndpointId() {
-    return primaryProductionEndpointId;
-  }
-  public void setPrimaryProductionEndpointId(String primaryProductionEndpointId) {
-    this.primaryProductionEndpointId = primaryProductionEndpointId;
-  }
-
-  /**
-   **/
-  public APIDTO primarySandboxEndpointId(String primarySandboxEndpointId) {
-    this.primarySandboxEndpointId = primarySandboxEndpointId;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "13092607-ed01-4fa1-bc64-5da0e2abe92c", value = "")
-  @JsonProperty("primarySandboxEndpointId")
-  public String getPrimarySandboxEndpointId() {
-    return primarySandboxEndpointId;
-  }
-  public void setPrimarySandboxEndpointId(String primarySandboxEndpointId) {
-    this.primarySandboxEndpointId = primarySandboxEndpointId;
-  }
-
-  /**
-   **/
-  public APIDTO endpointImplementationType(EndpointImplementationTypeEnum endpointImplementationType) {
-    this.endpointImplementationType = endpointImplementationType;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "INLINE", value = "")
-  @JsonProperty("endpointImplementationType")
-  public EndpointImplementationTypeEnum getEndpointImplementationType() {
-    return endpointImplementationType;
-  }
-  public void setEndpointImplementationType(EndpointImplementationTypeEnum endpointImplementationType) {
-    this.endpointImplementationType = endpointImplementationType;
-  }
-
-  /**
-   **/
-  public APIDTO subtypeConfiguration(SubtypeConfigurationDTO subtypeConfiguration) {
+  public MCPServerDTO subtypeConfiguration(SubtypeConfigurationDTO subtypeConfiguration) {
     this.subtypeConfiguration = subtypeConfiguration;
     return this;
   }
@@ -1307,7 +1100,7 @@ return null;
 
   /**
    **/
-  public APIDTO scopes(List<APIScopeDTO> scopes) {
+  public MCPServerDTO scopes(List<APIScopeDTO> scopes) {
     this.scopes = scopes;
     return this;
   }
@@ -1325,7 +1118,7 @@ return null;
 
   /**
    **/
-  public APIDTO operations(List<APIOperationsDTO> operations) {
+  public MCPServerDTO operations(List<APIOperationsDTO> operations) {
     this.operations = operations;
     return this;
   }
@@ -1343,7 +1136,7 @@ return null;
 
   /**
    **/
-  public APIDTO threatProtectionPolicies(APIThreatProtectionPoliciesDTO threatProtectionPolicies) {
+  public MCPServerDTO threatProtectionPolicies(APIThreatProtectionPoliciesDTO threatProtectionPolicies) {
     this.threatProtectionPolicies = threatProtectionPolicies;
     return this;
   }
@@ -1360,15 +1153,15 @@ return null;
   }
 
   /**
-   * API categories 
+   * API categories
    **/
-  public APIDTO categories(List<String> categories) {
+  public MCPServerDTO categories(List<String> categories) {
     this.categories = categories;
     return this;
   }
 
   
-  @ApiModelProperty(value = "API categories ")
+  @ApiModelProperty(value = "API categories")
   @JsonProperty("categories")
   public List<String> getCategories() {
     return categories;
@@ -1378,15 +1171,15 @@ return null;
   }
 
   /**
-   * API Key Managers 
+   * API Key Managers
    **/
-  public APIDTO keyManagers(Object keyManagers) {
+  public MCPServerDTO keyManagers(Object keyManagers) {
     this.keyManagers = keyManagers;
     return this;
   }
 
   
-  @ApiModelProperty(value = "API Key Managers ")
+  @ApiModelProperty(value = "API Key Managers")
       @Valid
   @JsonProperty("keyManagers")
   public Object getKeyManagers() {
@@ -1398,43 +1191,7 @@ return null;
 
   /**
    **/
-  public APIDTO serviceInfo(APIServiceInfoDTO serviceInfo) {
-    this.serviceInfo = serviceInfo;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("serviceInfo")
-  public APIServiceInfoDTO getServiceInfo() {
-    return serviceInfo;
-  }
-  public void setServiceInfo(APIServiceInfoDTO serviceInfo) {
-    this.serviceInfo = serviceInfo;
-  }
-
-  /**
-   **/
-  public APIDTO advertiseInfo(AdvertiseInfoDTO advertiseInfo) {
-    this.advertiseInfo = advertiseInfo;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("advertiseInfo")
-  public AdvertiseInfoDTO getAdvertiseInfo() {
-    return advertiseInfo;
-  }
-  public void setAdvertiseInfo(AdvertiseInfoDTO advertiseInfo) {
-    this.advertiseInfo = advertiseInfo;
-  }
-
-  /**
-   **/
-  public APIDTO gatewayVendor(String gatewayVendor) {
+  public MCPServerDTO gatewayVendor(String gatewayVendor) {
     this.gatewayVendor = gatewayVendor;
     return this;
   }
@@ -1450,15 +1207,15 @@ return null;
   }
 
   /**
-   * The gateway type selected for the API policies. Accepts one of the following. wso2/synapse, wso2/apk.
+   * The gateway type selected for the API policies. Accepts one of the following: wso2/synapse, wso2/apk, AWS. 
    **/
-  public APIDTO gatewayType(String gatewayType) {
+  public MCPServerDTO gatewayType(String gatewayType) {
     this.gatewayType = gatewayType;
     return this;
   }
 
   
-  @ApiModelProperty(example = "wso2/synapse wso2/apk AWS", value = "The gateway type selected for the API policies. Accepts one of the following. wso2/synapse, wso2/apk.")
+  @ApiModelProperty(example = "wso2/synapse wso2/apk AWS", value = "The gateway type selected for the API policies. Accepts one of the following: wso2/synapse, wso2/apk, AWS. ")
   @JsonProperty("gatewayType")
   public String getGatewayType() {
     return gatewayType;
@@ -1468,33 +1225,15 @@ return null;
   }
 
   /**
-   * Supported transports for the async API (http and/or https). 
+   * Whether the MCP Server is EGRESS or not
    **/
-  public APIDTO asyncTransportProtocols(List<String> asyncTransportProtocols) {
-    this.asyncTransportProtocols = asyncTransportProtocols;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "[\"http\",\"https\"]", value = "Supported transports for the async API (http and/or https). ")
-  @JsonProperty("asyncTransportProtocols")
-  public List<String> getAsyncTransportProtocols() {
-    return asyncTransportProtocols;
-  }
-  public void setAsyncTransportProtocols(List<String> asyncTransportProtocols) {
-    this.asyncTransportProtocols = asyncTransportProtocols;
-  }
-
-  /**
-   * Whether the API is EGRESS or not
-   **/
-  public APIDTO egress(Boolean egress) {
+  public MCPServerDTO egress(Boolean egress) {
     this.egress = egress;
     return this;
   }
 
   
-  @ApiModelProperty(example = "true", value = "Whether the API is EGRESS or not")
+  @ApiModelProperty(example = "true", value = "Whether the MCP Server is EGRESS or not")
   @JsonProperty("egress")
   public Boolean isEgress() {
     return egress;
@@ -1512,94 +1251,83 @@ return null;
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APIDTO API = (APIDTO) o;
-    return Objects.equals(id, API.id) &&
-        Objects.equals(name, API.name) &&
-        Objects.equals(description, API.description) &&
-        Objects.equals(context, API.context) &&
-        Objects.equals(version, API.version) &&
-        Objects.equals(provider, API.provider) &&
-        Objects.equals(lifeCycleStatus, API.lifeCycleStatus) &&
-        Objects.equals(wsdlInfo, API.wsdlInfo) &&
-        Objects.equals(wsdlUrl, API.wsdlUrl) &&
-        Objects.equals(responseCachingEnabled, API.responseCachingEnabled) &&
-        Objects.equals(cacheTimeout, API.cacheTimeout) &&
-        Objects.equals(hasThumbnail, API.hasThumbnail) &&
-        Objects.equals(isDefaultVersion, API.isDefaultVersion) &&
-        Objects.equals(isRevision, API.isRevision) &&
-        Objects.equals(revisionedApiId, API.revisionedApiId) &&
-        Objects.equals(revisionId, API.revisionId) &&
-        Objects.equals(enableSchemaValidation, API.enableSchemaValidation) &&
-        Objects.equals(enableSubscriberVerification, API.enableSubscriberVerification) &&
-        Objects.equals(type, API.type) &&
-        Objects.equals(audience, API.audience) &&
-        Objects.equals(audiences, API.audiences) &&
-        Objects.equals(transport, API.transport) &&
-        Objects.equals(tags, API.tags) &&
-        Objects.equals(policies, API.policies) &&
-        Objects.equals(organizationPolicies, API.organizationPolicies) &&
-        Objects.equals(apiThrottlingPolicy, API.apiThrottlingPolicy) &&
-        Objects.equals(authorizationHeader, API.authorizationHeader) &&
-        Objects.equals(apiKeyHeader, API.apiKeyHeader) &&
-        Objects.equals(securityScheme, API.securityScheme) &&
-        Objects.equals(maxTps, API.maxTps) &&
-        Objects.equals(visibility, API.visibility) &&
-        Objects.equals(visibleRoles, API.visibleRoles) &&
-        Objects.equals(visibleTenants, API.visibleTenants) &&
-        Objects.equals(visibleOrganizations, API.visibleOrganizations) &&
-        Objects.equals(mediationPolicies, API.mediationPolicies) &&
-        Objects.equals(apiPolicies, API.apiPolicies) &&
-        Objects.equals(subscriptionAvailability, API.subscriptionAvailability) &&
-        Objects.equals(subscriptionAvailableTenants, API.subscriptionAvailableTenants) &&
-        Objects.equals(additionalProperties, API.additionalProperties) &&
-        Objects.equals(additionalPropertiesMap, API.additionalPropertiesMap) &&
-        Objects.equals(monetization, API.monetization) &&
-        Objects.equals(accessControl, API.accessControl) &&
-        Objects.equals(accessControlRoles, API.accessControlRoles) &&
-        Objects.equals(businessInformation, API.businessInformation) &&
-        Objects.equals(corsConfiguration, API.corsConfiguration) &&
-        Objects.equals(websubSubscriptionConfiguration, API.websubSubscriptionConfiguration) &&
-        Objects.equals(workflowStatus, API.workflowStatus) &&
-        Objects.equals(createdTime, API.createdTime) &&
-        Objects.equals(lastUpdatedTimestamp, API.lastUpdatedTimestamp) &&
-        Objects.equals(lastUpdatedTime, API.lastUpdatedTime) &&
-        Objects.equals(endpointConfig, API.endpointConfig) &&
-        Objects.equals(primaryProductionEndpointId, API.primaryProductionEndpointId) &&
-        Objects.equals(primarySandboxEndpointId, API.primarySandboxEndpointId) &&
-        Objects.equals(endpointImplementationType, API.endpointImplementationType) &&
-        Objects.equals(subtypeConfiguration, API.subtypeConfiguration) &&
-        Objects.equals(scopes, API.scopes) &&
-        Objects.equals(operations, API.operations) &&
-        Objects.equals(threatProtectionPolicies, API.threatProtectionPolicies) &&
-        Objects.equals(categories, API.categories) &&
-        Objects.equals(keyManagers, API.keyManagers) &&
-        Objects.equals(serviceInfo, API.serviceInfo) &&
-        Objects.equals(advertiseInfo, API.advertiseInfo) &&
-        Objects.equals(gatewayVendor, API.gatewayVendor) &&
-        Objects.equals(gatewayType, API.gatewayType) &&
-        Objects.equals(asyncTransportProtocols, API.asyncTransportProtocols) &&
-        Objects.equals(egress, API.egress);
+    MCPServerDTO mcPServer = (MCPServerDTO) o;
+    return Objects.equals(id, mcPServer.id) &&
+        Objects.equals(name, mcPServer.name) &&
+        Objects.equals(description, mcPServer.description) &&
+        Objects.equals(context, mcPServer.context) &&
+        Objects.equals(backendAPIEndpointConfig, mcPServer.backendAPIEndpointConfig) &&
+        Objects.equals(version, mcPServer.version) &&
+        Objects.equals(provider, mcPServer.provider) &&
+        Objects.equals(lifeCycleStatus, mcPServer.lifeCycleStatus) &&
+        Objects.equals(responseCachingEnabled, mcPServer.responseCachingEnabled) &&
+        Objects.equals(cacheTimeout, mcPServer.cacheTimeout) &&
+        Objects.equals(hasThumbnail, mcPServer.hasThumbnail) &&
+        Objects.equals(isDefaultVersion, mcPServer.isDefaultVersion) &&
+        Objects.equals(isRevision, mcPServer.isRevision) &&
+        Objects.equals(revisionedApiId, mcPServer.revisionedApiId) &&
+        Objects.equals(revisionId, mcPServer.revisionId) &&
+        Objects.equals(enableSchemaValidation, mcPServer.enableSchemaValidation) &&
+        Objects.equals(enableSubscriberVerification, mcPServer.enableSubscriberVerification) &&
+        Objects.equals(audience, mcPServer.audience) &&
+        Objects.equals(audiences, mcPServer.audiences) &&
+        Objects.equals(transport, mcPServer.transport) &&
+        Objects.equals(tags, mcPServer.tags) &&
+        Objects.equals(policies, mcPServer.policies) &&
+        Objects.equals(organizationPolicies, mcPServer.organizationPolicies) &&
+        Objects.equals(apiThrottlingPolicy, mcPServer.apiThrottlingPolicy) &&
+        Objects.equals(authorizationHeader, mcPServer.authorizationHeader) &&
+        Objects.equals(apiKeyHeader, mcPServer.apiKeyHeader) &&
+        Objects.equals(securityScheme, mcPServer.securityScheme) &&
+        Objects.equals(maxTps, mcPServer.maxTps) &&
+        Objects.equals(visibility, mcPServer.visibility) &&
+        Objects.equals(visibleRoles, mcPServer.visibleRoles) &&
+        Objects.equals(visibleTenants, mcPServer.visibleTenants) &&
+        Objects.equals(visibleOrganizations, mcPServer.visibleOrganizations) &&
+        Objects.equals(mediationPolicies, mcPServer.mediationPolicies) &&
+        Objects.equals(apiPolicies, mcPServer.apiPolicies) &&
+        Objects.equals(subscriptionAvailability, mcPServer.subscriptionAvailability) &&
+        Objects.equals(subscriptionAvailableTenants, mcPServer.subscriptionAvailableTenants) &&
+        Objects.equals(additionalProperties, mcPServer.additionalProperties) &&
+        Objects.equals(additionalPropertiesMap, mcPServer.additionalPropertiesMap) &&
+        Objects.equals(monetization, mcPServer.monetization) &&
+        Objects.equals(accessControl, mcPServer.accessControl) &&
+        Objects.equals(accessControlRoles, mcPServer.accessControlRoles) &&
+        Objects.equals(businessInformation, mcPServer.businessInformation) &&
+        Objects.equals(corsConfiguration, mcPServer.corsConfiguration) &&
+        Objects.equals(workflowStatus, mcPServer.workflowStatus) &&
+        Objects.equals(createdTime, mcPServer.createdTime) &&
+        Objects.equals(lastUpdatedTimestamp, mcPServer.lastUpdatedTimestamp) &&
+        Objects.equals(lastUpdatedTime, mcPServer.lastUpdatedTime) &&
+        Objects.equals(subtypeConfiguration, mcPServer.subtypeConfiguration) &&
+        Objects.equals(scopes, mcPServer.scopes) &&
+        Objects.equals(operations, mcPServer.operations) &&
+        Objects.equals(threatProtectionPolicies, mcPServer.threatProtectionPolicies) &&
+        Objects.equals(categories, mcPServer.categories) &&
+        Objects.equals(keyManagers, mcPServer.keyManagers) &&
+        Objects.equals(gatewayVendor, mcPServer.gatewayVendor) &&
+        Objects.equals(gatewayType, mcPServer.gatewayType) &&
+        Objects.equals(egress, mcPServer.egress);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, lifeCycleStatus, wsdlInfo, wsdlUrl, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, type, audience, audiences, transport, tags, policies, organizationPolicies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, visibleOrganizations, mediationPolicies, apiPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, websubSubscriptionConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, endpointConfig, primaryProductionEndpointId, primarySandboxEndpointId, endpointImplementationType, subtypeConfiguration, scopes, operations, threatProtectionPolicies, categories, keyManagers, serviceInfo, advertiseInfo, gatewayVendor, gatewayType, asyncTransportProtocols, egress);
+    return Objects.hash(id, name, description, context, backendAPIEndpointConfig, version, provider, lifeCycleStatus, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, audience, audiences, transport, tags, policies, organizationPolicies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, visibleOrganizations, mediationPolicies, apiPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, subtypeConfiguration, scopes, operations, threatProtectionPolicies, categories, keyManagers, gatewayVendor, gatewayType, egress);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APIDTO {\n");
+    sb.append("class MCPServerDTO {\n");
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
+    sb.append("    backendAPIEndpointConfig: ").append(toIndentedString(backendAPIEndpointConfig)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
-    sb.append("    wsdlInfo: ").append(toIndentedString(wsdlInfo)).append("\n");
-    sb.append("    wsdlUrl: ").append(toIndentedString(wsdlUrl)).append("\n");
     sb.append("    responseCachingEnabled: ").append(toIndentedString(responseCachingEnabled)).append("\n");
     sb.append("    cacheTimeout: ").append(toIndentedString(cacheTimeout)).append("\n");
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
@@ -1609,7 +1337,6 @@ return null;
     sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
     sb.append("    enableSubscriberVerification: ").append(toIndentedString(enableSubscriberVerification)).append("\n");
-    sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    audience: ").append(toIndentedString(audience)).append("\n");
     sb.append("    audiences: ").append(toIndentedString(audiences)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
@@ -1636,26 +1363,18 @@ return null;
     sb.append("    accessControlRoles: ").append(toIndentedString(accessControlRoles)).append("\n");
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
-    sb.append("    websubSubscriptionConfiguration: ").append(toIndentedString(websubSubscriptionConfiguration)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTimestamp: ").append(toIndentedString(lastUpdatedTimestamp)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
-    sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
-    sb.append("    primaryProductionEndpointId: ").append(toIndentedString(primaryProductionEndpointId)).append("\n");
-    sb.append("    primarySandboxEndpointId: ").append(toIndentedString(primarySandboxEndpointId)).append("\n");
-    sb.append("    endpointImplementationType: ").append(toIndentedString(endpointImplementationType)).append("\n");
     sb.append("    subtypeConfiguration: ").append(toIndentedString(subtypeConfiguration)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
     sb.append("    threatProtectionPolicies: ").append(toIndentedString(threatProtectionPolicies)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
-    sb.append("    serviceInfo: ").append(toIndentedString(serviceInfo)).append("\n");
-    sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
-    sb.append("    asyncTransportProtocols: ").append(toIndentedString(asyncTransportProtocols)).append("\n");
     sb.append("    egress: ").append(toIndentedString(egress)).append("\n");
     sb.append("}");
     return sb.toString();

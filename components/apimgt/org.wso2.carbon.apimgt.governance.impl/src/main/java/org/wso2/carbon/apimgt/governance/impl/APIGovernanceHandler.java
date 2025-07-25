@@ -42,6 +42,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.APIDTOWrapper;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -418,8 +419,8 @@ public class APIGovernanceHandler implements ArtifactGovernanceHandler {
                 api.setUuid(apiId);
                 apiIdentifier.setUuid(apiId);
                 APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, true, apiProvider);
-                File apiProject = ExportUtils.exportApi(
-                        apiProvider, apiIdentifier, apiDtoToReturn, api, userName,
+                File apiProject = ExportUtils.exportAPI(
+                        apiProvider, apiIdentifier, new APIDTOWrapper(apiDtoToReturn), api, userName,
                         ExportFormat.YAML, true, true, StringUtils.EMPTY, organization, false
                 ); // returns zip file
                 return Files.readAllBytes(apiProject.toPath());
