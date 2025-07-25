@@ -1846,4 +1846,29 @@
               {% endfor %}
           </EmbeddingProvider>
       </AI>
+
+      <GatewayNotificationConfiguration>
+          <Enabled>{{apim.gateway_notification.enabled}}</Enabled>
+          <Heartbeat>
+              <NotifyIntervalSeconds>{{apim.gateway_notification.heartbeat.notify_interval}}</NotifyIntervalSeconds>
+              <GatewayID>{{apim.gateway_notification.heartbeat.gateway_id}}</GatewayID>
+          </Heartbeat>
+          <DeploymentAcknowledgement>
+              <BatchSize>{{apim.gateway_notification.deployment_ack.batch_size}}</BatchSize>
+              <BatchIntervalMillis>{{apim.gateway_notification.deployment_ack.batch_interval}}</BatchIntervalMillis>
+              <MaxRetryCount>{{apim.gateway_notification.deployment_ack.max_retry_count}}</MaxRetryCount>
+              <RetryDuration>{{apim.gateway_notification.deployment_ack.retry_duration}}</RetryDuration>
+              <RetryProgressionFactor>{{apim.gateway_notification.deployment_ack.retry_progression_factor}}</RetryProgressionFactor>
+          </DeploymentAcknowledgement>
+          <Registration>
+              <MaxRetryCount>{{apim.gateway_notification.registration.max_retry_count}}</MaxRetryCount>
+              <RetryDuration>{{apim.gateway_notification.registration.retry_duration}}</RetryDuration>
+              <RetryProgressionFactor>{{apim.gateway_notification.registration.retry_progression_factor}}</RetryProgressionFactor>
+          </Registration>
+          <GatewayCleanup>
+              <ExpireTimeSeconds>{{apim.gateway_cleanup.expire_time}}</ExpireTimeSeconds>
+              <DataRetentionPeriodSeconds>{{apim.gateway_cleanup.data_retention_period}}</DataRetentionPeriodSeconds>
+              <CleanupIntervalSeconds>{{apim.gateway_cleanup.cleanup_interval}}</CleanupIntervalSeconds>
+          </GatewayCleanup>
+      </GatewayNotificationConfiguration>
 </APIManager>
