@@ -394,17 +394,19 @@ public class AMDefaultKeyManagerImpl extends AbstractKeyManager {
             if (enableApplicationScopes) {
                 Object scopesObject = additionalProperties.get(APIConstants.KeyManager.APPLICATION_SCOPES);
                 if (scopesObject instanceof List) {
-                    try {
-                        List<String> applicationScopes = new ArrayList<>();
-                        for (Object scope : (List<?>) scopesObject) {
-                            if (scope instanceof String) {
-                                applicationScopes.add((String) scope);
-                            }
+                    List<String> applicationScopes = new ArrayList<>();
+                    for (Object scope : (List<?>) scopesObject) {
+                        if (scope instanceof String) {
+                            applicationScopes.add((String) scope);
+                        } else {
+                            log.warn("Skipping non-string application scope: " + scope);
                         }
-                        clientInfo.setApplicationScopes(applicationScopes);
-                    } catch (ClassCastException e) {
-                        log.error("Error while parsing application scopes", e);
                     }
+                    clientInfo.setApplicationScopes(applicationScopes);
+                } else {
+                    log.warn("Application scopes property is not a List, ignoring: " + scopesObject);
+                    // If application scopes are not provided in the expected format, set it to an empty list
+                    clientInfo.setApplicationScopes(new ArrayList<>());
                 }
             } else {
                 // If application scopes feature is disabled, empty application scopes will be sent in DCR call
