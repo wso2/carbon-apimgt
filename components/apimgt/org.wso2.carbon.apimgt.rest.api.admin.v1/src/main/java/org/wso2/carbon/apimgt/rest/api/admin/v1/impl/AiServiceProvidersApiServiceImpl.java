@@ -18,27 +18,29 @@
 
 package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Collections;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.model.LLMModel;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.LlmProvidersApiService;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.AiServiceProvidersApiService;
 
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderSummaryResponseListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AIServiceProviderResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AIServiceProviderSummaryResponseListDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ModelProviderDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.LLMProviderMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
@@ -53,9 +55,9 @@ import java.util.List;
 import java.io.InputStream;
 import javax.ws.rs.core.Response;
 
-public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
+public class AiServiceProvidersApiServiceImpl implements AiServiceProvidersApiService {
 
-    private static final Log log = LogFactory.getLog(LlmProvidersApiServiceImpl.class);
+    private static final Log log = LogFactory.getLog(AiServiceProvidersApiServiceImpl.class);
 
     /**
      * Adds a new LLMProvider to the system and returns a response indicating the result.
@@ -66,27 +68,29 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
      * @param configurations           The configurations for the LLMProvider.
      * @param apiDefinitionInputStream InputStream containing the API definition.
      * @param apiDefinitionDetail      Attachment with additional details for the API definition.
-     * @param modelList                Comma separated list of models associated with the LLMProvider.
+     * @param modelProviders           Comma separated list of models associated with the LLMProvider.
      * @param messageContext           The MessageContext for the request.
      * @return Response indicating success or failure of the LLMProvider creation.
      * @throws APIManagementException If an error occurs while adding the LLMProvider.
      */
     @Override
-    public Response addLLMProvider(String name, String apiVersion, String description,
-                                   String configurations, InputStream apiDefinitionInputStream,
-                                   Attachment apiDefinitionDetail, String modelList, MessageContext messageContext)
+    public Response addAIServiceProvider(String name, String apiVersion, String description,
+                                         String multipleModelProviderSupport, String configurations,
+                                         InputStream apiDefinitionInputStream, Attachment apiDefinitionDetail,
+                                         String modelProviders, MessageContext messageContext)
             throws APIManagementException {
 
-        try {
-            List<String> vendorModelList = null;
-            // convert the 'modelList' json into a list
-            if (StringUtils.isNotEmpty(modelList)) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                vendorModelList = objectMapper.readValue(modelList, new TypeReference<List<String>>() {});
-            }
 
+        try {
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<ModelProviderDTO> llmModel = new ArrayList<>();
+            if (StringUtils.isNotEmpty(modelProviders)) {
+                llmModel = objectMapper.readValue(modelProviders, new TypeReference<List<ModelProviderDTO>>() {
+                });
+            }
             LLMProvider provider = buildLLMProvider(name, apiVersion, description, configurations,
-                    apiDefinitionInputStream, vendorModelList);
+                    apiDefinitionInputStream, llmModel, multipleModelProviderSupport);
             if (provider == null) {
                 log.warn("Invalid provider configurations");
                 return Response.status(Response.Status.BAD_REQUEST).build();
@@ -95,8 +99,8 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
             APIAdmin apiAdmin = new APIAdminImpl();
             LLMProvider addedLLMProvider = apiAdmin.addLLMProvider(organization, provider);
             if (addedLLMProvider != null) {
-                LLMProviderResponseDTO llmProviderResponseDTO =
-                        LLMProviderMappingUtil.fromProviderToProviderResponseDTO(addedLLMProvider);
+                AIServiceProviderResponseDTO aiServiceProviderResponseDTO =
+                        LLMProviderMappingUtil.fromProviderToAIServiceProviderResponseDTO(addedLLMProvider);
                 URI location = new URI(RestApiConstants.RESOURCE_PATH_LLM_PROVIDER + "/"
                         + addedLLMProvider.getId());
                 String info = "{'id':'" + addedLLMProvider.getId() + "'}";
@@ -106,7 +110,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
                         APIConstants.AuditLogConstants.UPDATED,
                         RestApiCommonUtil.getLoggedInUsername()
                 );
-                return Response.created(location).entity(llmProviderResponseDTO).build();
+                return Response.created(location).entity(aiServiceProviderResponseDTO).build();
             } else {
                 return Response.status(Response.Status.NO_CONTENT).build();
             }
@@ -132,7 +136,8 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
      * @throws IOException If an error occurs while reading the API definition from the InputStream.
      */
     private LLMProvider buildLLMProvider(String name, String apiVersion, String description, String configurations,
-            InputStream apiDefinitionInputStream, List<String> modelList)
+                                         InputStream apiDefinitionInputStream, List<ModelProviderDTO> modelList,
+                                         String multipleVendorSupport)
             throws IOException {
 
         String apiDefinition = getApiDefinitionFromStream(apiDefinitionInputStream);
@@ -146,9 +151,19 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
         provider.setBuiltInSupport(false);
         provider.setConfigurations(configurations);
         provider.setApiDefinition(apiDefinition);
-        List<LLMModel> models = new ArrayList<>();
-        models.add(new LLMModel(name,modelList));
-        provider.setModelList(models);
+        if (StringUtils.isNotEmpty(multipleVendorSupport)) {
+            provider.setMultipleVendorSupport(Boolean.parseBoolean(multipleVendorSupport));
+        }
+        List<LLMModel> llmModels = new ArrayList<>();
+        if (modelList != null) {
+            for (ModelProviderDTO modelDTO : modelList) {
+                if (modelDTO != null && modelDTO.getName() != null && modelDTO.getModels() != null) {
+                    // Ensure that the modelDTO has valid vendor and values before adding
+                    llmModels.add(new LLMModel(modelDTO.getName(), modelDTO.getModels()));
+                }
+            }
+        }
+        provider.setModelList(llmModels);
 
         return provider;
     }
@@ -156,25 +171,25 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
     /**
      * Deletes a LLM provider by its ID.
      *
-     * @param llmProviderId  The ID of the LLM provider to be deleted.
-     * @param messageContext The message context containing necessary information for the operation.
+     * @param aiServiceProviderId The ID of the LLM provider to be deleted.
+     * @param messageContext      The message context containing necessary information for the operation.
      * @return A Response object indicating the result of the delete operation.
      * @throws APIManagementException If an error occurs while deleting the LLM provider.
      */
     @Override
-    public Response deleteLLMProvider(String llmProviderId, MessageContext messageContext)
+    public Response deleteAIServiceProvider(String aiServiceProviderId, MessageContext messageContext)
             throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        LLMProvider retrievedProvider = apiAdmin.getLLMProvider(organization, llmProviderId);
+        LLMProvider retrievedProvider = apiAdmin.getLLMProvider(organization, aiServiceProviderId);
         if (retrievedProvider == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
         String deletedLLMProviderId = apiAdmin
                 .deleteLLMProvider(organization, retrievedProvider, false);
         if (deletedLLMProviderId != null) {
-            String info = String.format("{\"id\":\"%s\"}", llmProviderId);
+            String info = String.format("{\"id\":\"%s\"}", aiServiceProviderId);
             APIUtil.logAuditMessage(
                     org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.LLM_PROVIDER,
                     info,
@@ -195,52 +210,55 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
      * @throws APIManagementException If an error occurs while retrieving the LLM providers.
      */
     @Override
-    public Response getLLMProviders(MessageContext messageContext) throws APIManagementException {
+    public Response getAIServiceProviders(MessageContext messageContext) throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
         List<LLMProvider> LLMProviderList = apiAdmin.getLLMProviders(
                 organization, null, null, null);
-        LLMProviderSummaryResponseListDTO providerListDTO =
-                LLMProviderMappingUtil.fromProviderSummaryListToProviderSummaryListDTO(LLMProviderList);
+        AIServiceProviderSummaryResponseListDTO providerListDTO =
+                LLMProviderMappingUtil.fromProviderSummaryListToAIServiceProviderSummaryListDTO(LLMProviderList);
         return Response.ok().entity(providerListDTO).build();
     }
 
     /**
      * Updates an existing LLM Provider.
      *
-     * @param llmProviderId            The ID of the LLM Provider to update.
+     * @param aiServiceProviderId            The ID of the LLM Provider to update.
      * @param name                     The name of the provider (unused in logic).
      * @param apiVersion               The API version of the provider (unused in logic).
      * @param description              The description of the provider.
+     * @param multipleModelProviderSupport    Whether the provider supports multiple vendors (unused in logic).
      * @param configurations           The configurations of the provider.
      * @param apiDefinitionInputStream The InputStream for the API definition.
      * @param apiDefinitionDetail      The attachment containing API definition details.
-     * @param modelList                Comma separated list of models associated with the LLMProvider.
+     * @param modelProviders           List of ModelProviderDTO objects representing the models.
      * @param messageContext           The message context for the request.
      * @return The response with the updated LLM Provider or an error message.
      * @throws APIManagementException If an error occurs while updating the provider.
      */
     @Override
-    public Response updateLLMProvider(String llmProviderId, String name, String apiVersion,
-                                      String description, String configurations, InputStream apiDefinitionInputStream,
-                                      Attachment apiDefinitionDetail, String modelList, MessageContext messageContext)
-            throws APIManagementException {
+    public Response updateAIServiceProvider(String aiServiceProviderId, String name, String apiVersion,
+                                            String description, String multipleModelProviderSupport,
+                                            String configurations, InputStream apiDefinitionInputStream,
+                                            Attachment apiDefinitionDetail, String modelProviders,
+                                            MessageContext messageContext) throws APIManagementException {
+
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            APIAdmin apiAdmin = new APIAdminImpl();
-            LLMProvider retrievedProvider = apiAdmin.getLLMProvider(organization, llmProviderId);
-
-            // convert the 'modelList' json into a list
-            List<String> vendorModelList = null;
-            if (StringUtils.isNotEmpty(modelList)) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                vendorModelList = objectMapper.readValue(modelList, new TypeReference<List<String>>() {});
+            ObjectMapper objectMapper = new ObjectMapper();
+            List<ModelProviderDTO> llmModel = new ArrayList<>();
+            if (StringUtils.isNotEmpty(modelProviders)) {
+                llmModel = objectMapper.readValue(modelProviders, new TypeReference<List<ModelProviderDTO>>() {
+                });
             }
+            APIAdmin apiAdmin = new APIAdminImpl();
+            LLMProvider retrievedProvider = apiAdmin.getLLMProvider(organization, aiServiceProviderId);
 
-            LLMProvider provider = buildUpdatedLLMProvider(retrievedProvider, llmProviderId, description,
-                    configurations, apiDefinitionInputStream, vendorModelList);
+            LLMProvider provider =
+                    buildUpdatedLLMProvider(retrievedProvider, aiServiceProviderId, description, configurations,
+                            apiDefinitionInputStream, llmModel);
 
             if (provider == null) {
                 log.warn("Invalid provider configurations");
@@ -250,18 +268,18 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
             LLMProvider updatedProvider = apiAdmin.updateLLMProvider(organization, provider);
 
             if (updatedProvider != null) {
-                LLMProviderResponseDTO llmProviderResponseDTO =
-                        LLMProviderMappingUtil.fromProviderToProviderResponseDTO(updatedProvider);
+                AIServiceProviderResponseDTO aiServiceProviderResponseDTO =
+                        LLMProviderMappingUtil.fromProviderToAIServiceProviderResponseDTO(updatedProvider);
                 URI location = new URI(
                         RestApiConstants.RESOURCE_PATH_LLM_PROVIDER + "/" + updatedProvider.getId());
-                String info = "{'id':'" + llmProviderId + "'}";
+                String info = "{'id':'" + aiServiceProviderId + "'}";
                 APIUtil.logAuditMessage(
                         org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.LLM_PROVIDER,
                         info,
                         APIConstants.AuditLogConstants.UPDATED,
                         RestApiCommonUtil.getLoggedInUsername()
                 );
-                return Response.ok(location).entity(llmProviderResponseDTO).build();
+                return Response.ok(location).entity(aiServiceProviderResponseDTO).build();
             }
             return Response.status(Response.Status.NO_CONTENT).build();
 
@@ -278,7 +296,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
      * Builds and returns an updated LLMProvider based on the retrieved provider details.
      *
      * @param retrievedProvider        The existing LLMProvider to update.
-     * @param llmProviderId            The ID of the LLMProvider.
+     * @param aiServiceProviderId            The ID of the LLMProvider.
      * @param description              The new description to update, if provided.
      * @param configurations           The new configurations to update, if provided.
      * @param apiDefinitionInputStream InputStream containing the updated API definition, if any.
@@ -286,16 +304,17 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
      * @return An updated LLMProvider object with the modified or retained properties.
      * @throws IOException If an error occurs while reading the API definition from the InputStream.
      */
-    private LLMProvider buildUpdatedLLMProvider(LLMProvider retrievedProvider, String llmProviderId,
+    private LLMProvider buildUpdatedLLMProvider(LLMProvider retrievedProvider, String aiServiceProviderId,
                                                 String description, String configurations,
-                                                InputStream apiDefinitionInputStream, List<String> modelList)
+                                                InputStream apiDefinitionInputStream, List<ModelProviderDTO> modelList)
             throws IOException {
 
         LLMProvider provider = new LLMProvider();
-        provider.setId(llmProviderId);
+        provider.setId(aiServiceProviderId);
         provider.setName(retrievedProvider.getName());
         provider.setApiVersion(retrievedProvider.getApiVersion());
         provider.setBuiltInSupport(retrievedProvider.isBuiltInSupport());
+        provider.setMultipleVendorSupport(retrievedProvider.isMultipleVendorSupport());
         String apiDefinition = getApiDefinitionFromStream(apiDefinitionInputStream);
         boolean isBuiltIn = retrievedProvider.isBuiltInSupport();
 
@@ -308,9 +327,15 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
                 (description != null ? description : retrievedProvider.getDescription()));
         provider.setConfigurations(isBuiltIn ? retrievedProvider.getConfigurations() :
                 (configurations != null ? configurations : retrievedProvider.getConfigurations()));
-
-        provider.setModelList(Collections.singletonList(new LLMModel(provider.getName(), modelList)));
-
+        List<LLMModel> llmModels = new ArrayList<>();
+        if (modelList != null) {
+            for (ModelProviderDTO modelDTO : modelList) {
+                if (modelDTO != null && modelDTO.getName() != null && modelDTO.getModels() != null) {
+                    llmModels.add(new LLMModel(modelDTO.getName(), modelDTO.getModels()));
+                }
+            }
+        }
+        provider.setModelList(llmModels);
         return provider;
     }
 
@@ -335,20 +360,25 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
     /**
      * Retrieves a specific LLM provider by its ID.
      *
-     * @param llmProviderId  The ID of the LLM provider to be retrieved.
+     * @param aiServiceProviderId  The ID of the LLM provider to be retrieved.
      * @param messageContext The message context containing necessary information for the operation.
      * @return A Response object containing the LLM provider details.
      * @throws APIManagementException If an error occurs while retrieving the LLM provider.
      */
     @Override
-    public Response getLLMProvider(String llmProviderId, MessageContext messageContext)
+    public Response getAIServiceProvider(String aiServiceProviderId, MessageContext messageContext)
             throws APIManagementException {
 
         APIAdmin apiAdmin = new APIAdminImpl();
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        LLMProviderResponseDTO result =
-                LLMProviderMappingUtil.fromProviderToProviderResponseDTO(apiAdmin.getLLMProvider(organization,
-                        llmProviderId));
-        return Response.ok().entity(result).build();
+        try {
+            AIServiceProviderResponseDTO result =
+                    LLMProviderMappingUtil.fromProviderToAIServiceProviderResponseDTO(apiAdmin.getLLMProvider(organization,
+                            aiServiceProviderId));
+            return Response.ok().entity(result).build();
+        } catch (JsonProcessingException e) {
+            throw new APIManagementException("Error while converting LLM Provider to DTO", e,
+                    ExceptionCodes.INTERNAL_ERROR);
+        }
     }
 }

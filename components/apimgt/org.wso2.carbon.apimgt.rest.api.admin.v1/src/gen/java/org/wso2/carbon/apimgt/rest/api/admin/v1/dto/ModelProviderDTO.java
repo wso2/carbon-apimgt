@@ -1,4 +1,4 @@
-package org.wso2.carbon.apimgt.rest.api.publisher.v1.dto;
+package org.wso2.carbon.apimgt.rest.api.admin.v1.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -20,14 +20,14 @@ import javax.validation.Valid;
 
 
 
-public class LLMModelDTO   {
+public class ModelProviderDTO   {
   
     private List<String> models = new ArrayList<String>();
-    private String vendor = null;
+    private String name = null;
 
   /**
    **/
-  public LLMModelDTO models(List<String> models) {
+  public ModelProviderDTO models(List<String> models) {
     this.models = models;
     return this;
   }
@@ -44,19 +44,20 @@ public class LLMModelDTO   {
 
   /**
    **/
-  public LLMModelDTO vendor(String vendor) {
-    this.vendor = vendor;
+  public ModelProviderDTO name(String name) {
+    this.name = name;
     return this;
   }
 
   
-  @ApiModelProperty(example = "OpenAI", value = "")
-  @JsonProperty("vendor")
-  public String getVendor() {
-    return vendor;
+  @ApiModelProperty(example = "OpenAI", required = true, value = "")
+  @JsonProperty("name")
+  @NotNull
+  public String getName() {
+    return name;
   }
-  public void setVendor(String vendor) {
-    this.vendor = vendor;
+  public void setName(String name) {
+    this.name = name;
   }
 
 
@@ -68,23 +69,23 @@ public class LLMModelDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    LLMModelDTO llMModel = (LLMModelDTO) o;
-    return Objects.equals(models, llMModel.models) &&
-        Objects.equals(vendor, llMModel.vendor);
+    ModelProviderDTO modelProvider = (ModelProviderDTO) o;
+    return Objects.equals(models, modelProvider.models) &&
+        Objects.equals(name, modelProvider.name);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(models, vendor);
+    return Objects.hash(models, name);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class LLMModelDTO {\n");
+    sb.append("class ModelProviderDTO {\n");
     
     sb.append("    models: ").append(toIndentedString(models)).append("\n");
-    sb.append("    vendor: ").append(toIndentedString(vendor)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("}");
     return sb.toString();
   }

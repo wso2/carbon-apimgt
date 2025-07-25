@@ -19,18 +19,19 @@ import javax.validation.Valid;
 
 
 
-public class LLMProviderRequestDTO   {
+public class AIServiceProviderRequestDTO   {
   
     private String name = null;
     private String apiVersion = null;
     private String description = null;
+    private String multitpleModelProviderSupport = "false";
     private String configurations = null;
     private File apiDefinition = null;
-    private String modelList = null;
+    private String modelProviders = null;
 
   /**
    **/
-  public LLMProviderRequestDTO name(String name) {
+  public AIServiceProviderRequestDTO name(String name) {
     this.name = name;
     return this;
   }
@@ -47,7 +48,7 @@ public class LLMProviderRequestDTO   {
 
   /**
    **/
-  public LLMProviderRequestDTO apiVersion(String apiVersion) {
+  public AIServiceProviderRequestDTO apiVersion(String apiVersion) {
     this.apiVersion = apiVersion;
     return this;
   }
@@ -64,7 +65,7 @@ public class LLMProviderRequestDTO   {
 
   /**
    **/
-  public LLMProviderRequestDTO description(String description) {
+  public AIServiceProviderRequestDTO description(String description) {
     this.description = description;
     return this;
   }
@@ -80,9 +81,27 @@ public class LLMProviderRequestDTO   {
   }
 
   /**
+   * Indicates whether the AI Service Provider supports multiple model providers. If true, the AI Service Provider can support multiple model providers. If false, the AI Service Provider supports only one model provider. 
+   **/
+  public AIServiceProviderRequestDTO multitpleModelProviderSupport(String multitpleModelProviderSupport) {
+    this.multitpleModelProviderSupport = multitpleModelProviderSupport;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "Indicates whether the AI Service Provider supports multiple model providers. If true, the AI Service Provider can support multiple model providers. If false, the AI Service Provider supports only one model provider. ")
+  @JsonProperty("multitpleModelProviderSupport")
+  public String getMultitpleModelProviderSupport() {
+    return multitpleModelProviderSupport;
+  }
+  public void setMultitpleModelProviderSupport(String multitpleModelProviderSupport) {
+    this.multitpleModelProviderSupport = multitpleModelProviderSupport;
+  }
+
+  /**
    * LLM Provider configurations
    **/
-  public LLMProviderRequestDTO configurations(String configurations) {
+  public AIServiceProviderRequestDTO configurations(String configurations) {
     this.configurations = configurations;
     return this;
   }
@@ -100,7 +119,7 @@ public class LLMProviderRequestDTO   {
   /**
    * OpenAPI specification
    **/
-  public LLMProviderRequestDTO apiDefinition(File apiDefinition) {
+  public AIServiceProviderRequestDTO apiDefinition(File apiDefinition) {
     this.apiDefinition = apiDefinition;
     return this;
   }
@@ -116,21 +135,20 @@ public class LLMProviderRequestDTO   {
   }
 
   /**
-   * List of models supported by the LLM Provider as a stringified JSON array
    **/
-  public LLMProviderRequestDTO modelList(String modelList) {
-    this.modelList = modelList;
+  public AIServiceProviderRequestDTO modelProviders(String modelProviders) {
+    this.modelProviders = modelProviders;
     return this;
   }
 
   
-  @ApiModelProperty(value = "List of models supported by the LLM Provider as a stringified JSON array")
-  @JsonProperty("modelList")
-  public String getModelList() {
-    return modelList;
+  @ApiModelProperty(value = "")
+  @JsonProperty("modelProviders")
+  public String getModelProviders() {
+    return modelProviders;
   }
-  public void setModelList(String modelList) {
-    this.modelList = modelList;
+  public void setModelProviders(String modelProviders) {
+    this.modelProviders = modelProviders;
   }
 
 
@@ -142,31 +160,33 @@ public class LLMProviderRequestDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    LLMProviderRequestDTO llMProviderRequest = (LLMProviderRequestDTO) o;
-    return Objects.equals(name, llMProviderRequest.name) &&
-        Objects.equals(apiVersion, llMProviderRequest.apiVersion) &&
-        Objects.equals(description, llMProviderRequest.description) &&
-        Objects.equals(configurations, llMProviderRequest.configurations) &&
-        Objects.equals(apiDefinition, llMProviderRequest.apiDefinition) &&
-        Objects.equals(modelList, llMProviderRequest.modelList);
+    AIServiceProviderRequestDTO aiServiceProviderRequest = (AIServiceProviderRequestDTO) o;
+    return Objects.equals(name, aiServiceProviderRequest.name) &&
+        Objects.equals(apiVersion, aiServiceProviderRequest.apiVersion) &&
+        Objects.equals(description, aiServiceProviderRequest.description) &&
+        Objects.equals(multitpleModelProviderSupport, aiServiceProviderRequest.multitpleModelProviderSupport) &&
+        Objects.equals(configurations, aiServiceProviderRequest.configurations) &&
+        Objects.equals(apiDefinition, aiServiceProviderRequest.apiDefinition) &&
+        Objects.equals(modelProviders, aiServiceProviderRequest.modelProviders);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, apiVersion, description, configurations, apiDefinition, modelList);
+    return Objects.hash(name, apiVersion, description, multitpleModelProviderSupport, configurations, apiDefinition, modelProviders);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class LLMProviderRequestDTO {\n");
+    sb.append("class AIServiceProviderRequestDTO {\n");
     
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
+    sb.append("    multitpleModelProviderSupport: ").append(toIndentedString(multitpleModelProviderSupport)).append("\n");
     sb.append("    configurations: ").append(toIndentedString(configurations)).append("\n");
     sb.append("    apiDefinition: ").append(toIndentedString(apiDefinition)).append("\n");
-    sb.append("    modelList: ").append(toIndentedString(modelList)).append("\n");
+    sb.append("    modelProviders: ").append(toIndentedString(modelProviders)).append("\n");
     sb.append("}");
     return sb.toString();
   }

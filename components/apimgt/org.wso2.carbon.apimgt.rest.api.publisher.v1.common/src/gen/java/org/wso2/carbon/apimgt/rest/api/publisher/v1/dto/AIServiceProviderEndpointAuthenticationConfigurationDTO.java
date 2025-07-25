@@ -18,7 +18,7 @@ import javax.validation.Valid;
 
 
 
-public class LLMProviderEndpointAuthenticationConfigurationDTO   {
+public class AIServiceProviderEndpointAuthenticationConfigurationDTO   {
   
     private Boolean enabled = false;
     private String type = null;
@@ -27,7 +27,7 @@ public class LLMProviderEndpointAuthenticationConfigurationDTO   {
   /**
    * Whether the authentication configuration is enabled or not
    **/
-  public LLMProviderEndpointAuthenticationConfigurationDTO enabled(Boolean enabled) {
+  public AIServiceProviderEndpointAuthenticationConfigurationDTO enabled(Boolean enabled) {
     this.enabled = enabled;
     return this;
   }
@@ -45,7 +45,7 @@ public class LLMProviderEndpointAuthenticationConfigurationDTO   {
   /**
    * Type of the authentication configuration
    **/
-  public LLMProviderEndpointAuthenticationConfigurationDTO type(String type) {
+  public AIServiceProviderEndpointAuthenticationConfigurationDTO type(String type) {
     this.type = type;
     return this;
   }
@@ -63,7 +63,7 @@ public class LLMProviderEndpointAuthenticationConfigurationDTO   {
   /**
    * Parameters required for the authentication configuration. The parameters are different based on the type of the authentication configuration. 
    **/
-  public LLMProviderEndpointAuthenticationConfigurationDTO parameters(Object parameters) {
+  public AIServiceProviderEndpointAuthenticationConfigurationDTO parameters(Object parameters) {
     this.parameters = parameters;
     return this;
   }
@@ -88,10 +88,10 @@ public class LLMProviderEndpointAuthenticationConfigurationDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    LLMProviderEndpointAuthenticationConfigurationDTO llMProviderEndpointAuthenticationConfiguration = (LLMProviderEndpointAuthenticationConfigurationDTO) o;
-    return Objects.equals(enabled, llMProviderEndpointAuthenticationConfiguration.enabled) &&
-        Objects.equals(type, llMProviderEndpointAuthenticationConfiguration.type) &&
-        Objects.equals(parameters, llMProviderEndpointAuthenticationConfiguration.parameters);
+    AIServiceProviderEndpointAuthenticationConfigurationDTO aiServiceProviderEndpointAuthenticationConfiguration = (AIServiceProviderEndpointAuthenticationConfigurationDTO) o;
+    return Objects.equals(enabled, aiServiceProviderEndpointAuthenticationConfiguration.enabled) &&
+        Objects.equals(type, aiServiceProviderEndpointAuthenticationConfiguration.type) &&
+        Objects.equals(parameters, aiServiceProviderEndpointAuthenticationConfiguration.parameters);
   }
 
   @Override
@@ -102,7 +102,7 @@ public class LLMProviderEndpointAuthenticationConfigurationDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class LLMProviderEndpointAuthenticationConfigurationDTO {\n");
+    sb.append("class AIServiceProviderEndpointAuthenticationConfigurationDTO {\n");
     
     sb.append("    enabled: ").append(toIndentedString(enabled)).append("\n");
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
