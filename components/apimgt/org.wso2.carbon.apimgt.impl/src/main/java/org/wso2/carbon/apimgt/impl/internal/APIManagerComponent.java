@@ -317,6 +317,7 @@ public class APIManagerComponent {
             CacheProvider.createGatewayBasicAuthResourceCache();
             CacheProvider.createGatewayUsernameCache();
             CacheProvider.createIntrospectionCache();
+            CacheProvider.createUserSchemaCache();
             if(configuration.isJWTClaimCacheEnabled()){
                 CacheProvider.createJWTClaimCache();
             }
