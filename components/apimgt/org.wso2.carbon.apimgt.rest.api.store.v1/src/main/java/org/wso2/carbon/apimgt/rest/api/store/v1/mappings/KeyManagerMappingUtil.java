@@ -108,7 +108,7 @@ public class KeyManagerMappingUtil {
         }
         keyManagerInfoDTO.setAdditionalProperties(additionalProperties);
         keyManagerInfoDTO
-                .setApplicationConfiguration(fromKeyManagerConfigurationDto(keyManagerConfigurationDTO.getType()));
+                .setApplicationConfiguration(fromKeyManagerConfigurationDto(keyManagerConfigurationDTO));
         return keyManagerInfoDTO;
     }
 
@@ -130,26 +130,38 @@ public class KeyManagerMappingUtil {
         return keyManagerListDTO;
     }
 
-    private static List<KeyManagerApplicationConfigurationDTO> fromKeyManagerConfigurationDto(String type) {
+    private static List<KeyManagerApplicationConfigurationDTO> fromKeyManagerConfigurationDto(
+            KeyManagerConfigurationDTO dto) {
 
         List<KeyManagerApplicationConfigurationDTO> keyManagerApplicationConfigurationDTOS = new ArrayList<>();
+        String type = dto.getType();
         KeyManagerConnectorConfiguration keyManagerConnectorConfiguration =
                 APIUtil.getKeyManagerConnectorConfigurationsByConnectorType(type);
         if (keyManagerConnectorConfiguration != null &&
                 keyManagerConnectorConfiguration.getApplicationConfigurations() != null) {
+            boolean enableApplicationScopes = false;
+            Object enableApplicationScopesKM =
+                    dto.getAdditionalProperties().get(APIConstants.KeyManager.ENABLE_APPLICATION_SCOPES);
+            if (enableApplicationScopesKM instanceof Boolean) {
+                enableApplicationScopes = (boolean) enableApplicationScopesKM;
+            }
             for (ConfigurationDto configurationDto : keyManagerConnectorConfiguration.getApplicationConfigurations()) {
                 KeyManagerApplicationConfigurationDTO keyManagerApplicationConfigurationDTO =
                         new KeyManagerApplicationConfigurationDTO();
-                keyManagerApplicationConfigurationDTO.setName(configurationDto.getName());
-                keyManagerApplicationConfigurationDTO.setLabel(configurationDto.getLabel());
-                keyManagerApplicationConfigurationDTO.setType(configurationDto.getType());
-                keyManagerApplicationConfigurationDTO.setRequired(configurationDto.isRequired());
-                keyManagerApplicationConfigurationDTO.setMask(configurationDto.isMask());
-                keyManagerApplicationConfigurationDTO.setMultiple(configurationDto.isMultiple());
-                keyManagerApplicationConfigurationDTO.setTooltip(configurationDto.getTooltip());
-                keyManagerApplicationConfigurationDTO.setDefault(configurationDto.getDefaultValue());
-                keyManagerApplicationConfigurationDTO.setValues(configurationDto.getValues());
-                keyManagerApplicationConfigurationDTOS.add(keyManagerApplicationConfigurationDTO);
+                boolean applicationScopesCheck = !configurationDto.getName()
+                        .equals(APIConstants.KeyManager.APPLICATION_SCOPES) || enableApplicationScopes;
+                if (applicationScopesCheck) {
+                    keyManagerApplicationConfigurationDTO.setName(configurationDto.getName());
+                    keyManagerApplicationConfigurationDTO.setLabel(configurationDto.getLabel());
+                    keyManagerApplicationConfigurationDTO.setType(configurationDto.getType());
+                    keyManagerApplicationConfigurationDTO.setRequired(configurationDto.isRequired());
+                    keyManagerApplicationConfigurationDTO.setMask(configurationDto.isMask());
+                    keyManagerApplicationConfigurationDTO.setMultiple(configurationDto.isMultiple());
+                    keyManagerApplicationConfigurationDTO.setTooltip(configurationDto.getTooltip());
+                    keyManagerApplicationConfigurationDTO.setDefault(configurationDto.getDefaultValue());
+                    keyManagerApplicationConfigurationDTO.setValues(configurationDto.getValues());
+                    keyManagerApplicationConfigurationDTOS.add(keyManagerApplicationConfigurationDTO);
+                }
             }
         }
         return keyManagerApplicationConfigurationDTOS;
