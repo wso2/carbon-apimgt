@@ -815,6 +815,8 @@ public final class APIConstants {
     public static final String KEY_MANAGER_TOKEN_CACHE = CACHE_CONFIGS + "EnableKeyManagerTokenCache";
     public static final String TOKEN_CACHE_EXPIRY = CACHE_CONFIGS + "TokenCacheExpiry";
     public static final String REST_API_TOKEN_CACHE_ENABLED = CACHE_CONFIGS + "EnableRESTAPITokenCache";
+    public static final String USER_SCHEMA_CACHE_ENABLED = CACHE_CONFIGS + "UserSchemaCacheEnabled";
+    public static final String USER_SCHEMA_CACHE_EXPIRY = CACHE_CONFIGS + "UserSchemaCacheExpiry";
     public static final String REST_API_TOKEN_CACHE_EXPIRY = CACHE_CONFIGS + "RESTAPITokenCacheExpiry";
     public static final String REST_API_CACHE_CONTROL_HEADERS_ENABLED = CACHE_CONFIGS
             + "EnableRESTAPICacheControlHeaders";
@@ -1206,6 +1208,7 @@ public final class APIConstants {
     public static final String REST_API_TOKEN_CACHE_NAME = "RESTAPITokenCache";
     public static final String REST_API_INVALID_TOKEN_CACHE_NAME = "RESTAPIInvalidTokenCache";
     public static final String GATEWAY_JWT_TOKEN_CACHE = "GatewayJWTTokenCache";
+    public static final String USER_SCHEMA_CACHE = "UserSchemaCache";
 
     public static final String KEY_CACHE_NAME = "keyCache";
     public static final String API_CONTEXT_CACHE = "apiContextCache";

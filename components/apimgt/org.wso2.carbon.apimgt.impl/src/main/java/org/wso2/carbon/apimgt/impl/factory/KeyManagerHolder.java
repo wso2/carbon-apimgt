@@ -84,8 +84,12 @@ public class KeyManagerHolder {
                     .getAPIManagerConfigurationService().getAPIManagerConfiguration();
             String defaultKeyManagerType = apiManagerConfiguration
                     .getFirstProperty(APIConstants.DEFAULT_KEY_MANAGER_TYPE);
+            boolean isUserSchemaCacheEnabled = Boolean.parseBoolean(
+                    apiManagerConfiguration.getFirstProperty(APIConstants.USER_SCHEMA_CACHE_ENABLED));
             KeyManagerConnectorConfiguration keyManagerConnectorConfiguration = ServiceReferenceHolder.getInstance()
                     .getKeyManagerConnectorConfiguration(type);
+            keyManagerConfiguration.addParameter(APIConstants.USER_SCHEMA_CACHE_ENABLED,
+                    isUserSchemaCacheEnabled);
             if (keyManagerConnectorConfiguration != null) {
                 if (StringUtils.isNotEmpty(keyManagerConnectorConfiguration.getImplementation())) {
                     try {

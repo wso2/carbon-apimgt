@@ -108,6 +108,16 @@ public class CacheProvider {
         return getCache(APIConstants.GATEWAY_JWT_TOKEN_CACHE);
     }
 
+    /**
+     * @return User Schema Cache
+     */
+    public static Cache getUserSchemaCache() {
+        return getCache(APIConstants.USER_SCHEMA_CACHE);
+    }
+
+    /**
+     * @return Gateway JWT Claim Cache
+     */
     public static Cache getJWTClaimCache() {
         return getCache(APIConstants.CLAIMS_APIM_CACHE);
     }
@@ -513,6 +523,23 @@ public class CacheProvider {
     }
 
     /**
+     * Create and return the Schema Cache for Gateway JWT Tokens
+     */
+    public static Cache createUserSchemaCache() {
+
+        String userSchemaCacheExpiry =
+                getApiManagerConfiguration().getFirstProperty(APIConstants.USER_SCHEMA_CACHE_EXPIRY);
+        if (userSchemaCacheExpiry != null) {
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.USER_SCHEMA_CACHE,
+                    Long.parseLong(userSchemaCacheExpiry), Long.parseLong(userSchemaCacheExpiry));
+        } else {
+            long defaultCacheTimeout = getDefaultCacheTimeout();
+            return getCache(APIConstants.API_MANAGER_CACHE_MANAGER, APIConstants.USER_SCHEMA_CACHE,
+                    defaultCacheTimeout, defaultCacheTimeout);
+        }
+    }
+
+    /**
      * Create and return the JWT Claim Cache
      */
     public static Cache createJWTClaimCache() {
@@ -587,6 +614,8 @@ public class CacheProvider {
                 createRESTAPIInvalidTokenCache().getName());
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
                 getGatewayJWTTokenCache().getName());
+        Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
+                getUserSchemaCache().getName());
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
                 getGatewayApiKeyCache().getName());
         Caching.getCacheManager(APIConstants.API_MANAGER_CACHE_MANAGER).removeCache(CacheProvider.
