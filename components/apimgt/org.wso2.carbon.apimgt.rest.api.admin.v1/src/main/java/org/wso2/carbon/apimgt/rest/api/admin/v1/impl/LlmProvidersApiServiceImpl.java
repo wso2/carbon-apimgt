@@ -20,12 +20,14 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1.impl;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Collections;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIAdmin;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.LLMModel;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -35,7 +37,6 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.LlmProvidersApiService;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
-import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.LLMProviderSummaryResponseListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.LLMProviderMappingUtil;
@@ -48,7 +49,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.io.InputStream;
 import javax.ws.rs.core.Response;
@@ -146,7 +146,9 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
         provider.setBuiltInSupport(false);
         provider.setConfigurations(configurations);
         provider.setApiDefinition(apiDefinition);
-        provider.setModelList(modelList);
+        List<LLMModel> models = new ArrayList<>();
+        models.add(new LLMModel(name,modelList));
+        provider.setModelList(models);
 
         return provider;
     }
@@ -307,7 +309,7 @@ public class LlmProvidersApiServiceImpl implements LlmProvidersApiService {
         provider.setConfigurations(isBuiltIn ? retrievedProvider.getConfigurations() :
                 (configurations != null ? configurations : retrievedProvider.getConfigurations()));
 
-        provider.setModelList(modelList != null ? modelList : new ArrayList<>());
+        provider.setModelList(Collections.singletonList(new LLMModel(provider.getName(), modelList)));
 
         return provider;
     }

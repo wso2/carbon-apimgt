@@ -16,7 +16,11 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.impl;
 
+import org.wso2.carbon.apimgt.api.model.LLMModel;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AIServiceProviderResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AIServiceProviderSummaryResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AIServiceProviderSummaryResponseListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LLMProviderResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LLMProviderSummaryResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LLMProviderSummaryResponseListDTO;
@@ -24,6 +28,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LLMProviderSummaryRespon
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ModelProviderDTO;
 
 public class LLMProviderMappingUtil {
 
@@ -71,12 +76,34 @@ public class LLMProviderMappingUtil {
     }
 
     /**
+     * Converts an LLMProvider object to an LLMProviderResponseDTO object.
+     *
+     * @param llmProvider The LLMProvider object to be converted.
+     * @return An LLMProviderResponseDTO containing detailed information about the LLMProvider object.
+     */
+    public static AIServiceProviderResponseDTO fromProviderToAIServiceProviderResponseDTO(LLMProvider llmProvider) {
+
+        if (llmProvider == null) {
+            return null;
+        }
+        AIServiceProviderResponseDTO aiServiceProviderResponseDTO = new AIServiceProviderResponseDTO();
+        aiServiceProviderResponseDTO.setId(llmProvider.getId());
+        aiServiceProviderResponseDTO.setName(llmProvider.getName());
+        aiServiceProviderResponseDTO.setApiVersion(llmProvider.getApiVersion());
+        aiServiceProviderResponseDTO.setDescription(llmProvider.getDescription());
+        aiServiceProviderResponseDTO.setApiDefinition(llmProvider.getApiDefinition());
+        aiServiceProviderResponseDTO.setBuiltInSupport(llmProvider.isBuiltInSupport());
+        aiServiceProviderResponseDTO.setConfigurations(llmProvider.getConfigurations());
+        return aiServiceProviderResponseDTO;
+    }
+
+    /**
      * Converts an LLMProvider object to an LLMProviderSummaryResponseDTO object.
      *
      * @param llmProvider The LLMProvider object to be converted.
      * @return An LLMProviderSummaryResponseDTO containing summary information about the LLMProvider object.
      */
-    public static LLMProviderSummaryResponseDTO fromProviderToProviderSummaryDTO(LLMProvider llmProvider) {
+    private static LLMProviderSummaryResponseDTO fromProviderToProviderSummaryDTO(LLMProvider llmProvider) {
 
         if (llmProvider == null) {
             return null;
@@ -91,4 +118,48 @@ public class LLMProviderMappingUtil {
         return llmProviderSummaryDTO;
     }
 
+    /**
+     * Converts an LLMProvider object to an LLMProviderSummaryResponseDTO object.
+     *
+     * @param llmProvider The LLMProvider object to be converted.
+     * @return An LLMProviderSummaryResponseDTO containing summary information about the LLMProvider object.
+     */
+    private static AIServiceProviderSummaryResponseDTO fromProviderToAIServiceProviderSummaryDTO(LLMProvider llmProvider) {
+
+        if (llmProvider == null) {
+            return null;
+        }
+
+        AIServiceProviderSummaryResponseDTO aiServiceProviderSummaryResponseDTO = new AIServiceProviderSummaryResponseDTO();
+        aiServiceProviderSummaryResponseDTO.setId(llmProvider.getId());
+        aiServiceProviderSummaryResponseDTO.setName(llmProvider.getName());
+        aiServiceProviderSummaryResponseDTO.setApiVersion(llmProvider.getApiVersion());
+        aiServiceProviderSummaryResponseDTO.setBuiltInSupport(llmProvider.isBuiltInSupport());
+        aiServiceProviderSummaryResponseDTO.setDescription(llmProvider.getDescription());
+        return aiServiceProviderSummaryResponseDTO;
+    }
+
+    public static List<ModelProviderDTO> fromLLMModelToModelProviderList(List<LLMModel> modelList) {
+        if (modelList == null) {
+            return new ArrayList<>();
+        }
+        return modelList.stream().map(model -> {
+            return new ModelProviderDTO().name(model.getModelVendor()).models(model.getValues());
+        }).collect(Collectors.toList());
+    }
+
+    public static AIServiceProviderSummaryResponseListDTO fromProviderSummaryListToAIServiceProviderSummaryResponseListDTO(
+            List<LLMProvider> llmProviderList) {
+        AIServiceProviderSummaryResponseListDTO providerListDTO = new AIServiceProviderSummaryResponseListDTO();
+        if (llmProviderList != null) {
+            providerListDTO.setCount(llmProviderList.size());
+            providerListDTO.setList(
+                    llmProviderList.stream().map(LLMProviderMappingUtil::fromProviderToAIServiceProviderSummaryDTO)
+                            .collect(Collectors.toList()));
+        } else {
+            providerListDTO.setCount(0);
+            providerListDTO.setList(new ArrayList<>());
+        }
+        return providerListDTO;
+    }
 }

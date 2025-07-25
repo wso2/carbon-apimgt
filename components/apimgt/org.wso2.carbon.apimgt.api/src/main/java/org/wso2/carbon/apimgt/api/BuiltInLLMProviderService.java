@@ -20,6 +20,11 @@ package org.wso2.carbon.apimgt.api;
 
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
 import java.io.IOException;
@@ -34,13 +39,11 @@ import java.util.Map;
  */
 public abstract class BuiltInLLMProviderService implements LLMProviderService {
 
-    @Override
-    public Map<String, String> getResponseMetadata(String payload, Map<String, String> headers,
-                                                   Map<String, String> queryParams,
-                                                   List<LLMProviderMetadata> metadataList,
-                                                   Map<String, String> metadataMap)
-            throws APIManagementException {
 
+    @Override
+    public Map<String, String> getResponseMetadata(LLMResponseMetaData responseMetadata,
+                                                   List<LLMProviderMetadata> metadataList,
+                                                   Map<String, String> metadataMap) throws APIManagementException {
         if (metadataList == null || metadataList.isEmpty()) {
             log.debug("Metadata list is null or empty.");
             return metadataMap;
@@ -51,15 +54,28 @@ public abstract class BuiltInLLMProviderService implements LLMProviderService {
                 String inputSource = metadata.getInputSource();
                 String attributeIdentifier = metadata.getAttributeIdentifier();
                 if (APIConstants.AIAPIConstants.INPUT_SOURCE_PAYLOAD.equalsIgnoreCase(inputSource)) {
-                    if (payload != null) {
+                    if (responseMetadata.getPayload() != null) {
                         try {
-                            String extractedValue = JsonPath.read(payload, attributeIdentifier).toString();
+                            String extractedValue =
+                                    JsonPath.read(responseMetadata.getPayload(), attributeIdentifier).toString();
                             metadataMap.put(attributeName, extractedValue);
                         } catch (PathNotFoundException e) {
                             log.debug("Attribute not found in the payload for identifier: " + attributeIdentifier);
                         }
                     } else {
                         log.debug("Payload is null, cannot extract metadata for attribute: " + attributeName);
+                    }
+                } else if (APIConstants.AIAPIConstants.INPUT_SOURCE_PATH.equalsIgnoreCase(inputSource)) {
+                    if (StringUtils.isNotEmpty(responseMetadata.getRequestPath())) {
+                        Pattern pattern = Pattern.compile(attributeIdentifier);
+                        Matcher matcher = pattern.matcher(
+                                URLDecoder.decode(responseMetadata.getRequestPath(), StandardCharsets.UTF_8));
+                        String matchedValue = matcher.find() ? matcher.group(0) : null;
+                        if (matchedValue != null) {
+                            metadataMap.put(attributeName, matchedValue);
+                        } else {
+                            log.debug("No match found for the path identifier: " + attributeIdentifier);
+                        }
                     }
                 } else {
                     log.debug("Unsupported input source: " + inputSource + " for attribute: " + attributeName);

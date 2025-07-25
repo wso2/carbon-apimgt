@@ -18,7 +18,11 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import org.osgi.service.component.annotations.Component;
+import org.wso2.carbon.apimgt.api.model.LLMModel;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 
 import java.io.File;
@@ -58,6 +62,7 @@ public class MistralAiLLMProviderService extends BuiltInLLMProviderService {
                     .LLM_PROVIDER_SERVICE_MISTRALAI_API_DEFINITION_FILE_NAME));
 
             LLMProviderConfiguration llmProviderConfiguration = new LLMProviderConfiguration();
+            llmProviderConfiguration.setAuthenticationConfiguration(getLlmProviderAuthenticationConfiguration());
             llmProviderConfiguration.setAuthHeader(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_MISTRALAI_KEY);
             llmProviderConfiguration.setAuthQueryParam(null);
             llmProviderConfiguration.setConnectorType(this.getType());
@@ -90,10 +95,9 @@ public class MistralAiLLMProviderService extends BuiltInLLMProviderService {
             llmProviderConfiguration.setMetadata(llmProviderMetadata);
 
             // Set default model List
-            List<String> modelList = new ArrayList<>();
-            modelList.add("mistral-small-latest");
-            modelList.add("mistral-medium");
-            modelList.add("open-mistral-7b");
+            List<LLMModel> modelList = new ArrayList<>();
+            modelList.add(new LLMModel(APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_MISTRALAI_NAME,
+                    Arrays.asList("mistral-small-latest", "mistral-medium", "open-mistral-7b")));
             llmProvider.setModelList(modelList);
 
             llmProvider.setConfigurations(llmProviderConfiguration.toJsonString());
@@ -101,5 +105,18 @@ public class MistralAiLLMProviderService extends BuiltInLLMProviderService {
         } catch (Exception e) {
             throw new APIManagementException("Error occurred when registering LLM Provider:" + this.getType());
         }
+    }
+    private static LLMProviderAuthenticationConfiguration getLlmProviderAuthenticationConfiguration() {
+        LLMProviderAuthenticationConfiguration llmProviderAuthenticationConfiguration =
+                new LLMProviderAuthenticationConfiguration();
+        llmProviderAuthenticationConfiguration.setType(APIConstants.AIAPIConstants.API_KEY_AUTHENTICATION_TYPE);
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put(APIConstants.AIAPIConstants.API_KEY_HEADER_NAME,
+                APIConstants.AIAPIConstants.LLM_PROVIDER_SERVICE_MISTRALAI_KEY);
+        parameters.put(APIConstants.AIAPIConstants.API_KEY_HEADER_ENABLED, true);
+        parameters.put(APIConstants.AIAPIConstants.API_KEY_QUERY_PARAMETER_ENABLED, false);
+        llmProviderAuthenticationConfiguration.setParameters(parameters);
+        llmProviderAuthenticationConfiguration.setEnabled(true);
+        return llmProviderAuthenticationConfiguration;
     }
 }
