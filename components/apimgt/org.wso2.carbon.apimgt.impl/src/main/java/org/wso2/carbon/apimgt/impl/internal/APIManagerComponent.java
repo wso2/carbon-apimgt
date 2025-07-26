@@ -51,6 +51,7 @@ import org.wso2.carbon.apimgt.common.gateway.http.BrowserHostnameVerifier;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.eventing.EventPublisherException;
 import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -1086,10 +1087,19 @@ public class APIManagerComponent {
             Map<String, Environment> environments = APIUtil.getEnvironments(organization);
             FederatedAPIDiscoveryService federatedAPIDiscoveryService = ServiceReferenceHolder
                     .getInstance().getFederatedAPIDiscoveryService();
+            APIAdminImpl apiAdmin = new APIAdminImpl();
 
             environments.forEach((name, environment) -> {
-                if (environment.getType().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
-                    federatedAPIDiscoveryService.scheduleDiscovery(environment, organization);
+                if (environment.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+                    try {
+                        Environment resolvedEnvironment = apiAdmin.getEnvironmentWithoutPropertyMasking(organization,
+                                environment.getUuid());
+                        resolvedEnvironment = apiAdmin.decryptGatewayConfigurationValues(resolvedEnvironment);
+                        federatedAPIDiscoveryService.scheduleDiscovery(resolvedEnvironment, organization);
+                    } catch (APIManagementException e) {
+                        log.error("Error while scheduling API Discovery for environment: "
+                                + name + " in organization: " + organization, e);
+                    }
                 }
             });
 

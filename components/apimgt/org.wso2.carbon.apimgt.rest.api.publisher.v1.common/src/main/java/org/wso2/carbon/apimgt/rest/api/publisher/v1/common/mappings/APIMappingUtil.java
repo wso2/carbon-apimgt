@@ -1157,6 +1157,7 @@ public class APIMappingUtil {
         }
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
+        dto.setDisplayName(model.getDisplayName() != null ? model.getDisplayName() : model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
         String providerName = model.getId().getProviderName();
         dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
@@ -1614,7 +1615,7 @@ public class APIMappingUtil {
         // Set primary endpoints
         dto.setPrimaryProductionEndpointId(model.getPrimaryProductionEndpointId());
         dto.setPrimarySandboxEndpointId(model.getPrimarySandboxEndpointId());
-
+        dto.setInitiatedFromGateway(model.isInitiatedFromGateway());
         return dto;
     }
 

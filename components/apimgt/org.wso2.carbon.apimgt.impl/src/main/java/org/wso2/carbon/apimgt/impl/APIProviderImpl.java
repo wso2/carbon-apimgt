@@ -2853,9 +2853,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         WorkflowDTO wfDTO;
 
         for (APIRevision apiRevision : apiRevisionList) {
-            if (!apiRevision.getApiRevisionDeploymentList().isEmpty() && !isAPIInitiatedFromGateway) {
-                undeployAPIRevisionDeployment(apiUUID, apiRevision.getRevisionUUID(),
-                        apiRevision.getApiRevisionDeploymentList(), organization);
+            if (!apiRevision.getApiRevisionDeploymentList().isEmpty()) {
+                if (!isAPIInitiatedFromGateway) {
+                    undeployAPIRevisionDeployment(apiUUID, apiRevision.getRevisionUUID(),
+                            apiRevision.getApiRevisionDeploymentList(), organization);
+                } else {
+                    apiMgtDAO.removeAPIRevisionDeployment(apiRevision.getRevisionUUID(),
+                            apiRevision.getApiRevisionDeploymentList());
+                }
             }
             wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(apiRevision.getRevisionUUID(),
                     WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);

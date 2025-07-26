@@ -46,7 +46,10 @@ import java.util.zip.ZipOutputStream;
 
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.API_YAML_FILE_NAME;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.DEPLOYMENT_ENVIRONMENTS_FILE_NAME;
+import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.DEPLOYMENT_NAME;
+import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.SWAGGER_YAML_FILE_NAME;
+import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.TYPE_DEPLOYMENT_ENVIRONMENTS;
 
 public class FederatedGatewayUtil {
     private static Log log = LogFactory.getLog(FederatedGatewayUtil.class);
@@ -67,6 +70,7 @@ public class FederatedGatewayUtil {
         try {
             APIProvider provider = APIManagerFactory.getInstance().getAPIProvider(CarbonContext.
                     getThreadLocalCarbonContext().getUsername());
+            provider.deleteAPIRevisions(apiUUID, organization);
             provider.deleteAPI(apiUUID, organization);
             log.debug("Deleted API: " + apiUUID + " organization: " + organization + " from environment: "
                     + environment.getName());
@@ -104,12 +108,12 @@ public class FederatedGatewayUtil {
     public static String createDeploymentYaml(Environment environment) {
         List<Map<String, String>> deploymentEnvData = new ArrayList<>();
         Map<String, String> envEntry = new LinkedHashMap<>();
-        envEntry.put("displayOnDevportal", "true");
-        envEntry.put("deploymentEnvironment", environment.getName());
+        envEntry.put(DISPLAY_ON_DEVPORTAL_OPTION, "true");
+        envEntry.put(DEPLOYMENT_NAME, environment.getName());
         deploymentEnvData.add(envEntry);
 
         Map<String, Object> yamlRoot = new LinkedHashMap<>();
-        yamlRoot.put("type", "deployment_environments");
+        yamlRoot.put("type", TYPE_DEPLOYMENT_ENVIRONMENTS);
         yamlRoot.put("version", "v4.3.0");
         yamlRoot.put("data", deploymentEnvData);
 

@@ -64,7 +64,7 @@
                             <goal>p2-feature-gen</goal>
                         </goals>
                         <configuration>
-                            <id>org.wso2.carbon.apimgt.federated.gateway.feature</id>
+                            <id>org.wso2.carbon.apimgt.federated.gateway</id>
                             <propertiesFile>../feature.properties</propertiesFile>
                             <adviceFile>
                                 <properties>

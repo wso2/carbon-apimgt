@@ -74,6 +74,7 @@
                             org.wso2.carbon.apimgt.rest.api.publisher.v1.common.*;version="[9.0,10.0)",
                             *;resolution:=optional
                         </Import-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>

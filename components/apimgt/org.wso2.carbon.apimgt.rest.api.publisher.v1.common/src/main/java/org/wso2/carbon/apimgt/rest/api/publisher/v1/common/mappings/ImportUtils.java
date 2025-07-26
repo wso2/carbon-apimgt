@@ -133,7 +133,6 @@ import java.util.UUID;
 import javax.validation.constraints.NotNull;
 
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.API_NAME_DELIMITER;
-import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.INITIATED_FROM_GATEWAY_CONSTANT;
 
 /**
  * This class usesd to utility for Import API.
