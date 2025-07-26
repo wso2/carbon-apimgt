@@ -2877,10 +2877,6 @@ public final class APIConstants {
         public static final String USERNAME = "Username";
         public static final String PASSWORD = "Password";
 
-        public static final String IS7_AUTHENTICATION = "Authentication";
-        public static final String IS7_MTLS = "Mutual-TLS";
-        public static final String IS7_IDENTITY_USER = "IdentityUser";
-
         public static final String KM_ADMIN_AS_APP_OWNER = "km_admin_as_app_owner";
         public static final String SELF_VALIDATE_JWT = "self_validate_jwt";
         public static final String CLAIM_MAPPING = "claim_mappings";
@@ -3430,14 +3426,6 @@ public final class APIConstants {
     public static final String TENANT_SHARING_CONFIG_TYPE = "type";
     public static final String TENANT_SHARING_CONFIG_PROPERTY = "Property";
     public static final String TENANT_SHARING_CONFIG_PROPERTY_KEY = "name";
-
-    public static class IS7TenantSharingConfigs {
-        public static final String ENABLE_TENANT_SYNC = "enable_tenant_sync";
-        public static final String AUTO_CONFIGURE_KEY_MANAGER = "auto_configure_key_manager";
-        public static final String USERNAME = "username";
-        public static final String PASSWORD = "password";
-        public static final String IDENTITY_SERVER_BASE_URL = "identity_server_base_url";
-    }
 
     public static class TransactionCounter {
 
