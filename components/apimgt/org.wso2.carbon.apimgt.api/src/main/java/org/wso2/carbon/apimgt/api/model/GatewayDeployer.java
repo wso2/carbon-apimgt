@@ -20,7 +20,6 @@ package org.wso2.carbon.apimgt.api.model;
 
 import org.wso2.carbon.apimgt.api.APIManagementException;
 
-
 /**
  * This Interface is  providing functionality of external gateway specific core operations.
  * You can implement deploy/undeploy  API methods by implementing this interface.
@@ -77,4 +76,5 @@ public interface GatewayDeployer {
      * @return API api object
      */
     void transformAPI(API api) throws APIManagementException;
+
 }

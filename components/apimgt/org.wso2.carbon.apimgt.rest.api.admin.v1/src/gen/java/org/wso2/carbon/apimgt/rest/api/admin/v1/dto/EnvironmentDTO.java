@@ -33,7 +33,41 @@ public class EnvironmentDTO   {
     private String type = "hybrid";
     private String gatewayType = "Regular";
     private String description = null;
-    private Boolean isReadOnly = null;
+    private Boolean isReadOnly = false;
+
+    @XmlType(name="ModeEnum")
+    @XmlEnum(String.class)
+    public enum ModeEnum {
+        READ_ONLY("READ_ONLY"),
+        READ_WRITE("READ_WRITE"),
+        WRITE_ONLY("WRITE_ONLY");
+        private String value;
+
+        ModeEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static ModeEnum fromValue(String v) {
+            for (ModeEnum b : ModeEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private ModeEnum mode = ModeEnum.READ_WRITE;
+    private Integer apiDiscoveryScheduledWindow = 60;
     private List<VHostDTO> vhosts = new ArrayList<VHostDTO>();
     private List<GatewayEnvironmentProtocolURIDTO> endpointURIs = new ArrayList<GatewayEnvironmentProtocolURIDTO>();
     private List<AdditionalPropertyDTO> additionalProperties = new ArrayList<AdditionalPropertyDTO>();
@@ -177,6 +211,42 @@ public class EnvironmentDTO   {
   }
 
   /**
+   * The mode of the environment. This indicates whether the environment is in read-only or read-write mode. **READ_ONLY:** The environment is in read-only mode. API cannot be deployed, only discovery is possible. **READ_WRITE:** The environment is in read-write mode. APIs can be deployed and discovered. **WRITE_ONLY:** The environment is in write-only mode/ APIs only can be deployed. 
+   **/
+  public EnvironmentDTO mode(ModeEnum mode) {
+    this.mode = mode;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "READ_WRITE", value = "The mode of the environment. This indicates whether the environment is in read-only or read-write mode. **READ_ONLY:** The environment is in read-only mode. API cannot be deployed, only discovery is possible. **READ_WRITE:** The environment is in read-write mode. APIs can be deployed and discovered. **WRITE_ONLY:** The environment is in write-only mode/ APIs only can be deployed. ")
+  @JsonProperty("mode")
+  public ModeEnum getMode() {
+    return mode;
+  }
+  public void setMode(ModeEnum mode) {
+    this.mode = mode;
+  }
+
+  /**
+   * The time window in minutes to schedule the API discovery task. This is used to discover APIs from the API Gateway and update the API list in the environment. 
+   **/
+  public EnvironmentDTO apiDiscoveryScheduledWindow(Integer apiDiscoveryScheduledWindow) {
+    this.apiDiscoveryScheduledWindow = apiDiscoveryScheduledWindow;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "The time window in minutes to schedule the API discovery task. This is used to discover APIs from the API Gateway and update the API list in the environment. ")
+  @JsonProperty("apiDiscoveryScheduledWindow")
+  public Integer getApiDiscoveryScheduledWindow() {
+    return apiDiscoveryScheduledWindow;
+  }
+  public void setApiDiscoveryScheduledWindow(Integer apiDiscoveryScheduledWindow) {
+    this.apiDiscoveryScheduledWindow = apiDiscoveryScheduledWindow;
+  }
+
+  /**
    **/
   public EnvironmentDTO vhosts(List<VHostDTO> vhosts) {
     this.vhosts = vhosts;
@@ -267,6 +337,8 @@ public class EnvironmentDTO   {
         Objects.equals(gatewayType, environment.gatewayType) &&
         Objects.equals(description, environment.description) &&
         Objects.equals(isReadOnly, environment.isReadOnly) &&
+        Objects.equals(mode, environment.mode) &&
+        Objects.equals(apiDiscoveryScheduledWindow, environment.apiDiscoveryScheduledWindow) &&
         Objects.equals(vhosts, environment.vhosts) &&
         Objects.equals(endpointURIs, environment.endpointURIs) &&
         Objects.equals(additionalProperties, environment.additionalProperties) &&
@@ -275,7 +347,7 @@ public class EnvironmentDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, displayName, provider, type, gatewayType, description, isReadOnly, vhosts, endpointURIs, additionalProperties, permissions);
+    return Objects.hash(id, name, displayName, provider, type, gatewayType, description, isReadOnly, mode, apiDiscoveryScheduledWindow, vhosts, endpointURIs, additionalProperties, permissions);
   }
 
   @Override
@@ -291,6 +363,8 @@ public class EnvironmentDTO   {
     sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    isReadOnly: ").append(toIndentedString(isReadOnly)).append("\n");
+    sb.append("    mode: ").append(toIndentedString(mode)).append("\n");
+    sb.append("    apiDiscoveryScheduledWindow: ").append(toIndentedString(apiDiscoveryScheduledWindow)).append("\n");
     sb.append("    vhosts: ").append(toIndentedString(vhosts)).append("\n");
     sb.append("    endpointURIs: ").append(toIndentedString(endpointURIs)).append("\n");
     sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");

@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ *
+ * Copyright (c) 2025, WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -14,30 +15,24 @@
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
+ *
  */
 
-package org.wso2.carbon.apimgt.impl.dto;
+package org.wso2.carbon.apimgt.api.model;
 
-import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
+public enum GatewayMode {
+    READ_ONLY("READ_ONLY"),
+    READ_WRITE("READ_WRITE"),
+    WRITE_ONLY("WRITE_ONLY");
 
-public class GatewayDto {
-    private String name;
-    private GatewayDeployer gatewayDeployer;
+    private String mode;
 
-    public String getName() {
-        return name;
+    private GatewayMode(String mode) {
+        this.mode = mode;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public GatewayDeployer getGatewayDeployer() {
-        return gatewayDeployer;
-    }
-
-    public void setGatewayDeployer(GatewayDeployer gatewayDeployer) {
-        this.gatewayDeployer = gatewayDeployer;
+    public String getMode() {
+        return mode;
     }
 
 }

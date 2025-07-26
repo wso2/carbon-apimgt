@@ -1355,7 +1355,20 @@ public interface APIProvider extends APIManager {
      * @param organization           Identifier of an organization
      * @throws APIManagementException if failed to add APIRevision
      */
-    void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments, String organization) throws APIManagementException;
+    void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments,
+                           String organization) throws APIManagementException;
+
+    /**
+     * Adds a new APIRevisionDeployment to an existing API
+     *
+     * @param apiId                  API UUID
+     * @param apiRevisionId          API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization           Identifier of an organization
+     * @throws APIManagementException if failed to add APIRevision
+     */
+    void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments,
+                           String organization, boolean isInitiatedFromGateway) throws APIManagementException;
 
     /**
      * Adds a new DeployedAPIRevision to an existing API
@@ -2002,6 +2015,18 @@ public interface APIProvider extends APIManager {
     void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID, String revisionId,
                                    String environment);
 
+    /**
+     * Resume API revision deployment process
+     *
+     * @param apiId        API Id using for the revision deployment
+     * @param organization organization identifier
+     * @param revisionUUID revision UUID
+     * @param revisionId   revision number
+     * @param environment  environment the deployment is happening
+     */
+    void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID, String revisionId,
+                                   String environment, boolean isInitiatedFromGateway);
+
     /***
      * Cleanup pending or rejected revision workflows
      *
@@ -2175,7 +2200,7 @@ public interface APIProvider extends APIManager {
      * @param organization Organization
      * @param apiId        API ID
      * @param sequences    list of SOAPToRestSequence.
-     * @throws APIPersistenceException
+     * @throws APIManagementException
      */
     void updateSoapToRestSequences(String organization, String apiId, List<SOAPToRestSequence> sequences)
             throws APIManagementException;
@@ -2203,8 +2228,8 @@ public interface APIProvider extends APIManager {
      * 
      * Retrieves list of organizations available for the given parent organization.
      * 
-     * @param parentOrgId parent organization id
-     * @param tenantDomain super domain
+     * @param orgId parent organization id
+     * @param superOrganization super domain
      * @return organization list
      */
     List<OrganizationDetailsDTO> getOrganizations(String orgId, String superOrganization) throws APIManagementException;
@@ -2261,4 +2286,13 @@ public interface APIProvider extends APIManager {
      * @throws APIManagementException If a database error occurs.
      */
     Map<String, String> getApiThemes(String organization, String apiId) throws APIManagementException;
+
+    /**
+     * Checks whether the API is initiated from the gateway.
+     *
+     * @param apiUUID Unique identifier of the API
+     * @return true if the API is initiated from the gateway, false otherwise
+     * @throws APIManagementException if an error occurs while checking the API initiation
+     */
+    boolean isAPIInitiatedFromGateway(String apiUUID) throws APIManagementException;
 }

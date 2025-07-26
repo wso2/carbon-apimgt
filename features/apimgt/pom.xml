@@ -55,6 +55,7 @@
         <module>org.wso2.carbon.apimgt.persistence.feature</module>
         <module>org.wso2.carbon.apimgt.rest.api.service.catalog.feature</module>
         <module>org.wso2.carbon.apimgt.governance.feature</module>
+        <module>org.wso2.carbon.apimgt.federated.gateway.feature</module>
     </modules>
     <build>
         <plugins>
