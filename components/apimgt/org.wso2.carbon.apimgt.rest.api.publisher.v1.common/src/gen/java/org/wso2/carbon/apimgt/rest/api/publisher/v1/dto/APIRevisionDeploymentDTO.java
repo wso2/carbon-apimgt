@@ -59,6 +59,9 @@ return null;
     private Boolean displayOnDevportal = true;
     private java.util.Date deployedTime = null;
     private java.util.Date successDeployedTime = null;
+    private Integer liveGatewayCount = null;
+    private Integer deployedGatewayCount = null;
+    private Integer failedGatewayCount = null;
 
   /**
    **/
@@ -179,6 +182,60 @@ return null;
     this.successDeployedTime = successDeployedTime;
   }
 
+  /**
+   * The number of gateways that are currenty live in the gateway environment 
+   **/
+  public APIRevisionDeploymentDTO liveGatewayCount(Integer liveGatewayCount) {
+    this.liveGatewayCount = liveGatewayCount;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1", value = "The number of gateways that are currenty live in the gateway environment ")
+  @JsonProperty("liveGatewayCount")
+  public Integer getLiveGatewayCount() {
+    return liveGatewayCount;
+  }
+  public void setLiveGatewayCount(Integer liveGatewayCount) {
+    this.liveGatewayCount = liveGatewayCount;
+  }
+
+  /**
+   * The number of gateways in which the API revision is deployed in the gateway environment 
+   **/
+  public APIRevisionDeploymentDTO deployedGatewayCount(Integer deployedGatewayCount) {
+    this.deployedGatewayCount = deployedGatewayCount;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1", value = "The number of gateways in which the API revision is deployed in the gateway environment ")
+  @JsonProperty("deployedGatewayCount")
+  public Integer getDeployedGatewayCount() {
+    return deployedGatewayCount;
+  }
+  public void setDeployedGatewayCount(Integer deployedGatewayCount) {
+    this.deployedGatewayCount = deployedGatewayCount;
+  }
+
+  /**
+   * The number of gateways in which the API revision is deployed in the gateway environment 
+   **/
+  public APIRevisionDeploymentDTO failedGatewayCount(Integer failedGatewayCount) {
+    this.failedGatewayCount = failedGatewayCount;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1", value = "The number of gateways in which the API revision is deployed in the gateway environment ")
+  @JsonProperty("failedGatewayCount")
+  public Integer getFailedGatewayCount() {
+    return failedGatewayCount;
+  }
+  public void setFailedGatewayCount(Integer failedGatewayCount) {
+    this.failedGatewayCount = failedGatewayCount;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -195,12 +252,15 @@ return null;
         Objects.equals(vhost, apIRevisionDeployment.vhost) &&
         Objects.equals(displayOnDevportal, apIRevisionDeployment.displayOnDevportal) &&
         Objects.equals(deployedTime, apIRevisionDeployment.deployedTime) &&
-        Objects.equals(successDeployedTime, apIRevisionDeployment.successDeployedTime);
+        Objects.equals(successDeployedTime, apIRevisionDeployment.successDeployedTime) &&
+        Objects.equals(liveGatewayCount, apIRevisionDeployment.liveGatewayCount) &&
+        Objects.equals(deployedGatewayCount, apIRevisionDeployment.deployedGatewayCount) &&
+        Objects.equals(failedGatewayCount, apIRevisionDeployment.failedGatewayCount);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(revisionUuid, name, status, vhost, displayOnDevportal, deployedTime, successDeployedTime);
+    return Objects.hash(revisionUuid, name, status, vhost, displayOnDevportal, deployedTime, successDeployedTime, liveGatewayCount, deployedGatewayCount, failedGatewayCount);
   }
 
   @Override
@@ -215,6 +275,9 @@ return null;
     sb.append("    displayOnDevportal: ").append(toIndentedString(displayOnDevportal)).append("\n");
     sb.append("    deployedTime: ").append(toIndentedString(deployedTime)).append("\n");
     sb.append("    successDeployedTime: ").append(toIndentedString(successDeployedTime)).append("\n");
+    sb.append("    liveGatewayCount: ").append(toIndentedString(liveGatewayCount)).append("\n");
+    sb.append("    deployedGatewayCount: ").append(toIndentedString(deployedGatewayCount)).append("\n");
+    sb.append("    failedGatewayCount: ").append(toIndentedString(failedGatewayCount)).append("\n");
     sb.append("}");
     return sb.toString();
   }
