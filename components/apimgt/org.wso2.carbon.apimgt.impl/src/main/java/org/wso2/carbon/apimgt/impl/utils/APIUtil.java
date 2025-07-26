@@ -12026,12 +12026,23 @@ public final class APIUtil {
         return mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
     }
 
-    public static void validateAndScheduleFederatedGatewayAPIDiscovery(Environment environment, String organization) {
+    public static void validateAndScheduleFederatedGatewayAPIDiscovery(Environment environment, String organization,
+                                                                       boolean updateEnvFlow) {
         FederatedAPIDiscoveryService federatedAPIDiscoveryService = ServiceReferenceHolder
                 .getInstance().getFederatedAPIDiscoveryService();
-
-        if (environment.getType().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
-            federatedAPIDiscoveryService.scheduleDiscovery(environment, organization);
+        try {
+            if (updateEnvFlow) {
+                APIAdminImpl apiAdmin = new APIAdminImpl();
+                environment = apiAdmin.getEnvironmentWithoutPropertyMasking(organization,
+                        environment.getUuid());
+                environment = apiAdmin.decryptGatewayConfigurationValues(environment);
+            }
+            if (environment.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+                federatedAPIDiscoveryService.scheduleDiscovery(environment, organization);
+            }
+        } catch (APIManagementException e) {
+            log.error("Error while validating and scheduling federated gateway API discovery for environment: "
+                    + environment.getName() + " in organization: " + organization, e);
         }
     }
 

@@ -21,6 +21,7 @@
 package org.wso2.carbon.apimgt;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,7 +36,9 @@ import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayMode;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
+import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
+import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.util.FederatedGatewayUtil;
@@ -99,19 +102,27 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             scheduledFuture.cancel(true);
                         }
                         executor.scheduleAtFixedRate(() -> {
-                            List<API> discoveredAPIs = federatedAPIDiscovery.discoverAPI();
-                            if (discoveredAPIs != null && !discoveredAPIs.isEmpty()) {
-                                log.info("Discovered " + discoveredAPIs.size() + " APIs in environment: "
-                                        + environment.getName());
-                                processDiscoveredAPIs(discoveredAPIs, environment, organization);
-                            } else {
-                                log.info("No APIs discovered in environment: " + environment.getName());
+                            try {
+                                List<API> discoveredAPIs = federatedAPIDiscovery.discoverAPI();
+                                if (discoveredAPIs != null && !discoveredAPIs.isEmpty()) {
+                                    processDiscoveredAPIs(discoveredAPIs, environment, organization);
+                                } else {
+                                    if (log.isDebugEnabled()) {
+                                        log.debug("No APIs discovered in environment: " + environment.getName());
+                                    }
+                                }
+                            } catch (Exception e) {
+                                log.error("Error during federated API discovery for environment: "
+                                        + environment.getName(), e);
                             }
                         }, 0, environment.getApiDiscoveryScheduledWindow(), TimeUnit.MINUTES);
                     }
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException |
                          NoSuchMethodException | InvocationTargetException | APIManagementException e) {
                     log.error("Error while loading federated API discovery for environment "
+                            + environment.getName(), e);
+                } catch (Throwable e) {
+                    log.error("Unexpected error while initializing federated API discovery for environment "
                             + environment.getName(), e);
                 }
             }
@@ -141,9 +152,8 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             + environment.getName() + APIConstants.DELEM_COLON + apidto.getVersion();
 
                     // Determine import mode
-                    boolean alreadyExists = alreadyAvailableAPIs.contains(apiKey);
+                    boolean update = alreadyAvailableAPIs.contains(apiKey) || alreadyAvailableAPIs.contains(envScopedKey);
                     boolean alreadyExistsWithEnvScope = alreadyAvailableAPIs.contains(envScopedKey);
-                    boolean update = alreadyExists || alreadyExistsWithEnvScope;
 
                     // Adjust name if needed
                     if (alreadyExistsWithEnvScope) {
@@ -154,9 +164,11 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     }
 
                     // Map to DTO and create ZIP
-                    String apiJson = new Gson().toJson(apidto);
+                    JsonObject apiJson = (JsonObject) new Gson().toJsonTree(apidto);
+                    apiJson = CommonUtil.addTypeAndVersionToFile(ImportExportConstants.TYPE_API,
+                            ImportExportConstants.APIM_VERSION, apiJson);
                     InputStream apiZip = FederatedGatewayUtil.createZipAsInputStream(
-                            apiJson, api.getSwaggerDefinition(),
+                            apiJson.toString(), api.getSwaggerDefinition(),
                             FederatedGatewayUtil.createDeploymentYaml(environment),
                             apidto.getName());
 
@@ -168,7 +180,10 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             new String[]{APIConstants.APIM_PUBLISHER_SCOPE, APIConstants.APIM_CREATOR_SCOPE}, organization);
 
                     // Track deployed
-                    discoveredAPIs.add(update && alreadyExistsWithEnvScope ? envScopedKey : apiKey);
+                    discoveredAPIs.add(alreadyExistsWithEnvScope ? envScopedKey : apiKey);
+                    if (!update) {
+                        alreadyAvailableAPIs.add(apidto.getName() + APIConstants.DELEM_COLON + apidto.getVersion());
+                    }
 
                     log.info((update ? "Updated" : "Created") + " API: " + api.getId().getName()
                             + " in environment: " + environment.getName());
@@ -182,8 +197,8 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                 }
             }
 
-            for (String apiName : discoveredAPIs) {
-                if (!alreadyAvailableAPIs.contains(apiName)) {
+            for (String apiName : alreadyAvailableAPIs) {
+                if (!discoveredAPIs.contains(apiName)) {
                     try {
                         String[] parts = apiName.split(APIConstants.DELEM_COLON);
                         if (parts.length < 2) {

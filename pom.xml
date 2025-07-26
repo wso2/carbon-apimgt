@@ -2309,7 +2309,7 @@
         <org.wso2.orbit.atlassian.oai.version>2.12.1.wso2v2</org.wso2.orbit.atlassian.oai.version>
         <maven.spotbugsplugin.exclude.file>${project.parent.basedir}/../../spotbugs-exclude.xml</maven.spotbugsplugin.exclude.file>
         <skip.aspectj>false</skip.aspectj>
-        <org.aspectj.weaver.openarchives.limit>1500</org.aspectj.weaver.openarchives.limit>
+        <org.aspectj.weaver.openarchives.limit>2000</org.aspectj.weaver.openarchives.limit>
         <javax.jms.version>2.0.1</javax.jms.version>
         <com.damnhandy.version>2.1.6</com.damnhandy.version>
         <damnhandy.version>${com.damnhandy.version}.wso2v2</damnhandy.version>
