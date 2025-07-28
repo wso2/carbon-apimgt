@@ -19,7 +19,7 @@ import java.util.*;
 public class PersistenceDAO {
     private static final Log log = LogFactory.getLog(PersistenceDAO.class);
     private static PersistenceDAO INSTANCE = null;
-    private SQLQueryInterface SQLQuery;
+    private final SQLQueryInterface SQLQuery;
 
     private PersistenceDAO() {
         this.SQLQuery = SQLQueryFactory.getSQLQueries();
@@ -1396,8 +1396,8 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByContent(String org, String searchContent, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQuery.searchContentByContentSql(roles, searchContent);
         searchContent = searchContent.toLowerCase();
+        String query = SQLQuery.searchContentByContentSql(roles, searchContent);
         try (Connection connection = PersistenceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);
@@ -2192,8 +2192,8 @@ public class PersistenceDAO {
 
     public List<ContentSearchResult> searchContentByContentForDevPortal(String org, String searchContent, int start, int offset, String[] roles) throws APIManagementException {
         List<ContentSearchResult> apiResults = new ArrayList<>();
-        String query = SQLQuery.searchContentByContentForDevPortalSql(roles, searchContent);
         searchContent = searchContent.toLowerCase();
+        String query = SQLQuery.searchContentByContentForDevPortalSql(roles, searchContent);
         try (Connection connection = PersistenceDBUtil.getConnection();
              PreparedStatement prepStmt = connection.prepareStatement(query)) {
             connection.setAutoCommit(false);

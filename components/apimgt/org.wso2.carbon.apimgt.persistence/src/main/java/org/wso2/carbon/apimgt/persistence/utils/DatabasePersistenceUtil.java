@@ -81,31 +81,6 @@ public class DatabasePersistenceUtil {
         return id;
     }
 
-    public static <T> JsonArray setToJSONArray(Set<T> items) {
-        JsonArray jsonArray = new JsonArray();
-        for (T item: items) {
-            JsonElement jsonElement = gson.toJsonTree(item);
-            jsonArray.add(jsonElement);
-        }
-        return jsonArray;
-    }
-
-    public static <T> JsonArray listToJSONArray(List<T> items) {
-        JsonArray jsonArray = new JsonArray();
-        for (T item: items) {
-            JsonElement jsonElement = gson.toJsonTree(item);
-            jsonArray.add(jsonElement);
-        }
-        return jsonArray;
-    }
-
-    public static JsonElement corsConfigToJson(CORSConfiguration corsConfiguration) {
-        JsonElement element = new JsonObject();
-        element = gson.toJsonTree(corsConfiguration);
-
-        return element;
-    }
-
     public static String dateToString(Date date) {
         if (date == null) return null;
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -219,13 +194,6 @@ public class DatabasePersistenceUtil {
         }
     }
 
-    private static String fixDoubleQuotes(String json) {
-        Pattern pattern = Pattern.compile("\"\"([^\"]*?)\"\"");
-        Matcher matcher = pattern.matcher(json);
-
-        return matcher.replaceAll("\"$1\"");
-    }
-
     public static String safeGetAsString(JsonObject obj, String memberName) {
         JsonElement element = obj.get(memberName);
         return (element != null && !element.isJsonNull()) ? element.getAsString() : null;
@@ -270,14 +238,6 @@ public class DatabasePersistenceUtil {
             log.error("Error while converting string to availableTiersForOrganizations object", e);
             return new LinkedHashSet<>();
         }
-    }
-
-    private static Set<String> getEnvironments(String environments) {
-        if(environments != null) {
-            String[] publishEnvironmentArray = environments.split(",");
-            return new HashSet<String>(Arrays.asList(publishEnvironmentArray));
-        }
-        return null;
     }
 
     public static PublisherAPI getAPIForSearch(JsonObject json) {
@@ -368,24 +328,6 @@ public class DatabasePersistenceUtil {
         return documentContent;
     }
 
-    public static long getDocumentFileLength(InputStream inputStream) {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
-        byte[] data = new byte[4096];
-        int nRead;
-        while (true) {
-            try {
-                if ((nRead = inputStream.read(data, 0, data.length)) == -1) break;
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            buffer.write(data, 0, nRead);
-        }
-
-        byte[] byteArray = buffer.toByteArray();
-        return byteArray.length;
-    }
-
     private static String stripSpecialCharacters(String input) {
         if (input == null || input.isEmpty()) {
             return input;
@@ -443,33 +385,6 @@ public class DatabasePersistenceUtil {
     public static String createWsdlFileName(String provider, String apiName, String apiVersion) {
 
         return provider + "--" + apiName + apiVersion;
-    }
-
-    public static String getOrganizationTiersToString(Map<String, Set<String>> availableTiersForOrganizations) {
-        StringBuilder tiersStringBuilder = new StringBuilder();
-        for (Map.Entry<String, Set<String>> entry : availableTiersForOrganizations.entrySet()) {
-            String orgName = entry.getKey();
-            Set<String> tiers = entry.getValue();
-            if (tiers != null && !tiers.isEmpty()) {
-                tiersStringBuilder.append(orgName).append(": ").append(String.join(", ", tiers)).append("\n");
-            } else {
-                tiersStringBuilder.append(orgName).append(": No available tiers\n");
-            }
-        }
-        return tiersStringBuilder.toString().trim();
-    }
-
-    private static Map stringToStringMap(String additionalProperties) {
-        if (additionalProperties == null || additionalProperties.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(additionalProperties, Map.class);
-        } catch (IOException e) {
-            log.error("Error while converting string to Map", e);
-            return Collections.emptyMap();
-        }
     }
 
     public static DevPortalAPIInfo mapAPItoAPIInfo(API api) {
@@ -606,19 +521,6 @@ public class DatabasePersistenceUtil {
     devPortalAPI.setAsyncTransportProtocols(apiProduct.isAsync() ? "async" : null);
 
         return devPortalAPI;
-    }
-
-    public static List<String> getUserRoles(String roles) {
-
-        if (roles == null || roles.isEmpty()) {
-            return List.of(new String[0]);
-        }
-
-        // Split the roles by comma and trim whitespace
-        return List.of(Arrays.stream(roles.split(","))
-                .map(String::trim)
-                .filter(role -> !role.isEmpty())
-                .toArray(String[]::new));
     }
 
     public static String getTenantAdminUserName(String tenantDomain) throws APIManagementException {
