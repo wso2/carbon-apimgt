@@ -600,7 +600,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
             if (searchQuery == null) {
                 results = persistenceDAO.getAllAPIsForDevPortal(orgName, start, offset, userRoles);
             } else {
-                results = DatabaseSearchUtil.serachAPIsForDevPortal(searchQuery, orgName, start, offset, userRoles);
+                results = DatabaseSearchUtil.searchAPIsForDevPortal(searchQuery, orgName, start, offset, userRoles);
             }
 
             if (results == null || results.isEmpty()) {

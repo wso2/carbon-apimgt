@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.persistence.dao.queries;
 import org.wso2.carbon.apimgt.persistence.dao.queries.impl.Oracle;
-import org.wso2.carbon.apimgt.persistence.utils.PersistanceDBUtil;
+import org.wso2.carbon.apimgt.persistence.utils.PersistenceDBUtil;
 
 import java.sql.Connection;
 
@@ -10,7 +10,7 @@ public class SQLQueryFactory {
     public static SQLQueryInterface getSQLQueries() {
         String dbType = null;
         try {
-            Connection connection = PersistanceDBUtil.getConnection();
+            Connection connection = PersistenceDBUtil.getConnection();
             if (connection != null) {
                 dbType = connection.getMetaData().getDriverName();
             }

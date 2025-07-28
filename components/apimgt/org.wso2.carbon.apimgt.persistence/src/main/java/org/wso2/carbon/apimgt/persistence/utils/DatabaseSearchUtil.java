@@ -204,7 +204,7 @@ public class DatabaseSearchUtil {
         return contentSearchResults;
     }
 
-    public static List<ContentSearchResult> serachAPIsForDevPortal(SearchQuery searchQuery, String orgName, int start, int offset, String[] roles) throws APIManagementException {
+    public static List<ContentSearchResult> searchAPIsForDevPortal(SearchQuery searchQuery, String orgName, int start, int offset, String[] roles) throws APIManagementException {
         String searchContent;
         SearchType searchType;
 

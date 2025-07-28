@@ -28,9 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class PersistanceDBUtil {
+public class PersistenceDBUtil {
 
-    private static final Log log = LogFactory.getLog(PersistanceDBUtil.class);
+    private static final Log log = LogFactory.getLog(PersistenceDBUtil.class);
 
     private static volatile DataSource dataSource = null;
     private static final String DB_CHECK_SQL = "SELECT * FROM AM_SUBSCRIBER";
@@ -47,7 +47,7 @@ public class PersistanceDBUtil {
             return;
         }
 
-        synchronized (PersistanceDBUtil.class) {
+        synchronized (PersistenceDBUtil.class) {
             if (dataSource == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Initializing data source");

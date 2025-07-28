@@ -1411,7 +1411,7 @@ public class Oracle implements SQLQueryInterface {
         return "SELECT a1.* FROM AM_ARTIFACT_DATA a1 " +
                 "JOIN (" +
                     "SELECT DISTINCT API_UUID FROM AM_ARTIFACT_DATA " +
-                    "AND LOWER(JSON_QUERY(a2.METADATA, '$." + propertyName + "')) LIKE ? "  +
+                    "AND LOWER(JSON_QUERY(METADATA, '$." + propertyName + "')) LIKE ? "  +
                     "AND (" +
                         getRoleConditionForDevPortal(roles) +
                     ") " +
