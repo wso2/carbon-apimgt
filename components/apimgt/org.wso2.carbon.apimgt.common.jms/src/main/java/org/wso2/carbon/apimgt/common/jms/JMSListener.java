@@ -163,7 +163,7 @@ public class JMSListener implements Runnable {
             if (log.isDebugEnabled()) {
                 log.debug(
                         "Connection could not be created towards the JMS provider for the listener: " 
-                                + "" + stm.getJmsConsumerName() + "#" + stm.getDestinationJNDIName());
+                                + stm.getJmsConsumerName() + "#" + stm.getDestinationJNDIName());
             }
         }
         return (connection != null);
