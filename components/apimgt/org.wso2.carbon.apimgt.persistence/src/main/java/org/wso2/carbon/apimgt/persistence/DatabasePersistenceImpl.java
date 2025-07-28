@@ -511,7 +511,7 @@ public class DatabasePersistenceImpl implements APIPersistence {
                 results = DatabaseSearchUtil.searchAPIsForPublisher(searchQuery, org.getName(), start, offset, userRoles);
             }
 
-            totalLength = results.getTotalcount();
+            totalLength = results.getTotalCount();
 
             for (String result: results.getResult()) {
                 JsonObject jsonObject = JsonParser.parseString(result).getAsJsonObject();

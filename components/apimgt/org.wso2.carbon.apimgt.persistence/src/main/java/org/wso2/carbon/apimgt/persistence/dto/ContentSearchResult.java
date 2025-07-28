@@ -1,12 +1,17 @@
 package org.wso2.carbon.apimgt.persistence.dto;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class ContentSearchResult {
+    private static final Log log = LogFactory.getLog(ContentSearchResult.class);
     private String metadata;
     private String type;
     private String apiId;
     private String uuid;
 
     public ContentSearchResult(String metadata, String type, String apiId, String uuid) {
+        log.debug("Creating ContentSearchResult with metadata: " + metadata +  ", type: " + type +"  apiId: " + apiId + " uuid: " + uuid);
         this.metadata = metadata;
         this.type = type;
         this.apiId = apiId;
@@ -14,6 +19,7 @@ public class ContentSearchResult {
     }
 
     public ContentSearchResult(String metadata, String type, String apiId) {
+        log.debug("Creating ContentSearchResult with metadata: " + metadata +  ", type: " + type +"  apiId: " + apiId);
         this.metadata = metadata;
         this.type = type;
         this.apiId = apiId;

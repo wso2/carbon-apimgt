@@ -40,6 +40,7 @@ public class DatabaseSearchUtil {
 
     private static SearchType getSearchType(String typeString) {
         if (typeString == null || typeString.isEmpty()) {
+            log.debug("Search type is null or empty, defaulting to SearchType.OTHER");
             return SearchType.OTHER;
         }
 

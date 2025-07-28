@@ -1,10 +1,15 @@
 package org.wso2.carbon.apimgt.persistence.dao.queries.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.persistence.dao.queries.SQLQueryInterface;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class Oracle implements SQLQueryInterface {
+    private static final Log log = LogFactory.getLog(SQLQueryInterface.class);
+
     private static String getRoleConditionForPublisher(String[] roles) {
         StringBuilder roleCondition = new StringBuilder();
         for (String role : roles) {
@@ -542,6 +547,7 @@ public class Oracle implements SQLQueryInterface {
 
     @Override
     public String getAllApiArtifactSql(String[] roles) {
+        log.debug("Retrieving all API artifacts for roles: " + Arrays.toString(roles));
         return "SELECT METADATA FROM AM_ARTIFACT_DATA " +
                 "WHERE ORG_NAME = ? " +
                 "AND TYPE = 'API' " +
@@ -552,6 +558,7 @@ public class Oracle implements SQLQueryInterface {
 
     @Override
     public String getAllApiCountSql(String[] roles) {
+        log.debug("Retrieving count of all APIs for roles: " + Arrays.toString(roles));
         return "SELECT COUNT(UUID) AS TOTAL_API_COUNT FROM ( " +
                     "SELECT UUID FROM AM_ARTIFACT_DATA " +
                     "WHERE TYPE = 'API' " +
@@ -568,6 +575,7 @@ public class Oracle implements SQLQueryInterface {
 
     @Override
     public String searchApiByContentSql(String[] roles) {
+        log.debug("Searching APIs by content for roles: " + Arrays.toString(roles));
         return "SELECT * FROM AM_ARTIFACT_DATA " +
                 "WHERE ORG_NAME = ? " +
                 "AND type = 'API' " +
@@ -578,6 +586,7 @@ public class Oracle implements SQLQueryInterface {
 
     @Override
     public String searchApiByContentCountSql(String[] roles) {
+        log.debug("Retrieving count of APIs matching content search for roles: " + Arrays.toString(roles));
         return "SELECT COUNT(*) AS COUNT FROM AM_ARTIFACT_DATA " +
                 "WHERE ORG_NAME = ? " +
                 "AND type = 'API' " +
@@ -1041,6 +1050,7 @@ public class Oracle implements SQLQueryInterface {
 
     @Override
     public String getAllApiProductSql(String[] roles) {
+        log.debug("Retrieving all API Products for roles: " + Arrays.toString(roles));
         return "SELECT * FROM AM_ARTIFACT_DATA " +
                 "WHERE ORG_NAME = ? " +
                 "AND type = 'API_PRODUCT' " +
@@ -1221,6 +1231,7 @@ public class Oracle implements SQLQueryInterface {
 
     @Override
     public String getAllApiArtifactsForDevPortalSql(String[] roles) {
+        log.debug("Retrieving all API artifacts for Developer Portal with roles: " + Arrays.toString(roles));
         return "SELECT * FROM AM_ARTIFACT_DATA " +
                 "WHERE API_STATUS = 'published' " +
                 "AND ORG_NAME = ? " +
