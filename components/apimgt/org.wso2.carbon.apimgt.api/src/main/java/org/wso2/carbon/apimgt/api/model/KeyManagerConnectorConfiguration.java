@@ -52,7 +52,7 @@ public interface KeyManagerConnectorConfiguration {
 
     /**
      * This method returns the AdvancedConnectorConfigurations related to key-manager registration
-     * This was introduced focusing on IS-7, with an improvement related to tenant sharing feature
+     * Introduced to accommodate advanced, hierarchical configuration models
      *
      * @return
      */
