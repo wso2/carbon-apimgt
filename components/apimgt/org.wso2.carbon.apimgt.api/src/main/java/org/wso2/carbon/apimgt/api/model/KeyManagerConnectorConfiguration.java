@@ -51,12 +51,12 @@ public interface KeyManagerConnectorConfiguration {
     public List<ConfigurationDto> getConnectionConfigurations();
 
     /**
-     * This method returns the AuthConfigurations related to key-manager registration
+     * This method returns the AdvancedConnectorConfigurations related to key-manager registration
      * This was introduced focusing on IS-7, with an improvement related to tenant sharing feature
      *
      * @return
      */
-    public default List<ConfigurationDto> getAuthConfigurations() {
+    public default List<ConfigurationDto> getAdvancedConnectionConfigurations() {
         return new ArrayList<>();
     }
 

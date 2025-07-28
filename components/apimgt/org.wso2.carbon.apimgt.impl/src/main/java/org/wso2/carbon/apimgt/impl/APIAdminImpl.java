@@ -72,8 +72,6 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManageme
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.deployer.GatewayConfigurationService;
-import org.wso2.carbon.apimgt.impl.deployer.GatewayConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
@@ -114,6 +112,7 @@ import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -838,10 +837,10 @@ public class APIAdminImpl implements APIAdmin {
         if (keyManagerConnectorConfiguration != null) {
             Map<String, Object> additionalProperties = updatedKeyManagerConfigurationDto.getAdditionalProperties();
             List<ConfigurationDto> connectionConfigurations;
-            // if authConfiguration array is not empty, use it as connector configuration
-            if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
-                    && !(keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty())) {
-                connectionConfigurations = keyManagerConnectorConfiguration.getAuthConfigurations();
+            // if advancedConfiguration array is not empty, use it as connector configuration
+            if (keyManagerConnectorConfiguration.getAdvancedConnectionConfigurations() != null
+                    && !(keyManagerConnectorConfiguration.getAdvancedConnectionConfigurations().isEmpty())) {
+                connectionConfigurations = keyManagerConnectorConfiguration.getAdvancedConnectionConfigurations();
             } else {
                 connectionConfigurations = keyManagerConnectorConfiguration.getConnectionConfigurations();
             }
@@ -1551,6 +1550,111 @@ public class APIAdminImpl implements APIAdmin {
         }
     }
 
+    private void validateKeyManagerAdvancedConfiguration(List<ConfigurationDto> rootConfigs,
+                                                     KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
+
+        Map<String, Object> userSelections = keyManagerConfigurationDTO.getAdditionalProperties();
+        for (ConfigurationDto rootNode : rootConfigs) {
+            validateNode(rootNode, userSelections, rootNode.getName());
+        }
+    }
+
+    private void validateNode(ConfigurationDto node,
+                              Map<String, Object> userSelections,
+                              String path) {
+
+        String type = node.getType();
+        String name = node.getName();
+        List<Object> children = node.getValues();
+
+        switch (type) {
+            case "dropdown":
+            case "options": {
+                String selected = getSelectionAsString(userSelections.get(name));
+                if (selected == null || selected.isEmpty()) {
+                    throw new IllegalArgumentException("A selection is required for: " + path);
+                }
+
+                ConfigurationDto selectedChild = findChildByName(children, selected);
+                if (selectedChild == null) {
+                    throw new IllegalArgumentException("Invalid selection '" + selected + "' under: " + path);
+                }
+
+                Map<String, Object> nestedSelections = getNestedSelections(userSelections, selectedChild.getName());
+                validateNode(selectedChild, nestedSelections, path + " → " + selectedChild.getName());
+                break;
+            }
+
+            case "labelOnly": {
+                for (Object child : children) {
+                    if (!userSelections.containsKey(((ConfigurationDto)child).getName())) {
+                        throw new IllegalArgumentException("Missing required field: " + path + " → "
+                                + ((ConfigurationDto)child).getName());
+                    }
+                    Map<String, Object> nestedSelections = getNestedSelections(userSelections,
+                            ((ConfigurationDto)child).getName());
+                    validateNode((ConfigurationDto) child, nestedSelections, path + " → " + ((ConfigurationDto)child).getName());
+                }
+                break;
+            }
+
+            case "select": {
+                String multiSelection = getSelectionAsString(userSelections.get(name));
+                if (multiSelection != null && !multiSelection.isEmpty()) {
+                    List<String> selectedNames = Arrays.asList(multiSelection.split(","));
+                    for (String sel : selectedNames) {
+                        ConfigurationDto selectedChild = findChildByName(children, sel.trim());
+                        if (selectedChild != null) {
+                            Map<String, Object> nestedSelections = getNestedSelections(userSelections, selectedChild.getName());
+                            validateNode(selectedChild, nestedSelections, path + " → " + selectedChild.getName());
+                        }
+                    }
+                }
+                break;
+            }
+
+            case "input":
+            case "certificate": {
+                if (Boolean.TRUE.equals(node.isRequired()) && !userSelections.containsKey(name)) {
+                    throw new IllegalArgumentException("Missing required field: " + path);
+                }
+                break;
+            }
+
+            default: {
+                for (Object child : children) {
+                    Map<String, Object> nestedSelections = getNestedSelections(userSelections,
+                            ((ConfigurationDto)child).getName());
+                    validateNode((ConfigurationDto) child, nestedSelections, path + " → "
+                            + ((ConfigurationDto)child).getName());
+                }
+            }
+        }
+    }
+
+    private ConfigurationDto findChildByName(List<Object> list, String name) {
+        if (list == null)
+            return null;
+        for (Object dto : list) {
+            if (((ConfigurationDto)dto).getName().equals(name)) {
+                return (ConfigurationDto) dto;
+            }
+        }
+        return null;
+    }
+
+    private String getSelectionAsString(Object obj) {
+        return obj instanceof String ? (String) obj : null;
+    }
+
+    private Map<String, Object> getNestedSelections(Map<String, Object> selections, String key) {
+        Object obj = selections.get(key);
+        if (obj instanceof KeyManagerConfigurationDTO) {
+            return ((KeyManagerConfigurationDTO) obj).getAdditionalProperties();
+        }
+        return Collections.emptyMap();
+    }
+
     private void validateKeyManagerConfiguration(KeyManagerConfigurationDTO keyManagerConfigurationDTO)
             throws APIManagementException {
 
@@ -1566,42 +1670,44 @@ public class APIAdminImpl implements APIAdmin {
             if (keyManagerConnectorConfiguration != null) {
                 List<String> missingRequiredConfigurations = new ArrayList<>();
                 List<ConfigurationDto> connectionConfigurations;
-                // if authConfiguration array is not empty, use it as connector configuration
-                if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
-                        && !(keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty())) {
-                    connectionConfigurations = keyManagerConnectorConfiguration.getAuthConfigurations();
+                // if advancedConfiguration array is not empty, use it as connector configuration
+                if (keyManagerConnectorConfiguration.getAdvancedConnectionConfigurations() != null
+                        && !(keyManagerConnectorConfiguration.getAdvancedConnectionConfigurations().isEmpty())) {
+                    connectionConfigurations = keyManagerConnectorConfiguration.getAdvancedConnectionConfigurations();
+                    //validateKeyManagerAdvancedConfiguration(connectionConfigurations, keyManagerConfigurationDTO);
                 } else {
                     connectionConfigurations = keyManagerConnectorConfiguration.getConnectionConfigurations();
-                }
-                for (ConfigurationDto configurationDto : connectionConfigurations) {
-                    if (configurationDto.isRequired()) {
-                        if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                                .containsKey(configurationDto.getName())) {
-                            if (StringUtils.isNotEmpty((String) configurationDto.getDefaultValue())) {
-                                keyManagerConfigurationDTO.getAdditionalProperties().put(configurationDto.getName(),
-                                        configurationDto.getDefaultValue());
+
+                    for (ConfigurationDto configurationDto : connectionConfigurations) {
+                        if (configurationDto.isRequired()) {
+                            if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                                    .containsKey(configurationDto.getName())) {
+                                if (StringUtils.isNotEmpty((String) configurationDto.getDefaultValue())) {
+                                    keyManagerConfigurationDTO.getAdditionalProperties().put(configurationDto.getName(),
+                                            configurationDto.getDefaultValue());
+                                }
+                                missingRequiredConfigurations.add(configurationDto.getName());
                             }
-                            missingRequiredConfigurations.add(configurationDto.getName());
                         }
                     }
-                }
-                if (!missingRequiredConfigurations.isEmpty()) {
-                    throw new APIManagementException("Key Manager Configuration value for " + String.join(",",
-                            missingRequiredConfigurations) + " is/are required",
-                            ExceptionCodes.REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING);
-                }
-                if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                        .containsKey(APIConstants.KeyManager.CONSUMER_KEY_CLAIM)) {
-                    if (StringUtils.isNotEmpty(keyManagerConnectorConfiguration.getDefaultConsumerKeyClaim())) {
-                        keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.CONSUMER_KEY_CLAIM,
-                                keyManagerConnectorConfiguration.getDefaultConsumerKeyClaim());
+                    if (!missingRequiredConfigurations.isEmpty()) {
+                        throw new APIManagementException("Key Manager Configuration value for " + String.join(",",
+                                missingRequiredConfigurations) + " is/are required",
+                                ExceptionCodes.REQUIRED_KEY_MANAGER_CONFIGURATION_MISSING);
                     }
-                }
-                if (!keyManagerConfigurationDTO.getAdditionalProperties()
-                        .containsKey(APIConstants.KeyManager.SCOPES_CLAIM)) {
-                    if (StringUtils.isNotEmpty(keyManagerConnectorConfiguration.getDefaultScopesClaim())) {
-                        keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.SCOPES_CLAIM,
-                                keyManagerConnectorConfiguration.getDefaultScopesClaim());
+                    if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                            .containsKey(APIConstants.KeyManager.CONSUMER_KEY_CLAIM)) {
+                        if (StringUtils.isNotEmpty(keyManagerConnectorConfiguration.getDefaultConsumerKeyClaim())) {
+                            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.CONSUMER_KEY_CLAIM,
+                                    keyManagerConnectorConfiguration.getDefaultConsumerKeyClaim());
+                        }
+                    }
+                    if (!keyManagerConfigurationDTO.getAdditionalProperties()
+                            .containsKey(APIConstants.KeyManager.SCOPES_CLAIM)) {
+                        if (StringUtils.isNotEmpty(keyManagerConnectorConfiguration.getDefaultScopesClaim())) {
+                            keyManagerConfigurationDTO.addProperty(APIConstants.KeyManager.SCOPES_CLAIM,
+                                    keyManagerConnectorConfiguration.getDefaultScopesClaim());
+                        }
                     }
                 }
             } else {
@@ -1655,10 +1761,10 @@ public class APIAdminImpl implements APIAdmin {
 
         Map<String, Object> additionalProperties = keyManagerConfigurationDTO.getAdditionalProperties();
         List<ConfigurationDto> connectionConfigurations;
-        // if authConfiguration array is not empty, use it as connector configuration
-        if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
-                && !(keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty())) {
-            connectionConfigurations = keyManagerConnectorConfiguration.getAuthConfigurations();
+        // if advancedConfiguration array is not empty, use it as connector configuration
+        if (keyManagerConnectorConfiguration.getAdvancedConnectionConfigurations() != null
+                && !(keyManagerConnectorConfiguration.getAdvancedConnectionConfigurations().isEmpty())) {
+            connectionConfigurations = keyManagerConnectorConfiguration.getAdvancedConnectionConfigurations();
         } else {
             connectionConfigurations = keyManagerConnectorConfiguration.getConnectionConfigurations();
         }
