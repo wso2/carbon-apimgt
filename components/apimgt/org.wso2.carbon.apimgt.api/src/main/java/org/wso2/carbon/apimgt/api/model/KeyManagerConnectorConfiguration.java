@@ -51,12 +51,12 @@ public interface KeyManagerConnectorConfiguration {
     public List<ConfigurationDto> getConnectionConfigurations();
 
     /**
-     * This method returns the AdvancedConnectorConfigurations related to key-manager registration
+     * This method returns the AuthConfigurations related to key-manager registration
      * Introduced to accommodate advanced, hierarchical configuration models
      *
      * @return
      */
-    public default List<ConfigurationDto> getAdvancedConnectionConfigurations() {
+    public default List<ConfigurationDto> getAuthConfigurations() {
         return new ArrayList<>();
     }
 

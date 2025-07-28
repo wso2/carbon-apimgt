@@ -77,7 +77,7 @@ public class SettingsMappingUtil {
                         keyManagerConfiguration.getDisplayName(),keyManagerConfiguration.getDefaultScopesClaim(),
                         keyManagerConfiguration.getDefaultConsumerKeyClaim(),
                         keyManagerConfiguration.getConnectionConfigurations(),
-                        keyManagerConfiguration.getAdvancedConnectionConfigurations(),
+                        keyManagerConfiguration.getAuthConfigurations(),
                         keyManagerConfiguration.getEndpointConfigurations()));
             }
         });
@@ -103,8 +103,7 @@ public class SettingsMappingUtil {
 
     private static SettingsKeyManagerConfigurationDTO fromKeyManagerConfigurationToSettingsKeyManagerConfigurationDTO(
             String name, String displayName, String scopesClaim, String consumerKeyClaim,
-            List<ConfigurationDto> connectionConfigurationDtoList,
-            List<ConfigurationDto> advancedConnectionConfigurationDtoList,
+            List<ConfigurationDto> connectionConfigurationDtoList, List<ConfigurationDto> authConfigurationDtoList,
             List<ConfigurationDto> endpointConfigurations) {
 
         SettingsKeyManagerConfigurationDTO settingsKeyManagerConfigurationDTO =
@@ -128,8 +127,8 @@ public class SettingsMappingUtil {
                 settingsKeyManagerConfigurationDTO.getConfigurations().add(keyManagerConfigurationDTO);
             }
         }
-        if (advancedConnectionConfigurationDtoList != null) {
-            for (ConfigurationDto configurationDto : advancedConnectionConfigurationDtoList) {
+        if (authConfigurationDtoList != null) {
+            for (ConfigurationDto configurationDto : authConfigurationDtoList) {
                 KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
                 keyManagerConfigurationDTO.setName(configurationDto.getName());
                 keyManagerConfigurationDTO.setLabel(configurationDto.getLabel());
@@ -140,7 +139,7 @@ public class SettingsMappingUtil {
                 keyManagerConfigurationDTO.setTooltip(configurationDto.getTooltip());
                 keyManagerConfigurationDTO.setDefault(configurationDto.getDefaultValue());
                 keyManagerConfigurationDTO.setValues(configurationDto.getValues());
-                settingsKeyManagerConfigurationDTO.getAdvancedConfigurations().add(keyManagerConfigurationDTO);
+                settingsKeyManagerConfigurationDTO.getAuthConfigurations().add(keyManagerConfigurationDTO);
             }
         }
         if (endpointConfigurations != null) {
