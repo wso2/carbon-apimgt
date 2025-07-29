@@ -33,7 +33,31 @@ public class Oracle implements SQLQueryInterface {
         roleCondition.append(" OR visibility = 'public' ");
         return roleCondition.toString();
     }
-    
+
+    private static String getRoleConditionForPublisherUnifiedSearch(String[] roles) {
+        StringBuilder roleCondition = new StringBuilder();
+        for (String role : roles) {
+            if (roleCondition.length() > 0) {
+                roleCondition.append(" OR ");
+            }
+            roleCondition.append("a3.access_roles LIKE '%").append(role.toLowerCase()).append("%'");
+        }
+        roleCondition.append(" OR a3.access_control = 'all' ");
+        return roleCondition.toString();
+    }
+
+    private static String getRoleConditionForDevPortalUnifiedSearch(String[] roles) {
+        StringBuilder roleCondition = new StringBuilder();
+        for (String role : roles) {
+            if (roleCondition.length() > 0) {
+                roleCondition.append(" OR ");
+            }
+            roleCondition.append("a3.visible_roles LIKE '%").append(role.toLowerCase()).append("%'");
+        }
+        roleCondition.append(" OR a3.visibility = 'public' ");
+        return roleCondition.toString();
+    }
+
     private static final String ADD_ARTIFACT_SQL =
             "INSERT INTO AM_ARTIFACT_DATA (type, org, metadata, uuid, api_uuid) " +
             "VALUES (?, ?, ?, ?, ?)";
@@ -784,23 +808,18 @@ public class Oracle implements SQLQueryInterface {
         return "SELECT a1.metadata, a1.api_uuid, a1.type, a1.uuid " +
                 "FROM AM_ARTIFACT_DATA a1 " +
                 "JOIN (" +
-                    "SELECT API_UUID " +
-                    "FROM ( " +
-                        "SELECT DISTINCT API_UUID " +
-                        "FROM AM_ARTIFACT_DATA " +
-                        "WHERE CONTAINS(METADATA, '" + searchQuery + "') > 0 " +
-                    ") metadata_uuids " +
-                    "INTERSECT " +
-                    "SELECT DISTINCT API_UUID " +
-                    "FROM AM_ARTIFACT_DATA " +
-                    "WHERE TYPE = 'API' " +
-                    "AND (" +
-                        getRoleConditionForPublisher(roles) +
+                    "SELECT DISTINCT a2.API_UUID " +
+                    "FROM AM_ARTIFACT_DATA a2 " +
+                    "JOIN AM_ARTIFACT_DATA a3 " +
+                    "ON a2.API_UUID = a3.API_UUID " +
+                    "WHERE CONTAINS(a2.METADATA, '" + searchQuery + "') > 0 " +
+                    "AND a3.type = 'API' " +
+                    "AND ( " +
+                        getRoleConditionForPublisherUnifiedSearch(roles) +
                     ") " +
-                ") filtered_api " +
-                "ON a1.API_UUID = filtered_api.API_UUID " +
+                ") filtered_api ON a1.API_UUID = filtered_api.API_UUID " +
                 "WHERE a1.ORG_NAME = ? " +
-                "AND TYPE != 'THUMBNAIL' " +
+                "AND a1.TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
@@ -1231,7 +1250,7 @@ public class Oracle implements SQLQueryInterface {
 
     @Override
     public String getAllApiArtifactsForDevPortalSql(String[] roles) {
-        log.debug("Retrieving all API artifacts for Developer Portal with roles: " + Arrays.toString(roles));
+        log.debug("Retrieving all API artifacts for Developer Portal with roles: " +  Arrays.toString(roles));
         return "SELECT * FROM AM_ARTIFACT_DATA " +
                 "WHERE API_STATUS = 'published' " +
                 "AND ORG_NAME = ? " +
@@ -1260,24 +1279,19 @@ public class Oracle implements SQLQueryInterface {
         return "SELECT a1.metadata, a1.api_uuid, a1.type, a1.uuid " +
                 "FROM AM_ARTIFACT_DATA a1 " +
                 "JOIN (" +
-                "SELECT API_UUID " +
-                "FROM ( " +
-                "SELECT DISTINCT API_UUID " +
-                "FROM AM_ARTIFACT_DATA " +
-                "WHERE CONTAINS(METADATA, '" + searchQuery + "') > 0 " +
-                ") metadata_uuids " +
-                "INTERSECT " +
-                "SELECT DISTINCT API_UUID " +
-                "FROM AM_ARTIFACT_DATA " +
-                "WHERE TYPE = 'API' " +
-                "AND API_STATUS = 'published' " +
-                "AND (" +
-                getRoleConditionForDevPortal(roles) +
+                "SELECT DISTINCT a2.API_UUID " +
+                "FROM AM_ARTIFACT_DATA a2 " +
+                "JOIN AM_ARTIFACT_DATA a3 " +
+                "ON a2.API_UUID = a3.API_UUID " +
+                "WHERE CONTAINS(a2.METADATA, '" + searchQuery + "') > 0 " +
+                "AND a3.type = 'API' " +
+                "AND a3.API_STATUS = 'published' " +
+                "AND ( " +
+                getRoleConditionForDevPortalUnifiedSearch(roles) +
                 ") " +
-                ") filtered_api " +
-                "ON a1.API_UUID = filtered_api.API_UUID " +
+                ") filtered_api ON a1.API_UUID = filtered_api.API_UUID " +
                 "WHERE a1.ORG_NAME = ? " +
-                "AND TYPE != 'THUMBNAIL' " +
+                "AND a1.TYPE != 'THUMBNAIL' " +
                 "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
     }
 
