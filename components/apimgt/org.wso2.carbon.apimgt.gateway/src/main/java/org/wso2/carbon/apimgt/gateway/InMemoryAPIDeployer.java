@@ -242,6 +242,10 @@ public class InMemoryAPIDeployer {
                     PrivilegedCarbonContext.startTenantFlow();
                     PrivilegedCarbonContext.getThreadLocalCarbonContext()
                             .setTenantDomain(tenantDomain, true);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Retrieving all artifacts for the gateway with the labels: " + labelString +
+                                " for tenant: " + tenantDomain);
+                    }
                     List<String> gatewayRuntimeArtifacts = ServiceReferenceHolder.getInstance().getArtifactRetriever()
                             .retrieveAllArtifacts(encodedString, tenantDomain);
                     if (gatewayRuntimeArtifacts.isEmpty()) {
