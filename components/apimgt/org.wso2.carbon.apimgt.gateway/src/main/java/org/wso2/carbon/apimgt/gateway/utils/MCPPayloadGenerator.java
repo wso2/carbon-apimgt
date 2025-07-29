@@ -108,29 +108,33 @@ public class MCPPayloadGenerator {
         JsonArray sanitizedArray = new JsonArray();
 
         // remove the header, query, and path prefixes from the required fields
-        for (JsonElement element : requiredArray) {
-            String requiredField = element.getAsString();
-            String sanitizedRequiredField;
-            if (!"requestBody".equalsIgnoreCase(requiredField)) {
-                sanitizedRequiredField = requiredField.split("_", 2)[1];
-            } else {
-                sanitizedRequiredField = requiredField;
+        if (requiredArray != null) {
+            for (JsonElement element : requiredArray) {
+                String requiredField = element.getAsString();
+                String sanitizedRequiredField;
+                if (!"requestBody".equalsIgnoreCase(requiredField)) {
+                    sanitizedRequiredField = requiredField.split("_", 2)[1];
+                } else {
+                    sanitizedRequiredField = requiredField;
+                }
+                sanitizedArray.add(sanitizedRequiredField);
             }
-            sanitizedArray.add(sanitizedRequiredField);
         }
         inputObject.add(APIConstants.MCP.REQUIRED_KEY, sanitizedArray);
 
         // remove the header, query, and path prefixes from the properties keys
         JsonObject propertiesObject = inputObject.getAsJsonObject(APIConstants.MCP.PROPERTIES_KEY);
         JsonObject sanitizedPropertiesObject = new JsonObject();
-        for (Map.Entry<String, JsonElement> entry : propertiesObject.entrySet()) {
-            String key = entry.getKey();
-            if ("requestBody".equalsIgnoreCase(key)) {
-                sanitizedPropertiesObject.add("requestBody", entry.getValue());
-                continue;
+        if (propertiesObject != null) {
+            for (Map.Entry<String, JsonElement> entry : propertiesObject.entrySet()) {
+                String key = entry.getKey();
+                if ("requestBody".equalsIgnoreCase(key)) {
+                    sanitizedPropertiesObject.add("requestBody", entry.getValue());
+                    continue;
+                }
+                String sanitizedKey = key.split("_", 2)[1];
+                sanitizedPropertiesObject.add(sanitizedKey, entry.getValue().getAsJsonObject());
             }
-            String sanitizedKey = key.split("_", 2)[1];
-            sanitizedPropertiesObject.add(sanitizedKey, entry.getValue().getAsJsonObject());
         }
         inputObject.add(APIConstants.MCP.PROPERTIES_KEY, sanitizedPropertiesObject);
         return inputObject;

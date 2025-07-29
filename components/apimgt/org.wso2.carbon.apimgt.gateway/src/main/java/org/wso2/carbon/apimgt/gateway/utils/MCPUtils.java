@@ -1,16 +1,31 @@
 package org.wso2.carbon.apimgt.gateway.utils;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import org.apache.axis2.AxisFault;
+import org.apache.axis2.Constants;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.exception.McpException;
 import org.wso2.carbon.apimgt.gateway.exception.McpExceptionWithId;
+import org.wso2.carbon.apimgt.gateway.mcp.Param;
+import org.wso2.carbon.apimgt.gateway.mcp.SchemaMapping;
 import org.wso2.carbon.apimgt.gateway.mcp.response.McpResponseDto;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.StreamSupport;
 
 public class MCPUtils {
 
@@ -80,7 +95,7 @@ public class MCPUtils {
      * @param additionalHeaders additional headers to send
      * @return the response payload as a String
      */
-    public static McpResponseDto processInternalRequest(API matchedMcpApi, JsonObject requestObject, String method,
+    public static McpResponseDto processInternalRequest(MessageContext messageContext, API matchedMcpApi, JsonObject requestObject, String method,
                                                         Map<String, String> additionalHeaders) {
         try {
             Object id = -1;
@@ -93,7 +108,8 @@ public class MCPUtils {
             } else if (APIConstants.MCP.METHOD_TOOL_LIST.equals(method)) {
                 return handleMcpToolList(id, matchedMcpApi, false);
             } else if (APIConstants.MCP.METHOD_TOOL_CALL.equals(method)) {
-
+                validateToolsCallRequest(requestObject, matchedMcpApi);
+                return handleMcpToolsCall(messageContext, id, matchedMcpApi, requestObject, additionalHeaders);
             } else if (APIConstants.MCP.METHOD_PING.equals(method)) {
 
             } else if (APIConstants.MCP.METHOD_RESOURCES_LIST.equals(method)) {
@@ -134,6 +150,42 @@ public class MCPUtils {
         }
     }
 
+    private static void validateToolsCallRequest(JsonObject jsonObject, API matchedApi) throws McpException {
+        if (jsonObject.has(APIConstants.MCP.PARAMS_KEY)) {
+            JsonObject params = jsonObject.getAsJsonObject(APIConstants.MCP.PARAMS_KEY);
+            if (params.has("name")) {
+                JsonElement toolNameElement = params.get("name");
+                if (toolNameElement == null || toolNameElement.isJsonNull()) {
+                    throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
+                            APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing toolName field");
+                }
+                String toolName = toolNameElement.getAsString();
+                if (toolName == null || toolName.isEmpty()) {
+                    throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
+                            APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing toolName field");
+                } else {
+                    if (!validateToolName(toolName, matchedApi)) {
+                        throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
+                                APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "The requested tool does not exist");
+                    }
+                }
+            } else {
+                throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
+                        APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing toolName field");
+            }
+        } else {
+            throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
+                    APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing params field");
+        }
+    }
+
+    private static boolean validateToolName(String toolName, API matchedApi) {
+        return matchedApi.getUrlMappings()
+                .stream()
+                .anyMatch(operation -> toolName.equals(operation.getUrlPattern()));
+    }
+
+
     public static McpResponseDto handleMcpInitialize(Object id, API matchedApi) {
         String name = matchedApi.getName();
         String version = matchedApi.getVersion();
@@ -147,6 +199,215 @@ public class MCPUtils {
         return new McpResponseDto(
                 MCPPayloadGenerator.generateToolListPayload(id, matchedApi.getUrlMappings(),
                         isThirdParty), 200, null);
+    }
+
+    private static McpResponseDto handleMcpToolsCall(MessageContext messageContext, Object id, API matchedApi, JsonObject jsonObject,
+                                                     Map<String, String> additionalHeaders)
+            throws McpException {
+        JsonObject params = jsonObject.getAsJsonObject(APIConstants.MCP.PARAMS_KEY);
+        String toolName = params.get(APIConstants.MCP.TOOL_NAME_KEY).getAsString();
+        URLMapping extendedOperation = matchedApi.getUrlMappings()
+                .stream()
+                .filter(operation -> operation.getUrlPattern().equals(toolName))
+                .findFirst()
+                .orElse(null);
+
+        String args;
+        if (params.has(APIConstants.MCP.ARGUMENTS_KEY)) {
+            args = params.get(APIConstants.MCP.ARGUMENTS_KEY).toString();
+        } else {
+            args = "{}";
+        }
+
+        transformMcpRequest(messageContext, extendedOperation, jsonObject);
+
+        return new McpResponseDto("success", 200, null);
+        // for now only supported mode is Rest API Backend
+
+    }
+
+    private static void transformMcpRequest(MessageContext messageContext, URLMapping extendedOperation,
+                                            JsonObject jsonObject) throws McpException {
+        if (extendedOperation != null) {
+            BackendOperationMapping backendOperationMapping = extendedOperation.getBackendOperationMapping();
+            if (backendOperationMapping != null) {
+                BackendOperation backendOperation = backendOperationMapping.getBackendOperation();
+                if (backendOperation != null) {
+                    //process HTTP Verb
+                    String verb = backendOperation.getVerb();
+
+                    //process schema
+                    String schemaDefinition = extendedOperation.getSchemaDefinition();
+                    SchemaMapping schemaMapping = processMcpSchema(schemaDefinition);
+
+                    //process endpoint URL including query and path params
+                    processEndpoint(messageContext, schemaMapping, jsonObject, backendOperation);
+
+                    //process headers
+                    processHeaders(messageContext, schemaMapping, jsonObject);
+
+                    //process request body
+                    processRequestBody(messageContext, schemaMapping, jsonObject);
+                }
+            }
+        } else {
+            //todo: handle error
+        }
+    }
+
+    private static SchemaMapping processMcpSchema(String schemaDefinition) {
+        JsonObject schemaJson = JsonParser.parseString(schemaDefinition).getAsJsonObject();
+
+        SchemaMapping schemaMapping = new SchemaMapping();
+        List<Param> queryParams = new ArrayList<>();
+        List<Param> headerParams = new ArrayList<>();
+        List<String> pathParams = new ArrayList<>();
+
+        JsonObject properties = new JsonObject();
+        JsonArray requiredProperties = new JsonArray();
+        if (schemaJson.get(APIConstants.MCP.PROPERTIES_KEY) != null) {
+            properties = schemaJson.get(APIConstants.MCP.PROPERTIES_KEY).getAsJsonObject();
+        }
+
+        if (schemaJson.get(APIConstants.MCP.REQUIRED_KEY) != null) {
+            requiredProperties = schemaJson.get(APIConstants.MCP.REQUIRED_KEY).getAsJsonArray();
+        }
+
+        for (Map.Entry<String, JsonElement> entry : properties.entrySet()) {
+            String key = entry.getKey();
+            JsonElement value = entry.getValue();
+            if ("requestBody".equalsIgnoreCase(key)) {
+                JsonObject requestBodySchema = value.getAsJsonObject();
+                schemaMapping.setContentType(requestBodySchema.get("contentType").getAsString());
+                schemaMapping.setHasBody(true);
+                continue;
+            }
+
+            String[] meta = key.split("_", 2);
+            String paramType = meta[0];
+            String paramName = meta[1];
+
+            Param param = new Param();
+            param.setName(paramName);
+            param.setRequired(StreamSupport.stream(requiredProperties.spliterator(), false)
+                    .anyMatch(e -> e.getAsString().equals(key)));
+            switch(paramType) {
+                case "query":
+                    queryParams.add(param);
+                    break;
+                case "header":
+                    headerParams.add(param);
+                    break;
+                case "path":
+                    pathParams.add(paramName);
+            }
+        }
+        schemaMapping.setQueryParams(queryParams);
+        schemaMapping.setHeaderParams(headerParams);
+        schemaMapping.setPathParams(pathParams);
+        return schemaMapping;
+    }
+
+    private static void processEndpoint(MessageContext messageContext, SchemaMapping schemaMapping, JsonObject jsonObject,
+                                        BackendOperation backendOperation) {
+        String httpMethod = backendOperation.getVerb();
+        String target = backendOperation.getTarget();
+
+        StringBuilder resourcePath = new StringBuilder();
+        StringBuilder queryString = new StringBuilder();
+        resourcePath.append(target);
+        List<Param> queryParams = schemaMapping.getQueryParams();
+        JsonObject paramsObj = jsonObject.getAsJsonObject(APIConstants.MCP.PARAMS_KEY);
+        if (paramsObj != null && !paramsObj.isEmpty()) {
+            JsonObject argumentObj = paramsObj.getAsJsonObject(APIConstants.MCP.ARGUMENTS_KEY);
+            for (Param param : queryParams) {
+                String paramName = param.getName();
+                boolean isParamRequired = param.isRequired();
+
+                if (argumentObj.get(paramName) != null) {
+                    String paramValue = argumentObj.get(paramName).getAsString();
+                    if (queryString.length() == 0) {
+                        queryString.append(paramName).append("=").append(paramValue);
+                    } else {
+                        queryString.append("&").append(paramName).append("=").append(paramValue);
+                    }
+                } else {
+                    if (isParamRequired) {
+                        //todo: handle error
+                    }
+                }
+            }
+            if (queryString.length() > 0) {
+                resourcePath.append("?").append(queryString);
+            }
+
+            List<String> pathParams = schemaMapping.getPathParams();
+            String resourcePathString = resourcePath.toString();
+            for (String pathParam : pathParams) {
+                String paramValue = argumentObj.get(pathParam).getAsString();
+                resourcePathString = resourcePathString.replace("{" + pathParam + "}", paramValue);
+            }
+            resourcePath.setLength(0);
+            resourcePath.append(resourcePathString);
+
+            org.apache.axis2.context.MessageContext axis2MessageContext =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            axis2MessageContext.setProperty(APIMgtGatewayConstants.REST_URL_POSTFIX, resourcePath.toString());
+            axis2MessageContext.setProperty(APIConstants.RESOURCE_METHOD, httpMethod.toUpperCase());
+        }
+    }
+
+    public static void processHeaders(MessageContext messageContext, SchemaMapping schemaMapping, JsonObject jsonObject) {
+        JsonObject paramsObj = jsonObject.getAsJsonObject(APIConstants.MCP.PARAMS_KEY);
+        if (paramsObj != null && !paramsObj.isEmpty()) {
+            JsonObject argumentObj = paramsObj.getAsJsonObject(APIConstants.MCP.ARGUMENTS_KEY);
+
+            List<Param> headerParams = schemaMapping.getHeaderParams();
+            org.apache.axis2.context.MessageContext axis2MessageContext =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            Map headers = (Map) axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+            for (Param param : headerParams) {
+                String paramName = param.getName();
+                boolean isParamRequired = param.isRequired();
+
+                if (argumentObj.get(paramName) != null) {
+                    String paramValue = argumentObj.get(paramName).getAsString();
+                    headers.put(paramName, paramValue);
+                } else {
+                    if (isParamRequired) {
+                        //todo: handle error
+                    }
+                }
+            }
+        }
+    }
+
+    public static void processRequestBody(MessageContext messageContext, SchemaMapping schemaMapping, JsonObject jsonObject) {
+        String contentType = schemaMapping.getContentType();
+
+        JsonObject paramsObj = jsonObject.getAsJsonObject(APIConstants.MCP.PARAMS_KEY);
+        if (paramsObj != null && !paramsObj.isEmpty()) {
+            JsonObject argumentObj = paramsObj.getAsJsonObject(APIConstants.MCP.ARGUMENTS_KEY);
+            if (schemaMapping.isHasBody()) {
+                org.apache.axis2.context.MessageContext axis2MessageContext =
+                        ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+
+                if (APIConstants.APPLICATION_JSON_MEDIA_TYPE.equals(contentType)) {
+                    JsonObject requestBody = argumentObj.get("requestBody").getAsJsonObject();
+
+                    try {
+                        JsonUtil.removeJsonPayload(axis2MessageContext);
+                        JsonUtil.getNewJsonPayload(axis2MessageContext, requestBody.getAsJsonObject().toString(), true, true);
+                        axis2MessageContext.setProperty(Constants.Configuration.MESSAGE_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                        axis2MessageContext.setProperty(Constants.Configuration.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                    } catch (AxisFault e) {
+                        //todo: handle fault
+                    }
+                } else if (APIConstants.APPLICATION_XML_MEDIA_TYPE.equals(contentType)) {
+                    //todo: handle xml payloads
+                }
+            }
+        }
     }
 
     private static void throwMissingJsonRpcError() throws McpException {

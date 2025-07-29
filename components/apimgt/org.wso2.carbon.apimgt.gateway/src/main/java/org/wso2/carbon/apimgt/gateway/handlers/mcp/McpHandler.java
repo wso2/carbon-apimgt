@@ -65,12 +65,12 @@ public class McpHandler extends AbstractHandler implements ManagedLifecycle {
             if (JsonUtil.hasAJsonPayload(axis2MC)) {
                 messageBody = JsonUtil.jsonPayloadToString(axis2MC);
             } else {
-                //TODO: in case no json payload present ??
-                messageBody = messageContext.getEnvelope().toString();
+                throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
+                        APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "No JSON-RPC payload found");
             }
         } catch (Exception e) {
-            //TODO: Handle error
-            messageBody = "Malformed Message";
+            throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
+                    APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Invalid or Malformed JSON-RPC payload found");
         }
         JsonObject requestObject =  MCPUtils.parseAndValidateRequest(messageBody);
         String method = requestObject.get(APIConstants.MCP.RpcConstants.METHOD).getAsString();

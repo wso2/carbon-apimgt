@@ -26,6 +26,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -1320,6 +1322,8 @@ public class SubscriptionValidationDAO {
                     String scopeName = resultSet.getString("SCOPE_NAME");
                     String description = resultSet.getString("DESCRIPTION");
                     String schemaDefinition = resultSet.getString("SCHEMA_DEFINITION");
+                    String target = resultSet.getString("TARGET");
+                    String verb = resultSet.getString("VERB");
                     URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
                     if (urlMapping == null) {
                         urlMapping = new URLMapping();
@@ -1329,6 +1333,14 @@ public class SubscriptionValidationDAO {
                         urlMapping.setUrlPattern(urlPattern);
                         urlMapping.setDescription(description);
                         urlMapping.setSchemaDefinition(schemaDefinition);
+
+                        BackendOperation backendOperation = new BackendOperation();
+                        backendOperation.setTarget(target);
+                        backendOperation.setVerb(verb);
+
+                        BackendOperationMapping backendOperationMapping = new BackendOperationMapping();
+                        backendOperationMapping.setBackendOperation(backendOperation);
+                        urlMapping.setBackendOperationMapping(backendOperationMapping);
                     }
                     if (StringUtils.isNotEmpty(scopeName)) {
                         urlMapping.addScope(scopeName);

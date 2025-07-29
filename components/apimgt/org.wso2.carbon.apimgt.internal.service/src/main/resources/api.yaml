@@ -1859,6 +1859,8 @@ components:
           type: string
         schemaDefinition:
           type: string
+        backendOperationMapping:
+          $ref: '#/components/schemas/BackendOperationMapping'
         operationPolicies:
           type: array
           items:
@@ -2172,7 +2174,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EndpointCertificate'
-
+    BackendOperation:
+      title: BackendOperation
+      type: object
+      properties:
+        target:
+          type: string
+        verb:
+          type: string
+    BackendOperationMapping:
+      title: BackendOperationMapping
+      type: object
+      properties:
+        backendId:
+          type: string
+        backendOperation:
+          $ref: '#/components/schemas/BackendOperation'
   parameters:
     requestedTenant:
       name: xWSO2Tenant

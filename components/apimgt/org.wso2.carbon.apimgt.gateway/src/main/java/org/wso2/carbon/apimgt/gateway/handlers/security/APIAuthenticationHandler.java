@@ -445,7 +445,11 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
 
             messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
-            boolean isMCPNoAuthRequest = (boolean) messageContext.getProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST);
+            boolean isMCPNoAuthRequest = false;
+            if (messageContext.getProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST) != null) {
+                isMCPNoAuthRequest = (boolean) messageContext.getProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST);
+            }
+
             if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) && isMCPNoAuthRequest) {
                 log.debug("Skipping authentication for MCP request"
                         + ", method: " + messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
@@ -465,7 +469,7 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 String authenticationScheme;
                 String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
                 if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) &&
-                        APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod)) {
+                        (APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod) || APIConstants.MCP.METHOD_TOOL_CALL.equals(mcpMethod))) {
                     // todo: iterate tools and set auth scheme
                     authenticationScheme = APIConstants.AUTH_NO_AUTHENTICATION;
                 } else {

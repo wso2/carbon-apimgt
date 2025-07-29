@@ -25,9 +25,7 @@ import org.wso2.carbon.apimgt.api.APIConsumer;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
-import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.OperationPolicy;
-import org.wso2.carbon.apimgt.api.model.Scope;
+import org.wso2.carbon.apimgt.api.model.*;
 import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
 import org.wso2.carbon.apimgt.api.model.policy.EventCountLimit;
@@ -94,6 +92,22 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setScopes(urlMapping.getScopes());
                 urlMappingDTO.setDescription(urlMapping.getDescription());
                 urlMappingDTO.setSchemaDefinition(urlMapping.getSchemaDefinition());
+
+                BackendOperationMapping backendOperationMapping = urlMapping.getBackendOperationMapping();
+                if (backendOperationMapping != null) {
+                    BackendOperation backendOperation = backendOperationMapping.getBackendOperation();
+                    if (backendOperation != null) {
+                        BackendOperationDTO backendOperationDTO = new BackendOperationDTO();
+                        backendOperationDTO.setVerb(backendOperation.getVerb());
+                        backendOperationDTO.setTarget(backendOperation.getTarget());
+
+                        BackendOperationMappingDTO backendOperationMappingDTO = new BackendOperationMappingDTO();
+                        backendOperationMappingDTO.setBackendId(backendOperationMapping.getBackendId());
+                        backendOperationMappingDTO.setBackendOperation(backendOperationDTO);
+                        urlMappingDTO.setBackendOperationMapping(backendOperationMappingDTO);
+                    }
+                }
+
                 List<OperationPolicyDTO> operationPolicyDTOList = new ArrayList<>();
                 for (OperationPolicy operationPolicy : urlMapping.getOperationPolicies()) {
                     OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
@@ -159,6 +173,22 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setScopes(urlMapping.getScopes());
                 urlMappingDTO.setDescription(urlMapping.getDescription());
                 urlMappingDTO.setSchemaDefinition(urlMapping.getSchemaDefinition());
+
+                BackendOperationMapping backendOperationMapping = urlMapping.getBackendOperationMapping();
+                if (backendOperationMapping != null) {
+                    BackendOperation backendOperation = backendOperationMapping.getBackendOperation();
+                    if (backendOperation != null) {
+                        BackendOperationDTO backendOperationDTO = new BackendOperationDTO();
+                        backendOperationDTO.setVerb(backendOperation.getVerb());
+                        backendOperationDTO.setTarget(backendOperation.getTarget());
+
+                        BackendOperationMappingDTO backendOperationMappingDTO = new BackendOperationMappingDTO();
+                        backendOperationMappingDTO.setBackendId(backendOperationMapping.getBackendId());
+                        backendOperationMappingDTO.setBackendOperation(backendOperationDTO);
+                        urlMappingDTO.setBackendOperationMapping(backendOperationMappingDTO);
+                    }
+                }
+
                 List<OperationPolicyDTO> operationPolicyDTOList = new ArrayList<>();
                 for (OperationPolicy operationPolicy : urlMapping.getOperationPolicies()) {
                     OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();

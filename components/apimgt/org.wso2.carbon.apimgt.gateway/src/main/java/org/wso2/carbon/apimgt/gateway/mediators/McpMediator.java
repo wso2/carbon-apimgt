@@ -50,7 +50,6 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         String path = (String) messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
         String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
 
-
         if (path.equals(APIMgtGatewayConstants.MCP_RESOURCE) && httpMethod.equals(APIConstants.HTTP_POST)) {
             handleMcpRequest(messageContext);
         } else if (path.equals(APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE) && httpMethod.equals(APIConstants.HTTP_GET)) {
@@ -69,28 +68,29 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         // TODO : Check application of below
         Map<String, String> additionalHeaders = new HashMap<>();
 
-        McpResponseDto mcpResponse = McpRequestProcessor.processRequest(matchedAPI, new Gson().toJson(requestBody),
+        McpResponseDto mcpResponse = McpRequestProcessor.processRequest(messageContext, matchedAPI, new Gson().toJson(requestBody),
                 additionalHeaders);
         if (APIConstants.MCP.METHOD_INITIALIZE.equals(mcpMethod) || APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod)) {
             messageContext.setProperty("MCP_PROCESSED", "true");
-        }
-
-        org.apache.axis2.context.MessageContext axis2MessageContext =
-                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
-        if (mcpResponse != null) {
-            try {
+            org.apache.axis2.context.MessageContext axis2MessageContext =
+                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+            if (mcpResponse != null) {
+                try {
+                    JsonUtil.removeJsonPayload(axis2MessageContext);
+                    JsonUtil.getNewJsonPayload(axis2MessageContext, mcpResponse.getResponse(), true, true);
+                    axis2MessageContext.setProperty(Constants.Configuration.MESSAGE_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                    axis2MessageContext.setProperty(Constants.Configuration.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                    axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, mcpResponse.getStatusCode());
+                } catch (AxisFault e) {
+                    log.error("Error while generating mcp payload " + axis2MessageContext.getLogIDString(), e);
+                }
+            } else {
+                //todo : check further
                 JsonUtil.removeJsonPayload(axis2MessageContext);
-                JsonUtil.getNewJsonPayload(axis2MessageContext, mcpResponse.getResponse(), true, true);
-                axis2MessageContext.setProperty(Constants.Configuration.MESSAGE_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-                axis2MessageContext.setProperty(Constants.Configuration.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-                axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, mcpResponse.getStatusCode());
-            } catch (AxisFault e) {
-                log.error("Error while generating mcp payload " + axis2MessageContext.getLogIDString(), e);
+                axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, HttpStatus.SC_NO_CONTENT);
             }
         } else {
-            //todo : check further
-            JsonUtil.removeJsonPayload(axis2MessageContext);
-            axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, HttpStatus.SC_NO_CONTENT);
+            //follow normal message flow for tools/call
         }
     }
 }
