@@ -2978,6 +2978,7 @@ public final class APIConstants {
         public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
         public static final String APPLICATION_GRANT_TYPE = "application";
         public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";
+        
 
         public static class KeyManagerEvent {
 
@@ -2995,6 +2996,16 @@ public final class APIConstants {
             public static final String TOKEN_TYPE = "tokenType";
             public static final String KEY_MANAGER_STREAM_ID = "org.wso2.apimgt.keymgt.stream:1.0.0";
         }
+        
+    }
+    
+    public static class TenantManagementEvent {
+        public static final String TENANT_MANAGMENT_TYPE = "TENANT_MANAGEMENT";
+        public static final String TYPE_ADD_TENANT = "add-tenant";
+        public static final String TYPE_UPDATE_TENANT = "update-tenant";
+        public static final String TYPE_ACTIVATE_TENANT = "activate-tenant";
+        public static final String TYPE_DEACTIVATE_TENANT = "deactivate-tenant";
+        
     }
 
     public static class GlobalCacheInvalidation {

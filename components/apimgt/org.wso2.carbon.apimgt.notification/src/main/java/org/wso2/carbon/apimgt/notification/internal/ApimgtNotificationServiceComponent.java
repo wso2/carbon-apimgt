@@ -29,6 +29,7 @@ import org.wso2.carbon.apimgt.impl.handlers.EventHandler;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyManagerEventHandler;
 import org.wso2.carbon.apimgt.notification.DefaultKeyManagerEventHandlerImpl;
 import org.wso2.carbon.apimgt.notification.NotificationEventService;
+import org.wso2.carbon.apimgt.notification.TenantManagementEventHandler;
 import org.wso2.carbon.apimgt.notification.WebhooksDeliveryEventHandler;
 import org.wso2.carbon.apimgt.notification.WebhooksSubscriptionEventHandler;
 import org.wso2.carbon.event.stream.core.EventStreamService;
@@ -47,6 +48,8 @@ public class ApimgtNotificationServiceComponent {
         ctxt.getBundleContext().registerService(EventHandler.class, new WebhooksSubscriptionEventHandler(),
                 null);
         ctxt.getBundleContext().registerService(EventHandler.class, new WebhooksDeliveryEventHandler(),
+                null);
+        ctxt.getBundleContext().registerService(EventHandler.class, new TenantManagementEventHandler(),
                 null);
         ctxt.getBundleContext().registerService(NotificationEventService.class, new NotificationEventService(), null);
     }
