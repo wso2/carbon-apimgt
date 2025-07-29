@@ -79,7 +79,7 @@ public class DBRetriever implements ArtifactRetriever {
         try {
             String encodedGatewayLabel = URLEncoder.encode(gatewayLabel, APIConstants.DigestAuthConstants.CHARSET);
             encodedGatewayLabel = encodedGatewayLabel.replace("\\+", "%20");
-            String path = APIConstants.GatewayArtifactSynchronizer.GATEAY_SYNAPSE_ARTIFACTS + "?apiId=" + apiId +
+            String path = APIConstants.GatewayArtifactSynchronizer.GATEWAY_SYNAPSE_ARTIFACTS + "?apiId=" + apiId +
                     "&gatewayLabel=" + encodedGatewayLabel + "&type=Synapse";
             String endpoint = baseURL + path;
             try (CloseableHttpResponse httpResponse = invokeService(endpoint, tenantDomain)) {
@@ -125,7 +125,7 @@ public class DBRetriever implements ArtifactRetriever {
         List<String> gatewayRuntimeArtifactsArray = new ArrayList<>();
         try {
             String endcodedgatewayLabel = URLEncoder.encode(label, APIConstants.DigestAuthConstants.CHARSET);
-            String path = APIConstants.GatewayArtifactSynchronizer.GATEAY_SYNAPSE_ARTIFACTS
+            String path = APIConstants.GatewayArtifactSynchronizer.GATEWAY_SYNAPSE_ARTIFACTS
                     + "?gatewayLabel=" + endcodedgatewayLabel + "&type=Synapse";
             String endpoint = baseURL + path;
             try (CloseableHttpResponse httpResponse = invokeService(endpoint,tenantDomain)) {
