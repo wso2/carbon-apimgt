@@ -1,27 +1,4 @@
-/*
-*  Copyright (c) 2005-2011, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
-*
-*  WSO2 Inc. licenses this file to you under the Apache License,
-*  Version 2.0 (the "License"); you may not use this file except
-*  in compliance with the License.
-*  You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing,
-* software distributed under the License is distributed on an
-* "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-* KIND, either express or implied.  See the License for the
-* specific language governing permissions and limitations
-* under the License.
-*/
-
-package org.wso2.carbon.apimgt.impl.utils;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+package org.wso2.carbon.apimgt.persistence.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
@@ -33,8 +10,8 @@ import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.WorkflowStatus;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Environment;
-import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
-import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.persistence.PersistenceManagerConfiguration;
+import org.wso2.carbon.apimgt.persistence.internal.ServiceReferenceHolder;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -46,15 +23,19 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public final class APIMgtDBUtil {
+public class PersistenceDBUtil {
 
-    private static final Log log = LogFactory.getLog(APIMgtDBUtil.class);
+    private static final Log log = LogFactory.getLog(PersistenceDBUtil.class);
 
     private static volatile DataSource dataSource = null;
     private static final String DB_CHECK_SQL = "SELECT * FROM AM_SUBSCRIBER";
-    
-    private static final String DATA_SOURCE_NAME = "DataSourceName";
+
+    private static final String DATA_SOURCE_NAME = "jdbc/WSO2AM_DB";
 
     /**
      * Initializes the data source
@@ -66,16 +47,12 @@ public final class APIMgtDBUtil {
             return;
         }
 
-        synchronized (APIMgtDBUtil.class) {
+        synchronized (PersistenceDBUtil.class) {
             if (dataSource == null) {
                 if (log.isDebugEnabled()) {
                     log.debug("Initializing data source");
                 }
-                APIManagerConfiguration config = ServiceReferenceHolder.getInstance().
-                        getAPIManagerConfigurationService().getAPIManagerConfiguration();
-                String dataSourceName = config.getFirstProperty(DATA_SOURCE_NAME);
-
-                log.info("DATA SOURCE NAME: " + dataSourceName);
+                String dataSourceName = DATA_SOURCE_NAME;
 
                 if (dataSourceName != null) {
                     try {
@@ -237,71 +214,71 @@ public final class APIMgtDBUtil {
      * @throws SQLException sql exception
      * @throws APIManagementException api management exception
      */
-    public static List<APIRevisionDeployment> mergeRevisionDeploymentDTOs(ResultSet rs) throws APIManagementException,
-            SQLException {
-        List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
-        Map<String, APIRevisionDeployment> uniqueSet = new HashMap<>();
-        while (rs.next()) {
-            APIRevisionDeployment apiRevisionDeployment;
-            String environmentName = rs.getString("NAME");
-
-            // If the gateway defined in the deployment.toml file has been decommissioned, ignore all revision
-            // deployments for that gateway
-            if (StringUtils.isEmpty(rs.getString("VHOST"))) {
-                Map<String, Environment> readOnlyEnvironments = APIUtil.getReadOnlyEnvironments();
-                if (readOnlyEnvironments.get(environmentName) == null) {
-                    continue;
-                }
-            }
-            String vhost = VHostUtils.resolveIfNullToDefaultVhost(environmentName,
-                    rs.getString("VHOST"));
-            String revisionUuid = rs.getString("REVISION_UUID");
-            String uniqueKey = (environmentName != null ? environmentName : "") +
-                    (vhost != null ? vhost : "") + (revisionUuid != null ? revisionUuid : "");
-            String revisionStatus = rs.getString("REVISION_STATUS");
-            WorkflowStatus status = null;
-            if (revisionStatus != null) {
-                switch (revisionStatus) {
-                case "CREATED":
-                    status = WorkflowStatus.CREATED;
-                    break;
-                case "APPROVED":
-                    status = WorkflowStatus.APPROVED;
-                    break;
-                case "REJECTED":
-                    status = WorkflowStatus.REJECTED;
-                    break;
-                default:
-                    // Handle the case where revisionStatus is not one of the expected values
-                    break;
-                }
-            }
-            if (!uniqueSet.containsKey(uniqueKey)) {
-                apiRevisionDeployment = new APIRevisionDeployment();
-                apiRevisionDeployment.setDeployment(environmentName);
-                apiRevisionDeployment.setVhost(vhost);
-                apiRevisionDeployment.setRevisionUUID(revisionUuid);
-                apiRevisionDeployment.setStatus(status);
-                apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
-                apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
-                apiRevisionDeploymentList.add(apiRevisionDeployment);
-                uniqueSet.put(uniqueKey, apiRevisionDeployment);
-            } else {
-                apiRevisionDeployment = uniqueSet.get(uniqueKey);
-                if (!apiRevisionDeployment.isDisplayOnDevportal()) {
-                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
-                }
-                if (apiRevisionDeployment.getDeployedTime() == null) {
-                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
-                }
-                if (apiRevisionDeployment.getSuccessDeployedTime() == null) {
-                    apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
-                }
-            }
-        }
-        return  apiRevisionDeploymentList;
-    }
+//    public static List<APIRevisionDeployment> mergeRevisionDeploymentDTOs(ResultSet rs) throws APIManagementException,
+//            SQLException {
+//        List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
+//        Map<String, APIRevisionDeployment> uniqueSet = new HashMap<>();
+//        while (rs.next()) {
+//            APIRevisionDeployment apiRevisionDeployment;
+//            String environmentName = rs.getString("NAME");
+//
+//            // If the gateway defined in the deployment.toml file has been decommissioned, ignore all revision
+//            // deployments for that gateway
+//            if (StringUtils.isEmpty(rs.getString("VHOST"))) {
+//                Map<String, Environment> readOnlyEnvironments = APIUtil.getReadOnlyEnvironments();
+//                if (readOnlyEnvironments.get(environmentName) == null) {
+//                    continue;
+//                }
+//            }
+//            String vhost = VHostUtils.resolveIfNullToDefaultVhost(environmentName,
+//                    rs.getString("VHOST"));
+//            String revisionUuid = rs.getString("REVISION_UUID");
+//            String uniqueKey = (environmentName != null ? environmentName : "") +
+//                    (vhost != null ? vhost : "") + (revisionUuid != null ? revisionUuid : "");
+//            String revisionStatus = rs.getString("REVISION_STATUS");
+//            WorkflowStatus status = null;
+//            if (revisionStatus != null) {
+//                switch (revisionStatus) {
+//                    case "CREATED":
+//                        status = WorkflowStatus.CREATED;
+//                        break;
+//                    case "APPROVED":
+//                        status = WorkflowStatus.APPROVED;
+//                        break;
+//                    case "REJECTED":
+//                        status = WorkflowStatus.REJECTED;
+//                        break;
+//                    default:
+//                        // Handle the case where revisionStatus is not one of the expected values
+//                        break;
+//                }
+//            }
+//            if (!uniqueSet.containsKey(uniqueKey)) {
+//                apiRevisionDeployment = new APIRevisionDeployment();
+//                apiRevisionDeployment.setDeployment(environmentName);
+//                apiRevisionDeployment.setVhost(vhost);
+//                apiRevisionDeployment.setRevisionUUID(revisionUuid);
+//                apiRevisionDeployment.setStatus(status);
+//                apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+//                apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
+//                apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
+//                apiRevisionDeploymentList.add(apiRevisionDeployment);
+//                uniqueSet.put(uniqueKey, apiRevisionDeployment);
+//            } else {
+//                apiRevisionDeployment = uniqueSet.get(uniqueKey);
+//                if (!apiRevisionDeployment.isDisplayOnDevportal()) {
+//                    apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
+//                }
+//                if (apiRevisionDeployment.getDeployedTime() == null) {
+//                    apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
+//                }
+//                if (apiRevisionDeployment.getSuccessDeployedTime() == null) {
+//                    apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
+//                }
+//            }
+//        }
+//        return  apiRevisionDeploymentList;
+//    }
 
     /**
      * Converts a JSON Object String to a String Map

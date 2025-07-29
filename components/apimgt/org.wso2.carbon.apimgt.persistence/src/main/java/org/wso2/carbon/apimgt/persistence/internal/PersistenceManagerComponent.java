@@ -21,7 +21,9 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.*;
+import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
+import org.wso2.carbon.apimgt.persistence.utils.PersistenceDBUtil;
 import org.wso2.carbon.registry.core.service.RegistryService;
 import org.wso2.carbon.registry.core.service.TenantRegistryLoader;
 import org.wso2.carbon.registry.indexing.service.TenantIndexingLoader;
@@ -36,6 +38,11 @@ import org.wso2.carbon.utils.ConfigurationContextService;
 
     @Activate protected void activate(ComponentContext ctxt) {
         log.info("Activating PersistenceManagerComponent ");
+        try {
+            PersistenceDBUtil.initialize();
+        } catch (APIManagerDatabaseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Deactivate protected void deactivate(ComponentContext context) {

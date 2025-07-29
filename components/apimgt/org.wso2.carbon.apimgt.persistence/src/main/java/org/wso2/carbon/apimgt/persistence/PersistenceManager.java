@@ -40,7 +40,8 @@ public class PersistenceManager {
                 persistence = serviceReferenceHolder.getApiPersistence();
             } else {
                 if (persistence == null) {
-                    persistence = new RegistryPersistenceImpl(properties);
+//                    persistence = new RegistryPersistenceImpl(properties);
+                    persistence = new DatabasePersistenceImpl(properties);
                 }
             }
         }

@@ -119,7 +119,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
                 organization = tenantDomain;
             }
         }
-        API api = apiProvider.getAPIbyUUID(revisionUUID, organization);
+        API api = apiProvider.getAPIbyUUID(apiId, organization);
         api.setUuid(apiId);
         apiIdentifier.setUuid(apiId);
         APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
@@ -136,7 +136,7 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String userName = RestApiCommonUtil.getLoggedInUsername();
         APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(apiId);
-        APIProduct product = apiProvider.getAPIProductbyUUID(revisionUUID, organization);
+        APIProduct product = apiProvider.getAPIProductbyUUID(apiId, organization); // changed revisionUUID to apiId
         APIProductDTO apiProductDtoToReturn = APIMappingUtil.fromAPIProducttoDTO(product);
         return ExportUtils.exportApiProduct(apiProvider, apiProductIdentifier, apiProductDtoToReturn, userName,
                 format, preserveStatus, preserveDocs, preserveCredentials, organization);

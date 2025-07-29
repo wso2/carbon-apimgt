@@ -153,7 +153,7 @@ public final class APIConstants {
 
     //key value of the APIImpl rxt
     public static final String API_KEY = "api";
-    public static final String API_OVERVIEW_WS_URI_MAPPING = "overview_wsUriMapping";
+    public static final String  API_OVERVIEW_WS_URI_MAPPING = "overview_wsUriMapping";
     public static final String CHAR_ASTERIX = "*";
 
     public static class Monetization {
@@ -413,4 +413,16 @@ public final class APIConstants {
     public static final String DEFAULT_VISIBLE_ORG = "all";
     
     public static final String VISIBLE_ORG_ALL = "all";
+
+    public static final String API_PRODUCT_DB_NAME = "API_PRODUCT";
+    public static final String DOCUMENTATION_DB_NAME = "DOCUMENTATION";
+    public static final String API_DB_NAME = "API";
+    public static final String API_DEFINITION_DB_NAME = "API_DEFINITION";
+    public static final String THUMBNAIL_DB_NAME = "THUMBNAIL";
+    public static final String GRAPHQL_SCHEMA_DB_NAME = "GRAPHQL_SCHEMA";
+    public static final String ASYNC_API_DEFINITION_DB_NAME = "ASYNC_API_DEFINITION";
+    public static final String WSDL_DB_NAME = "WSDL";
+
+    public static final String ADMIN_ROLE = "admin";
+    public static final String CHAR_COLON = ":";
 }
