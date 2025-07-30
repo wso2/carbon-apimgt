@@ -49,6 +49,7 @@ import org.wso2.carbon.event.processor.core.exception.ExecutionPlanConfiguration
 import org.wso2.carbon.event.processor.core.exception.ExecutionPlanDependencyValidationException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,10 +76,10 @@ public class PolicyUtil {
                 ServiceReferenceHolder.getInstance().getEventProcessorService();
         APIManagerConfiguration apiManagerConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIMConfiguration();
-        List<String> skipPolicyNames = new ArrayList<>();
-        if (apiManagerConfiguration.getThrottleProperties().getSkipDeployingPolicies() != null) {
-            skipPolicyNames = apiManagerConfiguration.getThrottleProperties().getSkipDeployingPolicies();
-        }
+        List<String> skipPolicyNames =
+                apiManagerConfiguration.getThrottleProperties().getSkipDeployingPolicies() != null ?
+                        apiManagerConfiguration.getThrottleProperties().getSkipDeployingPolicies() :
+                        Collections.emptyList();
         ThrottlePolicyTemplateBuilder policyTemplateBuilder = new ThrottlePolicyTemplateBuilder();
 
         Map<String, String> policiesToDeploy = new HashMap<>();
@@ -211,7 +212,7 @@ public class PolicyUtil {
         }
     }
 
-    /***
+    /**
      * Utility method to determine if a policy should be skipped
      * @param policyFileName Name of the policy file
      * @param skipPolicyNames List of policy file names to be skipped deploying
