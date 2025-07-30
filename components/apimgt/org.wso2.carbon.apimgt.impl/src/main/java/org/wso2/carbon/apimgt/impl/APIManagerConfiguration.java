@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -1407,8 +1408,8 @@ public class APIManagerConfiguration {
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
                             .SKIP_DEPLOYING_POLICIES));
             if (skipDeployingPoliciesElement != null) {
-                throttleProperties.setSkipDeployingPolicies(skipDeployingPoliciesElement
-                        .getText().split(APIConstants.DELEM_COMMA));
+                throttleProperties.setSkipDeployingPolicies(
+                        Arrays.asList(skipDeployingPoliciesElement.getText().split(APIConstants.DELEM_COMMA)));
             }
             OMElement enablePolicyDeployElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLE_POLICY_DEPLOYMENT));
