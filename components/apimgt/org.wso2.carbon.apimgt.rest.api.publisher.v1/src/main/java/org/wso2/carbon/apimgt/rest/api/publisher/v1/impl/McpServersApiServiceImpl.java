@@ -24,8 +24,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.cxf.phase.PhaseInterceptorChain;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIComplianceException;
+import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
@@ -42,6 +44,8 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BackendAPI;
+import org.wso2.carbon.apimgt.api.model.Comment;
+import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -52,6 +56,8 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.ExternalGatewayAPIValidationException;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIDTOWrapper;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
@@ -71,8 +77,8 @@ import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.*;
 import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.APIDTOWrapper;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.CommentMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.DocumentationMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIKeyDTO;
@@ -81,6 +87,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentRequestDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
@@ -95,6 +104,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
@@ -105,7 +115,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.io.InputStream;
 import java.util.List;
@@ -117,6 +129,11 @@ import javax.ws.rs.core.StreamingOutput;
 
 import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_VERSION_ALREADY_EXISTS;
 
+/**
+ * Implementation of the MCP Servers API service.
+ * This class provides methods to manage and retrieve information about MCP servers,
+ * including listing, retrieving details, handling documents, and managing revisions.
+ */
 public class McpServersApiServiceImpl implements McpServersApiService {
 
     private static final Log log = LogFactory.getLog(McpServersApiServiceImpl.class);
@@ -184,6 +201,67 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
+     * Retrieves a specific comment associated with an MCP server.
+     * Supports pagination for replies and can include commenter information.
+     *
+     * @param commentId            the ID of the comment to retrieve
+     * @param mcpServerId          the UUID of the MCP server
+     * @param xWSO2Tenant          the tenant identifier from request header
+     * @param ifNoneMatch          the ETag header value for conditional requests
+     * @param includeCommenterInfo whether to include commenter information in the response
+     * @param replyLimit           maximum number of replies to return
+     * @param replyOffset          starting index for pagination of replies
+     * @param messageContext       the message context of the request
+     * @return a {@link Response} containing the comment details or an error response
+     * @throws APIManagementException if an error occurs while retrieving the comment
+     */
+    @Override
+    public Response getCommentOfMCPServer(String commentId, String mcpServerId, String xWSO2Tenant, String ifNoneMatch,
+                                          Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset,
+                                          MessageContext messageContext) throws APIManagementException {
+
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(mcpServerId, requestedTenantDomain);
+            Comment comment = apiProvider.getComment(apiTypeWrapper, commentId, replyLimit, replyOffset);
+
+            if (comment != null) {
+                CommentDTO commentDTO;
+                if (includeCommenterInfo) {
+                    Map<String, Map<String, String>> userClaimsMap = CommentMappingUtil
+                            .retrieveUserClaims(comment.getUser(), new HashMap<>());
+                    commentDTO = CommentMappingUtil.fromCommentToDTOWithUserInfo(comment, userClaimsMap);
+                } else {
+                    commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
+                }
+                String uriString = RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + mcpServerId +
+                        RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
+                URI uri = new URI(uriString);
+                return Response.ok(uri).entity(commentDTO).build();
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
+                        String.valueOf(commentId), log);
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
+            } else {
+                String errorMessage =
+                        "Error while retrieving comment for MCP Server : " + mcpServerId + "with comment ID " +
+                                commentId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving comment content location : " + mcpServerId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    /**
      * Retrieves the MCP server API details for a given API UUID.
      * Validates that the API is of type MCP and applies organization-specific visibility and policy filters.
      *
@@ -215,7 +293,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("User is not authorized to access the MCP server",
                         e, log);
@@ -247,13 +325,15 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param mcpServerId
-     * @param documentId
-     * @param accept
-     * @param ifNoneMatch
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Retrieves the OpenAPI definition of a specific MCP server.
+     * Validates the API existence and retrieves the updated OpenAPI definition.
+     *
+     * @param mcpServerId    UUID of the MCP server.
+     * @param accept         The requested content type (e.g. JSON or plain text).
+     * @param ifNoneMatch    The ETag header value for conditional requests.
+     * @param messageContext Message context with request details.
+     * @return HTTP Response containing the OpenAPI definition or an error response.
+     * @throws APIManagementException if an error occurs while retrieving the OpenAPI definition.
      */
     @Override
     public Response getMCPServerDocument(String mcpServerId, String documentId, String accept, String ifNoneMatch,
@@ -273,7 +353,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             return Response.ok().entity(documentDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving document : "
                         + documentId + " of API " + mcpServerId, e, log);
@@ -286,13 +366,16 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param mcpServerId
-     * @param documentId
-     * @param accept
-     * @param ifNoneMatch
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Retrieves the content of a specific document associated with an MCP server.
+     * Handles different content types (file, inline, URL) and returns appropriate responses.
+     *
+     * @param mcpServerId    UUID of the MCP server.
+     * @param documentId     UUID of the document.
+     * @param accept         The requested content type (e.g. JSON or plain text).
+     * @param ifNoneMatch    The ETag header value for conditional requests.
+     * @param messageContext Message context with request details.
+     * @return HTTP Response containing the document content or an error response.
+     * @throws APIManagementException if an error occurs while retrieving the document content.
      */
     @Override
     public Response getMCPServerDocumentContent(String mcpServerId, String documentId, String accept,
@@ -330,7 +413,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while retrieving document : " + documentId + " of API " + mcpServerId, e,
@@ -347,14 +430,17 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param mcpServerId
-     * @param limit
-     * @param offset
-     * @param accept
-     * @param ifNoneMatch
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Retrieves all documents associated with a specific MCP server.
+     * Supports pagination and returns a list of documentation DTOs.
+     *
+     * @param mcpServerId    UUID of the MCP server.
+     * @param limit          Maximum number of documents to return.
+     * @param offset         Starting index for pagination.
+     * @param accept         The requested content type (e.g. JSON).
+     * @param ifNoneMatch    The ETag header value for conditional requests.
+     * @param messageContext Message context with request details.
+     * @return HTTP Response containing the list of documents or an error response.
+     * @throws APIManagementException if an error occurs while retrieving the documents.
      */
     @Override
     public Response getMCPServerDocuments(String mcpServerId, Integer limit, Integer offset, String accept,
@@ -375,7 +461,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             return Response.ok().entity(documentListDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while retrieving documents of API : " + mcpServerId, e, log);
@@ -411,7 +497,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             return Response.ok().entity(backendAPIDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while retrieving resource paths of API : " + mcpServerId, e, log);
@@ -453,7 +539,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             return Response.ok().entity(backendAPIDTOList).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while retrieving endpoints of MCP server: " + mcpServerId, e, log);
@@ -466,11 +552,13 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param mcpServerId
-     * @param ifNoneMatch
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Retrieves the lifecycle history of a specific MCP server.
+     *
+     * @param mcpServerId    UUID of the MCP server.
+     * @param ifNoneMatch    The ETag header value for conditional requests.
+     * @param messageContext Message context with request details.
+     * @return HTTP Response containing the lifecycle history DTO.
+     * @throws APIManagementException if an error occurs while retrieving the lifecycle history.
      */
     @Override
     public Response getMCPServerLifecycleHistory(String mcpServerId, String ifNoneMatch, MessageContext messageContext)
@@ -492,7 +580,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving the lifecycle "
                         + "events of API : " + mcpServerId, e, log);
@@ -505,11 +593,13 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param mcpServerId
-     * @param ifNoneMatch
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Retrieves the lifecycle state of a specific MCP server.
+     *
+     * @param mcpServerId    UUID of the MCP server.
+     * @param ifNoneMatch    The ETag header value for conditional requests.
+     * @param messageContext Message context with request details.
+     * @return HTTP Response containing the lifecycle state DTO.
+     * @throws APIManagementException if an error occurs while retrieving the lifecycle state.
      */
     @Override
     public Response getMCPServerLifecycleState(String mcpServerId, String ifNoneMatch, MessageContext messageContext)
@@ -541,6 +631,14 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         return Response.status(status).entity(errorObject).build();
     }
 
+    /**
+     * Retrieves the list of deployments for a specific MCP server revision.
+     *
+     * @param mcpServerId    UUID of the MCP server.
+     * @param messageContext Message context with request details.
+     * @return HTTP Response containing a list of APIRevisionDeploymentDTO objects.
+     * @throws APIManagementException if an error occurs while retrieving the deployments.
+     */
     @Override
     public Response getMCPServerRevisionDeployments(String mcpServerId, MessageContext messageContext)
             throws APIManagementException {
@@ -585,14 +683,17 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param mcpServerId
-     * @param xWSO2Tenant
-     * @param ifNoneMatch
-     * @param isAiApi
-     * @param organizationID
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Retrieves the subscription policies for a specific MCP server.
+     * Validates the API existence and retrieves the available throttling policies.
+     *
+     * @param mcpServerId    UUID of the MCP server.
+     * @param xWSO2Tenant    The tenant identifier from request header.
+     * @param ifNoneMatch    The ETag header value for conditional requests.
+     * @param isAiApi        Indicates if the API is an AI API.
+     * @param organizationID The organization ID for which to retrieve policies.
+     * @param messageContext Message context of the request.
+     * @return Response containing the list of available throttling policies for the MCP server.
+     * @throws APIManagementException if an error occurs while retrieving subscription policies.
      */
     @Override
     public Response getMCPServerSubscriptionPolicies(String mcpServerId, String xWSO2Tenant, String ifNoneMatch,
@@ -607,23 +708,24 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl().getThrottlingPolicyList(
                 ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), true, isAiApi);
 
-        if (apiInfo != null) {
-            List<String> apiPolicies =
-                    RestApiPublisherUtils.getSubscriptionPoliciesForOrganization(apiInfo, organizationID);
-            List<Tier> apiThrottlingPolicies = ApisApiServiceImplUtils.filterAPIThrottlingPolicies(apiPolicies,
-                    availableThrottlingPolicyList);
-            return Response.ok().entity(apiThrottlingPolicies).build();
-        }
-        return null;
+        List<String> apiPolicies =
+                RestApiPublisherUtils.getSubscriptionPoliciesForOrganization(new APIDTOWrapper(apiInfo),
+                        organizationID);
+        List<Tier> apiThrottlingPolicies = ApisApiServiceImplUtils.filterAPIThrottlingPolicies(apiPolicies,
+                availableThrottlingPolicyList);
+        return Response.ok().entity(apiThrottlingPolicies).build();
     }
 
     /**
-     * @param mcpServerId
-     * @param accept
-     * @param ifNoneMatch
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Retrieves the Swagger definition of a specific MCP server.
+     * Validates the API existence and retrieves the updated Swagger definition.
+     *
+     * @param mcpServerId    UUID of the MCP server.
+     * @param accept         The requested content type (e.g. JSON or plain text).
+     * @param ifNoneMatch    The ETag header value for conditional requests.
+     * @param messageContext Message context of the request.
+     * @return Response containing the Swagger definition or an error response.
+     * @throws APIManagementException if an error occurs while retrieving the Swagger definition.
      */
     @Override
     public Response getMCPServerSwagger(String mcpServerId, String accept, String ifNoneMatch,
@@ -643,7 +745,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil
                         .handleAuthorizationFailure("Authorization failure while retrieving swagger of API :"
@@ -657,17 +759,66 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param fileInputStream
-     * @param fileDetail
-     * @param preserveProvider
-     * @param rotateRevision
-     * @param overwrite
-     * @param preservePortalConfigurations
-     * @param dryRun
-     * @param accept
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Retrieves the replies of a specific comment associated with an MCP server.
+     * Supports pagination and can include commenter information.
+     *
+     * @param commentId            the ID of the comment to retrieve replies for
+     * @param mcpServerId          the UUID of the MCP server
+     * @param xWSO2Tenant          the tenant identifier from request header
+     * @param limit                maximum number of replies to return
+     * @param offset               starting index for pagination of replies
+     * @param ifNoneMatch          the ETag header value for conditional requests
+     * @param includeCommenterInfo whether to include commenter information in the response
+     * @param messageContext       the message context of the request
+     * @return a {@link Response} containing the list of replies or an error response
+     * @throws APIManagementException if an error occurs while retrieving the replies
+     */
+    @Override
+    public Response getRepliesOfCommentOfMCPServer(String commentId, String mcpServerId, String xWSO2Tenant,
+                                                   Integer limit, Integer offset, String ifNoneMatch,
+                                                   Boolean includeCommenterInfo, MessageContext messageContext)
+            throws APIManagementException {
+
+        String requestedTenantDomain = RestApiUtil.getRequestedTenantDomain(xWSO2Tenant);
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(mcpServerId, requestedTenantDomain);
+            CommentList comments = apiProvider.getComments(apiTypeWrapper, commentId, limit, offset);
+            CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
+
+            String uriString = RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + mcpServerId +
+                    RestApiConstants.RESOURCE_PATH_COMMENTS;
+            URI uri = new URI(uriString);
+            return Response.ok(uri).entity(commentDTO).build();
+
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Failed to get comments of API " + mcpServerId, e, log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving comments content location for API " + mcpServerId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Imports an MCP server from a file input stream.
+     * Validates the input parameters and performs the import operation.
+     *
+     * @param fileInputStream              InputStream of the file to be imported
+     * @param fileDetail                   Attachment details of the file
+     * @param preserveProvider             Whether to preserve the provider information
+     * @param rotateRevision               Whether to rotate the revision
+     * @param overwrite                    Whether to overwrite existing API
+     * @param preservePortalConfigurations Whether to preserve portal configurations
+     * @param dryRun                       Whether to perform a dry run without actual import
+     * @param accept                       The requested content type (e.g. JSON or plain text)
+     * @param messageContext               Message context of the request
+     * @return Response containing the result of the import operation
+     * @throws APIManagementException if an error occurs during import or validation
      */
     @Override
     public Response importMCPServer(InputStream fileInputStream, Attachment fileDetail,
@@ -744,7 +895,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                     ExceptionCodes.ADDITIONAL_PROPERTIES_PARSE_ERROR);
         }
         populateDefaultValuesForMCPServer(apiDTOFromProperties, APIConstants.API_SUBTYPE_DIRECT_ENDPOINT);
-        if (!PublisherCommonUtils.validateEndpoints(apiDTOFromProperties)) {
+        if (!PublisherCommonUtils.validateEndpoints(new APIDTOWrapper(apiDTOFromProperties))) {
             throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                     ExceptionCodes.INVALID_ENDPOINT_URL);
         }
@@ -761,7 +912,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             MCPServerDTO createdApiDTO = RestApiPublisherUtils.importOpenAPIDefinition(fileInputStream, url, null,
                     apiDTOFromProperties, fileDetail, null, organization);
-            URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
+            URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + createdApiDTO.getId());
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (URISyntaxException e) {
             String errorMessage =
@@ -885,11 +1036,56 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param mcpServerId
-     * @param documentDTO
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Adds a comment to an MCP server.
+     *
+     * @param mcpServerId        UUID of the MCP server.
+     * @param body Request body containing the comment details.
+     * @param replyTo            ID of the comment being replied to, if applicable.
+     * @param messageContext     Message context of the request.
+     * @return HTTP Response containing the created CommentDTO or an error response.
+     * @throws APIManagementException if an error occurs while adding the comment.
+     */
+    @Override
+    public Response addCommentToMCPServer(String mcpServerId, CommentRequestDTO body, String replyTo,
+                                          MessageContext messageContext) throws APIManagementException {
+
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(mcpServerId, organization);
+            Comment comment = ApisApiServiceImplUtils
+                    .createComment(body.getContent(), body.getCategory(),
+                            replyTo, username, mcpServerId);
+            String createdCommentId = apiProvider.addComment(mcpServerId, comment, username);
+            Comment createdComment = apiProvider.getComment(apiTypeWrapper, createdCommentId, 0, 0);
+            CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(createdComment);
+
+            String uriString = RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + mcpServerId +
+                    RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + createdCommentId;
+            URI uri = new URI(uriString);
+            return Response.created(uri).entity(commentDTO).build();
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
+            } else {
+                RestApiUtil.handleInternalServerError("Failed to add comment to the MCP Server " + mcpServerId, e, log);
+            }
+        } catch (URISyntaxException e) {
+            throw new APIManagementException(
+                    "Error while retrieving comment content location for MCP Server " + mcpServerId);
+        }
+        return null;
+    }
+
+    /**
+     * Adds a new document to an MCP server.
+     *
+     * @param mcpServerId    UUID of the MCP server.
+     * @param documentDTO    Document details to be added.
+     * @param messageContext Message context of the request.
+     * @return HTTP Response containing the created DocumentDTO or an error response.
+     * @throws APIManagementException if an error occurs while adding the document.
      */
     @Override
     public Response addMCPServerDocument(String mcpServerId, DocumentDTO documentDTO, MessageContext messageContext)
@@ -914,7 +1110,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil
                         .handleAuthorizationFailure(
@@ -933,15 +1129,17 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param mcpServerId
-     * @param documentId
-     * @param ifMatch
-     * @param fileInputStream
-     * @param fileDetail
-     * @param inlineContent
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Adds content to an existing MCP server document.
+     *
+     * @param mcpServerId     UUID of the MCP server.
+     * @param documentId      UUID of the document to which content should be added.
+     * @param ifMatch         ETag value for optimistic concurrency control.
+     * @param fileInputStream InputStream of the file to be added as content.
+     * @param fileDetail      Attachment details of the file.
+     * @param inlineContent   Inline content to be added to the document.
+     * @param messageContext  Message context of the request.
+     * @return HTTP Response containing the updated DocumentDTO or an error response.
+     * @throws APIManagementException if an error occurs while adding content to the document.
      */
     @Override
     public Response addMCPServerDocumentContent(String mcpServerId, String documentId, String ifMatch,
@@ -1002,7 +1200,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             return Response.created(uri).entity(documentDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while adding content to the document: " + documentId + " of API "
@@ -1022,13 +1220,15 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param action
-     * @param mcpServerId
-     * @param lifecycleChecklist
-     * @param ifMatch
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Changes the lifecycle state of an MCP server.
+     *
+     * @param action             The action to perform on the lifecycle (e.g., "promote", "demote").
+     * @param mcpServerId        UUID of the MCP server.
+     * @param lifecycleChecklist JSON string containing the lifecycle checklist.
+     * @param ifMatch            ETag value for optimistic concurrency control.
+     * @param messageContext     Message context of the request.
+     * @return HTTP Response containing the updated lifecycle state or an error response.
+     * @throws APIManagementException if an error occurs while changing the lifecycle state.
      */
     @Override
     public Response changeMCPServerLifecycle(String action, String mcpServerId, String lifecycleChecklist,
@@ -1047,7 +1247,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             return Response.ok().entity(workflowResponseDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while updating the lifecycle of API " + mcpServerId, e, log);
@@ -1059,11 +1259,15 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param body
-     * @param openAPIVersion
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Creates a new MCP server.
+     * Validates the API existence, checks governance compliance, and adds the new API with generated Swagger
+     * definition.
+     *
+     * @param body           DTO containing the details of the MCP server to be created.
+     * @param openAPIVersion OpenAPI version for the MCP server.
+     * @param messageContext Message context of the request.
+     * @return HTTP Response containing the created MCPServerDTO or an error response.
+     * @throws APIManagementException if an error occurs while creating the MCP server.
      */
     @Override
     public Response createMCPServer(MCPServerDTO body, String openAPIVersion, MessageContext messageContext)
@@ -1076,10 +1280,10 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             populateDefaultValuesForMCPServer(body, body.getSubtypeConfiguration().getSubtype());
             API createdApi = PublisherCommonUtils
-                    .addAPIWithGeneratedSwaggerDefinition(body, openAPIVersion, RestApiCommonUtil.getLoggedInUsername(),
-                            organization, orgInfo);
+                    .addAPIWithGeneratedSwaggerDefinition(new APIDTOWrapper(body), openAPIVersion,
+                            RestApiCommonUtil.getLoggedInUsername(), organization, orgInfo);
             createdApiDTO = APIMappingUtil.fromAPItoMCPServerDTO(createdApi);
-            createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + createdApiDTO.getId());
+            createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + createdApiDTO.getId());
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
@@ -1136,7 +1340,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             String revisionId = apiProvider.addAPIRevision(apiRevision, organization);
             APIRevision createdApiRevision = apiProvider.getAPIRevision(revisionId);
             APIRevisionDTO createdApiRevisionDTO = APIMappingUtil.fromAPIRevisiontoDTO(createdApiRevision);
-            URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_APIS
+            URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_MCP_SERVERS
                     + "/" + createdApiRevisionDTO.getApiInfo().getId() + "/"
                     + RestApiConstants.RESOURCE_PATH_REVISIONS + "/" + createdApiRevisionDTO.getId());
             PublisherCommonUtils.checkGovernanceComplianceAsync(mcpServerId, APIMGovernableState.API_DEPLOY,
@@ -1164,13 +1368,16 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param newVersion
-     * @param mcpServerId
-     * @param defaultVersion
-     * @param serviceVersion
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Creates a new version of an existing MCP server.
+     * Validates the API existence, checks for existing versions, and creates the new version.
+     *
+     * @param newVersion     The new version to be created.
+     * @param mcpServerId    UUID of the MCP Server to create a new version for.
+     * @param defaultVersion Indicates if this is the default version.
+     * @param serviceVersion Version of the service to be associated with the MCP server.
+     * @param messageContext Message context of the request.
+     * @return HTTP Response containing the created MCPServerDTO or an error response.
+     * @throws APIManagementException if an error occurs while creating the new version.
      */
     @Override
     public Response createNewMCPServerVersion(String newVersion, String mcpServerId, Boolean defaultVersion,
@@ -1229,7 +1436,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             }
             //This URI used to set the location header of the POST response
             newVersionedApiUri =
-                    new URI(RestApiConstants.RESOURCE_PATH_APIS + "/" + newVersionedApi.getId());
+                    new URI(RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + newVersionedApi.getId());
             PublisherCommonUtils.checkGovernanceComplianceAsync(newVersionedApi.getId(), APIMGovernableState.API_CREATE,
                     ArtifactType.API, organization);
             return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
@@ -1243,6 +1450,61 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         } catch (URISyntaxException e) {
             String errorMessage = "Error while retrieving API location of " + mcpServerId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Deletes a specific comment from an MCP server.
+     * Validates the comment existence, checks user permissions, and deletes the comment.
+     *
+     * @param commentId      UUID of the comment to be deleted.
+     * @param mcpServerId    UUID of the MCP server.
+     * @param ifMatch        ETag value for optimistic concurrency control.
+     * @param messageContext Message context of the request.
+     * @return HTTP Response indicating the result of the deletion operation.
+     * @throws APIManagementException if an error occurs while deleting the comment.
+     */
+    @Override
+    public Response deleteCommentOfMCPServer(String commentId, String mcpServerId, String ifMatch,
+                                             MessageContext messageContext) throws APIManagementException {
+
+        String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(mcpServerId, requestedTenantDomain);
+            Comment comment = apiProvider.getComment(apiTypeWrapper, commentId, 0, 0);
+            if (comment != null) {
+                String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
+                        .get(RestApiConstants.USER_REST_API_SCOPES);
+                if (Arrays.asList(tokenScopes).contains(RestApiConstants.ADMIN_SCOPE) ||
+                        comment.getUser().equals(username)) {
+                    if (apiProvider.deleteComment(apiTypeWrapper, commentId)) {
+                        JSONObject obj = new JSONObject();
+                        obj.put("id", commentId);
+                        obj.put("message", "The comment has been deleted");
+                        return Response.ok(obj).type(MediaType.APPLICATION_JSON).build();
+                    } else {
+                        return Response.status(405, "Method Not Allowed").type(MediaType
+                                .APPLICATION_JSON).build();
+                    }
+                } else {
+                    return Response.status(403, "Forbidden").type(MediaType.APPLICATION_JSON).build();
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
+                        String.valueOf(commentId), log);
+            }
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
+            } else if (RestApiUtil.isDueToResourceNotFound(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
+            } else {
+                String errorMessage = "Error while deleting comment " + commentId + "for API " + mcpServerId;
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
         }
         return null;
     }
@@ -1324,11 +1586,12 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                         + " on organization " + organization, log);
                 return null;
             }
-            PublisherCommonUtils.clearArtifactComplianceInfo(mcpServerId, RestApiConstants.RESOURCE_MCP, organization);
+            PublisherCommonUtils.clearArtifactComplianceInfo(mcpServerId, RestApiConstants.RESOURCE_MCP_SERVER,
+                    organization);
             return Response.ok().build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting MCP server: "
                         + mcpServerId, e, log);
@@ -1341,12 +1604,15 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param mcpServerId
-     * @param documentId
-     * @param ifMatch
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Deletes a specific document of an MCP server.
+     * Validates the API existence, checks governance compliance, and deletes the document.
+     *
+     * @param mcpServerId    UUID of the API.
+     * @param documentId     UUID of the document to be deleted.
+     * @param ifMatch        ETag value for optimistic concurrency control.
+     * @param messageContext Message context of the request.
+     * @return HTTP Response indicating the result of the deletion operation.
+     * @throws APIManagementException if an error occurs while deleting the document.
      */
     @Override
     public Response deleteMCPServerDocument(String mcpServerId, String documentId, String ifMatch,
@@ -1375,7 +1641,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while deleting : " + documentId + " of API " + mcpServerId, e, log);
@@ -1479,19 +1745,86 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param mcpServerId
-     * @param name
-     * @param version
-     * @param revisionNumber
-     * @param providerName
-     * @param format
-     * @param preserveStatus
-     * @param latestRevision
-     * @param gatewayEnvironment
-     * @param preserveCredentials
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Edits a specific comment of an MCP server.
+     * Validates the comment existence, checks user permissions, and updates the comment.
+     *
+     * @param commentId          UUID of the comment to be edited.
+     * @param mcpServerId        UUID of the MCP server.
+     * @param patchRequestBodyDTO DTO containing the updated comment details.
+     * @param messageContext     Message context of the request.
+     * @return HTTP Response containing the updated CommentDTO or an error response.
+     * @throws APIManagementException if an error occurs while editing the comment.
+     */
+    @Override
+    public Response editCommentOfMCPServer(String commentId, String mcpServerId,
+                                           CommentRequestDTO patchRequestBodyDTO, MessageContext messageContext)
+            throws APIManagementException {
+
+        String username = RestApiCommonUtil.getLoggedInUsername();
+        String requestedTenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        try {
+            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+            ApiTypeWrapper apiTypeWrapper = apiProvider.getAPIorAPIProductByUUID(mcpServerId, requestedTenantDomain);
+            Comment comment = apiProvider.getComment(apiTypeWrapper, commentId, 0, 0);
+            if (comment != null) {
+                if (comment.getUser().equals(username)) {
+                    boolean commentEdited = false;
+                    if (patchRequestBodyDTO.getCategory() != null && !(patchRequestBodyDTO.getCategory().equals(comment
+                            .getCategory()))) {
+                        comment.setCategory(patchRequestBodyDTO.getCategory());
+                        commentEdited = true;
+                    }
+                    if (patchRequestBodyDTO.getContent() != null && !(patchRequestBodyDTO.getContent().equals(comment
+                            .getText()))) {
+                        comment.setText(patchRequestBodyDTO.getContent());
+                        commentEdited = true;
+                    }
+                    if (commentEdited) {
+                        if (apiProvider.editComment(apiTypeWrapper, commentId, comment)) {
+                            Comment editedComment = apiProvider.getComment(apiTypeWrapper, commentId, 0, 0);
+                            CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(editedComment);
+
+                            String uriString = RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + mcpServerId +
+                                    RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
+                            URI uri = new URI(uriString);
+                            return Response.ok(uri).entity(commentDTO).build();
+                        }
+                    } else {
+                        return Response.ok().build();
+                    }
+                } else {
+                    RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_COMMENTS, String.valueOf(commentId)
+                            , log);
+                }
+            } else {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_COMMENTS,
+                        String.valueOf(commentId), log);
+            }
+        } catch (URISyntaxException e) {
+            String errorMessage = "Error while retrieving comment content location for MCP Server " + mcpServerId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
+        }
+        return null;
+    }
+
+    /**
+     * Exports an MCP server in the specified format.
+     * If the gateway environment is not specified, it exports the API in the given format.
+     * If the gateway environment is specified, it generates a runtime artifact for the MCP server.
+     *
+     * @param mcpServerId         UUID of the MCP server to be exported.
+     * @param name                Name of the MCP server.
+     * @param version             Version of the MCP server.
+     * @param revisionNumber      Revision number of the MCP server.
+     * @param providerName        Provider name of the MCP server.
+     * @param format              Export format (YAML or ZIP).
+     * @param preserveStatus      Whether to preserve the status of the API during export.
+     * @param latestRevision      Whether to export the latest revision.
+     * @param gatewayEnvironment  Gateway environment for runtime artifact generation.
+     * @param preserveCredentials Whether to preserve credentials during export.
+     * @param messageContext      Message context of the request.
+     * @return HTTP Response containing the exported file or runtime artifact.
+     * @throws APIManagementException if an error occurs while exporting the MCP server.
      */
     @Override
     public Response exportMCPServer(String mcpServerId, String name, String version, String revisionNumber,
@@ -1516,7 +1849,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 return Response.ok(file).header(RestApiConstants.HEADER_CONTENT_DISPOSITION,
                         "attachment; filename=\"" + file.getName() + "\"").build();
             } catch (APIImportExportException e) {
-                throw new APIManagementException("Error while exporting " + RestApiConstants.RESOURCE_MCP, e);
+                throw new APIManagementException("Error while exporting " + RestApiConstants.RESOURCE_MCP_SERVER, e);
             }
         } else {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -1588,8 +1921,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      */
     @Override
     public Response updateMCPServer(String mcpServerId, MCPServerDTO body, String ifMatch,
-                                    MessageContext messageContext)
-            throws APIManagementException {
+                                    MessageContext messageContext) throws APIManagementException {
 
         String[] tokenScopes =
                 (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
@@ -1599,7 +1931,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             OrganizationInfo organizationInfo = RestApiUtil.getOrganizationInfo(messageContext);
             CommonUtils.validateAPIExistence(mcpServerId);
-            if (!PublisherCommonUtils.validateEndpointConfigs(body)) {
+            if (!PublisherCommonUtils.validateEndpointConfigs(new APIDTOWrapper(body))) {
                 throw new APIManagementException("Invalid endpoint configs detected",
                         ExceptionCodes.INVALID_ENDPOINT_CONFIG);
             }
@@ -1613,7 +1945,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                         ExceptionCodes.ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES.getErrorCode(), log);
             }
 
-            if (!PublisherCommonUtils.validateEndpoints(body)) {
+            if (!PublisherCommonUtils.validateEndpoints(new APIDTOWrapper(body))) {
                 throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                         ExceptionCodes.INVALID_ENDPOINT_URL);
             }
@@ -1647,7 +1979,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                         .getErrorCode() == ExceptionCodes.GLOBAL_MEDIATION_POLICIES_NOT_FOUND.getErrorCode()) {
                     RestApiUtil.handleResourceNotFoundError(e.getErrorHandler().getErrorDescription(), e, log);
                 } else {
-                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
+                    RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
                 }
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while updating MCP server: "
@@ -1669,13 +2001,16 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param mcpServerId
-     * @param documentId
-     * @param documentDTO
-     * @param ifMatch
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Updates a specific document of an MCP server.
+     * Validates the API existence, checks governance compliance, and updates the document.
+     *
+     * @param mcpServerId    UUID of the API.
+     * @param documentId     UUID of the document to be updated.
+     * @param documentDTO    DocumentDTO containing the updated document details.
+     * @param ifMatch        ETag value for optimistic concurrency control.
+     * @param messageContext Message context of the request.
+     * @return HTTP Response containing the updated DocumentationDTO or an error response.
+     * @throws APIManagementException if an error occurs while updating the document.
      */
     @Override
     public Response updateMCPServerDocument(String mcpServerId, String documentId, DocumentDTO documentDTO,
@@ -1735,7 +2070,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
                         "Authorization failure while updating document : " + documentId + " of API "
@@ -1744,6 +2079,72 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 String errorMessage = "Error while updating the document " + documentId + " for API : " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
+        }
+        return null;
+    }
+
+    /**
+     * Updates the Swagger definition of an MCP server.
+     * Validates the existence, checks governance compliance, and updates the Swagger definition.
+     *
+     * @param mcpServerId     UUID of the MCP Server.
+     * @param ifMatch         ETag value for optimistic concurrency control.
+     * @param apiDefinition   OpenAPI definition in string format.
+     * @param url             URL to fetch the OpenAPI definition from (optional).
+     * @param fileInputStream InputStream of the OpenAPI definition file (optional).
+     * @param fileDetail      Attachment containing file details (optional).
+     * @param messageContext  Message context of the request.
+     * @return HTTP Response containing the updated Swagger definition or an error response.
+     * @throws APIManagementException if an error occurs while updating the Swagger definition.
+     */
+    @Override
+    public Response updateMCPServerSwagger(String mcpServerId, String ifMatch, String apiDefinition, String url,
+                                           InputStream fileInputStream, Attachment fileDetail,
+                                           MessageContext messageContext) throws APIManagementException {
+
+        try {
+            String updatedSwagger;
+            APIInfo apiInfo = CommonUtils.validateAPIExistence(mcpServerId);
+            validateAPIOperationsPerLC(apiInfo.getStatus());
+            String organization = RestApiUtil.getValidatedOrganization(messageContext);
+            if (url != null || fileInputStream != null) {
+                Map validationResponseMap = RestApiPublisherUtils.validateOpenAPIDefinition(url, fileInputStream,
+                        fileDetail, null, true, false);
+                APIDefinitionValidationResponse validationResponse =
+                        (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
+                if (!validationResponse.isValid()) {
+                    RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
+                }
+                updatedSwagger =
+                        PublisherCommonUtils.updateSwagger(mcpServerId, validationResponse, false, organization);
+            } else {
+                APIDefinitionValidationResponse response = OASParserUtil
+                        .validateAPIDefinition(apiDefinition, true);
+                if (!response.isValid()) {
+                    RestApiUtil.handleBadRequest(response.getErrorItems(), log);
+                }
+                updatedSwagger = PublisherCommonUtils.updateSwagger(mcpServerId, response, false, organization);
+            }
+            PublisherCommonUtils.checkGovernanceComplianceAsync(mcpServerId, APIMGovernableState.API_UPDATE,
+                    ArtifactType.API, organization);
+            return Response.ok().entity(updatedSwagger).build();
+        } catch (ExternalGatewayAPIValidationException e) {
+            RestApiUtil.handleBadRequest(e.getMessage(), log);
+        } catch (APIManagementException e) {
+            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
+            } else if (isAuthorizationFailure(e)) {
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while updating swagger definition of MCPServer: "
+                                + mcpServerId, e, log);
+            } else {
+                String errorMessage = "Error while updating the swagger definition of the MCP Server: "
+                        + mcpServerId + " - " + e.getMessage();
+                RestApiUtil.handleInternalServerError(errorMessage, e, log);
+            }
+        } catch (FaultGatewaysException e) {
+            String errorMessage = "Error while updating MCP Server : " + mcpServerId;
+            RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
     }
@@ -1769,7 +2170,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         BackendAPI backendAPI = apiProvider.getMCPServerEndpoint(mcpServerId, backendApiId, organization);
 
         if (backendAPI == null) {
-            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, log);
+            RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, log);
         } else {
             backendAPI.setEndpointConfig(backendAPIDTO.getEndpointConfig().toString());
         }
@@ -1778,6 +2179,17 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 false)).build();
     }
 
+    /**
+     * Updates the deployment details of a specific revision of an MCP server.
+     * Validates the API existence, checks governance compliance, and updates the deployment details.
+     *
+     * @param mcpServerId              UUID of the API.
+     * @param deploymentId             ID of the deployment to be updated.
+     * @param apIRevisionDeploymentDTO APIRevisionDeploymentDTO containing the updated deployment details.
+     * @param messageContext           Message context of the request.
+     * @return HTTP Response containing the updated APIRevisionDeploymentDTO or an error response.
+     * @throws APIManagementException if an error occurs while updating the deployment details.
+     */
     @Override
     public Response updateMCPServerDeployment(String mcpServerId, String deploymentId,
                                               APIRevisionDeploymentDTO apIRevisionDeploymentDTO,
@@ -1807,11 +2219,14 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param query
-     * @param ifNoneMatch
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Validates whether the MCP server exists based on the provided query.
+     * The query can be in the format "name:<apiName>" or "context:<apiContext>".
+     *
+     * @param query          The query to validate the MCP server existence.
+     * @param ifNoneMatch    ETag value for optimistic concurrency control.
+     * @param messageContext Message context of the request.
+     * @return Response indicating whether the MCP server exists or not.
+     * @throws APIManagementException if an error occurs while validating the MCP server.
      */
     @Override
     public Response validateMCPServer(String query, String ifNoneMatch, MessageContext messageContext)
@@ -1849,11 +2264,14 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param endpointUrl
-     * @param mcpServerId
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Validates the MCP server endpoint by sending an HTTP HEAD request.
+     * Returns a response with the validation results.
+     *
+     * @param endpointUrl    The URL of the MCP server endpoint to validate.
+     * @param mcpServerId    The ID of the MCP server.
+     * @param messageContext Message context of the request.
+     * @return Response containing the validation results or an error response if validation fails.
+     * @throws APIManagementException if an error occurs during validation.
      */
     @Override
     public Response validateMCPServerEndpoint(String endpointUrl, String mcpServerId, MessageContext messageContext)
@@ -1877,14 +2295,17 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * @param returnContent
-     * @param url
-     * @param fileInputStream
-     * @param fileDetail
-     * @param inlineAPIDefinition
-     * @param messageContext
-     * @return
-     * @throws APIManagementException
+     * Validates the OpenAPI definition of an MCP server.
+     * This method checks the validity of the OpenAPI definition and returns a response with validation results.
+     *
+     * @param returnContent       Whether to return the content of the OpenAPI definition.
+     * @param url                 The URL of the OpenAPI definition.
+     * @param fileInputStream     Input stream of the OpenAPI definition file.
+     * @param fileDetail          Attachment details of the OpenAPI definition file.
+     * @param inlineAPIDefinition Inline OpenAPI definition as a string.
+     * @param messageContext      Message context of the request.
+     * @return Response containing validation results or an error response if validation fails.
+     * @throws APIManagementException if an error occurs during validation.
      */
     @Override
     public Response validateOpenAPIDefinitionOfMCPServer(Boolean returnContent, String url, InputStream fileInputStream,
@@ -1983,7 +2404,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + mcpServerId, e,
                         log);

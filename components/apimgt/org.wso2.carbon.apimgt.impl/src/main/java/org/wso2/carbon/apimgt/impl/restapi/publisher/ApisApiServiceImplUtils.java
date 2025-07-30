@@ -708,8 +708,8 @@ public class ApisApiServiceImplUtils {
         String defaultAPILevelPolicy = APIUtil.getDefaultAPILevelPolicy(tenantId);
 
         if (APIConstants.API_TYPE_MCP.equals(apiToAdd.getType())) {
-
-            Set<Scope> scopes = apiDefinition.getScopes(definition);
+            //TODO: PASAN
+            Set<Scope> scopes = apiToAdd.getScopes();
             apiToAdd.setScopes(scopes);
 
             String backendApiId = UUID.randomUUID().toString();

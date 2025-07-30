@@ -74,11 +74,11 @@ import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
-import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.BackendAPI;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
+import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
@@ -112,7 +112,6 @@ import org.wso2.carbon.apimgt.impl.wsdl.SequenceGenerator;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.annotations.Scope;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.APIDTOWrapper;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
@@ -336,8 +335,8 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while updating the API and API definition
      * @throws FaultGatewaysException If an error occurs while updating manage of an existing API
      */
-    public static API updateApi(API originalAPI, APIDTOWrapper apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes,
-                                OrganizationInfo orginfo)
+    public static API updateApi(API originalAPI, APIDTOWrapper apiDtoToUpdate, APIProvider apiProvider,
+                                String[] tokenScopes, OrganizationInfo orginfo)
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
 
         API apiToUpdate;
@@ -569,8 +568,8 @@ public class PublisherCommonUtils {
      * @return Referenced API object.
      * @throws APIManagementException If an error occurs while fetching the referenced API.
      */
-    private static API fetchReferencedApi(ExistingAPIOperationMapping mapping, APIProvider apiProvider, String organization)
-            throws APIManagementException {
+    private static API fetchReferencedApi(ExistingAPIOperationMapping mapping, APIProvider apiProvider,
+                                          String organization) throws APIManagementException {
 
         String uuid = mapping.getApiUuid();
         String name = mapping.getApiName();
@@ -1165,6 +1164,9 @@ public class PublisherCommonUtils {
                         ExceptionCodes.from(ExceptionCodes.API_CATEGORY_INVALID, originalAPI.getId().getName()));
             }
         }
+        SwaggerData swaggerData = new SwaggerData(apiToUpdate);
+        String definitionToAdd = new OAS3Parser().generateAPIDefinition(swaggerData);
+        apiToUpdate.setSwaggerDefinition(definitionToAdd);
 
         apiToUpdate.setOrganization(originalAPI.getOrganization());
         apiToUpdate.setSubtype(originalAPI.getSubtype());
@@ -2052,6 +2054,7 @@ public class PublisherCommonUtils {
      * @throws CryptoException        If an error occurs during encryption operations.
      * @throws ParseException         If an error occurs while parsing the Swagger definition.
      */
+    @Deprecated
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username,
                                                            String organization, OrganizationInfo orgInfo)
             throws APIManagementException, CryptoException, ParseException {
@@ -2083,7 +2086,7 @@ public class PublisherCommonUtils {
         }
 
         // validate sandbox and production endpoints
-        if (!PublisherCommonUtils.validateEndpoints(apiDto)) {
+        if (!PublisherCommonUtils.validateEndpoints(new APIDTOWrapper(apiDto))) {
             throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                     ExceptionCodes.INVALID_ENDPOINT_URL);
         }
@@ -2122,55 +2125,81 @@ public class PublisherCommonUtils {
         return addAPIWithGeneratedSwaggerDefinition(apiToAdd, oasVersion, username, organization, orgInfo, isAsyncAPI);
     }
 
-    /**
-     * Adds an API with a generated Swagger definition based on the provided MCPServerDTO object.
-     *
-     * @param mcpServerDto The MCPServerDTO object to be added.
-     * @param oasVersion   The OpenAPI Specification version (e.g., "2.0", "3.0.1").
-     * @param username     The username of the user adding the API.
-     * @param organization The organization to which the API belongs.
-     * @param orgInfo      Organization information for visibility settings.
-     * @return The added API object with the generated Swagger definition.
-     * @throws APIManagementException If an error occurs during API addition.
-     * @throws CryptoException        If an error occurs during encryption operations.
-     * @throws ParseException         If an error occurs while parsing the Swagger definition.
-     */
-    public static API addAPIWithGeneratedSwaggerDefinition(MCPServerDTO mcpServerDto, String oasVersion,
-                                                           String username, String organization,
-                                                           OrganizationInfo orgInfo)
+    public static API addAPIWithGeneratedSwaggerDefinition(APIDTOWrapper dtoWrapper, String oasVersion, String username,
+                                                           String organization, OrganizationInfo orgInfo)
             throws APIManagementException, CryptoException, ParseException {
 
-        String name = mcpServerDto.getName();
-        mcpServerDto.setName(name.trim().replaceAll("\\s{2,}", " "));
+        String name = dtoWrapper.getName();
+        dtoWrapper.setName(name.trim().replaceAll("\\s{2,}", " "));
+
+        if (dtoWrapper.isAPIDTO() && dtoWrapper.getType() == APIDTO.TypeEnum.ASYNC) {
+            throw new APIManagementException("ASYNC API type does not support API creation from scratch",
+                    ExceptionCodes.API_CREATION_NOT_SUPPORTED_FOR_ASYNC_TYPE_APIS);
+        }
+
+        boolean isWSAPI = dtoWrapper.isAPIDTO() && dtoWrapper.getType() == APIDTO.TypeEnum.WS;
+        boolean isAsyncAPI = isWSAPI || dtoWrapper.isAPIDTO() &&
+                (dtoWrapper.getType() == APIDTO.TypeEnum.WEBSUB ||
+                        dtoWrapper.getType() == APIDTO.TypeEnum.SSE ||
+                        dtoWrapper.getType() == APIDTO.TypeEnum.ASYNC);
+
         username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
-        // validate context before proceeding
+        // Validate context
         try {
-            APIUtil.validateAPIContext(mcpServerDto.getContext(), mcpServerDto.getName());
+            APIUtil.validateAPIContext(dtoWrapper.getContext(), dtoWrapper.getName());
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while importing API: " + e.getMessage(),
                     ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
         }
 
-        // validate sandbox and production endpoints
-        if (!PublisherCommonUtils.validateEndpoints(mcpServerDto)) {
+        // Validate endpoints
+        if (dtoWrapper.isAPIDTO() && isWSAPI &&
+                !PublisherCommonUtils.isValidWSAPI((APIDTO) dtoWrapper.getWrappedDTO())) {
+            throw new APIManagementException("Endpoint URLs should be valid web socket URLs",
+                    ExceptionCodes.INVALID_ENDPOINT_URL);
+        }
+
+        if (!PublisherCommonUtils.validateEndpoints(dtoWrapper)) {
             throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                     ExceptionCodes.INVALID_ENDPOINT_URL);
         }
 
-        Map endpointConfig = (Map) mcpServerDto.getBackendAPIEndpointConfig();
+        // Validate gateway type
+        if (dtoWrapper.isAPIDTO()) {
+            String gatewayType = dtoWrapper.getGatewayType();
+            if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayType)) {
+                APIDTO.TypeEnum type = dtoWrapper.getType();
+                if (!(APIDTO.TypeEnum.HTTP.equals(type) || APIDTO.TypeEnum.GRAPHQL.equals(type))) {
+                    throw new APIManagementException("APIs of type " + type + " are not supported with WSO2 APK",
+                            ExceptionCodes.INVALID_GATEWAY_TYPE);
+                }
+            }
+        }
+
+        Map<String, Object> endpointConfig = (Map) dtoWrapper.getEndpointConfig();
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
 
-        // OAuth 2.0 backend protection: API Key and API Secret encryption
         encryptEndpointSecurityOAuthCredentials(endpointConfig, cryptoUtil, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, mcpServerDto);
+                StringUtils.EMPTY, StringUtils.EMPTY, dtoWrapper);
 
         encryptEndpointSecurityApiKeyCredentials(endpointConfig, cryptoUtil, StringUtils.EMPTY, StringUtils.EMPTY,
-                mcpServerDto);
+                dtoWrapper);
 
-        API apiToAdd = prepareToCreateAPIByMCPServerDTO(mcpServerDto, apiProvider, username, organization);
-        return addAPIWithGeneratedSwaggerDefinition(apiToAdd, oasVersion, username, organization, orgInfo, false);
+        // AWS Lambda secret key encryption
+        if (dtoWrapper.isAPIDTO() && dtoWrapper.getEndpointConfig() != null &&
+                endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
+            String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
+            if (!StringUtils.isEmpty(secretKey)) {
+                String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
+                endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
+                dtoWrapper.setEndpointConfig(endpointConfig);
+            }
+        }
+
+        API apiToAdd = prepareToCreateAPIByDTO(dtoWrapper, apiProvider, username, organization);
+        return addAPIWithGeneratedSwaggerDefinition(apiToAdd, oasVersion, username, organization, orgInfo, isAsyncAPI);
     }
 
     /**
@@ -2375,20 +2404,21 @@ public class PublisherCommonUtils {
      * @param apiDto API DTO of the API
      * @return validity of the endpoint configurations
      */
+    @Deprecated
     public static boolean validateEndpointConfigs(APIDTO apiDto) {
 
         return validateEndpointConfigs((Map) apiDto.getEndpointConfig());
     }
 
     /**
-     * Validate endpoint configurations of {@link MCPServerDTO}.
+     * Validate endpoint configurations of {@link APIDTO} or {@link MCPServerDTO} via wrapper.
      *
-     * @param mcpDto MCPServerDTO of the API
+     * @param dtoWrapper the wrapper for the DTO
      * @return validity of the endpoint configurations
      */
-    public static boolean validateEndpointConfigs(MCPServerDTO mcpDto) {
+    public static boolean validateEndpointConfigs(APIDTOWrapper dtoWrapper) {
 
-        return validateEndpointConfigs((Map) mcpDto.getBackendAPIEndpointConfig());
+        return validateEndpointConfigs((Map) dtoWrapper.getEndpointConfig());
     }
 
     /**
@@ -2441,6 +2471,7 @@ public class PublisherCommonUtils {
      * @return validity of URLs found within the endpoint configurations of the DTO
      * @throws APIManagementException if an error occurs during validation
      */
+    @Deprecated
     public static boolean validateEndpoints(APIDTO apiDto) throws APIManagementException {
 
         Map<String, Object> configMap = (Map<String, Object>) apiDto.getEndpointConfig();
@@ -2453,19 +2484,26 @@ public class PublisherCommonUtils {
     }
 
     /**
-     * Validate sandbox and production endpoint URLs.
+     * Validate sandbox and production endpoint URLs using a unified DTO wrapper.
      *
-     * @param mcpServerDto MCPServerDTO of the API
+     * @param dtoWrapper the wrapper for APIDTO or MCPServerDTO
      * @return validity of URLs found within the endpoint configurations of the DTO
      * @throws APIManagementException if an error occurs during validation
      */
-    public static boolean validateEndpoints(MCPServerDTO mcpServerDto) throws APIManagementException {
+    public static boolean validateEndpoints(APIDTOWrapper dtoWrapper) throws APIManagementException {
 
-        Map config = (Map) mcpServerDto.getBackendAPIEndpointConfig();
-        if (config == null) {
+        Map<String, Object> configMap = (Map<String, Object>) dtoWrapper.getEndpointConfig();
+        if (configMap == null) {
             return true;
         }
-        return validateEndpoints(config, null);
+
+        if (dtoWrapper.isAPIDTO()) {
+            return validateEndpoints(configMap,
+                    endpoints
+                            -> extractExternalEndpoints((APIDTO) dtoWrapper.getWrappedDTO(), endpoints));
+        } else {
+            return validateEndpoints(configMap, null);
+        }
     }
 
     /**
@@ -2825,10 +2863,12 @@ public class PublisherCommonUtils {
         }
 
         if (apiDtoWrapper.getAdditionalProperties() != null) {
-            String errorMessage = PublisherCommonUtils.validateAdditionalProperties(apiDtoWrapper.getAdditionalProperties());
+            String errorMessage =
+                    PublisherCommonUtils.validateAdditionalProperties(apiDtoWrapper.getAdditionalProperties());
             if (!errorMessage.isEmpty()) {
                 throw new APIManagementException(errorMessage, ExceptionCodes
-                        .from(ExceptionCodes.INVALID_ADDITIONAL_PROPERTIES, apiDtoWrapper.getName(), apiDtoWrapper.getVersion()));
+                        .from(ExceptionCodes.INVALID_ADDITIONAL_PROPERTIES, apiDtoWrapper.getName(),
+                                apiDtoWrapper.getVersion()));
             }
         }
         if (apiDtoWrapper.getContext() == null) {
@@ -2836,7 +2876,8 @@ public class PublisherCommonUtils {
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
         } else if (apiDtoWrapper.getContext().endsWith("/")) {
             throw new APIManagementException("Context cannot end with '/' character",
-                    ExceptionCodes.from(ExceptionCodes.INVALID_CONTEXT, apiDtoWrapper.getName(), apiDtoWrapper.getVersion()));
+                    ExceptionCodes.from(ExceptionCodes.INVALID_CONTEXT, apiDtoWrapper.getName(),
+                            apiDtoWrapper.getVersion()));
         }
 
         if (apiProvider.isApiNameWithDifferentCaseExist(apiDtoWrapper.getName(), organization)) {
@@ -2921,7 +2962,8 @@ public class PublisherCommonUtils {
         }
         APIPolicy apiPolicy = apiProvider.getAPIPolicy(username, apiDtoWrapper.getApiThrottlingPolicy());
         if (apiPolicy == null && apiDtoWrapper.getApiThrottlingPolicy() != null) {
-            throw new APIManagementException("Specified policy " + apiDtoWrapper.getApiThrottlingPolicy() + " is invalid",
+            throw new APIManagementException(
+                    "Specified policy " + apiDtoWrapper.getApiThrottlingPolicy() + " is invalid",
                     ExceptionCodes.UNSUPPORTED_THROTTLE_LIMIT_TYPE);
         }
 

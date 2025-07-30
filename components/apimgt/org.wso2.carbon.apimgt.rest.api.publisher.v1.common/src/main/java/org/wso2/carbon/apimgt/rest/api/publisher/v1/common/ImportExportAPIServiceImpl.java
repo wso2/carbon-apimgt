@@ -36,6 +36,7 @@ import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportAPI;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIDTOWrapper;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ExportUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.ImportUtils;
@@ -128,7 +129,8 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
             MCPServerDTO mcpServerDtoToReturn = APIMappingUtil.fromAPItoMCPServerDTO(api, preserveCredentials,
                     apiProvider);
             return ExportUtils.exportAPI(apiProvider, apiIdentifier, new APIDTOWrapper(mcpServerDtoToReturn), api,
-                    userName, format, preserveStatus, preserveDocs, StringUtils.EMPTY, organization, preserveCredentials);
+                    userName, format, preserveStatus, preserveDocs, StringUtils.EMPTY, organization,
+                    preserveCredentials);
         } else {
             APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, apiProvider);
             return ExportUtils.exportAPI(apiProvider, apiIdentifier, new APIDTOWrapper(apiDtoToReturn), api, userName,

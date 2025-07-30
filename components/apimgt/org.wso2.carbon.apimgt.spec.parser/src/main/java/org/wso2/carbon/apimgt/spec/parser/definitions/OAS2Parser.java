@@ -2381,7 +2381,7 @@ public class OAS2Parser extends APIDefinition {
             backendOperationMap.setBackendApiId(backendId);
             backendOperationMap.setBackendOperation(backendOperation);
             uriTemplate.setBackendOperationMapping(backendOperationMap);
-        } else if (uriTemplate.getExistingAPIOperationMapping() != null){
+        } else if (uriTemplate.getExistingAPIOperationMapping() != null) {
             ExistingAPIOperationMapping apiOperationMap = new ExistingAPIOperationMapping();
             apiOperationMap.setApiUuid(refApiId.getUUID());
             apiOperationMap.setApiName(refApiId.getApiName());
@@ -2389,10 +2389,39 @@ public class OAS2Parser extends APIDefinition {
             apiOperationMap.setBackendOperation(backendOperation);
             uriTemplate.setExistingAPIOperationMapping(apiOperationMap);
         }
+        Map<String, Object> extensions = match.operation.getVendorExtensions();
+        if (extensions != null) {
+            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_AUTH_TYPE)) {
+                String authType = (String) extensions.get(APISpecParserConstants.SWAGGER_X_AUTH_TYPE);
+                uriTemplate.setAuthType(authType);
+                uriTemplate.setAuthTypes(authType);
+            } else {
+                uriTemplate.setAuthType("Any");
+                uriTemplate.setAuthTypes("Any");
+            }
+            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER)) {
+                String throttlingTier =
+                        (String) extensions.get(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER);
+                uriTemplate.setThrottlingTier(throttlingTier);
+                uriTemplate.setThrottlingTiers(throttlingTier);
+            }
+            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
+                String mediationScript =
+                        (String) extensions.get(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT);
+                uriTemplate.setMediationScript(mediationScript);
+                uriTemplate.setMediationScripts(uriTemplate.getHTTPVerb(), mediationScript);
+            }
+        }
 
         return uriTemplate;
     }
 
+    /**
+     * Returns an ObjectMapper instance configured for JSON serialization.
+     * It enables pretty printing and excludes null values from the output.
+     *
+     * @return ObjectMapper instance
+     */
     private ObjectMapper getObjectMapper() {
 
         return new ObjectMapper()
@@ -2400,6 +2429,14 @@ public class OAS2Parser extends APIDefinition {
                 .setSerializationInclusion(JsonInclude.Include.NON_NULL);
     }
 
+    /**
+     * Finds a matching operation in the Swagger definition based on the target path and HTTP verb.
+     *
+     * @param swagger the Swagger definition to search
+     * @param target  the target path to match
+     * @param verb    the HTTP verb to match
+     * @return an OperationMatch containing the matched path, method, and operation, or null if no match is found
+     */
     private OperationMatch findMatchingOperation(Swagger swagger, String target, String verb) {
 
         for (Map.Entry<String, Path> pathEntry : swagger.getPaths().entrySet()) {
@@ -2413,6 +2450,14 @@ public class OAS2Parser extends APIDefinition {
         return null;
     }
 
+    /**
+     * Builds a unified input schema for the API based on the provided parameters and Swagger definition.
+     * It combines body parameters and other serializable parameters into a single JSON schema.
+     *
+     * @param parameters the list of parameters to include in the schema
+     * @param swagger    the Swagger definition containing model references
+     * @return a Map representing the unified input schema
+     */
     private Map<String, Object> buildUnifiedInputSchema(List<Parameter> parameters, Swagger swagger) {
 
         Map<String, Object> root = new LinkedHashMap<>();
@@ -2474,6 +2519,14 @@ public class OAS2Parser extends APIDefinition {
         return root;
     }
 
+    /**
+     * Resolves a model by following references and composed models in the Swagger definition.
+     * It merges properties from all referenced models and handles composed models.
+     *
+     * @param model   the model to resolve
+     * @param swagger the Swagger definition containing model references
+     * @return the resolved ModelImpl or ComposedModel
+     */
     private Model resolveModel(Model model, Swagger swagger) {
 
         if (model == null) return null;
@@ -2518,6 +2571,14 @@ public class OAS2Parser extends APIDefinition {
         return model;
     }
 
+    /**
+     * Resolves a property by following references and handling nested properties.
+     * It recursively resolves RefProperties, ArrayProperties, and ObjectProperties.
+     *
+     * @param property the property to resolve
+     * @param swagger  the Swagger definition containing model references
+     * @return the resolved Property
+     */
     private Property resolveProperty(Property property, Swagger swagger) {
 
         if (property instanceof RefProperty) {
@@ -2554,6 +2615,10 @@ public class OAS2Parser extends APIDefinition {
         return property;
     }
 
+    /**
+     * Represents a match between an OpenAPI operation and a specific path and HTTP method.
+     * Contains the path, HTTP method, and the operation details.
+     */
     private static class OperationMatch {
 
         String path;

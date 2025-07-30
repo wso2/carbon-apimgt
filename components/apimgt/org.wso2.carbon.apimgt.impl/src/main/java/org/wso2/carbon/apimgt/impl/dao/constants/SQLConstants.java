@@ -4690,7 +4690,7 @@ public class SQLConstants {
     public static final String GET_AM_BACKEND_APIS_REVISION_SQL =
             "SELECT BACKEND_API_ID, BACKEND_API_NAME, ENDPOINT_CONFIG, API_DEFINITION "
                     + "FROM AM_BACKEND_API "
-                    + "WHERE REFERENCE_API_UUIID = ? "
+                    + "WHERE REFERENCE_API_UUID = ? "
                     + "AND REFERENCE_API_REVISION_UUID = ? "
                     + "AND ORGANIZATION = ?";
 

@@ -57,7 +57,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.APIDTOWrapper;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIDTOWrapper;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -550,6 +550,7 @@ public class RestApiPublisherUtils {
      * @param organizationID    Organziation ID
      * @return                  List of subscription policies
      */
+    @Deprecated
     public static List<String> getSubscriptionPoliciesForOrganization(APIDTO apiInfo, String organizationID) {
 
         if (organizationID == null) {
@@ -568,7 +569,7 @@ public class RestApiPublisherUtils {
         return policies;
     }
 
-    public static List<String> getSubscriptionPoliciesForOrganization(MCPServerDTO apiInfo, String organizationID) {
+    public static List<String> getSubscriptionPoliciesForOrganization(APIDTOWrapper apiInfo, String organizationID) {
 
         if (organizationID == null) {
             return apiInfo.getPolicies();
@@ -651,7 +652,7 @@ public class RestApiPublisherUtils {
                                                      Attachment fileDetail, ServiceEntry service,
                                                      String organization) throws APIManagementException {
 
-        Map<String, Object> validationResponseMap;
+        Map validationResponseMap;
         boolean isServiceAPI = (service != null);
 
         try {
@@ -685,13 +686,15 @@ public class RestApiPublisherUtils {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String username = RestApiCommonUtil.getLoggedInUsername();
 
-        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(dtoFromProperties, apiProvider, username, organization);
+        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(dtoFromProperties, apiProvider, username,
+                organization);
         boolean syncOperations = !dtoFromProperties.getOperations().isEmpty();
 
         Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiToAdd.getUuid(),
                 APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
         if (!complianceResult.isEmpty()
-                && Boolean.FALSE.toString().equalsIgnoreCase(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
+                && Boolean.FALSE.toString()
+                .equalsIgnoreCase(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
             throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
         }
 
@@ -717,7 +720,8 @@ public class RestApiPublisherUtils {
      * validation response of type APIDefinitionValidationResponse coming from the impl level.
      */
     public static Map validateOpenAPIDefinition(String url, InputStream fileInputStream, Attachment fileDetail,
-                                                String apiDefinition, Boolean returnContent, Boolean isServiceAPI) throws APIManagementException {
+                                                String apiDefinition, Boolean returnContent, Boolean isServiceAPI)
+            throws APIManagementException {
         //validate inputs
         handleInvalidParams(fileInputStream, fileDetail, url, apiDefinition, isServiceAPI);
         String fileName = null;
@@ -727,7 +731,8 @@ public class RestApiPublisherUtils {
         if (fileDetail != null) {
             fileName = fileDetail.getContentDisposition().getFilename();
         }
-        validationResponse = ApisApiServiceImplUtils.validateOpenAPIDefinition(url, fileInputStream, apiDefinition, fileName, returnContent);
+        validationResponse = ApisApiServiceImplUtils.validateOpenAPIDefinition(url, fileInputStream, apiDefinition,
+                fileName, returnContent);
         responseDTO = APIMappingUtil.getOpenAPIDefinitionValidationResponseFromModel(validationResponse,
                 returnContent);
 
