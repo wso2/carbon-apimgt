@@ -140,37 +140,6 @@ public class MCPPayloadGenerator {
         return inputObject;
     }
 
-
-    // not relevant to On prem MCP
-//    public static JsonObject generateTransformationRequestPayload(String toolName, String vHost, String args,
-//                                                                  ExtendedOperation extendedOperation,
-//                                                                  String authParam) {
-//        StringBuilder sb = new StringBuilder("https://");
-//        JsonObject payload = new JsonObject();
-//        payload.addProperty(APIConstants.MCP.PAYLOAD_TOOL_NAME, toolName);
-//        payload.addProperty(APIConstants.MCP.PAYLOAD_SCHEMA, extendedOperation.getSchema());
-//
-//        JsonObject apiInfo = new JsonObject();
-//        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_API_NAME, extendedOperation.getApiName());
-//        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_CONTEXT, extendedOperation.getApiContext());
-//        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_VERSION, extendedOperation.getApiVersion());
-//        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_PATH, extendedOperation.getApiTarget());
-//        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_VERB, extendedOperation.getApiVerb());
-//        if (!authParam.isEmpty()) {
-//            apiInfo.addProperty(APIConstants.MCP.PAYLOAD_AUTH, authParam);
-//        }
-//        if ("localhost".equals(vHost)) {
-//            sb.append("router").append(":").append("9095");
-//        } else {
-//            sb.append(vHost);
-//        }
-//        apiInfo.addProperty(APIConstants.MCP.PAYLOAD_ENDPOINT, sb.toString());
-//        payload.add("api", apiInfo);
-//
-//        payload.addProperty(APIConstants.MCP.ARGUMENTS_KEY, args);
-//        return payload;
-//    }
-
     public static String generateMCPResponsePayload(Object id, boolean isError, String body) {
         MCPResponse response = new MCPResponse(id);
         JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);

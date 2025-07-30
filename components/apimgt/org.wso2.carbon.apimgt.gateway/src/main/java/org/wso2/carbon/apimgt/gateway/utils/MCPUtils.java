@@ -218,15 +218,16 @@ public class MCPUtils {
         } else {
             args = "{}";
         }
+        params.addProperty(APIConstants.MCP.ARGUMENTS_KEY, args);
 
-        transformMcpRequest(messageContext, extendedOperation, jsonObject);
+        transformMcpRequest(messageContext, id, extendedOperation, jsonObject);
 
         return new McpResponseDto("success", 200, null);
         // for now only supported mode is Rest API Backend
 
     }
 
-    private static void transformMcpRequest(MessageContext messageContext, URLMapping extendedOperation,
+    private static void transformMcpRequest(MessageContext messageContext, Object id, URLMapping extendedOperation,
                                             JsonObject jsonObject) throws McpException {
         if (extendedOperation != null) {
             BackendOperationMapping backendOperationMapping = extendedOperation.getBackendOperationMapping();
@@ -248,6 +249,9 @@ public class MCPUtils {
 
                     //process request body
                     processRequestBody(messageContext, schemaMapping, jsonObject);
+
+                    //set received id to msg context
+                    messageContext.setProperty("RECEIVED_MCP_ID", id.toString());
                 }
             }
         } else {
