@@ -606,6 +606,13 @@ public class APIAdminImpl implements APIAdmin {
             }
             maskValues(keyManagerConfigurationDTO);
         }
+        // add missing fields for migrated Key manager configs
+        Map<String, KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap =
+                ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfigurations();
+        if (keyManagerConnectorConfigurationMap.containsKey(keyManagerConfigurationDTO.getName())) {
+            keyManagerConnectorConfigurationMap.get(keyManagerConfigurationDTO.getName())
+                    .processConnectorConfigurations(keyManagerConfigurationDTO.getAdditionalProperties());
+        }
         if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
                 .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
             maskValues(keyManagerConfigurationDTO);
@@ -758,7 +765,7 @@ public class APIAdminImpl implements APIAdmin {
                 new KeyManagerConfigurationDTO(keyManagerConfigurationDTO);
         encryptKeyManagerConfigurationValues(null, keyManagerConfigurationToStore);
         apiMgtDAO.addKeyManagerConfiguration(keyManagerConfigurationToStore);
-
+//
         // if MTLS is selected and tenant wide cert is provided, add that cert into trust store providing an alias
         if (keyManagerConfigurationDTO.getAdditionalProperties().containsKey(MUTUAL_TLS) &&
                 keyManagerConfigurationDTO.getAdditionalProperties().get(MUTUAL_TLS).equals(TENANT_WIDE_CERTIFICATE)) {
@@ -835,13 +842,12 @@ public class APIAdminImpl implements APIAdmin {
                 .getKeyManagerConnectorConfiguration(updatedKeyManagerConfigurationDto.getType());
         if (keyManagerConnectorConfiguration != null) {
             Map<String, Object> additionalProperties = updatedKeyManagerConfigurationDto.getAdditionalProperties();
-            List<ConfigurationDto> connectionConfigurations;
-            // if authConfiguration array is not empty, use it as connector configuration
+            List<ConfigurationDto> connectionConfigurations =
+                    keyManagerConnectorConfiguration.getConnectionConfigurations();
+            // if authConfiguration array is not empty, add it to connector configuration
             if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
                     && !(keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty())) {
-                connectionConfigurations = keyManagerConnectorConfiguration.getAuthConfigurations();
-            } else {
-                connectionConfigurations = keyManagerConnectorConfiguration.getConnectionConfigurations();
+                connectionConfigurations.addAll(keyManagerConnectorConfiguration.getAuthConfigurations());
             }
             for (ConfigurationDto configurationDto : connectionConfigurations) {
                 if (configurationDto.isMask()) {
@@ -1224,6 +1230,13 @@ public class APIAdminImpl implements APIAdmin {
 
         KeyManagerConfigurationDTO keyManagerConfiguration =
                 apiMgtDAO.getKeyManagerConfigurationByName(organization, name);
+        // add missing fields for migrated Key manager configs
+        Map<String, KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap =
+                ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfigurations();
+        if (keyManagerConnectorConfigurationMap.containsKey(name)) {
+            keyManagerConnectorConfigurationMap.get(name)
+                    .processConnectorConfigurations(keyManagerConfiguration.getAdditionalProperties());
+        }
         if (keyManagerConfiguration != null) {
             if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName()) && (
                     APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfiguration.getType())
@@ -1578,7 +1591,8 @@ public class APIAdminImpl implements APIAdmin {
                 }
                 if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
                         && !keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty()) {
-                    //TODO : add a validation logic to auth configs
+                    missingRequiredConfigurations.addAll(keyManagerConnectorConfiguration.validateAuthConfigurations(
+                            keyManagerConfigurationDTO.getAdditionalProperties()));
                 }
                 if (!missingRequiredConfigurations.isEmpty()) {
                     throw new APIManagementException("Key Manager Configuration value for " + String.join(",",
@@ -1649,19 +1663,35 @@ public class APIAdminImpl implements APIAdmin {
                 .getKeyManagerConnectorConfiguration(keyManagerConfigurationDTO.getType());
 
         Map<String, Object> additionalProperties = keyManagerConfigurationDTO.getAdditionalProperties();
-        List<ConfigurationDto> connectionConfigurations;
-        // if authConfiguration array is not empty, use it as connector configuration
-        if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
-                && !(keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty())) {
-            connectionConfigurations = keyManagerConnectorConfiguration.getAuthConfigurations();
-        } else {
-            connectionConfigurations = keyManagerConnectorConfiguration.getConnectionConfigurations();
-        }
+        List<ConfigurationDto> connectionConfigurations =
+                keyManagerConnectorConfiguration.getConnectionConfigurations();
         for (ConfigurationDto connectionConfiguration : connectionConfigurations) {
             if (connectionConfiguration.isMask()) {
                 additionalProperties.replace(connectionConfiguration.getName(),
                         APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
             }
+        }
+        // if authConfiguration array is not empty, check for maskable values there as well
+        if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
+                && !(keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty())) {
+            List<ConfigurationDto> authConfigurations = keyManagerConnectorConfiguration.getAuthConfigurations();
+            // Recursively check nested objects in authConfigurations and apply masking
+            for (ConfigurationDto authConfiguration : authConfigurations) {
+                applyMaskToNestedFields(authConfiguration.getValues());
+            }
+        }
+    }
+
+    private void applyMaskToNestedFields(List<Object> configurations) {
+        if (configurations == null || configurations.isEmpty()) {
+            return;
+        }
+        for (Object configuration : configurations) {
+            if (((ConfigurationDto)configuration).isMask()) {
+                ((ConfigurationDto)configuration).setDefaultValue(APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+            }
+            // Recursively process nested values
+            applyMaskToNestedFields(((ConfigurationDto)configuration).getValues());
         }
     }
 

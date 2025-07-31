@@ -19,10 +19,13 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import org.wso2.carbon.apimgt.api.APIConstants;
+import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This Interface providing functionality to register KeyManagerConnector Related Configurations
@@ -52,12 +55,33 @@ public interface KeyManagerConnectorConfiguration {
 
     /**
      * This method returns the AuthConfigurations related to key-manager registration
-     * Introduced to accommodate advanced, hierarchical configuration models
+     * Introduced to accommodate advanced, hierarchical configuration models for key manager authentication
      *
      * @return
      */
     public default List<ConfigurationDto> getAuthConfigurations() {
         return new ArrayList<>();
+    }
+
+    /**
+     * This method is used to process connector configurations
+     * This is a default method and can be overridden by the implementing class if needed
+     */
+    public default void processConnectorConfigurations(Map<String, Object> propertiesMap) {
+        // Default implementation does nothing.
+    }
+
+    public default List<String> validateAuthConfigurations(Map<String, Object> propertiesMap) {
+        // Default implementation does nothing.
+        return new ArrayList<>();
+    }
+
+    /**
+     * This method is used to configure the default key manager with required configuration values passed as a map.
+     */
+    public default boolean configureDefaultKeyManager(Map<String, String> propertiesMap) throws APIManagementException {
+        // Default implementation does nothing.
+        return false;
     }
 
     /**
