@@ -537,7 +537,7 @@ public class APIMappingUtil {
                 model.setAiConfiguration(
                         new Gson().fromJson(dto.getSubtypeConfiguration().getConfiguration().toString(),
                                 AIConfiguration.class));
-            } else if (APIConstants.API_TYPE_MCP.equals(dto.getSubtypeConfiguration().getSubtype())) {
+            } else if (APIConstants.API_TYPE_MCP.equals(dto.getType().value())) {
                 model.setSubtype(dto.getSubtypeConfiguration().getSubtype());
             } else {
                 model.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);

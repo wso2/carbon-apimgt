@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
+import org.wso2.carbon.apimgt.api.model.ApiOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 
@@ -38,6 +39,7 @@ public class URLMapping {
     private List<String> scopes = new ArrayList<>();
     private Set<OperationPolicy> operationPolicies = new HashSet<>();
     private BackendOperationMapping backendOperationMapping = new BackendOperationMapping();
+    private ApiOperationMapping apiOperationMapping = new ApiOperationMapping();
 
     public String getDescription() {
         return description;
@@ -61,6 +63,14 @@ public class URLMapping {
 
     public void setBackendOperationMapping(BackendOperationMapping backendOperationMapping) {
         this.backendOperationMapping = backendOperationMapping;
+    }
+
+    public void setApiOperationMapping(ApiOperationMapping apiOperationMapping) {
+        this.apiOperationMapping = apiOperationMapping;
+    }
+
+    public ApiOperationMapping getApiOperationMapping() {
+        return apiOperationMapping;
     }
 
     public String getHttpMethod() {
@@ -148,6 +158,7 @@ public class URLMapping {
                 ", description ='" + description + '\'' +
                 ", schemaDefinition ='" + schemaDefinition + '\'' +
                 ", backendOperationMapping ='" + backendOperationMapping + '\'' +
+                ", apiOperationMapping ='" + apiOperationMapping + '\'' +
                 '}';
     }
 }

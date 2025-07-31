@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
+import org.wso2.carbon.apimgt.internal.service.dto.APIOperationMappingDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.BackendOperationMappingDTO;
 import org.wso2.carbon.apimgt.internal.service.dto.OperationPolicyDTO;
 import javax.validation.constraints.*;
@@ -32,6 +33,7 @@ public class URLMappingDTO   {
     private String description = null;
     private String schemaDefinition = null;
     private BackendOperationMappingDTO backendOperationMapping = null;
+    private APIOperationMappingDTO apiOperationMapping = null;
     private List<OperationPolicyDTO> operationPolicies = new ArrayList<>();
 
   /**
@@ -173,6 +175,24 @@ public class URLMappingDTO   {
 
   /**
    **/
+  public URLMappingDTO apiOperationMapping(APIOperationMappingDTO apiOperationMapping) {
+    this.apiOperationMapping = apiOperationMapping;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("apiOperationMapping")
+  public APIOperationMappingDTO getApiOperationMapping() {
+    return apiOperationMapping;
+  }
+  public void setApiOperationMapping(APIOperationMappingDTO apiOperationMapping) {
+    this.apiOperationMapping = apiOperationMapping;
+  }
+
+  /**
+   **/
   public URLMappingDTO operationPolicies(List<OperationPolicyDTO> operationPolicies) {
     this.operationPolicies = operationPolicies;
     return this;
@@ -207,12 +227,13 @@ public class URLMappingDTO   {
         Objects.equals(description, urLMapping.description) &&
         Objects.equals(schemaDefinition, urLMapping.schemaDefinition) &&
         Objects.equals(backendOperationMapping, urLMapping.backendOperationMapping) &&
+        Objects.equals(apiOperationMapping, urLMapping.apiOperationMapping) &&
         Objects.equals(operationPolicies, urLMapping.operationPolicies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(authScheme, throttlingPolicy, httpMethod, urlPattern, scopes, description, schemaDefinition, backendOperationMapping, operationPolicies);
+    return Objects.hash(authScheme, throttlingPolicy, httpMethod, urlPattern, scopes, description, schemaDefinition, backendOperationMapping, apiOperationMapping, operationPolicies);
   }
 
   @Override
@@ -228,6 +249,7 @@ public class URLMappingDTO   {
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    schemaDefinition: ").append(toIndentedString(schemaDefinition)).append("\n");
     sb.append("    backendOperationMapping: ").append(toIndentedString(backendOperationMapping)).append("\n");
+    sb.append("    apiOperationMapping: ").append(toIndentedString(apiOperationMapping)).append("\n");
     sb.append("    operationPolicies: ").append(toIndentedString(operationPolicies)).append("\n");
     sb.append("}");
     return sb.toString();

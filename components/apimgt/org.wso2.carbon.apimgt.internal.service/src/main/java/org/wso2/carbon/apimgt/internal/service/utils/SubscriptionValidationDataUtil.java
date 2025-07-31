@@ -108,6 +108,24 @@ public class SubscriptionValidationDataUtil {
                     }
                 }
 
+                ApiOperationMapping apiOperationMapping = urlMapping.getApiOperationMapping();
+                if (apiOperationMapping != null) {
+                    BackendOperation backendOperation = apiOperationMapping.getBackendOperation();
+                    if (backendOperation != null) {
+                        BackendOperationDTO backendOperationDTO = new BackendOperationDTO();
+                        backendOperationDTO.setVerb(backendOperation.getVerb());
+                        backendOperationDTO.setTarget(backendOperation.getTarget());
+
+                        APIOperationMappingDTO apiOperationMappingDTO = new APIOperationMappingDTO();
+                        apiOperationMappingDTO.setApiUUID(apidto.getUuid());
+                        apiOperationMappingDTO.setApiName(apiOperationMapping.getApiName());
+                        apiOperationMappingDTO.setApiVersion(apiOperationMapping.getApiVersion());
+                        apiOperationMappingDTO.setApiContext(apiOperationMapping.getApiContext());
+                        apiOperationMappingDTO.setBackendOperation(backendOperationDTO);
+                        urlMappingDTO.setApiOperationMapping(apiOperationMappingDTO);
+                    }
+                }
+
                 List<OperationPolicyDTO> operationPolicyDTOList = new ArrayList<>();
                 for (OperationPolicy operationPolicy : urlMapping.getOperationPolicies()) {
                     OperationPolicyDTO operationPolicyDTO = new OperationPolicyDTO();
@@ -186,6 +204,24 @@ public class SubscriptionValidationDataUtil {
                         backendOperationMappingDTO.setBackendId(backendOperationMapping.getBackendId());
                         backendOperationMappingDTO.setBackendOperation(backendOperationDTO);
                         urlMappingDTO.setBackendOperationMapping(backendOperationMappingDTO);
+                    }
+                }
+
+                ApiOperationMapping apiOperationMapping = urlMapping.getApiOperationMapping();
+                if (apiOperationMapping != null) {
+                    BackendOperation backendOperation = apiOperationMapping.getBackendOperation();
+                    if (backendOperation != null) {
+                        BackendOperationDTO backendOperationDTO = new BackendOperationDTO();
+                        backendOperationDTO.setVerb(backendOperation.getVerb());
+                        backendOperationDTO.setTarget(backendOperation.getTarget());
+
+                        APIOperationMappingDTO apiOperationMappingDTO = new APIOperationMappingDTO();
+                        apiOperationMappingDTO.setApiUUID(apidto.getUuid());
+                        apiOperationMappingDTO.setApiName(apiOperationMapping.getApiName());
+                        apiOperationMappingDTO.setApiVersion(apiOperationMapping.getApiVersion());
+                        apiOperationMappingDTO.setApiContext(apiOperationMapping.getApiContext());
+                        apiOperationMappingDTO.setBackendOperation(backendOperationDTO);
+                        urlMappingDTO.setApiOperationMapping(apiOperationMappingDTO);
                     }
                 }
 

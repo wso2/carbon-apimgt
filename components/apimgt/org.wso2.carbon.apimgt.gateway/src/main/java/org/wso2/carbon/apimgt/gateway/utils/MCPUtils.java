@@ -10,6 +10,7 @@ import org.apache.axis2.Constants;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.wso2.carbon.apimgt.api.model.ApiOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
@@ -212,15 +213,13 @@ public class MCPUtils {
                 .findFirst()
                 .orElse(null);
 
-        String args;
-        if (params.has(APIConstants.MCP.ARGUMENTS_KEY)) {
-            args = params.get(APIConstants.MCP.ARGUMENTS_KEY).toString();
-        } else {
-            args = "{}";
+        if (!params.has(APIConstants.MCP.ARGUMENTS_KEY)) {
+            JsonObject args = new JsonObject();
+            params.add(APIConstants.MCP.ARGUMENTS_KEY, args);
         }
-        params.addProperty(APIConstants.MCP.ARGUMENTS_KEY, args);
 
-        transformMcpRequest(messageContext, id, extendedOperation, jsonObject);
+        String subType = matchedApi.getSubtype();
+        transformMcpRequest(messageContext, id, extendedOperation, jsonObject, subType);
 
         return new McpResponseDto("success", 200, null);
         // for now only supported mode is Rest API Backend
@@ -228,31 +227,37 @@ public class MCPUtils {
     }
 
     private static void transformMcpRequest(MessageContext messageContext, Object id, URLMapping extendedOperation,
-                                            JsonObject jsonObject) throws McpException {
+                                            JsonObject jsonObject, String subType) throws McpException {
         if (extendedOperation != null) {
-            BackendOperationMapping backendOperationMapping = extendedOperation.getBackendOperationMapping();
-            if (backendOperationMapping != null) {
-                BackendOperation backendOperation = backendOperationMapping.getBackendOperation();
-                if (backendOperation != null) {
-                    //process HTTP Verb
-                    String verb = backendOperation.getVerb();
-
-                    //process schema
-                    String schemaDefinition = extendedOperation.getSchemaDefinition();
-                    SchemaMapping schemaMapping = processMcpSchema(schemaDefinition);
-
-                    //process endpoint URL including query and path params
-                    processEndpoint(messageContext, schemaMapping, jsonObject, backendOperation);
-
-                    //process headers
-                    processHeaders(messageContext, schemaMapping, jsonObject);
-
-                    //process request body
-                    processRequestBody(messageContext, schemaMapping, jsonObject);
-
-                    //set received id to msg context
-                    messageContext.setProperty("RECEIVED_MCP_ID", id.toString());
+            BackendOperation backendOperation = null;
+            if (APIConstants.API_SUBTYPE_EXISTING_API.equals(subType)) {
+                ApiOperationMapping apiOperationMapping = extendedOperation.getApiOperationMapping();
+                if (apiOperationMapping != null) {
+                    backendOperation = apiOperationMapping.getBackendOperation();
                 }
+            } else if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(subType)) {
+                BackendOperationMapping backendOperationMapping = extendedOperation.getBackendOperationMapping();
+                if (backendOperationMapping != null) {
+                    backendOperation = backendOperationMapping.getBackendOperation();
+                }
+            }
+
+            if (backendOperation != null) {
+                //process schema
+                String schemaDefinition = extendedOperation.getSchemaDefinition();
+                SchemaMapping schemaMapping = processMcpSchema(schemaDefinition);
+
+                //process endpoint URL including query and path params
+                processEndpoint(messageContext, schemaMapping, jsonObject, backendOperation);
+
+                //process headers
+                processHeaders(messageContext, schemaMapping, jsonObject);
+
+                //process request body
+                processRequestBody(messageContext, schemaMapping, jsonObject);
+
+                //set received id to msg context
+                messageContext.setProperty("RECEIVED_MCP_ID", id.toString());
             }
         } else {
             //todo: handle error

@@ -26,6 +26,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.model.ApiOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
@@ -1322,8 +1323,7 @@ public class SubscriptionValidationDAO {
                     String scopeName = resultSet.getString("SCOPE_NAME");
                     String description = resultSet.getString("DESCRIPTION");
                     String schemaDefinition = resultSet.getString("SCHEMA_DEFINITION");
-                    String target = resultSet.getString("TARGET");
-                    String verb = resultSet.getString("VERB");
+                    int urlMappingId = resultSet.getInt("URL_MAPPING_ID");
                     URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
                     if (urlMapping == null) {
                         urlMapping = new URLMapping();
@@ -1334,13 +1334,9 @@ public class SubscriptionValidationDAO {
                         urlMapping.setDescription(description);
                         urlMapping.setSchemaDefinition(schemaDefinition);
 
-                        BackendOperation backendOperation = new BackendOperation();
-                        backendOperation.setTarget(target);
-                        backendOperation.setVerb(verb);
-
-                        BackendOperationMapping backendOperationMapping = new BackendOperationMapping();
-                        backendOperationMapping.setBackendOperation(backendOperation);
-                        urlMapping.setBackendOperationMapping(backendOperationMapping);
+                        if (APIConstants.API_TYPE_MCP.equals(api.getApiType())) {
+                            populateMcpOperationMappings(connection, urlMappingId, urlMapping, api);
+                        }
                     }
                     if (StringUtils.isNotEmpty(scopeName)) {
                         urlMapping.addScope(scopeName);
@@ -1354,6 +1350,50 @@ public class SubscriptionValidationDAO {
             boolean isPolicyEnabled = Boolean.parseBoolean(configs.get(POLICY_ENABLED_FOR_ANALYTICS));
             if (isPolicyEnabled) {
                 attachPolicies(connection, revisionId, api);
+            }
+        }
+    }
+
+    private void populateMcpOperationMappings(Connection connection, int urlMappingId, URLMapping urlMapping, API api)
+            throws SQLException {
+        String sql;
+        if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
+            sql = SubscriptionValidationSQLConstants.GET_MCP_BACKEND_OPERATION_MAPPING_BY_REF_URL_MAPPING_ID;
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, urlMappingId);
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    if (resultSet.next()) {
+                        BackendOperationMapping backendOperationMapping = new BackendOperationMapping();
+
+                        BackendOperation backendOperation = new BackendOperation();
+                        backendOperation.setVerb(resultSet.getString("VERB"));
+                        backendOperation.setTarget(resultSet.getString("TARGET"));
+                        backendOperationMapping.setBackendOperation(backendOperation);
+
+                        urlMapping.setBackendOperationMapping(backendOperationMapping);
+                    }
+                }
+            }
+        } else if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
+            sql = SubscriptionValidationSQLConstants.GET_MCP_API_OPERATION_MAPPING_BY_REF_URL_MAPPING_ID;
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, urlMappingId);
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    if (resultSet.next()) {
+
+                        ApiOperationMapping apiOperationMapping = new ApiOperationMapping();
+                        apiOperationMapping.setApiName(resultSet.getString("API_NAME"));
+                        apiOperationMapping.setApiVersion(resultSet.getString("API_VERSION"));
+                        apiOperationMapping.setApiContext(resultSet.getString("CONTEXT"));
+
+                        BackendOperation backendOperation = new BackendOperation();
+                        backendOperation.setVerb(resultSet.getString("HTTP_METHOD"));
+                        backendOperation.setTarget(resultSet.getString("URL_PATTERN"));
+                        apiOperationMapping.setBackendOperation(backendOperation);
+
+                        urlMapping.setApiOperationMapping(apiOperationMapping);
+                    }
+                }
             }
         }
     }

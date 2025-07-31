@@ -1861,6 +1861,8 @@ components:
           type: string
         backendOperationMapping:
           $ref: '#/components/schemas/BackendOperationMapping'
+        apiOperationMapping:
+          $ref: '#/components/schemas/APIOperationMapping'
         operationPolicies:
           type: array
           items:
@@ -2187,6 +2189,20 @@ components:
       type: object
       properties:
         backendId:
+          type: string
+        backendOperation:
+          $ref: '#/components/schemas/BackendOperation'
+    APIOperationMapping:
+      title: APIOperationMapping
+      type: object
+      properties:
+        apiUUID:
+          type: string
+        apiName:
+          type: string
+        apiVersion:
+          type: string
+        apiContext:
           type: string
         backendOperation:
           $ref: '#/components/schemas/BackendOperation'

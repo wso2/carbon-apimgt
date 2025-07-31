@@ -25,6 +25,8 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.EndpointConfigDTO;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.model.ApiOperationMapping;
+import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.template.APITemplateException;
 import org.wso2.carbon.apimgt.impl.utils.GatewayUtils;
@@ -114,8 +116,18 @@ public class EndpointConfigContext extends ConfigContextDecorator {
      * @return String of endpoint key
      */
     private String getEndpointKey(API api) {
-
-        return getEndpointKey(api.getId().getApiName(), api.getId().getVersion());
+        String apiName = api.getId().getApiName();
+        String apiVersion = api.getId().getVersion();
+        if (APIConstants.API_TYPE_MCP.equals(api.getType()) &&
+                APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
+            URITemplate template = (URITemplate) (api.getUriTemplates().toArray()[0]);
+            ApiOperationMapping apiOperationMapping = template.getApiOperationMapping();
+            if (apiOperationMapping != null) {
+                apiName = apiOperationMapping.getApiName();
+                apiVersion = apiOperationMapping.getApiVersion();
+            }
+        }
+        return getEndpointKey(apiName, apiVersion);
     }
 
     /**
