@@ -19,6 +19,8 @@
 
 package org.wso2.carbon.apimgt.api;
 
+import org.wso2.carbon.apimgt.api.model.URITemplate;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,6 +92,7 @@ public class APIDefinitionValidationResponse {
         private String context;
         private String description;
         private List<String> endpoints;
+        private List<URITemplate> uriTemplates = new ArrayList<>();
 
         public String getOpenAPIVersion() {
             return openAPIVersion;
@@ -134,6 +137,14 @@ public class APIDefinitionValidationResponse {
         public List<String> getEndpoints() { return endpoints; }
 
         public void setEndpoints(List<String> endpoints) { this.endpoints = endpoints; }
+
+        public List<URITemplate> getUriTemplates() {
+            return uriTemplates;
+        }
+
+        public void setUriTemplates(List<URITemplate> uriTemplates) {
+            this.uriTemplates = uriTemplates;
+        }
     }
 
     public APIDefinition getParser() {
@@ -153,4 +164,6 @@ public class APIDefinitionValidationResponse {
 
         this.protocol = protocol;
     }
+
+
 }

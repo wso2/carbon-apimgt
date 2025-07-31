@@ -244,6 +244,8 @@ public class API implements Serializable {
   
     private String primaryProductionEndpointId;
 
+    private List<BackendAPI> backendAPIS = new ArrayList<>();
+
     public AIConfiguration getAiConfiguration() {
 
         return aiConfiguration;
@@ -1593,6 +1595,11 @@ public class API implements Serializable {
         return isEgress;
     }
 
+    public boolean isEgressAPI() {
+
+        return isEgress == 1;
+    }
+
     public void setEgress(int egress) {
         isEgress = egress;
     }
@@ -1613,5 +1620,15 @@ public class API implements Serializable {
 
     public void setPrimarySandboxEndpointId(String primarySandboxEndpointId) {
         this.primarySandboxEndpointId = primarySandboxEndpointId;
+    }
+
+    public List<BackendAPI> getBackendAPIs() {
+
+        return backendAPIS;
+    }
+
+    public void setBackendAPIs(List<BackendAPI> backendAPIS) {
+
+        this.backendAPIS = backendAPIS;
     }
 }

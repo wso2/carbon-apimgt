@@ -18,6 +18,9 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.OperationPolicyData;
 import org.wso2.carbon.apimgt.api.model.OperationPolicySpecAttribute;
@@ -25,6 +28,8 @@ import org.wso2.carbon.apimgt.api.model.OperationPolicySpecification;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.OperationPolicyComparator;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendAPIOperationMappingDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExistingAPIOperationMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataListDTO;
@@ -138,6 +143,38 @@ public class OperationPolicyMappingUtil {
             }
         }
         return operationPoliciesList;
+    }
+
+    public static BackendAPIOperationMapping fromDTOToBackendOperationMapping(
+            BackendAPIOperationMappingDTO backendOperationMappingDTO) {
+
+        BackendAPIOperationMapping backendAPIOperationMapping = new BackendAPIOperationMapping();
+
+        BackendOperation backendOperation = new BackendOperation();
+        backendOperation.setTarget(backendOperationMappingDTO.getBackendOperation().getTarget());
+        backendOperation.setVerb(backendOperationMappingDTO.getBackendOperation().getVerb());
+        backendAPIOperationMapping.setBackendOperation(backendOperation);
+
+        backendAPIOperationMapping.setBackendApiId(backendOperationMappingDTO.getBackendAPIId());
+
+        return backendAPIOperationMapping;
+    }
+
+    public static ExistingAPIOperationMapping fromDTOToAPIOperationMapping(
+            ExistingAPIOperationMappingDTO apiOperationMappingDTO) {
+
+        ExistingAPIOperationMapping existingAPIOperationMapping = new ExistingAPIOperationMapping();
+
+        BackendOperation backendOperation = new BackendOperation();
+        backendOperation.setTarget(apiOperationMappingDTO.getBackendOperation().getTarget());
+        backendOperation.setVerb(apiOperationMappingDTO.getBackendOperation().getVerb());
+        existingAPIOperationMapping.setBackendOperation(backendOperation);
+
+        existingAPIOperationMapping.setApiUuid(apiOperationMappingDTO.getApiId());
+        existingAPIOperationMapping.setApiName(apiOperationMappingDTO.getApiName());
+        existingAPIOperationMapping.setApiVersion(apiOperationMappingDTO.getApiVersion());
+
+        return existingAPIOperationMapping;
     }
 
     public static OperationPolicyDataListDTO fromOperationPolicyDataListToDTO(

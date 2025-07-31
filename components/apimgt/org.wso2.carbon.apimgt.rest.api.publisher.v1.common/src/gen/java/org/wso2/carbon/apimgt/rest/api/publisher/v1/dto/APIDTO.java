@@ -18,11 +18,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIServiceInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APISubtypeConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubtypeConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WebsubSubscriptionConfigurationDTO;
 import javax.validation.constraints.*;
@@ -320,7 +320,7 @@ return null;
         }
     }
     private EndpointImplementationTypeEnum endpointImplementationType = EndpointImplementationTypeEnum.ENDPOINT;
-    private APISubtypeConfigurationDTO subtypeConfiguration = null;
+    private SubtypeConfigurationDTO subtypeConfiguration = null;
     private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
     private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
     private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
@@ -1288,7 +1288,7 @@ return null;
 
   /**
    **/
-  public APIDTO subtypeConfiguration(APISubtypeConfigurationDTO subtypeConfiguration) {
+  public APIDTO subtypeConfiguration(SubtypeConfigurationDTO subtypeConfiguration) {
     this.subtypeConfiguration = subtypeConfiguration;
     return this;
   }
@@ -1297,10 +1297,10 @@ return null;
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("subtypeConfiguration")
-  public APISubtypeConfigurationDTO getSubtypeConfiguration() {
+  public SubtypeConfigurationDTO getSubtypeConfiguration() {
     return subtypeConfiguration;
   }
-  public void setSubtypeConfiguration(APISubtypeConfigurationDTO subtypeConfiguration) {
+  public void setSubtypeConfiguration(SubtypeConfigurationDTO subtypeConfiguration) {
     this.subtypeConfiguration = subtypeConfiguration;
   }
 

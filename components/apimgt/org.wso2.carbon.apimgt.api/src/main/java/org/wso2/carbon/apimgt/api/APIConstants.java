@@ -44,6 +44,7 @@ public class APIConstants {
     public static final String ENDPOINT_SECURITY_PRODUCTION = "production";
     public static final String ENDPOINT_SECURITY_SANDBOX = "sandbox";
     public static final String ENDPOINT_CONFIG_SESSION_TIMEOUT = "sessionTimeOut";
+    public static final String HTTP_VERB_TOOL = "tool";
 
     public static class AIAPIConstants {
         public static final int MILLISECONDS_IN_SECOND = 1000;
