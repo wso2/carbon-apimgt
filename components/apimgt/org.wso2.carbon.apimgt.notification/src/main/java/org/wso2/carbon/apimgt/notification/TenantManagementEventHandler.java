@@ -41,8 +41,22 @@ public class TenantManagementEventHandler implements EventHandler {
     @Override
     public boolean handleEvent(String event, Map<String, List<String>> headers) throws APIManagementException {
         try {
-            client = new TenantManagementClient();
+            if (client == null) {
+                client = new TenantManagementClient();
+            }
             TenantManagementEvent tenantMgtEvent = new Gson().fromJson(event, TenantManagementEvent.class);
+            if (tenantMgtEvent == null || tenantMgtEvent.getTenantDomain() == null) {
+                throw new APIManagementException("Invalid tenant management event data");
+            }
+
+            if (log.isDebugEnabled()) {
+                log.debug("Processing tenant management event of type: " + tenantMgtEvent.getType());
+            }
+
+            if (tenantMgtEvent.getType() == null) {
+                throw new APIManagementException("Event type cannot be null");
+            }
+
             if (APIConstants.TenantManagementEvent.TYPE_ADD_TENANT.equals(tenantMgtEvent.getType())) {
                 addTenant(tenantMgtEvent);
             } else if (APIConstants.TenantManagementEvent.TYPE_UPDATE_TENANT.equals(tenantMgtEvent.getType())) {
@@ -52,9 +66,10 @@ public class TenantManagementEventHandler implements EventHandler {
             } else if (APIConstants.TenantManagementEvent.TYPE_DEACTIVATE_TENANT.equals(tenantMgtEvent.getType())) {
                 deactivateTenant(tenantMgtEvent);
             } else {
-                throw new APIManagementException("Invalid event type");
+                throw new APIManagementException("Invalid event type " + tenantMgtEvent.getType());
             }
         } catch (APIManagementException e) {
+            log.error("Error processing tenant management event", e);
             throw new APIManagementException("Error while creating tenant management client", e);
         }
         return true;
@@ -89,7 +104,7 @@ public class TenantManagementEventHandler implements EventHandler {
 
     @Override
     public String getType() {
-        return APIConstants.TenantManagementEvent.TENANT_MANAGMENT_TYPE;
+        return APIConstants.TenantManagementEvent.TENANT_MANAGEMENT_TYPE;
     }
 
 }

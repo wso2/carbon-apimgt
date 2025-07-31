@@ -21,6 +21,8 @@ package org.wso2.carbon.apimgt.impl.clients;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.client.Options;
 import org.apache.axis2.client.ServiceClient;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
@@ -33,6 +35,7 @@ import org.wso2.carbon.utils.CarbonUtils;
 import java.rmi.RemoteException;
 
 public class TenantManagementClient {
+    private static final Log log = LogFactory.getLog(TenantManagementClient.class);
     private static final String TENANT_MANAGEMENT_ADMIN_SERVICE = "/services/TenantMgtAdminService";
     private TenantMgtAdminServiceStub stub;
 
@@ -40,11 +43,18 @@ public class TenantManagementClient {
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
         EventHubConfigurationDto eventHubConfigurationDto = config.getEventHubConfigurationDto();
+        if (eventHubConfigurationDto == null) {
+            throw new APIManagementException("Event hub configuration not found");
+        }
         String username = eventHubConfigurationDto.getUsername();
         String password = eventHubConfigurationDto.getPassword();
         String url = eventHubConfigurationDto.getServiceUrl();
+        if (username == null || password == null || url == null) {
+           throw new APIManagementException("Event hub configuration is incomplete");
+        }
 
         try {
+            log.debug("Creating TenantMgtAdminServiceStub with URL: " + url + TENANT_MANAGEMENT_ADMIN_SERVICE);
             stub = new TenantMgtAdminServiceStub(url + TENANT_MANAGEMENT_ADMIN_SERVICE);
             ServiceClient client = stub._getServiceClient();
             Options options = client.getOptions();
@@ -52,6 +62,7 @@ public class TenantManagementClient {
             options.setManageSession(true);
             CarbonUtils.setBasicAccessSecurityHeaders(username, password, client);
         } catch (AxisFault axisFault) {
+            log.error("Error while accessing tenant management admin service", axisFault);
             throw new APIManagementException("Error while accessing tenant management admin service ", axisFault);
         }
 
@@ -59,6 +70,8 @@ public class TenantManagementClient {
 
     public void addTenant(String firstName, String lastName, String adminUserName, String adminPassword,
             String email, String tenantDomain, boolean isActive) throws APIManagementException {
+        
+        log.debug("Adding tenant with domain: " + tenantDomain);
         
         TenantInfoBean tenantInfoBean = new TenantInfoBean();
         tenantInfoBean.setTenantDomain(tenantDomain);
@@ -72,6 +85,7 @@ public class TenantManagementClient {
         try {
             stub.addTenant(tenantInfoBean);
         } catch (RemoteException | TenantMgtAdminServiceExceptionException e) {
+            log.error("Error while creating tenant with domain: " + tenantDomain, e);
             throw new APIManagementException("Error while creating tenant ", e);
         }
 
@@ -79,10 +93,13 @@ public class TenantManagementClient {
 
     public void updateTenant(String firstName, String lastName, String adminUserName, String adminPassword,
             String email, String tenantDomain, boolean isActive) throws APIManagementException {
-
+        log.debug("Updating tenant with domain: " + tenantDomain);
         try {
             // get the existing tenant with tenant ID
             TenantInfoBean tenantInfoInAPIM = stub.getTenant(tenantDomain);
+            if (tenantInfoInAPIM == null) {
+                throw new APIManagementException("Tenant not found: " + tenantDomain);
+            }
             
             tenantInfoInAPIM.setAdmin(adminUserName);
             tenantInfoInAPIM.setAdminPassword(adminPassword);
@@ -92,23 +109,28 @@ public class TenantManagementClient {
             tenantInfoInAPIM.setActive(isActive);
             stub.updateTenant(tenantInfoInAPIM);
         } catch (RemoteException | TenantMgtAdminServiceExceptionException e) {
+            log.error("Error while updating tenant with domain: " + tenantDomain, e);
             throw new APIManagementException("Error while updating tenant ", e);
         }
 
     }
 
     public void activateTenant(String tenantDomain) throws APIManagementException {
+        log.debug("Activating tenant with domain: " + tenantDomain);
         try {
             stub.activateTenant(tenantDomain);
         } catch (RemoteException | TenantMgtAdminServiceExceptionException e) {
+            log.error("Error while activating tenant with domain: " + tenantDomain, e);
             throw new APIManagementException("Error while activating tenant ", e);
         }
     }
 
     public void deactivateTenant(String tenantDomain) throws APIManagementException {
+        log.debug("Deactivating tenant with domain: " + tenantDomain);
         try {
             stub.deactivateTenant(tenantDomain);
         } catch (RemoteException | TenantMgtAdminServiceExceptionException e) {
+            log.error("Error while deactivating tenant with domain: " + tenantDomain, e);
             throw new APIManagementException("Error while deactivating tenant ", e);
         }
     }

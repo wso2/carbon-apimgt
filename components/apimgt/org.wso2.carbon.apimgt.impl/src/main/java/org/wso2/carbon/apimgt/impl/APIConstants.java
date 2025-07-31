@@ -2948,7 +2948,7 @@ public final class APIConstants {
     }
     
     public static class TenantManagementEvent {
-        public static final String TENANT_MANAGMENT_TYPE = "TENANT_MANAGEMENT";
+        public static final String TENANT_MANAGEMENT_TYPE = "TENANT_MANAGEMENT";
         public static final String TYPE_ADD_TENANT = "add-tenant";
         public static final String TYPE_UPDATE_TENANT = "update-tenant";
         public static final String TYPE_ACTIVATE_TENANT = "activate-tenant";
