@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+/**
+ * Represents a mapping between a backend API and its operations.
+ * This class encapsulates the backend API ID and the corresponding backend operation.
+ */
 public class BackendAPIOperationMapping {
 
     private String backendApiId = null;

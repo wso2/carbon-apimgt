@@ -18,6 +18,11 @@ package org.wso2.carbon.apimgt.api.model;
 
 import java.io.Serializable;
 
+/**
+ * Represents a Backend API in the API Management system.
+ * This class encapsulates the details of a backend API including its ID, definition,
+ * endpoint configuration, and name.
+ */
 public class BackendAPI implements Serializable {
 
     private String backendApiId;

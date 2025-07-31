@@ -18,6 +18,10 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+/**
+ * Represents a mapping between an existing API and its backend operation.
+ * This class encapsulates the API UUID, name, version, and the corresponding backend operation.
+ */
 public class ExistingAPIOperationMapping {
 
     private String apiUuid = null;

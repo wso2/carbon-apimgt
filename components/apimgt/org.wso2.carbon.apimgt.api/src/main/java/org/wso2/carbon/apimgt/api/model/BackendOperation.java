@@ -19,6 +19,11 @@ package org.wso2.carbon.apimgt.api.model;
 
 import java.io.Serializable;
 
+/**
+ * Represents a Backend Operation in the API Management system.
+ * This class encapsulates the details of a backend operation including its reference URI mapping ID,
+ * target endpoint, and HTTP verb.
+ */
 public class BackendOperation implements Serializable {
 
     private int refUriMappingId;
