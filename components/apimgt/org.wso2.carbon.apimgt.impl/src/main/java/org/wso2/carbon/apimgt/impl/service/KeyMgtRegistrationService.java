@@ -52,12 +52,13 @@ public final class KeyMgtRegistrationService {
         throw new IllegalStateException("Service class for key manager registration");
     }
 
-    private static boolean isUserSuperAdmin(String username) {
+    private static boolean isUserSuperTenantAdmin(String username) {
 
         try {
             RealmConfiguration realmConfig = new RealmConfigXMLProcessor().buildRealmConfigurationFromFile();
             String adminUserName = realmConfig.getAdminUserName();
-            return adminUserName.equalsIgnoreCase(MultitenantUtils.getTenantAwareUsername(username));
+            return (adminUserName.equalsIgnoreCase(MultitenantUtils.getTenantAwareUsername(username)) &&
+                    (APIConstants.SUPER_TENANT_DOMAIN == MultitenantUtils.getTenantDomain(username)));
         } catch (UserStoreException e) {
             log.error("Error while retrieving super admin username", e);
             return false;
@@ -73,7 +74,7 @@ public final class KeyMgtRegistrationService {
         synchronized (KeyMgtRegistrationService.class.getName().concat(organization)) {
             ApiMgtDAO instance = ApiMgtDAO.getInstance();
             if (instance.getKeyManagerConfigurationByName(organization, APIConstants.KeyManager.DEFAULT_KEY_MANAGER) ==
-                    null && (isUserSuperAdmin(CommonUtils.getLoggedInUsername()) || !skipCreateResidentKm)) {
+                    null && (isUserSuperTenantAdmin(CommonUtils.getLoggedInUsername()) || !skipCreateResidentKm)) {
                 KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
                 keyManagerConfigurationDTO.setName(APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
                 keyManagerConfigurationDTO.setEnabled(true);

@@ -477,7 +477,15 @@ public class APIAdminImpl implements APIAdmin {
         if (checkUsages) {
             setKeyManagerUsageRelatedInformation(keyManagerConfigurationsByTenant, organization);
         }
-
+        // Add missing fields for migrated Key manager configs
+        Map<String, KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap =
+                ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfigurations();
+        for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
+            if (keyManagerConnectorConfigurationMap.containsKey(keyManagerConfigurationDTO.getType())) {
+                keyManagerConnectorConfigurationMap.get(keyManagerConfigurationDTO.getType())
+                        .processConnectorConfigurations(keyManagerConfigurationDTO.getAdditionalProperties());
+            }
+        }
         return keyManagerConfigurationsByTenant;
     }
 
@@ -598,13 +606,6 @@ public class APIAdminImpl implements APIAdmin {
                 APIUtil.getAndSetDefaultKeyManagerConfiguration(keyManagerConfigurationDTO);
             }
             maskValues(keyManagerConfigurationDTO);
-        }
-        // add missing fields for migrated Key manager configs
-        Map<String, KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap =
-                ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfigurations();
-        if (keyManagerConnectorConfigurationMap.containsKey(keyManagerConfigurationDTO.getName())) {
-            keyManagerConnectorConfigurationMap.get(keyManagerConfigurationDTO.getName())
-                    .processConnectorConfigurations(keyManagerConfigurationDTO.getAdditionalProperties());
         }
         if (!KeyManagerConfiguration.TokenType.valueOf(keyManagerConfigurationDTO.getTokenType().toUpperCase())
                 .equals(KeyManagerConfiguration.TokenType.EXCHANGED)) {
@@ -820,6 +821,32 @@ public class APIAdminImpl implements APIAdmin {
         }
     }
 
+    private void encryptConfigurationInNestedFields(List<Object> configurations,
+                                                    Map<String, Object> additionalProperties,
+                                                    KeyManagerConfigurationDTO retrievedKeyManagerConfigurationDTO) throws APIManagementException {
+        if (configurations == null || configurations.isEmpty()) {
+            return;
+        }
+        for (Object configuration : configurations) {
+            ConfigurationDto configurationDto = (ConfigurationDto) configuration;
+            if (configurationDto.isMask()) {
+                String value = (String) additionalProperties.get(configurationDto.getName());
+                if (APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD.equals(value)) {
+                    if (retrievedKeyManagerConfigurationDTO != null) {
+                        Object unModifiedValue = retrievedKeyManagerConfigurationDTO.getAdditionalProperties()
+                                .get(configurationDto.getName());
+                        additionalProperties.replace(configurationDto.getName(), unModifiedValue);
+                    }
+                } else if (StringUtils.isNotEmpty(value)) {
+                    additionalProperties.replace(configurationDto.getName(), encryptValues(value));
+                }
+            }
+            // Recursively process nested values
+            encryptConfigurationInNestedFields(((ConfigurationDto) configuration).getValues(),
+                    additionalProperties, retrievedKeyManagerConfigurationDTO);
+        }
+    }
+
     private void encryptKeyManagerConfigurationValues(KeyManagerConfigurationDTO retrievedKeyManagerConfigurationDTO,
                                                       KeyManagerConfigurationDTO updatedKeyManagerConfigurationDto)
             throws APIManagementException {
@@ -828,14 +855,8 @@ public class APIAdminImpl implements APIAdmin {
                 .getKeyManagerConnectorConfiguration(updatedKeyManagerConfigurationDto.getType());
         if (keyManagerConnectorConfiguration != null) {
             Map<String, Object> additionalProperties = updatedKeyManagerConfigurationDto.getAdditionalProperties();
-            List<ConfigurationDto> connectionConfigurations =
-                    keyManagerConnectorConfiguration.getConnectionConfigurations();
-            // if authConfiguration array is not empty, add it to connector configuration
-            if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
-                    && !(keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty())) {
-                connectionConfigurations.addAll(keyManagerConnectorConfiguration.getAuthConfigurations());
-            }
-            for (ConfigurationDto configurationDto : connectionConfigurations) {
+            for (ConfigurationDto configurationDto : keyManagerConnectorConfiguration
+                    .getConnectionConfigurations()) {
                 if (configurationDto.isMask()) {
                     String value = (String) additionalProperties.get(configurationDto.getName());
                     if (APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD.equals(value)) {
@@ -847,6 +868,16 @@ public class APIAdminImpl implements APIAdmin {
                     } else if (StringUtils.isNotEmpty(value)) {
                         additionalProperties.replace(configurationDto.getName(), encryptValues(value));
                     }
+                }
+            }
+            // if authConfiguration array is not empty, encrypt values there as well
+            if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
+                    && !(keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty())) {
+                List<ConfigurationDto> authConfigurations = keyManagerConnectorConfiguration.getAuthConfigurations();
+                // Recursively check nested objects in authConfigurations and apply encryption
+                for (ConfigurationDto authConfiguration : authConfigurations) {
+                    encryptConfigurationInNestedFields(authConfiguration.getValues(), additionalProperties,
+                            retrievedKeyManagerConfigurationDTO);
                 }
             }
         }
@@ -1161,13 +1192,6 @@ public class APIAdminImpl implements APIAdmin {
 
         KeyManagerConfigurationDTO keyManagerConfiguration =
                 apiMgtDAO.getKeyManagerConfigurationByName(organization, name);
-        // add missing fields for migrated Key manager configs
-        Map<String, KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap =
-                ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfigurations();
-        if (keyManagerConnectorConfigurationMap.containsKey(name)) {
-            keyManagerConnectorConfigurationMap.get(name)
-                    .processConnectorConfigurations(keyManagerConfiguration.getAdditionalProperties());
-        }
         if (keyManagerConfiguration != null) {
             if (APIConstants.KeyManager.DEFAULT_KEY_MANAGER.equals(keyManagerConfiguration.getName()) && (
                     APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE.equals(keyManagerConfiguration.getType())
@@ -1608,21 +1632,22 @@ public class APIAdminImpl implements APIAdmin {
             List<ConfigurationDto> authConfigurations = keyManagerConnectorConfiguration.getAuthConfigurations();
             // Recursively check nested objects in authConfigurations and apply masking
             for (ConfigurationDto authConfiguration : authConfigurations) {
-                applyMaskToNestedFields(authConfiguration.getValues());
+                applyMaskToNestedFields(authConfiguration.getValues(), additionalProperties);
             }
         }
     }
 
-    private void applyMaskToNestedFields(List<Object> configurations) {
+    private void applyMaskToNestedFields(List<Object> configurations, Map<String, Object> additionalProperties) {
         if (configurations == null || configurations.isEmpty()) {
             return;
         }
         for (Object configuration : configurations) {
             if (((ConfigurationDto)configuration).isMask()) {
-                ((ConfigurationDto)configuration).setDefaultValue(APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+                additionalProperties.replace(((ConfigurationDto) configuration).getName(),
+                        APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
             }
             // Recursively process nested values
-            applyMaskToNestedFields(((ConfigurationDto)configuration).getValues());
+            applyMaskToNestedFields(((ConfigurationDto)configuration).getValues(), additionalProperties);
         }
     }
 
