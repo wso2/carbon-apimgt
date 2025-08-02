@@ -67,8 +67,6 @@ import org.wso2.carbon.apimgt.api.model.botDataAPI.BotDetectionData;
 import org.wso2.carbon.apimgt.api.model.policy.Policy;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
-import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
-import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
@@ -82,7 +80,6 @@ import org.wso2.carbon.apimgt.impl.notifier.events.LabelEvent;
 import org.wso2.carbon.apimgt.impl.service.KeyMgtRegistrationService;
 import org.wso2.carbon.apimgt.impl.utils.APINameComparator;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.apimgt.impl.utils.CertificateMgtUtils;
 import org.wso2.carbon.apimgt.impl.utils.ContentSearchResultNameComparator;
 import org.wso2.carbon.apimgt.persistence.APIPersistence;
 import org.wso2.carbon.apimgt.persistence.dto.AdminApiSearchContent;
@@ -135,7 +132,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getPaginatedApplicationList;
-import static org.wso2.carbon.apimgt.impl.utils.APIUtil.getTenantIdFromTenantDomain;
 
 /**
  * This class provides the core API admin functionality.
@@ -145,9 +141,6 @@ public class APIAdminImpl implements APIAdmin {
     private static final Log log = LogFactory.getLog(APIAdminImpl.class);
     protected ApiMgtDAO apiMgtDAO;
     protected LabelsDAO labelsDAO;
-    private CertificateMgtUtils certificateMgtUtils = CertificateMgtUtils.getInstance();
-    private static final String MUTUAL_TLS = "Mutual-TLS";
-    private static final String TENANT_WIDE_CERTIFICATE = "TenantWide";
 
     public APIAdminImpl() {
         apiMgtDAO = ApiMgtDAO.getInstance();
@@ -758,6 +751,7 @@ public class APIAdminImpl implements APIAdmin {
                         ExceptionCodes.IDP_ADDING_FAILED);
             }
         }
+
         if (StringUtils.isBlank(keyManagerConfigurationDTO.getUuid())) {
             keyManagerConfigurationDTO.setUuid(UUID.randomUUID().toString());
         }
@@ -765,14 +759,6 @@ public class APIAdminImpl implements APIAdmin {
                 new KeyManagerConfigurationDTO(keyManagerConfigurationDTO);
         encryptKeyManagerConfigurationValues(null, keyManagerConfigurationToStore);
         apiMgtDAO.addKeyManagerConfiguration(keyManagerConfigurationToStore);
-//
-        // if MTLS is selected and tenant wide cert is provided, add that cert into trust store providing an alias
-        if (keyManagerConfigurationDTO.getAdditionalProperties().containsKey(MUTUAL_TLS) &&
-                keyManagerConfigurationDTO.getAdditionalProperties().get(MUTUAL_TLS).equals(TENANT_WIDE_CERTIFICATE)) {
-            addOrUpdateCertificateInTrustStore(getTenantWideCertificateValue(keyManagerConfigurationDTO
-                            .getAdditionalProperties().get("certificates")),
-                    getTenantCertAlias(keyManagerConfigurationDTO), false);
-        }
         new KeyMgtNotificationSender()
                 .notify(keyManagerConfigurationDTO, APIConstants.KeyManager.KeyManagerEvent.ACTION_ADD);
         return keyManagerConfigurationDTO;
@@ -1030,56 +1016,12 @@ public class APIAdminImpl implements APIAdmin {
         }
         encryptKeyManagerConfigurationValues(oldKeyManagerConfiguration, keyManagerConfigurationDTO);
         apiMgtDAO.updateKeyManagerConfiguration(keyManagerConfigurationDTO);
-
-        // if MTLS is selected and tenant wide cert is provided, update that cert in the trust store
-        if (keyManagerConfigurationDTO.getAdditionalProperties().containsKey(MUTUAL_TLS) &&
-                keyManagerConfigurationDTO.getAdditionalProperties().get(MUTUAL_TLS).equals(TENANT_WIDE_CERTIFICATE)) {
-            addOrUpdateCertificateInTrustStore(getTenantWideCertificateValue(keyManagerConfigurationDTO
-                            .getAdditionalProperties().get("certificates")),
-                    getTenantCertAlias(keyManagerConfigurationDTO), true);
-        }
         KeyManagerConfigurationDTO decryptedKeyManagerConfiguration =
                 decryptKeyManagerConfigurationValues(keyManagerConfigurationDTO);
         new KeyMgtNotificationSender()
                 .notify(decryptedKeyManagerConfiguration, APIConstants.KeyManager.KeyManagerEvent.ACTION_UPDATE);
         return keyManagerConfigurationDTO;
     }
-
-    private String getTenantWideCertificateValue(Object certificateObject) {
-        if (certificateObject instanceof Map) {
-            Map<String, String> certificateMap = (Map<String, String>) certificateObject;
-            Object value = certificateMap.get("value");
-            if (value != null) {
-                return value.toString();
-            }
-        }
-        return null;
-    }
-
-    private String getTenantCertAlias(KeyManagerConfigurationDTO keyManagerConfigurationDTO) {
-        return "tenant_wide_" + keyManagerConfigurationDTO.getName() + "_"
-                + getTenantIdFromTenantDomain(keyManagerConfigurationDTO.getOrganization());
-    }
-
-    private void addOrUpdateCertificateInTrustStore(String certificate, String alias, boolean isUpdate)
-            throws APIManagementException {
-        ResponseCode responseCode = certificateMgtUtils.addCertificateToTrustStore(certificate, alias);
-        if (isUpdate && (responseCode.getResponseCode() == ResponseCode.ALIAS_EXISTS_IN_TRUST_STORE
-                .getResponseCode())) {
-            try {
-                responseCode = certificateMgtUtils.updateCertificate(certificate, alias);
-            } catch (CertificateManagementException e) {
-                throw new APIManagementException(e);
-            }
-        }
-        String errorMessage = "Error while " + (isUpdate? "updating" : "adding") +
-                " tenant-wide certificate in the truststore. ";
-        if (responseCode.getResponseCode() != ResponseCode.SUCCESS.getResponseCode()) {
-            log.error(errorMessage);
-            throw new APIManagementException(errorMessage);
-        }
-    }
-
     @Override
     public KeyManagerPermissionConfigurationDTO getKeyManagerPermissions(String id) throws APIManagementException {
 
@@ -1200,17 +1142,6 @@ public class APIAdminImpl implements APIAdmin {
                                 || APIConstants.KeyManager.WSO2_IS_KEY_MANAGER_TYPE.equals(kmConfig.getType())))) {
                     deleteIdentityProvider(organization, kmConfig);
                     apiMgtDAO.deleteKeyManagerConfigurationById(kmConfig.getUuid(), organization);
-                    //Remove tenant-wide certificate from truststore
-                    if (kmConfig.getAdditionalProperties().containsKey(MUTUAL_TLS) &&
-                            kmConfig.getAdditionalProperties().get(MUTUAL_TLS).equals(TENANT_WIDE_CERTIFICATE)) {
-                        ResponseCode responseCode = certificateMgtUtils.removeCertificateFromTrustStore(
-                                getTenantCertAlias(kmConfig));
-                        if (ResponseCode.SUCCESS.getResponseCode() != responseCode.getResponseCode()) {
-                            log.error("Error while removing tenant-wide certificate from truststore. ");
-                            throw new APIManagementException("Error while removing tenant-wide certificate " +
-                                    "from truststore. ");
-                        }
-                    }
                     new KeyMgtNotificationSender()
                             .notify(kmConfig, APIConstants.KeyManager.KeyManagerEvent.ACTION_DELETE);
                 } else {
