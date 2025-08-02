@@ -153,9 +153,19 @@ public class JMSListener implements Runnable {
                 }
             }
         }
-        log.info("Connection successfully created towards the JMS provider for the listener: " +
-                stm.getJmsConsumerName() + "#" + stm.getDestinationJNDIName() + ". The connected JMS provider is " +
-                connection.toString().replace("\n", " | "));
+        if (connection != null) {
+            log.info(
+                    "Connection successfully created towards the JMS provider for the listener: "
+                            + stm.getJmsConsumerName() + "#" + stm.getDestinationJNDIName()
+                            + ". The connected JMS provider is " + connection.toString()
+                            .replace("\n", " | "));
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug(
+                        "Connection could not be created towards the JMS provider for the listener: " 
+                                + stm.getJmsConsumerName() + "#" + stm.getDestinationJNDIName());
+            }
+        }
         return (connection != null);
     }
 
