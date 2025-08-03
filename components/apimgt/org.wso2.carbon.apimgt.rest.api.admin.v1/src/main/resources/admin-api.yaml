@@ -1752,11 +1752,6 @@ paths:
         content:
           multipart/form-data:
             schema:
-              required:
-                - name
-                - apiVersion
-                - configurations
-                - apiDefinition
               $ref: '#/components/schemas/AIServiceProviderRequest'
         required: true
       responses:
@@ -1776,8 +1771,10 @@ paths:
             - apim:llm_provider_manage
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/ai-service-providers"'
+          source: 'curl -k -X POST -H "Authorization: Bearer <ACCESS_TOKEN>" -H "Content-Type: multipart/form-data" 
+          -F "name=AIServiceProviderName" -F "apiVersion=v1" -F "configurations={\"key\":\"value\"}" 
+          -F "apiDefinition=@api_definition_file.json" 
+          "https://127.0.0.1:9443/api/am/admin/v4/ai-service-providers"'
       operationId: addAIServiceProvider
 
   ######################################################
@@ -1798,8 +1795,6 @@ paths:
         content:
           multipart/form-data:
             schema:
-              required:
-                - apiDefinition
               $ref: '#/components/schemas/AIServiceProviderRequest'
         required: true
       responses:
@@ -1821,8 +1816,12 @@ paths:
             - apim:llm_provider_manage
       x-code-samples:
         - lang: Curl
-          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/admin/v4/ai-service-providers/a2f1e643-9b2a-4f58-bd7a-8c2d3f1e9d6f"'
+          source: 'curl -k -X PUT -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" \
+                   -F "name=UpdatedProviderName" \
+                   -F "apiVersion=v2" \
+                   -F "configurations={\"key\":\"value\"}" \
+                   -F "apiDefinition=@api_definition.json" \
+                   "https://127.0.0.1:9443/api/am/admin/v4/ai-service-providers/{aiServiceProviderId}"'
       operationId: updateAIServiceProvider
 
     delete:
@@ -5538,6 +5537,11 @@ components:
             $ref: '#/components/schemas/Organization'
     AIServiceProviderRequest:
       title: AIServiceProvider
+      required:
+        - name
+        - apiVersion
+        - configurations
+        - apiDefinition
       type: object
       properties:
         name:
@@ -5554,7 +5558,7 @@ components:
           maxLength: 1023
           type: string
           example: OpenAI LLM
-        multitpleModelProviderSupport:
+        multipleModelProviderSupport:
           type: string
           description: |
             Indicates whether the AI Service Provider supports multiple model providers.
@@ -5571,10 +5575,11 @@ components:
         modelProviders:
           type: string
     ModelProvider:
-      title: LLM Model
+      title: Model Provider
       type: object
       required:
         - name
+        - models
       properties:
         models:
           type: array
@@ -5622,11 +5627,16 @@ components:
           type: string
           description: OpenAPI specification
         modelProviders:
-          type: string
-          description: List of models supported by the LLM Provider
+          type: array
+          description: List of model providers supported by the AI Service Provider
+          items:
+            $ref: '#/components/schemas/ModelProvider'
     AIServiceProviderSummaryResponse:
       title: AIServiceProviderSummaryResponse
       type: object
+      required:
+        - name
+        - apiVersion
       properties:
         id:
           type: string

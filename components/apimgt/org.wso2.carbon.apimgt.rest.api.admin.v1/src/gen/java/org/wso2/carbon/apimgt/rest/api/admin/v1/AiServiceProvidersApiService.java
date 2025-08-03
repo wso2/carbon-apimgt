@@ -23,9 +23,9 @@ import javax.ws.rs.core.SecurityContext;
 
 
 public interface AiServiceProvidersApiService {
-      public Response addAIServiceProvider(String name, String apiVersion, String description, String multitpleModelProviderSupport, String configurations, InputStream apiDefinitionInputStream, Attachment apiDefinitionDetail, String modelProviders, MessageContext messageContext) throws APIManagementException;
+      public Response addAIServiceProvider(String name, String apiVersion, String configurations, InputStream apiDefinitionInputStream, Attachment apiDefinitionDetail, String description, String multipleModelProviderSupport, String modelProviders, MessageContext messageContext) throws APIManagementException;
       public Response deleteAIServiceProvider(String aiServiceProviderId, MessageContext messageContext) throws APIManagementException;
       public Response getAIServiceProvider(String aiServiceProviderId, MessageContext messageContext) throws APIManagementException;
       public Response getAIServiceProviders(MessageContext messageContext) throws APIManagementException;
-      public Response updateAIServiceProvider(String aiServiceProviderId, String name, String apiVersion, String description, String multitpleModelProviderSupport, String configurations, InputStream apiDefinitionInputStream, Attachment apiDefinitionDetail, String modelProviders, MessageContext messageContext) throws APIManagementException;
+      public Response updateAIServiceProvider(String aiServiceProviderId, String name, String apiVersion, String configurations, InputStream apiDefinitionInputStream, Attachment apiDefinitionDetail, String description, String multipleModelProviderSupport, String modelProviders, MessageContext messageContext) throws APIManagementException;
 }

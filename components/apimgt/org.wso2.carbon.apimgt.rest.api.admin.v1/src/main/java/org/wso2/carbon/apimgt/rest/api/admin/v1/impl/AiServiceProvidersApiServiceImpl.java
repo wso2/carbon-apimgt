@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
  * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
@@ -74,14 +74,14 @@ public class AiServiceProvidersApiServiceImpl implements AiServiceProvidersApiSe
      * @throws APIManagementException If an error occurs while adding the LLMProvider.
      */
     @Override
-    public Response addAIServiceProvider(String name, String apiVersion, String description,
-                                         String multipleModelProviderSupport, String configurations,
+    public Response addAIServiceProvider(String name, String apiVersion, String configurations,
                                          InputStream apiDefinitionInputStream, Attachment apiDefinitionDetail,
-                                         String modelProviders, MessageContext messageContext)
+                                         String description, String multipleModelProviderSupport, String modelProviders,
+                                         MessageContext messageContext)
             throws APIManagementException {
 
 
-        try {
+        try (InputStream apiDefStream = apiDefinitionInputStream) {
 
             ObjectMapper objectMapper = new ObjectMapper();
             List<ModelProviderDTO> llmModel = new ArrayList<>();
@@ -90,7 +90,7 @@ public class AiServiceProvidersApiServiceImpl implements AiServiceProvidersApiSe
                 });
             }
             LLMProvider provider = buildLLMProvider(name, apiVersion, description, configurations,
-                    apiDefinitionInputStream, llmModel, multipleModelProviderSupport);
+                    apiDefStream, llmModel, multipleModelProviderSupport);
             if (provider == null) {
                 log.warn("Invalid provider configurations");
                 return Response.status(Response.Status.BAD_REQUEST).build();
@@ -220,7 +220,6 @@ public class AiServiceProvidersApiServiceImpl implements AiServiceProvidersApiSe
                 LLMProviderMappingUtil.fromProviderSummaryListToAIServiceProviderSummaryListDTO(LLMProviderList);
         return Response.ok().entity(providerListDTO).build();
     }
-
     /**
      * Updates an existing LLM Provider.
      *
@@ -239,13 +238,13 @@ public class AiServiceProvidersApiServiceImpl implements AiServiceProvidersApiSe
      */
     @Override
     public Response updateAIServiceProvider(String aiServiceProviderId, String name, String apiVersion,
-                                            String description, String multipleModelProviderSupport,
                                             String configurations, InputStream apiDefinitionInputStream,
-                                            Attachment apiDefinitionDetail, String modelProviders,
+                                            Attachment apiDefinitionDetail, String description,
+                                            String multipleModelProviderSupport, String modelProviders,
                                             MessageContext messageContext) throws APIManagementException {
 
 
-        try {
+        try (InputStream apiDefStream = apiDefinitionInputStream) {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             ObjectMapper objectMapper = new ObjectMapper();
             List<ModelProviderDTO> llmModel = new ArrayList<>();
@@ -258,7 +257,7 @@ public class AiServiceProvidersApiServiceImpl implements AiServiceProvidersApiSe
 
             LLMProvider provider =
                     buildUpdatedLLMProvider(retrievedProvider, aiServiceProviderId, description, configurations,
-                            apiDefinitionInputStream, llmModel);
+                            apiDefStream, llmModel);
 
             if (provider == null) {
                 log.warn("Invalid provider configurations");

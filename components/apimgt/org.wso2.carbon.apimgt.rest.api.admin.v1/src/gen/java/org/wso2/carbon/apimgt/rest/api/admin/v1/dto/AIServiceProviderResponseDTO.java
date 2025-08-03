@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.ArrayList;
+import java.util.List;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ModelProviderDTO;
 import javax.validation.constraints.*;
 
 
@@ -28,7 +31,7 @@ public class AIServiceProviderResponseDTO   {
     private String description = null;
     private String configurations = null;
     private String apiDefinition = null;
-    private String modelProviders = null;
+    private List<ModelProviderDTO> modelProviders = new ArrayList<ModelProviderDTO>();
 
   /**
    **/
@@ -171,20 +174,21 @@ public class AIServiceProviderResponseDTO   {
   }
 
   /**
-   * List of models supported by the LLM Provider
+   * List of model providers supported by the AI Service Provider
    **/
-  public AIServiceProviderResponseDTO modelProviders(String modelProviders) {
+  public AIServiceProviderResponseDTO modelProviders(List<ModelProviderDTO> modelProviders) {
     this.modelProviders = modelProviders;
     return this;
   }
 
   
-  @ApiModelProperty(value = "List of models supported by the LLM Provider")
+  @ApiModelProperty(value = "List of model providers supported by the AI Service Provider")
+      @Valid
   @JsonProperty("modelProviders")
-  public String getModelProviders() {
+  public List<ModelProviderDTO> getModelProviders() {
     return modelProviders;
   }
-  public void setModelProviders(String modelProviders) {
+  public void setModelProviders(List<ModelProviderDTO> modelProviders) {
     this.modelProviders = modelProviders;
   }
 

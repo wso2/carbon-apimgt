@@ -24,7 +24,7 @@ public class AIServiceProviderRequestDTO   {
     private String name = null;
     private String apiVersion = null;
     private String description = null;
-    private String multitpleModelProviderSupport = "false";
+    private String multipleModelProviderSupport = "false";
     private String configurations = null;
     private File apiDefinition = null;
     private String modelProviders = null;
@@ -37,8 +37,9 @@ public class AIServiceProviderRequestDTO   {
   }
 
   
-  @ApiModelProperty(example = "OpenAI", value = "")
+  @ApiModelProperty(example = "OpenAI", required = true, value = "")
   @JsonProperty("name")
+  @NotNull
  @Size(min=1,max=255)  public String getName() {
     return name;
   }
@@ -54,8 +55,9 @@ public class AIServiceProviderRequestDTO   {
   }
 
   
-  @ApiModelProperty(example = "1.0.0", value = "")
+  @ApiModelProperty(example = "1.0.0", required = true, value = "")
   @JsonProperty("apiVersion")
+  @NotNull
  @Size(min=1,max=255)  public String getApiVersion() {
     return apiVersion;
   }
@@ -83,19 +85,19 @@ public class AIServiceProviderRequestDTO   {
   /**
    * Indicates whether the AI Service Provider supports multiple model providers. If true, the AI Service Provider can support multiple model providers. If false, the AI Service Provider supports only one model provider. 
    **/
-  public AIServiceProviderRequestDTO multitpleModelProviderSupport(String multitpleModelProviderSupport) {
-    this.multitpleModelProviderSupport = multitpleModelProviderSupport;
+  public AIServiceProviderRequestDTO multipleModelProviderSupport(String multipleModelProviderSupport) {
+    this.multipleModelProviderSupport = multipleModelProviderSupport;
     return this;
   }
 
   
   @ApiModelProperty(value = "Indicates whether the AI Service Provider supports multiple model providers. If true, the AI Service Provider can support multiple model providers. If false, the AI Service Provider supports only one model provider. ")
-  @JsonProperty("multitpleModelProviderSupport")
-  public String getMultitpleModelProviderSupport() {
-    return multitpleModelProviderSupport;
+  @JsonProperty("multipleModelProviderSupport")
+  public String getMultipleModelProviderSupport() {
+    return multipleModelProviderSupport;
   }
-  public void setMultitpleModelProviderSupport(String multitpleModelProviderSupport) {
-    this.multitpleModelProviderSupport = multitpleModelProviderSupport;
+  public void setMultipleModelProviderSupport(String multipleModelProviderSupport) {
+    this.multipleModelProviderSupport = multipleModelProviderSupport;
   }
 
   /**
@@ -107,8 +109,9 @@ public class AIServiceProviderRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "LLM Provider configurations")
+  @ApiModelProperty(required = true, value = "LLM Provider configurations")
   @JsonProperty("configurations")
+  @NotNull
   public String getConfigurations() {
     return configurations;
   }
@@ -125,8 +128,9 @@ public class AIServiceProviderRequestDTO   {
   }
 
   
-  @ApiModelProperty(value = "OpenAPI specification")
+  @ApiModelProperty(required = true, value = "OpenAPI specification")
   @JsonProperty("apiDefinition")
+  @NotNull
   public File getApiDefinition() {
     return apiDefinition;
   }
@@ -164,7 +168,7 @@ public class AIServiceProviderRequestDTO   {
     return Objects.equals(name, aiServiceProviderRequest.name) &&
         Objects.equals(apiVersion, aiServiceProviderRequest.apiVersion) &&
         Objects.equals(description, aiServiceProviderRequest.description) &&
-        Objects.equals(multitpleModelProviderSupport, aiServiceProviderRequest.multitpleModelProviderSupport) &&
+        Objects.equals(multipleModelProviderSupport, aiServiceProviderRequest.multipleModelProviderSupport) &&
         Objects.equals(configurations, aiServiceProviderRequest.configurations) &&
         Objects.equals(apiDefinition, aiServiceProviderRequest.apiDefinition) &&
         Objects.equals(modelProviders, aiServiceProviderRequest.modelProviders);
@@ -172,7 +176,7 @@ public class AIServiceProviderRequestDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, apiVersion, description, multitpleModelProviderSupport, configurations, apiDefinition, modelProviders);
+    return Objects.hash(name, apiVersion, description, multipleModelProviderSupport, configurations, apiDefinition, modelProviders);
   }
 
   @Override
@@ -183,7 +187,7 @@ public class AIServiceProviderRequestDTO   {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
-    sb.append("    multitpleModelProviderSupport: ").append(toIndentedString(multitpleModelProviderSupport)).append("\n");
+    sb.append("    multipleModelProviderSupport: ").append(toIndentedString(multipleModelProviderSupport)).append("\n");
     sb.append("    configurations: ").append(toIndentedString(configurations)).append("\n");
     sb.append("    apiDefinition: ").append(toIndentedString(apiDefinition)).append("\n");
     sb.append("    modelProviders: ").append(toIndentedString(modelProviders)).append("\n");

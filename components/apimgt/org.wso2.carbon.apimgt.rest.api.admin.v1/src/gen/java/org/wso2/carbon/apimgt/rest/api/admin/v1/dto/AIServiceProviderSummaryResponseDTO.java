@@ -51,8 +51,9 @@ public class AIServiceProviderSummaryResponseDTO   {
   }
 
   
-  @ApiModelProperty(example = "open-ai", value = "")
+  @ApiModelProperty(example = "open-ai", required = true, value = "")
   @JsonProperty("name")
+  @NotNull
  @Size(min=1,max=255)  public String getName() {
     return name;
   }
@@ -68,8 +69,9 @@ public class AIServiceProviderSummaryResponseDTO   {
   }
 
   
-  @ApiModelProperty(example = "1.0.0", value = "")
+  @ApiModelProperty(example = "1.0.0", required = true, value = "")
   @JsonProperty("apiVersion")
+  @NotNull
  @Size(min=1,max=255)  public String getApiVersion() {
     return apiVersion;
   }

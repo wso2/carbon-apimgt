@@ -17,7 +17,6 @@
 package org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import org.wso2.carbon.apimgt.api.model.LLMProvider;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.AIServiceProviderResponseDTO;
@@ -103,8 +102,7 @@ public class LLMProviderMappingUtil {
                         .map(model -> new ModelProviderDTO().name(model.getModelVendor())
                                 .models(model.getValues()))
                         .collect(Collectors.toList());
-        ObjectMapper objectMapper = new ObjectMapper();
-        llmProviderResponseDTO.setModelProviders(objectMapper.writeValueAsString(llmModelDTOList));
+        llmProviderResponseDTO.setModelProviders(llmModelDTOList);
         return llmProviderResponseDTO;
     }
     /**
@@ -129,7 +127,7 @@ public class LLMProviderMappingUtil {
         List<String> llmModelDTOList = new ArrayList<>();
         if (llmProvider.getModelList() != null) {
             llmModelDTOList = llmProvider.getModelList().stream()
-                    .map(model -> model.getValues().toString())
+                    .flatMap(model -> model.getValues().stream())
                     .collect(Collectors.toList());
         }
         llmProviderResponseDTO.setModelList(llmModelDTOList);

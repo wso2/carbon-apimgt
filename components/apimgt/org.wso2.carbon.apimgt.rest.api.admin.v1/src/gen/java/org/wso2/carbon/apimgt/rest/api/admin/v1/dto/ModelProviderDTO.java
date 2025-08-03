@@ -33,8 +33,9 @@ public class ModelProviderDTO   {
   }
 
   
-  @ApiModelProperty(value = "")
+  @ApiModelProperty(required = true, value = "")
   @JsonProperty("models")
+  @NotNull
   public List<String> getModels() {
     return models;
   }
