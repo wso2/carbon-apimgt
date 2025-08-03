@@ -30,12 +30,7 @@ import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dto.TokenHandlingDto;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.keymgt.KeyMgtNotificationSender;
-import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
-import org.wso2.carbon.user.api.RealmConfiguration;
-import org.wso2.carbon.user.core.UserStoreException;
-import org.wso2.carbon.user.core.config.RealmConfigXMLProcessor;
-import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.Arrays;
 import java.util.UUID;
@@ -52,19 +47,6 @@ public final class KeyMgtRegistrationService {
         throw new IllegalStateException("Service class for key manager registration");
     }
 
-    private static boolean isUserSuperTenantAdmin(String username) {
-
-        try {
-            RealmConfiguration realmConfig = new RealmConfigXMLProcessor().buildRealmConfigurationFromFile();
-            String adminUserName = realmConfig.getAdminUserName();
-            return (adminUserName.equalsIgnoreCase(MultitenantUtils.getTenantAwareUsername(username)) &&
-                    (APIConstants.SUPER_TENANT_DOMAIN == MultitenantUtils.getTenantDomain(username)));
-        } catch (UserStoreException e) {
-            log.error("Error while retrieving super admin username", e);
-            return false;
-        }
-    }
-
     public static void registerDefaultKeyManager(String organization) throws APIManagementException {
 
         APIManagerConfigurationService apiManagerConfigurationService =
@@ -74,7 +56,7 @@ public final class KeyMgtRegistrationService {
         synchronized (KeyMgtRegistrationService.class.getName().concat(organization)) {
             ApiMgtDAO instance = ApiMgtDAO.getInstance();
             if (instance.getKeyManagerConfigurationByName(organization, APIConstants.KeyManager.DEFAULT_KEY_MANAGER) ==
-                    null && (isUserSuperTenantAdmin(CommonUtils.getLoggedInUsername()) || !skipCreateResidentKm)) {
+                    null && !skipCreateResidentKm) {
                 KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
                 keyManagerConfigurationDTO.setName(APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
                 keyManagerConfigurationDTO.setEnabled(true);
