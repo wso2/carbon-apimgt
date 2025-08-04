@@ -98,7 +98,7 @@ public class SubscriptionValidationDataUtil {
                     BackendOperation backendOperation = backendOperationMapping.getBackendOperation();
                     if (backendOperation != null) {
                         BackendOperationDTO backendOperationDTO = new BackendOperationDTO();
-                        backendOperationDTO.setVerb(backendOperation.getVerb());
+                        backendOperationDTO.setVerb(backendOperation.getVerb().toString());
                         backendOperationDTO.setTarget(backendOperation.getTarget());
 
                         BackendOperationMappingDTO backendOperationMappingDTO = new BackendOperationMappingDTO();
@@ -113,7 +113,7 @@ public class SubscriptionValidationDataUtil {
                     BackendOperation backendOperation = apiOperationMapping.getBackendOperation();
                     if (backendOperation != null) {
                         BackendOperationDTO backendOperationDTO = new BackendOperationDTO();
-                        backendOperationDTO.setVerb(backendOperation.getVerb());
+                        backendOperationDTO.setVerb(backendOperation.getVerb().toString());
                         backendOperationDTO.setTarget(backendOperation.getTarget());
 
                         APIOperationMappingDTO apiOperationMappingDTO = new APIOperationMappingDTO();
@@ -197,7 +197,7 @@ public class SubscriptionValidationDataUtil {
                     BackendOperation backendOperation = backendOperationMapping.getBackendOperation();
                     if (backendOperation != null) {
                         BackendOperationDTO backendOperationDTO = new BackendOperationDTO();
-                        backendOperationDTO.setVerb(backendOperation.getVerb());
+                        backendOperationDTO.setVerb(backendOperation.getVerb().toString());
                         backendOperationDTO.setTarget(backendOperation.getTarget());
 
                         BackendOperationMappingDTO backendOperationMappingDTO = new BackendOperationMappingDTO();
@@ -212,7 +212,7 @@ public class SubscriptionValidationDataUtil {
                     BackendOperation backendOperation = apiOperationMapping.getBackendOperation();
                     if (backendOperation != null) {
                         BackendOperationDTO backendOperationDTO = new BackendOperationDTO();
-                        backendOperationDTO.setVerb(backendOperation.getVerb());
+                        backendOperationDTO.setVerb(backendOperation.getVerb().toString());
                         backendOperationDTO.setTarget(backendOperation.getTarget());
 
                         APIOperationMappingDTO apiOperationMappingDTO = new APIOperationMappingDTO();

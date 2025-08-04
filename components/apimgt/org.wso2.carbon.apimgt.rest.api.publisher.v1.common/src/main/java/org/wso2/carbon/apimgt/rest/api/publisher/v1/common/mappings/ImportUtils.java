@@ -31,6 +31,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIComplianceException;
 import org.wso2.carbon.apimgt.api.APIDefinition;
@@ -93,6 +95,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLValidationResponseDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WSDLInfoDTO;
@@ -1452,6 +1455,31 @@ public class ImportUtils {
     }
 
     @NotNull
+    private static JsonObject retrievedMCPDtoJson(String pathToArchive) throws IOException, APIManagementException {
+        // Get API Definition as JSON
+        String jsonContent =
+                getFileContentAsJson(pathToArchive + ImportExportConstants.MCP_SERVER_FILE_LOCATION);
+        if (jsonContent == null) {
+            throw new APIManagementException("Cannot find API definition. api.yaml or api.json should present",
+                    ExceptionCodes.ERROR_FETCHING_DEFINITION_FILE);
+        }
+        return processRetrievedDefinition(jsonContent);
+    }
+
+    @NotNull
+    private static JsonObject retrievedBackendAPIDtoJson(String pathToArchive) throws IOException,
+            APIManagementException {
+        // Get API Definition as JSON
+        String jsonContent =
+                getFileContentAsJson(pathToArchive + ImportExportConstants.BACKEND_APIS_FILE_LOCATION);
+        if (jsonContent == null) {
+            throw new APIManagementException("Cannot find API definition. api.yaml or api.json should present",
+                    ExceptionCodes.ERROR_FETCHING_DEFINITION_FILE);
+        }
+        return processRetrievedDefinition(jsonContent);
+    }
+
+    @NotNull
     private static JsonObject retrievedAPIProductDtoJson(String pathToArchive)
             throws IOException, APIManagementException {
         // Get API Product Definition as JSON
@@ -1477,7 +1505,16 @@ public class ImportUtils {
         // Retrieving the field "data" in api.yaml/json or api_product.yaml/json and
         // convert it to a JSON object for further processing
         JsonElement configElement = new JsonParser().parse(jsonContent).getAsJsonObject().get(APIConstants.DATA);
-        JsonObject configObject = configElement.getAsJsonObject();
+
+        JsonObject configObject = new JsonObject();
+        if (configElement.isJsonObject()) {
+            configObject = configElement.getAsJsonObject();
+        } else if (configElement.isJsonArray()) {
+            //data object can be an array for MCP once we support creating MCPs with multiple backend endpoints. For now
+            //we only consider the 1st element of the array
+            configObject = configElement.getAsJsonArray().get(0).getAsJsonObject();
+        }
+
 
         configObject = preProcessEndpointConfig(configObject);
 
@@ -1508,6 +1545,18 @@ public class ImportUtils {
         return new Gson().fromJson(jsonObject, APIDTO.class);
     }
 
+    public static MCPServerDTO retrievedMCPDto(String pathToArchive) throws IOException, APIManagementException,
+            ParseException {
+
+        JsonObject mcpServer = retrievedMCPDtoJson(pathToArchive);
+        JsonObject backendAPI = retrievedBackendAPIDtoJson(pathToArchive);
+        MCPServerDTO mcpServerDTO = new Gson().fromJson(mcpServer, MCPServerDTO.class);
+        JSONParser parser = new JSONParser();
+        JSONObject endpointConfig = (JSONObject) parser.parse(backendAPI.get("endpointConfig").getAsString());
+        mcpServerDTO.setBackendAPIEndpointConfig(endpointConfig);
+        return mcpServerDTO;
+    }
+
     public static APIProductDTO retrieveAPIProductDto(String pathToArchive) throws IOException, APIManagementException {
 
         JsonObject jsonObject = retrievedAPIProductDtoJson(pathToArchive);
@@ -1523,7 +1572,9 @@ public class ImportUtils {
      */
     private static JsonObject preProcessEndpointConfig(JsonObject configObject) {
 
-        if (configObject.has(ImportExportConstants.ENDPOINT_CONFIG)) {
+        //todo: added to skip endpoint config processing for Direct_EP MCP Apis
+        if (configObject.has(ImportExportConstants.ENDPOINT_CONFIG) &&
+                configObject.get(ImportExportConstants.ENDPOINT_CONFIG).isJsonObject()) {
             JsonObject endpointConfig = configObject.get(ImportExportConstants.ENDPOINT_CONFIG).getAsJsonObject();
             if (endpointConfig.has(APIConstants.ENDPOINT_SECURITY)) {
                 JsonObject endpointSecurity = endpointConfig.get(APIConstants.ENDPOINT_SECURITY).getAsJsonObject();

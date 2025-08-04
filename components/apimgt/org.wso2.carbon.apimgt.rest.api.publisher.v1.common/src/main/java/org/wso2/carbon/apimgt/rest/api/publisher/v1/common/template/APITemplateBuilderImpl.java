@@ -283,7 +283,7 @@ public class APITemplateBuilderImpl implements APITemplateBuilder {
                 configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api);
             } else if (APIConstants.API_SUBTYPE_AI_API.equals(api.getSubtype())) {
                 configcontext = new EndpointConfigContext(configcontext, this.apiProduct, api, endpointConfig);
-            } else if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
+            } else if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
                 configcontext = new EndpointConfigContext(configcontext, api);
             }
 

@@ -319,7 +319,7 @@ public class MCPUtils {
 
     private static void processEndpoint(MessageContext messageContext, SchemaMapping schemaMapping, JsonObject jsonObject,
                                         BackendOperation backendOperation) {
-        String httpMethod = backendOperation.getVerb();
+        org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs httpMethod = backendOperation.getVerb();
         String target = backendOperation.getTarget();
 
         StringBuilder resourcePath = new StringBuilder();
@@ -362,7 +362,7 @@ public class MCPUtils {
             org.apache.axis2.context.MessageContext axis2MessageContext =
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             axis2MessageContext.setProperty(APIMgtGatewayConstants.REST_URL_POSTFIX, resourcePath.toString());
-            axis2MessageContext.setProperty(APIConstants.RESOURCE_METHOD, httpMethod.toUpperCase());
+            axis2MessageContext.setProperty(APIConstants.RESOURCE_METHOD, httpMethod.toString().toUpperCase());
         }
     }
 

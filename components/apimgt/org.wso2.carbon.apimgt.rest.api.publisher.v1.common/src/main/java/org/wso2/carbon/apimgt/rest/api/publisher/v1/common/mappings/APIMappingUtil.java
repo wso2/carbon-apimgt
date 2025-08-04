@@ -577,6 +577,7 @@ public class APIMappingUtil {
         // Later we can use it by checking admin privileges of the user.
         APIIdentifier apiId = new APIIdentifier(providerEmailDomainReplaced, dto.getName(), dto.getVersion());
         API model = new API(apiId);
+        model.setUuid(dto.getId());
 
         String context = dto.getContext();
         final String originalContext = context;
