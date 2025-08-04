@@ -777,18 +777,7 @@ public class ImportUtils {
                         for (JsonElement endpointElement : endpoints) {
                             JsonObject endpointObj = endpointElement.getAsJsonObject();
                             if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
-                                BackendAPI backendAPI =
-                                        new Gson().fromJson(endpointObj, BackendAPI.class);
-                                String endpointUUID = backendAPI.getBackendApiId();
-                                //TODO: PASAN
-//                                try {
-//                                    String createdEndpointUUID = provider.addAPIEndpoint(apiUUID, backendEndpoint);
-//                                } catch (APIManagementException e) {
-//                                    throw new APIManagementException(
-//                                            "Error while adding API Endpoint with ID: " + endpointUUID,
-//                                            e, ExceptionCodes.from(ExceptionCodes.ERROR_ADDING_API_ENDPOINT,
-//                                            endpointUUID));
-//                                }
+                                // TODO: Implementation for MCP API endpoints
                             } else {
                                 APIEndpointInfo apiEndpointInfo =
                                         new Gson().fromJson(endpointObj, APIEndpointInfo.class);
