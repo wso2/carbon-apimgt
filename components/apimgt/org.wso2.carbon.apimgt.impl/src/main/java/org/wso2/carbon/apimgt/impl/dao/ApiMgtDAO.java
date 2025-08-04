@@ -23493,22 +23493,54 @@ public class ApiMgtDAO {
             List<SequenceBackendData> sequenceBackendDataList = new ArrayList<>();
             int count = 0;
 
-            try (ResultSet rs = getPstmt.executeQuery()) {
-                while (rs.next()) {
-                    addPstmt.setString(1, rs.getString("ID"));
-                    addPstmt.setString(2, apiRevision.getApiUUID());
-                    addPstmt.setBinaryStream(3, rs.getBinaryStream("SEQUENCE"));
-                    addPstmt.setString(4, rs.getString("TYPE"));
-                    addPstmt.setString(5, apiRevision.getRevisionUUID());
-                    addPstmt.setString(6, rs.getString("NAME"));
-                    addPstmt.addBatch();
-                    count++;
+            // Handled Custom Backend batch update separately since mssql gives stream close issue
+            // due to TDS protocol
+            if (connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData().getDriverName()
+                    .contains("Microsoft")) {
+                try (ResultSet rs = getPstmt.executeQuery()) {
+                    while (rs.next()) {
+                        addPstmt.setString(1, rs.getString("ID"));
+                        addPstmt.setString(2, apiRevision.getApiUUID());
+                        try (InputStream sequenceStream = rs.getBinaryStream("SEQUENCE")) {
+                            try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+                                byte[] data = new byte[64 * 1024];
+                                int bytesRead;
+                                while ((bytesRead = sequenceStream.read(data)) != -1) {
+                                    buffer.write(data, 0, bytesRead);
+                                }
+                                byte[] blobBytes = buffer.toByteArray();
+                                addPstmt.setBinaryStream(3, new ByteArrayInputStream(blobBytes), blobBytes.length);
+                            }
+                        } catch (IOException ex) {
+                            handleException(
+                                    "Error while reading Custom Backend Sequence of API: " + apiRevision.getApiUUID(),
+                                    ex);
+                        }
+                        addPstmt.setString(4, rs.getString("TYPE"));
+                        addPstmt.setString(5, apiRevision.getRevisionUUID());
+                        addPstmt.setString(6, rs.getString("NAME"));
+                        addPstmt.addBatch();
+                    }
+                }
+            } else {
+                try (ResultSet rs = getPstmt.executeQuery()) {
+                    while (rs.next()) {
+                        try (InputStream sequenceStream = rs.getBinaryStream("SEQUENCE")) {
+                            addPstmt.setString(1, rs.getString("ID"));
+                            addPstmt.setString(2, apiRevision.getApiUUID());
+                            addPstmt.setBinaryStream(3, sequenceStream);
+                            addPstmt.setString(4, rs.getString("TYPE"));
+                            addPstmt.setString(5, apiRevision.getRevisionUUID());
+                            addPstmt.setString(6, rs.getString("NAME"));
+                            addPstmt.addBatch();
+                        } catch (IOException ex) {
+                            handleException("Error while reading Custom Sequence of API: " + apiRevision.getApiUUID(),
+                                    ex);
+                        }
+                    }
                 }
             }
-
-            if (count > 0) {
-                addPstmt.executeBatch();
-            }
+            addPstmt.executeBatch();
         } catch (SQLException ex) {
             handleException("Error while adding Custom Backends to the database of API: " + apiRevision.getApiUUID(),
                     ex);
