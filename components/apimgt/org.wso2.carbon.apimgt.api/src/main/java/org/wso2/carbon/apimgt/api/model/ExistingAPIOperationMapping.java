@@ -18,12 +18,15 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import java.io.Serializable;
+
 /**
  * Represents a mapping between an existing API and its backend operation.
  * This class encapsulates the API UUID, name, version, and the corresponding backend operation.
  */
-public class ExistingAPIOperationMapping {
+public class ExistingAPIOperationMapping implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private String apiUuid = null;
     private String apiName = null;
     private String apiVersion = null;

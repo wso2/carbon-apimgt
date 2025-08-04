@@ -305,10 +305,10 @@ public abstract class APIDefinition {
                                                     Set<URITemplate> uriTemplates) throws APIManagementException;
 
     /**
-     * Populate definition with wso2 APIM specific information
+     * Generates an enriched OpenAPI Specification definition for backend APIs
      *
-     * @param apiDefinition OAS definition
      * @param swaggerData   API
+     * @param apiDefinition OAS definition of the backend API
      * @return Generated OAS definition
      * @throws APIManagementException If an error occurred
      */

@@ -16234,6 +16234,14 @@ components:
         verb:
           type: string
           description: Backend target method
+          enum:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - PATCH
+            - HEAD
+            - OPTIONS
           example: POST
     BackendAPIList:
       title: BackendAPIList
