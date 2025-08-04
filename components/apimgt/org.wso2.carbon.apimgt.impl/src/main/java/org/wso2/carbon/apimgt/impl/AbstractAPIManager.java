@@ -1223,7 +1223,7 @@ public abstract class AbstractAPIManager implements APIManager {
         return apiMgtDAO.getAPIProductResourceMappings(productIdentifier);
     }
 
-    protected void populateAPIInformation(String uuid, String organization, API api)
+    protected void  populateAPIInformation(String uuid, String organization, API api)
             throws APIManagementException, OASPersistenceException, ParseException, AsyncSpecPersistenceException {
         String username = CarbonContext.getThreadLocalCarbonContext().getUsername();
         //UUID

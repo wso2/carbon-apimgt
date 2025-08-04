@@ -197,7 +197,8 @@ public class OAuthAuthenticator implements Authenticator {
             log.debug("Default Version API invoked");
         }
 
-        if (removeOAuthHeadersFromOutMessage) {
+        String apiType = (String) synCtx.getProperty(APIMgtGatewayConstants.API_TYPE);
+        if (removeOAuthHeadersFromOutMessage && !APIConstants.API_TYPE_MCP.equals(apiType)) {
             //Remove authorization headers sent for authentication at the gateway and pass others to the backend
             if (StringUtils.isNotBlank(remainingAuthHeader.get())) {
                 if (log.isDebugEnabled()) {

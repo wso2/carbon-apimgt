@@ -3515,6 +3515,7 @@ public class APIMappingUtil {
             mappingDTO.setApiId(existingAPIOperationMapping.getApiUuid());
             mappingDTO.setApiName(existingAPIOperationMapping.getApiName());
             mappingDTO.setApiVersion(existingAPIOperationMapping.getApiVersion());
+            mappingDTO.setApiContext(apiOperationMapping.getApiContext());
             mappingDTO.setBackendOperation(operationDTO);
 
             operationsDTO.setExistingAPIOperationMapping(mappingDTO);

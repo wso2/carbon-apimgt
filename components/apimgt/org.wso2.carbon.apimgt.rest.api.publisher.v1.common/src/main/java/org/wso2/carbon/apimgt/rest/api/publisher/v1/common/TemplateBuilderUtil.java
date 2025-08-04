@@ -724,6 +724,40 @@ public class TemplateBuilderUtil {
                     }
                 }
                 api.setUriTemplates(uriTemplates);
+
+                String endpointsString = environment.getApiGatewayEndpoint();
+                if (!StringUtils.isEmpty(endpointsString)) {
+                    String[] gwEndpoints = endpointsString.split(",");
+
+                    StringBuilder endpoint = new StringBuilder();
+                    String httpsURI = getEndpointURI(gwEndpoints, APIConstants.HTTPS_TRANSPORT_PROTOCOL_NAME);
+                    if (!StringUtils.isEmpty(httpsURI)) {
+                        endpoint.append(httpsURI);
+                    } else {
+                        String httpURI = getEndpointURI(gwEndpoints, APIConstants.HTTP_TRANSPORT_PROTOCOL_NAME);
+                        endpoint.append(httpURI);
+                    }
+
+                    //construct gw URL for reference API
+                    Set<URITemplate> uriTemplateSet = api.getUriTemplates();
+                    if (!uriTemplateSet.isEmpty()) {
+                        URITemplate tempUri = (URITemplate) (uriTemplateSet.toArray()[0]);
+                        ApiOperationMapping apiOperationMapping = tempUri.getApiOperationMapping();
+                        if (apiOperationMapping != null) {
+                            String refApiContext = apiOperationMapping.getApiContext();
+                            endpoint.append(refApiContext);
+                        }
+                    }
+
+                    JsonObject urlObj = new JsonObject();
+                    urlObj.addProperty("url", endpoint.toString());
+                    JsonObject endpointConfig = new JsonObject();
+                    endpointConfig.addProperty(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+                    endpointConfig.add(APIConstants.APIEndpoint.ENDPOINT_CONFIG_SANDBOX_ENDPOINTS, urlObj);
+                    endpointConfig.add(APIConstants.APIEndpoint.ENDPOINT_CONFIG_PRODUCTION_ENDPOINTS, urlObj);
+
+                    api.setEndpointConfig(endpointConfig.toString());
+                }
             }
         }
 
@@ -2122,6 +2156,15 @@ public class TemplateBuilderUtil {
             throw new APIManagementException("Error while deriving subscription endpoint from GraphQL API endpoint "
                     + "config: " + endpointConfig, e);
         }
+    }
+
+    private static String getEndpointURI(String[] uris, String scheme) {
+        for (String uri : uris) {
+            if (uri.startsWith(scheme)) {
+                return uri;
+            }
+        }
+        return null;
     }
 
 }
