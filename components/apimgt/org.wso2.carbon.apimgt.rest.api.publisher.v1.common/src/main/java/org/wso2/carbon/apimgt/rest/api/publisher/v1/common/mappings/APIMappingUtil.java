@@ -3494,7 +3494,7 @@ public class APIMappingUtil {
             BackendOperation operation = backendAPIOperationMapping.getBackendOperation();
 
             BackendOperationDTO operationDTO = new BackendOperationDTO();
-            operationDTO.setVerb(operation.getVerb());
+            operationDTO.setVerb(OperationPolicyMappingUtil.toSupportedHTTPVerbEnum(operation.getVerb()));
             operationDTO.setTarget(operation.getTarget());
 
             BackendAPIOperationMappingDTO mappingDTO = new BackendAPIOperationMappingDTO();
@@ -3508,7 +3508,7 @@ public class APIMappingUtil {
             BackendOperation operation = existingAPIOperationMapping.getBackendOperation();
 
             BackendOperationDTO operationDTO = new BackendOperationDTO();
-            operationDTO.setVerb(operation.getVerb());
+            operationDTO.setVerb(OperationPolicyMappingUtil.toSupportedHTTPVerbEnum(operation.getVerb()));
             operationDTO.setTarget(operation.getTarget());
 
             ExistingAPIOperationMappingDTO mappingDTO = new ExistingAPIOperationMappingDTO();

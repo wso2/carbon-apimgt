@@ -181,7 +181,7 @@ public final class APISpecParserConstants {
 
     public static final Set<String> SUPPORTED_METHODS =
             Collections.unmodifiableSet(new HashSet<String>(
-                    Arrays.asList(new String[]{"get", "put", "post", "delete", "patch", "head", "options"})));
+                    Arrays.asList(new String[]{"get", "put", "post", "delete", "patch", "head", "options", "tool"})));
     public static final String MCP_RESOURCES_MCP = "/mcp";
     public static final String MCP_RESOURCES_WELL_KNOWN = "/.well-known/oauth-authorization-server";
 
@@ -219,7 +219,8 @@ public final class APISpecParserConstants {
         DELETE,
         PATCH,
         HEAD,
-        OPTIONS
+        OPTIONS,
+        TOOL
     }
 
     public static final String API_SUBTYPE_DIRECT_ENDPOINT = "DIRECT_ENDPOINT";

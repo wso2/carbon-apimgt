@@ -392,8 +392,7 @@ public class URITemplate implements Serializable{
 
     @Override
     public int hashCode() {
-        int result = 31;
-        result = 31 * result + (uriTemplate != null ? uriTemplate.hashCode() : 0);
+        int result = uriTemplate != null ? uriTemplate.hashCode() : 0;
         result = 31 * result + (resourceURI != null ? resourceURI.hashCode() : 0);
         result = 31 * result + (resourceSandboxURI != null ? resourceSandboxURI.hashCode() : 0);
         result = 31 * result + (httpVerb != null ? httpVerb.hashCode() : 0);

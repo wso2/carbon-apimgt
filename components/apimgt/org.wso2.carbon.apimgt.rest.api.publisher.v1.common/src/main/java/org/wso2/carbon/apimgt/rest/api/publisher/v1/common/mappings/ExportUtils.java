@@ -1091,7 +1091,9 @@ public class ExportUtils {
                 apiEndpointDTOList.add(
                         APIMappingUtil.fromAPIEndpointToDTO(apiEndpointInfo, organization, preserveCredentials));
             }
-            writeEndpointDTOsToFile(apiEndpointDTOList, archivePath, exportFormat);
+            writeDTOListToFile(apiEndpointDTOList, archivePath,
+                    ImportExportConstants.API_ENDPOINTS_FILE_LOCATION,
+                    ImportExportConstants.API_ENDPOINTS_TYPE, exportFormat);
         } catch (APIImportExportException e) {
             throw new APIManagementException("Error while adding operation endpoints details for API: " + apiUuid, e);
         } catch (IOException e) {
@@ -1114,7 +1116,9 @@ public class ExportUtils {
                             APIMappingUtil.fromBackendAPIToDTO(backendAPI, organization,
                                     preserveCredentials));
                 }
-                writeBackendAPIDTOsToFile(backendAPIDTOList, archivePath, exportFormat);
+                writeDTOListToFile(backendAPIDTOList, archivePath,
+                        ImportExportConstants.BACKEND_APIS_FILE_LOCATION,
+                        ImportExportConstants.BACKEND_APIS_TYPE, exportFormat);
             }
         } catch (APIImportExportException e) {
             throw new APIManagementException("Error while adding operation endpoints details for API: " + apiUuid, e);
@@ -1124,17 +1128,8 @@ public class ExportUtils {
         }
     }
 
-    /**
-     * Writes a list of API endpoint DTOs as JSON into the archive file.
-     * Serializes the provided DTO list into a JSON array and saves it to the specified archive location.
-     *
-     * @param dtoList      the list of DTOs to serialize and write
-     * @param archivePath  the base path where the archive is located
-     * @param exportFormat the format used for export (e.g., YAML or JSON)
-     * @throws APIImportExportException if an error occurs during serialization or file writing
-     * @throws IOException              if an I/O error occurs while writing the file
-     */
-    private static void writeEndpointDTOsToFile(List<?> dtoList, String archivePath, ExportFormat exportFormat)
+    private static void writeDTOListToFile(List<?> dtoList, String archivePath, String fileLocation,
+                                           String dtoType, ExportFormat exportFormat)
             throws APIImportExportException, IOException {
 
         if (!dtoList.isEmpty()) {
@@ -1142,25 +1137,9 @@ public class ExportUtils {
             JsonElement jsonElement = gson.toJsonTree(dtoList);
             JsonArray jsonArray = (JsonArray) jsonElement;
             CommonUtil.writeDtoToFile(
-                    archivePath + ImportExportConstants.API_ENDPOINTS_FILE_LOCATION,
+                    archivePath + fileLocation,
                     exportFormat,
-                    ImportExportConstants.API_ENDPOINTS_TYPE,
-                    jsonArray);
-        }
-    }
-
-    private static void writeBackendAPIDTOsToFile(List<BackendAPIDTO> dtoList, String archivePath,
-                                                  ExportFormat exportFormat)
-            throws APIImportExportException, IOException {
-
-        if (!dtoList.isEmpty()) {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            JsonElement jsonElement = gson.toJsonTree(dtoList);
-            JsonArray jsonArray = (JsonArray) jsonElement;
-            CommonUtil.writeDtoToFile(
-                    archivePath + ImportExportConstants.BACKEND_APIS_FILE_LOCATION,
-                    exportFormat,
-                    ImportExportConstants.BACKEND_APIS_TYPE,
+                    dtoType,
                     jsonArray);
         }
     }

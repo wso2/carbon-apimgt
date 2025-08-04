@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs;
 import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
@@ -29,6 +30,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.utils.OperationPolicyComparator;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendAPIOperationMappingDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendOperationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExistingAPIOperationMappingDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OperationPolicyDataDTO;
@@ -145,6 +147,12 @@ public class OperationPolicyMappingUtil {
         return operationPoliciesList;
     }
 
+    /**
+     * Converts a {@link BackendAPIOperationMappingDTO} to a {@link BackendAPIOperationMapping}.
+     *
+     * @param backendOperationMappingDTO the DTO to convert
+     * @return the converted BackendAPIOperationMapping
+     */
     public static BackendAPIOperationMapping fromDTOToBackendOperationMapping(
             BackendAPIOperationMappingDTO backendOperationMappingDTO) {
 
@@ -152,7 +160,9 @@ public class OperationPolicyMappingUtil {
 
         BackendOperation backendOperation = new BackendOperation();
         backendOperation.setTarget(backendOperationMappingDTO.getBackendOperation().getTarget());
-        backendOperation.setVerb(backendOperationMappingDTO.getBackendOperation().getVerb());
+        backendOperation.setVerb(
+                toSupportedHTTPVerb(backendOperationMappingDTO.getBackendOperation().getVerb())
+        );
         backendAPIOperationMapping.setBackendOperation(backendOperation);
 
         backendAPIOperationMapping.setBackendApiId(backendOperationMappingDTO.getBackendAPIId());
@@ -160,14 +170,26 @@ public class OperationPolicyMappingUtil {
         return backendAPIOperationMapping;
     }
 
+    /**
+     * Converts a {@link ExistingAPIOperationMappingDTO} to an {@link ExistingAPIOperationMapping}.
+     *
+     * @param apiOperationMappingDTO the DTO to convert
+     * @return the converted ExistingAPIOperationMapping
+     */
     public static ExistingAPIOperationMapping fromDTOToAPIOperationMapping(
             ExistingAPIOperationMappingDTO apiOperationMappingDTO) {
 
+        if (apiOperationMappingDTO == null) {
+            return null;
+        }
         ExistingAPIOperationMapping existingAPIOperationMapping = new ExistingAPIOperationMapping();
-
         BackendOperation backendOperation = new BackendOperation();
-        backendOperation.setTarget(apiOperationMappingDTO.getBackendOperation().getTarget());
-        backendOperation.setVerb(apiOperationMappingDTO.getBackendOperation().getVerb());
+        if (apiOperationMappingDTO.getBackendOperation() != null) {
+            backendOperation.setTarget(apiOperationMappingDTO.getBackendOperation().getTarget());
+            backendOperation.setVerb(
+                    toSupportedHTTPVerb(apiOperationMappingDTO.getBackendOperation().getVerb())
+            );
+        }
         existingAPIOperationMapping.setBackendOperation(backendOperation);
 
         existingAPIOperationMapping.setApiUuid(apiOperationMappingDTO.getApiId());
@@ -249,5 +271,33 @@ public class OperationPolicyMappingUtil {
             specAttributeDTO.setAllowedValues(specAttribute.getAllowedValues());
         }
         return specAttributeDTO;
+    }
+
+    /**
+     * Converts a {@link BackendOperationDTO.VerbEnum} to {@link APIConstants.SupportedHTTPVerbs}.
+     *
+     * @param verbEnum the HTTP verb from the DTO
+     * @return the corresponding {@link SupportedHTTPVerbs} enum, or null if input is null
+     */
+    public static SupportedHTTPVerbs toSupportedHTTPVerb(BackendOperationDTO.VerbEnum verbEnum) {
+
+        if (verbEnum == null) {
+            return null;
+        }
+        return SupportedHTTPVerbs.valueOf(verbEnum.name());
+    }
+
+    /**
+     * Converts a {@link APIConstants.SupportedHTTPVerbs} to {@link BackendOperationDTO.VerbEnum}.
+     *
+     * @param verb the HTTP verb from the model
+     * @return the corresponding {@link BackendOperationDTO.VerbEnum}, or null if input is null
+     */
+    public static BackendOperationDTO.VerbEnum toSupportedHTTPVerbEnum(SupportedHTTPVerbs verb) {
+
+        if (verb == null) {
+            return null;
+        }
+        return BackendOperationDTO.VerbEnum.valueOf(verb.name());
     }
 }

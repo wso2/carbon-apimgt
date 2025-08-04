@@ -1138,7 +1138,7 @@ paths:
   /apis/{apiId}/topics:
     get:
       tags:
-      - Topics
+        - Topics
       summary: |
         Get a list of available topics for a given async API
       description: |
@@ -1867,7 +1867,7 @@ paths:
         - lang: Curl
           source: 'curl -k -X PUT -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json 
-          "https://localhost:9443/mcp-servers/am/devportal/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"'
+          "https://localhost:9443/api/am/devportal/v3/mcp-servers/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"'
       operationId: addMCPServerRating
 
     delete:
@@ -1896,7 +1896,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k -X DELETE -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-            "https://localhost:9443/mcp-servers/am/devportal/v3/apis/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
+            "https://localhost:9443/api/am/devportal/v3/mcp-servers/e93fb282-b456-48fc-8981-003fb89086ae/user-rating"
       operationId: deleteMCPServerRating
 
   /mcp-servers/{mcpServerId}/comments:
@@ -6624,6 +6624,14 @@ components:
       in: query
       description: |
         **API ID** consisting of the **UUID** of the API.
+      schema:
+        type: string
+    requestedTenant-Q:
+      name: X-WSO2-Tenant-Q
+      in: query
+      description: |
+        For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be
+          retirieved from.
       schema:
         type: string
     apiType-Q:

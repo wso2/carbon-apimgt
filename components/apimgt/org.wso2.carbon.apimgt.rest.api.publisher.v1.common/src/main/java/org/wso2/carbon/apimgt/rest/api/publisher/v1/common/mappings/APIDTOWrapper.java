@@ -19,6 +19,9 @@
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -37,17 +40,25 @@ import java.util.List;
  */
 public class APIDTOWrapper {
 
+    private static final Log log = LogFactory.getLog(APIDTOWrapper.class);
+
     private final APIDTO apiDto;
     private final MCPServerDTO mcpServerDto;
 
     public APIDTOWrapper(APIDTO apiDto) {
 
+        if (apiDto == null) {
+            throw new IllegalArgumentException("APIDTO cannot be null");
+        }
         this.apiDto = apiDto;
         this.mcpServerDto = null;
     }
 
     public APIDTOWrapper(MCPServerDTO mcpServerDto) {
 
+        if (mcpServerDto == null) {
+            throw new IllegalArgumentException("MCPServerDTO cannot be null");
+        }
         this.apiDto = null;
         this.mcpServerDto = mcpServerDto;
     }
@@ -247,8 +258,13 @@ public class APIDTOWrapper {
         }
         String subtype = apiDto.getSubtypeConfiguration().getSubtype();
         if (APIConstants.API_SUBTYPE_AI_API.equals(subtype)) {
-            return new Gson().fromJson(apiDto.getSubtypeConfiguration().getConfiguration().toString(),
-                    AIConfiguration.class);
+            try {
+                return new Gson().fromJson(apiDto.getSubtypeConfiguration().getConfiguration().toString(),
+                        AIConfiguration.class);
+            } catch (JsonSyntaxException e) {
+                log.error("Failed to parse AI configuration", e);
+                return null;
+            }
         }
         return null;
     }

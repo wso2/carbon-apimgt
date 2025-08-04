@@ -62,6 +62,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -766,9 +767,7 @@ public class OAS3Parser extends APIDefinition {
 
         OpenAPI openAPI = getOpenAPI(oasDefinition);
         removePublisherSpecificInfo(openAPI);
-        Set<SwaggerData.Resource> unmatchedResources = new HashSet<>(swaggerData.getResources());
-
-        cleanUpPathItems(openAPI, unmatchedResources);
+        cleanUpPathItems(openAPI, swaggerData.getResources());
 
         updateOpenAPIMetadata(openAPI, swaggerData);
         updateSwaggerSecurityDefinition(openAPI, swaggerData, OPENAPI_DEFAULT_AUTHORIZATION_URL,
@@ -828,10 +827,11 @@ public class OAS3Parser extends APIDefinition {
         for (SwaggerData.Resource resource : resources) {
             if (APISpecParserConstants.HTTP_VERB_TOOL.equalsIgnoreCase(resource.getVerb())
                     && resource.getBackendAPIOperationMapping() != null) {
-                String mappedMethod = resource.getBackendAPIOperationMapping().getBackendOperation().getVerb();
+                APIConstants.SupportedHTTPVerbs
+                        mappedMethod = resource.getBackendAPIOperationMapping().getBackendOperation().getVerb();
                 String mappedTarget = resource.getBackendAPIOperationMapping().getBackendOperation().getTarget();
 
-                if (method.equalsIgnoreCase(mappedMethod) && path.equalsIgnoreCase(mappedTarget)) {
+                if (method.equalsIgnoreCase(mappedMethod.toString()) && path.equalsIgnoreCase(mappedTarget)) {
                     return resource;
                 }
             }
@@ -2586,6 +2586,10 @@ public class OAS3Parser extends APIDefinition {
             throws APIManagementException {
 
         OpenAPI backendDefinition = getOpenAPI(backendApiDefinition);
+        if (backendDefinition.getPaths() == null || backendDefinition.getPaths().isEmpty()) {
+            log.warn("Backend API definition has no paths defined");
+            return new HashSet<>();
+        }
         Set<URITemplate> generatedTools = new HashSet<>();
         for (URITemplate template : uriTemplates) {
             if (!mcpFeatureType.equalsIgnoreCase(template.getHttpVerb())) {
@@ -2629,6 +2633,10 @@ public class OAS3Parser extends APIDefinition {
             throws APIManagementException {
 
         OpenAPI backendDefinition = getOpenAPI(backendApiDefinition);
+        if (backendDefinition.getPaths() == null || backendDefinition.getPaths().isEmpty()) {
+            log.warn("Backend API definition has no paths defined");
+            return new HashSet<>();
+        }
         Set<URITemplate> updatedTools = new HashSet<>();
 
         for (URITemplate template : uriTemplates) {
@@ -2682,7 +2690,8 @@ public class OAS3Parser extends APIDefinition {
      * @return the populated URITemplate
      */
     private URITemplate populateURITemplate(URITemplate uriTemplate, OperationMatch match, String mcpFeatureType,
-                                            OpenAPI backendAPIDefinition, String backendId, APIIdentifier refApiId) {
+                                            OpenAPI backendAPIDefinition, String backendId, APIIdentifier refApiId)
+            throws APIManagementException {
 
         if (uriTemplate.getUriTemplate() == null || uriTemplate.getUriTemplate().isEmpty()) {
             String operationId = Optional.ofNullable(match.operation.getOperationId())
@@ -2712,29 +2721,26 @@ public class OAS3Parser extends APIDefinition {
                 uriTemplate.setSchemaDefinition(jsonSchema);
             } catch (JsonProcessingException e) {
                 log.error("Error generating JSON schema for operation: " + uriTemplate.getUriTemplate(), e);
+                throw new APIManagementException(
+                        "Error generating JSON schema for operation: " + uriTemplate.getUriTemplate(), e);
             }
         }
-        if (uriTemplate.getBackendOperationMapping() != null) {
-            BackendOperation backendOperation = new BackendOperation();
-            backendOperation.setVerb(match.method.toString());
-            backendOperation.setTarget(match.path);
 
+        BackendOperation backendOperation = new BackendOperation();
+        backendOperation.setVerb(APIConstants.SupportedHTTPVerbs.valueOf(match.method.toString()));
+        backendOperation.setTarget(match.path);
+
+        if (uriTemplate.getBackendOperationMapping() != null) {
             BackendAPIOperationMapping backendOperationMap = new BackendAPIOperationMapping();
             backendOperationMap.setBackendApiId(backendId);
             backendOperationMap.setBackendOperation(backendOperation);
-
             uriTemplate.setBackendOperationMapping(backendOperationMap);
         } else if (uriTemplate.getExistingAPIOperationMapping() != null) {
-            BackendOperation backendOperation = new BackendOperation();
-            backendOperation.setVerb(match.method.toString());
-            backendOperation.setTarget(match.path);
-
             ExistingAPIOperationMapping apiOperationMap = new ExistingAPIOperationMapping();
             apiOperationMap.setApiUuid(refApiId.getUUID());
             apiOperationMap.setApiName(refApiId.getApiName());
             apiOperationMap.setApiVersion(refApiId.getVersion());
             apiOperationMap.setBackendOperation(backendOperation);
-
             uriTemplate.setExistingAPIOperationMapping(apiOperationMap);
         }
         Map<String, Object> extensions = match.operation.getExtensions();
@@ -2777,13 +2783,13 @@ public class OAS3Parser extends APIDefinition {
      * @param verb    HTTP verb to match
      * @return OperationMatch if found, null otherwise
      */
-    private OperationMatch findMatchingOperation(OpenAPI openAPI, String target, String verb) {
+    private OperationMatch findMatchingOperation(OpenAPI openAPI, String target, APIConstants.SupportedHTTPVerbs verb) {
 
         for (Map.Entry<String, PathItem> pathEntry : openAPI.getPaths().entrySet()) {
             for (Map.Entry<PathItem.HttpMethod, Operation> opEntry :
                     pathEntry.getValue().readOperationsMap().entrySet()) {
                 if (pathEntry.getKey().equals(target) &&
-                        opEntry.getKey().toString().equalsIgnoreCase(verb)) {
+                        opEntry.getKey().toString().equalsIgnoreCase(verb.toString())) {
                     return new OperationMatch(pathEntry.getKey(), opEntry.getKey(), opEntry.getValue());
                 }
             }
@@ -2792,8 +2798,13 @@ public class OAS3Parser extends APIDefinition {
     }
 
     /**
-     * Represents a match found in the OpenAPI definition for a specific operation.
-     * Contains the path, HTTP method, and operation details.
+     * Builds a unified input schema for the operation, combining parameters and request body.
+     * Returns a Map representing the schema structure.
+     *
+     * @param parameters   List of parameters for the operation
+     * @param requestBody  Request body schema if available
+     * @param openAPI      OpenAPI definition to resolve schemas
+     * @return Map representing the unified input schema
      */
     private Map<String, Object> buildUnifiedInputSchema(List<Parameter> parameters, RequestBody requestBody,
                                                         OpenAPI openAPI) {
@@ -2853,13 +2864,31 @@ public class OAS3Parser extends APIDefinition {
         return root;
     }
 
+    /**
+     * Resolves a schema by recursively resolving $ref, allOf, oneOf, anyOf, and not properties.
+     * Returns the resolved Schema object.
+     *
+     * @param schema   Schema to resolve
+     * @param openAPI  OpenAPI definition to resolve against
+     * @return Resolved Schema object
+     */
     private Schema<?> resolveSchema(Schema<?> schema, OpenAPI openAPI) {
+
+        return resolveSchema(schema, openAPI, new HashSet<>());
+    }
+
+    private Schema<?> resolveSchema(Schema<?> schema, OpenAPI openAPI, Set<String> visitedRefs) {
 
         if (schema == null) return null;
 
         // Resolve $ref
         while (schema.get$ref() != null) {
             String refName = schema.get$ref().replace("#/components/schemas/", "");
+            if (visitedRefs.contains(refName)) {
+                log.warn("Circular reference detected: " + refName);
+                break;
+            }
+            visitedRefs.add(refName);
             Schema<?> refSchema = openAPI.getComponents().getSchemas().get(refName);
             if (refSchema == null) break;
             schema = refSchema;

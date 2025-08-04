@@ -21,7 +21,43 @@ import javax.validation.Valid;
 public class BackendOperationDTO   {
   
     private String target = null;
-    private String verb = null;
+
+    @XmlType(name="VerbEnum")
+    @XmlEnum(String.class)
+    public enum VerbEnum {
+        GET("GET"),
+        POST("POST"),
+        PUT("PUT"),
+        DELETE("DELETE"),
+        PATCH("PATCH"),
+        HEAD("HEAD"),
+        OPTIONS("OPTIONS");
+        private String value;
+
+        VerbEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static VerbEnum fromValue(String v) {
+            for (VerbEnum b : VerbEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private VerbEnum verb = null;
 
   /**
    * Backend target path
@@ -44,7 +80,7 @@ public class BackendOperationDTO   {
   /**
    * Backend target method
    **/
-  public BackendOperationDTO verb(String verb) {
+  public BackendOperationDTO verb(VerbEnum verb) {
     this.verb = verb;
     return this;
   }
@@ -52,10 +88,10 @@ public class BackendOperationDTO   {
   
   @ApiModelProperty(example = "POST", value = "Backend target method")
   @JsonProperty("verb")
-  public String getVerb() {
+  public VerbEnum getVerb() {
     return verb;
   }
-  public void setVerb(String verb) {
+  public void setVerb(VerbEnum verb) {
     this.verb = verb;
   }
 

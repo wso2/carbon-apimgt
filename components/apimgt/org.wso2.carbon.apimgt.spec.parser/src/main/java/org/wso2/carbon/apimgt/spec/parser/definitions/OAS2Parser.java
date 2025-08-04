@@ -69,6 +69,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.apimgt.api.APIConstants;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -922,8 +923,13 @@ public class OAS2Parser extends APIDefinition {
             if (resource.getBackendAPIOperationMapping() == null) {
                 continue;
             }
-            String path = resource.getBackendAPIOperationMapping().getBackendOperation().getTarget();
-            String verb = resource.getBackendAPIOperationMapping().getBackendOperation().getVerb().toUpperCase();
+            BackendOperation backendOp = resource.getBackendAPIOperationMapping().getBackendOperation();
+            if (backendOp == null || backendOp.getTarget() == null || backendOp.getVerb() == null) {
+                log.warn("Skipping resource with incomplete backend operation: " + resource);
+                continue;
+            }
+            String path = backendOp.getTarget();
+            String verb = backendOp.getVerb().toString().toUpperCase();
             map.computeIfAbsent(path, k -> new HashMap<>()).put(verb, resource);
         }
         return map;
@@ -944,8 +950,13 @@ public class OAS2Parser extends APIDefinition {
         if (resource == null || resource.getBackendAPIOperationMapping() == null) {
             return null;
         }
-        String mappedPath = resource.getBackendAPIOperationMapping().getBackendOperation().getTarget();
-        String mappedVerb = resource.getBackendAPIOperationMapping().getBackendOperation().getVerb();
+        BackendOperation backendOp = resource.getBackendAPIOperationMapping().getBackendOperation();
+        if (backendOp == null || backendOp.getTarget() == null || backendOp.getVerb() == null) {
+            return null;
+        }
+        String mappedPath = backendOp.getTarget();
+        String mappedVerb = backendOp.getVerb().toString();
+
         return (mappedPath.equalsIgnoreCase(path) && mappedVerb.equalsIgnoreCase(method)) ? resource : null;
     }
 
@@ -2225,24 +2236,25 @@ public class OAS2Parser extends APIDefinition {
 
     @Override
     public String getType() {
-
         return null;
     }
 
     @Override
     public Set<URITemplate> generateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
-                                             String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates) {
+                                             String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates)
+            throws APIManagementException {
 
         Swagger backendDefinition = getSwagger(backendApiDefinition);
+        if (backendDefinition.getPaths() == null || backendDefinition.getPaths().isEmpty()) {
+            log.warn("Backend API definition has no paths defined");
+            return new HashSet<>();
+        }
         Set<URITemplate> generatedTools = new HashSet<>();
-
         for (URITemplate template : uriTemplates) {
             if (!mcpFeatureType.equalsIgnoreCase(template.getHttpVerb())) {
                 continue;
             }
-
             BackendOperation backendOperation = null;
-
             if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
                 BackendAPIOperationMapping mapping = template.getBackendOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
@@ -2283,9 +2295,13 @@ public class OAS2Parser extends APIDefinition {
                                            APIIdentifier refApiId, String backendId,
                                            String mcpFeatureType,
                                            String mcpSubtype,
-                                           Set<URITemplate> uriTemplates) {
+                                           Set<URITemplate> uriTemplates) throws APIManagementException {
 
         Swagger backendDefinition = getSwagger(backendApiDefinition);
+        if (backendDefinition.getPaths() == null || backendDefinition.getPaths().isEmpty()) {
+            log.warn("Backend API definition has no paths defined");
+            return new HashSet<>();
+        }
         Set<URITemplate> updatedTools = new HashSet<>();
 
         for (URITemplate template : uriTemplates) {
@@ -2340,7 +2356,8 @@ public class OAS2Parser extends APIDefinition {
      * @return the populated URITemplate
      */
     private URITemplate populateURITemplate(URITemplate uriTemplate, OperationMatch match, String mcpFeatureType,
-                                            Swagger backendAPIDefinition, String backendId, APIIdentifier refApiId) {
+                                            Swagger backendAPIDefinition, String backendId, APIIdentifier refApiId)
+            throws APIManagementException {
 
         if (uriTemplate.getUriTemplate() == null || uriTemplate.getUriTemplate().isEmpty()) {
             String operationId = Optional.ofNullable(match.operation.getOperationId())
@@ -2369,11 +2386,13 @@ public class OAS2Parser extends APIDefinition {
                 uriTemplate.setSchemaDefinition(jsonSchema);
             } catch (JsonProcessingException e) {
                 log.error("Error generating JSON schema for operation: " + uriTemplate.getUriTemplate(), e);
+                throw new APIManagementException(
+                        "Error generating JSON schema for operation: " + uriTemplate.getUriTemplate(), e);
             }
         }
 
         BackendOperation backendOperation = new BackendOperation();
-        backendOperation.setVerb(match.method.toString());
+        backendOperation.setVerb(APIConstants.SupportedHTTPVerbs.valueOf(match.method.toString()));
         backendOperation.setTarget(match.path);
 
         if (uriTemplate.getBackendOperationMapping() != null) {
@@ -2431,18 +2450,19 @@ public class OAS2Parser extends APIDefinition {
 
     /**
      * Finds a matching operation in the Swagger definition based on the target path and HTTP verb.
+     * It iterates through all paths and operations to find an exact match.
      *
-     * @param swagger the Swagger definition to search
+     * @param swagger the Swagger definition to search in
      * @param target  the target path to match
      * @param verb    the HTTP verb to match
-     * @return an OperationMatch containing the matched path, method, and operation, or null if no match is found
+     * @return an OperationMatch containing the matched path, method, and operation, or null if not found
      */
-    private OperationMatch findMatchingOperation(Swagger swagger, String target, String verb) {
+    private OperationMatch findMatchingOperation(Swagger swagger, String target, APIConstants.SupportedHTTPVerbs verb) {
 
         for (Map.Entry<String, Path> pathEntry : swagger.getPaths().entrySet()) {
             for (Map.Entry<HttpMethod, Operation> opEntry : pathEntry.getValue().getOperationMap().entrySet()) {
                 if (pathEntry.getKey().equals(target) &&
-                        opEntry.getKey().toString().equalsIgnoreCase(verb)) {
+                        opEntry.getKey().toString().equalsIgnoreCase(verb.toString())) {
                     return new OperationMatch(pathEntry.getKey(), opEntry.getKey(), opEntry.getValue());
                 }
             }
@@ -2468,7 +2488,13 @@ public class OAS2Parser extends APIDefinition {
 
         if (parameters != null) {
             for (Parameter param : parameters) {
-
+                if (param instanceof RefParameter) {
+                    RefParameter refParam = (RefParameter) param;
+                    Parameter resolved = swagger.getParameter(refParam.getSimpleRef());
+                    if (resolved != null) {
+                        param = resolved;
+                    }
+                }
                 if (param instanceof BodyParameter) {
                     BodyParameter bodyParam = (BodyParameter) param;
                     Model rawModel = bodyParam.getSchema();
@@ -2529,10 +2555,18 @@ public class OAS2Parser extends APIDefinition {
      */
     private Model resolveModel(Model model, Swagger swagger) {
 
-        if (model == null) return null;
+        if (model == null) {
+            return null;
+        }
+        Set<String> visitedRefs = new HashSet<>();
 
         while (model instanceof RefModel) {
             String ref = ((RefModel) model).getSimpleRef();
+            if (visitedRefs.contains(ref)) {
+                log.warn("Circular reference detected for model: " + ref);
+                break;
+            }
+            visitedRefs.add(ref);
             Model resolved = swagger.getDefinitions().get(ref);
             if (resolved == null || resolved == model) break;
             model = resolved;
@@ -2571,6 +2605,10 @@ public class OAS2Parser extends APIDefinition {
         return model;
     }
 
+    private Property resolveProperty(Property property, Swagger swagger) {
+        return resolveProperty(property, swagger, new HashSet<>());
+    }
+
     /**
      * Resolves a property by following references and handling nested properties.
      * It recursively resolves RefProperties, ArrayProperties, and ObjectProperties.
@@ -2579,18 +2617,25 @@ public class OAS2Parser extends APIDefinition {
      * @param swagger  the Swagger definition containing model references
      * @return the resolved Property
      */
-    private Property resolveProperty(Property property, Swagger swagger) {
+    private Property resolveProperty(Property property, Swagger swagger, Set<String> visitedRefs) {
 
         if (property instanceof RefProperty) {
             String ref = ((RefProperty) property).getSimpleRef();
+            if (visitedRefs.contains(ref)) {
+                log.warn("Circular reference detected for property: " + ref);
+                return property;
+            }
+            visitedRefs.add(ref);
             Model refModel = swagger.getDefinitions().get(ref);
             if (refModel instanceof ModelImpl) {
                 ModelImpl impl = (ModelImpl) resolveModel(refModel, swagger);
                 ObjectProperty objProp = new ObjectProperty();
+                objProp.setDescription(property.getDescription());
+                objProp.setExample(property.getExample());
                 if (impl.getProperties() != null) {
                     Map<String, Property> nested = new LinkedHashMap<>();
                     for (Map.Entry<String, Property> entry : impl.getProperties().entrySet()) {
-                        nested.put(entry.getKey(), resolveProperty(entry.getValue(), swagger));
+                        nested.put(entry.getKey(), resolveProperty(entry.getValue(), swagger, visitedRefs));
                     }
                     objProp.setProperties(nested);
                 }

@@ -17,6 +17,8 @@
 
 package org.wso2.carbon.apimgt.api.model;
 
+import org.wso2.carbon.apimgt.api.APIConstants;
+
 import java.io.Serializable;
 
 /**
@@ -26,9 +28,10 @@ import java.io.Serializable;
  */
 public class BackendOperation implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private int refUriMappingId;
     private String target;
-    private String verb;
+    private APIConstants.SupportedHTTPVerbs verb;
 
     public BackendOperation() {
 
@@ -44,12 +47,12 @@ public class BackendOperation implements Serializable {
         this.target = target;
     }
 
-    public String getVerb() {
+    public APIConstants.SupportedHTTPVerbs getVerb() {
 
         return verb;
     }
 
-    public void setVerb(String verb) {
+    public void setVerb(APIConstants.SupportedHTTPVerbs verb) {
 
         this.verb = verb;
     }

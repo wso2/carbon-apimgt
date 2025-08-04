@@ -64,8 +64,6 @@ public enum ExceptionCodes implements ErrorHandler {
     APIM_DAO_EXCEPTION(900320, "Internal server error.", 500, "Error occurred while retrieving data"),
     GATEWAY_LABELS_CANNOT_BE_NULL(900321, "Gateway labels cannot be null.", 400, "Gateway labels cannot be null"),
     STATUS_CANNOT_BE_NULL(900322, "Status cannot be null.", 400, "Status cannot be null"),
-    INVALID_OPERATION_MAPPING(900323, "Invalid operation mapping", 400, "Invalid operation mapping"),
-    BACKEND_OPERATION_MAPPING_NOT_FOUND(900322, "Backend operation mapping not found.", 404, "Backend operation mapping not found"),
     RATING_NOT_FOUND(900324, "Rating not found", 404, "Couldn't retrieve rating"),
     RATING_VALUE_INVALID(900325, "Rating value invalid", 400, "Provided rating value does not fall in between min max "
             + "values"),
