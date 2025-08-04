@@ -215,8 +215,11 @@ public class APIDTOWrapper {
     public List<String> getKeyManagers() {
 
         Object managers = isAPIDTO() ? apiDto.getKeyManagers() : mcpServerDto.getKeyManagers();
-        return managers instanceof List ? (List<String>) managers :
-                Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS);
+        if (managers instanceof List<?>) {
+            return (List<String>) managers;
+        } else {
+            return Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS);
+        }
     }
 
     public String getGatewayVendor() {

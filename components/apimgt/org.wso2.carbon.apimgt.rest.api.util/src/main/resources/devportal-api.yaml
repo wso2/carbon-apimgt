@@ -871,7 +871,7 @@ paths:
       operationId: addCommentToAPI
       parameters:
         - $ref: '#/components/parameters/apiId'
-        - $ref: '#/components/parameters/parentCommentID'
+        - $ref: '#/components/parameters/parentCommentId'
       requestBody:
         description: |
           Comment object that should to be added
@@ -1765,6 +1765,7 @@ paths:
       x-code-samples:
         - lang: Curl
           source: curl -k "https://localhost:9443/api/am/devportal/v3/mcp-servers/e93fb282-b456-48fc-8981-003fb89086ae/ratings"
+      operationId: getMCPServerRatings
 
   /mcp-servers/{mcpServerId}/user-rating:
     get:
@@ -1938,7 +1939,7 @@ paths:
       summary: Add a MCP Server Comment
       parameters:
         - $ref: '#/components/parameters/mcpServerId'
-        - $ref: '#/components/parameters/parentCommentID'
+        - $ref: '#/components/parameters/parentCommentId'
       requestBody:
         description: |
           Comment object that should to be added
@@ -6570,7 +6571,7 @@ components:
             moreInfo: ""
             error: []
   parameters:
-    parentCommentID:
+    parentCommentId:
       name: replyTo
       in: query
       description: |

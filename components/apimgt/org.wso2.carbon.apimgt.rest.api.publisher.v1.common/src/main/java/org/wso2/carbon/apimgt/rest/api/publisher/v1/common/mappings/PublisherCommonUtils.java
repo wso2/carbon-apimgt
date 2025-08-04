@@ -450,8 +450,14 @@ public class PublisherCommonUtils {
     private static void handleDirectEndpointSubtype(API apiToUpdate, API originalAPI, APIProvider apiProvider)
             throws APIManagementException {
 
-        BackendAPI backendAPI = apiProvider
-                .getMCPServerBackendAPIs(apiToUpdate.getUuid(), originalAPI.getOrganization()).get(0);
+        List<BackendAPI> backendApis =
+                apiProvider.getMCPServerBackendAPIs(apiToUpdate.getUuid(), originalAPI.getOrganization());
+
+        if (backendApis.isEmpty()) {
+            throw new APIManagementException("No backend API found for MCP-server subtype "
+                    + apiToUpdate.getUuid(), ExceptionCodes.API_NOT_FOUND);
+        }
+        BackendAPI backendAPI = backendApis.get(0);
 
         APIDefinition definitionParser = OASParserUtil.getOASParser(backendAPI.getApiDefinition());
         String newDefinition = definitionParser.generateAPIDefinitionForBackendAPI(new SwaggerData(apiToUpdate),
@@ -582,10 +588,11 @@ public class PublisherCommonUtils {
 
             if (name != null && !name.isEmpty() && version != null && !version.isEmpty()) {
                 String query = "name:" + name + " version:" + version;
-                Map<String, Object> searchResult = apiProvider.searchPaginatedAPIs(query, organization, 0, 1);
-
-                if (!searchResult.isEmpty()) {
-                    return (API) searchResult.get(0);
+                Map<String, Object> searchResult =
+                        apiProvider.searchPaginatedAPIs(query, organization, 0, 1);
+                Object apiList = searchResult.get("apis");
+                if (apiList instanceof List && !((List<?>) apiList).isEmpty()) {
+                    return (API) ((List<?>) apiList).get(0);
                 }
 
                 throw new APIManagementException("Referenced API not found for name=" + name + ", version=" + version,

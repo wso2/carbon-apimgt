@@ -108,6 +108,9 @@ public class OAS3Parser extends APIDefinition {
     private static final Log log = LogFactory.getLog(OAS3Parser.class);
     static final String OPENAPI_SECURITY_SCHEMA_KEY = "default";
     static final String OPENAPI_DEFAULT_AUTHORIZATION_URL = "https://test.com";
+    private static final ObjectMapper OBJECT_MAPPER =
+            new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL);
     private List<String> otherSchemes;
     private List<String> getOtherSchemes() {
         return otherSchemes;
@@ -2769,9 +2772,7 @@ public class OAS3Parser extends APIDefinition {
 
     private ObjectMapper getObjectMapper() {
 
-        return new ObjectMapper()
-                .enable(SerializationFeature.INDENT_OUTPUT)
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        return OBJECT_MAPPER;
     }
 
     /**
