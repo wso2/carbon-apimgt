@@ -427,7 +427,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        query = query == null ? StringUtils.EMPTY : query;
+        query = query == null ? "type:MCP" : "type:MCP " + query;
         APIListDTO apiListDTO = new APIListDTO();
         try {
             String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
