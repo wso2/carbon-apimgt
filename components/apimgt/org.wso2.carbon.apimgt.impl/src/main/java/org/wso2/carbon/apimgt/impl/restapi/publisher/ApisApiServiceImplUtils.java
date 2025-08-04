@@ -708,14 +708,9 @@ public class ApisApiServiceImplUtils {
         String defaultAPILevelPolicy = APIUtil.getDefaultAPILevelPolicy(tenantId);
 
         if (APIConstants.API_TYPE_MCP.equals(apiToAdd.getType())) {
-            //TODO: PASAN
-            Set<Scope> scopes = apiToAdd.getScopes();
-            apiToAdd.setScopes(scopes);
-
             String backendApiId = UUID.randomUUID().toString();
             Set<URITemplate> uriTemplates = generateMCPFeatures(
                     apiToAdd.getSubtype(), definition, backendApiId, apiToAdd.getUriTemplates(), apiDefinition);
-
             applyDefaultThrottlingAndAuth(uriTemplates, defaultAPILevelPolicy);
             apiToAdd.setUriTemplates(uriTemplates);
 
@@ -725,20 +720,16 @@ public class ApisApiServiceImplUtils {
 
             BackendAPI backendAPI =
                     createDefaultBackendAPI(backendApiId, backendApiDefinition, apiToAdd.getEndpointConfig());
-
             apiToAdd.getBackendAPIs().add(backendAPI);
             apiToAdd.setEndpointConfig(null);
-
             swaggerData = new SwaggerData(apiToAdd);
             definitionToAdd = new OAS3Parser().generateAPIDefinition(swaggerData);
-
         } else {
             if (syncOperations) {
                 validateScopes(apiToAdd, apiProvider, username);
                 SwaggerData swaggerData = new SwaggerData(apiToAdd);
                 definition = apiDefinition.populateCustomManagementInfo(definition, swaggerData);
             }
-
             Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definition);
             applyDefaultThrottlingAndAuth(uriTemplates, defaultAPILevelPolicy);
 
@@ -750,12 +741,11 @@ public class ApisApiServiceImplUtils {
             if (!syncOperations) {
                 validateScopes(apiToAdd, apiProvider, username);
                 SwaggerData swaggerData = new SwaggerData(apiToAdd);
-                definition = apiDefinition.populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
+                definition =
+                        apiDefinition.populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
             }
-
             definitionToAdd = definition;
         }
-
         // adding the definition
         apiToAdd.setSwaggerDefinition(definitionToAdd);
 

@@ -46,16 +46,13 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.store.v1.*;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.*;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.APIListDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.CommentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.DocumentListDTO;
-import org.wso2.carbon.apimgt.rest.api.store.v1.dto.ErrorDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PatchRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.PostRequestBodyDTO;
 import org.wso2.carbon.apimgt.rest.api.store.v1.dto.RatingDTO;
@@ -74,14 +71,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 
+/**
+ * Implementation of the McpServersApiService interface, providing methods to manage MCP servers,
+ * including adding comments, ratings, and retrieving server details.
+ */
 public class McpServersApiServiceImpl implements McpServersApiService {
 
     private static final Log log = LogFactory.getLog(McpServersApiServiceImpl.class);
@@ -110,7 +109,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             comment.setText(postRequestBodyDTO.getContent());
             comment.setCategory(postRequestBodyDTO.getCategory());
             comment.setParentCommentID(replyTo);
-            comment.setEntryPoint("DEVPORTAL");
+            comment.setEntryPoint(APIConstants.CommentEntryPoint.DEVPORTAL.toString());
             comment.setUser(username);
             comment.setApiId(mcpServerId);
             String createdCommentId = apiConsumer.addComment(mcpServerId, comment, username);
@@ -123,12 +122,13 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             return Response.created(uri).entity(commentDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Failed to add comment to the API " + mcpServerId, e, log);
+                RestApiUtil.handleInternalServerError("Failed to add comment to the MCP Server " + mcpServerId, e, log);
             }
         } catch (URISyntaxException e) {
-            throw new APIManagementException("Error while retrieving comment content location for API " + mcpServerId);
+            throw new APIManagementException(
+                    "Error while retrieving comment content location for MCP Server " + mcpServerId);
         }
         return null;
     }
@@ -146,7 +146,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      */
     @Override
     public Response addMCPServerRating(String mcpServerId, RatingDTO ratingDTO, String xWSO2Tenant,
-                                       MessageContext messageContext) throws APIManagementException {
+                                       MessageContext messageContext) {
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -197,15 +197,15 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API,
+                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_MCP_SERVER,
                         mcpServerId, e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(
-                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API,
+                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_MCP_SERVER,
                         mcpServerId, e, log);
             } else {
                 RestApiUtil
-                        .handleInternalServerError("Error while adding/updating user rating for API "
+                        .handleInternalServerError("Error while adding/updating user rating for MCP Server "
                                 + mcpServerId, e, log);
             }
         }
@@ -235,7 +235,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             if (comment != null) {
                 String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                         .get(RestApiConstants.USER_REST_API_SCOPES);
-                if (Arrays.asList(tokenScopes).contains("apim:admin") || comment.getUser().equals(username)) {
+                if (Arrays.asList(tokenScopes).contains(RestApiConstants.ADMIN_SCOPE)
+                        || comment.getUser().equals(username)) {
                     if (apiConsumer.deleteComment(apiTypeWrapper, commentId)) {
                         JSONObject obj = new JSONObject();
                         obj.put("id", commentId);
@@ -254,11 +255,11 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, mcpServerId, e, log);
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while deleting comment " + commentId + "for API " + mcpServerId;
+                String errorMessage = "Error while deleting comment " + commentId + "for MCP Server " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -277,7 +278,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      */
     @Override
     public Response deleteMCPServerRating(String mcpServerId, String xWSO2Tenant, String ifMatch,
-                                          MessageContext messageContext) throws APIManagementException {
+                                          MessageContext messageContext) {
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -289,15 +290,15 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, mcpServerId, e,
-                        log);
+                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId,
+                        e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(
-                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, mcpServerId, e,
-                        log);
+                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId,
+                        e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Error while deleting user rating for API " + mcpServerId, e,
-                        log);
+                RestApiUtil.handleInternalServerError("Error while deleting user rating for MCP Server " + mcpServerId,
+                        e, log);
             }
         }
         return null;
@@ -342,7 +343,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                             Comment editedComment = apiConsumer.getComment(apiTypeWrapper, commentId, 0, 0);
                             CommentDTO commentDTO = CommentMappingUtil.fromCommentToDTO(editedComment);
 
-                            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + mcpServerId +
+                            String uriString = RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + mcpServerId +
                                     RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
                             URI uri = new URI(uriString);
                             return Response.ok(uri).entity(commentDTO).build();
@@ -359,7 +360,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                         String.valueOf(commentId), log);
             }
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving comment content location for API " + mcpServerId;
+            String errorMessage = "Error while retrieving comment content location for MCP Server " + mcpServerId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -390,19 +391,19 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             CommentList comments = apiConsumer.getComments(apiTypeWrapper, parentCommentID, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
-            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + mcpServerId +
+            String uriString = RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + mcpServerId +
                     RestApiConstants.RESOURCE_PATH_COMMENTS;
             URI uri = new URI(uriString);
             return Response.ok(uri).entity(commentDTO).build();
 
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Failed to get comments of API " + mcpServerId, e, log);
+                RestApiUtil.handleInternalServerError("Failed to get comments of MCP Server " + mcpServerId, e, log);
             }
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving comments content location for API " + mcpServerId;
+            String errorMessage = "Error while retrieving comments content location for MCP Server " + mcpServerId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -422,11 +423,11 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      */
     @Override
     public Response getAllMCPServers(Integer limit, Integer offset, String xWSO2Tenant, String query,
-                                     String ifNoneMatch, MessageContext messageContext) throws APIManagementException {
+                                     String ifNoneMatch, MessageContext messageContext) {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        query = query == null ? "" : query;
+        query = query == null ? StringUtils.EMPTY : query;
         APIListDTO apiListDTO = new APIListDTO();
         try {
             String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -440,7 +441,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             // REST api practices
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":")) {
                 query = query
-                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":", APIConstants.NAME_TYPE_PREFIX + ":");
+                        .replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":",
+                                APIConstants.NAME_TYPE_PREFIX + ":");
             }
 
             Map allMatchedApisMap;
@@ -516,7 +518,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 } else {
                     commentDTO = CommentMappingUtil.fromCommentToDTO(comment);
                 }
-                String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + mcpServerId +
+                String uriString = RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + mcpServerId +
                         RestApiConstants.RESOURCE_PATH_COMMENTS + "/" + commentId;
                 URI uri = new URI(uriString);
                 return Response.ok(uri).entity(commentDTO).build();
@@ -526,9 +528,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, mcpServerId, e, log);
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else {
                 String errorMessage = "Error while retrieving comment for API : " + mcpServerId + "with comment ID "
                         + commentId;
@@ -558,7 +560,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
         OrganizationInfo userOrgInfo = RestApiUtil.getOrganizationInfo(messageContext);
         userOrgInfo.setSuperOrganization(superOrganization);
-        return Response.ok().entity(getAPIByAPIId(mcpServerId, superOrganization, userOrgInfo)).build();
+        return Response.ok().entity(getMCPServerByMCPServerId(mcpServerId, superOrganization, userOrgInfo)).build();
     }
 
     /**
@@ -609,9 +611,10 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while retrieving document " + documentId + " of the API " + mcpServerId;
+                String errorMessage =
+                        "Error while retrieving document " + documentId + " of the MCP Server " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (URISyntaxException e) {
@@ -635,8 +638,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      */
     @Override
     public Response getMCPServerDocumentContent(String mcpServerId, String documentId, String xWSO2Tenant,
-                                                String ifNoneMatch, MessageContext messageContext)
-            throws APIManagementException {
+                                                String ifNoneMatch, MessageContext messageContext) {
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -670,9 +672,10 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while retrieving document " + documentId + " of the API " + mcpServerId;
+                String errorMessage =
+                        "Error while retrieving document " + documentId + " of the MCP Server " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (URISyntaxException e) {
@@ -696,8 +699,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      */
     @Override
     public Response getMCPServerDocuments(String mcpServerId, Integer limit, Integer offset, String xWSO2Tenant,
-                                          String ifNoneMatch, MessageContext messageContext)
-            throws APIManagementException {
+                                          String ifNoneMatch, MessageContext messageContext) {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -714,11 +716,11 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             return Response.ok().entity(documentListDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, mcpServerId, e, log);
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Error while getting API " + mcpServerId, e, log);
+                RestApiUtil.handleInternalServerError("Error while getting MCP Server " + mcpServerId, e, log);
             }
         }
         return null;
@@ -736,7 +738,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      */
     @Override
     public Response getMCPServerRating(String mcpServerId, String xWSO2Tenant, String ifNoneMatch,
-                                       MessageContext messageContext) throws APIManagementException {
+                                       MessageContext messageContext) {
 
         try {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
@@ -754,15 +756,15 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, mcpServerId, e,
-                        log);
+                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId,
+                        e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(
-                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, mcpServerId, e,
-                        log);
+                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId,
+                        e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Error while retrieving user rating for API " + mcpServerId, e,
-                        log);
+                RestApiUtil.handleInternalServerError(
+                        "Error while retrieving user rating for MCP Server " + mcpServerId, e, log);
             }
         }
         return null;
@@ -789,7 +791,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
         OrganizationInfo userOrgInfo = RestApiUtil.getOrganizationInfo(messageContext);
         userOrgInfo.setSuperOrganization(superOrganization);
-        APIDTO api = getAPIByAPIId(mcpServerId, superOrganization, userOrgInfo);
+        APIDTO api = getMCPServerByMCPServerId(mcpServerId, superOrganization, userOrgInfo);
         APIClientGenerationManager apiClientGenerationManager = new APIClientGenerationManager();
         Map<String, String> sdkArtifacts;
         String swaggerDefinition = api.getApiDefinition();
@@ -802,11 +804,12 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 return Response.ok(sdkFile, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition",
                         "attachment; filename=\"" + sdkArtifacts.get("zipFileName") + "\"").build();
             } catch (APIClientGenerationException e) {
-                String message = "Error generating client sdk for api: " + api.getName() + " for language: " + language;
+                String message =
+                        "Error generating client sdk for MCP Server: " + api.getName() + " for language: " + language;
                 RestApiUtil.handleInternalServerError(message, e, log);
             }
         }
-        String message = "Could not find an API for ID " + mcpServerId;
+        String message = "Could not find a MCP Server for ID " + mcpServerId;
         RestApiUtil.handleResourceNotFoundError(message, log);
         return null;
     }
@@ -829,7 +832,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String superOrganization = RestApiUtil.getValidatedOrganization(messageContext);
         OrganizationInfo userOrgInfo = RestApiUtil.getOrganizationInfo(messageContext);
         userOrgInfo.setSuperOrganization(superOrganization);
-        APIDTO apiInfo = getAPIByAPIId(mcpServerId, superOrganization, userOrgInfo);
+        APIDTO apiInfo = getMCPServerByMCPServerId(mcpServerId, superOrganization, userOrgInfo);
         List<Tier> availableThrottlingPolicyList = new ThrottlingPoliciesApiServiceImpl()
                 .getThrottlingPolicyList(ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(),
                         superOrganization);
@@ -868,7 +871,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     @Override
     public Response getMCPServerSwagger(String mcpServerId, String environmentName, String ifNoneMatch,
                                         String xWSO2Tenant, String xWSO2TenantQ, String query,
-                                        MessageContext messageContext) throws APIManagementException {
+                                        MessageContext messageContext) {
 
         try {
             String organization;
@@ -935,9 +938,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                     "attachment; filename=\"" + "swagger.json" + "\"").build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, mcpServerId, e, log);
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else {
                 String errorMessage = "Error while retrieving swagger of API : " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -979,9 +982,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
             // existence of the resource
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while retrieving thumbnail of API : " + mcpServerId;
+                String errorMessage = "Error while retrieving thumbnail of MCP Server : " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -1016,19 +1019,19 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             CommentList comments = apiConsumer.getComments(apiTypeWrapper, commentId, limit, offset);
             CommentListDTO commentDTO = CommentMappingUtil.fromCommentListToDTO(comments, includeCommenterInfo);
 
-            String uriString = RestApiConstants.RESOURCE_PATH_APIS + "/" + mcpServerId +
+            String uriString = RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + mcpServerId +
                     RestApiConstants.RESOURCE_PATH_COMMENTS;
             URI uri = new URI(uriString);
             return Response.ok(uri).entity(commentDTO).build();
 
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, mcpServerId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Failed to get comments of API " + mcpServerId, e, log);
+                RestApiUtil.handleInternalServerError("Failed to get comments of MCP Server " + mcpServerId, e, log);
             }
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving comments content location for API " + mcpServerId;
+            String errorMessage = "Error while retrieving comments content location for MCP Server " + mcpServerId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -1048,8 +1051,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      */
     @Override
     public Response mcpServersMcpServerIdRatingsGet(String mcpServerId, Integer limit, Integer offset,
-                                                    String xWSO2Tenant, MessageContext messageContext)
-            throws APIManagementException {
+                                                    String xWSO2Tenant, MessageContext messageContext) {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
@@ -1079,10 +1081,11 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(
-                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_API, mcpServerId, e,
-                        log);
+                        RestApiConstants.RESOURCE_RATING + " for " + RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId,
+                        e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Error while retrieving ratings for API " + mcpServerId, e, log);
+                RestApiUtil.handleInternalServerError("Error while retrieving ratings for MCP Server " + mcpServerId, e,
+                        log);
             }
         }
         return null;
@@ -1091,16 +1094,16 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     /**
      * Retrieves the API details by its ID, including status checks and user organization visibility.
      *
-     * @param apiId        the UUID of the API to be retrieved
+     * @param mcpServerId  the UUID of the MCP Server to be retrieved
      * @param organization the organization to which the API belongs
      * @param userOrgInfo  information about the user's organization
      * @return an {@link APIDTO} containing API details if found and accessible, otherwise throws an error
      */
-    private APIDTO getAPIByAPIId(String apiId, String organization, OrganizationInfo userOrgInfo) {
+    private APIDTO getMCPServerByMCPServerId(String mcpServerId, String organization, OrganizationInfo userOrgInfo) {
 
         try {
             APIConsumer apiConsumer = RestApiCommonUtil.getLoggedInUserConsumer();
-            ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(apiId, organization);
+            ApiTypeWrapper api = apiConsumer.getAPIorAPIProductByUUID(mcpServerId, organization);
             String status = api.getStatus();
             String userOrg = userOrgInfo.getOrganizationId();
 
@@ -1108,7 +1111,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
             if (!api.isAPIProduct() && !RestApiUtil.isOrganizationVisibilityAllowed(userName,
                     api.getApi().getVisibleOrganizations(), userOrg)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, log);
             }
 
             if (!api.isAPIProduct() && !StringUtils.isEmpty(userOrgInfo.getOrganizationId())) {
@@ -1123,19 +1126,19 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                     || APIConstants.DEPRECATED.equals(status)) {
 
                 APIDTO apidto = APIMappingUtil.fromAPItoDTO(api, organization);
-                long subscriptionCountOfAPI = apiConsumer.getSubscriptionCountOfAPI(apiId, organization);
+                long subscriptionCountOfAPI = apiConsumer.getSubscriptionCountOfAPI(mcpServerId, organization);
                 apidto.setSubscriptions(subscriptionCountOfAPI);
                 return apidto;
             } else {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, log);
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, log);
             }
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_API, apiId, e, log);
+                RestApiUtil.handleAuthorizationFailure(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_API, apiId, e, log);
+                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while retrieving API : " + apiId;
+                String errorMessage = "Error while retrieving MCP Server: " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }

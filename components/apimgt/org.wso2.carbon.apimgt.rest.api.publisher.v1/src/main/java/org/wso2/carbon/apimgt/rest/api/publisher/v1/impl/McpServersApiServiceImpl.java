@@ -356,7 +356,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving document : "
-                        + documentId + " of API " + mcpServerId, e, log);
+                        + documentId + " of MCP Server " + mcpServerId, e, log);
             } else {
                 String errorMessage = "Error while retrieving document : " + documentId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
@@ -416,10 +416,11 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving document : " + documentId + " of API " + mcpServerId, e,
-                        log);
+                        "Authorization failure while retrieving document : " + documentId + " of MCP Server " +
+                                mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while retrieving document " + documentId + " of the API " + mcpServerId;
+                String errorMessage =
+                        "Error while retrieving document " + documentId + " of the MCP Server " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         } catch (URISyntaxException e) {
@@ -464,9 +465,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving documents of API : " + mcpServerId, e, log);
+                        "Authorization failure while retrieving documents of MCP Server : " + mcpServerId, e, log);
             } else {
-                String msg = "Error while retrieving documents of API " + mcpServerId;
+                String msg = "Error while retrieving documents of MCP Server " + mcpServerId;
                 RestApiUtil.handleInternalServerError(msg, e, log);
             }
         }
@@ -500,9 +501,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while retrieving resource paths of API : " + mcpServerId, e, log);
+                        "Authorization failure while retrieving resource paths of MCP Server : " + mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while retrieving endpoint of API : " + mcpServerId;
+                String errorMessage = "Error while retrieving endpoint of MCP Server : " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -583,9 +584,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure("Authorization failure while retrieving the lifecycle "
-                        + "events of API : " + mcpServerId, e, log);
+                        + "events of MCP Server : " + mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while retrieving the lifecycle events of API : " + mcpServerId;
+                String errorMessage = "Error while retrieving the lifecycle events of MCP Server : " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -748,10 +749,10 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil
-                        .handleAuthorizationFailure("Authorization failure while retrieving swagger of API :"
-                                + mcpServerId, e, log);
+                        .handleAuthorizationFailure(
+                                "Authorization failure while retrieving swagger of MCP Server :" + mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while retrieving swagger of API : " + mcpServerId;
+                String errorMessage = "Error while retrieving swagger of MCP Server : " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -795,10 +796,10 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else {
-                RestApiUtil.handleInternalServerError("Failed to get comments of API " + mcpServerId, e, log);
+                RestApiUtil.handleInternalServerError("Failed to get comments of MCP Server " + mcpServerId, e, log);
             }
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving comments content location for API " + mcpServerId;
+            String errorMessage = "Error while retrieving comments content location for MCP Server " + mcpServerId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -854,7 +855,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                     .revision(importedAPIDTO.getRevision());
             return Response.ok().entity(responseDTO).build();
         }
-        return Response.status(Response.Status.OK).entity("API imported successfully.").build();
+        return Response.status(Response.Status.OK).entity("MCP Server imported successfully.").build();
     }
 
     /**
@@ -1038,10 +1039,10 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     /**
      * Adds a comment to an MCP server.
      *
-     * @param mcpServerId        UUID of the MCP server.
-     * @param body Request body containing the comment details.
-     * @param replyTo            ID of the comment being replied to, if applicable.
-     * @param messageContext     Message context of the request.
+     * @param mcpServerId    UUID of the MCP server.
+     * @param body           Request body containing the comment details.
+     * @param replyTo        ID of the comment being replied to, if applicable.
+     * @param messageContext Message context of the request.
      * @return HTTP Response containing the created CommentDTO or an error response.
      * @throws APIManagementException if an error occurs while adding the comment.
      */
@@ -1114,15 +1115,16 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil
                         .handleAuthorizationFailure(
-                                "Authorization failure while adding documents of API : " + mcpServerId, e,
+                                "Authorization failure while adding documents of MCP Server: " + mcpServerId, e,
                                 log);
             } else {
                 throw new APIManagementException(
-                        "Error while adding a new document to API " + mcpServerId + " : " + e.getMessage(), e);
+                        "Error while adding a new document to MCP Server " + mcpServerId + " : " + e.getMessage(), e);
             }
         } catch (URISyntaxException e) {
             String errorMessage =
-                    "Error while retrieving location for document " + documentDTO.getName() + " of API " + mcpServerId;
+                    "Error while retrieving location for document " + documentDTO.getName() + " of MCP Server " +
+                            mcpServerId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -1203,7 +1205,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while adding content to the document: " + documentId + " of API "
+                        "Authorization failure while adding content to the document: " + documentId + " of MCP Server "
                                 + mcpServerId, e, log);
             } else if (e.getErrorHandler() != ExceptionCodes.INTERNAL_ERROR) {
                 throw e;
@@ -1250,7 +1252,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while updating the lifecycle of API " + mcpServerId, e, log);
+                        "Authorization failure while updating the lifecycle of MCP Server " + mcpServerId, e, log);
             } else {
                 throw e;
             }
@@ -1286,16 +1288,17 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + createdApiDTO.getId());
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving API location : " + body.getProvider() + "-" +
+            String errorMessage = "Error while retrieving MCP Server location : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (CryptoException e) {
-            String errorMessage = "Error while encrypting the secret key of API : " + body.getProvider() + "-" +
+            String errorMessage = "Error while encrypting the secret key of MCP Server : " + body.getProvider() + "-" +
                     body.getName() + "-" + body.getVersion() + " - " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (ParseException e) {
-            String errorMessage = "Error while parsing the endpoint configuration of API : " + body.getProvider() +
-                    "-" + body.getName() + "-" + body.getVersion() + " - " + e.getMessage();
+            String errorMessage =
+                    "Error while parsing the endpoint configuration of MCP Server : " + body.getProvider() +
+                            "-" + body.getName() + "-" + body.getVersion() + " - " + e.getMessage();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -1400,7 +1403,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             int tenantId = APIUtil.getInternalOrganizationId(organization);
             API existingAPI = apiProvider.getAPIbyUUID(mcpServerId, organization);
             if (existingAPI == null) {
-                throw new APIMgtResourceNotFoundException("API not found for id " + mcpServerId,
+                throw new APIMgtResourceNotFoundException("MCP Server not found for id " + mcpServerId,
                         ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, mcpServerId));
             }
             //Get all existing versions of API
@@ -1448,7 +1451,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 throw e;
             }
         } catch (URISyntaxException e) {
-            String errorMessage = "Error while retrieving API location of " + mcpServerId;
+            String errorMessage = "Error while retrieving MCP Server location of " + mcpServerId;
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         }
         return null;
@@ -1502,7 +1505,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             } else if (RestApiUtil.isDueToResourceNotFound(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while deleting comment " + commentId + "for API " + mcpServerId;
+                String errorMessage = "Error while deleting comment " + commentId + "for MCP Server " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -1628,9 +1631,6 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //validate API update operation permitted based on the LC state
             validateAPIOperationsPerLC(apiInfo.getStatus().toString());
 
-            //this will fail if user does not have access to the API or the API does not exist
-            //mcpServerIdentifier mcpServerIdentifier = APIMappingUtil.getmcpServerIdentifierFromUUID(mcpServerId,
-            // organization);
             documentation = apiProvider.getDocumentation(mcpServerId, documentId, organization);
             if (documentation == null) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_DOCUMENTATION, documentId, log);
@@ -1644,9 +1644,10 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while deleting : " + documentId + " of API " + mcpServerId, e, log);
+                        "Authorization failure while deleting : " + documentId + " of MCP Server " + mcpServerId, e,
+                        log);
             } else {
-                String errorMessage = "Error while retrieving API : " + mcpServerId;
+                String errorMessage = "Error while retrieving MCP Server : " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -1748,10 +1749,10 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * Edits a specific comment of an MCP server.
      * Validates the comment existence, checks user permissions, and updates the comment.
      *
-     * @param commentId          UUID of the comment to be edited.
-     * @param mcpServerId        UUID of the MCP server.
+     * @param commentId           UUID of the comment to be edited.
+     * @param mcpServerId         UUID of the MCP server.
      * @param patchRequestBodyDTO DTO containing the updated comment details.
-     * @param messageContext     Message context of the request.
+     * @param messageContext      Message context of the request.
      * @return HTTP Response containing the updated CommentDTO or an error response.
      * @throws APIManagementException if an error occurs while editing the comment.
      */
@@ -1809,7 +1810,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
     /**
      * Exports an MCP server in the specified format.
-     * If the gateway environment is not specified, it exports the API in the given format.
+     * If the gateway environment is not specified, it exports the MCP Server in the given format.
      * If the gateway environment is specified, it generates a runtime artifact for the MCP server.
      *
      * @param mcpServerId         UUID of the MCP server to be exported.
@@ -2073,10 +2074,11 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
                 RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while updating document : " + documentId + " of API "
-                                + mcpServerId, e, log);
+                        "Authorization failure while updating document : " + documentId + " of MCP Server " +
+                                mcpServerId, e, log);
             } else {
-                String errorMessage = "Error while updating the document " + documentId + " for API : " + mcpServerId;
+                String errorMessage =
+                        "Error while updating the document " + documentId + " for MCP Server : " + mcpServerId;
                 RestApiUtil.handleInternalServerError(errorMessage, e, log);
             }
         }
@@ -2288,7 +2290,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             log.error("Malformed Url error occurred while sending the HEAD request to the given endpoint url:", e);
             apiEndpointValidationResponseDTO.setError(e.getMessage());
         } catch (Exception e) {
-            RestApiUtil.handleInternalServerError("Error while testing the validity of API endpoint url " +
+            RestApiUtil.handleInternalServerError("Error while testing the validity of MCP Server endpoint url " +
                     "existence", e, log);
         }
         return Response.status(Response.Status.OK).entity(apiEndpointValidationResponseDTO).build();
@@ -2357,9 +2359,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 break;
             }
         }
-        if (!updatePermittedForPublishedDeprecated && (
-                APIConstants.PUBLISHED.equals(status)
-                        || APIConstants.DEPRECATED.equals(status))) {
+        if (!updatePermittedForPublishedDeprecated
+                && (APIConstants.PUBLISHED.equals(status) || APIConstants.DEPRECATED.equals(status))) {
             throw new APIManagementException(
                     ExceptionCodes.from(ExceptionCodes.API_UPDATE_FORBIDDEN_PER_LC, status));
         }
@@ -2396,7 +2397,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 mcpServerIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(mcpServerId);
             }
             if (mcpServerIdentifier == null) {
-                throw new APIManagementException("Error while getting the api identifier for the API:" +
+                throw new APIManagementException("Error while getting the api identifier for the MCP Server:" +
                         mcpServerId, ExceptionCodes.from(ExceptionCodes.INVALID_API_ID, mcpServerId));
             }
             return PublisherCommonUtils.getLifecycleStateInformation(mcpServerIdentifier, organization);
@@ -2406,7 +2407,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
                 RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
             } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure("Authorization failure while deleting API : " + mcpServerId, e,
+                RestApiUtil.handleAuthorizationFailure(
+                        "Authorization failure while deleting MCP Server : " + mcpServerId, e,
                         log);
             } else {
                 throw e;
