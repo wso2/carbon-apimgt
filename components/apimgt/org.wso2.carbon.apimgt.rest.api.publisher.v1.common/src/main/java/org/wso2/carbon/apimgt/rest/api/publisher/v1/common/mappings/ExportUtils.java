@@ -1464,11 +1464,13 @@ public class ExportUtils {
 
         try {
             API api;
+            boolean isMCPServer = false;
             if (apiDtoWrapper.isAPIDTO()) {
                 api = APIMappingUtil.fromDTOtoAPI((APIDTO) apiDtoWrapper.getWrappedDTO(), apiDtoWrapper.getProvider());
             } else if (apiDtoWrapper.isMCPServerDTO()) {
                 api = APIMappingUtil.fromMCPServerDTOtoAPI((MCPServerDTO) apiDtoWrapper.getWrappedDTO(),
                         apiDtoWrapper.getProvider());
+                isMCPServer = true;
             } else {
                 throw new APIManagementException("Unsupported DTO Type in wrapper");
             }
@@ -1483,8 +1485,7 @@ public class ExportUtils {
 
             String apiType = apiDtoWrapper.getType() != null ? apiDtoWrapper.getType().toString() : null;
 
-            if (apiDtoWrapper.isMCPServerDTO() || (apiDtoWrapper.isAPIDTO() &&
-                    !PublisherCommonUtils.isStreamingAPI((APIDTO) apiDtoWrapper.getWrappedDTO()))) {
+            if (isMCPServer || !PublisherCommonUtils.isStreamingAPI((APIDTO) apiDtoWrapper.getWrappedDTO())) {
                 if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                     if (organization != null) {
                         schemaContent = apiProvider.getGraphqlSchemaDefinition(currentApiUuid, organization);
@@ -1577,8 +1578,15 @@ public class ExportUtils {
             } else {
                 apiJson.addProperty("organizationId", apiTenantDomain);
             }
-            CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
-                    ImportExportConstants.TYPE_API, apiJson);
+            String filePath = isMCPServer
+                    ? archivePath + ImportExportConstants.MCP_SERVER_FILE_LOCATION
+                    : archivePath + ImportExportConstants.API_FILE_LOCATION;
+
+            String type = isMCPServer
+                    ? ImportExportConstants.TYPE_MCP_SERVER
+                    : ImportExportConstants.TYPE_API;
+
+            CommonUtil.writeDtoToFile(filePath, exportFormat, type, apiJson);
         } catch (APIManagementException e) {
             throw new APIImportExportException("Error while retrieving Swagger definition for API: "
                     + apiDtoWrapper.getName() + " " + APIConstants.API_DATA_VERSION + ": "
