@@ -26,9 +26,9 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
-import org.wso2.carbon.apimgt.api.model.ApiOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
-import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
+import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -1363,7 +1363,7 @@ public class SubscriptionValidationDAO {
                 ps.setInt(1, urlMappingId);
                 try (ResultSet resultSet = ps.executeQuery()) {
                     if (resultSet.next()) {
-                        BackendOperationMapping backendOperationMapping = new BackendOperationMapping();
+                        BackendAPIOperationMapping backendOperationMapping = new BackendAPIOperationMapping();
 
                         BackendOperation backendOperation = new BackendOperation();
                         backendOperation.setVerb(resultSet.getString("VERB"));
@@ -1381,7 +1381,7 @@ public class SubscriptionValidationDAO {
                 try (ResultSet resultSet = ps.executeQuery()) {
                     if (resultSet.next()) {
 
-                        ApiOperationMapping apiOperationMapping = new ApiOperationMapping();
+                        ExistingAPIOperationMapping apiOperationMapping = new ExistingAPIOperationMapping();
                         apiOperationMapping.setApiName(resultSet.getString("API_NAME"));
                         apiOperationMapping.setApiVersion(resultSet.getString("API_VERSION"));
                         apiOperationMapping.setApiContext(resultSet.getString("CONTEXT"));

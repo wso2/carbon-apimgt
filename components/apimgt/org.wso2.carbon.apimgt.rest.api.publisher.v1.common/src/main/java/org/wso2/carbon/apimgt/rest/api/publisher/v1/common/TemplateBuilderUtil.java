@@ -47,9 +47,9 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
-import org.wso2.carbon.apimgt.api.model.ApiOperationMapping;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Environment;
+import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.SequenceBackendData;
 import org.wso2.carbon.apimgt.api.model.SimplifiedEndpoint;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -715,11 +715,11 @@ public class TemplateBuilderUtil {
                     Set<URITemplate> mcpToolTemplates = api.getUriTemplates();
                     if (!mcpToolTemplates.isEmpty()) {
                         URITemplate tool = (URITemplate) (mcpToolTemplates.toArray())[0];
-                        ApiOperationMapping apiOperationMapping = tool.getApiOperationMapping();
+                        ExistingAPIOperationMapping apiOperationMapping = tool.getExistingAPIOperationMapping();
 
                         //set apiOperationMapping info to the mcp default resources
                         for (URITemplate uriTemplate : uriTemplates) {
-                            uriTemplate.setApiOperationMapping(apiOperationMapping);
+                            uriTemplate.setExistingAPIOperationMapping(apiOperationMapping);
                         }
                     }
                 }
@@ -742,7 +742,7 @@ public class TemplateBuilderUtil {
                     Set<URITemplate> uriTemplateSet = api.getUriTemplates();
                     if (!uriTemplateSet.isEmpty()) {
                         URITemplate tempUri = (URITemplate) (uriTemplateSet.toArray()[0]);
-                        ApiOperationMapping apiOperationMapping = tempUri.getApiOperationMapping();
+                        ExistingAPIOperationMapping apiOperationMapping = tempUri.getExistingAPIOperationMapping();
                         if (apiOperationMapping != null) {
                             String refApiContext = apiOperationMapping.getApiContext();
                             endpoint.append(refApiContext);

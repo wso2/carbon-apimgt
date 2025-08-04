@@ -50,7 +50,7 @@ public class BackendAPIOperationMapping {
     @Override
     public String toString() {
         return "BackendOperationMapping {" +
-                "backendId='" + backendId + '\'' +
+                "backendId='" + backendApiId + '\'' +
                 ", backendOperation=" + backendOperation +
                 '}';
     }

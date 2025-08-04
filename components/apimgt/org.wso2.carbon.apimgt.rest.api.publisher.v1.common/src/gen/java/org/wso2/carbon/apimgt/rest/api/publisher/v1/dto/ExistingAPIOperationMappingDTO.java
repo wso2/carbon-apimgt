@@ -79,7 +79,9 @@ public class ExistingAPIOperationMappingDTO   {
     this.apiVersion = apiVersion;
   }
 
-  public APIOperationMappingDTO apiContext(String apiContext) {
+  /**
+   **/
+  public ExistingAPIOperationMappingDTO apiContext(String apiContext) {
     this.apiContext = apiContext;
     return this;
   }
@@ -121,20 +123,12 @@ public class ExistingAPIOperationMappingDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-<<<<<<< HEAD:components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1.common/src/gen/java/org/wso2/carbon/apimgt/rest/api/publisher/v1/dto/ExistingAPIOperationMappingDTO.java
     ExistingAPIOperationMappingDTO existingAPIOperationMapping = (ExistingAPIOperationMappingDTO) o;
     return Objects.equals(apiId, existingAPIOperationMapping.apiId) &&
         Objects.equals(apiName, existingAPIOperationMapping.apiName) &&
         Objects.equals(apiVersion, existingAPIOperationMapping.apiVersion) &&
+        Objects.equals(apiContext, existingAPIOperationMapping.apiContext) &&
         Objects.equals(backendOperation, existingAPIOperationMapping.backendOperation);
-=======
-    APIOperationMappingDTO apIOperationMapping = (APIOperationMappingDTO) o;
-    return Objects.equals(apiId, apIOperationMapping.apiId) &&
-        Objects.equals(apiName, apIOperationMapping.apiName) &&
-        Objects.equals(apiVersion, apIOperationMapping.apiVersion) &&
-        Objects.equals(apiContext, apIOperationMapping.apiContext) &&
-        Objects.equals(backendOperation, apIOperationMapping.backendOperation);
->>>>>>> 793aaef3dde (Fix MCP tool call for EXISTING_API MCP subtype to go through GW artifact):components/apimgt/org.wso2.carbon.apimgt.rest.api.publisher.v1.common/src/gen/java/org/wso2/carbon/apimgt/rest/api/publisher/v1/dto/APIOperationMappingDTO.java
   }
 
   @Override
