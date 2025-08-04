@@ -284,6 +284,22 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     }
 
     @GET
+    @Path("/{mcpServerId}/ratings")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Retrieve MCP Server Ratings", notes = "This operation can be used to retrieve the list of ratings of a MCP Server.  `X-WSO2-Tenant` header can be used to retrieve ratings of a MCP Server that belongs to a different tenant  domain. If not specified super tenant will be used. If Authorization header is present in the request, the  user's tenant associated with the access token will be used. ", response = RatingListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            
+        })
+    }, tags={ "Ratings",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. Rating list returned. ", response = RatingListDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response getMCPServerRatings(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
+        return delegate.getMCPServerRatings(mcpServerId, limit, offset, xWSO2Tenant, securityContext);
+    }
+
+    @GET
     @Path("/{mcpServerId}/sdks/{language}")
     
     @Produces({ "application/zip", "application/json" })
@@ -363,7 +379,7 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @Authorization(value = "OAuth2Security", scopes = {
             
         })
-    }, tags={ "Comments",  })
+    }, tags={ "Comments" })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "OK. Comment returned. ", response = CommentListDTO.class),
         @ApiResponse(code = 401, message = "Unauthorized. The user is not authorized.", response = ErrorDTO.class),
@@ -372,21 +388,5 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
     public Response getRepliesOfCommentOfMCPServer(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId, @ApiParam(value = "Comment Id ",required=true) @PathParam("commentId") String commentId,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resourec. " )@HeaderParam("If-None-Match") String ifNoneMatch,  @ApiParam(value = "Whether we need to display commentor details. ", defaultValue="false") @DefaultValue("false") @QueryParam("includeCommenterInfo") Boolean includeCommenterInfo) throws APIManagementException{
         return delegate.getRepliesOfCommentOfMCPServer(mcpServerId, commentId, xWSO2Tenant, limit, offset, ifNoneMatch, includeCommenterInfo, securityContext);
-    }
-
-    @GET
-    @Path("/{mcpServerId}/ratings")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Retrieve MCP Server Ratings", notes = "This operation can be used to retrieve the list of ratings of a MCP Server.  `X-WSO2-Tenant` header can be used to retrieve ratings of a MCP Server that belongs to a different tenant  domain. If not specified super tenant will be used. If Authorization header is present in the request, the  user's tenant associated with the access token will be used. ", response = RatingListDTO.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            
-        })
-    }, tags={ "Ratings" })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Rating list returned. ", response = RatingListDTO.class),
-        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response mcpServersMcpServerIdRatingsGet(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId,  @ApiParam(value = "Maximum size of resource array to return. ", defaultValue="25") @DefaultValue("25") @QueryParam("limit") Integer limit,  @ApiParam(value = "Starting point within the complete list of items qualified. ", defaultValue="0") @DefaultValue("0") @QueryParam("offset") Integer offset,  @ApiParam(value = "For cross-tenant invocations, this is used to specify the tenant domain, where the resource need to be   retrieved from. " )@HeaderParam("X-WSO2-Tenant") String xWSO2Tenant) throws APIManagementException{
-        return delegate.mcpServersMcpServerIdRatingsGet(mcpServerId, limit, offset, xWSO2Tenant, securityContext);
     }
 }

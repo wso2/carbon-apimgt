@@ -121,6 +121,9 @@ public class OAS2Parser extends APIDefinition {
 
     private static final Log log = LogFactory.getLog(OAS2Parser.class);
     private static final String SWAGGER_SECURITY_SCHEMA_KEY = "default";
+    private static final ObjectMapper OBJECT_MAPPER =
+            new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT)
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL);
     private List<String> otherSchemes;
 
     private List<String> getOtherSchemes() {
@@ -2443,9 +2446,7 @@ public class OAS2Parser extends APIDefinition {
      */
     private ObjectMapper getObjectMapper() {
 
-        return new ObjectMapper()
-                .enable(SerializationFeature.INDENT_OUTPUT)
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        return OBJECT_MAPPER;
     }
 
     /**

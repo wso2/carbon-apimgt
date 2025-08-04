@@ -44,10 +44,10 @@ public interface McpServersApiService {
       public Response getMCPServerDocumentContent(String mcpServerId, String documentId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getMCPServerDocuments(String mcpServerId, Integer limit, Integer offset, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getMCPServerRating(String mcpServerId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
+      public Response getMCPServerRatings(String mcpServerId, Integer limit, Integer offset, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response getMCPServerSDK(String mcpServerId, String language, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
       public Response getMCPServerSubscriptionPolicies(String mcpServerId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getMCPServerSwagger(String mcpServerId, String environmentName, String ifNoneMatch, String xWSO2Tenant, String xWSO2TenantQ, String query, MessageContext messageContext) throws APIManagementException;
       public Response getMCPServerThumbnail(String mcpServerId, String xWSO2Tenant, String ifNoneMatch, MessageContext messageContext) throws APIManagementException;
       public Response getRepliesOfCommentOfMCPServer(String mcpServerId, String commentId, String xWSO2Tenant, Integer limit, Integer offset, String ifNoneMatch, Boolean includeCommenterInfo, MessageContext messageContext) throws APIManagementException;
-      public Response mcpServersMcpServerIdRatingsGet(String mcpServerId, Integer limit, Integer offset, String xWSO2Tenant, MessageContext messageContext) throws APIManagementException;
 }

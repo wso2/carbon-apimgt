@@ -1050,7 +1050,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException if an error occurs during rating retrieval or pagination
      */
     @Override
-    public Response mcpServersMcpServerIdRatingsGet(String mcpServerId, Integer limit, Integer offset,
+    public Response getMCPServerRatings(String mcpServerId, Integer limit, Integer offset,
                                                     String xWSO2Tenant, MessageContext messageContext) {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
