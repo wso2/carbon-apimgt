@@ -1144,8 +1144,8 @@ paths:
       description: |
         This operation will provide a list of topics available for a given Async API, based on the provided API ID.
       parameters:
-      - $ref: '#/components/parameters/apiId'
-      - $ref: '#/components/parameters/requestedTenant'
+        - $ref: '#/components/parameters/apiId'
+        - $ref: '#/components/parameters/requestedTenant'
       responses:
         200:
           description: |
@@ -1167,11 +1167,11 @@ paths:
         500:
           $ref: '#/components/responses/InternalServerError'
       security:
-      - OAuth2Security: []
+        - OAuth2Security: []
       x-code-samples:
-      - lang: Curl
-        source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
-          "https://localhost:9443/api/am/store/v1/topics/5b65808c-cdf2-43e1-a695-de63e3ad0ae9"
+        - lang: Curl
+          source: curl -k -H "Authorization:Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
+            "https://localhost:9443/api/am/store/v1/topics/5b65808c-cdf2-43e1-a695-de63e3ad0ae9"
 
   /apis/{apiId}/subscription-policies:
     get:

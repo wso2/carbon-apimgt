@@ -296,7 +296,7 @@ public class PublisherCommonUtils {
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
 
-        if (apiUpdated.getVisibleOrganizations() != null) {
+        if (orginfo != null && apiUpdated.getVisibleOrganizations() != null) {
             List<String> orgList = new ArrayList<>(Arrays.asList(apiUpdated.getVisibleOrganizations().split(",")));
             orgList.remove(orginfo.getOrganizationId());  // remove current user org
             String visibleOrgs = StringUtils.join(orgList, ',');
@@ -375,8 +375,8 @@ public class PublisherCommonUtils {
         
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
-        
-        if (apiUpdated.getVisibleOrganizations() != null) {
+
+        if (orginfo != null && apiUpdated.getVisibleOrganizations() != null) {
             List<String> orgList = new ArrayList<>(Arrays.asList(apiUpdated.getVisibleOrganizations().split(",")));
             orgList.remove(orginfo.getOrganizationId());  // remove current user org
             String visibleOrgs = StringUtils.join(orgList, ',');
@@ -4874,6 +4874,18 @@ public class PublisherCommonUtils {
         return mcpTools;
     }
 
+    /**
+     * Apply organization subscription policies to the API.
+     *
+     * @param rootTiers           List of root tiers
+     * @param orgPolicies         List of organization policies
+     * @param originalStatus      Original status of the API
+     * @param tenantDomain        Tenant domain of the API
+     * @param apiSecurity         List of API security types
+     * @param definedTiers        Set of defined tiers
+     * @param isValidationAllowed Whether subscription validation is allowed
+     * @throws APIManagementException If an error occurs while applying organization subscription policies
+     */
     private static void applyOrganizationSubscriptionPolicies(List<String> rootTiers,
                                                               List<OrganizationPoliciesDTO> orgPolicies,
                                                               String originalStatus, String tenantDomain,
@@ -4881,6 +4893,9 @@ public class PublisherCommonUtils {
                                                               boolean isValidationAllowed)
             throws APIManagementException {
 
+        if (rootTiers == null) {
+            rootTiers = Collections.emptyList();
+        }
         for (OrganizationPoliciesDTO organizationPoliciesDTO : orgPolicies) {
             List<String> organizationTiersFromDTO = organizationPoliciesDTO.getPolicies();
             if (isValidationAllowed) {
