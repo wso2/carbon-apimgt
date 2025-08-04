@@ -1104,9 +1104,9 @@ public class PublisherCommonUtils {
             }
         }
 
-        boolean isSubscriptionValidationDisablingEnabled
-                = tiersFromDTO.contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)
-                || tiersFromDTO.contains(APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS);
+        boolean isSubscriptionValidationDisablingEnabled = tiersFromDTO != null
+                && (tiersFromDTO.contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)
+                || tiersFromDTO.contains(APIConstants.DEFAULT_SUB_POLICY_ASYNC_SUBSCRIPTIONLESS));
         // Organization based subscription policies
         if (APIUtil.isOrganizationAccessControlEnabled()) {
             applyOrganizationSubscriptionPolicies(tiersFromDTO, organizationPoliciesDTOs, originalStatus, tenantDomain,
