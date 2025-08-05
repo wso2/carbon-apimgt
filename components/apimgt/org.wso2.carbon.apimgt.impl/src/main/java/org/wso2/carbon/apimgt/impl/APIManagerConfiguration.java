@@ -42,6 +42,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.VectorDBProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.Environment;
@@ -140,6 +141,8 @@ public class APIManagerConfiguration {
     private final Map<String, GuardrailProviderConfigurationDTO> guardrailProviders = new HashMap<>();
     private final EmbeddingProviderConfigurationDTO embeddingProviderConfigurationDTO =
             new EmbeddingProviderConfigurationDTO();
+    private final VectorDBProviderConfigurationDTO vectorDBProviderConfigurationDTO =
+            new VectorDBProviderConfigurationDTO();
     private static Properties realtimeNotifierProperties;
     private static Properties persistentNotifierProperties;
     private static Map<String, String> analyticsProperties;
@@ -782,6 +785,35 @@ public class APIManagerConfiguration {
                         this.embeddingProviderConfigurationDTO.setType(type);
                         this.embeddingProviderConfigurationDTO.setProperties(propertiesMap);
                     }
+
+                    if (APIConstants.AI.VECTOR_DB_PROVIDER.equals(aiChildElement.getLocalName())) {
+                        // Get the vector DB type
+                        String type = aiChildElement.getAttributeValue(
+                                new QName(APIConstants.AI.VECTOR_DB_PROVIDER_TYPE));
+                        if (type == null || type.isEmpty()) {
+                            continue; // skip if no type defined
+                        }
+
+                        Map<String, String> propertiesMap = new HashMap<>();
+
+                        // Iterate through each <Property>
+                        for (Iterator<?> props = aiChildElement.getChildElements(); props.hasNext(); ) {
+                            OMElement prop = (OMElement) props.next();
+
+                            if (APIConstants.AI.VECTOR_DB_PROVIDER_PROPERTY.equals(prop.getLocalName())) {
+                                String key = prop.getAttributeValue(
+                                        new QName(APIConstants.AI.VECTOR_DB_PROVIDER_PROPERTY_KEY));
+                                String value = MiscellaneousUtil.resolve(prop, secretResolver);
+
+                                if (key != null && !key.isEmpty()) {
+                                    propertiesMap.put(key, value);
+                                }
+                            }
+                        }
+
+                        this.vectorDBProviderConfigurationDTO.setType(type);
+                        this.vectorDBProviderConfigurationDTO.setProperties(propertiesMap);
+                    }
                 }
             }
             readChildElements(element, nameStack);
@@ -1211,6 +1243,11 @@ public class APIManagerConfiguration {
     public EmbeddingProviderConfigurationDTO getEmbeddingProvider() {
 
         return embeddingProviderConfigurationDTO;
+    }
+
+    public VectorDBProviderConfigurationDTO getVectorDBProvider() {
+
+        return vectorDBProviderConfigurationDTO;
     }
 
     public GuardrailProviderConfigurationDTO getGuardrailProvider(String type) {

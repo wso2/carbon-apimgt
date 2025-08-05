@@ -1845,5 +1845,11 @@
               <Property name="{{key}}">{{value}}</Property>
               {% endfor %}
           </EmbeddingProvider>
+
+          <VectorDBProvider type="{{apim.ai.vector_db_provider.type}}">
+                {% for key,value in apim.ai.vector_db_provider.properties.items() %}
+                <Property name="{{key}}">{{value}}</Property>
+                {% endfor %}
+          </VectorDBProvider>
       </AI>
 </APIManager>
