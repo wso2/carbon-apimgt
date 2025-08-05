@@ -23,6 +23,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.httpclient.Header;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -294,20 +295,11 @@ public class APIKeyValidationService {
             template.setUriTemplate(urlMapping.getUrlPattern());
             template.setThrottlingTier(urlMapping.getThrottlingPolicy());
 
-            if("MCP".equals(api.getApiType())) {
-                // TODO: Replace these with actual values from the URL Mapping when the backend id done
-                template.setDescription("Use this tool to get the menu items of restaurant");
-                template.setSchemaDefinition("{\n" +
-                        "  \"type\": \"object\",\n" +
-                        "  \"properties\": {\n" +
-                        "    \"menuItems\": {\n" +
-                        "      \"type\": \"array\",\n" +
-                        "      \"items\": {\n" +
-                        "        \"type\": \"string\"\n" +
-                        "      }\n" +
-                        "    }\n" +
-                        "  }\n" +
-                        "}");
+            if(StringUtils.equals(APIConstants.API_TYPE_MCP, api.getApiType())) {
+                template.setDescription(urlMapping.getDescription());
+                template.setSchemaDefinition(urlMapping.getSchemaDefinition());
+                template.setExistingAPIOperationMapping(urlMapping.getApiOperationMapping());
+                template.setBackendOperationMapping(urlMapping.getBackendOperationMapping());
             }
 
 

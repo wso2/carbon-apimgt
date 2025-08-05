@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.mcp;
 
 import com.google.gson.JsonObject;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.ManagedLifecycle;
@@ -10,10 +11,15 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.exception.McpException;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
 public class McpInitHandler extends AbstractHandler implements ManagedLifecycle {
     private static final Log log = LogFactory.getLog(McpInitHandler.class);
@@ -76,7 +82,28 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
         messageContext.setProperty(APIMgtGatewayConstants.MCP_METHOD, method);
         messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY, requestObject);
         messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, APIConstants.API_TYPE_MCP);
+
         // TODO: Add elected resource - tool that is invoked
+        if (StringUtils.equals(method, APIConstants.MCP.METHOD_TOOL_CALL)) {
+            JsonObject params = requestObject.getAsJsonObject(APIConstants.MCP.PARAMS_KEY);
+            String toolName = params.get(APIConstants.MCP.TOOL_NAME_KEY).getAsString();
+            API api = GatewayUtils.getAPI(messageContext);
+            URLMapping extendedOperation = api.getUrlMappings()
+                    .stream()
+                    .filter(operation -> operation.getUrlPattern().equals(toolName))
+                    .findFirst()
+                    .orElse(null);
+
+            if (extendedOperation != null) {
+                BackendAPIOperationMapping backendAPIOperationMapping = extendedOperation.getBackendOperationMapping();
+                if (backendAPIOperationMapping != null) {
+                    BackendOperation backendOperation = backendAPIOperationMapping.getBackendOperation();
+                    messageContext.setProperty("MCP_HTTP_METHOD", backendOperation.getVerb());
+                    messageContext.setProperty("MCP_API_ELECTED_RESOURCE", backendOperation.getTarget());
+                }
+            }
+        }
+
         return method;
     }
 

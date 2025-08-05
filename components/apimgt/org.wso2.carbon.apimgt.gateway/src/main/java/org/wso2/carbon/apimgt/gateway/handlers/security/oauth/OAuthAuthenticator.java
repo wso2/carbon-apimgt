@@ -222,6 +222,11 @@ public class OAuthAuthenticator implements Authenticator {
         String httpMethod = (String)((Axis2MessageContext) synCtx).getAxis2MessageContext().
                 getProperty(Constants.Configuration.HTTP_METHOD);
         String matchingResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+
+        if (StringUtils.equals(APIConstants.API_TYPE_MCP, apiType)) {
+            httpMethod = synCtx.getProperty("MCP_HTTP_METHOD").toString();
+            matchingResource = (String) synCtx.getProperty("MCP_API_ELECTED_RESOURCE");
+        }
         SignedJWTInfo signedJWTInfo = null;
 
         //If the matching resource does not require authentication

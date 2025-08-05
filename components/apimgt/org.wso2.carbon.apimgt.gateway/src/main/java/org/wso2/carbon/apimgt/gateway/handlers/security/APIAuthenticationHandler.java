@@ -465,16 +465,15 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                     initOAuthParams();
                 }
 
-                // todo : temporary fix
                 String authenticationScheme;
                 String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
-                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) &&
-                        (APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod) || APIConstants.MCP.METHOD_TOOL_CALL.equals(mcpMethod))) {
+                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) && (APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod))) {
                     // todo: iterate tools and set auth scheme
                     authenticationScheme = APIConstants.AUTH_NO_AUTHENTICATION;
                 } else {
                     authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(messageContext);
                 }
+
                 if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)) {
                     if(log.isDebugEnabled()){
                         log.debug("Found Authentication Scheme: ".concat(authenticationScheme));

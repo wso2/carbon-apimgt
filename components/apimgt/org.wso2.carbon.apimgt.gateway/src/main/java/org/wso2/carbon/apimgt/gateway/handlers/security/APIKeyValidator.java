@@ -16,6 +16,8 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -30,7 +32,10 @@ import org.apache.synapse.api.Resource;
 import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.MethodStats;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
@@ -339,8 +344,26 @@ public class APIKeyValidator {
         String apiContext = (String) synCtx.getProperty(RESTConstants.REST_API_CONTEXT);
         String apiVersion = (String) synCtx.getProperty(RESTConstants.SYNAPSE_REST_API_VERSION);
         String fullRequestPath = (String) synCtx.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
-
         String electedResource = (String) synCtx.getProperty(APIConstants.API_ELECTED_RESOURCE);
+
+        org.wso2.carbon.apimgt.keymgt.model.entity.API api = GatewayUtils.getAPI(synCtx);
+        if (api != null && api.getApiType() != null && StringUtils.equals(api.getApiType(),
+                APIConstants.API_TYPE_MCP)) {
+            JsonObject requestBody = (JsonObject) synCtx.getProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY);
+            JsonObject params = requestBody.getAsJsonObject(APIConstants.MCP.PARAMS_KEY);
+            String toolName = params.get(APIConstants.MCP.TOOL_NAME_KEY).getAsString();
+            URLMapping extendedOperation = api.getUrlMappings()
+                    .stream()
+                    .filter(operation -> operation.getUrlPattern().equals(toolName))
+                    .findFirst()
+                    .orElse(null);
+            if (extendedOperation != null) {
+                BackendAPIOperationMapping backendAPIOperationMapping = extendedOperation.getBackendOperationMapping();
+                BackendOperation backendOperation = backendAPIOperationMapping.getBackendOperation();
+                httpMethod = backendOperation.getVerb().toString();
+                electedResource = backendOperation.getTarget();
+            }
+        }
         ArrayList<String> resourceArray = null;
 
         if (electedResource != null) {
@@ -495,7 +518,15 @@ public class APIKeyValidator {
             for (ResourceInfoDTO resourceInfoDTO : apiInfoDTO.getResources()) {
                 Set<VerbInfoDTO> verbDTOList = resourceInfoDTO.getHttpVerbs();
                 for (VerbInfoDTO verb : verbDTOList) {
-                    if (verb.getHttpVerb().equals(httpMethod)) {
+                    //mcp direct_endpoint scenario
+                    String httpVerb = verb.getHttpVerb();
+                    if (verb.getBackendAPIOperationMapping() != null) {
+                        BackendOperation backendOperation = verb.getBackendAPIOperationMapping().getBackendOperation();
+                        if (backendOperation != null) {
+                            httpVerb = backendOperation.getVerb().toString();
+                        }
+                    }
+                    if (httpVerb.equals(httpMethod)) {
                         for (String resourceString : resourceArray) {
                             if (isResourcePathMatching(resourceString, resourceInfoDTO)) {
                                 resourceCacheKey = APIUtil.getResourceInfoDTOCacheKey(apiContext, apiVersion,
@@ -540,6 +571,16 @@ public class APIKeyValidator {
     private boolean isResourcePathMatching(String resourceString, ResourceInfoDTO resourceInfoDTO) {
         String resource = resourceString.trim();
         String urlPattern = resourceInfoDTO.getUrlPattern().trim();
+
+        //MCP direct_ep
+        VerbInfoDTO verbInfoDTO = (VerbInfoDTO) resourceInfoDTO.getHttpVerbs().toArray()[0];
+        BackendAPIOperationMapping backendAPIOperationMapping = verbInfoDTO.getBackendAPIOperationMapping();
+        if (backendAPIOperationMapping != null) {
+            BackendOperation backendOperation = backendAPIOperationMapping.getBackendOperation();
+            if (backendOperation != null) {
+                urlPattern = backendOperation.getTarget();
+            }
+        }
 
         if (resource.equalsIgnoreCase(urlPattern)) {
             return true;
@@ -600,6 +641,13 @@ public class APIKeyValidator {
             verbInfoDTO.setThrottlingConditions(uriTemplate.getThrottlingConditions());
             verbInfoDTO.setConditionGroups(uriTemplate.getConditionGroups());
             verbInfoDTO.setApplicableLevel(uriTemplate.getApplicableLevel());
+
+            //MCP
+            BackendAPIOperationMapping backendAPIOperationMapping = uriTemplate.getBackendOperationMapping();
+            if (backendAPIOperationMapping != null) {
+                verbInfoDTO.setBackendAPIOperationMapping(backendAPIOperationMapping);
+            }
+
             resourceInfoDTO.getHttpVerbs().add(verbInfoDTO);
         }
 
