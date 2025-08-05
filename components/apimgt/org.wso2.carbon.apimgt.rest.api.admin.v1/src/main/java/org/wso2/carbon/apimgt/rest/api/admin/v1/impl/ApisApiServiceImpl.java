@@ -99,6 +99,7 @@ public class ApisApiServiceImpl implements ApisApiService {
             }
             APIAdmin apiAdmin = new APIAdminImpl();
             apiAdmin.updateApiProvider(apiId, provider, organization);
+            log.info("Successfully changed API provider to: " + provider + " for API ID: " + apiId);
         } catch (APIManagementException e) {
             throw new APIManagementException("Error while changing the API provider. " + e.getMessage(), e,
                     ExceptionCodes.CHANGE_API_PROVIDER_FAILED);
