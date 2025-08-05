@@ -109,6 +109,7 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             JsonUtil.removeJsonPayload(axis2MessageContext);
             axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, 202);
+            axis2MessageContext.setProperty(APIConstants.NO_ENTITY_BODY, true);
         } else {
             //follow normal message flow for tools/call
         }
