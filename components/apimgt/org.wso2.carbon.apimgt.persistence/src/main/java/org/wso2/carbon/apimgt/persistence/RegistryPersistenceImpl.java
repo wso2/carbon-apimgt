@@ -4070,15 +4070,19 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     String errorMessage = "Artifact manager is null when changing the provider name of " + apiId;
                     log.error(errorMessage);
                     throw new APIPersistenceException(errorMessage);
-                GenericArtifact artifact = getAPIArtifact(apiId, userRegistry);
-                if (log.isDebugEnabled()) {
-                    log.debug("Changing API provider for API: " + apiId + " to: " + providerName);
                 }
                 GenericArtifact artifact = getAPIArtifact(apiId, userRegistry);
+                if (log.isDebugEnabled()) {
+                    log.debug("Changing the provider name of API with id: " + apiId + " to " + providerName);
+                }
                 artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, RegistryPersistenceUtil
                         .replaceEmailDomain(providerName));
                 artifactManager.updateGenericArtifact(artifact);
                 userRegistry.commitTransaction();
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully changed the provider name of API with id: " + apiId + " " +
+                            "to " + providerName);
+                }
                 transactionCommitted = true;
             }
         } catch (RegistryException e) {
