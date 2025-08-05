@@ -57,6 +57,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil.fromAPItoDTO;
+import static org.wso2.carbon.apimgt.util.FederatedGatewayConstants.DISCOVERED_API_LIST;
+import static org.wso2.carbon.apimgt.util.FederatedGatewayConstants.PUBLISHED_API_LIST;
 
 /**
  * This class is responsible for scheduling and executing the discovery of APIs in a federated gateway environment.
@@ -137,9 +139,11 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
             FederatedGatewayUtil.startTenantFlow(organization);
             String adminUsername = APIUtil.getAdminUsername();
 
-            List<String> alreadyAvailableAPIs =
-                    APIUtil.getDiscoveredAPIsFromFederatedGateway(environment, organization);
-            List<String> discoveredAPIs = new ArrayList<>();
+            Map<String, List<String>> alreadyAvailableAPIs =
+                    FederatedGatewayUtil.getDiscoveredAPIsFromFederatedGateway(environment, organization,
+                            adminUsername);
+            List<String> discoveredAPIsFromFederatedGW = new ArrayList<>();
+            List<String> alreadyDiscoveredAPIsList = alreadyAvailableAPIs.get(DISCOVERED_API_LIST);
 
             for (API api : apisToDeployInGatewayEnv) {
                 APIDTO apidto = fromAPItoDTO(api);
@@ -152,8 +156,11 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             + environment.getName() + APIConstants.DELEM_COLON + apidto.getVersion();
 
                     // Determine import mode
-                    boolean update = alreadyAvailableAPIs.contains(apiKey) || alreadyAvailableAPIs.contains(envScopedKey);
-                    boolean alreadyExistsWithEnvScope = alreadyAvailableAPIs.contains(envScopedKey);
+                    boolean isPublishedAPIFromCP = alreadyAvailableAPIs.get(PUBLISHED_API_LIST).contains(apiKey) ||
+                            alreadyAvailableAPIs.get(PUBLISHED_API_LIST).contains(envScopedKey);
+                    boolean update = alreadyDiscoveredAPIsList.contains(apiKey) ||
+                            alreadyDiscoveredAPIsList.contains(envScopedKey);
+                    boolean alreadyExistsWithEnvScope = alreadyDiscoveredAPIsList.contains(envScopedKey);
 
                     // Adjust name if needed
                     if (alreadyExistsWithEnvScope) {
@@ -177,12 +184,14 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
 
                     // Import API
                     importExportAPI.importAPI(apiZip, true, true, update, true,
-                            new String[]{APIConstants.APIM_PUBLISHER_SCOPE, APIConstants.APIM_CREATOR_SCOPE}, organization);
+                            new String[]{APIConstants.APIM_PUBLISHER_SCOPE, APIConstants.APIM_CREATOR_SCOPE},
+                            organization);
 
                     // Track deployed
-                    discoveredAPIs.add(alreadyExistsWithEnvScope ? envScopedKey : apiKey);
+                    discoveredAPIsFromFederatedGW.add(alreadyExistsWithEnvScope ? envScopedKey : apiKey);
                     if (!update) {
-                        alreadyAvailableAPIs.add(apidto.getName() + APIConstants.DELEM_COLON + apidto.getVersion());
+                        alreadyDiscoveredAPIsList.add(apidto.getName() + APIConstants.DELEM_COLON
+                                + apidto.getVersion());
                     }
 
                     log.info((update ? "Updated" : "Created") + " API: " + api.getId().getName()
@@ -197,8 +206,8 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                 }
             }
 
-            for (String apiName : alreadyAvailableAPIs) {
-                if (!discoveredAPIs.contains(apiName)) {
+            for (String apiName : alreadyDiscoveredAPIsList) {
+                if (!discoveredAPIsFromFederatedGW.contains(apiName)) {
                     try {
                         String[] parts = apiName.split(APIConstants.DELEM_COLON);
                         if (parts.length < 2) {

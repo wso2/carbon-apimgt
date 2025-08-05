@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
+import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
@@ -38,6 +39,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +52,8 @@ import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.DEP
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.SWAGGER_YAML_FILE_NAME;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.TYPE_DEPLOYMENT_ENVIRONMENTS;
+import static org.wso2.carbon.apimgt.util.FederatedGatewayConstants.DISCOVERED_API_LIST;
+import static org.wso2.carbon.apimgt.util.FederatedGatewayConstants.PUBLISHED_API_LIST;
 
 public class FederatedGatewayUtil {
     private static Log log = LogFactory.getLog(FederatedGatewayUtil.class);
@@ -119,5 +123,27 @@ public class FederatedGatewayUtil {
 
         Yaml yaml = new Yaml();
         return yaml.dump(yamlRoot);
+    }
+
+    public static Map<String, List<String>> getDiscoveredAPIsFromFederatedGateway(Environment environment, String organization,
+                                                                                  String providerName) throws APIManagementException {
+        GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
+        Map<String, List<String>> apisDeployedInGateway = new HashMap<>();
+        List<String> discoveredAPIs = new ArrayList<>();
+        List<String> publishedAPIs = new ArrayList<>();
+        APIProvider provider = APIManagerFactory.getInstance().getAPIProvider(providerName);
+        List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = gatewayArtifactsMgtDAO
+                .retrieveGatewayArtifactsByLabel(new String[]{environment.getName()}, organization);
+        for (APIRuntimeArtifactDto apiRuntimeArtifactDto : apiRuntimeArtifactDtoList) {
+           API api =  provider.getAPIbyUUID(apiRuntimeArtifactDto.getApiId(), organization);
+           if (api != null && !api.isInitiatedFromGateway()) {
+                publishedAPIs.add(apiRuntimeArtifactDto.getName() + ":" + apiRuntimeArtifactDto.getVersion());
+            } else {
+               discoveredAPIs.add(apiRuntimeArtifactDto.getName() + ":" + apiRuntimeArtifactDto.getVersion());
+           }
+        }
+        apisDeployedInGateway.put(DISCOVERED_API_LIST, discoveredAPIs);
+        apisDeployedInGateway.put(PUBLISHED_API_LIST, publishedAPIs);
+        return apisDeployedInGateway;
     }
 }
