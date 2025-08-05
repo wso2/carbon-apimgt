@@ -55,6 +55,7 @@ import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
 import org.wso2.carbon.apimgt.impl.dto.LoadingTenants;
 import org.wso2.carbon.apimgt.impl.dto.OrgAccessControl;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
+import org.wso2.carbon.apimgt.impl.dto.TenantSharingConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TokenValidationDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
@@ -138,6 +139,7 @@ public class APIManagerConfiguration {
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
     private final Map<String, GuardrailProviderConfigurationDTO> guardrailProviders = new HashMap<>();
+    private final Map<String, TenantSharingConfigurationDTO> tenantSharingConfigurations = new HashMap<>();
     private final EmbeddingProviderConfigurationDTO embeddingProviderConfigurationDTO =
             new EmbeddingProviderConfigurationDTO();
     private static Properties realtimeNotifierProperties;
@@ -701,6 +703,45 @@ public class APIManagerConfiguration {
                 setTokenValidation(element);
             } else if (APIConstants.ORG_BASED_ACCESS_CONTROL.equals(localName)) {
                 setOrgBasedAccessControlConfigs(element);
+            } else if (APIConstants.TENANT_SHARING_CONFIGS.equals(localName)) {
+                    // Iterate through each <TenantSharingConfig>
+                    for (Iterator<?> tenantSharingConfigs = element.getChildElements(); tenantSharingConfigs.hasNext(); ) {
+                        OMElement tenantSharingConfigElement = (OMElement) tenantSharingConfigs.next();
+
+                        if (APIConstants.TENANT_SHARING_CONFIG.equals(tenantSharingConfigElement.getLocalName())) {
+                            // Get the tenantSharingConfigs type
+                            String type = tenantSharingConfigElement.getAttributeValue(
+                                    new QName(APIConstants.TENANT_SHARING_CONFIG_TYPE));
+                            if (type == null || type.isEmpty()) {
+                                continue; // skip if no type defined
+                            }
+
+                            Map<String, String> propertiesMap = new HashMap<>();
+
+                            // Iterate through each <Property>
+                            for (Iterator<?> props = tenantSharingConfigElement.getChildElements(); props.hasNext(); ) {
+                                OMElement prop = (OMElement) props.next();
+
+                                if (APIConstants.TENANT_SHARING_CONFIG_PROPERTY.equals(prop.getLocalName())) {
+                                    String key = prop.getAttributeValue(
+                                            new QName(APIConstants.TENANT_SHARING_CONFIG_PROPERTY_KEY));
+                                    String value = MiscellaneousUtil.resolve(prop, secretResolver);
+
+                                    if (key != null && !key.isEmpty()) {
+                                        propertiesMap.put(key, value);
+                                    }
+                                }
+                            }
+
+                            // Add to the main map
+                            TenantSharingConfigurationDTO tenantSharingConfigurationDTO =
+                                    new TenantSharingConfigurationDTO();
+                            tenantSharingConfigurationDTO.setType(type);
+                            tenantSharingConfigurationDTO.setProperties(propertiesMap);
+                            tenantSharingConfigurations.put(type, tenantSharingConfigurationDTO);
+                        }
+                    }
+
             } else if (APIConstants.HASHING.equals(localName)) {
                 setHashingAlgorithm(element);
             } else if (APIConstants.TransactionCounter.TRANSACTIONCOUNTER.equals(localName)) {
@@ -807,7 +848,6 @@ public class APIManagerConfiguration {
             orgAccessControl.setOrgIdLocalClaim(orgIdElement.getText());
         }
     }
-        
     public boolean getTransactionCounterProperties() {
         return isTransactionCounterEnabled;
     }
@@ -1216,6 +1256,11 @@ public class APIManagerConfiguration {
     public GuardrailProviderConfigurationDTO getGuardrailProvider(String type) {
 
         return guardrailProviders.get(type);
+    }
+
+    public TenantSharingConfigurationDTO getTenantSharingConfiguration(String type) {
+
+        return tenantSharingConfigurations.get(type);
     }
 
     public RecommendationEnvironment getApiRecommendationEnvironment() {
