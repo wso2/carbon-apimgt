@@ -53,8 +53,8 @@ public class URLMapping {
         return schemaDefinition;
     }
 
-    public void setSchemaDefinition(String shemaDefinition) {
-        this.schemaDefinition = shemaDefinition;
+    public void setSchemaDefinition(String schemaDefinition) {
+        this.schemaDefinition = schemaDefinition;
     }
 
     public BackendAPIOperationMapping getBackendOperationMapping() {
