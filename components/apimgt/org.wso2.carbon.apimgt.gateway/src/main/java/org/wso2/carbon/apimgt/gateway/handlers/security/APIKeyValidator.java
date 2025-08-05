@@ -34,6 +34,7 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -42,6 +43,9 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.mcp.Param;
+import org.wso2.carbon.apimgt.gateway.mcp.request.McpRequest;
+import org.wso2.carbon.apimgt.gateway.mcp.request.Params;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -349,19 +353,29 @@ public class APIKeyValidator {
         org.wso2.carbon.apimgt.keymgt.model.entity.API api = GatewayUtils.getAPI(synCtx);
         if (api != null && api.getApiType() != null && StringUtils.equals(api.getApiType(),
                 APIConstants.API_TYPE_MCP)) {
-            JsonObject requestBody = (JsonObject) synCtx.getProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY);
-            JsonObject params = requestBody.getAsJsonObject(APIConstants.MCP.PARAMS_KEY);
-            String toolName = params.get(APIConstants.MCP.TOOL_NAME_KEY).getAsString();
+            McpRequest requestBody = (McpRequest) synCtx.getProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY);
+            Params params = requestBody.getParams();
+            String toolName = params.getToolName();
             URLMapping extendedOperation = api.getUrlMappings()
                     .stream()
                     .filter(operation -> operation.getUrlPattern().equals(toolName))
                     .findFirst()
                     .orElse(null);
             if (extendedOperation != null) {
-                BackendAPIOperationMapping backendAPIOperationMapping = extendedOperation.getBackendOperationMapping();
-                BackendOperation backendOperation = backendAPIOperationMapping.getBackendOperation();
-                httpMethod = backendOperation.getVerb().toString();
-                electedResource = backendOperation.getTarget();
+                BackendOperation backendOperation = null;
+                if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_DIRECT_ENDPOINT)) {
+                    BackendAPIOperationMapping backendAPIOperationMapping = extendedOperation.getBackendOperationMapping();
+                    backendOperation = backendAPIOperationMapping.getBackendOperation();
+                } else if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_EXISTING_API))  {
+                    ExistingAPIOperationMapping existingAPIOperationMapping = extendedOperation.getApiOperationMapping();
+                    backendOperation = existingAPIOperationMapping.getBackendOperation();
+                    apiContext = existingAPIOperationMapping.getApiContext();
+                    apiVersion = existingAPIOperationMapping.getApiVersion();
+                }
+                if (backendOperation != null) {
+                    httpMethod = backendOperation.getVerb().toString();
+                    electedResource = backendOperation.getTarget();
+                }
             }
         }
         ArrayList<String> resourceArray = null;
@@ -374,7 +388,13 @@ public class APIKeyValidator {
             }
         }
 
-        String requestPath = getRequestPath(synCtx, apiContext, apiVersion, fullRequestPath);
+        String requestPath = null;
+        if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_EXISTING_API)) {
+            requestPath = electedResource;
+        } else {
+            requestPath = getRequestPath(synCtx, apiContext, apiVersion, fullRequestPath);
+        }
+
         if ("".equals(requestPath)) {
             requestPath = "/";
         }

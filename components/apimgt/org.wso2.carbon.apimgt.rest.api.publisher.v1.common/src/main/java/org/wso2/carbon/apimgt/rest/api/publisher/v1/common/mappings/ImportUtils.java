@@ -1456,7 +1456,7 @@ public class ImportUtils {
 
     @NotNull
     private static JsonObject retrievedMCPDtoJson(String pathToArchive) throws IOException, APIManagementException {
-        // Get API Definition as JSON
+        // Get MCP Server Definition as JSON
         String jsonContent =
                 getFileContentAsJson(pathToArchive + ImportExportConstants.MCP_SERVER_FILE_LOCATION);
         if (jsonContent == null) {
@@ -1469,7 +1469,7 @@ public class ImportUtils {
     @NotNull
     private static JsonObject retrievedBackendAPIDtoJson(String pathToArchive) throws IOException,
             APIManagementException {
-        // Get API Definition as JSON
+        // Get MCP Backend API Definition as JSON
         String jsonContent =
                 getFileContentAsJson(pathToArchive + ImportExportConstants.BACKEND_APIS_FILE_LOCATION);
         if (jsonContent == null) {
@@ -1549,11 +1549,15 @@ public class ImportUtils {
             ParseException {
 
         JsonObject mcpServer = retrievedMCPDtoJson(pathToArchive);
-        JsonObject backendAPI = retrievedBackendAPIDtoJson(pathToArchive);
         MCPServerDTO mcpServerDTO = new Gson().fromJson(mcpServer, MCPServerDTO.class);
-        JSONParser parser = new JSONParser();
-        JSONObject endpointConfig = (JSONObject) parser.parse(backendAPI.get("endpointConfig").getAsString());
-        mcpServerDTO.setBackendAPIEndpointConfig(endpointConfig);
+        if (StringUtils.equals(mcpServerDTO.getSubtypeConfiguration().getSubtype(),
+                APIConstants.API_SUBTYPE_DIRECT_ENDPOINT)) {
+            JsonObject backendAPI = retrievedBackendAPIDtoJson(pathToArchive);
+            JSONParser parser = new JSONParser();
+            JSONObject endpointConfig = (JSONObject) parser.parse(backendAPI.get("endpointConfig").getAsString());
+            mcpServerDTO.setBackendAPIEndpointConfig(endpointConfig);
+        }
+
         return mcpServerDTO;
     }
 

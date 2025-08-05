@@ -114,8 +114,8 @@ public class EndpointConfigContext extends ConfigContextDecorator {
      * @return String of endpoint key
      */
     private String getEndpointKey(API api) {
-        return getEndpointKey(api.getId().getApiName(), api.getId().getVersion());
 
+        return getEndpointKey(api.getId().getApiName(), api.getId().getVersion());
     }
 
     /**

@@ -37,6 +37,7 @@ import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.exception.McpException;
+import org.wso2.carbon.apimgt.gateway.mcp.request.McpRequest;
 import org.wso2.carbon.apimgt.gateway.mcp.request.McpRequestProcessor;
 import org.wso2.carbon.apimgt.gateway.mcp.response.McpResponseDto;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
@@ -93,13 +94,13 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
 
     private void handleMcpRequest(MessageContext messageContext) {
         API matchedAPI = GatewayUtils.getAPI(messageContext);
-        JsonObject requestBody = (JsonObject) messageContext.getProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY);
+        McpRequest requestBody = (McpRequest) messageContext.getProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY);
         String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
 
         // TODO : Check application of below
         Map<String, String> additionalHeaders = new HashMap<>();
 
-        McpResponseDto mcpResponse = McpRequestProcessor.processRequest(messageContext, matchedAPI, new Gson().toJson(requestBody),
+        McpResponseDto mcpResponse = McpRequestProcessor.processRequest(messageContext, matchedAPI, requestBody,
                 additionalHeaders);
         if (APIConstants.MCP.METHOD_INITIALIZE.equals(mcpMethod) || APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod)) {
             messageContext.setProperty("MCP_PROCESSED", "true");

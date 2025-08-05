@@ -2872,7 +2872,6 @@ public class APIMappingUtil {
                         }
                     }
                 }
-
             }
             // AWS Lambda: set arn to URI template
             String amznResourceName = operation.getAmznResourceName();

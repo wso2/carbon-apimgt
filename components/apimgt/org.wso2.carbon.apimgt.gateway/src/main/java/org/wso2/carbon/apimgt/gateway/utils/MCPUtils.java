@@ -18,13 +18,15 @@
 
 package org.wso2.carbon.apimgt.gateway.utils;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.formula.functions.T;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -37,6 +39,8 @@ import org.wso2.carbon.apimgt.gateway.exception.McpException;
 import org.wso2.carbon.apimgt.gateway.exception.McpExceptionWithId;
 import org.wso2.carbon.apimgt.gateway.mcp.Param;
 import org.wso2.carbon.apimgt.gateway.mcp.SchemaMapping;
+import org.wso2.carbon.apimgt.gateway.mcp.request.McpRequest;
+import org.wso2.carbon.apimgt.gateway.mcp.request.Params;
 import org.wso2.carbon.apimgt.gateway.mcp.response.McpResponseDto;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
@@ -48,61 +52,33 @@ import java.util.stream.StreamSupport;
 
 public class MCPUtils {
 
-    public static JsonObject parseAndValidateRequest(String requestBody) throws McpException {
-        JsonElement jsonElement;
-        try {
-            jsonElement = JsonParser.parseString(requestBody);
-        } catch (JsonSyntaxException e) {
-            // TODO: Check error codes
-            throw new McpException(APIConstants.MCP.RpcConstants.PARSE_ERROR_CODE,
-                    APIConstants.MCP.RpcConstants.PARSE_ERROR_MESSAGE, e.getMessage());
+    public static boolean validateRequest(McpRequest request) throws McpException {
+        String jsonRpcVersion = request.getJsonRpcVersion();
+        if (StringUtils.isEmpty(jsonRpcVersion)) {
+            throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
+                    APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing jsonrpc field");
+        }
+        if (!APIConstants.MCP.RpcConstants.JSON_RPC_VERSION.equals(jsonRpcVersion)) {
+            throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
+                    APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Invalid JSON-RPC version");
+        }
 
+        String method = request.getMethod();
+        if (StringUtils.isEmpty(method)) {
+            throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
+                    APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing method field");
         }
-        if (jsonElement.isJsonObject()) {
-            JsonObject jsonObject = jsonElement.getAsJsonObject();
-            if (jsonObject.has(APIConstants.MCP.RpcConstants.JSON_RPC)) {
-                JsonElement jsonRpcElement = jsonObject.get(APIConstants.MCP.RpcConstants.JSON_RPC);
-                if (jsonRpcElement == null || jsonRpcElement.isJsonNull()) {
-                    throwMissingJsonRpcError();
-                }
-                if (!APIConstants.MCP.RpcConstants.JSON_RPC_VERSION.equals(jsonRpcElement.getAsString())) {
-                    throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
-                            APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Invalid JSON-RPC version");
-                }
-            } else {
-                throwMissingJsonRpcError();
-            }
-            String method = "";
-            if (jsonObject.has(APIConstants.MCP.RpcConstants.METHOD)) {
-                JsonElement methodElement = jsonObject.get(APIConstants.MCP.RpcConstants.METHOD);
-                if (methodElement == null || methodElement.isJsonNull()) {
-                    throwMissingMethodError();
-                }
-                method = methodElement.getAsString();
-                if (method.isEmpty()) {
-                    throwMissingMethodError();
-                }
-                if (!APIConstants.MCP.ALLOWED_METHODS.contains(method)) {
-                    throw new McpException(APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_CODE,
-                            APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_MESSAGE, "Method not found");
-                }
-            } else {
-                throwMissingMethodError();
-            }
-            if (jsonObject.has(APIConstants.MCP.RpcConstants.ID)) {
-                JsonElement idElement = jsonObject.get(APIConstants.MCP.RpcConstants.ID);
-                if (idElement == null || idElement.isJsonNull() || idElement.getAsString().isEmpty()) {
-                    throwMissingIdError();
-                }
-            } else if (!APIConstants.MCP.METHOD_NOTIFICATION_INITIALIZED.equals(method)) {
-                // TODO: Check if this is needed to be handled
-                throwMissingIdError();
-            }
-            return jsonObject;
-        } else {
-            throw new McpException(APIConstants.MCP.RpcConstants.PARSE_ERROR_CODE,
-                    APIConstants.MCP.RpcConstants.PARSE_ERROR_MESSAGE, "Invalid JSON format");
+        if (!APIConstants.MCP.ALLOWED_METHODS.contains(method)) {
+            throw new McpException(APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_CODE,
+                    APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_MESSAGE, "Method not found");
         }
+
+        Object id = request.getId();
+        if (id == null && !APIConstants.MCP.METHOD_NOTIFICATION_INITIALIZED.equals(method)) {
+            throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
+                    APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing id field");
+        }
+        return true;
     }
 
     /**
@@ -114,12 +90,12 @@ public class MCPUtils {
      * @param additionalHeaders additional headers to send
      * @return the response payload as a String
      */
-    public static McpResponseDto processInternalRequest(MessageContext messageContext, API matchedMcpApi, JsonObject requestObject, String method,
-                                                        Map<String, String> additionalHeaders) {
+    public static McpResponseDto processInternalRequest(MessageContext messageContext, API matchedMcpApi,
+            McpRequest requestObject, String method, Map<String, String> additionalHeaders) {
         try {
             Object id = -1;
             if (!method.contains("notifications/")) {
-                id = requestObject.get(APIConstants.MCP.RpcConstants.ID);
+                id = requestObject.getId();
             }
             if (APIConstants.MCP.METHOD_INITIALIZE.equals(method)) {
                 validateInitializeRequest(id, requestObject);
@@ -149,11 +125,11 @@ public class MCPUtils {
         }
     }
 
-    public static void validateInitializeRequest(Object id, JsonObject requestObject) throws McpException {
-        if (requestObject.has(APIConstants.MCP.PARAMS_KEY)) {
-            JsonObject params = requestObject.getAsJsonObject(APIConstants.MCP.PARAMS_KEY);
-            if (params.has(APIConstants.MCP.PROTOCOL_VERSION_KEY)) {
-                String protocolVersion = params.get(APIConstants.MCP.PROTOCOL_VERSION_KEY).getAsString();
+    public static void validateInitializeRequest(Object id, McpRequest requestObject) throws McpException {
+        if (requestObject.getParams() != null) {
+            Params params = requestObject.getParams();
+            String protocolVersion = params.getProtocolVersion();
+            if (!StringUtils.isEmpty(protocolVersion)) {
                 if (!APIConstants.MCP.SUPPORTED_PROTOCOL_VERSIONS.contains(protocolVersion)) {
                     throw new McpExceptionWithId(id, APIConstants.MCP.RpcConstants.INVALID_PARAMS_CODE,
                             APIConstants.MCP.PROTOCOL_MISMATCH_ERROR,
@@ -169,28 +145,18 @@ public class MCPUtils {
         }
     }
 
-    private static void validateToolsCallRequest(JsonObject jsonObject, API matchedApi) throws McpException {
-        if (jsonObject.has(APIConstants.MCP.PARAMS_KEY)) {
-            JsonObject params = jsonObject.getAsJsonObject(APIConstants.MCP.PARAMS_KEY);
-            if (params.has("name")) {
-                JsonElement toolNameElement = params.get("name");
-                if (toolNameElement == null || toolNameElement.isJsonNull()) {
-                    throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
-                            APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing toolName field");
-                }
-                String toolName = toolNameElement.getAsString();
-                if (toolName == null || toolName.isEmpty()) {
-                    throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
-                            APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing toolName field");
-                } else {
-                    if (!validateToolName(toolName, matchedApi)) {
-                        throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
-                                APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "The requested tool does not exist");
-                    }
-                }
-            } else {
+    private static void validateToolsCallRequest(McpRequest mcpRequest, API matchedApi) throws McpException {
+        Params params = mcpRequest.getParams();
+        if (params != null) {
+            String toolName = params.getToolName();
+            if (StringUtils.isEmpty(toolName)) {
                 throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
                         APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Missing toolName field");
+            } else {
+                if (!validateToolName(toolName, matchedApi)) {
+                    throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
+                            APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "The requested tool does not exist");
+                }
             }
         } else {
             throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
@@ -220,32 +186,27 @@ public class MCPUtils {
                         isThirdParty), 200, null);
     }
 
-    private static McpResponseDto handleMcpToolsCall(MessageContext messageContext, Object id, API matchedApi, JsonObject jsonObject,
-                                                     Map<String, String> additionalHeaders)
+    private static McpResponseDto handleMcpToolsCall(MessageContext messageContext, Object id, API matchedApi,
+        McpRequest mcpRequest, Map<String, String> additionalHeaders)
             throws McpException {
-        JsonObject params = jsonObject.getAsJsonObject(APIConstants.MCP.PARAMS_KEY);
-        String toolName = params.get(APIConstants.MCP.TOOL_NAME_KEY).getAsString();
-        URLMapping extendedOperation = matchedApi.getUrlMappings()
-                .stream()
-                .filter(operation -> operation.getUrlPattern().equals(toolName))
-                .findFirst()
-                .orElse(null);
-
-        if (!params.has(APIConstants.MCP.ARGUMENTS_KEY)) {
-            JsonObject args = new JsonObject();
-            params.add(APIConstants.MCP.ARGUMENTS_KEY, args);
+        Params params = mcpRequest.getParams();
+        if (params != null) {
+            String toolName = params.getToolName();
+            URLMapping extendedOperation = matchedApi.getUrlMappings()
+                    .stream()
+                    .filter(operation -> operation.getUrlPattern().equals(toolName))
+                    .findFirst()
+                    .orElse(null);
+            String subType = matchedApi.getSubtype();
+            transformMcpRequest(messageContext, id, extendedOperation, mcpRequest, subType);
         }
 
-        String subType = matchedApi.getSubtype();
-        transformMcpRequest(messageContext, id, extendedOperation, jsonObject, subType);
-
         return new McpResponseDto("success", 200, null);
-        // for now only supported mode is Rest API Backend
 
     }
 
     private static void transformMcpRequest(MessageContext messageContext, Object id, URLMapping extendedOperation,
-                                            JsonObject jsonObject, String subType) throws McpException {
+                                            McpRequest mcpRequest, String subType) throws McpException {
         if (extendedOperation != null) {
             BackendOperation backendOperation = null;
             if (APIConstants.API_SUBTYPE_EXISTING_API.equals(subType)) {
@@ -266,13 +227,13 @@ public class MCPUtils {
                 SchemaMapping schemaMapping = processMcpSchema(schemaDefinition);
 
                 //process endpoint URL including query and path params
-                processEndpoint(messageContext, schemaMapping, jsonObject, backendOperation);
+                processEndpoint(messageContext, schemaMapping, mcpRequest, backendOperation);
 
                 //process headers
-                processHeaders(messageContext, schemaMapping, jsonObject);
+                processHeaders(messageContext, schemaMapping, mcpRequest);
 
                 //process request body
-                processRequestBody(messageContext, schemaMapping, jsonObject);
+                processRequestBody(messageContext, schemaMapping, mcpRequest);
 
                 //set received id to msg context
                 messageContext.setProperty("RECEIVED_MCP_ID", id.toString());
@@ -335,8 +296,8 @@ public class MCPUtils {
         return schemaMapping;
     }
 
-    private static void processEndpoint(MessageContext messageContext, SchemaMapping schemaMapping, JsonObject jsonObject,
-                                        BackendOperation backendOperation) {
+    private static void processEndpoint(MessageContext messageContext, SchemaMapping schemaMapping, McpRequest
+          mcpRequest, BackendOperation backendOperation) {
         org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs httpMethod = backendOperation.getVerb();
         String target = backendOperation.getTarget();
 
@@ -344,15 +305,16 @@ public class MCPUtils {
         StringBuilder queryString = new StringBuilder();
         resourcePath.append(target);
         List<Param> queryParams = schemaMapping.getQueryParams();
-        JsonObject paramsObj = jsonObject.getAsJsonObject(APIConstants.MCP.PARAMS_KEY);
-        if (paramsObj != null && !paramsObj.isEmpty()) {
-            JsonObject argumentObj = paramsObj.getAsJsonObject(APIConstants.MCP.ARGUMENTS_KEY);
+        Params paramsObj = mcpRequest.getParams();
+        if (paramsObj != null) {
+            Map<String, Object> argumentObj = (Map<String, Object>) paramsObj.getArguments();
             for (Param param : queryParams) {
                 String paramName = param.getName();
                 boolean isParamRequired = param.isRequired();
 
+
                 if (argumentObj.get(paramName) != null) {
-                    String paramValue = argumentObj.get(paramName).getAsString();
+                    String paramValue = (String) argumentObj.get(paramName);
                     if (queryString.length() == 0) {
                         queryString.append(paramName).append("=").append(paramValue);
                     } else {
@@ -370,8 +332,9 @@ public class MCPUtils {
 
             List<String> pathParams = schemaMapping.getPathParams();
             String resourcePathString = resourcePath.toString();
+
             for (String pathParam : pathParams) {
-                String paramValue = argumentObj.get(pathParam).getAsString();
+                String paramValue = (String) argumentObj.get(pathParam);
                 resourcePathString = resourcePathString.replace("{" + pathParam + "}", paramValue);
             }
             resourcePath.setLength(0);
@@ -384,10 +347,10 @@ public class MCPUtils {
         }
     }
 
-    public static void processHeaders(MessageContext messageContext, SchemaMapping schemaMapping, JsonObject jsonObject) {
-        JsonObject paramsObj = jsonObject.getAsJsonObject(APIConstants.MCP.PARAMS_KEY);
-        if (paramsObj != null && !paramsObj.isEmpty()) {
-            JsonObject argumentObj = paramsObj.getAsJsonObject(APIConstants.MCP.ARGUMENTS_KEY);
+    public static void processHeaders(MessageContext messageContext, SchemaMapping schemaMapping, McpRequest mcpRequest) {
+        Params paramsObj = mcpRequest.getParams();
+        if (paramsObj != null) {
+            Map<String, Object> argumentObj = (Map<String, Object>) paramsObj.getArguments();
 
             List<Param> headerParams = schemaMapping.getHeaderParams();
             org.apache.axis2.context.MessageContext axis2MessageContext =
@@ -398,7 +361,7 @@ public class MCPUtils {
                 boolean isParamRequired = param.isRequired();
 
                 if (argumentObj.get(paramName) != null) {
-                    String paramValue = argumentObj.get(paramName).getAsString();
+                    String paramValue = (String) argumentObj.get(paramName);
                     headers.put(paramName, paramValue);
                 } else {
                     if (isParamRequired) {
@@ -409,22 +372,24 @@ public class MCPUtils {
         }
     }
 
-    public static void processRequestBody(MessageContext messageContext, SchemaMapping schemaMapping, JsonObject jsonObject) {
+    public static void processRequestBody(MessageContext messageContext, SchemaMapping schemaMapping, McpRequest mcpRequest) {
         String contentType = schemaMapping.getContentType();
 
-        JsonObject paramsObj = jsonObject.getAsJsonObject(APIConstants.MCP.PARAMS_KEY);
-        if (paramsObj != null && !paramsObj.isEmpty()) {
-            JsonObject argumentObj = paramsObj.getAsJsonObject(APIConstants.MCP.ARGUMENTS_KEY);
+        Params paramsObj = mcpRequest.getParams();
+        if (paramsObj != null) {
+            Map<String, Object> argumentObj = (Map<String, Object>) paramsObj.getArguments();
             if (schemaMapping.isHasBody()) {
                 org.apache.axis2.context.MessageContext axis2MessageContext =
                         ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
                 if (APIConstants.APPLICATION_JSON_MEDIA_TYPE.equals(contentType)) {
-                    JsonObject requestBody = argumentObj.get("requestBody").getAsJsonObject();
+                    Map<String, Object> requestBodyObj = (Map<String, Object>) argumentObj.get("requestBody");
+                    Gson gson = new Gson();
+                    String requestString = gson.toJson(requestBodyObj);
 
                     try {
                         JsonUtil.removeJsonPayload(axis2MessageContext);
-                        JsonUtil.getNewJsonPayload(axis2MessageContext, requestBody.getAsJsonObject().toString(), true, true);
+                        JsonUtil.getNewJsonPayload(axis2MessageContext, requestString, true, true);
                         axis2MessageContext.setProperty(Constants.Configuration.MESSAGE_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                         axis2MessageContext.setProperty(Constants.Configuration.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                     } catch (AxisFault e) {
