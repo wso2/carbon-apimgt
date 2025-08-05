@@ -4070,6 +4070,9 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     String errorMessage = "Artifact manager is null when changing the provider name of " + apiId;
                     log.error(errorMessage);
                     throw new APIPersistenceException(errorMessage);
+                GenericArtifact artifact = getAPIArtifact(apiId, userRegistry);
+                if (log.isDebugEnabled()) {
+                    log.debug("Changing API provider for API: " + apiId + " to: " + providerName);
                 }
                 GenericArtifact artifact = getAPIArtifact(apiId, userRegistry);
                 artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, RegistryPersistenceUtil
