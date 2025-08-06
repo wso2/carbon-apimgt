@@ -23,7 +23,6 @@ public abstract class AbstractKeyManagerConnectorConfiguration implements KeyMan
     private Map<String, List<ConfigurationDto>> configListMap = new HashMap<>();
     private Log log = LogFactory.getLog(AbstractKeyManagerConnectorConfiguration.class);
     public static final String CONNECTOR_CONFIGURATION = "configurations";
-    public static final String AUTH_CONFIGURATION = "authConfigurations";
     public static final String APPLICATION_CONFIGURATIONS = "application_configurations";
 
     @Override
@@ -34,16 +33,6 @@ public abstract class AbstractKeyManagerConnectorConfiguration implements KeyMan
         }
         return configListMap.get(CONNECTOR_CONFIGURATION);
     }
-
-    @Override
-    public List<ConfigurationDto> getAuthConfigurations() {
-
-        if (configListMap.get(AUTH_CONFIGURATION) == null) {
-            convertJsonToConnectorConfiguration();
-        }
-        return configListMap.get(AUTH_CONFIGURATION);
-    }
-
 
     @Override
     public List<ConfigurationDto> getApplicationConfigurations() {

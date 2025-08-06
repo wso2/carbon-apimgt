@@ -90,7 +90,7 @@ public class ConfigurationDto {
         return values;
     }
 
-    public void setValues(List<Object> values) {
+    public void setValues(List<String> values) {
 
         this.values = values;
     }

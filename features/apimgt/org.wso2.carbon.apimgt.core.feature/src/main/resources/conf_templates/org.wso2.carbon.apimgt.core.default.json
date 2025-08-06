@@ -71,7 +71,6 @@
   "apim.key_manager.key_validation_handler_impl": "org.wso2.carbon.apimgt.keymgt.handlers.DefaultKeyValidationHandler",
   "apim.key_manager.enable_provisioned_app_validation": true,
   "apim.key_manager.allow_subscription_validation_disabling": true,
-  "apim.key_manager.skip_create_resident_key_manager": false,
   "apim.monetization.publish_duration": "1d",
   "apim.monetization.granularity": "days",
   "apim.monetization.monetization_impl": "org.wso2.carbon.apimgt.impl.monetization.DefaultMonetizationImpl",
