@@ -161,6 +161,7 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfigurationService;
+import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.APIType;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.ExternalGatewayAPIValidationException;
@@ -12044,17 +12045,5 @@ public final class APIUtil {
             log.error("Error while validating and scheduling federated gateway API discovery for environment: "
                     + environment.getName() + " in organization: " + organization, e);
         }
-    }
-
-    public static List<String> getDiscoveredAPIsFromFederatedGateway(Environment environment, String organization) throws APIManagementException {
-        GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
-        List<String> apisDeployedInGateway = new ArrayList<>();
-        List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = gatewayArtifactsMgtDAO
-                .retrieveGatewayArtifactsByLabel(new String[]{environment.getName()}, organization);
-
-        for (APIRuntimeArtifactDto apiRuntimeArtifactDto : apiRuntimeArtifactDtoList) {
-            apisDeployedInGateway.add(apiRuntimeArtifactDto.getName() + ":" + apiRuntimeArtifactDto.getVersion());
-        }
-        return apisDeployedInGateway;
     }
 }

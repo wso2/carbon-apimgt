@@ -204,6 +204,7 @@ public final class ImportExportConstants {
     public static final String TYPE_CLIENT_CERTIFICATES = "client_certificates";
 
     public static final String TYPE_DEPLOYMENT_ENVIRONMENTS = "deployment_environments";
+    public static final String DEPLOYMENT_ENVIRONMENT_VERSION = "v4.3.0";
 
     public static final String TYPE_POLICY_SPECIFICATION = "operation_policy_specification";
 

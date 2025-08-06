@@ -1,8 +1,8 @@
 /*
  *
- * Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 LLC. licenses this file to you under the Apache License,
+ * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt;
+package org.wso2.carbon.federated.gateway;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -41,7 +41,7 @@ import org.wso2.carbon.apimgt.impl.importexport.utils.APIImportExportUtil;
 import org.wso2.carbon.apimgt.impl.importexport.utils.CommonUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
-import org.wso2.carbon.apimgt.util.FederatedGatewayUtil;
+import org.wso2.carbon.federated.gateway.util.FederatedGatewayUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import java.io.IOException;
@@ -57,8 +57,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil.fromAPItoDTO;
-import static org.wso2.carbon.apimgt.util.FederatedGatewayConstants.DISCOVERED_API_LIST;
-import static org.wso2.carbon.apimgt.util.FederatedGatewayConstants.PUBLISHED_API_LIST;
+import static org.wso2.carbon.federated.gateway.util.FederatedGatewayConstants.DISCOVERED_API_LIST;
+import static org.wso2.carbon.federated.gateway.util.FederatedGatewayConstants.PUBLISHED_API_LIST;
 
 /**
  * This class is responsible for scheduling and executing the discovery of APIs in a federated gateway environment.
@@ -71,7 +71,7 @@ import static org.wso2.carbon.apimgt.util.FederatedGatewayConstants.PUBLISHED_AP
 )
 public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService {
     private static final ScheduledExecutorService executor = Executors.newScheduledThreadPool(5);
-    static Map<String, ScheduledFuture<?>> scheduledDiscoveryTasks = new ConcurrentHashMap<>();
+    private static final Map<String, ScheduledFuture<?>> scheduledDiscoveryTasks = new ConcurrentHashMap<>();
     private static Log log = LogFactory.getLog(FederatedAPIDiscoveryRunner.class);
 
     /**
@@ -103,7 +103,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                         if (scheduledFuture != null) {
                             scheduledFuture.cancel(true);
                         }
-                        executor.scheduleAtFixedRate(() -> {
+                        ScheduledFuture<?> newTask = executor.scheduleAtFixedRate(() -> {
                             try {
                                 List<API> discoveredAPIs = federatedAPIDiscovery.discoverAPI();
                                 if (discoveredAPIs != null && !discoveredAPIs.isEmpty()) {
@@ -118,6 +118,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                                         + environment.getName(), e);
                             }
                         }, 0, environment.getApiDiscoveryScheduledWindow(), TimeUnit.MINUTES);
+                        scheduledDiscoveryTasks.put(environment.getName() + organization, newTask);
                     }
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException |
                          NoSuchMethodException | InvocationTargetException | APIManagementException e) {
@@ -146,10 +147,10 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
             List<String> alreadyDiscoveredAPIsList = alreadyAvailableAPIs.get(DISCOVERED_API_LIST);
 
             for (API api : apisToDeployInGatewayEnv) {
-                APIDTO apidto = fromAPItoDTO(api);
                 if (api == null) {
                     continue;
                 }
+                APIDTO apidto = fromAPItoDTO(api);
                 try {
                     String apiKey = apidto.getName() + APIConstants.DELEM_COLON + apidto.getVersion();
                     String envScopedKey = apidto.getName() + APIConstants.DELEM_UNDERSCORE
@@ -162,6 +163,9 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             alreadyDiscoveredAPIsList.contains(envScopedKey);
                     boolean alreadyExistsWithEnvScope = alreadyDiscoveredAPIsList.contains(envScopedKey);
 
+                    if (isPublishedAPIFromCP) {
+                        continue;
+                    }
                     // Adjust name if needed
                     if (alreadyExistsWithEnvScope) {
                         if (api.getDisplayName() == null) {
@@ -238,7 +242,8 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
             }
 
         } catch (APIManagementException e) {
-            throw new RuntimeException("Failed during federated API processing", e);
+            log.error("Failed during federated API processing for environment: " + environment.getName() +
+                    " and organization: " + organization, e);
         } finally {
             PrivilegedCarbonContext.endTenantFlow();
         }

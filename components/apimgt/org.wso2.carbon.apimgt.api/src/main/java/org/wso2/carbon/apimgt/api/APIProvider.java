@@ -1365,6 +1365,7 @@ public interface APIProvider extends APIManager {
      * @param apiRevisionId          API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
      * @param organization           Identifier of an organization
+     * @param isInitiatedFromGateway  true if the deployment is initiated from gateway, false otherwise
      * @throws APIManagementException if failed to add APIRevision
      */
     void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments,
@@ -2023,6 +2024,7 @@ public interface APIProvider extends APIManager {
      * @param revisionUUID revision UUID
      * @param revisionId   revision number
      * @param environment  environment the deployment is happening
+     * @param isInitiatedFromGateway whether the deployment is initiated from the gateway
      */
     void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID, String revisionId,
                                    String environment, boolean isInitiatedFromGateway);

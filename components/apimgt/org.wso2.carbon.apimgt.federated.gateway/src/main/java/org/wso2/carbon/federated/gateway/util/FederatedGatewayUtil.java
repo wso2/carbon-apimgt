@@ -1,8 +1,8 @@
 /*
  *
- * Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 LLC. licenses this file to you under the Apache License,
+ * WSO2 Inc. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,7 @@
  *
  */
 
-package org.wso2.carbon.apimgt.util;
+package org.wso2.carbon.federated.gateway.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,6 +38,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -48,12 +49,13 @@ import java.util.zip.ZipOutputStream;
 
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.API_YAML_FILE_NAME;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.DEPLOYMENT_ENVIRONMENTS_FILE_NAME;
+import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.DEPLOYMENT_ENVIRONMENT_VERSION;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.DEPLOYMENT_NAME;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.DISPLAY_ON_DEVPORTAL_OPTION;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.SWAGGER_YAML_FILE_NAME;
 import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.TYPE_DEPLOYMENT_ENVIRONMENTS;
-import static org.wso2.carbon.apimgt.util.FederatedGatewayConstants.DISCOVERED_API_LIST;
-import static org.wso2.carbon.apimgt.util.FederatedGatewayConstants.PUBLISHED_API_LIST;
+import static org.wso2.carbon.federated.gateway.util.FederatedGatewayConstants.DISCOVERED_API_LIST;
+import static org.wso2.carbon.federated.gateway.util.FederatedGatewayConstants.PUBLISHED_API_LIST;
 
 public class FederatedGatewayUtil {
     private static Log log = LogFactory.getLog(FederatedGatewayUtil.class);
@@ -85,6 +87,9 @@ public class FederatedGatewayUtil {
 
     public static InputStream createZipAsInputStream(String apiYaml, String swaggerYaml, String deploymentYaml,
                                                      String zipName) throws IOException {
+        if (apiYaml == null || swaggerYaml == null || deploymentYaml == null) {
+            throw new IllegalArgumentException("Input parameters cannot be null for API: " + zipName);
+        }
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try (ZipOutputStream zos = new ZipOutputStream(byteArrayOutputStream)) {
 
@@ -104,7 +109,7 @@ public class FederatedGatewayUtil {
     private static void addToZip(ZipOutputStream zos, String path, String content) throws IOException {
         ZipEntry entry = new ZipEntry(path);
         zos.putNextEntry(entry);
-        byte[] data = content.getBytes();
+        byte[] data = content.getBytes(StandardCharsets.UTF_8);
         zos.write(data, 0, data.length);
         zos.closeEntry();
     }
@@ -118,7 +123,7 @@ public class FederatedGatewayUtil {
 
         Map<String, Object> yamlRoot = new LinkedHashMap<>();
         yamlRoot.put("type", TYPE_DEPLOYMENT_ENVIRONMENTS);
-        yamlRoot.put("version", "v4.3.0");
+        yamlRoot.put("version", DEPLOYMENT_ENVIRONMENT_VERSION);
         yamlRoot.put("data", deploymentEnvData);
 
         Yaml yaml = new Yaml();
@@ -135,12 +140,12 @@ public class FederatedGatewayUtil {
         List<APIRuntimeArtifactDto> apiRuntimeArtifactDtoList = gatewayArtifactsMgtDAO
                 .retrieveGatewayArtifactsByLabel(new String[]{environment.getName()}, organization);
         for (APIRuntimeArtifactDto apiRuntimeArtifactDto : apiRuntimeArtifactDtoList) {
-           API api =  provider.getAPIbyUUID(apiRuntimeArtifactDto.getApiId(), organization);
-           if (api != null && !api.isInitiatedFromGateway()) {
+            API api = provider.getAPIbyUUID(apiRuntimeArtifactDto.getApiId(), organization);
+            if (api != null && !api.isInitiatedFromGateway()) {
                 publishedAPIs.add(apiRuntimeArtifactDto.getName() + ":" + apiRuntimeArtifactDto.getVersion());
             } else {
-               discoveredAPIs.add(apiRuntimeArtifactDto.getName() + ":" + apiRuntimeArtifactDto.getVersion());
-           }
+                discoveredAPIs.add(apiRuntimeArtifactDto.getName() + ":" + apiRuntimeArtifactDto.getVersion());
+            }
         }
         apisDeployedInGateway.put(DISCOVERED_API_LIST, discoveredAPIs);
         apisDeployedInGateway.put(PUBLISHED_API_LIST, publishedAPIs);

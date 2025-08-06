@@ -250,7 +250,7 @@ public class ImportUtils {
                     tenantDomain, apiProvider, organization);
 
             if (importedApiDTO.isInitiatedFromGateway() && !overwrite &&
-                    ApiMgtDAO.getInstance().isApiNameExist(importedApiDTO.getName(), organization, organization)) {
+                    apiProvider.isApiNameExist(importedApiDTO.getName(), organization)) {
                 if (!apiRevisionDeployments.isEmpty()) {
                     importedApiDTO.name(importedApiDTO.getName() + API_NAME_DELIMITER + apiRevisionDeployments.get(0)
                             .getDeployment());
