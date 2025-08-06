@@ -674,11 +674,6 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public List<String> getLLMProviderModels(String organization,String llmProviderId) throws APIManagementException {
-        return apiMgtDAO.getLLMProviderModels(organization, llmProviderId);
-    }
-
-    @Override
     public String deleteLLMProvider(String organization, LLMProvider provider, boolean builtIn)
             throws APIManagementException {
 
@@ -702,7 +697,12 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public LLMProvider getLLMProvider(String organization, String llmProviderId) throws APIManagementException {
 
-        return apiMgtDAO.getLLMProvider(organization, llmProviderId);
+        LLMProvider llmProvider = apiMgtDAO.getLLMProvider(organization, llmProviderId);
+        if (llmProvider== null) {
+            throw new APIManagementException(
+                    ExceptionCodes.from(ExceptionCodes.AI_SERVICE_PROVIDER_NOT_FOUND, llmProviderId));
+        }
+        return llmProvider;
     }
 
     @Override

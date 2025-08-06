@@ -276,7 +276,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -285,10 +284,6 @@ import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -322,8 +317,6 @@ import javax.cache.Caching;
 import java.security.cert.X509Certificate;
 import java.text.Normalizer;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import javax.validation.constraints.NotNull;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
@@ -3119,7 +3112,8 @@ public final class APIUtil {
                     APIConstants.ENDPOINT_SECURITY_TYPE_BASIC,
                     APIConstants.ENDPOINT_SECURITY_TYPE_DIGEST,
                     APIConstants.ENDPOINT_SECURITY_TYPE_OAUTH,
-                    APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY
+                    APIConstants.ENDPOINT_SECURITY_TYPE_API_KEY,
+                    APIConstants.ENDPOINT_SECURITY_TYPE_AWS
             );
             if (validTypes.stream().noneMatch(type::equalsIgnoreCase)) {
                 ErrorHandler errorHandler = ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_SECURITY_CONFIG,
