@@ -30,6 +30,15 @@ public interface LLMProviderService {
 
     Log log = LogFactory.getLog(LLMProviderService.class);
 
+
+    default Map<String,String> getResponseMetadata(LLMResponseMetaData responseMetadata, List<LLMProviderMetadata> metadataList,
+                                            Map<String, String> metadataMap) throws APIManagementException{
+
+        return getResponseMetadata(responseMetadata.getPayload(), responseMetadata.getHeader(),
+                responseMetadata.getQueryParams(), metadataList, metadataMap);
+    }
+
+
     /**
      * Extracts response metadata from the payload, headers, or query parameters.
      *
@@ -40,11 +49,14 @@ public interface LLMProviderService {
      * @param metadataMap Map of metadata
      * @return Map of extracted response metadata.
      * @throws APIManagementException If extraction fails.
+     * @deprecated Use {@link #getResponseMetadata(LLMResponseMetaData, List, Map)} instead.
      */
-    Map<String, String> getResponseMetadata(String payload, Map<String, String> header,
-                                            Map<String, String> queryParams, List<LLMProviderMetadata> metadata,
-                                            Map<String, String> metadataMap)
-            throws APIManagementException;
+    @Deprecated
+    default Map<String, String> getResponseMetadata(String payload, Map<String, String> header,
+                                                    Map<String, String> queryParams, List<LLMProviderMetadata> metadata,
+                                                    Map<String, String> metadataMap) throws APIManagementException {
+        return null;
+    }
 
     /**
      * Extracts request metadata from the payload, headers, or query parameters.

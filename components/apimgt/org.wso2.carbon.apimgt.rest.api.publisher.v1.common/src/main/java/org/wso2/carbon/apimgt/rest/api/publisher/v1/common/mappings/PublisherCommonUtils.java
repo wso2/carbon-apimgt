@@ -163,6 +163,7 @@ import java.util.regex.Pattern;
 import static org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.AI_API_QUOTA_TYPE;
 import static org.wso2.carbon.apimgt.api.model.policy.PolicyConstants.EVENT_COUNT_TYPE;
 
+import static org.wso2.carbon.apimgt.impl.APIConstants.ENDPOINT_SECURITY_TYPE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE;
 import static org.wso2.carbon.apimgt.impl.APIConstants.GOVERNANCE_COMPLIANCE_KEY;
 import static org.wso2.carbon.apimgt.impl.APIConstants.PUBLISH;
@@ -263,14 +264,14 @@ public class PublisherCommonUtils {
             OrganizationInfo orginfo)
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
         API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
-       
+
         if (orginfo != null && orginfo.getOrganizationId() != null) {
             String visibleOrgs = apiToUpdate.getVisibleOrganizations();
             if (!StringUtils.isEmpty(visibleOrgs) && APIConstants.VISIBLE_ORG_ALL.equals(visibleOrgs)) {
                 // IF visibility is all
                 apiToUpdate.setVisibleOrganizations(APIConstants.VISIBLE_ORG_ALL);
             } else if (StringUtils.isEmpty(visibleOrgs) || APIConstants.VISIBLE_ORG_NONE.equals(visibleOrgs)) {
-                // IF visibility is none 
+                // IF visibility is none
                 apiToUpdate.setVisibleOrganizations(orginfo.getOrganizationId()); // set to current org
             } else {
                 // add current id to existing visibility list
@@ -286,10 +287,10 @@ public class PublisherCommonUtils {
             currentOrganizationTiers.add(parentOrgTiers);
             apiToUpdate.setAvailableTiersForOrganizations(currentOrganizationTiers);
         }
-        
+
         apiProvider.updateAPI(apiToUpdate, originalAPI);
         API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
-        
+
         if (apiUpdated.getVisibleOrganizations() != null) {
             List<String> orgList = new ArrayList<>(Arrays.asList(apiUpdated.getVisibleOrganizations().split(",")));
             orgList.remove(orginfo.getOrganizationId());  // remove current user org
@@ -405,7 +406,8 @@ public class PublisherCommonUtils {
 
         String oldProductionApiKeyValue = null;
         String oldSandboxApiKeyValue = null;
-
+        String oldProductionAWSSecretKey = null;
+        String oldSandboxAWSSecretKey = null;
         Object oldProductionCustomParams = null;
         Object oldSandboxCustomParams = null;
 
@@ -429,6 +431,12 @@ public class PublisherCommonUtils {
                             .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE) != null) {
                         oldProductionApiKeyValue = oldEndpointSecurityProduction
                                 .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
+                    } else if (oldEndpointSecurityProduction.get(ENDPOINT_SECURITY_TYPE) != null &&
+                            APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(
+                                    oldEndpointSecurityProduction.get(ENDPOINT_SECURITY_TYPE).toString())) {
+                        oldProductionAWSSecretKey =
+                                (String) oldEndpointSecurityProduction.get(
+                                        APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
                     }
 
                     // Keep old custom parameters data for future usage
@@ -456,6 +464,11 @@ public class PublisherCommonUtils {
                             .get(APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE) != null) {
                         oldSandboxApiKeyValue = oldEndpointSecuritySandbox
                                 .get(APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
+                    } else if (oldEndpointSecuritySandbox.get(ENDPOINT_SECURITY_TYPE) != null &&
+                            APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(
+                                    oldEndpointSecuritySandbox.get(ENDPOINT_SECURITY_TYPE).toString())) {
+                        oldSandboxAWSSecretKey =
+                                (String) oldEndpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY);
                     }
 
                     // Keep old custom parameters data for future usage
@@ -479,6 +492,8 @@ public class PublisherCommonUtils {
 
         encryptEndpointSecurityApiKeyCredentials(endpointConfig, cryptoUtil, oldProductionApiKeyValue,
                 oldSandboxApiKeyValue, apiDtoToUpdate);
+        encryptEndpointSecurityAWSSecretKey(endpointConfig, cryptoUtil, oldProductionAWSSecretKey,
+                oldSandboxAWSSecretKey, apiDtoToUpdate);
         // update endpointConfig with the provided custom sequence
         if (endpointConfig != null) {
             if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
@@ -915,6 +930,92 @@ public class PublisherCommonUtils {
     }
 
     /**
+     * This method will encrypt the AWS Secret Key
+     *
+     * @param endpointConfig           endpoint configuration of API
+     * @param cryptoUtil               cryptography util
+     * @param oldProductionSecretKeyValue existing production API secret
+     * @param oldSandboxSecretKeyValue    existing sandbox API secret
+     * @param apidto                   API DTO
+     * @throws CryptoException        if an error occurs while encrypting and base64 encode
+     * @throws APIManagementException if an error occurs due to a problem in the endpointConfig payload
+     */
+    public static void encryptEndpointSecurityAWSSecretKey(Map endpointConfig,
+                                                                CryptoUtil cryptoUtil,
+                                                                String oldProductionSecretKeyValue,
+                                                                String oldSandboxSecretKeyValue, APIDTO apidto)
+            throws CryptoException, APIManagementException {
+
+        if (endpointConfig != null) {
+            if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
+                Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                    Map endpointSecurityProduction = (Map) endpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
+                    String productionEndpointType = (String) endpointSecurityProduction
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                    if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(productionEndpointType)) {
+                        if (endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null &&
+                                StringUtils.isNotEmpty(endpointSecurityProduction.get(
+                                        APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).toString()) &&
+                                !endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY)
+                                        .equals(oldProductionSecretKeyValue)) {
+                            String apiKeyValue = endpointSecurityProduction
+                                    .get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).toString();
+                            String encryptedApiKeyValue = cryptoUtil.encryptAndBase64Encode(apiKeyValue.getBytes());
+                            endpointSecurityProduction
+                                    .put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, encryptedApiKeyValue);
+                        } else if (StringUtils.isNotBlank(oldProductionSecretKeyValue)) {
+                            endpointSecurityProduction
+                                    .put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, oldProductionSecretKeyValue);
+                        } else {
+                            String errorMessage = "Secret Key value is not provided for production endpoint security";
+                            throw new APIManagementException(
+                                    ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
+                        }
+                    }
+                    endpointSecurity
+                            .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION, endpointSecurityProduction);
+                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    apidto.setEndpointConfig(endpointConfig);
+                }
+                if (endpointSecurity.get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                    Map endpointSecuritySandbox = (Map) endpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
+                    String sandboxEndpointType = (String) endpointSecuritySandbox
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                    if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(sandboxEndpointType)) {
+                        if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null
+                                && StringUtils.isNotEmpty(
+                                endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY)
+                                        .toString()) &&
+                                !endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).equals(
+                                        oldSandboxSecretKeyValue)) {
+                            String apiKeyValue = endpointSecuritySandbox
+                                    .get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).toString();
+                            String encryptedApiKeyValue = cryptoUtil.encryptAndBase64Encode(apiKeyValue.getBytes());
+                            endpointSecuritySandbox
+                                    .put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, encryptedApiKeyValue);
+                        } else if (StringUtils.isNotBlank(oldSandboxSecretKeyValue)) {
+                            endpointSecuritySandbox
+                                    .put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, oldSandboxSecretKeyValue);
+                        } else {
+                            String errorMessage = "Secret Key value is not provided for sandbox endpoint security";
+                            throw new APIManagementException(
+                                    ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
+                        }
+                    }
+                    endpointSecurity
+                            .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecuritySandbox);
+                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    apidto.setEndpointConfig(endpointConfig);
+                }
+            }
+        }
+    }
+    /**
      * This method will encrypt the OAuth 2.0 API Key and API Secret
      *
      * @param endpointConfig            endpoint configuration of API
@@ -1060,6 +1161,96 @@ public class PublisherCommonUtils {
     }
 
     /**
+     * This method will encrypt AWS secret Key.
+     *
+     * @param apiEndpointDTO APIEndpointDTO
+     * @param cryptoUtil     cryptography util
+     * @param oldApiSecret   existing API secret
+     * @param endpointConfig endpoint configuration of API
+     * @throws CryptoException        if an error occurs while encrypting and base64 encode
+     * @throws APIManagementException if an error occurs due to a problem in the endpointConfig payload
+     */
+    public static void encryptEndpointSecurityAWSSecretKey(APIEndpointDTO apiEndpointDTO,
+                                                           CryptoUtil cryptoUtil,
+                                                           String oldApiSecret, Map endpointConfig)
+            throws CryptoException, APIManagementException {
+
+        if (endpointConfig != null) {
+            if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
+                Map endpointSecurity = (Map) endpointConfig.get(APIConstants.ENDPOINT_SECURITY);
+                if (APIConstants.APIEndpoint.PRODUCTION.equals(
+                        apiEndpointDTO.getDeploymentStage()) && endpointSecurity.get(
+                        APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION) != null) {
+                    Map endpointSecurityProduction = (Map) endpointSecurity.get(
+                            APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION);
+                    String productionEndpointType = (String) endpointSecurityProduction.get(
+                            APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                    if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(productionEndpointType)) {
+                        if (endpointSecurityProduction.get(
+                                APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null && StringUtils.isNotEmpty(
+                                endpointSecurityProduction.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY)
+                                        .toString()) && !endpointSecurityProduction.get(
+                                APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).equals(oldApiSecret)) {
+                            String apiKeyValue = endpointSecurityProduction.get(
+                                    APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).toString();
+                            String encryptedApiKeyValue = cryptoUtil.encryptAndBase64Encode(apiKeyValue.getBytes());
+                            endpointSecurityProduction.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY,
+                                    encryptedApiKeyValue);
+                        } else if (StringUtils.isNotBlank(oldApiSecret)) {
+                            String encryptedOldApiKeyValue = cryptoUtil.encryptAndBase64Encode(oldApiSecret.getBytes());
+                            endpointSecurityProduction.put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY,
+                                    encryptedOldApiKeyValue);
+                        } else {
+                            String errorMessage = "AWS secret value is not provided for production endpoint security";
+                            throw new APIManagementException(
+                                    ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
+                        }
+                    }
+                    endpointSecurity.put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_PRODUCTION,
+                            endpointSecurityProduction);
+                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    apiEndpointDTO.setEndpointConfig(endpointConfig);
+                }
+                if (APIConstants.APIEndpoint.SANDBOX.equals(
+                        apiEndpointDTO.getDeploymentStage()) && endpointSecurity.get(
+                        APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX) != null) {
+                    Map endpointSecuritySandbox = (Map) endpointSecurity
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX);
+                    String sandboxEndpointType = (String) endpointSecuritySandbox
+                            .get(APIConstants.OAuthConstants.ENDPOINT_SECURITY_TYPE);
+
+                    if (APIConstants.ENDPOINT_SECURITY_TYPE_AWS.equals(sandboxEndpointType)) {
+                        if (endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) != null
+                                && StringUtils.isNotEmpty(
+                                endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY)
+                                        .toString()) &&
+                                !endpointSecuritySandbox.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).equals(
+                                        oldApiSecret)) {
+                            String apiKeyValue = endpointSecuritySandbox
+                                    .get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).toString();
+                            String encryptedApiKeyValue = cryptoUtil.encryptAndBase64Encode(apiKeyValue.getBytes());
+                            endpointSecuritySandbox
+                                    .put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, encryptedApiKeyValue);
+                        } else if (StringUtils.isNotBlank(oldApiSecret)) {
+                            endpointSecuritySandbox
+                                    .put(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY, oldApiSecret);
+                        } else {
+                            String errorMessage = "AWS secret value is not provided for sandbox endpoint security";
+                            throw new APIManagementException(
+                                    ExceptionCodes.from(ExceptionCodes.INVALID_ENDPOINT_CREDENTIALS, errorMessage));
+                        }
+                    }
+                    endpointSecurity
+                            .put(APIConstants.OAuthConstants.ENDPOINT_SECURITY_SANDBOX, endpointSecuritySandbox);
+                    endpointConfig.put(APIConstants.ENDPOINT_SECURITY, endpointSecurity);
+                    apiEndpointDTO.setEndpointConfig(endpointConfig);
+                }
+            }
+        }
+    }
+
+    /**
      * This method will encrypt the API Key
      *
      * @param apiEndpointDTO APIEndpointDTO
@@ -1070,8 +1261,9 @@ public class PublisherCommonUtils {
      * @throws APIManagementException if an error occurs due to a problem in the endpointConfig payload
      */
     public static void encryptEndpointSecurityApiKeyCredentials(APIEndpointDTO apiEndpointDTO,
-            CryptoUtil cryptoUtil,
-            String oldApiSecret, Map endpointConfig) throws CryptoException, APIManagementException {
+                                                                CryptoUtil cryptoUtil,
+                                                                String oldApiSecret, Map endpointConfig)
+            throws CryptoException, APIManagementException {
 
         if (endpointConfig != null) {
             if ((endpointConfig.get(APIConstants.ENDPOINT_SECURITY) != null)) {
@@ -1556,6 +1748,7 @@ public class PublisherCommonUtils {
             throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                     ExceptionCodes.INVALID_ENDPOINT_URL);
         }
+        APIUtil.validateAPIEndpointConfig(apiDto.getEndpointConfig(), apiDto.getType().toString(), apiDto.getName());
 
         // validate gateway type before proceeding
         String gatewayType = apiDto.getGatewayType();
@@ -1575,7 +1768,8 @@ public class PublisherCommonUtils {
 
         encryptEndpointSecurityApiKeyCredentials(endpointConfig, cryptoUtil, StringUtils.EMPTY, StringUtils.EMPTY,
                 apiDto);
-
+        encryptEndpointSecurityAWSSecretKey(endpointConfig, cryptoUtil, StringUtils.EMPTY, StringUtils.EMPTY,
+                apiDto);
         // AWS Lambda: secret key encryption while creating the API
         if (apiDto.getEndpointConfig() != null) {
             if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
@@ -1642,7 +1836,7 @@ public class PublisherCommonUtils {
                 // IF visibility is all
                 apiToAdd.setVisibleOrganizations(APIConstants.VISIBLE_ORG_ALL);
             } else if (StringUtils.isEmpty(visibleOrgs) || APIConstants.VISIBLE_ORG_NONE.equals(visibleOrgs)) {
-                // IF visibility is none 
+                // IF visibility is none
                 apiToAdd.setVisibleOrganizations(orgInfo.getOrganizationId()); // set to current org
             } else {
                 // add current id to existing visibility list
@@ -3444,6 +3638,10 @@ public class PublisherCommonUtils {
                                         APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE) != null) {
                             oldApiEndpointSecret = oldProductionEndpointSecurity.get(
                                     APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
+                        } else if (oldProductionEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) !=
+                                null) {
+                            oldApiEndpointSecret = oldProductionEndpointSecurity.get(
+                                    APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).toString();
                         }
                     }
                 } else if (APIConstants.APIEndpoint.SANDBOX.equals(apiEndpointDTO.getDeploymentStage())) {
@@ -3463,6 +3661,10 @@ public class PublisherCommonUtils {
                                         APIConstants.ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE) != null) {
                             oldApiEndpointSecret = oldSandboxEndpointSecurity.get(
                                     APIConstants.ENDPOINT_SECURITY_API_KEY_VALUE).toString();
+                        } else if (oldSandboxEndpointSecurity.get(APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY) !=
+                                null) {
+                            oldApiEndpointSecret = oldSandboxEndpointSecurity.get(
+                                    APIConstants.ENDPOINT_SECURITY_AWS_SECRET_KEY).toString();
                         }
                     }
                 }
@@ -3473,7 +3675,7 @@ public class PublisherCommonUtils {
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
 
         encryptEndpointSecurityApiKeyCredentials(apiEndpointDTO, cryptoUtil, oldApiEndpointSecret, endpointConfig);
-
+        encryptEndpointSecurityAWSSecretKey(apiEndpointDTO, cryptoUtil, oldApiEndpointSecret, endpointConfig);
         APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
         if (apiEndpoint.getId() == null) {
             apiEndpoint.setId(endpointId);
@@ -3525,7 +3727,7 @@ public class PublisherCommonUtils {
         Map endpointConfig = (Map) apiEndpointDTO.getEndpointConfig();
         CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
         encryptEndpointSecurityApiKeyCredentials(apiEndpointDTO, cryptoUtil, StringUtils.EMPTY, endpointConfig);
-
+        encryptEndpointSecurityAWSSecretKey(apiEndpointDTO, cryptoUtil, StringUtils.EMPTY, endpointConfig);
         APIEndpointInfo apiEndpoint = APIMappingUtil.fromDTOtoAPIEndpoint(apiEndpointDTO, organization);
 
         // extract endpoint URL
