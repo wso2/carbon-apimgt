@@ -99,6 +99,8 @@ public class KeyManagerHolder {
                             keyManagerConfiguration.addParameter(APIConstants.KEY_MANAGER_PASSWORD,
                                     apiManagerConfiguration.getFirstProperty(APIConstants.API_KEY_VALIDATOR_PASSWORD));
                             keyManagerConfiguration.addParameter(APIConstants.KEY_MANAGER_TENANT_DOMAIN, organization);
+                            keyManagerConfiguration.addParameter(APIConstants.KeyManager.ENABLE_APPLICATION_SCOPES,
+                                    APIUtil.isApplicationScopesEnabledForResidentKM());
                         }
                         keyManager.loadConfiguration(keyManagerConfiguration);
                     } catch (ClassNotFoundException | IllegalAccessException | InstantiationException
