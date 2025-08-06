@@ -105,7 +105,7 @@ public class MCPUtils {
                 validateToolsCallRequest(requestObject, matchedMcpApi);
                 return handleMcpToolsCall(messageContext, id, matchedMcpApi, requestObject, additionalHeaders);
             } else if (APIConstants.MCP.METHOD_PING.equals(method)) {
-
+                return handleMcpPing(id);
             } else if (APIConstants.MCP.METHOD_RESOURCES_LIST.equals(method)) {
 
             } else if (APIConstants.MCP.METHOD_RESOURCE_TEMPLATE_LIST.equals(method)) {
@@ -202,6 +202,10 @@ public class MCPUtils {
 
         return new McpResponseDto("success", 200, null);
 
+    }
+
+    private static McpResponseDto handleMcpPing(Object id) {
+        return new McpResponseDto(MCPPayloadGenerator.generatePingResponse(id), 200, null);
     }
 
     private static void transformMcpRequest(MessageContext messageContext, Object id, URLMapping extendedOperation,
