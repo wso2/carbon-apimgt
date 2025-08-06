@@ -120,5 +120,6 @@ public class APIConstants {
         public static final String DEFAULT_SANDBOX_ENDPOINT_NAME = "DEFAULT SANDBOX ENDPOINT";
         public static final String ENDPOINT_SEQUENCE = "_EndpointsSeq";
         public static final String REQUEST_TIMEOUT = "REQUEST_TIMEOUT";
+        public static final String HTTP_PROTOCOL_TYPE = "HTTP";
     }
 }
