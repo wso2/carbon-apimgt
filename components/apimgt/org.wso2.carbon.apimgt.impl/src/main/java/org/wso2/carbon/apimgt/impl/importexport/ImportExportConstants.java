@@ -208,7 +208,7 @@ public final class ImportExportConstants {
 
     public static final String TYPE_POLICY_SPECIFICATION = "operation_policy_specification";
 
-    public static final String APIM_VERSION = "v4.5.0";
+    public static final String APIM_VERSION = "v4.6.0";
 
     public static final String ENDPOINT_CONFIG = "endpointConfig";
 
