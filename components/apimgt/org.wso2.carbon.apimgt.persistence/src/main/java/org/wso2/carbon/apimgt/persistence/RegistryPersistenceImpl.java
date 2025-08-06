@@ -2136,7 +2136,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
 
-            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(
+                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             String visibleRoles = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
@@ -4071,10 +4072,18 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     throw new APIPersistenceException(errorMessage);
                 }
                 GenericArtifact artifact = getAPIArtifact(apiId, userRegistry);
-                artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, providerName);
+                if (log.isDebugEnabled()) {
+                    log.debug("Changing the provider name of API with id: " + apiId + " to " + providerName);
+                }
+                artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, RegistryPersistenceUtil
+                        .replaceEmailDomain(providerName));
                 artifactManager.updateGenericArtifact(artifact);
                 userRegistry.commitTransaction();
-                transactionCommitted=true;
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully changed the provider name of API with id: " + apiId + " " +
+                            "to " + providerName);
+                }
+                transactionCommitted = true;
             }
         } catch (RegistryException e) {
             throw new APIPersistenceException("Error while Changing the api Provider", e);

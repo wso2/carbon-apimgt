@@ -493,6 +493,7 @@
       {% if apim.key_manager.enable_application_scopes_for_resident_km is defined %}
       <EnableApplicationScopesForResidentKM>{{apim.key_manager.enable_application_scopes_for_resident_km}}</EnableApplicationScopesForResidentKM>
       {% endif %}
+      <SkipCreateResidentKeyManager>{{apim.key_manager.skip_create_resident_key_manager}}</SkipCreateResidentKeyManager>
     </APIKeyValidator>
 
 
@@ -1716,6 +1717,7 @@
             <Sequence>_cors_request_handler_.xml</Sequence>
             <Sequence>dispatchSeq.xml</Sequence>
             <Sequence>fault.xml</Sequence>
+            <Sequence>guardrail_fault.xml</Sequence>
             <Sequence>_graphql_failure_handler_.xml</Sequence>
             <Sequence>main.xml</Sequence>
             <Sequence>outDispatchSeq.xml</Sequence>
@@ -1826,6 +1828,16 @@
             </CustomProperties>
         </PropertyConfigurations>
       {% endif %}
+
+      <TenantSharingConfigs>
+        {% for tenant_sharing_config in apim.tenant_sharing %}
+        <TenantSharingConfig type="{{tenant_sharing_config.type}}">
+            {% for key,value in tenant_sharing_config.properties.items() %}
+            <Property name="{{key}}">{{value}}</Property>
+            {% endfor %}
+        </TenantSharingConfig>
+        {% endfor %}
+      </TenantSharingConfigs>
 
       <Hashing>
         <HashingAlgorithm>{{apim.hashing.hashing_algorithm}}</HashingAlgorithm>
