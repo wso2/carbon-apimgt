@@ -564,7 +564,7 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
         public static final String MCP_DEFAULT_FEATURE_TYPE = "TOOL";
-        public static final String MCP_DEFAULT_BACKEND_API_NAME = "Default API";
+        public static final String MCP_DEFAULT_BACKEND_API_NAME = "Default Backend";
 
         public static final String OPENAI_EMBEDDING_PROVIDER_TYPE = "openai";
         public static final String AZURE_OPENAI_EMBEDDING_PROVIDER_TYPE = "azure-openai";

@@ -80,9 +80,9 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
-import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
-import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
@@ -923,10 +923,10 @@ public class OAS2Parser extends APIDefinition {
             if (!APISpecParserConstants.HTTP_VERB_TOOL.equalsIgnoreCase(resource.getVerb())) {
                 continue;
             }
-            if (resource.getBackendAPIOperationMapping() == null) {
+            if (resource.getBackendOperationMapping() == null) {
                 continue;
             }
-            BackendOperation backendOp = resource.getBackendAPIOperationMapping().getBackendOperation();
+            BackendOperation backendOp = resource.getBackendOperationMapping().getBackendOperation();
             if (backendOp == null || backendOp.getTarget() == null || backendOp.getVerb() == null) {
                 log.warn("Skipping resource with incomplete backend operation: " + resource);
                 continue;
@@ -950,10 +950,10 @@ public class OAS2Parser extends APIDefinition {
                                                              String path, String method) {
 
         SwaggerData.Resource resource = pathResources.get(method.toUpperCase());
-        if (resource == null || resource.getBackendAPIOperationMapping() == null) {
+        if (resource == null || resource.getBackendOperationMapping() == null) {
             return null;
         }
-        BackendOperation backendOp = resource.getBackendAPIOperationMapping().getBackendOperation();
+        BackendOperation backendOp = resource.getBackendOperationMapping().getBackendOperation();
         if (backendOp == null || backendOp.getTarget() == null || backendOp.getVerb() == null) {
             return null;
         }
@@ -2259,12 +2259,12 @@ public class OAS2Parser extends APIDefinition {
             }
             BackendOperation backendOperation = null;
             if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
-                BackendAPIOperationMapping mapping = template.getBackendOperationMapping();
+                BackendOperationMapping mapping = template.getBackendOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
             } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
-                ExistingAPIOperationMapping mapping = template.getExistingAPIOperationMapping();
+                APIOperationMapping mapping = template.getExistingAPIOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
@@ -2315,12 +2315,12 @@ public class OAS2Parser extends APIDefinition {
             BackendOperation backendOperation = null;
 
             if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
-                BackendAPIOperationMapping mapping = template.getBackendOperationMapping();
+                BackendOperationMapping mapping = template.getBackendOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
             } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
-                ExistingAPIOperationMapping mapping = template.getExistingAPIOperationMapping();
+                APIOperationMapping mapping = template.getExistingAPIOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
@@ -2399,12 +2399,12 @@ public class OAS2Parser extends APIDefinition {
         backendOperation.setTarget(match.path);
 
         if (uriTemplate.getBackendOperationMapping() != null) {
-            BackendAPIOperationMapping backendOperationMap = new BackendAPIOperationMapping();
-            backendOperationMap.setBackendApiId(backendId);
+            BackendOperationMapping backendOperationMap = new BackendOperationMapping();
+            backendOperationMap.setBackendId(backendId);
             backendOperationMap.setBackendOperation(backendOperation);
             uriTemplate.setBackendOperationMapping(backendOperationMap);
         } else if (uriTemplate.getExistingAPIOperationMapping() != null) {
-            ExistingAPIOperationMapping apiOperationMap = new ExistingAPIOperationMapping();
+            APIOperationMapping apiOperationMap = new APIOperationMapping();
             apiOperationMap.setApiUuid(refApiId.getUUID());
             apiOperationMap.setApiName(refApiId.getApiName());
             apiOperationMap.setApiVersion(refApiId.getVersion());

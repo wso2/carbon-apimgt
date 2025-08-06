@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
@@ -38,14 +37,14 @@ import java.util.List;
  * A unified wrapper to abstract differences between {@link APIDTO} and {@link MCPServerDTO}
  * and provide a common interface for accessing shared properties.
  */
-public class APIDTOWrapper {
+public class APIDTOTypeWrapper {
 
-    private static final Log log = LogFactory.getLog(APIDTOWrapper.class);
+    private static final Log log = LogFactory.getLog(APIDTOTypeWrapper.class);
 
     private final APIDTO apiDto;
     private final MCPServerDTO mcpServerDto;
 
-    public APIDTOWrapper(APIDTO apiDto) {
+    public APIDTOTypeWrapper(APIDTO apiDto) {
 
         if (apiDto == null) {
             throw new IllegalArgumentException("APIDTO cannot be null");
@@ -54,7 +53,7 @@ public class APIDTOWrapper {
         this.mcpServerDto = null;
     }
 
-    public APIDTOWrapper(MCPServerDTO mcpServerDto) {
+    public APIDTOTypeWrapper(MCPServerDTO mcpServerDto) {
 
         if (mcpServerDto == null) {
             throw new IllegalArgumentException("MCPServerDTO cannot be null");
@@ -171,12 +170,17 @@ public class APIDTOWrapper {
 
         if (isAPIDTO()) {
             apiDto.setType(type);
+        } else {
+            throw new UnsupportedOperationException("Type is not applicable for MCPServerDTO");
         }
     }
 
-    public List<APIOperationsDTO> getOperations() {
+    public boolean isOperationsEmpty() {
 
-        return isAPIDTO() ? apiDto.getOperations() : mcpServerDto.getOperations();
+        if (isAPIDTO()) {
+            return apiDto == null || apiDto.getOperations() == null || apiDto.getOperations().isEmpty();
+        }
+        return mcpServerDto == null || mcpServerDto.getOperations() == null || mcpServerDto.getOperations().isEmpty();
     }
 
     public String getAuthorizationHeader() {
@@ -209,7 +213,7 @@ public class APIDTOWrapper {
 
     public String getApiThrottlingPolicy() {
 
-        return isAPIDTO() ? apiDto.getApiThrottlingPolicy() : mcpServerDto.getApiThrottlingPolicy();
+        return isAPIDTO() ? apiDto.getApiThrottlingPolicy() : mcpServerDto.getThrottlingPolicy();
     }
 
     public List<String> getKeyManagers() {
@@ -234,7 +238,7 @@ public class APIDTOWrapper {
 
     public boolean isEgress() {
 
-        return isAPIDTO() ? apiDto.isEgress() : mcpServerDto.isEgress();
+        return isAPIDTO() ? apiDto.isEgress() : null;
     }
 
     public boolean isVisibilityRestricted() {
@@ -284,7 +288,7 @@ public class APIDTOWrapper {
 
     public List<APIInfoAdditionalPropertiesDTO> getAdditionalProperties() {
 
-        return isAPIDTO() ? apiDto.getAdditionalProperties() : mcpServerDto.getAdditionalProperties();
+        return isAPIDTO() ? apiDto.getAdditionalProperties() : null;
     }
 
     public void setLifeCycleStatus(String status) {
@@ -298,7 +302,7 @@ public class APIDTOWrapper {
 
     public Object getEndpointConfig() {
 
-        return isAPIDTO() ? apiDto.getEndpointConfig() : mcpServerDto.getBackendAPIEndpointConfig();
+        return isAPIDTO() ? apiDto.getEndpointConfig() : mcpServerDto.getEndpointConfig();
     }
 
     public void setEndpointConfig(Object endpointConfig) {
@@ -306,13 +310,13 @@ public class APIDTOWrapper {
         if (isAPIDTO()) {
             apiDto.setEndpointConfig(endpointConfig);
         } else {
-            mcpServerDto.setBackendAPIEndpointConfig(endpointConfig);
+            mcpServerDto.setEndpointConfig(endpointConfig);
         }
     }
 
     public List<MediationPolicyDTO> getMediationPolicies() {
 
-        return isAPIDTO() ? apiDto.getMediationPolicies() : mcpServerDto.getMediationPolicies();
+        return isAPIDTO() ? apiDto.getMediationPolicies() : null;
     }
 
     public void setMediationPolicies(List<MediationPolicyDTO> policies) {
@@ -320,7 +324,7 @@ public class APIDTOWrapper {
         if (isAPIDTO()) {
             apiDto.setMediationPolicies(policies);
         } else {
-            mcpServerDto.setMediationPolicies(policies);
+            throw new UnsupportedOperationException("Mediation policies are not supported for MCPServerDTO");
         }
     }
 

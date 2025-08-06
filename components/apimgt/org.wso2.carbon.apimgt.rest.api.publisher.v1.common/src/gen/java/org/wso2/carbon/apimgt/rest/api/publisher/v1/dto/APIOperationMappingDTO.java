@@ -19,7 +19,7 @@ import javax.validation.Valid;
 
 
 
-public class ExistingAPIOperationMappingDTO   {
+public class APIOperationMappingDTO   {
   
     private String apiId = null;
     private String apiName = null;
@@ -29,7 +29,7 @@ public class ExistingAPIOperationMappingDTO   {
   /**
    * UUID of the referenced API 
    **/
-  public ExistingAPIOperationMappingDTO apiId(String apiId) {
+  public APIOperationMappingDTO apiId(String apiId) {
     this.apiId = apiId;
     return this;
   }
@@ -46,7 +46,7 @@ public class ExistingAPIOperationMappingDTO   {
 
   /**
    **/
-  public ExistingAPIOperationMappingDTO apiName(String apiName) {
+  public APIOperationMappingDTO apiName(String apiName) {
     this.apiName = apiName;
     return this;
   }
@@ -63,7 +63,7 @@ public class ExistingAPIOperationMappingDTO   {
 
   /**
    **/
-  public ExistingAPIOperationMappingDTO apiVersion(String apiVersion) {
+  public APIOperationMappingDTO apiVersion(String apiVersion) {
     this.apiVersion = apiVersion;
     return this;
   }
@@ -80,7 +80,7 @@ public class ExistingAPIOperationMappingDTO   {
 
   /**
    **/
-  public ExistingAPIOperationMappingDTO backendOperation(BackendOperationDTO backendOperation) {
+  public APIOperationMappingDTO backendOperation(BackendOperationDTO backendOperation) {
     this.backendOperation = backendOperation;
     return this;
   }
@@ -105,11 +105,11 @@ public class ExistingAPIOperationMappingDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ExistingAPIOperationMappingDTO existingAPIOperationMapping = (ExistingAPIOperationMappingDTO) o;
-    return Objects.equals(apiId, existingAPIOperationMapping.apiId) &&
-        Objects.equals(apiName, existingAPIOperationMapping.apiName) &&
-        Objects.equals(apiVersion, existingAPIOperationMapping.apiVersion) &&
-        Objects.equals(backendOperation, existingAPIOperationMapping.backendOperation);
+    APIOperationMappingDTO apIOperationMapping = (APIOperationMappingDTO) o;
+    return Objects.equals(apiId, apIOperationMapping.apiId) &&
+        Objects.equals(apiName, apIOperationMapping.apiName) &&
+        Objects.equals(apiVersion, apIOperationMapping.apiVersion) &&
+        Objects.equals(backendOperation, apIOperationMapping.backendOperation);
   }
 
   @Override
@@ -120,7 +120,7 @@ public class ExistingAPIOperationMappingDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ExistingAPIOperationMappingDTO {\n");
+    sb.append("class APIOperationMappingDTO {\n");
     
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");

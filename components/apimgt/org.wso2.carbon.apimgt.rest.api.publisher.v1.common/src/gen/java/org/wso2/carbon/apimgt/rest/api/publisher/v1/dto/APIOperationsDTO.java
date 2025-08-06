@@ -7,8 +7,6 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendAPIOperationMappingDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ExistingAPIOperationMappingDTO;
 import javax.validation.constraints.*;
 
 
@@ -37,11 +35,7 @@ public class APIOperationsDTO   {
     private Boolean amznResourceContentEncode = null;
     private String payloadSchema = null;
     private String uriMapping = null;
-    private String schemaDefinition = null;
-    private String description = null;
     private APIOperationPoliciesDTO operationPolicies = null;
-    private BackendAPIOperationMappingDTO backendAPIOperationMapping = null;
-    private ExistingAPIOperationMappingDTO existingAPIOperationMapping = null;
 
   /**
    **/
@@ -249,40 +243,6 @@ public class APIOperationsDTO   {
 
   /**
    **/
-  public APIOperationsDTO schemaDefinition(String schemaDefinition) {
-    this.schemaDefinition = schemaDefinition;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-  @JsonProperty("schemaDefinition")
-  public String getSchemaDefinition() {
-    return schemaDefinition;
-  }
-  public void setSchemaDefinition(String schemaDefinition) {
-    this.schemaDefinition = schemaDefinition;
-  }
-
-  /**
-   **/
-  public APIOperationsDTO description(String description) {
-    this.description = description;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "this is an operation of get orderId", value = "")
-  @JsonProperty("description")
-  public String getDescription() {
-    return description;
-  }
-  public void setDescription(String description) {
-    this.description = description;
-  }
-
-  /**
-   **/
   public APIOperationsDTO operationPolicies(APIOperationPoliciesDTO operationPolicies) {
     this.operationPolicies = operationPolicies;
     return this;
@@ -297,42 +257,6 @@ public class APIOperationsDTO   {
   }
   public void setOperationPolicies(APIOperationPoliciesDTO operationPolicies) {
     this.operationPolicies = operationPolicies;
-  }
-
-  /**
-   **/
-  public APIOperationsDTO backendAPIOperationMapping(BackendAPIOperationMappingDTO backendAPIOperationMapping) {
-    this.backendAPIOperationMapping = backendAPIOperationMapping;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("backendAPIOperationMapping")
-  public BackendAPIOperationMappingDTO getBackendAPIOperationMapping() {
-    return backendAPIOperationMapping;
-  }
-  public void setBackendAPIOperationMapping(BackendAPIOperationMappingDTO backendAPIOperationMapping) {
-    this.backendAPIOperationMapping = backendAPIOperationMapping;
-  }
-
-  /**
-   **/
-  public APIOperationsDTO existingAPIOperationMapping(ExistingAPIOperationMappingDTO existingAPIOperationMapping) {
-    this.existingAPIOperationMapping = existingAPIOperationMapping;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("existingAPIOperationMapping")
-  public ExistingAPIOperationMappingDTO getExistingAPIOperationMapping() {
-    return existingAPIOperationMapping;
-  }
-  public void setExistingAPIOperationMapping(ExistingAPIOperationMappingDTO existingAPIOperationMapping) {
-    this.existingAPIOperationMapping = existingAPIOperationMapping;
   }
 
 
@@ -357,16 +281,12 @@ public class APIOperationsDTO   {
         Objects.equals(amznResourceContentEncode, apIOperations.amznResourceContentEncode) &&
         Objects.equals(payloadSchema, apIOperations.payloadSchema) &&
         Objects.equals(uriMapping, apIOperations.uriMapping) &&
-        Objects.equals(schemaDefinition, apIOperations.schemaDefinition) &&
-        Objects.equals(description, apIOperations.description) &&
-        Objects.equals(operationPolicies, apIOperations.operationPolicies) &&
-        Objects.equals(backendAPIOperationMapping, apIOperations.backendAPIOperationMapping) &&
-        Objects.equals(existingAPIOperationMapping, apIOperations.existingAPIOperationMapping);
+        Objects.equals(operationPolicies, apIOperations.operationPolicies);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds, amznResourceName, amznResourceTimeout, amznResourceContentEncode, payloadSchema, uriMapping, schemaDefinition, description, operationPolicies, backendAPIOperationMapping, existingAPIOperationMapping);
+    return Objects.hash(id, target, verb, authType, throttlingPolicy, scopes, usedProductIds, amznResourceName, amznResourceTimeout, amznResourceContentEncode, payloadSchema, uriMapping, operationPolicies);
   }
 
   @Override
@@ -386,11 +306,7 @@ public class APIOperationsDTO   {
     sb.append("    amznResourceContentEncode: ").append(toIndentedString(amznResourceContentEncode)).append("\n");
     sb.append("    payloadSchema: ").append(toIndentedString(payloadSchema)).append("\n");
     sb.append("    uriMapping: ").append(toIndentedString(uriMapping)).append("\n");
-    sb.append("    schemaDefinition: ").append(toIndentedString(schemaDefinition)).append("\n");
-    sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    operationPolicies: ").append(toIndentedString(operationPolicies)).append("\n");
-    sb.append("    backendAPIOperationMapping: ").append(toIndentedString(backendAPIOperationMapping)).append("\n");
-    sb.append("    existingAPIOperationMapping: ").append(toIndentedString(existingAPIOperationMapping)).append("\n");
     sb.append("}");
     return sb.toString();
   }

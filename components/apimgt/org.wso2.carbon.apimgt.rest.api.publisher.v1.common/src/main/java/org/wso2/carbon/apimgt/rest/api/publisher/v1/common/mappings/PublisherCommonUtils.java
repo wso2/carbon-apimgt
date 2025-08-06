@@ -70,15 +70,15 @@ import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.BackendAPI;
+import org.wso2.carbon.apimgt.api.model.Backend;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
-import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.Label;
 import org.wso2.carbon.apimgt.api.model.LifeCycleEvent;
@@ -335,17 +335,19 @@ public class PublisherCommonUtils {
      * @throws APIManagementException If an error occurs while updating the API and API definition
      * @throws FaultGatewaysException If an error occurs while updating manage of an existing API
      */
-    public static API updateApi(API originalAPI, APIDTOWrapper apiDtoToUpdate, APIProvider apiProvider,
+    public static API updateApi(API originalAPI, APIDTOTypeWrapper apiDtoToUpdate, APIProvider apiProvider,
                                 String[] tokenScopes, OrganizationInfo orginfo)
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
 
         API apiToUpdate;
         if (apiDtoToUpdate.isAPIDTO()) {
-            apiToUpdate = prepareForUpdateApi(originalAPI, (APIDTO) apiDtoToUpdate.getWrappedDTO(), apiProvider,
-                    tokenScopes);
+            apiToUpdate = prepareForUpdateApi(
+                    originalAPI, (APIDTO) apiDtoToUpdate.getWrappedDTO(), apiProvider, tokenScopes
+            );
         } else if (apiDtoToUpdate.isMCPServerDTO()) {
-            apiToUpdate = prepareForUpdateApi(originalAPI, (MCPServerDTO) apiDtoToUpdate.getWrappedDTO(), apiProvider,
-                    tokenScopes);
+            apiToUpdate = prepareForUpdateApi(
+                    originalAPI, (MCPServerDTO) apiDtoToUpdate.getWrappedDTO(), apiProvider, tokenScopes
+            );
         } else {
             throw new APIManagementException("Unsupported DTO Type in wrapper");
         }
@@ -450,28 +452,21 @@ public class PublisherCommonUtils {
     private static void handleDirectEndpointSubtype(API apiToUpdate, API originalAPI, APIProvider apiProvider)
             throws APIManagementException {
 
-        List<BackendAPI> backendApis =
-                apiProvider.getMCPServerBackendAPIs(apiToUpdate.getUuid(), originalAPI.getOrganization());
+        populateExistingSchemaDefinitions(apiToUpdate, originalAPI.getUriTemplates());
 
-        if (backendApis.isEmpty()) {
-            throw new APIManagementException("No backend API found for MCP-server subtype "
+        List<Backend> backends =
+                apiProvider.getMCPServerBackends(apiToUpdate.getUuid(), originalAPI.getOrganization());
+
+        if (backends.isEmpty()) {
+            throw new APIManagementException("No backend API found for MCP server with UUID: "
                     + apiToUpdate.getUuid(), ExceptionCodes.API_NOT_FOUND);
         }
-        BackendAPI backendAPI = backendApis.get(0);
-
-        APIDefinition definitionParser = OASParserUtil.getOASParser(backendAPI.getApiDefinition());
-        String newDefinition = definitionParser.generateAPIDefinitionForBackendAPI(new SwaggerData(apiToUpdate),
-                backendAPI.getApiDefinition());
-        backendAPI.setApiDefinition(newDefinition);
-
-        apiProvider.updateMCPServerBackendAPI(originalAPI.getUuid(), backendAPI, originalAPI.getOrganization());
-
-        syncSchemaDefinitions(apiToUpdate, originalAPI.getUriTemplates());
+        Backend backend = backends.get(0);
 
         Set<URITemplate> updatedTemplates = updateTemplatesFromDefinition(
-                backendAPI.getApiDefinition(),
+                backend.getDefinition(),
                 null,
-                backendAPI.getBackendApiId(),
+                backend.getId(),
                 originalAPI.getSubtype(),
                 apiToUpdate.getUriTemplates()
         );
@@ -495,7 +490,7 @@ public class PublisherCommonUtils {
             throw new APIManagementException("No URI templates defined for existing API subtype.");
         }
 
-        ExistingAPIOperationMapping mapping = uriTemplates.iterator().next().getExistingAPIOperationMapping();
+        APIOperationMapping mapping = uriTemplates.iterator().next().getExistingAPIOperationMapping();
         if (mapping == null) {
             throw new APIManagementException("API operation mapping is missing in the URI template.");
         }
@@ -518,7 +513,7 @@ public class PublisherCommonUtils {
      * @param apiToUpdate       API to update with schema definitions.
      * @param existingTemplates Existing URI templates to find matching schema definitions.
      */
-    private static void syncSchemaDefinitions(API apiToUpdate, Set<URITemplate> existingTemplates) {
+    private static void populateExistingSchemaDefinitions(API apiToUpdate, Set<URITemplate> existingTemplates) {
 
         for (URITemplate uriTemplate : apiToUpdate.getUriTemplates()) {
             if (!APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE.equals(uriTemplate.getHTTPVerb())) {
@@ -574,35 +569,17 @@ public class PublisherCommonUtils {
      * @return Referenced API object.
      * @throws APIManagementException If an error occurs while fetching the referenced API.
      */
-    private static API fetchReferencedApi(ExistingAPIOperationMapping mapping, APIProvider apiProvider,
+    private static API fetchReferencedApi(APIOperationMapping mapping, APIProvider apiProvider,
                                           String organization) throws APIManagementException {
 
         String uuid = mapping.getApiUuid();
-        String name = mapping.getApiName();
-        String version = mapping.getApiVersion();
-
         try {
             if (uuid != null && !uuid.isEmpty()) {
                 return apiProvider.getAPIbyUUID(uuid, organization);
             }
-
-            if (name != null && !name.isEmpty() && version != null && !version.isEmpty()) {
-                String query = "name:" + name + " version:" + version;
-                Map<String, Object> searchResult =
-                        apiProvider.searchPaginatedAPIs(query, organization, 0, 1);
-                Object apiList = searchResult.get("apis");
-                if (apiList instanceof List && !((List<?>) apiList).isEmpty()) {
-                    return (API) ((List<?>) apiList).get(0);
-                }
-
-                throw new APIManagementException("Referenced API not found for name=" + name + ", version=" + version,
-                        ExceptionCodes.API_NOT_FOUND);
-            }
-
             throw new APIManagementException("Insufficient information to locate referenced API.");
         } catch (IndexOutOfBoundsException e) {
-            throw new APIManagementException("Referenced API search returned no results for: " + name + " " + version,
-                    e);
+            throw new APIManagementException("Referenced API search returned no results for: " + uuid, e);
         }
     }
 
@@ -729,10 +706,10 @@ public class PublisherCommonUtils {
 
         // OAuth 2.0 backend protection: API Key and API Secret encryption
         encryptEndpointSecurityOAuthCredentials(endpointConfig, cryptoUtil, oldProductionApiSecret, oldSandboxApiSecret,
-                oldProductionCustomParams, oldSandboxCustomParams, new APIDTOWrapper(apiDtoToUpdate));
+                oldProductionCustomParams, oldSandboxCustomParams, new APIDTOTypeWrapper(apiDtoToUpdate));
 
         encryptEndpointSecurityApiKeyCredentials(endpointConfig, cryptoUtil, oldProductionApiKeyValue,
-                oldSandboxApiKeyValue, new APIDTOWrapper(apiDtoToUpdate));
+                oldSandboxApiKeyValue, new APIDTOTypeWrapper(apiDtoToUpdate));
         // update endpointConfig with the provided custom sequence
         if (endpointConfig != null) {
             if (APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
@@ -1010,7 +987,7 @@ public class PublisherCommonUtils {
                     + " as the token information hasn't been correctly set internally",
                     ExceptionCodes.TOKEN_SCOPES_NOT_SET);
         }
-        APIUtil.validateAPIEndpointConfig(apiDtoToUpdate.getBackendAPIEndpointConfig(), APIConstants.API_TYPE_MCP,
+        APIUtil.validateAPIEndpointConfig(apiDtoToUpdate.getEndpointConfig(), APIConstants.API_TYPE_MCP,
                 apiDtoToUpdate.getName());
         if (apiDtoToUpdate.getVisibility() == MCPServerDTO.VisibilityEnum.RESTRICTED && apiDtoToUpdate.getVisibleRoles()
                 .isEmpty()) {
@@ -1124,14 +1101,6 @@ public class PublisherCommonUtils {
             String errorMessage = validateRoles(apiDtoToUpdate.getVisibleRoles());
             if (!errorMessage.isEmpty()) {
                 throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_USER_ROLES);
-            }
-        }
-        if (apiDtoToUpdate.getAdditionalProperties() != null) {
-            String errorMessage = validateAdditionalProperties(apiDtoToUpdate.getAdditionalProperties());
-            if (!errorMessage.isEmpty()) {
-                throw new APIManagementException(errorMessage, ExceptionCodes
-                        .from(ExceptionCodes.INVALID_ADDITIONAL_PROPERTIES, apiDtoToUpdate.getName(),
-                                apiDtoToUpdate.getVersion()));
             }
         }
         // Validate if resources are empty
@@ -1257,7 +1226,7 @@ public class PublisherCommonUtils {
      * @param cryptoUtil               encryption utility
      * @param oldProductionApiKeyValue previous production key
      * @param oldSandboxApiKeyValue    previous sandbox key
-     * @param apiDtoWrapper            APIDTOWrapper to update can be aither APIDTO or MCPServerDTO
+     * @param apiDtoTypeWrapper            APIDTOWrapper to update can be aither APIDTO or MCPServerDTO
      * @throws CryptoException        on encryption failure
      * @throws APIManagementException on invalid config or missing key
      */
@@ -1265,11 +1234,11 @@ public class PublisherCommonUtils {
                                                                 CryptoUtil cryptoUtil,
                                                                 String oldProductionApiKeyValue,
                                                                 String oldSandboxApiKeyValue,
-                                                                APIDTOWrapper apiDtoWrapper)
+                                                                APIDTOTypeWrapper apiDtoTypeWrapper)
             throws CryptoException, APIManagementException {
 
         encryptApiKeyInternal(endpointConfig, cryptoUtil, oldProductionApiKeyValue, oldSandboxApiKeyValue,
-                apiDtoWrapper::setEndpointConfig);
+                apiDtoTypeWrapper::setEndpointConfig);
     }
 
     /**
@@ -1395,7 +1364,7 @@ public class PublisherCommonUtils {
      * @param oldSandboxApiSecret       Existing sandbox API secret
      * @param oldProductionCustomParams Existing production custom parameters
      * @param oldSandboxCustomParams    Existing sandbox custom parameters
-     * @param apiDtoWrapper            APIDTOWrapper to update can be aither APIDTO or MCPServerDTO
+     * @param apiDtoTypeWrapper            APIDTOWrapper to update can be aither APIDTO or MCPServerDTO
      * @throws CryptoException        If an error occurs while encrypting and base64 encoding
      * @throws APIManagementException If an error occurs due to a problem in the endpointConfig payload
      * @throws ParseException         If an error occurs while parsing JSON strings
@@ -1405,11 +1374,11 @@ public class PublisherCommonUtils {
                                                                String oldSandboxApiSecret,
                                                                Object oldProductionCustomParams,
                                                                Object oldSandboxCustomParams,
-                                                               APIDTOWrapper apiDtoWrapper)
+                                                               APIDTOTypeWrapper apiDtoTypeWrapper)
             throws CryptoException, APIManagementException, ParseException {
 
         encryptEndpointSecurityOAuthInternal(endpointConfig, cryptoUtil, oldProductionApiSecret, oldSandboxApiSecret,
-                oldProductionCustomParams, oldSandboxCustomParams, apiDtoWrapper::setEndpointConfig);
+                oldProductionCustomParams, oldSandboxCustomParams, apiDtoTypeWrapper::setEndpointConfig);
     }
 
     /**
@@ -2093,7 +2062,7 @@ public class PublisherCommonUtils {
         }
 
         // validate sandbox and production endpoints
-        if (!PublisherCommonUtils.validateEndpoints(new APIDTOWrapper(apiDto))) {
+        if (!PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto))) {
             throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                     ExceptionCodes.INVALID_ENDPOINT_URL);
         }
@@ -2112,10 +2081,10 @@ public class PublisherCommonUtils {
 
         // OAuth 2.0 backend protection: API Key and API Secret encryption
         encryptEndpointSecurityOAuthCredentials(endpointConfig, cryptoUtil, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, new APIDTOWrapper(apiDto));
+                StringUtils.EMPTY, StringUtils.EMPTY, new APIDTOTypeWrapper(apiDto));
 
         encryptEndpointSecurityApiKeyCredentials(endpointConfig, cryptoUtil, StringUtils.EMPTY, StringUtils.EMPTY,
-                new APIDTOWrapper(apiDto));
+                new APIDTOTypeWrapper(apiDto));
 
         // AWS Lambda: secret key encryption while creating the API
         if (apiDto.getEndpointConfig() != null) {
@@ -2128,12 +2097,13 @@ public class PublisherCommonUtils {
                 }
             }
         }
-        API apiToAdd = prepareToCreateAPIByDTO(new APIDTOWrapper(apiDto), apiProvider, username, organization);
+        API apiToAdd = prepareToCreateAPIByDTO(new APIDTOTypeWrapper(apiDto), apiProvider, username, organization);
         return addAPIWithGeneratedSwaggerDefinition(apiToAdd, oasVersion, username, organization, orgInfo, isAsyncAPI);
     }
 
-    public static API addAPIWithGeneratedSwaggerDefinition(APIDTOWrapper dtoWrapper, String oasVersion, String username,
-                                                           String organization, OrganizationInfo orgInfo)
+    public static API addAPIWithGeneratedSwaggerDefinition(APIDTOTypeWrapper dtoWrapper, String oasVersion,
+                                                           String username, String organization,
+                                                           OrganizationInfo orgInfo)
             throws APIManagementException, CryptoException, ParseException {
 
         String name = dtoWrapper.getName();
@@ -2346,30 +2316,15 @@ public class PublisherCommonUtils {
         }
 
         String backendApiUuid = template.getExistingAPIOperationMapping().getApiUuid();
-        String backendApiName = template.getExistingAPIOperationMapping().getApiName();
-        String backendApiVersion = template.getExistingAPIOperationMapping().getApiVersion();
 
-        API refApi = null;
-        if (StringUtils.isNotEmpty(backendApiUuid)) {
-            refApi = apiProvider.getAPIbyUUID(backendApiUuid, organization);
-        } else if (StringUtils.isNotEmpty(backendApiName) && StringUtils.isNotEmpty(backendApiVersion)) {
-            String query = "name:" + backendApiName + " version:" + backendApiVersion;
-            Map<String, Object> searchResult = apiProvider.searchPaginatedAPIs(query, organization, 0, 1);
-            Object result = searchResult.get("apis");
-            if (result instanceof List && !((List<?>) result).isEmpty()) {
-                Object apiObj = ((List<?>) result).get(0);
-                if (apiObj instanceof API) {
-                    refApi = (API) apiObj;
-                }
-            }
-        }
-
+        API refApi = StringUtils.isNotEmpty(backendApiUuid)
+                ? apiProvider.getAPIbyUUID(backendApiUuid, organization)
+                : null;
         if (refApi == null) {
             throw new APIManagementException(
-                    "Referenced API not found: " + backendApiName + " " + backendApiVersion,
+                    String.format("Referenced API not found: %s", backendApiUuid),
                     ExceptionCodes.API_NOT_FOUND);
         }
-
         return generateMCPFeatures(apiToAdd.getSubtype(), refApi.getSwaggerDefinition(),
                 apiToAdd.getUriTemplates(), refApi.getId(), oasParser);
     }
@@ -2423,7 +2378,7 @@ public class PublisherCommonUtils {
      * @param dtoWrapper the wrapper for the DTO
      * @return validity of the endpoint configurations
      */
-    public static boolean validateEndpointConfigs(APIDTOWrapper dtoWrapper) {
+    public static boolean validateEndpointConfigs(APIDTOTypeWrapper dtoWrapper) {
 
         return validateEndpointConfigs((Map) dtoWrapper.getEndpointConfig());
     }
@@ -2497,7 +2452,7 @@ public class PublisherCommonUtils {
      * @return validity of URLs found within the endpoint configurations of the DTO
      * @throws APIManagementException if an error occurs during validation
      */
-    public static boolean validateEndpoints(APIDTOWrapper dtoWrapper) throws APIManagementException {
+    public static boolean validateEndpoints(APIDTOTypeWrapper dtoWrapper) throws APIManagementException {
 
         Map<String, Object> configMap = (Map<String, Object>) dtoWrapper.getEndpointConfig();
         if (configMap == null) {
@@ -2842,86 +2797,86 @@ public class PublisherCommonUtils {
     /**
      * Prepares the API Model object to be created using the DTO object.
      *
-     * @param apiDtoWrapper     APIDTOWrapper of the API
+     * @param apiDtoTypeWrapper     APIDTOWrapper of the API
      * @param apiProvider  API Provider
      * @param username     Username
      * @param organization Organization Identifier
      * @return API object to be created
      * @throws APIManagementException Error while creating the API
      */
-    public static API prepareToCreateAPIByDTO(APIDTOWrapper apiDtoWrapper, APIProvider apiProvider, String username,
-                                              String organization) throws APIManagementException {
+    public static API prepareToCreateAPIByDTO(APIDTOTypeWrapper apiDtoTypeWrapper, APIProvider apiProvider,
+                                              String username, String organization) throws APIManagementException {
 
-        String context = apiDtoWrapper.getContext();
+        String context = apiDtoTypeWrapper.getContext();
         context = context.startsWith("/") ? context : ("/" + context);
 
         if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(organization) &&
                 !context.contains("/t/" + organization)) {
             context = "/t/" + organization + context;
         }
-        apiDtoWrapper.setContext(context);
+        apiDtoTypeWrapper.setContext(context);
 
-        if (apiDtoWrapper.getAccessControlRoles() != null) {
-            String errorMessage = PublisherCommonUtils.validateUserRoles(apiDtoWrapper.getAccessControlRoles());
+        if (apiDtoTypeWrapper.getAccessControlRoles() != null) {
+            String errorMessage = PublisherCommonUtils.validateUserRoles(apiDtoTypeWrapper.getAccessControlRoles());
 
             if (!errorMessage.isEmpty()) {
                 throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_USER_ROLES);
             }
         }
 
-        if (apiDtoWrapper.getAdditionalProperties() != null) {
+        if (apiDtoTypeWrapper.getAdditionalProperties() != null) {
             String errorMessage =
-                    PublisherCommonUtils.validateAdditionalProperties(apiDtoWrapper.getAdditionalProperties());
+                    PublisherCommonUtils.validateAdditionalProperties(apiDtoTypeWrapper.getAdditionalProperties());
             if (!errorMessage.isEmpty()) {
                 throw new APIManagementException(errorMessage, ExceptionCodes
-                        .from(ExceptionCodes.INVALID_ADDITIONAL_PROPERTIES, apiDtoWrapper.getName(),
-                                apiDtoWrapper.getVersion()));
+                        .from(ExceptionCodes.INVALID_ADDITIONAL_PROPERTIES, apiDtoTypeWrapper.getName(),
+                                apiDtoTypeWrapper.getVersion()));
             }
         }
-        if (apiDtoWrapper.getContext() == null) {
+        if (apiDtoTypeWrapper.getContext() == null) {
             throw new APIManagementException("Parameter: \"context\" cannot be null",
                     ExceptionCodes.PARAMETER_NOT_PROVIDED);
-        } else if (apiDtoWrapper.getContext().endsWith("/")) {
+        } else if (apiDtoTypeWrapper.getContext().endsWith("/")) {
             throw new APIManagementException("Context cannot end with '/' character",
-                    ExceptionCodes.from(ExceptionCodes.INVALID_CONTEXT, apiDtoWrapper.getName(),
-                            apiDtoWrapper.getVersion()));
+                    ExceptionCodes.from(ExceptionCodes.INVALID_CONTEXT, apiDtoTypeWrapper.getName(),
+                            apiDtoTypeWrapper.getVersion()));
         }
 
-        if (apiProvider.isApiNameWithDifferentCaseExist(apiDtoWrapper.getName(), organization)) {
+        if (apiProvider.isApiNameWithDifferentCaseExist(apiDtoTypeWrapper.getName(), organization)) {
             throw new APIManagementException(
-                    "API with name " + apiDtoWrapper.getName() + " already exists.",
-                    ExceptionCodes.from(ExceptionCodes.API_NAME_ALREADY_EXISTS, apiDtoWrapper.getName()));
+                    "API with name " + apiDtoTypeWrapper.getName() + " already exists.",
+                    ExceptionCodes.from(ExceptionCodes.API_NAME_ALREADY_EXISTS, apiDtoTypeWrapper.getName()));
         }
 
-        if (apiDtoWrapper.getAuthorizationHeader() == null) {
-            apiDtoWrapper.setAuthorizationHeader(
+        if (apiDtoTypeWrapper.getAuthorizationHeader() == null) {
+            apiDtoTypeWrapper.setAuthorizationHeader(
                     APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
         }
-        if (apiDtoWrapper.getAuthorizationHeader() == null) {
-            apiDtoWrapper.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
+        if (apiDtoTypeWrapper.getAuthorizationHeader() == null) {
+            apiDtoTypeWrapper.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
         }
-        if (apiDtoWrapper.getApiKeyHeader() == null) {
-            apiDtoWrapper.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
+        if (apiDtoTypeWrapper.getApiKeyHeader() == null) {
+            apiDtoTypeWrapper.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
         }
 
-        if (apiDtoWrapper.isVisibilityRestricted() && apiDtoWrapper.getVisibleRoles().isEmpty()) {
+        if (apiDtoTypeWrapper.isVisibilityRestricted() && apiDtoTypeWrapper.getVisibleRoles().isEmpty()) {
             throw new APIManagementException("Visible roles must be defined for restricted visibility",
                     ExceptionCodes.USER_ROLES_CANNOT_BE_NULL);
         }
 
-        if (apiDtoWrapper.getVisibleRoles() != null) {
-            String errorMessage = PublisherCommonUtils.validateRoles(apiDtoWrapper.getVisibleRoles());
+        if (apiDtoTypeWrapper.getVisibleRoles() != null) {
+            String errorMessage = PublisherCommonUtils.validateRoles(apiDtoTypeWrapper.getVisibleRoles());
             if (!errorMessage.isEmpty()) {
                 throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_USER_ROLES);
             }
         }
 
-        List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(apiDtoWrapper.getName(),
+        List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(apiDtoTypeWrapper.getName(),
                 username, organization);
 
         if (!apiVersions.isEmpty()) {
             for (String version : apiVersions) {
-                if (version.equalsIgnoreCase(apiDtoWrapper.getVersion())) {
+                if (version.equalsIgnoreCase(apiDtoTypeWrapper.getVersion())) {
                     if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context, organization)) {
                         throw new APIManagementException("Duplicate API context in organization",
                                 ExceptionCodes.API_ALREADY_EXISTS);
@@ -2939,13 +2894,13 @@ public class PublisherCommonUtils {
         String contextTemplate = context.contains(APIConstants.VERSION_PLACEHOLDER) ?
                 context : context + "/" + APIConstants.VERSION_PLACEHOLDER;
 
-        if (!apiProvider.isValidContext(apiDtoWrapper.getProvider(), apiDtoWrapper.getName(), contextTemplate,
+        if (!apiProvider.isValidContext(apiDtoTypeWrapper.getProvider(), apiDtoTypeWrapper.getName(), contextTemplate,
                 username, organization)) {
             throw new APIManagementException(ExceptionCodes.BLOCK_CONDITION_UNSUPPORTED_API_CONTEXT);
         }
 
         // Override provider if necessary
-        String provider = apiDtoWrapper.getProvider();
+        String provider = apiDtoTypeWrapper.getProvider();
         if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
             if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
                 provider = username;
@@ -2957,7 +2912,7 @@ public class PublisherCommonUtils {
             provider = username;
         }
 
-        List<String> tiersFromDTO = apiDtoWrapper.getPolicies();
+        List<String> tiersFromDTO = apiDtoTypeWrapper.getPolicies();
 
         //check whether the added API's tiers are all valid
         Set<Tier> definedTiers = apiProvider.getTiers();
@@ -2967,18 +2922,18 @@ public class PublisherCommonUtils {
                     "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid",
                     ExceptionCodes.TIER_NAME_INVALID);
         }
-        APIPolicy apiPolicy = apiProvider.getAPIPolicy(username, apiDtoWrapper.getApiThrottlingPolicy());
-        if (apiPolicy == null && apiDtoWrapper.getApiThrottlingPolicy() != null) {
+        APIPolicy apiPolicy = apiProvider.getAPIPolicy(username, apiDtoTypeWrapper.getApiThrottlingPolicy());
+        if (apiPolicy == null && apiDtoTypeWrapper.getApiThrottlingPolicy() != null) {
             throw new APIManagementException(
-                    "Specified policy " + apiDtoWrapper.getApiThrottlingPolicy() + " is invalid",
+                    "Specified policy " + apiDtoTypeWrapper.getApiThrottlingPolicy() + " is invalid",
                     ExceptionCodes.UNSUPPORTED_THROTTLE_LIMIT_TYPE);
         }
 
         API api;
-        if (apiDtoWrapper.isAPIDTO()) {
-            api = APIMappingUtil.fromDTOtoAPI((APIDTO) apiDtoWrapper.getWrappedDTO(), provider);
-        } else if (apiDtoWrapper.isMCPServerDTO()) {
-            api = APIMappingUtil.fromMCPServerDTOtoAPI((MCPServerDTO) apiDtoWrapper.getWrappedDTO(), provider);
+        if (apiDtoTypeWrapper.isAPIDTO()) {
+            api = APIMappingUtil.fromDTOtoAPI((APIDTO) apiDtoTypeWrapper.getWrappedDTO(), provider);
+        } else if (apiDtoTypeWrapper.isMCPServerDTO()) {
+            api = APIMappingUtil.fromMCPServerDTOtoAPI((MCPServerDTO) apiDtoTypeWrapper.getWrappedDTO(), provider);
         } else {
             throw new APIManagementException("Unsupported DTO Type in wrapper");
         }
@@ -2989,14 +2944,14 @@ public class PublisherCommonUtils {
             api.setApiOwner(provider);
         }
 
-        api.setKeyManagers(apiDtoWrapper.getKeyManagers());
-        api.setGatewayVendor(apiDtoWrapper.getGatewayVendor() != null ? apiDtoWrapper.getGatewayVendor()
+        api.setKeyManagers(apiDtoTypeWrapper.getKeyManagers());
+        api.setGatewayVendor(apiDtoTypeWrapper.getGatewayVendor() != null ? apiDtoTypeWrapper.getGatewayVendor()
                 : APIConstants.WSO2_GATEWAY_ENVIRONMENT);
         api.setOrganization(organization);
-        api.setGatewayType(apiDtoWrapper.getGatewayType());
-        api.setEgress(apiDtoWrapper.isEgress() ? 1 : 0);
-        api.setSubtype(apiDtoWrapper.getResolvedApiSubtype());
-        api.setAiConfiguration(apiDtoWrapper.getAiConfiguration());
+        api.setGatewayType(apiDtoTypeWrapper.getGatewayType());
+        api.setEgress(apiDtoTypeWrapper.isEgress() ? 1 : 0);
+        api.setSubtype(apiDtoTypeWrapper.getResolvedApiSubtype());
+        api.setAiConfiguration(apiDtoTypeWrapper.getAiConfiguration());
 
         return api;
     }
@@ -4498,7 +4453,7 @@ public class PublisherCommonUtils {
             apiDto.getPolicies().add(APIConstants.DEFAULT_SUB_POLICY_ASYNC_UNLIMITED);
             apiDto.setAsyncTransportProtocols(AsyncApiParser.getTransportProtocolsForAsyncAPI(definitionToAdd));
         }
-        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(new APIDTOWrapper(apiDto), apiProvider,
+        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(new APIDTOTypeWrapper(apiDto), apiProvider,
                 RestApiCommonUtil.getLoggedInUsername(), organization);
         if (isServiceAPI) {
             apiToAdd.setServiceInfo("key", service.getServiceKey());

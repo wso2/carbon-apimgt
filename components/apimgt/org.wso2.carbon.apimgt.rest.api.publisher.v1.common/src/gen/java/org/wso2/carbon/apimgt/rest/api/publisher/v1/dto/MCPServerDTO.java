@@ -10,15 +10,11 @@ import java.util.List;
 import java.util.Map;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APICorsConfigurationDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationPoliciesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIScopeDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIThreatProtectionPoliciesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerOperationDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerOperationPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerScopeDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubtypeConfigurationDTO;
 import javax.validation.constraints.*;
@@ -44,53 +40,18 @@ public class MCPServerDTO   {
     private String name = null;
     private String description = null;
     private String context = null;
-    private Object backendAPIEndpointConfig = null;
+    private Object endpointConfig = null;
     private String version = null;
     private String provider = null;
     @Scope(name = "apim:mcp_server_publish", description="", value ="")
     @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private String lifeCycleStatus = null;
-    private Boolean responseCachingEnabled = null;
-    private Integer cacheTimeout = null;
     private Boolean hasThumbnail = null;
     private Boolean isDefaultVersion = null;
     private Boolean isRevision = null;
-    private String revisionedApiId = null;
+    private String revisionedMCPServerId = null;
     private Integer revisionId = null;
     private Boolean enableSchemaValidation = null;
-    private Boolean enableSubscriberVerification = null;
-
-    @XmlType(name="AudienceEnum")
-    @XmlEnum(String.class)
-    public enum AudienceEnum {
-        PUBLIC("PUBLIC"),
-        SINGLE("SINGLE");
-        private String value;
-
-        AudienceEnum (String v) {
-            value = v;
-        }
-
-        public String value() {
-            return value;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
-
-        @JsonCreator
-        public static AudienceEnum fromValue(String v) {
-            for (AudienceEnum b : AudienceEnum.values()) {
-                if (String.valueOf(b.value).equals(v)) {
-                    return b;
-                }
-            }
-return null;
-        }
-    }
-    private AudienceEnum audience = null;
     private List<String> audiences = new ArrayList<String>();
     private List<String> transport = new ArrayList<String>();
     @Scope(name = "apim:mcp_server_publish", description="", value ="")
@@ -104,11 +65,10 @@ return null;
     private List<OrganizationPoliciesDTO> organizationPolicies = new ArrayList<OrganizationPoliciesDTO>();
     @Scope(name = "apim:mcp_server_publish", description="", value ="")
     @Scope(name = "apim:mcp_server_manage", description="", value ="")
-    private String apiThrottlingPolicy = null;
+    private String throttlingPolicy = null;
     private String authorizationHeader = null;
     private String apiKeyHeader = null;
     private List<String> securityScheme = new ArrayList<String>();
-    private APIMaxTpsDTO maxTps = null;
 
     @XmlType(name="VisibilityEnum")
     @XmlEnum(String.class)
@@ -151,8 +111,7 @@ return null;
     @Scope(name = "apim:mcp_server_publish", description="", value ="")
     @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private List<String> visibleOrganizations = new ArrayList<String>();
-    private List<MediationPolicyDTO> mediationPolicies = new ArrayList<MediationPolicyDTO>();
-    private APIOperationPoliciesDTO apiPolicies = null;
+    private MCPServerOperationPoliciesDTO mcpServerPolicies = null;
 
     @XmlType(name="SubscriptionAvailabilityEnum")
     @XmlEnum(String.class)
@@ -189,9 +148,6 @@ return null;
     @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private SubscriptionAvailabilityEnum subscriptionAvailability = SubscriptionAvailabilityEnum.CURRENT_TENANT;
     private List<String> subscriptionAvailableTenants = new ArrayList<String>();
-    @Scope(name = "apim:mcp_server_publish", description="", value ="")
-    @Scope(name = "apim:mcp_server_manage", description="", value ="")
-    private List<APIInfoAdditionalPropertiesDTO> additionalProperties = new ArrayList<APIInfoAdditionalPropertiesDTO>();
     @Scope(name = "apim:mcp_server_publish", description="", value ="")
     @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<String, APIInfoAdditionalPropertiesMapDTO>();
@@ -240,18 +196,16 @@ return null;
     @Scope(name = "apim:mcp_server_manage", description="", value ="")
     private String lastUpdatedTime = null;
     private SubtypeConfigurationDTO subtypeConfiguration = null;
-    private List<APIScopeDTO> scopes = new ArrayList<APIScopeDTO>();
-    private List<APIOperationsDTO> operations = new ArrayList<APIOperationsDTO>();
-    private APIThreatProtectionPoliciesDTO threatProtectionPolicies = null;
+    private List<MCPServerScopeDTO> scopes = new ArrayList<MCPServerScopeDTO>();
+    private List<MCPServerOperationDTO> operations = new ArrayList<MCPServerOperationDTO>();
     @Scope(name = "apim:mcp_server_publish", description="", value ="")
     private List<String> categories = new ArrayList<String>();
     private Object keyManagers = null;
     private String gatewayVendor = null;
     private String gatewayType = "wso2/synapse";
-    private Boolean egress = false;
 
   /**
-   * UUID of the artifact
+   * UUID of the MCP Server
    **/
   public MCPServerDTO id(String id) {
     this.id = id;
@@ -259,7 +213,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the artifact")
+  @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the MCP Server")
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -322,22 +276,22 @@ return null;
   }
 
   /**
-   * Endpoint configuration of the backend API. 
+   * Endpoint configuration of the backend. 
    **/
-  public MCPServerDTO backendAPIEndpointConfig(Object backendAPIEndpointConfig) {
-    this.backendAPIEndpointConfig = backendAPIEndpointConfig;
+  public MCPServerDTO endpointConfig(Object endpointConfig) {
+    this.endpointConfig = endpointConfig;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Endpoint configuration of the backend API. ")
+  @ApiModelProperty(value = "Endpoint configuration of the backend. ")
       @Valid
-  @JsonProperty("backendAPIEndpointConfig")
-  public Object getBackendAPIEndpointConfig() {
-    return backendAPIEndpointConfig;
+  @JsonProperty("endpointConfig")
+  public Object getEndpointConfig() {
+    return endpointConfig;
   }
-  public void setBackendAPIEndpointConfig(Object backendAPIEndpointConfig) {
-    this.backendAPIEndpointConfig = backendAPIEndpointConfig;
+  public void setEndpointConfig(Object endpointConfig) {
+    this.endpointConfig = endpointConfig;
   }
 
   /**
@@ -395,40 +349,6 @@ return null;
 
   /**
    **/
-  public MCPServerDTO responseCachingEnabled(Boolean responseCachingEnabled) {
-    this.responseCachingEnabled = responseCachingEnabled;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "true", value = "")
-  @JsonProperty("responseCachingEnabled")
-  public Boolean isResponseCachingEnabled() {
-    return responseCachingEnabled;
-  }
-  public void setResponseCachingEnabled(Boolean responseCachingEnabled) {
-    this.responseCachingEnabled = responseCachingEnabled;
-  }
-
-  /**
-   **/
-  public MCPServerDTO cacheTimeout(Integer cacheTimeout) {
-    this.cacheTimeout = cacheTimeout;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "300", value = "")
-  @JsonProperty("cacheTimeout")
-  public Integer getCacheTimeout() {
-    return cacheTimeout;
-  }
-  public void setCacheTimeout(Integer cacheTimeout) {
-    this.cacheTimeout = cacheTimeout;
-  }
-
-  /**
-   **/
   public MCPServerDTO hasThumbnail(Boolean hasThumbnail) {
     this.hasThumbnail = hasThumbnail;
     return this;
@@ -481,19 +401,19 @@ return null;
   /**
    * UUID of the artifact
    **/
-  public MCPServerDTO revisionedApiId(String revisionedApiId) {
-    this.revisionedApiId = revisionedApiId;
+  public MCPServerDTO revisionedMCPServerId(String revisionedMCPServerId) {
+    this.revisionedMCPServerId = revisionedMCPServerId;
     return this;
   }
 
   
   @ApiModelProperty(example = "01234567-0123-0123-0123-012345678901", value = "UUID of the artifact")
-  @JsonProperty("revisionedApiId")
-  public String getRevisionedApiId() {
-    return revisionedApiId;
+  @JsonProperty("revisionedMCPServerId")
+  public String getRevisionedMCPServerId() {
+    return revisionedMCPServerId;
   }
-  public void setRevisionedApiId(String revisionedApiId) {
-    this.revisionedApiId = revisionedApiId;
+  public void setRevisionedMCPServerId(String revisionedMCPServerId) {
+    this.revisionedMCPServerId = revisionedMCPServerId;
   }
 
   /**
@@ -531,42 +451,7 @@ return null;
   }
 
   /**
-   **/
-  public MCPServerDTO enableSubscriberVerification(Boolean enableSubscriberVerification) {
-    this.enableSubscriberVerification = enableSubscriberVerification;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "false", value = "")
-  @JsonProperty("enableSubscriberVerification")
-  public Boolean isEnableSubscriberVerification() {
-    return enableSubscriberVerification;
-  }
-  public void setEnableSubscriberVerification(Boolean enableSubscriberVerification) {
-    this.enableSubscriberVerification = enableSubscriberVerification;
-  }
-
-  /**
-   * The audience of the MCP Server. Accepted values are PUBLIC, SINGLE
-   **/
-  public MCPServerDTO audience(AudienceEnum audience) {
-    this.audience = audience;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "PUBLIC", value = "The audience of the MCP Server. Accepted values are PUBLIC, SINGLE")
-  @JsonProperty("audience")
-  public AudienceEnum getAudience() {
-    return audience;
-  }
-  public void setAudience(AudienceEnum audience) {
-    this.audience = audience;
-  }
-
-  /**
-   * The audiences of the API for jwt validation. Accepted values are any String values
+   * The audiences of the MCP Server for jwt validation. Accepted values are any String values
    **/
   public MCPServerDTO audiences(List<String> audiences) {
     this.audiences = audiences;
@@ -574,7 +459,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "The audiences of the API for jwt validation. Accepted values are any String values")
+  @ApiModelProperty(value = "The audiences of the MCP Server for jwt validation. Accepted values are any String values")
   @JsonProperty("audiences")
   public List<String> getAudiences() {
     return audiences;
@@ -654,25 +539,25 @@ return null;
   }
 
   /**
-   * The API level throttling policy selected.
+   * The MCP Server level throttling policy selected.
    **/
-  public MCPServerDTO apiThrottlingPolicy(String apiThrottlingPolicy) {
-    this.apiThrottlingPolicy = apiThrottlingPolicy;
+  public MCPServerDTO throttlingPolicy(String throttlingPolicy) {
+    this.throttlingPolicy = throttlingPolicy;
     return this;
   }
 
   
-  @ApiModelProperty(example = "Unlimited", value = "The API level throttling policy selected.")
-  @JsonProperty("apiThrottlingPolicy")
-  public String getApiThrottlingPolicy() {
-    return apiThrottlingPolicy;
+  @ApiModelProperty(example = "Unlimited", value = "The MCP Server level throttling policy selected.")
+  @JsonProperty("throttlingPolicy")
+  public String getThrottlingPolicy() {
+    return throttlingPolicy;
   }
-  public void setApiThrottlingPolicy(String apiThrottlingPolicy) {
-    this.apiThrottlingPolicy = apiThrottlingPolicy;
+  public void setThrottlingPolicy(String throttlingPolicy) {
+    this.throttlingPolicy = throttlingPolicy;
   }
 
   /**
-   * Name of the Authorization header used for invoking the MCP Server. If it is not set,Authorization header name specified in tenant or system level will be used.
+   * Name of the Authorization header used for invoking the MCP Server. If it is not set,  Authorization header name specified in tenant or system level will be used. 
    **/
   public MCPServerDTO authorizationHeader(String authorizationHeader) {
     this.authorizationHeader = authorizationHeader;
@@ -680,7 +565,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "Authorization", value = "Name of the Authorization header used for invoking the MCP Server. If it is not set,Authorization header name specified in tenant or system level will be used.")
+  @ApiModelProperty(example = "Authorization", value = "Name of the Authorization header used for invoking the MCP Server. If it is not set,  Authorization header name specified in tenant or system level will be used. ")
   @JsonProperty("authorizationHeader")
  @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\s+]*$)")  public String getAuthorizationHeader() {
     return authorizationHeader;
@@ -690,7 +575,7 @@ return null;
   }
 
   /**
-   * Name of the API key header used for invoking the MCP Server. If it is not set, default value&#x60;apiKey&#x60; will be used.
+   * Name of the API key header used for invoking the MCP Server. If it is not set, default value&#x60;apiKey&#x60;  will be used. 
    **/
   public MCPServerDTO apiKeyHeader(String apiKeyHeader) {
     this.apiKeyHeader = apiKeyHeader;
@@ -698,7 +583,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "apiKey", value = "Name of the API key header used for invoking the MCP Server. If it is not set, default value`apiKey` will be used.")
+  @ApiModelProperty(example = "apiKey", value = "Name of the API key header used for invoking the MCP Server. If it is not set, default value`apiKey`  will be used. ")
   @JsonProperty("apiKeyHeader")
  @Pattern(regexp="(^[^~!@#;:%^*()+={}|\\\\<>\"',&$\\s+]*$)")  public String getApiKeyHeader() {
     return apiKeyHeader;
@@ -708,7 +593,7 @@ return null;
   }
 
   /**
-   * Types of API security, the current MCP Server secured with. It can be either OAuth2 or mutual SSLor both. If it is not set OAuth2 will be set as the security.
+   * Types of API security, the current MCP Server secured with. It can be either OAuth2 or mutual SSLor both. If it is not set OAuth2 will be set as the security. 
    **/
   public MCPServerDTO securityScheme(List<String> securityScheme) {
     this.securityScheme = securityScheme;
@@ -716,31 +601,13 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "[\"oauth2\"]", value = "Types of API security, the current MCP Server secured with. It can be either OAuth2 or mutual SSLor both. If it is not set OAuth2 will be set as the security.")
+  @ApiModelProperty(example = "[\"oauth2\"]", value = "Types of API security, the current MCP Server secured with. It can be either OAuth2 or mutual SSLor both. If it is not set OAuth2 will be set as the security. ")
   @JsonProperty("securityScheme")
   public List<String> getSecurityScheme() {
     return securityScheme;
   }
   public void setSecurityScheme(List<String> securityScheme) {
     this.securityScheme = securityScheme;
-  }
-
-  /**
-   **/
-  public MCPServerDTO maxTps(APIMaxTpsDTO maxTps) {
-    this.maxTps = maxTps;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("maxTps")
-  public APIMaxTpsDTO getMaxTps() {
-    return maxTps;
-  }
-  public void setMaxTps(APIMaxTpsDTO maxTps) {
-    this.maxTps = maxTps;
   }
 
   /**
@@ -816,42 +683,24 @@ return null;
 
   /**
    **/
-  public MCPServerDTO mediationPolicies(List<MediationPolicyDTO> mediationPolicies) {
-    this.mediationPolicies = mediationPolicies;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "[{\"name\":\"json_to_xml_in_message\",\"type\":\"in\"},{\"name\":\"xml_to_json_out_message\",\"type\":\"out\"},{\"name\":\"json_fault\",\"type\":\"fault\"}]", value = "")
-      @Valid
-  @JsonProperty("mediationPolicies")
-  public List<MediationPolicyDTO> getMediationPolicies() {
-    return mediationPolicies;
-  }
-  public void setMediationPolicies(List<MediationPolicyDTO> mediationPolicies) {
-    this.mediationPolicies = mediationPolicies;
-  }
-
-  /**
-   **/
-  public MCPServerDTO apiPolicies(APIOperationPoliciesDTO apiPolicies) {
-    this.apiPolicies = apiPolicies;
+  public MCPServerDTO mcpServerPolicies(MCPServerOperationPoliciesDTO mcpServerPolicies) {
+    this.mcpServerPolicies = mcpServerPolicies;
     return this;
   }
 
   
   @ApiModelProperty(value = "")
       @Valid
-  @JsonProperty("apiPolicies")
-  public APIOperationPoliciesDTO getApiPolicies() {
-    return apiPolicies;
+  @JsonProperty("mcpServerPolicies")
+  public MCPServerOperationPoliciesDTO getMcpServerPolicies() {
+    return mcpServerPolicies;
   }
-  public void setApiPolicies(APIOperationPoliciesDTO apiPolicies) {
-    this.apiPolicies = apiPolicies;
+  public void setMcpServerPolicies(MCPServerOperationPoliciesDTO mcpServerPolicies) {
+    this.mcpServerPolicies = mcpServerPolicies;
   }
 
   /**
-   * The subscription availability. Accepts one of the following: CURRENT_TENANT, ALL_TENANTS, or SPECIFIC_TENANTS. 
+   * The subscription availability. Accepts one of the following: CURRENT_TENANT, ALL_TENANTS, or  SPECIFIC_TENANTS. 
    **/
   public MCPServerDTO subscriptionAvailability(SubscriptionAvailabilityEnum subscriptionAvailability) {
     this.subscriptionAvailability = subscriptionAvailability;
@@ -859,7 +708,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "CURRENT_TENANT", value = "The subscription availability. Accepts one of the following: CURRENT_TENANT, ALL_TENANTS, or SPECIFIC_TENANTS. ")
+  @ApiModelProperty(example = "CURRENT_TENANT", value = "The subscription availability. Accepts one of the following: CURRENT_TENANT, ALL_TENANTS, or  SPECIFIC_TENANTS. ")
   @JsonProperty("subscriptionAvailability")
   public SubscriptionAvailabilityEnum getSubscriptionAvailability() {
     return subscriptionAvailability;
@@ -883,25 +732,6 @@ return null;
   }
   public void setSubscriptionAvailableTenants(List<String> subscriptionAvailableTenants) {
     this.subscriptionAvailableTenants = subscriptionAvailableTenants;
-  }
-
-  /**
-   * Map of custom properties of MCP Server
-   **/
-  public MCPServerDTO additionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
-    this.additionalProperties = additionalProperties;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "Map of custom properties of MCP Server")
-      @Valid
-  @JsonProperty("additionalProperties")
-  public List<APIInfoAdditionalPropertiesDTO> getAdditionalProperties() {
-    return additionalProperties;
-  }
-  public void setAdditionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalProperties) {
-    this.additionalProperties = additionalProperties;
   }
 
   /**
@@ -941,7 +771,7 @@ return null;
   }
 
   /**
-   * Is the MCP server restricted to certain publishers or creators or is it visible to all publishers and creators. If the accessControl restriction is NONE, this can be modified by all publishers and creators. Otherwise, it can only be viewable/modifiable by a specific set of users based on the restriction. 
+   * Is the MCP server restricted to certain publishers or creators or is it visible to all publishers and  creators. If the accessControl restriction is NONE, this can be modified by all publishers and creators. Otherwise, it can only be viewable/modifiable by a specific set of users based on the restriction. 
    **/
   public MCPServerDTO accessControl(AccessControlEnum accessControl) {
     this.accessControl = accessControl;
@@ -949,7 +779,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "Is the MCP server restricted to certain publishers or creators or is it visible to all publishers and creators. If the accessControl restriction is NONE, this can be modified by all publishers and creators. Otherwise, it can only be viewable/modifiable by a specific set of users based on the restriction. ")
+  @ApiModelProperty(value = "Is the MCP server restricted to certain publishers or creators or is it visible to all publishers and  creators. If the accessControl restriction is NONE, this can be modified by all publishers and creators. Otherwise, it can only be viewable/modifiable by a specific set of users based on the restriction. ")
   @JsonProperty("accessControl")
   public AccessControlEnum getAccessControl() {
     return accessControl;
@@ -959,7 +789,7 @@ return null;
   }
 
   /**
-   * The user roles that are able to view/modify as API publisher or creator.
+   * The user roles that are able to view/modify as publisher or creator.
    **/
   public MCPServerDTO accessControlRoles(List<String> accessControlRoles) {
     this.accessControlRoles = accessControlRoles;
@@ -967,7 +797,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "[]", value = "The user roles that are able to view/modify as API publisher or creator.")
+  @ApiModelProperty(example = "[]", value = "The user roles that are able to view/modify as publisher or creator.")
   @JsonProperty("accessControlRoles")
   public List<String> getAccessControlRoles() {
     return accessControlRoles;
@@ -1100,7 +930,7 @@ return null;
 
   /**
    **/
-  public MCPServerDTO scopes(List<APIScopeDTO> scopes) {
+  public MCPServerDTO scopes(List<MCPServerScopeDTO> scopes) {
     this.scopes = scopes;
     return this;
   }
@@ -1109,51 +939,33 @@ return null;
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("scopes")
-  public List<APIScopeDTO> getScopes() {
+  public List<MCPServerScopeDTO> getScopes() {
     return scopes;
   }
-  public void setScopes(List<APIScopeDTO> scopes) {
+  public void setScopes(List<MCPServerScopeDTO> scopes) {
     this.scopes = scopes;
   }
 
   /**
    **/
-  public MCPServerDTO operations(List<APIOperationsDTO> operations) {
+  public MCPServerDTO operations(List<MCPServerOperationDTO> operations) {
     this.operations = operations;
     return this;
   }
 
   
-  @ApiModelProperty(example = "[{\"target\":\"/order/{orderId}\",\"verb\":\"POST\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"},{\"target\":\"/menu\",\"verb\":\"GET\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"}]", value = "")
+  @ApiModelProperty(example = "[{\"target\":\"listBooks\",\"feature\":\"TOOL\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"},{\"target\":\"addBook\",\"verb\":\"TOOL\",\"authType\":\"Application & Application User\",\"throttlingPolicy\":\"Unlimited\"}]", value = "")
       @Valid
   @JsonProperty("operations")
-  public List<APIOperationsDTO> getOperations() {
+  public List<MCPServerOperationDTO> getOperations() {
     return operations;
   }
-  public void setOperations(List<APIOperationsDTO> operations) {
+  public void setOperations(List<MCPServerOperationDTO> operations) {
     this.operations = operations;
   }
 
   /**
-   **/
-  public MCPServerDTO threatProtectionPolicies(APIThreatProtectionPoliciesDTO threatProtectionPolicies) {
-    this.threatProtectionPolicies = threatProtectionPolicies;
-    return this;
-  }
-
-  
-  @ApiModelProperty(value = "")
-      @Valid
-  @JsonProperty("threatProtectionPolicies")
-  public APIThreatProtectionPoliciesDTO getThreatProtectionPolicies() {
-    return threatProtectionPolicies;
-  }
-  public void setThreatProtectionPolicies(APIThreatProtectionPoliciesDTO threatProtectionPolicies) {
-    this.threatProtectionPolicies = threatProtectionPolicies;
-  }
-
-  /**
-   * API categories
+   * MCP Server categories
    **/
   public MCPServerDTO categories(List<String> categories) {
     this.categories = categories;
@@ -1161,7 +973,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "API categories")
+  @ApiModelProperty(value = "MCP Server categories")
   @JsonProperty("categories")
   public List<String> getCategories() {
     return categories;
@@ -1171,7 +983,7 @@ return null;
   }
 
   /**
-   * API Key Managers
+   * Key Managers
    **/
   public MCPServerDTO keyManagers(Object keyManagers) {
     this.keyManagers = keyManagers;
@@ -1179,7 +991,7 @@ return null;
   }
 
   
-  @ApiModelProperty(value = "API Key Managers")
+  @ApiModelProperty(value = "Key Managers")
       @Valid
   @JsonProperty("keyManagers")
   public Object getKeyManagers() {
@@ -1207,7 +1019,7 @@ return null;
   }
 
   /**
-   * The gateway type selected for the API policies. Accepts one of the following: wso2/synapse, wso2/apk, AWS. 
+   * The gateway type selected for the policies. Accepts one of the following: wso2/synapse, wso2/apk, AWS. 
    **/
   public MCPServerDTO gatewayType(String gatewayType) {
     this.gatewayType = gatewayType;
@@ -1215,31 +1027,13 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "wso2/synapse wso2/apk AWS", value = "The gateway type selected for the API policies. Accepts one of the following: wso2/synapse, wso2/apk, AWS. ")
+  @ApiModelProperty(example = "wso2/synapse wso2/apk AWS", value = "The gateway type selected for the policies. Accepts one of the following: wso2/synapse, wso2/apk, AWS. ")
   @JsonProperty("gatewayType")
   public String getGatewayType() {
     return gatewayType;
   }
   public void setGatewayType(String gatewayType) {
     this.gatewayType = gatewayType;
-  }
-
-  /**
-   * Whether the MCP Server is EGRESS or not
-   **/
-  public MCPServerDTO egress(Boolean egress) {
-    this.egress = egress;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "true", value = "Whether the MCP Server is EGRESS or not")
-  @JsonProperty("egress")
-  public Boolean isEgress() {
-    return egress;
-  }
-  public void setEgress(Boolean egress) {
-    this.egress = egress;
   }
 
 
@@ -1256,39 +1050,32 @@ return null;
         Objects.equals(name, mcPServer.name) &&
         Objects.equals(description, mcPServer.description) &&
         Objects.equals(context, mcPServer.context) &&
-        Objects.equals(backendAPIEndpointConfig, mcPServer.backendAPIEndpointConfig) &&
+        Objects.equals(endpointConfig, mcPServer.endpointConfig) &&
         Objects.equals(version, mcPServer.version) &&
         Objects.equals(provider, mcPServer.provider) &&
         Objects.equals(lifeCycleStatus, mcPServer.lifeCycleStatus) &&
-        Objects.equals(responseCachingEnabled, mcPServer.responseCachingEnabled) &&
-        Objects.equals(cacheTimeout, mcPServer.cacheTimeout) &&
         Objects.equals(hasThumbnail, mcPServer.hasThumbnail) &&
         Objects.equals(isDefaultVersion, mcPServer.isDefaultVersion) &&
         Objects.equals(isRevision, mcPServer.isRevision) &&
-        Objects.equals(revisionedApiId, mcPServer.revisionedApiId) &&
+        Objects.equals(revisionedMCPServerId, mcPServer.revisionedMCPServerId) &&
         Objects.equals(revisionId, mcPServer.revisionId) &&
         Objects.equals(enableSchemaValidation, mcPServer.enableSchemaValidation) &&
-        Objects.equals(enableSubscriberVerification, mcPServer.enableSubscriberVerification) &&
-        Objects.equals(audience, mcPServer.audience) &&
         Objects.equals(audiences, mcPServer.audiences) &&
         Objects.equals(transport, mcPServer.transport) &&
         Objects.equals(tags, mcPServer.tags) &&
         Objects.equals(policies, mcPServer.policies) &&
         Objects.equals(organizationPolicies, mcPServer.organizationPolicies) &&
-        Objects.equals(apiThrottlingPolicy, mcPServer.apiThrottlingPolicy) &&
+        Objects.equals(throttlingPolicy, mcPServer.throttlingPolicy) &&
         Objects.equals(authorizationHeader, mcPServer.authorizationHeader) &&
         Objects.equals(apiKeyHeader, mcPServer.apiKeyHeader) &&
         Objects.equals(securityScheme, mcPServer.securityScheme) &&
-        Objects.equals(maxTps, mcPServer.maxTps) &&
         Objects.equals(visibility, mcPServer.visibility) &&
         Objects.equals(visibleRoles, mcPServer.visibleRoles) &&
         Objects.equals(visibleTenants, mcPServer.visibleTenants) &&
         Objects.equals(visibleOrganizations, mcPServer.visibleOrganizations) &&
-        Objects.equals(mediationPolicies, mcPServer.mediationPolicies) &&
-        Objects.equals(apiPolicies, mcPServer.apiPolicies) &&
+        Objects.equals(mcpServerPolicies, mcPServer.mcpServerPolicies) &&
         Objects.equals(subscriptionAvailability, mcPServer.subscriptionAvailability) &&
         Objects.equals(subscriptionAvailableTenants, mcPServer.subscriptionAvailableTenants) &&
-        Objects.equals(additionalProperties, mcPServer.additionalProperties) &&
         Objects.equals(additionalPropertiesMap, mcPServer.additionalPropertiesMap) &&
         Objects.equals(monetization, mcPServer.monetization) &&
         Objects.equals(accessControl, mcPServer.accessControl) &&
@@ -1302,17 +1089,15 @@ return null;
         Objects.equals(subtypeConfiguration, mcPServer.subtypeConfiguration) &&
         Objects.equals(scopes, mcPServer.scopes) &&
         Objects.equals(operations, mcPServer.operations) &&
-        Objects.equals(threatProtectionPolicies, mcPServer.threatProtectionPolicies) &&
         Objects.equals(categories, mcPServer.categories) &&
         Objects.equals(keyManagers, mcPServer.keyManagers) &&
         Objects.equals(gatewayVendor, mcPServer.gatewayVendor) &&
-        Objects.equals(gatewayType, mcPServer.gatewayType) &&
-        Objects.equals(egress, mcPServer.egress);
+        Objects.equals(gatewayType, mcPServer.gatewayType);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, backendAPIEndpointConfig, version, provider, lifeCycleStatus, responseCachingEnabled, cacheTimeout, hasThumbnail, isDefaultVersion, isRevision, revisionedApiId, revisionId, enableSchemaValidation, enableSubscriberVerification, audience, audiences, transport, tags, policies, organizationPolicies, apiThrottlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, visibleOrganizations, mediationPolicies, apiPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalProperties, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, subtypeConfiguration, scopes, operations, threatProtectionPolicies, categories, keyManagers, gatewayVendor, gatewayType, egress);
+    return Objects.hash(id, name, description, context, endpointConfig, version, provider, lifeCycleStatus, hasThumbnail, isDefaultVersion, isRevision, revisionedMCPServerId, revisionId, enableSchemaValidation, audiences, transport, tags, policies, organizationPolicies, throttlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, visibility, visibleRoles, visibleTenants, visibleOrganizations, mcpServerPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, subtypeConfiguration, scopes, operations, categories, keyManagers, gatewayVendor, gatewayType);
   }
 
   @Override
@@ -1324,39 +1109,32 @@ return null;
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
-    sb.append("    backendAPIEndpointConfig: ").append(toIndentedString(backendAPIEndpointConfig)).append("\n");
+    sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
     sb.append("    version: ").append(toIndentedString(version)).append("\n");
     sb.append("    provider: ").append(toIndentedString(provider)).append("\n");
     sb.append("    lifeCycleStatus: ").append(toIndentedString(lifeCycleStatus)).append("\n");
-    sb.append("    responseCachingEnabled: ").append(toIndentedString(responseCachingEnabled)).append("\n");
-    sb.append("    cacheTimeout: ").append(toIndentedString(cacheTimeout)).append("\n");
     sb.append("    hasThumbnail: ").append(toIndentedString(hasThumbnail)).append("\n");
     sb.append("    isDefaultVersion: ").append(toIndentedString(isDefaultVersion)).append("\n");
     sb.append("    isRevision: ").append(toIndentedString(isRevision)).append("\n");
-    sb.append("    revisionedApiId: ").append(toIndentedString(revisionedApiId)).append("\n");
+    sb.append("    revisionedMCPServerId: ").append(toIndentedString(revisionedMCPServerId)).append("\n");
     sb.append("    revisionId: ").append(toIndentedString(revisionId)).append("\n");
     sb.append("    enableSchemaValidation: ").append(toIndentedString(enableSchemaValidation)).append("\n");
-    sb.append("    enableSubscriberVerification: ").append(toIndentedString(enableSubscriberVerification)).append("\n");
-    sb.append("    audience: ").append(toIndentedString(audience)).append("\n");
     sb.append("    audiences: ").append(toIndentedString(audiences)).append("\n");
     sb.append("    transport: ").append(toIndentedString(transport)).append("\n");
     sb.append("    tags: ").append(toIndentedString(tags)).append("\n");
     sb.append("    policies: ").append(toIndentedString(policies)).append("\n");
     sb.append("    organizationPolicies: ").append(toIndentedString(organizationPolicies)).append("\n");
-    sb.append("    apiThrottlingPolicy: ").append(toIndentedString(apiThrottlingPolicy)).append("\n");
+    sb.append("    throttlingPolicy: ").append(toIndentedString(throttlingPolicy)).append("\n");
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
     sb.append("    apiKeyHeader: ").append(toIndentedString(apiKeyHeader)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
-    sb.append("    maxTps: ").append(toIndentedString(maxTps)).append("\n");
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("    visibleRoles: ").append(toIndentedString(visibleRoles)).append("\n");
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
     sb.append("    visibleOrganizations: ").append(toIndentedString(visibleOrganizations)).append("\n");
-    sb.append("    mediationPolicies: ").append(toIndentedString(mediationPolicies)).append("\n");
-    sb.append("    apiPolicies: ").append(toIndentedString(apiPolicies)).append("\n");
+    sb.append("    mcpServerPolicies: ").append(toIndentedString(mcpServerPolicies)).append("\n");
     sb.append("    subscriptionAvailability: ").append(toIndentedString(subscriptionAvailability)).append("\n");
     sb.append("    subscriptionAvailableTenants: ").append(toIndentedString(subscriptionAvailableTenants)).append("\n");
-    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("    additionalPropertiesMap: ").append(toIndentedString(additionalPropertiesMap)).append("\n");
     sb.append("    monetization: ").append(toIndentedString(monetization)).append("\n");
     sb.append("    accessControl: ").append(toIndentedString(accessControl)).append("\n");
@@ -1370,12 +1148,10 @@ return null;
     sb.append("    subtypeConfiguration: ").append(toIndentedString(subtypeConfiguration)).append("\n");
     sb.append("    scopes: ").append(toIndentedString(scopes)).append("\n");
     sb.append("    operations: ").append(toIndentedString(operations)).append("\n");
-    sb.append("    threatProtectionPolicies: ").append(toIndentedString(threatProtectionPolicies)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
-    sb.append("    egress: ").append(toIndentedString(egress)).append("\n");
     sb.append("}");
     return sb.toString();
   }
