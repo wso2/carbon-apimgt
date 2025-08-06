@@ -26,9 +26,12 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.clients.TenantManagementClient;
 import org.wso2.carbon.apimgt.impl.handlers.EventHandler;
 import org.wso2.carbon.apimgt.notification.event.TenantManagementEvent;
+import org.wso2.carbon.apimgt.notification.event.TenantManagementEvent.EventDetail;
+import org.wso2.carbon.apimgt.notification.event.TenantManagementEvent.Owner;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Event handler to handle tenant management related events
@@ -45,29 +48,60 @@ public class TenantManagementEventHandler implements EventHandler {
                 client = new TenantManagementClient();
             }
             TenantManagementEvent tenantMgtEvent = new Gson().fromJson(event, TenantManagementEvent.class);
-            if (tenantMgtEvent == null || tenantMgtEvent.getTenantDomain() == null) {
-                throw new APIManagementException("Invalid tenant management event data");
-            }
+            EventDetail eventDetail;
 
-            if (log.isDebugEnabled()) {
-                log.debug("Processing tenant management event of type: " + tenantMgtEvent.getType());
-            }
+            if (tenantMgtEvent != null) {
+                Map<String, EventDetail> eventsMap = tenantMgtEvent.getEvents();
 
-            if (tenantMgtEvent.getType() == null) {
-                throw new APIManagementException("Event type cannot be null");
-            }
+                if (eventsMap != null && !eventsMap.isEmpty()) {
+                    Optional<EventDetail> firstEventDetail = eventsMap.values().stream().findFirst();
 
-            if (APIConstants.TenantManagementEvent.TYPE_ADD_TENANT.equals(tenantMgtEvent.getType())) {
-                addTenant(tenantMgtEvent);
-            } else if (APIConstants.TenantManagementEvent.TYPE_UPDATE_TENANT.equals(tenantMgtEvent.getType())) {
-                updateTenant(tenantMgtEvent);
-            } else if (APIConstants.TenantManagementEvent.TYPE_ACTIVATE_TENANT.equals(tenantMgtEvent.getType())) {
-                activateTenant(tenantMgtEvent);
-            } else if (APIConstants.TenantManagementEvent.TYPE_DEACTIVATE_TENANT.equals(tenantMgtEvent.getType())) {
-                deactivateTenant(tenantMgtEvent);
+                    if (firstEventDetail.isPresent()) {
+                        eventDetail = firstEventDetail.get();
+                        if (eventDetail != null) {
+                            if (eventDetail.getTenant() == null || eventDetail.getTenant().getDomain() == null) {
+                                throw new APIManagementException("Invalid tenant management event data");
+                            }
+
+                            String tenantDomain = eventDetail.getTenant().getDomain();
+
+                            String action = eventDetail.getAction();
+                            if (log.isDebugEnabled()) {
+                                log.debug("Processing tenant management event of type: " + action);
+                            }
+                            if (action == null) {
+                                throw new APIManagementException("action type cannot be null");
+                            }
+
+                            if (APIConstants.TenantManagementEvent.TYPE_ADD_TENANT.equals(action)) {
+                                addTenant(eventDetail);
+                            } else if (APIConstants.TenantManagementEvent.TYPE_UPDATE_TENANT.equals(action)) {
+                                updateTenant(eventDetail);
+                            } else if (APIConstants.TenantManagementEvent.TYPE_ACTIVATE_TENANT.equals(action)) {
+                                activateTenant(tenantDomain);
+                            } else if (APIConstants.TenantManagementEvent.TYPE_DEACTIVATE_TENANT.equals(action)) {
+                                deactivateTenant(tenantDomain);
+                            } else {
+                                throw new APIManagementException("Invalid action in tenant management event " + action);
+                            }
+                        } else {
+                            throw new APIManagementException(
+                                    "Could not process event because EventDetail could not be extracted.");
+                        }
+
+                    } else {
+                        throw new APIManagementException("Events element does not contain necessary data");
+                    }
+
+                } else {
+                    throw new APIManagementException(
+                            "The 'events' field in the payload was either missing, null, or empty.");
+                }
             } else {
-                throw new APIManagementException("Invalid event type " + tenantMgtEvent.getType());
+                throw new APIManagementException(
+                        "Failed to deserialize the event payload. The JSON string might be null or malformed.");
             }
+
         } catch (APIManagementException e) {
             log.error("Error processing tenant management event", e);
             throw new APIManagementException("Error while creating tenant management client", e);
@@ -75,31 +109,73 @@ public class TenantManagementEventHandler implements EventHandler {
         return true;
     }
 
-    private void deactivateTenant(TenantManagementEvent tenantMgtEvent) throws APIManagementException {
-
-        client.deactivateTenant(tenantMgtEvent.getTenantDomain());
+    private void deactivateTenant(String tenantDomain) throws APIManagementException {
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Deactivate tenant " + tenantDomain);
+        }
+        if (client != null) {
+            client.deactivateTenant(tenantDomain);
+        }
 
     }
 
-    private void activateTenant(TenantManagementEvent tenantMgtEvent) throws APIManagementException {
-
-        client.activateTenant(tenantMgtEvent.getTenantDomain());
+    private void activateTenant(String tenantDomain) throws APIManagementException {
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Activate tenant " + tenantDomain);
+        }
+        if (client != null) {
+            client.activateTenant(tenantDomain);
+        }
 
     }
 
-    private void updateTenant(TenantManagementEvent updateTenantEvent) throws APIManagementException {
+    private void updateTenant(EventDetail updateTenantEvent) throws APIManagementException {
 
-        client.updateTenant(updateTenantEvent.getFirstName(), updateTenantEvent.getLastName(),
-                updateTenantEvent.getAdminUserName(), updateTenantEvent.getAdminPassword(),
-                updateTenantEvent.getEmail(), updateTenantEvent.getTenantDomain(), updateTenantEvent.isActive());
+        if (updateTenantEvent != null && updateTenantEvent.getTenant() != null
+                && updateTenantEvent.getTenant().getOwners() != null
+                && !updateTenantEvent.getTenant().getOwners().isEmpty()) {
+
+            Owner userInfo = updateTenantEvent.getTenant().getOwners().get(0);
+            String firstName = userInfo.getFirstname();
+            String lastName = userInfo.getLastname();
+            String adminPassword = userInfo.getPassword();
+            String tenantDomain = updateTenantEvent.getTenant().getDomain();
+            String email = userInfo.getEmail();
+
+            if (log.isDebugEnabled()) {
+                log.debug("Update tenant " + tenantDomain);
+            }
+
+            if (client != null) {
+                client.updateTenant(firstName, lastName, adminPassword, email, tenantDomain, true);
+            }
+        }
     }
 
-    private void addTenant(TenantManagementEvent addTenantEvent) throws APIManagementException {
+    private void addTenant(EventDetail addTenantEvent) throws APIManagementException {
 
-        client.addTenant(addTenantEvent.getFirstName(), addTenantEvent.getLastName(), addTenantEvent.getAdminUserName(),
-                addTenantEvent.getAdminPassword(), addTenantEvent.getEmail(), addTenantEvent.getTenantDomain(),
-                addTenantEvent.isActive());
+        if (addTenantEvent != null && addTenantEvent.getTenant() != null
+                && addTenantEvent.getTenant().getOwners() != null
+                && !addTenantEvent.getTenant().getOwners().isEmpty()) {
 
+            Owner userInfo = addTenantEvent.getTenant().getOwners().get(0);
+            String firstName = userInfo.getFirstname();
+            String lastName = userInfo.getLastname();
+            String adminUserName = userInfo.getUsername();
+            String adminPassword = userInfo.getPassword();
+            String tenantDomain = addTenantEvent.getTenant().getDomain();
+            String email = userInfo.getEmail();
+
+            if (log.isDebugEnabled()) {
+                log.debug("Add tenant " + tenantDomain);
+            }
+
+            if (client != null) {
+                client.addTenant(firstName, lastName, adminUserName, adminPassword, email, tenantDomain, true);
+            }
+        }
     }
 
     @Override

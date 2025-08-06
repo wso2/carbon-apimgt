@@ -18,65 +18,276 @@
 
 package org.wso2.carbon.apimgt.notification.event;
 
+import com.google.gson.annotations.SerializedName;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Tenant Management Event.
  */
 
-public class TenantManagementEvent extends Event {
+public class TenantManagementEvent {
 
-    private boolean active;
-    private String adminUserName;
-    private String adminPassword;
-    private String email;
-    private String firstName;
-    private String lastName;
+    @SerializedName("iss")
+    private String iss;
 
-    public boolean isActive() {
-        return active;
+    @SerializedName("jti")
+    private String jti;
+
+    @SerializedName("iat")
+    private long iat;
+
+    @SerializedName("events")
+    private Map<String, EventDetail> events;
+
+
+    public String getIss() {
+        return iss;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
+    public void setIss(String iss) {
+        this.iss = iss;
     }
 
-    public String getAdminUserName() {
-        return adminUserName;
+    public String getJti() {
+        return jti;
     }
 
-    public void setAdminUserName(String adminUserName) {
-        this.adminUserName = adminUserName;
+    public void setJti(String jti) {
+        this.jti = jti;
     }
 
-    public String getAdminPassword() {
-        return adminPassword;
+    public long getIat() {
+        return iat;
     }
 
-    public void setAdminPassword(String adminPassword) {
-        this.adminPassword = adminPassword;
+    public void setIat(long iat) {
+        this.iat = iat;
     }
 
-    public String getEmail() {
-        return email;
+    public Map<String, EventDetail> getEvents() {
+        if (events == null) {
+            return null;
+        }
+        return new HashMap<>(events);
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setEvents(Map<String, EventDetail> events) {
+        if (events == null) {
+            this.events = null;
+        } else {
+            this.events = new HashMap<>(events);
+        }
     }
 
-    public String getFirstName() {
-        return firstName;
+    /**
+     * Represents the detailed information contained within a specific event type.
+     */
+    public static class EventDetail {
+
+        @SerializedName("initiatorType")
+        private String initiatorType;
+
+        @SerializedName("tenant")
+        private Tenant tenant;
+
+        @SerializedName("action")
+        private String action;
+
+
+        public String getInitiatorType() {
+            return initiatorType;
+        }
+
+        public void setInitiatorType(String initiatorType) {
+            this.initiatorType = initiatorType;
+        }
+
+        public Tenant getTenant() {
+            return (this.tenant != null) ? new Tenant(this.tenant) : null;
+        }
+
+        public void setTenant(Tenant tenant) {
+            this.tenant = (tenant != null) ? new Tenant(tenant) : null;
+        }
+
+        public String getAction() {
+            return action;
+        }
+
+        public void setAction(String action) {
+            this.action = action;
+        }
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    /**
+     * Represents the tenant object. This class includes all possible fields from all
+     * event types. Fields not present in a specific JSON will be null.
+     */
+    public static class Tenant {
+
+        @SerializedName("id")
+        private String id;
+
+        @SerializedName("domain")
+        private String domain;
+
+        @SerializedName("owners")
+        private List<Owner> owners;
+
+        @SerializedName("lifecycleStatus")
+        private LifecycleStatus lifecycleStatus;
+
+        @SerializedName("ref")
+        private String ref;
+
+        public Tenant() {
+            
+        }
+
+        public Tenant(Tenant other) {
+            this.id = other.id;
+            this.domain = other.domain;
+            this.ref = other.ref;
+            this.setOwners(other.owners);
+            this.setLifecycleStatus(other.lifecycleStatus); 
+        }
+        
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getDomain() {
+            return domain;
+        }
+
+        public void setDomain(String name) {
+            this.domain = name;
+        }
+
+        public List<Owner> getOwners() {
+            if (this.owners == null) {
+                return null;
+            }
+            return new ArrayList<>(this.owners);
+        }
+
+        public void setOwners(List<Owner> owners) {
+            if (owners == null) {
+                this.owners = null;
+            } else {
+                this.owners = new ArrayList<>(owners);
+            }
+        }
+
+        public LifecycleStatus getLifecycleStatus() {
+            return (this.lifecycleStatus != null) ? new LifecycleStatus(this.lifecycleStatus) : null;
+        }
+
+        public void setLifecycleStatus(LifecycleStatus lifecycleStatus) {
+            this.lifecycleStatus = (lifecycleStatus != null) ? new LifecycleStatus(lifecycleStatus) : null;
+        }
+
+        public String getRef() {
+            return ref;
+        }
+
+        public void setRef(String ref) {
+            this.ref = ref;
+        }
     }
 
-    public String getLastName() {
-        return lastName;
+    /**
+     * Represents an owner of a tenant.
+     */
+    public static class Owner {
+
+        @SerializedName("username")
+        private String username;
+
+        @SerializedName("password")
+        private String password;
+
+        @SerializedName("email")
+        private String email;
+
+        @SerializedName("firstname")
+        private String firstname;
+
+        @SerializedName("lastname")
+        private String lastname;
+
+        
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public String getFirstname() {
+            return firstname;
+        }
+
+        public void setFirstname(String firstname) {
+            this.firstname = firstname;
+        }
+
+        public String getLastname() {
+            return lastname;
+        }
+
+        public void setLastname(String lastname) {
+            this.lastname = lastname;
+        }
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
+    /**
+     * Represents the lifecycle status of a tenant, used in activation/deactivation events.
+     */
+    public static class LifecycleStatus {
 
+        @SerializedName("activated")
+        private boolean activated;
+        
+        public LifecycleStatus() {
+            
+        }
+
+        public LifecycleStatus(LifecycleStatus other) {
+            this.activated = other.activated;
+        }
+        
+        public boolean isActivated() {
+            return activated;
+        }
+
+        public void setActivated(boolean activated) {
+            this.activated = activated;
+        }
+    }
 }

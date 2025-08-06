@@ -68,8 +68,8 @@ public class TenantManagementClient {
 
     }
 
-    public void addTenant(String firstName, String lastName, String adminUserName, String adminPassword,
-            String email, String tenantDomain, boolean isActive) throws APIManagementException {
+    public void addTenant(String firstName, String lastName, String adminUserName, String adminPassword, String email,
+            String tenantDomain, boolean isActive) throws APIManagementException {
         
         log.debug("Adding tenant with domain: " + tenantDomain);
         
@@ -91,7 +91,7 @@ public class TenantManagementClient {
 
     }
 
-    public void updateTenant(String firstName, String lastName, String adminUserName, String adminPassword,
+    public void updateTenant(String firstName, String lastName, String adminPassword,
             String email, String tenantDomain, boolean isActive) throws APIManagementException {
         log.debug("Updating tenant with domain: " + tenantDomain);
         try {
@@ -101,7 +101,6 @@ public class TenantManagementClient {
                 throw new APIManagementException("Tenant not found: " + tenantDomain);
             }
             
-            tenantInfoInAPIM.setAdmin(adminUserName);
             tenantInfoInAPIM.setAdminPassword(adminPassword);
             tenantInfoInAPIM.setEmail(email);
             tenantInfoInAPIM.setFirstname(firstName);
