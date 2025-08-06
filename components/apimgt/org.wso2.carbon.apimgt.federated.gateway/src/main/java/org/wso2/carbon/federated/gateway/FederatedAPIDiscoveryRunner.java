@@ -1,8 +1,8 @@
 /*
  *
- * Copyright (c) WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2025 WSO2 LLC. (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC. licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,7 +77,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     /**
      * Schedules the discovery of APIs at a specified interval.
      *
-     * @param environment    The environment from which APIs will be discovered.
+     * @param environment The environment from which APIs will be discovered.
      */
     public void scheduleDiscovery(Environment environment, String organization) {
         GatewayAgentConfiguration gatewayConfiguration = org.wso2.carbon.apimgt.impl.internal.
@@ -92,7 +92,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                                     .getDeclaredConstructor().newInstance();
                     federatedAPIDiscovery.init(environment, organization);
                     ScheduledFuture<?> scheduledFuture = scheduledDiscoveryTasks
-                            .get(environment.getName() + organization);
+                            .get(environment.getName() + ":" + organization);
                     if (environment.getMode().equals(GatewayMode.WRITE_ONLY.getMode())) {
                         log.info("Federated API discovery is disabled for environment: " + environment.getName());
 
@@ -118,7 +118,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                                         + environment.getName(), e);
                             }
                         }, 0, environment.getApiDiscoveryScheduledWindow(), TimeUnit.MINUTES);
-                        scheduledDiscoveryTasks.put(environment.getName() + organization, newTask);
+                        scheduledDiscoveryTasks.put(environment.getName() + ":" + organization, newTask);
                     }
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException |
                          NoSuchMethodException | InvocationTargetException | APIManagementException e) {
@@ -133,7 +133,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     }
 
     private void processDiscoveredAPIs(List<API> apisToDeployInGatewayEnv, Environment environment,
-                                      String organization) {
+                                       String organization) {
 
         boolean debugLogEnabled = log.isDebugEnabled();
         try {
@@ -252,5 +252,15 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     public static void shutdown() {
         scheduledDiscoveryTasks.values().forEach(f -> f.cancel(false));
         executor.shutdown();
+        try {
+            if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+                log.warn("Forced shutdown of federated API discovery executor after timeout");
+            }
+        } catch (InterruptedException e) {
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+            log.error("Interrupted during federated API discovery shutdown", e);
+        }
     }
 }
