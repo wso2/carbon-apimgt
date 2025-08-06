@@ -66,4 +66,12 @@ public class BackendOperation implements Serializable {
 
         this.refUriMappingId = refUriMappingId;
     }
+    
+    @Override
+    public String toString() {
+        return "BackendOperation {" +
+                "target='" + target + '\'' +
+                ", verb='" + verb + '\'' +
+                '}';
+    }
 }

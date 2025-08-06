@@ -46,4 +46,12 @@ public class BackendAPIOperationMapping {
 
         this.backendOperation = backendOperation;
     }
+
+    @Override
+    public String toString() {
+        return "BackendOperationMapping {" +
+                "backendId='" + backendApiId + '\'' +
+                ", backendOperation=" + backendOperation +
+                '}';
+    }
 }

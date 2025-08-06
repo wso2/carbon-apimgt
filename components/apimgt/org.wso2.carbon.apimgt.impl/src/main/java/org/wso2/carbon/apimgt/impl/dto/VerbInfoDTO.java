@@ -1,6 +1,7 @@
 package org.wso2.carbon.apimgt.impl.dto;
 
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import java.io.Serializable;
@@ -26,6 +27,8 @@ public class VerbInfoDTO implements Serializable {
     private ConditionGroupDTO[] conditionGroups;
     
     private boolean contentAware;
+
+    private BackendAPIOperationMapping backendAPIOperationMapping;
 
     public String getThrottling() {
         return throttling;
@@ -111,5 +114,13 @@ public class VerbInfoDTO implements Serializable {
 
     public void setContentAware(boolean contentAware) {
         this.contentAware = contentAware;
+    }
+
+    public BackendAPIOperationMapping getBackendAPIOperationMapping() {
+        return backendAPIOperationMapping;
+    }
+
+    public void setBackendAPIOperationMapping(BackendAPIOperationMapping backendAPIOperationMapping) {
+        this.backendAPIOperationMapping = backendAPIOperationMapping;
     }
 }

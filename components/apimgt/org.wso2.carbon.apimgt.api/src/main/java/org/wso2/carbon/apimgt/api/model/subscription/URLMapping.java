@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
+import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 
 import java.util.ArrayList;
@@ -32,9 +34,44 @@ public class URLMapping {
     private String authScheme;
     private String httpMethod;
     private String urlPattern;
+    private String description;
+    private String schemaDefinition;
     private List<String> scopes = new ArrayList<>();
     private Set<OperationPolicy> operationPolicies = new HashSet<>();
+    private BackendAPIOperationMapping backendOperationMapping = new BackendAPIOperationMapping();
+    private ExistingAPIOperationMapping apiOperationMapping = new ExistingAPIOperationMapping();
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getSchemaDefinition() {
+        return schemaDefinition;
+    }
+
+    public void setSchemaDefinition(String schemaDefinition) {
+        this.schemaDefinition = schemaDefinition;
+    }
+
+    public BackendAPIOperationMapping getBackendOperationMapping() {
+        return backendOperationMapping;
+    }
+
+    public void setBackendOperationMapping(BackendAPIOperationMapping backendOperationMapping) {
+        this.backendOperationMapping = backendOperationMapping;
+    }
+
+    public void setApiOperationMapping(ExistingAPIOperationMapping apiOperationMapping) {
+        this.apiOperationMapping = apiOperationMapping;
+    }
+
+    public ExistingAPIOperationMapping getApiOperationMapping() {
+        return apiOperationMapping;
+    }
 
     public String getHttpMethod() {
 
@@ -118,6 +155,10 @@ public class URLMapping {
                 ", httpMethod ='" + httpMethod + '\'' +
                 ", urlPattern ='" + urlPattern + '\'' +
                 ", operationPolicies ='" + operationPolicies + '\'' +
+                ", description ='" + description + '\'' +
+                ", schemaDefinition ='" + schemaDefinition + '\'' +
+                ", backendOperationMapping ='" + backendOperationMapping + '\'' +
+                ", apiOperationMapping ='" + apiOperationMapping + '\'' +
                 '}';
     }
 }

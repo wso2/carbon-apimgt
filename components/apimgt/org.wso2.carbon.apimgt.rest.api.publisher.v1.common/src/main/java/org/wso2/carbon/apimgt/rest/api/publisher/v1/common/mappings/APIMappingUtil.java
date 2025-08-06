@@ -537,7 +537,7 @@ public class APIMappingUtil {
                 model.setAiConfiguration(
                         new Gson().fromJson(dto.getSubtypeConfiguration().getConfiguration().toString(),
                                 AIConfiguration.class));
-            } else if (APIConstants.API_TYPE_MCP.equals(dto.getSubtypeConfiguration().getSubtype())) {
+            } else if (APIConstants.API_TYPE_MCP.equals(dto.getType().value())) {
                 model.setSubtype(dto.getSubtypeConfiguration().getSubtype());
             } else {
                 model.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
@@ -577,6 +577,7 @@ public class APIMappingUtil {
         // Later we can use it by checking admin privileges of the user.
         APIIdentifier apiId = new APIIdentifier(providerEmailDomainReplaced, dto.getName(), dto.getVersion());
         API model = new API(apiId);
+        model.setUuid(dto.getId());
 
         String context = dto.getContext();
         final String originalContext = context;
@@ -2871,7 +2872,6 @@ public class APIMappingUtil {
                         }
                     }
                 }
-
             }
             // AWS Lambda: set arn to URI template
             String amznResourceName = operation.getAmznResourceName();
@@ -3515,6 +3515,7 @@ public class APIMappingUtil {
             mappingDTO.setApiId(existingAPIOperationMapping.getApiUuid());
             mappingDTO.setApiName(existingAPIOperationMapping.getApiName());
             mappingDTO.setApiVersion(existingAPIOperationMapping.getApiVersion());
+            mappingDTO.setApiContext(existingAPIOperationMapping.getApiContext());
             mappingDTO.setBackendOperation(operationDTO);
 
             operationsDTO.setExistingAPIOperationMapping(mappingDTO);

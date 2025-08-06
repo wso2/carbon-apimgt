@@ -16221,6 +16221,11 @@ components:
           type: string
           pattern: '^[^~!@#;:%^*()+={}|\\<>"'',&/$\[\]\s+\/]+$'
           example: 1.0.0
+        apiContext:
+          maxLength: 30
+          minLength: 1
+          type: string
+          example: 1.0.0
         backendOperation:
           $ref: '#/components/schemas/BackendOperation'
     BackendOperation:

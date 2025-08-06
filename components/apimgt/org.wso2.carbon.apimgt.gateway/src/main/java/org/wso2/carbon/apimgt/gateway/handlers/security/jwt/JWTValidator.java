@@ -166,6 +166,12 @@ public class JWTValidator {
         String jwtTokenIdentifier = getJWTTokenIdentifier(signedJWTInfo);
         String jwtHeader = signedJWTInfo.getSignedJWT().getHeader().toString();
 
+        String apiType = (String) synCtx.getProperty(APIMgtGatewayConstants.API_TYPE);
+        if (org.apache.commons.lang3.StringUtils.equals(APIConstants.API_TYPE_MCP, apiType)) {
+            httpMethod = synCtx.getProperty("MCP_HTTP_METHOD").toString();
+            matchingResource = (String) synCtx.getProperty("MCP_API_ELECTED_RESOURCE");
+        }
+
         // Check for CNF validation
         if (!isCNFValidationDisabled(disableCNFValidation, false)) {
             try {

@@ -624,6 +624,17 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
             return true;
         }
 
+        String apiType = (String) messageContext.getProperty(APIMgtGatewayConstants.API_TYPE);
+        if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
+            String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
+            if (StringUtils.isNotEmpty(mcpMethod) && !APIConstants.MCP.METHOD_TOOL_CALL.equalsIgnoreCase(mcpMethod)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping MCP call request throttling.");
+                }
+                return true;
+            }
+        }
+
         if (ServiceReferenceHolder.getInstance().getThrottleDataPublisher() == null) {
             log.error("Cannot publish events to traffic manager because ThrottleDataPublisher " +
                     "has not been initialised");

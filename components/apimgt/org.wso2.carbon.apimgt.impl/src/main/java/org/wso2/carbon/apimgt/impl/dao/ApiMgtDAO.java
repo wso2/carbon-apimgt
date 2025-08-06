@@ -22943,6 +22943,7 @@ public class ApiMgtDAO {
                     existingAPIOperationMapping.setApiUuid(rs.getString("REF_API_UUID"));
                     existingAPIOperationMapping.setApiName(rs.getString("REF_API_NAME"));
                     existingAPIOperationMapping.setApiVersion(rs.getString("REF_API_VERSION"));
+                    existingAPIOperationMapping.setApiContext(rs.getString("REF_API_CONTEXT"));
                     existingAPIOperationMapping.setBackendOperation(backendOperation);
 
                     uriTemplate.setExistingAPIOperationMapping(existingAPIOperationMapping);

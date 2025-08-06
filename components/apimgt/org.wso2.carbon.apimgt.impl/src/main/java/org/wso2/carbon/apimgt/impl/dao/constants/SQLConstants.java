@@ -4634,7 +4634,8 @@ public class SQLConstants {
                         "   REF.HTTP_METHOD AS VERB, " +
                         "   REF_API.API_UUID AS REF_API_UUID, " +
                         "   REF_API.API_NAME AS REF_API_NAME, " +
-                        "   REF_API.API_VERSION AS REF_API_VERSION " +
+                        "   REF_API.API_VERSION AS REF_API_VERSION, " +
+                        "   REF_API.CONTEXT AS REF_API_CONTEXT " +
                         " FROM " +
                         "   AM_API_URL_MAPPING AUM " +
                         "INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
@@ -4654,7 +4655,8 @@ public class SQLConstants {
                         "   REF.HTTP_METHOD AS VERB, " +
                         "   REF_API.API_UUID AS REF_API_UUID, " +
                         "   REF_API.API_NAME AS REF_API_NAME, " +
-                        "   REF_API.API_VERSION AS REF_API_VERSION " +
+                        "   REF_API.API_VERSION AS REF_API_VERSION, " +
+                        "   REF_API.CONTEXT AS REF_API_CONTEXT " +
                         " FROM " +
                         "   AM_API_URL_MAPPING AUM " +
                         "INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +

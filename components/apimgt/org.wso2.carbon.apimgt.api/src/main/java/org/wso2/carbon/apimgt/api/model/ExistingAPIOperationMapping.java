@@ -30,6 +30,7 @@ public class ExistingAPIOperationMapping implements Serializable {
     private String apiUuid = null;
     private String apiName = null;
     private String apiVersion = null;
+    private String apiContext = null;
     private BackendOperation backendOperation = null;
 
     public String getApiUuid() {
@@ -70,5 +71,24 @@ public class ExistingAPIOperationMapping implements Serializable {
     public void setApiVersion(String apiVersion) {
 
         this.apiVersion = apiVersion;
+    }
+
+    public String getApiContext() {
+        return apiContext;
+    }
+
+    public void setApiContext(String apiContext) {
+        this.apiContext = apiContext;
+    }
+
+    @Override
+    public String toString() {
+        return "ApiOperationMapping{" +
+                "apiUuid='" + apiUuid + '\'' +
+                ", apiName='" + apiName + '\'' +
+                ", apiVersion='" + apiVersion + '\'' +
+                ", apiContext='" + apiContext + '\'' +
+                ", backendOperation=" + backendOperation +
+                '}';
     }
 }

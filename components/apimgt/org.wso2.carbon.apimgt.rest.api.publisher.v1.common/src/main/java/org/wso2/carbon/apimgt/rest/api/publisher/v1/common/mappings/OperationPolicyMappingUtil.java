@@ -195,6 +195,7 @@ public class OperationPolicyMappingUtil {
         existingAPIOperationMapping.setApiUuid(apiOperationMappingDTO.getApiId());
         existingAPIOperationMapping.setApiName(apiOperationMappingDTO.getApiName());
         existingAPIOperationMapping.setApiVersion(apiOperationMappingDTO.getApiVersion());
+        existingAPIOperationMapping.setApiContext(apiOperationMappingDTO.getApiContext());
 
         return existingAPIOperationMapping;
     }
