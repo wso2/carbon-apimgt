@@ -16,8 +16,6 @@
 
 package org.wso2.carbon.apimgt.gateway.handlers.security;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -43,7 +41,6 @@ import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.APIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.handlers.security.keys.WSAPIKeyDataStore;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.gateway.mcp.Param;
 import org.wso2.carbon.apimgt.gateway.mcp.request.McpRequest;
 import org.wso2.carbon.apimgt.gateway.mcp.request.Params;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;

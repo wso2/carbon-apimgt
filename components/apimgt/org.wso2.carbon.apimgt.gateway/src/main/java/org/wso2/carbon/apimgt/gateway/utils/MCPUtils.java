@@ -26,7 +26,6 @@ import com.google.gson.JsonParser;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.functions.T;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -239,7 +238,8 @@ public class MCPUtils {
                 messageContext.setProperty("RECEIVED_MCP_ID", id.toString());
             }
         } else {
-            //todo: handle error
+            throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE,
+                    APIConstants.MCP.RpcConstants.INTERNAL_ERROR_MESSAGE, "No matched tool found");
         }
     }
 
@@ -297,7 +297,7 @@ public class MCPUtils {
     }
 
     private static void processEndpoint(MessageContext messageContext, SchemaMapping schemaMapping, McpRequest
-          mcpRequest, BackendOperation backendOperation) {
+          mcpRequest, BackendOperation backendOperation) throws McpException {
         org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs httpMethod = backendOperation.getVerb();
         String target = backendOperation.getTarget();
 
@@ -322,7 +322,9 @@ public class MCPUtils {
                     }
                 } else {
                     if (isParamRequired) {
-                        //todo: handle error
+                        throw new McpException(APIConstants.MCP.RpcConstants.INVALID_PARAMS_CODE,
+                                APIConstants.MCP.RpcConstants.INVALID_PARAMS_MESSAGE, "Required param " + paramName +
+                                "is not defined");
                     }
                 }
             }
@@ -347,7 +349,8 @@ public class MCPUtils {
         }
     }
 
-    public static void processHeaders(MessageContext messageContext, SchemaMapping schemaMapping, McpRequest mcpRequest) {
+    public static void processHeaders(MessageContext messageContext, SchemaMapping schemaMapping, McpRequest mcpRequest)
+        throws McpException {
         Params paramsObj = mcpRequest.getParams();
         if (paramsObj != null) {
             Map<String, Object> argumentObj = (Map<String, Object>) paramsObj.getArguments();
@@ -365,14 +368,17 @@ public class MCPUtils {
                     headers.put(paramName, paramValue);
                 } else {
                     if (isParamRequired) {
-                        //todo: handle error
+                        throw new McpException(APIConstants.MCP.RpcConstants.INVALID_PARAMS_CODE,
+                                APIConstants.MCP.RpcConstants.INVALID_PARAMS_MESSAGE, "Required param " + paramName +
+                                "is not defined");
                     }
                 }
             }
         }
     }
 
-    public static void processRequestBody(MessageContext messageContext, SchemaMapping schemaMapping, McpRequest mcpRequest) {
+    public static void processRequestBody(MessageContext messageContext, SchemaMapping schemaMapping,
+                                          McpRequest mcpRequest) {
         String contentType = schemaMapping.getContentType();
 
         Params paramsObj = mcpRequest.getParams();
@@ -390,8 +396,10 @@ public class MCPUtils {
                     try {
                         JsonUtil.removeJsonPayload(axis2MessageContext);
                         JsonUtil.getNewJsonPayload(axis2MessageContext, requestString, true, true);
-                        axis2MessageContext.setProperty(Constants.Configuration.MESSAGE_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-                        axis2MessageContext.setProperty(Constants.Configuration.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                        axis2MessageContext.setProperty(Constants.Configuration.MESSAGE_TYPE,
+                                APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+                        axis2MessageContext.setProperty(Constants.Configuration.CONTENT_TYPE,
+                                APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                     } catch (AxisFault e) {
                         //todo: handle fault
                     }

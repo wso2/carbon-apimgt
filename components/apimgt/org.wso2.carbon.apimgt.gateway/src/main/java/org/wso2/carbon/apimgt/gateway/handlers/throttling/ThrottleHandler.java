@@ -633,11 +633,6 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
                 }
                 return true;
             }
-
-            // todo : Handle throttling for mcp tool calls, temporarily disabling
-            if (APIConstants.MCP.METHOD_TOOL_CALL.equalsIgnoreCase(mcpMethod)) {
-                return true;
-            }
         }
 
         if (ServiceReferenceHolder.getInstance().getThrottleDataPublisher() == null) {
