@@ -592,7 +592,7 @@ public final class APIConstants {
         public static final String VECTOR_DB_PROVIDER_ID = "id";
         public static final String VECTOR_DB_PROVIDER_THRESHOLD = "threshold";
         public static final String VECTOR_DB_PROVIDER_TTL = "ttl";
-        public static final String VECTOR_DB_PROVIDER_TTL_DEFAULT = "36000";
+        public static final String VECTOR_DB_PROVIDER_TTL_DEFAULT = "3600";
 
         public static final String VECTOR_DB_PROVIDER_ZILLIZ_TYPE = "zilliz";
         public static final String VECTOR_DB_PROVIDER_URI = "uri";

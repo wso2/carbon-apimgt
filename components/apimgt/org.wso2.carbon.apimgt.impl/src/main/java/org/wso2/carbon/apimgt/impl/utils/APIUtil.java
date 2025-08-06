@@ -12005,4 +12005,31 @@ public final class APIUtil {
         mac.init(secretKeySpec);
         return mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
     }
+
+    // This method is used to invoke Zilliz API with the provided endpoint, token, and payload.
+    public static CloseableHttpResponse invokeZillizAPI(String endpoint, String token, String payload)
+            throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Invoking Zilliz API endpoint: " + endpoint);
+        }
+        try {
+            HttpPost postRequest = new HttpPost(endpoint);
+            postRequest.setHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT,
+                    APIConstants.AUTHORIZATION_BEARER + token);
+            postRequest.setHeader(HttpHeaders.CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
+
+            StringEntity entity = new StringEntity(payload, ContentType.APPLICATION_JSON);
+            postRequest.setEntity(entity);
+
+            URL url = new URL(endpoint);
+            int port = url.getPort();
+            String protocol = url.getProtocol();
+            HttpClient httpClient = APIUtil.getHttpClient(port, protocol);
+
+            return executeHTTPRequest(postRequest, httpClient);
+        } catch (Exception e) {
+            log.error("Error invoking Zilliz API at endpoint: " + endpoint, e);
+            throw new APIManagementException("Error invoking Zilliz API at endpoint [" + endpoint + "]: " + e.getMessage(), e);
+        }
+    }
 }
