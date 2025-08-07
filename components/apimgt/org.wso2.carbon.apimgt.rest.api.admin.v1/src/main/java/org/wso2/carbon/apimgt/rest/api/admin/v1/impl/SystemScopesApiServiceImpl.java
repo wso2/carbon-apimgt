@@ -81,6 +81,9 @@ public class SystemScopesApiServiceImpl implements SystemScopesApiService {
         APIUtil.updateTenantConfOfRoleScopeMapping(newScopeRoleJson, RestApiCommonUtil.getLoggedInUsername());
         String tenantDomain = MultitenantUtils.getTenantDomain(RestApiCommonUtil.getLoggedInUsername());
         CacheProvider.getRESTAPIScopeCache().remove(tenantDomain);
+        if (log.isDebugEnabled()) {
+            log.debug("REST API scope cache removed for tenant: " + tenantDomain);
+        }
         Map<String, String> scopeRoleMapping = APIUtil.getRESTAPIScopesForTenantWithoutRoleMappings(tenantDomain);
         ScopeListDTO scopeListDTO = SystemScopesMappingUtil.fromScopeListToScopeListDTO(scopeRoleMapping);
         APIUtil.logAuditMessage(APIConstants.AuditLogConstants.ROLES_FOR_SCOPE, APIConstants.AuditLogConstants.ROLES_FOR_SCOPE_INFO,

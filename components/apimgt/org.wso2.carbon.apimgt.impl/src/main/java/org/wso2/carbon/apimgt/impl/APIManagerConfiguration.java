@@ -1410,6 +1410,11 @@ public class APIManagerConfiguration {
             if (skipDeployingPoliciesElement != null) {
                 throttleProperties.setSkipDeployingPolicies(
                         Arrays.asList(skipDeployingPoliciesElement.getText().split(APIConstants.DELEM_COMMA)));
+                if (log.isDebugEnabled()) {
+                    if (throttleProperties.getSkipDeployingPolicies() != null) {
+                        log.debug("Skip deploying throttle policies: " + throttleProperties.getSkipDeployingPolicies());
+                    }
+                }
             }
             OMElement enablePolicyDeployElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLE_POLICY_DEPLOYMENT));
