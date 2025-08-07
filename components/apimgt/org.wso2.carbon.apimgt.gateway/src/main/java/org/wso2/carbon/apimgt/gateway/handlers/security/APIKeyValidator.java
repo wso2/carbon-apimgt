@@ -30,9 +30,9 @@ import org.apache.synapse.api.Resource;
 import org.apache.synapse.api.dispatch.RESTDispatcher;
 import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
-import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -361,10 +361,10 @@ public class APIKeyValidator {
             if (extendedOperation != null) {
                 BackendOperation backendOperation = null;
                 if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_DIRECT_ENDPOINT)) {
-                    BackendAPIOperationMapping backendAPIOperationMapping = extendedOperation.getBackendOperationMapping();
+                    BackendOperationMapping backendAPIOperationMapping = extendedOperation.getBackendOperationMapping();
                     backendOperation = backendAPIOperationMapping.getBackendOperation();
                 } else if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_EXISTING_API))  {
-                    ExistingAPIOperationMapping existingAPIOperationMapping = extendedOperation.getApiOperationMapping();
+                    APIOperationMapping existingAPIOperationMapping = extendedOperation.getApiOperationMapping();
                     backendOperation = existingAPIOperationMapping.getBackendOperation();
                     apiContext = existingAPIOperationMapping.getApiContext();
                     apiVersion = existingAPIOperationMapping.getApiVersion();
@@ -591,7 +591,7 @@ public class APIKeyValidator {
 
         //MCP direct_ep
         VerbInfoDTO verbInfoDTO = (VerbInfoDTO) resourceInfoDTO.getHttpVerbs().toArray()[0];
-        BackendAPIOperationMapping backendAPIOperationMapping = verbInfoDTO.getBackendAPIOperationMapping();
+        BackendOperationMapping backendAPIOperationMapping = verbInfoDTO.getBackendAPIOperationMapping();
         if (backendAPIOperationMapping != null) {
             BackendOperation backendOperation = backendAPIOperationMapping.getBackendOperation();
             if (backendOperation != null) {
@@ -660,9 +660,9 @@ public class APIKeyValidator {
             verbInfoDTO.setApplicableLevel(uriTemplate.getApplicableLevel());
 
             //MCP
-            BackendAPIOperationMapping backendAPIOperationMapping = uriTemplate.getBackendOperationMapping();
+            BackendOperationMapping backendAPIOperationMapping = uriTemplate.getBackendOperationMapping();
             if (backendAPIOperationMapping != null) {
-                verbInfoDTO.setBackendAPIOperationMapping(backendAPIOperationMapping);
+                verbInfoDTO.setBackendOperationMapping(backendAPIOperationMapping);
             }
 
             resourceInfoDTO.getHttpVerbs().add(verbInfoDTO);

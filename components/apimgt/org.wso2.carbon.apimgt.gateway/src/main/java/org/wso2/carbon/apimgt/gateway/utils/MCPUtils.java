@@ -29,9 +29,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
-import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.exception.McpException;
@@ -214,12 +214,12 @@ public class MCPUtils {
         if (extendedOperation != null) {
             BackendOperation backendOperation = null;
             if (APIConstants.API_SUBTYPE_EXISTING_API.equals(subType)) {
-                ExistingAPIOperationMapping apiOperationMapping = extendedOperation.getApiOperationMapping();
+                APIOperationMapping apiOperationMapping = extendedOperation.getApiOperationMapping();
                 if (apiOperationMapping != null) {
                     backendOperation = apiOperationMapping.getBackendOperation();
                 }
             } else if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(subType)) {
-                BackendAPIOperationMapping backendOperationMapping = extendedOperation.getBackendOperationMapping();
+                BackendOperationMapping backendOperationMapping = extendedOperation.getBackendOperationMapping();
                 if (backendOperationMapping != null) {
                     backendOperation = backendOperationMapping.getBackendOperation();
                 }

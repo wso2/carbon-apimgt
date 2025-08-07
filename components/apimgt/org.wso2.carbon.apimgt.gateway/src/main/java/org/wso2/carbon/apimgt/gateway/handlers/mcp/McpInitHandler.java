@@ -29,9 +29,9 @@ import org.apache.synapse.core.SynapseEnvironment;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.AbstractHandler;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
-import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
-import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
 import org.wso2.carbon.apimgt.gateway.exception.McpException;
@@ -115,13 +115,13 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
 
                     BackendOperation backendOperation = null;
                     if (extendedOperation != null) { //direct_endpoint
-                        BackendAPIOperationMapping backendAPIOperationMapping = extendedOperation.getBackendOperationMapping();
+                        BackendOperationMapping backendAPIOperationMapping = extendedOperation.getBackendOperationMapping();
                         if (backendAPIOperationMapping != null) {
                             backendOperation = backendAPIOperationMapping.getBackendOperation();
                             messageContext.setProperty("MCP_HTTP_METHOD", backendOperation.getVerb());
                             messageContext.setProperty("MCP_API_ELECTED_RESOURCE", backendOperation.getTarget());
                         } else { //existing_api
-                            ExistingAPIOperationMapping existingAPIOperationMapping = extendedOperation.getApiOperationMapping();
+                            APIOperationMapping existingAPIOperationMapping = extendedOperation.getApiOperationMapping();
                             if (existingAPIOperationMapping != null) {
                                 backendOperation = existingAPIOperationMapping.getBackendOperation();
                             }
