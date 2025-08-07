@@ -125,6 +125,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_VERSION_ALREADY_EXISTS;
+import static org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.QUERY_API_TYPE_MCP;
 
 /**
  * Implementation of the MCP Servers API service.
@@ -159,7 +160,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        query = query == null ? "type:MCP" : "type:MCP " + query;
+        query = query == null ? QUERY_API_TYPE_MCP : QUERY_API_TYPE_MCP + " " + query;
         try {
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":")) {
                 query = query.replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":",

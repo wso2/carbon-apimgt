@@ -783,7 +783,7 @@ public class ApisApiServiceImplUtils {
 
         Backend backend = new Backend();
         backend.setId(backendApiId);
-        backend.setName(APIConstants.AI.MCP_DEFAULT_BACKEND_API_NAME);
+        backend.setName(APIConstants.AI.MCP_DEFAULT_BACKEND_NAME);
         backend.setDefinition(backendDefinition);
         backend.setEndpointConfig(endpointConfig);
         return backend;
