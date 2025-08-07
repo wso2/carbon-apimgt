@@ -45,10 +45,10 @@ import org.wso2.carbon.apimgt.gateway.handlers.analytics.Constants;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.service.APIGatewayAdmin;
+import org.wso2.carbon.apimgt.gateway.notifiers.DeploymentStatusNotifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.caching.CacheInvalidationServiceImpl;
-import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
@@ -78,12 +78,14 @@ public class InMemoryAPIDeployer {
     private static final Log log = LogFactory.getLog(InMemoryAPIDeployer.class);
     ArtifactRetriever artifactRetriever;
     GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
+    DeploymentStatusNotifier deploymentStatusNotifier;
 
     public InMemoryAPIDeployer() {
 
         this.artifactRetriever = ServiceReferenceHolder.getInstance().getArtifactRetriever();
         this.gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
                 .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
+        this.deploymentStatusNotifier = DeploymentStatusNotifier.getInstance();
     }
 
     /**
@@ -257,17 +259,30 @@ public class InMemoryAPIDeployer {
                                             apiMap.get(gatewayAPIDTO.getApiContext());
                                     // Here, we redeploy APIs only if there is a new revision deployed in the
                                     // Control Plane and not synced with the gateway due to connection issues.
-                                    if (api != null && api.getRevisionId() != null &&
-                                            (!api.getRevisionId().equalsIgnoreCase(gatewayAPIDTO.getRevision()))) {
-                                        DeployAPIInGatewayEvent deployAPIInGatewayEvent =
-                                                new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                                                        System.currentTimeMillis(),
-                                                        APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(),
-                                                        tenantDomain, api.getApiId(), api.getUuid(),
-                                                        assignedGatewayLabels, api.getName(), api.getVersion(),
-                                                        api.getApiProvider(), api.getApiType(), api.getContext());
-                                        unDeployAPI(deployAPIInGatewayEvent);
-                                        deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
+                                    if (api != null && api.getRevisionId() != null) {
+                                        if (!api.getRevisionId().equalsIgnoreCase(gatewayAPIDTO.getRevision())) {
+                                            DeployAPIInGatewayEvent deployAPIInGatewayEvent =
+                                                    new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
+                                                                                System.currentTimeMillis(),
+                                                                                APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(),
+                                                                                tenantDomain, api.getApiId(),
+                                                                                api.getUuid(), assignedGatewayLabels,
+                                                                                api.getName(), api.getVersion(),
+                                                                                api.getApiProvider(), api.getApiType(),
+                                                                                api.getContext());
+                                            unDeployAPI(deployAPIInGatewayEvent);
+                                            deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
+                                            deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
+                                                                                            gatewayAPIDTO.getRevision(),
+                                                                                            true, APIConstants.AuditLogConstants.DEPLOY, null, null,
+                                                                                            tenantDomain, true);
+                                        } else if (DataHolder.getInstance().getGatewayRegistrationResponse()
+                                                != DataHolder.GatewayRegistrationResponse.ACKNOWLEDGED) {
+                                            deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
+                                                                                            gatewayAPIDTO.getRevision(),
+                                                                                            true, APIConstants.AuditLogConstants.DEPLOY, null, null,
+                                                                                            tenantDomain, true);
+                                        }
                                     } else {
                                         if (log.isDebugEnabled()) {
                                             log.debug("API " + gatewayAPIDTO.getName() + " is already deployed");
@@ -275,9 +290,19 @@ public class InMemoryAPIDeployer {
                                     }
                                 } else {
                                     deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
+
+                                    deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
+                                                                                    gatewayAPIDTO.getRevision(), true,
+                                                                                    APIConstants.AuditLogConstants.DEPLOY, null, null, tenantDomain, true);
                                 }
                             }
                         } catch (AxisFault axisFault) {
+                            deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
+                                                                            gatewayAPIDTO.getRevision(), false,
+                                                                            APIConstants.AuditLogConstants.DEPLOY,
+                                                                            ExceptionCodes.INTERNAL_ERROR.getErrorCode(),
+                                                                            axisFault.getMessage(), tenantDomain, true);
+
                             log.error("Error in deploying " + gatewayAPIDTO.getName() + " to the Gateway ", axisFault);
                             errorCount++;
                         }
