@@ -2726,7 +2726,13 @@ public class OAS3Parser extends APIDefinition {
         }
 
         BackendOperation backendOperation = new BackendOperation();
-        backendOperation.setVerb(APIConstants.SupportedHTTPVerbs.valueOf(match.method.toString()));
+        String methodStr = match.method.toString();
+        try {
+            APIConstants.SupportedHTTPVerbs verb = APIConstants.SupportedHTTPVerbs.fromValue(methodStr);
+            backendOperation.setVerb(verb);
+        } catch (IllegalArgumentException e) {
+            throw new APIManagementException("Unsupported HTTP verb: " + methodStr, e);
+        }
         backendOperation.setTarget(match.path);
 
         if (uriTemplate.getBackendOperationMapping() != null) {

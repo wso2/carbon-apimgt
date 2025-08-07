@@ -38,6 +38,7 @@ public final class APISpecParserConstants {
     public static final String ENUM = "enum";
     public static final String DEFAULT = "default";
     public static final String DESCRIPTION = "description";
+    public static final String AUTH_TYPE_ANY = "Any";
     public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
     public static final String APPLICATION_XML_MEDIA_TYPE = "application/xml";
     public static final String OPENAPI_ARCHIVES_TEMP_FOLDER = "OPENAPI-archives";

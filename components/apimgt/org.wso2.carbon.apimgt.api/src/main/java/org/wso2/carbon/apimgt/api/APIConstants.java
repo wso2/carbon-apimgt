@@ -52,8 +52,26 @@ public class APIConstants {
         DELETE,
         PATCH,
         HEAD,
-        OPTIONS
+        OPTIONS;
+
+        /**
+         * Returns the SupportedHTTPVerbs enum constant corresponding to the given HTTP method string.
+         *
+         * @param method The HTTP method string (e.g., "GET", "POST").
+         * @return The corresponding SupportedHTTPVerbs enum constant.
+         * @throws IllegalArgumentException If the method does not match any of the enum constants.
+         */
+        public static SupportedHTTPVerbs fromValue(String method) {
+
+            for (SupportedHTTPVerbs verb : values()) {
+                if (verb.name().equalsIgnoreCase(method)) {
+                    return verb;
+                }
+            }
+            throw new IllegalArgumentException("Invalid HTTP verb: " + method);
+        }
     }
+
 
     public static class AIAPIConstants {
         public static final int MILLISECONDS_IN_SECOND = 1000;

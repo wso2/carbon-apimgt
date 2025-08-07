@@ -2101,6 +2101,19 @@ public class PublisherCommonUtils {
         return addAPIWithGeneratedSwaggerDefinition(apiToAdd, oasVersion, username, organization, orgInfo, isAsyncAPI);
     }
 
+    /**
+     * Adds an API with a generated Swagger definition based on the provided APIDTOTypeWrapper object.
+     *
+     * @param dtoWrapper   The APIDTOTypeWrapper object containing API details.
+     * @param oasVersion   The OpenAPI Specification version (e.g., "2.0", "3.0.1").
+     * @param username     The username of the user adding the API.
+     * @param organization The organization to which the API belongs.
+     * @param orgInfo      Organization information for visibility settings.
+     * @return The added API object with the generated Swagger definition.
+     * @throws APIManagementException If an error occurs during API addition.
+     * @throws CryptoException        If an error occurs during encryption operations.
+     * @throws ParseException         If an error occurs while parsing the Swagger definition.
+     */
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTOTypeWrapper dtoWrapper, String oasVersion,
                                                            String username, String organization,
                                                            OrganizationInfo orgInfo)
@@ -2274,17 +2287,21 @@ public class PublisherCommonUtils {
             apiToAdd.setVisibleOrganizations(organization);
         }
 
-        //adding the api
-        Map<String, String> complianceResult = checkGovernanceComplianceSync(apiToAdd.getUuid(),
-                APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
-        if (!complianceResult.isEmpty()
-                && complianceResult.get(GOVERNANCE_COMPLIANCE_KEY) != null
-                && !Boolean.parseBoolean(complianceResult.get(GOVERNANCE_COMPLIANCE_KEY))) {
-            throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+        boolean isNotMCPServer = !APIConstants.API_TYPE_MCP.equals(apiToAdd.getType());
+
+        if (isNotMCPServer) {
+            Map<String, String> complianceResult = checkGovernanceComplianceSync(
+                    apiToAdd.getUuid(), APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);
+            if (!complianceResult.isEmpty()
+                    && !Boolean.parseBoolean(complianceResult.get(GOVERNANCE_COMPLIANCE_KEY))) {
+                throw new APIComplianceException(complianceResult.get(GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
+            }
         }
         apiProvider.addAPI(apiToAdd);
-        checkGovernanceComplianceAsync(apiToAdd.getUuid(), APIMGovernableState.API_CREATE, ArtifactType.API,
-                organization);
+        if (isNotMCPServer) {
+            checkGovernanceComplianceAsync(apiToAdd.getUuid(),
+                    APIMGovernableState.API_CREATE, ArtifactType.API, organization);
+        }
         // Remove parentOrgTiers from OrganizationTiers list
         Set<OrganizationTiers> updatedOrganizationTiers = apiToAdd.getAvailableTiersForOrganizations();
         if (updatedOrganizationTiers != null) {

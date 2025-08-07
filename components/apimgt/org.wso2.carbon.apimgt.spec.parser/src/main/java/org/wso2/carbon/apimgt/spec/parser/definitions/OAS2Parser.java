@@ -2278,14 +2278,8 @@ public class OAS2Parser extends APIDefinition {
             OperationMatch match =
                     findMatchingOperation(backendDefinition, backendOperation.getTarget(), backendOperation.getVerb());
             if (match != null) {
-                URITemplate toolTemplate = populateURITemplate(
-                        template,
-                        match,
-                        mcpFeatureType,
-                        backendDefinition,
-                        backendId,
-                        refApiId
-                );
+                URITemplate toolTemplate = populateURITemplate(template, match, mcpFeatureType, backendDefinition,
+                        backendId, refApiId);
                 generatedTools.add(toolTemplate);
             }
         }
@@ -2294,11 +2288,9 @@ public class OAS2Parser extends APIDefinition {
     }
 
     @Override
-    public Set<URITemplate> updateMCPTools(String backendApiDefinition,
-                                           APIIdentifier refApiId, String backendId,
-                                           String mcpFeatureType,
-                                           String mcpSubtype,
-                                           Set<URITemplate> uriTemplates) throws APIManagementException {
+    public Set<URITemplate> updateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
+                                           String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates)
+            throws APIManagementException {
 
         Swagger backendDefinition = getSwagger(backendApiDefinition);
         if (backendDefinition.getPaths() == null || backendDefinition.getPaths().isEmpty()) {
@@ -2395,7 +2387,13 @@ public class OAS2Parser extends APIDefinition {
         }
 
         BackendOperation backendOperation = new BackendOperation();
-        backendOperation.setVerb(APIConstants.SupportedHTTPVerbs.valueOf(match.method.toString()));
+        String methodStr = match.method.toString();
+        try {
+            APIConstants.SupportedHTTPVerbs verb = APIConstants.SupportedHTTPVerbs.fromValue(methodStr);
+            backendOperation.setVerb(verb);
+        } catch (IllegalArgumentException e) {
+            throw new APIManagementException("Unsupported HTTP verb: " + methodStr, e);
+        }
         backendOperation.setTarget(match.path);
 
         if (uriTemplate.getBackendOperationMapping() != null) {
@@ -2418,8 +2416,8 @@ public class OAS2Parser extends APIDefinition {
                 uriTemplate.setAuthType(authType);
                 uriTemplate.setAuthTypes(authType);
             } else {
-                uriTemplate.setAuthType("Any");
-                uriTemplate.setAuthTypes("Any");
+                uriTemplate.setAuthType(APISpecParserConstants.AUTH_TYPE_ANY);
+                uriTemplate.setAuthTypes(APISpecParserConstants.AUTH_TYPE_ANY);
             }
             if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER)) {
                 String throttlingTier =
@@ -2482,7 +2480,7 @@ public class OAS2Parser extends APIDefinition {
     private Map<String, Object> buildUnifiedInputSchema(List<Parameter> parameters, Swagger swagger) {
 
         Map<String, Object> root = new LinkedHashMap<>();
-        root.put("type", "object");
+        root.put(APISpecParserConstants.TYPE, APISpecParserConstants.OBJECT);
 
         Map<String, Object> props = new LinkedHashMap<>();
         List<String> requiredFields = new ArrayList<>();
@@ -2502,21 +2500,21 @@ public class OAS2Parser extends APIDefinition {
                     Model resolvedModel = resolveModel(rawModel, swagger);
 
                     Map<String, Object> requestBodyNode = new LinkedHashMap<>();
-                    requestBodyNode.put("type", "object");
-                    requestBodyNode.put("contentType", "application/json");
+                    requestBodyNode.put(APISpecParserConstants.TYPE, APISpecParserConstants.OBJECT);
+                    requestBodyNode.put(APISpecParserConstants.CONTENT_TYPE, APPLICATION_JSON_MEDIA_TYPE);
 
                     if (resolvedModel instanceof ModelImpl) {
                         ModelImpl modelImpl = (ModelImpl) resolvedModel;
                         if (modelImpl.getProperties() != null) {
-                            requestBodyNode.put("properties", modelImpl.getProperties());
+                            requestBodyNode.put(APISpecParserConstants.PROPERTIES, modelImpl.getProperties());
                         }
                         if (modelImpl.getRequired() != null) {
-                            requestBodyNode.put("required", modelImpl.getRequired());
+                            requestBodyNode.put(APISpecParserConstants.REQUIRED, modelImpl.getRequired());
                         }
                     }
 
-                    props.put("requestBody", requestBodyNode);
-                    requiredFields.add("requestBody");
+                    props.put(APISpecParserConstants.REQUEST_BODY, requestBodyNode);
+                    requiredFields.add(APISpecParserConstants.REQUEST_BODY);
 
                 } else if (param instanceof AbstractSerializableParameter) {
                     AbstractSerializableParameter<?> serialParam = (AbstractSerializableParameter<?>) param;
@@ -2524,11 +2522,15 @@ public class OAS2Parser extends APIDefinition {
                     String name = serialParam.getIn() + "_" + serialParam.getName();
                     Map<String, Object> paramSchema = new LinkedHashMap<>();
 
-                    paramSchema.put("type", serialParam.getType());
-                    if (serialParam.getFormat() != null) paramSchema.put("format", serialParam.getFormat());
-                    if (serialParam.getEnum() != null) paramSchema.put("enum", serialParam.getEnum());
-                    if (serialParam.getDefault() != null) paramSchema.put("default", serialParam.getDefault());
-                    if (param.getDescription() != null) paramSchema.put("description", param.getDescription());
+                    paramSchema.put(APISpecParserConstants.TYPE, serialParam.getType());
+                    if (serialParam.getFormat() != null) paramSchema.put(APISpecParserConstants.FORMAT,
+                            serialParam.getFormat());
+                    if (serialParam.getEnum() != null) paramSchema.put(APISpecParserConstants.ENUM,
+                            serialParam.getEnum());
+                    if (serialParam.getDefault() != null) paramSchema.put(APISpecParserConstants.DEFAULT,
+                            serialParam.getDefault());
+                    if (param.getDescription() != null) paramSchema.put(APISpecParserConstants.DESCRIPTION,
+                            param.getDescription());
 
                     props.put(name, paramSchema);
                     if (Boolean.TRUE.equals(serialParam.getRequired())) {
@@ -2538,9 +2540,9 @@ public class OAS2Parser extends APIDefinition {
             }
         }
 
-        root.put("properties", props);
+        root.put(APISpecParserConstants.PROPERTIES, props);
         if (!requiredFields.isEmpty()) {
-            root.put("required", requiredFields);
+            root.put(APISpecParserConstants.REQUIRED, requiredFields);
         }
 
         return root;
