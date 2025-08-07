@@ -35,6 +35,7 @@ import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 import javax.naming.Context;
@@ -56,6 +57,7 @@ public final class APIMgtDBUtil {
     private static final String DB_CHECK_SQL = "SELECT * FROM AM_SUBSCRIBER";
     
     private static final String DATA_SOURCE_NAME = "DataSourceName";
+    private static final GatewayManagementDAO gatewayManagementDAO = GatewayManagementDAO.getInstance();
 
     /**
      * Initializes the data source
@@ -288,6 +290,10 @@ public final class APIMgtDBUtil {
                 apiRevisionDeployment.setDisplayOnDevportal(rs.getBoolean("DISPLAY_ON_DEVPORTAL"));
                 apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
                 apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
+
+                gatewayManagementDAO.calculateGatewayDeploymentStats(apiRevisionDeployment, revisionUuid,
+                                                                     environmentName);
+
                 apiRevisionDeploymentList.add(apiRevisionDeployment);
                 uniqueSet.put(uniqueKey, apiRevisionDeployment);
             } else {
