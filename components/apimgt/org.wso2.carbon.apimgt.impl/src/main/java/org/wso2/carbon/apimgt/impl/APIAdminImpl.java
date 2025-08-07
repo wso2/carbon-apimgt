@@ -70,8 +70,6 @@ import org.wso2.carbon.apimgt.impl.alertmgt.AlertMgtConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.LabelsDAO;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
-import org.wso2.carbon.apimgt.impl.deployer.GatewayConfigurationService;
-import org.wso2.carbon.apimgt.impl.deployer.GatewayConfigurationServiceImpl;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.factory.PersistenceFactory;
@@ -479,7 +477,15 @@ public class APIAdminImpl implements APIAdmin {
         if (checkUsages) {
             setKeyManagerUsageRelatedInformation(keyManagerConfigurationsByTenant, organization);
         }
-
+        // Add missing fields for migrated Key manager configs
+        Map<String, KeyManagerConnectorConfiguration> keyManagerConnectorConfigurationMap =
+                ServiceReferenceHolder.getInstance().getKeyManagerConnectorConfigurations();
+        for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByTenant) {
+            if (keyManagerConnectorConfigurationMap.containsKey(keyManagerConfigurationDTO.getType())) {
+                keyManagerConnectorConfigurationMap.get(keyManagerConfigurationDTO.getType())
+                        .processConnectorConfigurations(keyManagerConfigurationDTO.getAdditionalProperties());
+            }
+        }
         return keyManagerConfigurationsByTenant;
     }
 
@@ -668,11 +674,6 @@ public class APIAdminImpl implements APIAdmin {
     }
 
     @Override
-    public List<String> getLLMProviderModels(String organization,String llmProviderId) throws APIManagementException {
-        return apiMgtDAO.getLLMProviderModels(organization, llmProviderId);
-    }
-
-    @Override
     public String deleteLLMProvider(String organization, LLMProvider provider, boolean builtIn)
             throws APIManagementException {
 
@@ -696,7 +697,12 @@ public class APIAdminImpl implements APIAdmin {
     @Override
     public LLMProvider getLLMProvider(String organization, String llmProviderId) throws APIManagementException {
 
-        return apiMgtDAO.getLLMProvider(organization, llmProviderId);
+        LLMProvider llmProvider = apiMgtDAO.getLLMProvider(organization, llmProviderId);
+        if (llmProvider== null) {
+            throw new APIManagementException(
+                    ExceptionCodes.from(ExceptionCodes.AI_SERVICE_PROVIDER_NOT_FOUND, llmProviderId));
+        }
+        return llmProvider;
     }
 
     @Override
@@ -815,6 +821,32 @@ public class APIAdminImpl implements APIAdmin {
         }
     }
 
+    private void encryptConfigurationInNestedFields(List<Object> configurations,
+                                                    Map<String, Object> additionalProperties,
+                                                    KeyManagerConfigurationDTO retrievedKeyManagerConfigurationDTO) throws APIManagementException {
+        if (configurations == null || configurations.isEmpty()) {
+            return;
+        }
+        for (Object configuration : configurations) {
+            ConfigurationDto configurationDto = (ConfigurationDto) configuration;
+            if (configurationDto.isMask()) {
+                String value = (String) additionalProperties.get(configurationDto.getName());
+                if (APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD.equals(value)) {
+                    if (retrievedKeyManagerConfigurationDTO != null) {
+                        Object unModifiedValue = retrievedKeyManagerConfigurationDTO.getAdditionalProperties()
+                                .get(configurationDto.getName());
+                        additionalProperties.replace(configurationDto.getName(), unModifiedValue);
+                    }
+                } else if (StringUtils.isNotEmpty(value)) {
+                    additionalProperties.replace(configurationDto.getName(), encryptValues(value));
+                }
+            }
+            // Recursively process nested values
+            encryptConfigurationInNestedFields(((ConfigurationDto) configuration).getValues(),
+                    additionalProperties, retrievedKeyManagerConfigurationDTO);
+        }
+    }
+
     private void encryptKeyManagerConfigurationValues(KeyManagerConfigurationDTO retrievedKeyManagerConfigurationDTO,
                                                       KeyManagerConfigurationDTO updatedKeyManagerConfigurationDto)
             throws APIManagementException {
@@ -836,6 +868,16 @@ public class APIAdminImpl implements APIAdmin {
                     } else if (StringUtils.isNotEmpty(value)) {
                         additionalProperties.replace(configurationDto.getName(), encryptValues(value));
                     }
+                }
+            }
+            // if authConfiguration array is not empty, encrypt values there as well
+            if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
+                    && !(keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty())) {
+                List<ConfigurationDto> authConfigurations = keyManagerConnectorConfiguration.getAuthConfigurations();
+                // Recursively check nested objects in authConfigurations and apply encryption
+                for (ConfigurationDto authConfiguration : authConfigurations) {
+                    encryptConfigurationInNestedFields(authConfiguration.getValues(), additionalProperties,
+                            retrievedKeyManagerConfigurationDTO);
                 }
             }
         }
@@ -1502,6 +1544,11 @@ public class APIAdminImpl implements APIAdmin {
                         }
                     }
                 }
+                if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
+                        && !keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty()) {
+                    missingRequiredConfigurations.addAll(keyManagerConnectorConfiguration.validateAuthConfigurations(
+                            keyManagerConfigurationDTO.getAdditionalProperties()));
+                }
                 if (!missingRequiredConfigurations.isEmpty()) {
                     throw new APIManagementException("Key Manager Configuration value for " + String.join(",",
                             missingRequiredConfigurations) + " is/are required",
@@ -1578,6 +1625,29 @@ public class APIAdminImpl implements APIAdmin {
                 additionalProperties.replace(connectionConfiguration.getName(),
                         APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
             }
+        }
+        // if authConfiguration array is not empty, check for maskable values there as well
+        if (keyManagerConnectorConfiguration.getAuthConfigurations() != null
+                && !(keyManagerConnectorConfiguration.getAuthConfigurations().isEmpty())) {
+            List<ConfigurationDto> authConfigurations = keyManagerConnectorConfiguration.getAuthConfigurations();
+            // Recursively check nested objects in authConfigurations and apply masking
+            for (ConfigurationDto authConfiguration : authConfigurations) {
+                applyMaskToNestedFields(authConfiguration.getValues(), additionalProperties);
+            }
+        }
+    }
+
+    private void applyMaskToNestedFields(List<Object> configurations, Map<String, Object> additionalProperties) {
+        if (configurations == null || configurations.isEmpty()) {
+            return;
+        }
+        for (Object configuration : configurations) {
+            if (((ConfigurationDto)configuration).isMask()) {
+                additionalProperties.replace(((ConfigurationDto) configuration).getName(),
+                        APIConstants.DEFAULT_MODIFIED_ENDPOINT_PASSWORD);
+            }
+            // Recursively process nested values
+            applyMaskToNestedFields(((ConfigurationDto)configuration).getValues(), additionalProperties);
         }
     }
 

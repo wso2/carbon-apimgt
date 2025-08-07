@@ -37,6 +37,7 @@ import org.wso2.carbon.apimgt.rest.api.admin.v1.utils.mappings.ApplicationMappin
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,16 +86,21 @@ public class ApisApiServiceImpl implements ApisApiService {
      */
     public Response providerNamePost(String provider, String apiId, MessageContext messageContext)
             throws APIManagementException {
-        String organisation = RestApiCommonUtil.getLoggedInUserTenantDomain();
+        String organization = RestApiCommonUtil.getLoggedInUserTenantDomain();
         try {
             if (!APIUtil.isUserExist(provider)) {
                 throw new APIManagementException("User " + provider + " not found.",
                         ExceptionCodes.USER_NOT_FOUND);
             }
+            // Check if the user tenant domain matches with the API's tenant domain
+            if (organization != null && !organization.equals(MultitenantUtils.getTenantDomain(provider))) {
+                throw new APIManagementException("Provider tenant domain does not match with the API's tenant domain.",
+                        ExceptionCodes.TENANT_MISMATCH);
+            }
             APIAdmin apiAdmin = new APIAdminImpl();
-            apiAdmin.updateApiProvider(apiId, provider, organisation);
+            apiAdmin.updateApiProvider(apiId, provider, organization);
         } catch (APIManagementException e) {
-            throw new APIManagementException("Error while changing the API provider", e,
+            throw new APIManagementException("Error while changing the API provider. " + e.getMessage(), e,
                     ExceptionCodes.CHANGE_API_PROVIDER_FAILED);
         }
         return Response.ok().build();

@@ -234,7 +234,6 @@ public class APIManagerComponent {
                 APIUtil.loadCommonOperationPolicies(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
                 APIManagerAnalyticsConfiguration analyticsConfiguration = APIManagerAnalyticsConfiguration.getInstance();
                 analyticsConfiguration.setAPIManagerConfiguration(configuration);
-                registration = componentContext.getBundleContext().registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
                 KeyManagerConfigurationServiceImpl keyManagerConfigurationService = new KeyManagerConfigurationServiceImpl();
                 registration = componentContext.getBundleContext().registerService(KeyManagerConfigurationService.class,
                         keyManagerConfigurationService, null);
@@ -245,8 +244,6 @@ public class APIManagerComponent {
                 APIStatusObserverList.getInstance().init(configuration);
                 MonetizationDataHolder.getInstance().init();
             }
-            registration = componentContext.getBundleContext()
-                    .registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
             log.debug("Reading Analytics Configuration from file...");
             // This method is called in two places. Mostly by the time activate hits,
             // ServiceDataPublisherAdmin is not activated. Therefore, this same method is run,
@@ -332,6 +329,12 @@ public class APIManagerComponent {
                 }
             }
             bundleContext.registerService(ScopeValidator.class, new SystemScopesIssuer(), null);
+            /* The service registration was moved to the end because the HTTP client configuration was not available
+            with the previous placement, where the http client configuration was populated after registering the
+            APIManagerConfigurationService
+             */
+            registration = componentContext.getBundleContext()
+                    .registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {

@@ -27,6 +27,7 @@ public class SettingsKeyManagerConfigurationDTO   {
     private String displayName = null;
     private String defaultConsumerKeyClaim = null;
     private String defaultScopesClaim = null;
+    private List<KeyManagerConfigurationDTO> authConfigurations = new ArrayList<KeyManagerConfigurationDTO>();
     private List<KeyManagerConfigurationDTO> configurations = new ArrayList<KeyManagerConfigurationDTO>();
     private List<KeyManagerConfigurationDTO> endpointConfigurations = new ArrayList<KeyManagerConfigurationDTO>();
 
@@ -100,6 +101,24 @@ public class SettingsKeyManagerConfigurationDTO   {
 
   /**
    **/
+  public SettingsKeyManagerConfigurationDTO authConfigurations(List<KeyManagerConfigurationDTO> authConfigurations) {
+    this.authConfigurations = authConfigurations;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("authConfigurations")
+  public List<KeyManagerConfigurationDTO> getAuthConfigurations() {
+    return authConfigurations;
+  }
+  public void setAuthConfigurations(List<KeyManagerConfigurationDTO> authConfigurations) {
+    this.authConfigurations = authConfigurations;
+  }
+
+  /**
+   **/
   public SettingsKeyManagerConfigurationDTO configurations(List<KeyManagerConfigurationDTO> configurations) {
     this.configurations = configurations;
     return this;
@@ -148,13 +167,14 @@ public class SettingsKeyManagerConfigurationDTO   {
         Objects.equals(displayName, settingsKeyManagerConfiguration.displayName) &&
         Objects.equals(defaultConsumerKeyClaim, settingsKeyManagerConfiguration.defaultConsumerKeyClaim) &&
         Objects.equals(defaultScopesClaim, settingsKeyManagerConfiguration.defaultScopesClaim) &&
+        Objects.equals(authConfigurations, settingsKeyManagerConfiguration.authConfigurations) &&
         Objects.equals(configurations, settingsKeyManagerConfiguration.configurations) &&
         Objects.equals(endpointConfigurations, settingsKeyManagerConfiguration.endpointConfigurations);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, displayName, defaultConsumerKeyClaim, defaultScopesClaim, configurations, endpointConfigurations);
+    return Objects.hash(type, displayName, defaultConsumerKeyClaim, defaultScopesClaim, authConfigurations, configurations, endpointConfigurations);
   }
 
   @Override
@@ -166,6 +186,7 @@ public class SettingsKeyManagerConfigurationDTO   {
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    defaultConsumerKeyClaim: ").append(toIndentedString(defaultConsumerKeyClaim)).append("\n");
     sb.append("    defaultScopesClaim: ").append(toIndentedString(defaultScopesClaim)).append("\n");
+    sb.append("    authConfigurations: ").append(toIndentedString(authConfigurations)).append("\n");
     sb.append("    configurations: ").append(toIndentedString(configurations)).append("\n");
     sb.append("    endpointConfigurations: ").append(toIndentedString(endpointConfigurations)).append("\n");
     sb.append("}");
