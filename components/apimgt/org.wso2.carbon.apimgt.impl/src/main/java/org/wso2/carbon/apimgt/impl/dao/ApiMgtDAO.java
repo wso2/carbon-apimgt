@@ -6237,7 +6237,7 @@ public class ApiMgtDAO {
              PreparedStatement uriScopeMappingPrepStmt =
                      connection.prepareStatement(SQLConstants.ADD_API_RESOURCE_SCOPE_MAPPING);
              PreparedStatement addBackendOperationMappingPrepStmt =
-                     connection.prepareStatement(SQLConstants.ADD_AM_API_BACKEND_OPERATION_MAPPING_SQL);
+                     connection.prepareStatement(SQLConstants.ADD_AM_BACKEND_OPERATION_MAPPING_SQL);
              PreparedStatement addApiOperationMappingPrepStmt =
                      connection.prepareStatement(SQLConstants.ADD_AM_API_OPERATION_MAPPING_SQL)) {
             for (URITemplate uriTemplate : api.getUriTemplates()) {
@@ -19312,7 +19312,7 @@ public class ApiMgtDAO {
                 PreparedStatement insertProductResourceMappingStatement = connection
                         .prepareStatement(SQLConstants.APIRevisionSqlConstants.INSERT_PRODUCT_RESOURCE_MAPPING);
                 PreparedStatement addBackendOperationMappingPrepStmt =
-                        connection.prepareStatement(SQLConstants.ADD_AM_API_BACKEND_OPERATION_MAPPING_SQL);
+                        connection.prepareStatement(SQLConstants.ADD_AM_BACKEND_OPERATION_MAPPING_SQL);
                 PreparedStatement addApiOperationMappingPrepStmt =
                         connection.prepareStatement(SQLConstants.ADD_AM_API_OPERATION_MAPPING_SQL);
                 for (URITemplate urlMapping : uriTemplateMap.values()) {
@@ -20357,7 +20357,7 @@ public class ApiMgtDAO {
                 PreparedStatement deleteOutdatedOperationPolicyStatement = connection
                         .prepareStatement(SQLConstants.OperationPolicyConstants.DELETE_OPERATION_POLICY_BY_POLICY_ID);
                 PreparedStatement addBackendOperationMappingPrepStmt =
-                        connection.prepareStatement(SQLConstants.ADD_AM_API_BACKEND_OPERATION_MAPPING_SQL);
+                        connection.prepareStatement(SQLConstants.ADD_AM_BACKEND_OPERATION_MAPPING_SQL);
                 PreparedStatement addApiOperationMappingPrepStmt =
                         connection.prepareStatement(SQLConstants.ADD_AM_API_OPERATION_MAPPING_SQL);
 
@@ -22045,7 +22045,7 @@ public class ApiMgtDAO {
     private void removeBackendOperationMapping(Connection connection, Set<URITemplate> uriTemplates)
             throws SQLException {
 
-        String query = SQLConstants.REMOVE_FROM_AM_API_BACKEND_OPERATION_MAPPING_SQL;
+        String query = SQLConstants.REMOVE_FROM_AM_BACKEND_OPERATION_MAPPING_SQL;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             for (URITemplate uriTemplate : uriTemplates) {
                 if (uriTemplate.getBackendOperationMapping() != null) {
@@ -22253,7 +22253,7 @@ public class ApiMgtDAO {
             log.error("Error while retrieving endpoint config for backend API with ID "
                     + backendId, e);
         }
-        try (InputStream backendDefinition = resultSet.getBinaryStream("API_DEFINITION")) {
+        try (InputStream backendDefinition = resultSet.getBinaryStream("DEFINITION")) {
             if (backendDefinition != null) {
                 endpoint.setDefinition(IOUtils.toString(backendDefinition));
             }
