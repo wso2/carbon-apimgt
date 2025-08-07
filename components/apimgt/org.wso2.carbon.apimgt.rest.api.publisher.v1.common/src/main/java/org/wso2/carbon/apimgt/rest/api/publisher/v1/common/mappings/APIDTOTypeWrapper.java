@@ -260,22 +260,31 @@ public class APIDTOTypeWrapper {
         return subtype != null ? subtype : APIConstants.API_SUBTYPE_DEFAULT;
     }
 
+    /**
+     * Retrieves the AI configuration from the subtype configuration if available and valid.
+     *
+     * @return AIConfiguration object or {@code null} if not applicable or parsing fails.
+     */
     public AIConfiguration getAiConfiguration() {
 
         if (!isAPIDTO() || apiDto.getSubtypeConfiguration() == null) {
             return null;
         }
         String subtype = apiDto.getSubtypeConfiguration().getSubtype();
-        if (APIConstants.API_SUBTYPE_AI_API.equals(subtype)) {
-            try {
-                return new Gson().fromJson(apiDto.getSubtypeConfiguration().getConfiguration().toString(),
-                        AIConfiguration.class);
-            } catch (JsonSyntaxException e) {
-                log.error("Failed to parse AI configuration", e);
-                return null;
-            }
+        if (!APIConstants.API_SUBTYPE_AI_API.equals(subtype)) {
+            return null;
         }
-        return null;
+        Object config = apiDto.getSubtypeConfiguration().getConfiguration();
+        if (config == null) {
+            return null;
+        }
+        try {
+            String jsonConfig = (config instanceof String) ? (String) config : new Gson().toJson(config);
+            return new Gson().fromJson(jsonConfig, AIConfiguration.class);
+        } catch (JsonSyntaxException e) {
+            log.error("Failed to parse AI configuration for API: " + getId(), e);
+            return null;
+        }
     }
 
     public List<String> getVisibleRoles() {
@@ -453,15 +462,6 @@ public class APIDTOTypeWrapper {
             apiDto.setVisibleTenants(visibleTenants);
         } else {
             mcpServerDto.setVisibleTenants(visibleTenants);
-        }
-    }
-
-    public void setVisibleOrganizations(List emptyList) {
-
-        if (isAPIDTO()) {
-            apiDto.setVisibleOrganizations(emptyList);
-        } else {
-            mcpServerDto.setVisibleOrganizations(emptyList);
         }
     }
 
