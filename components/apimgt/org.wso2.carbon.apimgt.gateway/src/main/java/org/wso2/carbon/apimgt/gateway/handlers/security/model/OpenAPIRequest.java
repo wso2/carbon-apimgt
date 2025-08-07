@@ -93,10 +93,13 @@ public class OpenAPIRequest implements Request {
         //Set transport headers
         for (Map.Entry<String, Collection<String>> header : headerMap.entrySet()) {
             String headerKey = header.getKey();
+            if (headerKey == null) {
+                continue; // Skip null keys
+            }
             String value = header.getValue().iterator().next();
-            if (headerKey.equalsIgnoreCase(Headers.CONTENT_TYPE)) {
+            if (Headers.CONTENT_TYPE.equalsIgnoreCase(headerKey)) {
                 headerKey = Headers.CONTENT_TYPE;
-            } else if (headerKey.equalsIgnoreCase(Headers.ACCEPT)) {
+            } else if (Headers.ACCEPT.equalsIgnoreCase(headerKey)) {
                 headerKey = Headers.ACCEPT;
             } else {
                 headerKey = headerKey.toLowerCase(Locale.ROOT);
