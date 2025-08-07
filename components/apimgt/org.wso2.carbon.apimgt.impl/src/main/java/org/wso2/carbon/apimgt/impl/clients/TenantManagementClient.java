@@ -40,8 +40,10 @@ public class TenantManagementClient {
     private TenantMgtAdminServiceStub stub;
 
     public TenantManagementClient() throws APIManagementException {
+        
         APIManagerConfiguration config = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
                 .getAPIManagerConfiguration();
+        
         EventHubConfigurationDto eventHubConfigurationDto = config.getEventHubConfigurationDto();
         if (eventHubConfigurationDto == null) {
             throw new APIManagementException("Event hub configuration not found");
@@ -54,7 +56,9 @@ public class TenantManagementClient {
         }
 
         try {
-            log.debug("Creating TenantMgtAdminServiceStub with URL: " + url + TENANT_MANAGEMENT_ADMIN_SERVICE);
+            if (log.isDebugEnabled()) {
+                log.debug("Creating TenantMgtAdminServiceStub with URL: " + url + TENANT_MANAGEMENT_ADMIN_SERVICE);
+            }
             stub = new TenantMgtAdminServiceStub(url + TENANT_MANAGEMENT_ADMIN_SERVICE);
             ServiceClient client = stub._getServiceClient();
             Options options = client.getOptions();
@@ -71,8 +75,9 @@ public class TenantManagementClient {
     public void addTenant(String firstName, String lastName, String adminUserName, String adminPassword, String email,
             String tenantDomain, boolean isActive) throws APIManagementException {
         
-        log.debug("Adding tenant with domain: " + tenantDomain);
-        
+        if (log.isDebugEnabled()) {
+            log.debug("Adding tenant with domain: " + tenantDomain);
+        }   
         TenantInfoBean tenantInfoBean = new TenantInfoBean();
         tenantInfoBean.setTenantDomain(tenantDomain);
         tenantInfoBean.setAdmin(adminUserName);
@@ -93,7 +98,10 @@ public class TenantManagementClient {
 
     public void updateTenant(String firstName, String lastName, String adminPassword,
             String email, String tenantDomain, boolean isActive) throws APIManagementException {
-        log.debug("Updating tenant with domain: " + tenantDomain);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Updating tenant with domain: " + tenantDomain);
+        }
         try {
             // get the existing tenant with tenant ID
             TenantInfoBean tenantInfoInAPIM = stub.getTenant(tenantDomain);
@@ -115,7 +123,10 @@ public class TenantManagementClient {
     }
 
     public void activateTenant(String tenantDomain) throws APIManagementException {
-        log.debug("Activating tenant with domain: " + tenantDomain);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Activating tenant with domain: " + tenantDomain);
+        }
         try {
             stub.activateTenant(tenantDomain);
         } catch (RemoteException | TenantMgtAdminServiceExceptionException e) {
@@ -125,7 +136,10 @@ public class TenantManagementClient {
     }
 
     public void deactivateTenant(String tenantDomain) throws APIManagementException {
-        log.debug("Deactivating tenant with domain: " + tenantDomain);
+
+        if (log.isDebugEnabled()) {
+            log.debug("Deactivating tenant with domain: " + tenantDomain);
+        }
         try {
             stub.deactivateTenant(tenantDomain);
         } catch (RemoteException | TenantMgtAdminServiceExceptionException e) {
