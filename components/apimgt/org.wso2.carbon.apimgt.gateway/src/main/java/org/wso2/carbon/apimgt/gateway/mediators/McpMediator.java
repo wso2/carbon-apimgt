@@ -165,7 +165,8 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                 JsonUtil.removeJsonPayload(axis2MC);
                 JsonUtil.getNewJsonPayload(axis2MC, mcpResponse, true, true);
             } else {
-                //todo: handle other response content types
+                throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE,
+                        APIConstants.MCP.RpcConstants.INTERNAL_ERROR_MESSAGE, "No Json Payload found in the response");
             }
         } catch (Exception e) {
             throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE,

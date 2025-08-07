@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.gateway.handlers.mcp;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +42,9 @@ import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
+
+import javax.xml.stream.XMLStreamException;
+import java.io.IOException;
 
 public class McpInitHandler extends AbstractHandler implements ManagedLifecycle {
     private static final Log log = LogFactory.getLog(McpInitHandler.class);
@@ -142,7 +146,7 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                 throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
                         APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "No JSON-RPC payload found");
             }
-        } catch (Exception e) {
+        } catch (IOException | JsonSyntaxException | XMLStreamException e) {
             throw new McpException(APIConstants.MCP.RpcConstants.INVALID_REQUEST_CODE,
                     APIConstants.MCP.RpcConstants.INVALID_REQUEST_MESSAGE, "Invalid or Malformed JSON-RPC payload found");
         }
