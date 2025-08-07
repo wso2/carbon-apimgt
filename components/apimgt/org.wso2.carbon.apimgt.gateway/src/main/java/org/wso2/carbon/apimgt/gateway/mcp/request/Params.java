@@ -5,27 +5,27 @@ import com.google.gson.annotations.SerializedName;
 public class Params {
     //available in initialize method request
     @SerializedName("protocolVersion")
-    public String protocolVersion;
+    private String protocolVersion;
 
     //available in initialize method request
     @SerializedName("capabilities")
-    public Capabilities capabilities;
+    private Capabilities capabilities;
 
     //available in initialize method request
     @SerializedName("clientInfo")
-    public ClientInfo clientInfo;
+    private ClientInfo clientInfo;
 
     //available in tools/call method request
     @SerializedName("name")
-    public String toolName;
+    private String toolName;
 
     //available in tools/call method request
     @SerializedName("arguments")
-    public Object arguments;
+    private Object arguments;
 
     //available in tools/list method request
     @SerializedName("cursor")
-    public String cursor;
+    private String cursor;
 
     public String getProtocolVersion() {
         return protocolVersion;
@@ -77,13 +77,13 @@ public class Params {
 
     public static class Capabilities {
         @SerializedName("roots")
-        public Object roots;
+        private Object roots;
 
         @SerializedName("sampling")
-        public Object sampling;
+        private Object sampling;
 
         @SerializedName("elicitation")
-        public Object elicitation;
+        private Object elicitation;
 
         public Object getRoots() {
             return roots;
@@ -113,13 +113,13 @@ public class Params {
     //available in initialize method request
     public static class ClientInfo {
         @SerializedName("name")
-        public String name;
+        private String name;
 
         @SerializedName("title")
-        public String title;
+        private String title;
 
         @SerializedName("version")
-        public String version;
+        private String version;
 
         public String getName() {
             return name;
