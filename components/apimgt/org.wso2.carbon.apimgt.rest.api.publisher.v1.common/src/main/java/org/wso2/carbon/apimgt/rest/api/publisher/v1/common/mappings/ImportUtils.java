@@ -132,6 +132,8 @@ import java.util.Set;
 import java.util.UUID;
 import javax.validation.constraints.NotNull;
 
+import static org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants.API_NAME_DELIMITER;
+
 /**
  * This class usesd to utility for Import API.
  */
@@ -196,6 +198,7 @@ public class ImportUtils {
         int tenantId = 0;
         JsonArray deploymentInfoArray = null;
         JsonObject paramsConfigObject;
+        String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
 
         importedApiDTO = ImportUtils.getImportAPIDto(extractedFolderPath, importedApiDTO, preserveProvider,
                 RestApiCommonUtil.getLoggedInUsername());
@@ -239,6 +242,24 @@ public class ImportUtils {
                     }
                 }
             }
+            if (deploymentInfoArray == null && !isAdvertiseOnlyAPI(importedApiDTO)) {
+                //If the params have not overwritten the deployment environments, yaml file will be read
+                deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, dependentAPIFromProduct);
+            }
+            List<APIRevisionDeployment> apiRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
+                    tenantDomain, apiProvider, organization);
+
+            if (importedApiDTO.isInitiatedFromGateway() && !overwrite &&
+                    apiProvider.isApiNameExist(importedApiDTO.getName(), organization)) {
+                if (!apiRevisionDeployments.isEmpty()) {
+                    importedApiDTO.name(importedApiDTO.getName() + API_NAME_DELIMITER + apiRevisionDeployments.get(0)
+                            .getDeployment());
+                } else {
+                    importedApiDTO.name(importedApiDTO.getName() + API_NAME_DELIMITER + UUID.randomUUID().toString().
+                            replace(API_NAME_DELIMITER, "").substring(0, 4));
+                }
+            }
+
 
             String apiType = importedApiDTO.getType().toString();
             boolean asyncAPI = PublisherCommonUtils.isStreamingAPI(importedApiDTO);
@@ -313,7 +334,6 @@ public class ImportUtils {
 
                 // Drop any API Endpoints (if exists)
                 dropAPIEndpoints(targetApi, apiProvider);
-
                 targetApi.setOrganization(organization);
                 if (preservePortalConfigurations) {
                     APIDTO convertedOldAPI = APIMappingUtil.fromAPItoDTO(targetApi);
@@ -427,6 +447,7 @@ public class ImportUtils {
             String primarySandboxEndpointId = importedApiDTO.getPrimarySandboxEndpointId();
             importedApi.setPrimaryProductionEndpointId(primaryProductionEndpointId);
             importedApi.setPrimarySandboxEndpointId(primarySandboxEndpointId);
+            importedApi.setInitiatedFromGateway(importedApiDTO.isInitiatedFromGateway());
 
             apiProvider.updateAPI(importedApi, oldAPI);
 
@@ -462,7 +483,6 @@ public class ImportUtils {
                     .equals(importedApi.getType().toLowerCase(), APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
                 List<SOAPToRestSequence> sequences = getSOAPToRESTSequences(extractedFolderPath);
                 if (sequences != null && !sequences.isEmpty()) {
-                    String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
                     apiProvider.updateSoapToRestSequences(tenantDomain, importedApi.getUuid(), sequences);
                 }
             }
@@ -493,13 +513,7 @@ public class ImportUtils {
                 addThumbnailImage(extractedFolderPath, apiTypeWrapperWithUpdatedApi, apiProvider);
             }
             addAPIWsdl(extractedFolderPath, importedApi, apiProvider);
-            String tenantDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
-            if (deploymentInfoArray == null && !isAdvertiseOnlyAPI(importedApiDTO)) {
-                //If the params have not overwritten the deployment environments, yaml file will be read
-                deploymentInfoArray = retrieveDeploymentLabelsFromArchive(extractedFolderPath, dependentAPIFromProduct);
-            }
-            List<APIRevisionDeployment> apiRevisionDeployments = getValidatedDeploymentsList(deploymentInfoArray,
-                    tenantDomain, apiProvider, organization);
+
             if (apiRevisionDeployments.size() > 0 && !StringUtils.equals(currentStatus, APIStatus.RETIRED.toString())) {
                 String importedAPIUuid = importedApi.getUuid();
                 APIRevision apiRevision = new APIRevision();
@@ -542,7 +556,8 @@ public class ImportUtils {
 
                 //Once the new revision successfully created, artifacts will be deployed in mentioned gateway
                 //environments
-                apiProvider.deployAPIRevision(importedAPIUuid, revisionId, apiRevisionDeployments, organization);
+                apiProvider.deployAPIRevision(importedAPIUuid, revisionId, apiRevisionDeployments, organization,
+                        importedApi.isInitiatedFromGateway());
                 if (log.isDebugEnabled()) {
                     log.debug("API: " + importedApi.getId().getApiName() + "_" + importedApi.getId().getVersion() +
                             " was deployed in " + apiRevisionDeployments.size() + " gateway environments.");
@@ -577,6 +592,39 @@ public class ImportUtils {
                         ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
             }
             throw new APIManagementException(errorMessage + StringUtils.SPACE + e.getMessage(), e);
+        }
+    }
+
+
+    /**
+     * This method imports an API.
+     *
+     * @param importInfo                     Location of the extracted folder of the API
+     * @param importedApiDTO                 API DTO of the importing API
+     *                                       (This will not be null when importing dependent APIs with API Products)
+     * @param preserveProvider               Decision to keep or replace the provider
+     * @param overwrite                      Whether to update the API or not
+     * @param tokenScopes                    Scopes of the token
+     * @param dependentAPIParamsConfigObject Params configuration of an API (this will not be null if a dependent API
+     *                                       of an
+     *                                       API product wants to override the parameters)
+     * @param organization                   Identifier of an Organization
+     * @throws APIManagementException If there is an error in importing an API
+     * @return Imported API
+     */
+    public static ImportedAPIDTO importApi(InputStream importInfo, APIDTO importedApiDTO, Boolean preserveProvider,
+                                           Boolean rotateRevision, Boolean overwrite,
+                                           Boolean preservePortalConfigurations, Boolean dependentAPIFromProduct,
+                                           String[] tokenScopes, JsonObject dependentAPIParamsConfigObject,
+                                           String organization)
+            throws APIManagementException {
+        try {
+            String extractedFolderPath = getArchivePathOfExtractedDirectory(importInfo);
+            return importApi(extractedFolderPath, importedApiDTO, preserveProvider, rotateRevision, overwrite,
+                    preservePortalConfigurations, dependentAPIFromProduct, tokenScopes, dependentAPIParamsConfigObject,
+                    organization);
+        } catch (APIImportExportException e) {
+            throw new APIManagementException(e);
         }
     }
 

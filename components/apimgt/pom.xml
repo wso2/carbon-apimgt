@@ -71,5 +71,6 @@
         <module>org.wso2.carbon.apimgt.devops.impl</module>
         <module>org.wso2.carbon.apimgt.governance.impl</module>
         <module>org.wso2.carbon.apimgt.governance.rest.api</module>
+        <module>org.wso2.carbon.apimgt.federated.gateway</module>
     </modules>
 </project>

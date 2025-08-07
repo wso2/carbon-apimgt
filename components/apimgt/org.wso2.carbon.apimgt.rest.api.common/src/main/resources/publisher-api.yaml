@@ -10695,6 +10695,13 @@ components:
         name:
           type: string
           example: CalculatorAPI
+        displayName:
+          type: string
+          example: Calculator API
+          description: |
+            Display name of the API.
+            This is the name that will be displayed in the Publisher and DevPortal.
+            If not provided, the name will be used as the display name.
         description:
           type: string
           example: A calculator API that supports basic operations
@@ -10807,6 +10814,13 @@ components:
         egress:
           type: boolean
           description: Whether the API is EGRESS or not
+          default: false
+          example: true
+        initiatedFromGateway:
+          type: boolean
+          description: |
+            Whether the API is initiated from the gateway or not.
+            This is used to identify whether the API is created from the Publisher or from the Gateway.
           default: false
           example: true
     APIMetadata:
@@ -10993,6 +11007,11 @@ components:
           pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\[\]\/]*$)'
           type: string
           example: PizzaShackAPI
+        displayName:
+          description: Human-friendly name shown in UI. Length limited to DB column size.
+          minLength: 1
+          type: string
+          example: Pizza Shack API
         description:
           maxLength: 32766
           type: string
@@ -11507,6 +11526,14 @@ components:
             wso2/apk
             AWS
           default: wso2/synapse
+        initiatedFromGateway:
+          type: boolean
+          description: |
+            Whether the API is initiated from the gateway or not. This is used to identify
+            whether the API is created from the publisher or discovered from the gateway.
+          example: false
+          default: false
+          readOnly: true
         asyncTransportProtocols:
           type: array
           description: |
