@@ -267,7 +267,8 @@ public class Environment implements Serializable {
     public void setVhosts(List<VHost> vhosts) {
         this.vhosts = vhosts;
         // set gateway endpoint if it is empty
-        if (StringUtils.isEmpty(apiGatewayEndpoint) && StringUtils.isEmpty(websocketGatewayEndpoint) && !vhosts.isEmpty()) {
+        if (StringUtils.isEmpty(apiGatewayEndpoint) && StringUtils.isEmpty(websocketGatewayEndpoint)
+                && !vhosts.isEmpty()) {
             VHost vhost = vhosts.get(0);
             String endpointFormat = "%s%s:%s%s"; // {protocol}://{host}:{port}/{context}
 

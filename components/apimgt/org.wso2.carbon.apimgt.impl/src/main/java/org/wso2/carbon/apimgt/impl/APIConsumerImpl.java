@@ -3752,7 +3752,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
             boolean isExternalGateway = false;
             GatewayDeployer gatewayDeployer = null;
-            if (gatewayConfiguration != null && StringUtils.isNotEmpty(gatewayConfiguration.getGatewayDeployerImplementation())) {
+            if (gatewayConfiguration != null && StringUtils.isNotEmpty(gatewayConfiguration
+                    .getGatewayDeployerImplementation())) {
                 gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain, environmentName);
                 isExternalGateway = true;
             }
@@ -3917,7 +3918,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
 
     @Override
-    public Set<Subscription> getTopicSubscriptions(String applicationUUID, String apiUUID) throws APIManagementException {
+    public Set<Subscription> getTopicSubscriptions(String applicationUUID, String apiUUID)
+            throws APIManagementException {
 
         if (StringUtils.isNotEmpty(apiUUID)) {
             return apiMgtDAO.getTopicSubscriptionsByApiUUID(applicationUUID, apiUUID);
@@ -4006,15 +4008,16 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
     
     @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, OrganizationInfo organizationInfo, int start, int end,
-                                                   String sortBy, String sortOrder) throws APIManagementException {
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, OrganizationInfo organizationInfo, int start,
+                                                   int end, String sortBy, String sortOrder)
+            throws APIManagementException {
         Organization org = new Organization(organizationInfo.getSuperOrganization());
         String userName = (userNameWithoutChange != null) ? userNameWithoutChange : username;
         String[] roles = APIUtil.getListOfRoles(userName);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
         UserContext userCtx = new UserContext(userNameWithoutChange,
-                new Organization(organizationInfo.getName(), organizationInfo.getOrganizationId(), null), properties,
-                roles);
+                new Organization(organizationInfo.getName(), organizationInfo.getOrganizationId(), null),
+                properties, roles);
 
         return searchPaginatedAPIs(searchQuery, start, end, org, userCtx, organizationInfo);
     }
@@ -4142,7 +4145,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 // and publishers having the roles which has been specified under publisher access control irrespective
                 // of devportal visibility restrictions.
                 if (publisherAccessControlRoles != null && !publisherAccessControlRoles.trim().isEmpty()) {
-                    String[] accessControlRoleList = publisherAccessControlRoles.replaceAll("\\s+", "").split(",");
+                    String[] accessControlRoleList = publisherAccessControlRoles.replaceAll("\\s+",
+                            "").split(",");
                     if (log.isDebugEnabled()) {
                         log.debug("API has restricted access to creators and publishers with the roles : "
                                 + Arrays.toString(accessControlRoleList));

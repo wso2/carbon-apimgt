@@ -153,9 +153,11 @@ public class APIAdminImpl implements APIAdmin {
         // gateway environment name should be unique, ignore environments defined in api-manager.xml with the same name
         // if a dynamic (saved in database) environment exists.
         List<String> dynamicEnvNames = dynamicEnvs.stream().map(Environment::getName).collect(Collectors.toList());
-        List<Environment> allEnvs = new ArrayList<>(dynamicEnvs.size() + APIUtil.getReadOnlyEnvironments().size());
+        List<Environment> allEnvs = new ArrayList<>(dynamicEnvs.size() +
+                APIUtil.getReadOnlyEnvironments().size());
         // add read only environments first and dynamic environments later
-        APIUtil.getReadOnlyEnvironments().values().stream().filter(env -> !dynamicEnvNames.contains(env.getName())).forEach(allEnvs::add);
+        APIUtil.getReadOnlyEnvironments().values().stream().filter(env ->
+                !dynamicEnvNames.contains(env.getName())).forEach(allEnvs::add);
         allEnvs.addAll(dynamicEnvs);
 
         for (Environment env : allEnvs) {
@@ -174,8 +176,8 @@ public class APIAdminImpl implements APIAdmin {
         if (env == null) {
             env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
             if (env == null) {
-                String errorMessage = String.format("Failed to retrieve Environment with UUID %s. Environment not found",
-                        uuid);
+                String errorMessage = String.format("Failed to retrieve Environment with UUID %s." +
+                                " Environment not found", uuid);
                 throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
                         ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid))
                 );
@@ -216,15 +218,16 @@ public class APIAdminImpl implements APIAdmin {
         apiMgtDAO.deleteEnvironment(uuid);
     }
 
-    public Environment getEnvironmentWithoutPropertyMasking(String tenantDomain, String uuid) throws APIManagementException {
+    public Environment getEnvironmentWithoutPropertyMasking(String tenantDomain, String uuid)
+            throws APIManagementException {
         // priority for configured environments over dynamic environments
         // name is the UUID of environments configured in api-manager.xml
         Environment env = APIUtil.getReadOnlyEnvironments().get(uuid);
         if (env == null) {
             env = apiMgtDAO.getEnvironment(tenantDomain, uuid);
             if (env == null) {
-                String errorMessage = String.format("Failed to retrieve Environment with UUID %s. Environment not found",
-                        uuid);
+                String errorMessage = String.format("Failed to retrieve Environment with UUID %s. " +
+                                "Environment not found", uuid);
                 throw new APIMgtResourceNotFoundException(errorMessage, ExceptionCodes.from(
                         ExceptionCodes.GATEWAY_ENVIRONMENT_NOT_FOUND, String.format("UUID '%s'", uuid))
                 );
@@ -489,7 +492,9 @@ public class APIAdminImpl implements APIAdmin {
         return keyManagerConfigurationsByTenant;
     }
 
-    private void setIdentityProviderRelatedInformation(List<KeyManagerConfigurationDTO> keyManagerConfigurationsByOrganization, String organization)
+    private void setIdentityProviderRelatedInformation(List<KeyManagerConfigurationDTO>
+                                                               keyManagerConfigurationsByOrganization,
+                                                       String organization)
             throws APIManagementException {
 
         for (KeyManagerConfigurationDTO keyManagerConfigurationDTO : keyManagerConfigurationsByOrganization) {

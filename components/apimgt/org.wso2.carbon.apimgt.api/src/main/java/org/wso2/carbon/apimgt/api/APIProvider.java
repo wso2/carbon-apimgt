@@ -100,7 +100,8 @@ public interface APIProvider extends APIManager {
      * @return Comments
      * @throws APIManagementException if failed to get comments for identifier
      */
-    CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer replyLimit, Integer replyOffset) throws APIManagementException;
+    CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID, Integer replyLimit,
+                            Integer replyOffset) throws APIManagementException;
 
     /**
      * @param apiTypeWrapper Api Type Wrapper
@@ -176,7 +177,8 @@ public interface APIProvider extends APIManager {
      * @throws org.wso2.carbon.apimgt.api.APIManagementException
      *          If failed to get UserApplicationAPIUsage
      */
-    List<SubscribedAPI> getAPIProductUsageByAPIProductId(APIProductIdentifier apiProductId) throws APIManagementException;
+    List<SubscribedAPI> getAPIProductUsageByAPIProductId(APIProductIdentifier apiProductId)
+            throws APIManagementException;
 
     /**
      * Shows how a given consumer uses the given API.
@@ -330,8 +332,8 @@ public interface APIProvider extends APIManager {
     API addAPI(API api) throws APIManagementException;
 
     /**
-     * Updates design and implementation of an existing API. This method must not be used to change API status. Implementations
-     * should throw an exceptions when such attempts are made. All life cycle state changes
+     * Updates design and implementation of an existing API. This method must not be used to change API status.
+     * Implementations should throw an exceptions when such attempts are made. All life cycle state changes
      * should be carried out using the changeAPIStatus method of this interface.
      *
      * @param api         API
@@ -430,7 +432,8 @@ public interface APIProvider extends APIManager {
      * @return Documentation      created documentation Documentation
      * @throws APIManagementException if failed to add documentation
      */
-    Documentation addDocumentation(String uuid, Documentation documentation, String organization) throws APIManagementException;
+    Documentation addDocumentation(String uuid, Documentation documentation, String organization)
+            throws APIManagementException;
 
 
     /**
@@ -454,7 +457,8 @@ public interface APIProvider extends APIManager {
      * @return updated documentation Documentation
      * @throws APIManagementException if failed to update docs
      */
-    Documentation updateDocumentation(String apiId, Documentation documentation, String organization) throws APIManagementException;
+    Documentation updateDocumentation(String apiId, Documentation documentation, String organization)
+            throws APIManagementException;
 
     /**
      * Returns the details of all the life-cycle changes done per API or API Product

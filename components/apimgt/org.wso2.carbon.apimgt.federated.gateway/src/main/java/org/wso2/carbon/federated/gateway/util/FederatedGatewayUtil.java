@@ -130,8 +130,10 @@ public class FederatedGatewayUtil {
         return yaml.dump(yamlRoot);
     }
 
-    public static Map<String, List<String>> getDiscoveredAPIsFromFederatedGateway(Environment environment, String organization,
-                                                                                  String providerName) throws APIManagementException {
+    public static Map<String, List<String>> getDiscoveredAPIsFromFederatedGateway(Environment environment,
+                                                                                  String organization,
+                                                                                  String providerName)
+            throws APIManagementException {
         GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO = GatewayArtifactsMgtDAO.getInstance();
         Map<String, List<String>> apisDeployedInGateway = new HashMap<>();
         List<String> discoveredAPIs = new ArrayList<>();
