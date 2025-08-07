@@ -101,6 +101,9 @@ public final class ImportExportConstants {
     public static final String UPLOAD_API_FILE_NAME = "APIArchive.zip";
 
     public static final String UPLOAD_POLICY_FILE_NAME = "PolicyArchive.zip";
+    public static final String API_YAML_FILE_NAME = "api.yaml";
+    public static final String SWAGGER_YAML_FILE_NAME = "Definitions/swagger.yaml";
+    public static final String DEPLOYMENT_ENVIRONMENTS_FILE_NAME = "deployment_environments.yaml";
 
     // Location of the API swagger definition file
     public static final String JSON_SWAGGER_DEFINITION_LOCATION =
@@ -204,6 +207,7 @@ public final class ImportExportConstants {
     public static final String TYPE_CLIENT_CERTIFICATES = "client_certificates";
 
     public static final String TYPE_DEPLOYMENT_ENVIRONMENTS = "deployment_environments";
+    public static final String DEPLOYMENT_ENVIRONMENT_VERSION = "v4.3.0";
 
     public static final String TYPE_POLICY_SPECIFICATION = "operation_policy_specification";
 
@@ -330,4 +334,7 @@ public final class ImportExportConstants {
 
     public static final String BACKENDS_TYPE = "backends";
     public static final String BACKENDS_FILE_LOCATION = File.separator + "backends";
+
+    public static final String API_NAME_DELIMITER = "-";
+    public static final String INITIATED_FROM_GATEWAY_CONSTANT = "initiatedFromGateway";
 }

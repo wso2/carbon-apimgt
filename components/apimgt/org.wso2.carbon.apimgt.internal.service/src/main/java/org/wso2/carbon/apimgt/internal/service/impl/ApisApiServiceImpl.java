@@ -44,7 +44,6 @@ import org.wso2.carbon.apimgt.internal.service.dto.UnDeployedAPIRevisionDTO;
 import org.wso2.carbon.apimgt.internal.service.utils.SubscriptionValidationDataUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.context.CarbonContext;
 
 public class ApisApiServiceImpl implements ApisApiService {
 
@@ -98,7 +97,8 @@ public class ApisApiServiceImpl implements ApisApiService {
         return null;
     }
 
-    public Response deployedAPIRevision(List<DeployedAPIRevisionDTO> deployedAPIRevisionDTOList, MessageContext messageContext) throws APIManagementException {
+    public Response deployedAPIRevision(List<DeployedAPIRevisionDTO> deployedAPIRevisionDTOList,
+                                        MessageContext messageContext) throws APIManagementException {
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
         List<String> revisionUUIDs = new ArrayList<>();

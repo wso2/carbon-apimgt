@@ -2505,6 +2505,7 @@ public class PublisherCommonUtils {
                     -> tier.getOrganizationID().equals(orgInfo.getOrganizationId()));
             apiToAdd.setAvailableTiersForOrganizations(updatedOrganizationTiers);
         }
+        apiToAdd.setInitiatedFromGateway(apiDto.isInitiatedFromGateway());
         return apiToAdd;
     }
 
@@ -3013,6 +3014,7 @@ public class PublisherCommonUtils {
             apiToAdd.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
         }
         apiToAdd.setEgress(body.isEgress() ? 1 : 0);
+        apiToAdd.setInitiatedFromGateway(body.isInitiatedFromGateway());
         return apiToAdd;
     }
 

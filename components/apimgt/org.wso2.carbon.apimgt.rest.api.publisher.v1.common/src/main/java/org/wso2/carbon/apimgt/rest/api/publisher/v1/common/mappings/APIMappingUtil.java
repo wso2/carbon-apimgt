@@ -792,8 +792,8 @@ public class APIMappingUtil {
                     org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder.getInstance().
                             getExternalGatewayConnectorConfiguration(model.getGatewayType());
             if (gatewayConfiguration != null) {
-                GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration.getImplementation()).
-                        getDeclaredConstructor().newInstance();
+                GatewayDeployer deployer = (GatewayDeployer) Class.forName(gatewayConfiguration
+                                .getGatewayDeployerImplementation()).getDeclaredConstructor().newInstance();
                 if (deployer != null) {
                     deployer.transformAPI(model);
                 }
@@ -1095,6 +1095,7 @@ public class APIMappingUtil {
         apiInfoDTO.setGatewayVendor(api.getGatewayVendor());
         apiInfoDTO.setEgress(api.isEgress() == 1); // true -1, false - 0
         apiInfoDTO.setSubtype(api.getSubtype());
+        apiInfoDTO.setInitiatedFromGateway(api.isInitiatedFromGateway());
         return apiInfoDTO;
     }
 
@@ -1542,6 +1543,7 @@ public class APIMappingUtil {
         }
         APIDTO dto = new APIDTO();
         dto.setName(model.getId().getApiName());
+        dto.setDisplayName(model.getDisplayName() != null ? model.getDisplayName() : model.getId().getApiName());
         dto.setVersion(model.getId().getVersion());
         String providerName = model.getId().getProviderName();
         dto.setProvider(APIUtil.replaceEmailDomainBack(providerName));
@@ -1835,13 +1837,18 @@ public class APIMappingUtil {
                 transports.add(APIConstants.HTTPS_PROTOCOL);
 
                 dto.setTransport(transports);
+            } else {
+                dto.setTransport(Arrays.asList(model.getTransports().split(",")));
             }
-            dto.setTransport(Arrays.asList(model.getTransports().split(",")));
         }
         if (StringUtils.isEmpty(model.getTransports())) {
             dto.setVisibility(APIDTO.VisibilityEnum.PUBLIC);
         }
-        dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
+        if (model.getVisibility() != null) {
+            dto.setVisibility(mapVisibilityFromAPItoDTO(model.getVisibility()));
+        } else {
+            dto.setVisibility(APIDTO.VisibilityEnum.PUBLIC);
+        }
         if (model.getVisibleRoles() != null) {
             dto.setVisibleRoles(Arrays.asList(model.getVisibleRoles().split(",")));
         }
@@ -2012,7 +2019,7 @@ public class APIMappingUtil {
         // Set primary endpoints
         dto.setPrimaryProductionEndpointId(model.getPrimaryProductionEndpointId());
         dto.setPrimarySandboxEndpointId(model.getPrimarySandboxEndpointId());
-
+        dto.setInitiatedFromGateway(model.isInitiatedFromGateway());
         return dto;
     }
 
