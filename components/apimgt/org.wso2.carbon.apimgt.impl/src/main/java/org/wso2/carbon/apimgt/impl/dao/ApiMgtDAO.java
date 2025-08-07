@@ -7437,7 +7437,7 @@ public class ApiMgtDAO {
         String deleteExternalAPIStoresQuery = SQLConstants.REMOVE_FROM_EXTERNAL_STORES_SQL;
         String deleteAPIQuery = SQLConstants.REMOVE_FROM_API_SQL_BY_UUID;
         String deleteResourceScopeMappingsQuery = SQLConstants.REMOVE_RESOURCE_SCOPE_URL_MAPPING_SQL;
-        String deleteAPIBackendQuery = SQLConstants.REMOVE_AM_BACKEND_API_SQL;
+        String deleteAPIBackendQuery = SQLConstants.REMOVE_AM_BACKEND_SQL;
         String deleteURLTemplateQuery = SQLConstants.REMOVE_FROM_API_URL_MAPPINGS_SQL;
         String deleteGraphqlComplexityQuery = SQLConstants.REMOVE_FROM_GRAPHQL_COMPLEXITY_SQL;
         try {
@@ -19159,7 +19159,7 @@ public class ApiMgtDAO {
 
                 List<Backend> backends = getBackends(apiRevision.getApiUUID(), organization);
                 PreparedStatement insertBackendStatement = connection
-                        .prepareStatement(SQLConstants.ADD_AM_BACKEND_API_REVISION_SQL);
+                        .prepareStatement(SQLConstants.ADD_AM_BACKEND_REVISION_SQL);
                 if (!backends.isEmpty()) {
                     for (Backend backend : backends) {
                         String backendId = UUID.randomUUID().toString();
@@ -20600,7 +20600,7 @@ public class ApiMgtDAO {
             throws SQLException {
 
         PreparedStatement removeApiBackendStatement =
-                connection.prepareStatement(SQLConstants.REMOVE_AM_BACKEND_API_REVISION_SQL);
+                connection.prepareStatement(SQLConstants.REMOVE_AM_BACKEND_REVISION_SQL);
         removeApiBackendStatement.setString(1, apiUuid);
         removeApiBackendStatement.setString(2, revisionUUID);
         removeApiBackendStatement.executeUpdate();
@@ -20616,7 +20616,7 @@ public class ApiMgtDAO {
     public void removeBackendOfCurrentAPI(Connection connection, String apiUuid) throws SQLException {
 
         PreparedStatement removeApiBackendStatement =
-                connection.prepareStatement(SQLConstants.REMOVE_AM_BACKEND_API_REVISION_OF_CURRENT_API_SQL);
+                connection.prepareStatement(SQLConstants.REMOVE_AM_BACKEND_REVISION_OF_CURRENT_API_SQL);
         removeApiBackendStatement.setString(1, apiUuid);
         removeApiBackendStatement.executeUpdate();
     }
@@ -21876,7 +21876,7 @@ public class ApiMgtDAO {
     private void addBackends(Connection connection, String apiUuid, List<Backend> backends, String organization)
             throws SQLException {
 
-        String dbQuery = SQLConstants.ADD_AM_BACKEND_API_SQL;
+        String dbQuery = SQLConstants.ADD_AM_BACKEND_SQL;
 
         try (PreparedStatement statement = connection.prepareStatement(dbQuery)) {
             for (Backend backend : backends) {
@@ -21940,7 +21940,7 @@ public class ApiMgtDAO {
     public List<Backend> getBackends(String apiUuid, Connection connection, String organization) throws SQLException {
 
         List<Backend> endpointsList = new ArrayList<>();
-        String query = SQLConstants.GET_AM_BACKEND_APIS_SQL;
+        String query = SQLConstants.GET_AM_BACKENDS_SQL;
         try (PreparedStatement getBackendPrepStmt = connection.prepareStatement(query)) {
             getBackendPrepStmt.setString(1, apiUuid);
             getBackendPrepStmt.setString(2, organization);
@@ -21997,7 +21997,7 @@ public class ApiMgtDAO {
     public Backend getBackend(String apiUuid, String backendId, Connection connection, String organization)
             throws SQLException {
 
-        String query = SQLConstants.GET_AM_BACKEND_API_SQL;
+        String query = SQLConstants.GET_AM_BACKEND_SQL;
         Backend backend = null;
         try (PreparedStatement getBackendPrepStmt = connection.prepareStatement(query)) {
             getBackendPrepStmt.setString(1, apiUuid);
@@ -22150,7 +22150,7 @@ public class ApiMgtDAO {
             throws SQLException {
 
         List<Backend> endpointsList = new ArrayList<>();
-        String query = SQLConstants.GET_AM_BACKEND_APIS_REVISION_SQL;
+        String query = SQLConstants.GET_AM_BACKENDS_REVISION_SQL;
 
         try (PreparedStatement getBackendPrepStmt = connection.prepareStatement(query)) {
             getBackendPrepStmt.setString(1, apiUuid);
@@ -22212,7 +22212,7 @@ public class ApiMgtDAO {
                                        String organization) throws SQLException {
 
         Backend backend = new Backend();
-        String query = SQLConstants.GET_AM_BACKEND_API_REVISION_SQL;
+        String query = SQLConstants.GET_AM_BACKEND_REVISION_SQL;
 
         try (PreparedStatement getBackendPrepStmt = connection.prepareStatement(query)) {
             getBackendPrepStmt.setString(1, apiUuid);
@@ -22241,8 +22241,8 @@ public class ApiMgtDAO {
     private Backend extractBackend(ResultSet resultSet) throws SQLException {
 
         Backend endpoint = new Backend();
-        String backendId = resultSet.getString("BACKEND_API_ID");
-        String backendName = resultSet.getString("BACKEND_API_NAME");
+        String backendId = resultSet.getString("BACKEND_ID");
+        String backendName = resultSet.getString("BACKEND_NAME");
         endpoint.setId(backendId);
         endpoint.setName(backendName);
         try (InputStream endpointConfig = resultSet.getBinaryStream("ENDPOINT_CONFIG")) {
@@ -22301,7 +22301,7 @@ public class ApiMgtDAO {
     private void updateBackend(Connection connection, String apiUuid, Backend backend, String organization)
             throws SQLException {
 
-        String query = SQLConstants.UPDATE_AM_BACKEND_API_SQL;
+        String query = SQLConstants.UPDATE_AM_BACKEND_SQL;
 
         try (PreparedStatement getBackendPrepStmt = connection.prepareStatement(query)) {
             getBackendPrepStmt.setBinaryStream(1,
@@ -22880,7 +22880,7 @@ public class ApiMgtDAO {
                     backendOperation.setVerb(SupportedHTTPVerbs.valueOf(rs.getString("VERB")));
 
                     BackendOperationMapping backendOperationMap = new BackendOperationMapping();
-                    backendOperationMap.setBackendId(rs.getString("BACKEND_API_ID"));
+                    backendOperationMap.setBackendId(rs.getString("BACKEND_ID"));
                     backendOperationMap.setBackendOperation(backendOperation);
 
                     uriTemplate.setBackendOperationMapping(backendOperationMap);
