@@ -30,6 +30,14 @@ import java.util.Set;
 public final class APISpecParserConstants {
     public static final String STRING = "string";
     public static final String OBJECT = "object";
+    public static final String CONTENT_TYPE = "contentType";
+    public static final String REQUEST_BODY = "requestBody";
+    public static final String PROPERTIES = "properties";
+    public static final String REQUIRED = "required";
+    public static final String FORMAT = "format";
+    public static final String ENUM = "enum";
+    public static final String DEFAULT = "default";
+    public static final String DESCRIPTION = "description";
     public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
     public static final String APPLICATION_XML_MEDIA_TYPE = "application/xml";
     public static final String OPENAPI_ARCHIVES_TEMP_FOLDER = "OPENAPI-archives";

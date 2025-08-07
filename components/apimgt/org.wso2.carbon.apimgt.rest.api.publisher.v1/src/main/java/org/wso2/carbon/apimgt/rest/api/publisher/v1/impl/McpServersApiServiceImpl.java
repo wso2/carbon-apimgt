@@ -27,7 +27,6 @@ import org.apache.cxf.phase.PhaseInterceptorChain;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.wso2.carbon.apimgt.api.APIComplianceException;
-import org.wso2.carbon.apimgt.api.APIDefinitionValidationResponse;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceAlreadyExistsException;
 import org.wso2.carbon.apimgt.api.APIMgtResourceNotFoundException;
@@ -43,7 +42,7 @@ import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.BackendAPI;
+import org.wso2.carbon.apimgt.api.model.Backend;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
 import org.wso2.carbon.apimgt.api.model.Documentation;
@@ -56,8 +55,7 @@ import org.wso2.carbon.apimgt.api.model.Tier;
 import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
 import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.ExternalGatewayAPIValidationException;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIDTOWrapper;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIDTOTypeWrapper;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.GZIPUtils;
 import org.wso2.carbon.apimgt.impl.ServiceCatalogImpl;
@@ -86,7 +84,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentRequestDTO;
@@ -104,7 +102,6 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.utils.RestApiPublisherUtils;
 import org.wso2.carbon.apimgt.rest.api.util.exception.BadRequestException;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
-import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
 
@@ -128,6 +125,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import static org.wso2.carbon.apimgt.api.ExceptionCodes.API_VERSION_ALREADY_EXISTS;
+import static org.wso2.carbon.apimgt.api.APIConstants.AIAPIConstants.QUERY_API_TYPE_MCP;
 
 /**
  * Implementation of the MCP Servers API service.
@@ -162,7 +160,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
         limit = limit != null ? limit : RestApiConstants.PAGINATION_LIMIT_DEFAULT;
         offset = offset != null ? offset : RestApiConstants.PAGINATION_OFFSET_DEFAULT;
-        query = query == null ? "type:MCP" : "type:MCP " + query;
+        query = query == null ? QUERY_API_TYPE_MCP : QUERY_API_TYPE_MCP + " " + query;
         try {
             if (query.startsWith(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":")) {
                 query = query.replace(APIConstants.CONTENT_SEARCH_TYPE_PREFIX + ":",
@@ -484,7 +482,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException if an error occurs while retrieving the endpoint.
      */
     @Override
-    public Response getMCPServerBackendAPI(String mcpServerId, String backendApiId, MessageContext messageContext)
+    public Response getMCPServerBackend(String mcpServerId, String backendApiId, MessageContext messageContext)
             throws APIManagementException {
 
         try {
@@ -492,9 +490,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             CommonUtils.validateAPIExistence(mcpServerId);
 
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            BackendAPI backendAPI = apiProvider.getMCPServerEndpoint(mcpServerId, backendApiId, organization);
-            BackendAPIDTO backendAPIDTO = APIMappingUtil.fromBackendAPIToDTO(backendAPI,
-                    organization, false);
+            Backend backend = apiProvider.getMCPServerBackend(mcpServerId, backendApiId, organization);
+            BackendDTO backendAPIDTO = APIMappingUtil.fromBackendAPIToDTO(backend, organization, false);
             return Response.ok().entity(backendAPIDTO).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -519,18 +516,18 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @throws APIManagementException if an error occurs while retrieving the endpoints.
      */
     @Override
-    public Response getMCPServerBackendAPIs(String mcpServerId, MessageContext messageContext)
+    public Response getMCPServerBackends(String mcpServerId, MessageContext messageContext)
             throws APIManagementException {
 
         try {
             APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
             CommonUtils.validateAPIExistence(mcpServerId);
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            List<BackendAPI> backendAPIList = apiProvider.getMCPServerBackendAPIs(mcpServerId, organization);
-            List<BackendAPIDTO> backendAPIDTOList = new ArrayList<>();
-            for (BackendAPI endpoint : backendAPIList) {
+            List<Backend> backendList = apiProvider.getMCPServerBackends(mcpServerId, organization);
+            List<BackendDTO> backendAPIDTOList = new ArrayList<>();
+            for (Backend endpoint : backendList) {
                 try {
-                    BackendAPIDTO dto = APIMappingUtil.fromBackendAPIToDTO(endpoint, organization, false);
+                    BackendDTO dto = APIMappingUtil.fromBackendAPIToDTO(endpoint, organization, false);
                     backendAPIDTOList.add(dto);
                 } catch (APIManagementException e) {
                     String errorMessage = "Error while mapping backend endpoint to DTO for MCP Server: " + mcpServerId;
@@ -710,53 +707,11 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 ThrottlingPolicyDTO.PolicyLevelEnum.SUBSCRIPTION.toString(), true, isAiApi);
 
         List<String> apiPolicies =
-                RestApiPublisherUtils.getSubscriptionPoliciesForOrganization(new APIDTOWrapper(apiInfo),
+                RestApiPublisherUtils.getSubscriptionPoliciesForOrganization(new APIDTOTypeWrapper(apiInfo),
                         organizationID);
         List<Tier> apiThrottlingPolicies = ApisApiServiceImplUtils.filterAPIThrottlingPolicies(apiPolicies,
                 availableThrottlingPolicyList);
         return Response.ok().entity(apiThrottlingPolicies).build();
-    }
-
-    /**
-     * Retrieves the Swagger definition of a specific MCP server.
-     * Validates the API existence and retrieves the updated Swagger definition.
-     *
-     * @param mcpServerId    UUID of the MCP server.
-     * @param accept         The requested content type (e.g. JSON or plain text).
-     * @param ifNoneMatch    The ETag header value for conditional requests.
-     * @param messageContext Message context of the request.
-     * @return Response containing the Swagger definition or an error response.
-     * @throws APIManagementException if an error occurs while retrieving the Swagger definition.
-     */
-    @Override
-    public Response getMCPServerSwagger(String mcpServerId, String accept, String ifNoneMatch,
-                                        MessageContext messageContext)
-            throws APIManagementException {
-
-        try {
-            APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            //this will fail if user does not have access to the API or the API does not exist
-            API api = apiProvider.getAPIbyUUID(mcpServerId, organization);
-            api.setOrganization(organization);
-            String updatedDefinition = RestApiCommonUtil.retrieveSwaggerDefinition(mcpServerId, api, apiProvider);
-            return Response.ok().entity(updatedDefinition).header("Content-Disposition",
-                    "attachment; filename=\"" + "swagger.json" + "\"").build();
-        } catch (APIManagementException e) {
-            //Auth failure occurs when cross tenant accessing APIs. Sends 404, since we don't need to expose the
-            // existence of the resource
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil
-                        .handleAuthorizationFailure(
-                                "Authorization failure while retrieving swagger of MCP Server :" + mcpServerId, e, log);
-            } else {
-                String errorMessage = "Error while retrieving swagger of MCP Server : " + mcpServerId;
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        }
-        return null;
     }
 
     /**
@@ -896,40 +851,42 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                     ExceptionCodes.ADDITIONAL_PROPERTIES_PARSE_ERROR);
         }
         populateDefaultValuesForMCPServer(apiDTOFromProperties, APIConstants.API_SUBTYPE_DIRECT_ENDPOINT);
-        if (!PublisherCommonUtils.validateEndpoints(new APIDTOWrapper(apiDTOFromProperties))) {
+
+        APIDTOTypeWrapper mcpServerDtoWrapper = new APIDTOTypeWrapper(apiDTOFromProperties);
+        if (!PublisherCommonUtils.validateEndpoints(mcpServerDtoWrapper)) {
             throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                     ExceptionCodes.INVALID_ENDPOINT_URL);
         }
         try {
-            LinkedHashMap endpointConfig = (LinkedHashMap) apiDTOFromProperties.getBackendAPIEndpointConfig();
+            LinkedHashMap endpointConfig = (LinkedHashMap) mcpServerDtoWrapper.getEndpointConfig();
             PublisherCommonUtils
                     .encryptEndpointSecurityOAuthCredentials(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
                             StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                            new APIDTOWrapper(apiDTOFromProperties));
+                            mcpServerDtoWrapper);
             PublisherCommonUtils
                     .encryptEndpointSecurityApiKeyCredentials(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
-                            StringUtils.EMPTY, StringUtils.EMPTY, new APIDTOWrapper(apiDTOFromProperties));
+                            StringUtils.EMPTY, StringUtils.EMPTY, mcpServerDtoWrapper);
 
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            MCPServerDTO createdApiDTO = RestApiPublisherUtils.importOpenAPIDefinition(fileInputStream, url, null,
-                    apiDTOFromProperties, fileDetail, null, organization);
+            MCPServerDTO createdApiDTO = RestApiPublisherUtils.importOpenAPIDefinitionForMCPServers(fileInputStream,
+                    url, null, mcpServerDtoWrapper, fileDetail, null, organization);
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + createdApiDTO.getId());
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (URISyntaxException e) {
             String errorMessage =
-                    "Error while retrieving MCP server location: " + apiDTOFromProperties.getProvider() + "-" +
-                            apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion();
+                    "Error while retrieving MCP server location: " + mcpServerDtoWrapper.getProvider() + "-" +
+                            mcpServerDtoWrapper.getName() + "-" + mcpServerDtoWrapper.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (CryptoException e) {
             String errorMessage =
-                    "Error while encrypting the secret key of MCP server: " + apiDTOFromProperties.getProvider() + "-"
-                            + apiDTOFromProperties.getName() + "-" + apiDTOFromProperties.getVersion();
+                    "Error while encrypting the secret key of MCP server: " + mcpServerDtoWrapper.getProvider() + "-"
+                            + mcpServerDtoWrapper.getName() + "-" + mcpServerDtoWrapper.getVersion();
             throw new APIManagementException(errorMessage, e,
                     ExceptionCodes.from(ExceptionCodes.ENDPOINT_SECURITY_CRYPTO_EXCEPTION, errorMessage));
         } catch (ParseException e) {
             String errorMessage = "Error while parsing the endpoint configuration of MCP server: "
-                    + apiDTOFromProperties.getProvider() + "-" + apiDTOFromProperties.getName() + "-"
-                    + apiDTOFromProperties.getVersion();
+                    + mcpServerDtoWrapper.getProvider() + "-" + mcpServerDtoWrapper.getName() + "-"
+                    + mcpServerDtoWrapper.getVersion();
             throw new APIManagementException(errorMessage, e);
         }
         return null;
@@ -1282,7 +1239,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             OrganizationInfo orgInfo = RestApiUtil.getOrganizationInfo(messageContext);
             populateDefaultValuesForMCPServer(body, body.getSubtypeConfiguration().getSubtype());
             API createdApi = PublisherCommonUtils
-                    .addAPIWithGeneratedSwaggerDefinition(new APIDTOWrapper(body), openAPIVersion,
+                    .addAPIWithGeneratedSwaggerDefinition(new APIDTOTypeWrapper(body), openAPIVersion,
                             RestApiCommonUtil.getLoggedInUsername(), organization, orgInfo);
             createdApiDTO = APIMappingUtil.fromAPItoMCPServerDTO(createdApi);
             createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + createdApiDTO.getId());
@@ -1429,8 +1386,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) || ServiceEntry
                         .DefinitionType.OAS3.equals(service.getDefinitionType())) {
                     newVersionedApi =
-                            RestApiPublisherUtils.importOpenAPIDefinition(service.getEndpointDef(), null, null, apidto,
-                                    null, service, organization);
+                            RestApiPublisherUtils.importOpenAPIDefinitionForMCPServers(service.getEndpointDef(),
+                                    null, null, new APIDTOTypeWrapper(apidto), null, service, organization);
                 }
             } else {
                 API versionedAPI =
@@ -1932,7 +1889,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             OrganizationInfo organizationInfo = RestApiUtil.getOrganizationInfo(messageContext);
             CommonUtils.validateAPIExistence(mcpServerId);
-            if (!PublisherCommonUtils.validateEndpointConfigs(new APIDTOWrapper(body))) {
+            if (!PublisherCommonUtils.validateEndpointConfigs(new APIDTOTypeWrapper(body))) {
                 throw new APIManagementException("Invalid endpoint configs detected",
                         ExceptionCodes.INVALID_ENDPOINT_CONFIG);
             }
@@ -1946,7 +1903,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                         ExceptionCodes.ERROR_WHILE_UPDATING_MANDATORY_PROPERTIES.getErrorCode(), log);
             }
 
-            if (!PublisherCommonUtils.validateEndpoints(new APIDTOWrapper(body))) {
+            if (!PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(body))) {
                 throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                         ExceptionCodes.INVALID_ENDPOINT_URL);
             }
@@ -1968,7 +1925,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             }
 
             API updatedApi =
-                    PublisherCommonUtils.updateApi(originalAPI, new APIDTOWrapper(body), apiProvider, tokenScopes,
+                    PublisherCommonUtils.updateApi(originalAPI, new APIDTOTypeWrapper(body), apiProvider, tokenScopes,
                             organizationInfo);
 
             PublisherCommonUtils.checkGovernanceComplianceAsync(originalAPI.getUuid(), APIMGovernableState.API_UPDATE,
@@ -2086,98 +2043,32 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
-     * Updates the Swagger definition of an MCP server.
-     * Validates the existence, checks governance compliance, and updates the Swagger definition.
+     * Updates the backend API of an MCP server.
+     * Validates the API existence, checks governance compliance, and updates the backend API.
      *
-     * @param mcpServerId     UUID of the MCP Server.
-     * @param ifMatch         ETag value for optimistic concurrency control.
-     * @param apiDefinition   OpenAPI definition in string format.
-     * @param url             URL to fetch the OpenAPI definition from (optional).
-     * @param fileInputStream InputStream of the OpenAPI definition file (optional).
-     * @param fileDetail      Attachment containing file details (optional).
-     * @param messageContext  Message context of the request.
-     * @return HTTP Response containing the updated Swagger definition or an error response.
-     * @throws APIManagementException if an error occurs while updating the Swagger definition.
-     */
-    @Override
-    public Response updateMCPServerSwagger(String mcpServerId, String ifMatch, String apiDefinition, String url,
-                                           InputStream fileInputStream, Attachment fileDetail,
-                                           MessageContext messageContext) throws APIManagementException {
-
-        try {
-            String updatedSwagger;
-            APIInfo apiInfo = CommonUtils.validateAPIExistence(mcpServerId);
-            validateAPIOperationsPerLC(apiInfo.getStatus());
-            String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            if (url != null || fileInputStream != null) {
-                Map validationResponseMap = RestApiPublisherUtils.validateOpenAPIDefinition(url, fileInputStream,
-                        fileDetail, null, true, false);
-                APIDefinitionValidationResponse validationResponse =
-                        (APIDefinitionValidationResponse) validationResponseMap.get(RestApiConstants.RETURN_MODEL);
-                if (!validationResponse.isValid()) {
-                    RestApiUtil.handleBadRequest(validationResponse.getErrorItems(), log);
-                }
-                updatedSwagger =
-                        PublisherCommonUtils.updateSwagger(mcpServerId, validationResponse, false, organization);
-            } else {
-                APIDefinitionValidationResponse response = OASParserUtil
-                        .validateAPIDefinition(apiDefinition, true);
-                if (!response.isValid()) {
-                    RestApiUtil.handleBadRequest(response.getErrorItems(), log);
-                }
-                updatedSwagger = PublisherCommonUtils.updateSwagger(mcpServerId, response, false, organization);
-            }
-            PublisherCommonUtils.checkGovernanceComplianceAsync(mcpServerId, APIMGovernableState.API_UPDATE,
-                    ArtifactType.API, organization);
-            return Response.ok().entity(updatedSwagger).build();
-        } catch (ExternalGatewayAPIValidationException e) {
-            RestApiUtil.handleBadRequest(e.getMessage(), log);
-        } catch (APIManagementException e) {
-            if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
-                RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, e, log);
-            } else if (isAuthorizationFailure(e)) {
-                RestApiUtil.handleAuthorizationFailure(
-                        "Authorization failure while updating swagger definition of MCPServer: "
-                                + mcpServerId, e, log);
-            } else {
-                String errorMessage = "Error while updating the swagger definition of the MCP Server: "
-                        + mcpServerId + " - " + e.getMessage();
-                RestApiUtil.handleInternalServerError(errorMessage, e, log);
-            }
-        } catch (FaultGatewaysException e) {
-            String errorMessage = "Error while updating MCP Server : " + mcpServerId;
-            RestApiUtil.handleInternalServerError(errorMessage, e, log);
-        }
-        return null;
-    }
-
-    /**
-     * Retrieves a specific endpoint of an MCP server by its ID.
-     * Validates the API existence and retrieves the endpoint details.
-     *
-     * @param mcpServerId    UUID of the API.
-     * @param backendApiId   UUID of the backend API to be retrieved.
+     * @param mcpServerId    UUID of the MCP Server.
+     * @param backendApiId   UUID of the backend API to be updated.
+     * @param backendAPIDTO  BackendDTO containing the updated backend API details.
      * @param messageContext Message context of the request.
-     * @return HTTP Response containing the BackendAPIDTO or an error response.
-     * @throws APIManagementException if an error occurs while retrieving the endpoint.
+     * @return HTTP Response containing the updated BackendDTO or an error response.
+     * @throws APIManagementException if an error occurs while updating the backend API.
      */
     @Override
-    public Response updateMCPServerBackendAPI(String mcpServerId, String backendApiId,
-                                              BackendAPIDTO backendAPIDTO,
-                                              MessageContext messageContext) throws APIManagementException {
+    public Response updateMCPServerBackend(String mcpServerId, String backendApiId, BackendDTO backendAPIDTO,
+                                           MessageContext messageContext) throws APIManagementException {
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         CommonUtils.validateAPIExistence(mcpServerId);
         String organization = RestApiUtil.getValidatedOrganization(messageContext);
-        BackendAPI backendAPI = apiProvider.getMCPServerEndpoint(mcpServerId, backendApiId, organization);
+        Backend backend = apiProvider.getMCPServerBackend(mcpServerId, backendApiId, organization);
 
-        if (backendAPI == null) {
+        if (backend == null) {
             RestApiUtil.handleResourceNotFoundError(RestApiConstants.RESOURCE_MCP_SERVER, mcpServerId, log);
         } else {
-            backendAPI.setEndpointConfig(backendAPIDTO.getEndpointConfig().toString());
+            backend.setEndpointConfig(backendAPIDTO.getEndpointConfig().toString());
         }
-        apiProvider.updateMCPServerBackendAPI(mcpServerId, backendAPI, organization);
-        return Response.ok().entity(APIMappingUtil.fromBackendAPIToDTO(backendAPI, organization,
+        apiProvider.updateMCPServerBackend(mcpServerId, backend, organization);
+        return Response.ok().entity(APIMappingUtil.fromBackendAPIToDTO(backend, organization,
                 false)).build();
     }
 

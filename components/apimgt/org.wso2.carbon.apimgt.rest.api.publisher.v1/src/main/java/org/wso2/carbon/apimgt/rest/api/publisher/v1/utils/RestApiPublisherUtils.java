@@ -57,7 +57,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.common.RestApiConstants;
 import org.wso2.carbon.apimgt.rest.api.common.dto.ErrorDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIDTOWrapper;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIDTOTypeWrapper;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIMappingUtil;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.PublisherCommonUtils;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
@@ -569,7 +569,7 @@ public class RestApiPublisherUtils {
         return policies;
     }
 
-    public static List<String> getSubscriptionPoliciesForOrganization(APIDTOWrapper apiInfo, String organizationID) {
+    public static List<String> getSubscriptionPoliciesForOrganization(APIDTOTypeWrapper apiInfo, String organizationID) {
 
         if (organizationID == null) {
             return apiInfo.getPolicies();
@@ -588,50 +588,50 @@ public class RestApiPublisherUtils {
     }
 
     /**
-     * Imports an OpenAPI definition and returns a MCPServerDTO object.
+     * Imports an OpenAPI definition and returns an APIDTO object.
      *
-     * @param definition             InputStream of the OpenAPI definition
-     * @param definitionUrl          URL of the OpenAPI definition
-     * @param inlineDefinition       Inline OpenAPI definition as a string
-     * @param mcpServerDTOProperties Properties for MCPServerDTO
-     * @param fileDetail             Attachment containing file details
-     * @param service                ServiceEntry object if applicable
-     * @param organization           Organization identifier
-     * @return MCPServerDTO object created from the OpenAPI definition
+     * @param definition       InputStream of the OpenAPI definition
+     * @param definitionUrl    URL of the OpenAPI definition
+     * @param inlineDefinition Inline OpenAPI definition as a string
+     * @param wrapper          APIDTOWrapper containing properties for APIDTO
+     * @param fileDetail       Attachment containing file details
+     * @param service          ServiceEntry object if applicable
+     * @param organization     Organization identifier
+     * @return APIDTO object created from the OpenAPI definition
      * @throws APIManagementException if an error occurs during import
      */
-    public static MCPServerDTO importOpenAPIDefinition(InputStream definition, String definitionUrl,
-                                                       String inlineDefinition,
-                                                       MCPServerDTO mcpServerDTOProperties, Attachment fileDetail,
-                                                       ServiceEntry service,
-                                                       String organization) throws APIManagementException {
+    public static APIDTO importOpenAPIDefinitionForAPIs(InputStream definition, String definitionUrl,
+                                                        String inlineDefinition, APIDTOTypeWrapper wrapper,
+                                                        Attachment fileDetail, ServiceEntry service,
+                                                        String organization) throws APIManagementException {
 
-        API api = createApiFromOpenAPIDefinition(definition, definitionUrl, inlineDefinition,
-                new APIDTOWrapper(mcpServerDTOProperties), fileDetail, service, organization);
-        return APIMappingUtil.fromAPItoMCPServerDTO(api);
+        API api = createAPIFromOpenAPIDefinition(definition, definitionUrl, inlineDefinition, wrapper, fileDetail,
+                service, organization);
+        return APIMappingUtil.fromAPItoDTO(api);
     }
 
     /**
-     * Imports an OpenAPI definition and returns a APIDTO object.
+     * Imports an OpenAPI definition and returns a MCPServerDTO object.
      *
-     * @param definition           InputStream of the OpenAPI definition
-     * @param definitionUrl        URL of the OpenAPI definition
-     * @param inlineDefinition     Inline OpenAPI definition as a string
-     * @param apiDtoFromProperties Properties for APIDTO
-     * @param fileDetail           Attachment containing file details
-     * @param service              ServiceEntry object if applicable
-     * @param organization         Organization identifier
+     * @param definition       InputStream of the OpenAPI definition
+     * @param definitionUrl    URL of the OpenAPI definition
+     * @param inlineDefinition Inline OpenAPI definition as a string
+     * @param wrapper          APIDTOWrapper containing properties for MCPServerDTO
+     * @param fileDetail       Attachment containing file details
+     * @param service          ServiceEntry object if applicable
+     * @param organization     Organization identifier
      * @return MCPServerDTO object created from the OpenAPI definition
      * @throws APIManagementException if an error occurs during import
      */
-    public static APIDTO importOpenAPIDefinition(InputStream definition, String definitionUrl, String inlineDefinition,
-                                                 APIDTO apiDtoFromProperties, Attachment fileDetail,
-                                                 ServiceEntry service,
-                                                 String organization) throws APIManagementException {
+    public static MCPServerDTO importOpenAPIDefinitionForMCPServers(InputStream definition, String definitionUrl,
+                                                                    String inlineDefinition,
+                                                                    APIDTOTypeWrapper wrapper, Attachment fileDetail,
+                                                                    ServiceEntry service,
+                                                                    String organization) throws APIManagementException {
 
-        API api = createApiFromOpenAPIDefinition(definition, definitionUrl, inlineDefinition,
-                new APIDTOWrapper(apiDtoFromProperties), fileDetail, service, organization);
-        return APIMappingUtil.fromAPItoDTO(api);
+        API api = createAPIFromOpenAPIDefinition(definition, definitionUrl, inlineDefinition, wrapper, fileDetail,
+                service, organization);
+        return APIMappingUtil.fromAPItoMCPServerDTO(api);
     }
 
     /**
@@ -640,15 +640,15 @@ public class RestApiPublisherUtils {
      * @param definition        InputStream of the OpenAPI definition
      * @param definitionUrl     URL of the OpenAPI definition
      * @param inlineDefinition  Inline OpenAPI definition as a string
-     * @param dtoFromProperties Properties for APIDTO or MCPServerDTO
+     * @param apiDtoTypeWrapper Properties for APIDTO or MCPServerDTO
      * @param fileDetail        Attachment containing file details
      * @param service           ServiceEntry object if applicable
      * @param organization      Organization identifier
      * @return API object created from the OpenAPI definition
      * @throws APIManagementException if an error occurs during creation
      */
-    public static API createApiFromOpenAPIDefinition(InputStream definition, String definitionUrl,
-                                                     String inlineDefinition, APIDTOWrapper dtoFromProperties,
+    public static API createAPIFromOpenAPIDefinition(InputStream definition, String definitionUrl,
+                                                     String inlineDefinition, APIDTOTypeWrapper apiDtoTypeWrapper,
                                                      Attachment fileDetail, ServiceEntry service,
                                                      String organization) throws APIManagementException {
 
@@ -660,7 +660,7 @@ public class RestApiPublisherUtils {
                     true, isServiceAPI);
         } catch (APIManagementException e) {
             RestApiUtil.handleInternalServerError("Error occurred while validating API Definition", e, log);
-            return null; // For compiler; unreachable
+            return null;
         }
 
         OpenAPIDefinitionValidationResponseDTO validationResponseDTO =
@@ -674,21 +674,20 @@ public class RestApiPublisherUtils {
         }
 
         // Set description if missing
-        if (validationResponseDTO.getInfo().getDescription() != null && dtoFromProperties.getDescription() == null) {
-            dtoFromProperties.setDescription(validationResponseDTO.getInfo().getDescription());
+        if (validationResponseDTO.getInfo().getDescription() != null && apiDtoTypeWrapper.getDescription() == null) {
+            apiDtoTypeWrapper.setDescription(validationResponseDTO.getInfo().getDescription());
         }
 
         // Set API type if service-based and using APIDTO
-        if (isServiceAPI && dtoFromProperties.isAPIDTO()) {
-            dtoFromProperties.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), null));
+        if (isServiceAPI && apiDtoTypeWrapper.isAPIDTO()) {
+            apiDtoTypeWrapper.setType(PublisherCommonUtils.getAPIType(service.getDefinitionType(), null));
         }
 
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
         String username = RestApiCommonUtil.getLoggedInUsername();
 
-        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(dtoFromProperties, apiProvider, username,
-                organization);
-        boolean syncOperations = !dtoFromProperties.getOperations().isEmpty();
+        API apiToAdd = PublisherCommonUtils.prepareToCreateAPIByDTO(apiDtoTypeWrapper, apiProvider, username, organization);
+        boolean syncOperations = !apiDtoTypeWrapper.isOperationsEmpty();
 
         Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(apiToAdd.getUuid(),
                 APIMGovernableState.API_CREATE, ArtifactType.API, organization, null, null);

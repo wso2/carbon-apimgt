@@ -52,8 +52,8 @@ public class URITemplate implements Serializable{
     private List<OperationPolicy> operationPolicies = new ArrayList<>();
     private String description;
     private String schemaDefinition = null;
-    private ExistingAPIOperationMapping existingAPIOperationMapping = null;
-    private BackendAPIOperationMapping backendAPIOperationMapping = null;
+    private APIOperationMapping APIOperationMapping = null;
+    private BackendOperationMapping backendOperationMapping = null;
 
     public ConditionGroupDTO[] getConditionGroups() {
         return conditionGroups;
@@ -377,12 +377,12 @@ public class URITemplate implements Serializable{
                 null) {
             return false;
         }
-        if (backendAPIOperationMapping != null ? !backendAPIOperationMapping.equals(that.backendAPIOperationMapping) :
-                that.backendAPIOperationMapping != null) {
+        if (backendOperationMapping != null ? !backendOperationMapping.equals(that.backendOperationMapping) :
+                that.backendOperationMapping != null) {
             return false;
         }
-        if (existingAPIOperationMapping != null ? !existingAPIOperationMapping.equals(that.existingAPIOperationMapping) :
-                that.existingAPIOperationMapping != null) {
+        if (APIOperationMapping != null ? !APIOperationMapping.equals(that.APIOperationMapping) :
+                that.APIOperationMapping != null) {
             return false;
         }
 
@@ -407,8 +407,8 @@ public class URITemplate implements Serializable{
         result = 31 * result + (mediationScript != null ? mediationScript.hashCode() : 0);
         result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
         result = 31 * result + (mediationScripts != null ? mediationScripts.hashCode() : 0);
-        result = 31 * result + (backendAPIOperationMapping != null ? backendAPIOperationMapping.hashCode() : 0);
-        result = 31 * result + (existingAPIOperationMapping != null ? existingAPIOperationMapping.hashCode() : 0);
+        result = 31 * result + (backendOperationMapping != null ? backendOperationMapping.hashCode() : 0);
+        result = 31 * result + (APIOperationMapping != null ? APIOperationMapping.hashCode() : 0);
         result = 31 * result + Arrays.hashCode(conditionGroups);
         return result;
     }
@@ -494,24 +494,24 @@ public class URITemplate implements Serializable{
         this.schemaDefinition = schemaDefinition;
     }
 
-    public ExistingAPIOperationMapping getExistingAPIOperationMapping() {
+    public APIOperationMapping getExistingAPIOperationMapping() {
 
-        return existingAPIOperationMapping;
+        return APIOperationMapping;
     }
 
-    public void setExistingAPIOperationMapping(ExistingAPIOperationMapping existingAPIOperationMapping) {
+    public void setExistingAPIOperationMapping(APIOperationMapping APIOperationMapping) {
 
-        this.existingAPIOperationMapping = existingAPIOperationMapping;
+        this.APIOperationMapping = APIOperationMapping;
     }
 
-    public BackendAPIOperationMapping getBackendOperationMapping() {
+    public BackendOperationMapping getBackendOperationMapping() {
 
-        return backendAPIOperationMapping;
+        return backendOperationMapping;
     }
 
-    public void setBackendOperationMapping(BackendAPIOperationMapping backendAPIOperationMapping) {
+    public void setBackendOperationMapping(BackendOperationMapping backendOperationMapping) {
 
-        this.backendAPIOperationMapping = backendAPIOperationMapping;
+        this.backendOperationMapping = backendOperationMapping;
     }
 
     public String getHttpVerb() {

@@ -1,12 +1,12 @@
 /*
- * Copyright (c) 2025, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ * Copyright (c) 2025, WSO2 LLC (http://www.wso2.org) All Rights Reserved.
  *
- * WSO2 Inc. licenses this file to you under the Apache License,
+ * WSO2 LLC licenses this file to you under the Apache License,
  * Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License.
- * You may obtain a copy of the License at
+ * you may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -19,22 +19,22 @@
 package org.wso2.carbon.apimgt.api.model;
 
 /**
- * Represents a mapping between a backend API and its operations.
- * This class encapsulates the backend API ID and the corresponding backend operation.
+ * Represents a mapping between a backend and its operations.
+ * This class encapsulates the backend ID and the corresponding backend operation.
  */
-public class BackendAPIOperationMapping {
+public class BackendOperationMapping {
 
-    private String backendApiId = null;
+    private String backendId = null;
     private BackendOperation backendOperation = null;
 
-    public String getBackendApiId() {
+    public String getBackendId() {
 
-        return backendApiId;
+        return backendId;
     }
 
-    public void setBackendApiId(String backendApiId) {
+    public void setBackendId(String backendId) {
 
-        this.backendApiId = backendApiId;
+        this.backendId = backendId;
     }
 
     public BackendOperation getBackendOperation() {

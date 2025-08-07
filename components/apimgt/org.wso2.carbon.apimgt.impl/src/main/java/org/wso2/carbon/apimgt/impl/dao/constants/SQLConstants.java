@@ -1564,8 +1564,8 @@ public class SQLConstants {
                     "DESCRIPTION, SCHEMA_DEFINITION)" +
             " VALUES (?,?,?,?,?,?,?,?)";
 
-    public static final String ADD_AM_API_BACKEND_OPERATION_MAPPING_SQL =
-            "INSERT INTO AM_API_BACKEND_OPERATION_MAPPING (URL_MAPPING_ID, BACKEND_API_ID, TARGET, VERB) " +
+    public static final String ADD_AM_BACKEND_OPERATION_MAPPING_SQL =
+            "INSERT INTO AM_BACKEND_OPERATION_MAPPING (URL_MAPPING_ID, BACKEND_ID, TARGET, VERB) " +
                     "VALUES (?,?,?,?)";
 
     public static final String ADD_AM_API_OPERATION_MAPPING_SQL =
@@ -1758,8 +1758,8 @@ public class SQLConstants {
     public static final String REMOVE_FROM_API_URL_MAPPINGS_SQL =
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
 
-    public static final String REMOVE_FROM_AM_API_BACKEND_OPERATION_MAPPING_SQL =
-            "DELETE FROM AM_API_BACKEND_OPERATION_MAPPING WHERE URL_MAPPING_ID = ? AND BACKEND_API_ID = ?";
+    public static final String REMOVE_FROM_AM_BACKEND_OPERATION_MAPPING_SQL =
+            "DELETE FROM AM_BACKEND_OPERATION_MAPPING WHERE URL_MAPPING_ID = ? AND BACKEND_ID = ?";
 
     public static final String REMOVE_FROM_AM_API_OPERATION_MAPPING_SQL =
             "DELETE FROM AM_API_OPERATION_MAPPING WHERE URL_MAPPING_ID = ?";
@@ -4042,7 +4042,7 @@ public class SQLConstants {
                         "FROM AM_API_URL_MAPPING AUM " +
                         "LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
                         "LEFT JOIN AM_API_PRODUCT_MAPPING PROD_MAP ON AUM.URL_MAPPING_ID = PROD_MAP.URL_MAPPING_ID " +
-                        "LEFT JOIN AM_API_BACKEND_OPERATION_MAPPING BACK_MAP ON AUM.URL_MAPPING_ID = BACK_MAP.URL_MAPPING_ID " +
+                        "LEFT JOIN AM_BACKEND_OPERATION_MAPPING BACK_MAP ON AUM.URL_MAPPING_ID = BACK_MAP.URL_MAPPING_ID " +
                         "LEFT JOIN AM_API_OPERATION_MAPPING API_MAP ON AUM.URL_MAPPING_ID = API_MAP.URL_MAPPING_ID " +
                         "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID IS NULL";
 
@@ -4181,7 +4181,7 @@ public class SQLConstants {
                 "BACK_MAP.TARGET, BACK_MAP.VERB, API_MAP.REF_URL_MAPPING_ID " +
                 "FROM AM_API_URL_MAPPING AUM LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
                 "LEFT JOIN AM_API_PRODUCT_MAPPING PROD_MAP ON AUM.URL_MAPPING_ID = PROD_MAP.URL_MAPPING_ID " +
-                "LEFT JOIN AM_API_BACKEND_OPERATION_MAPPING BACK_MAP ON AUM.URL_MAPPING_ID = BACK_MAP.URL_MAPPING_ID " +
+                "LEFT JOIN AM_BACKEND_OPERATION_MAPPING BACK_MAP ON AUM.URL_MAPPING_ID = BACK_MAP.URL_MAPPING_ID " +
                 "LEFT JOIN AM_API_OPERATION_MAPPING API_MAP ON AUM.URL_MAPPING_ID = API_MAP.URL_MAPPING_ID " +
                 "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID = ?";
         public static final String INSERT_URL_MAPPINGS_CURRENT_API = "INSERT INTO AM_API_URL_MAPPING(API_ID, HTTP_METHOD," +
@@ -4603,11 +4603,11 @@ public class SQLConstants {
 
         public static final String GET_BACKEND_OPERATION_MAPPING_FOR_API_REVISION_SQL =
                 " SELECT " +
-                        " BOM.BACKEND_API_ID, BOM.TARGET, BOM.VERB" +
+                        " BOM.BACKEND_ID, BOM.TARGET, BOM.VERB" +
                         " FROM " +
                         " AM_API_URL_MAPPING AUM " +
                         " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
-                        " INNER JOIN AM_API_BACKEND_OPERATION_MAPPING BOM ON AUM.URL_MAPPING_ID = BOM.URL_MAPPING_ID" +
+                        " INNER JOIN AM_BACKEND_OPERATION_MAPPING BOM ON AUM.URL_MAPPING_ID = BOM.URL_MAPPING_ID" +
                         " WHERE " +
                         " API.API_UUID = ? " +
                         " AND AUM.URL_MAPPING_ID = ? " +
@@ -4616,11 +4616,11 @@ public class SQLConstants {
 
         public static final String GET_BACKEND_OPERATION_MAPPING_OF_API_SQL =
                 " SELECT " +
-                        " BOM.BACKEND_API_ID, BOM.TARGET, BOM.VERB " +
+                        " BOM.BACKEND_ID, BOM.TARGET, BOM.VERB " +
                         " FROM " +
                         " AM_API_URL_MAPPING AUM " +
                         " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
-                        " INNER JOIN AM_API_BACKEND_OPERATION_MAPPING BOM ON AUM.URL_MAPPING_ID = BOM.URL_MAPPING_ID" +
+                        " INNER JOIN AM_BACKEND_OPERATION_MAPPING BOM ON AUM.URL_MAPPING_ID = BOM.URL_MAPPING_ID" +
                         " WHERE " +
                         " API.API_UUID = ? " +
                         " AND AUM.URL_MAPPING_ID = ? " +
@@ -4670,67 +4670,67 @@ public class SQLConstants {
                         "ORDER BY AUM.URL_MAPPING_ID ASC";
     }
 
-    public static final String ADD_AM_BACKEND_API_SQL =
-            "INSERT INTO AM_BACKEND_API ("
-                    + "BACKEND_API_ID, BACKEND_API_NAME, ENDPOINT_CONFIG, API_DEFINITION, REFERENCE_API_UUID, "
+    public static final String ADD_AM_BACKEND_SQL =
+            "INSERT INTO AM_BACKEND ("
+                    + "BACKEND_ID, BACKEND_NAME, ENDPOINT_CONFIG, DEFINITION, REFERENCE_API_UUID, "
                     + "ORGANIZATION) "
                     + "VALUES (?, ?, ?, ?, ?, ?)";
 
-    public static final String ADD_AM_BACKEND_API_REVISION_SQL =
-            "INSERT INTO AM_BACKEND_API ("
-                    + "BACKEND_API_ID, BACKEND_API_NAME, ENDPOINT_CONFIG, API_DEFINITION, REFERENCE_API_UUID,"
+    public static final String ADD_AM_BACKEND_REVISION_SQL =
+            "INSERT INTO AM_BACKEND ("
+                    + "BACKEND_ID, BACKEND_NAME, ENDPOINT_CONFIG, DEFINITION, REFERENCE_API_UUID,"
                     + " REFERENCE_API_REVISION_UUID, ORGANIZATION) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-    public static final String GET_AM_BACKEND_APIS_SQL =
-            "SELECT BACKEND_API_ID, BACKEND_API_NAME, ENDPOINT_CONFIG, API_DEFINITION "
-                    + "FROM AM_BACKEND_API "
+    public static final String GET_AM_BACKENDS_SQL =
+            "SELECT BACKEND_ID, BACKEND_NAME, ENDPOINT_CONFIG, DEFINITION "
+                    + "FROM AM_BACKEND "
                     + "WHERE REFERENCE_API_UUID = ? "
                     + "AND REFERENCE_API_REVISION_UUID IS NULL "
                     + "AND ORGANIZATION = ?";
 
-    public static final String GET_AM_BACKEND_APIS_REVISION_SQL =
-            "SELECT BACKEND_API_ID, BACKEND_API_NAME, ENDPOINT_CONFIG, API_DEFINITION "
-                    + "FROM AM_BACKEND_API "
+    public static final String GET_AM_BACKENDS_REVISION_SQL =
+            "SELECT BACKEND_ID, BACKEND_NAME, ENDPOINT_CONFIG, DEFINITION "
+                    + "FROM AM_BACKEND "
                     + "WHERE REFERENCE_API_UUID = ? "
                     + "AND REFERENCE_API_REVISION_UUID = ? "
                     + "AND ORGANIZATION = ?";
 
-    public static final String GET_AM_BACKEND_API_SQL =
-            "SELECT BACKEND_API_ID, BACKEND_API_NAME, ENDPOINT_CONFIG, API_DEFINITION "
-                    + "FROM AM_BACKEND_API "
+    public static final String GET_AM_BACKEND_SQL =
+            "SELECT BACKEND_ID, BACKEND_NAME, ENDPOINT_CONFIG, DEFINITION "
+                    + "FROM AM_BACKEND "
                     + "WHERE REFERENCE_API_UUID = ? "
                     + "AND REFERENCE_API_REVISION_UUID IS NULL "
-                    + "AND BACKEND_API_ID = ? "
+                    + "AND BACKEND_ID = ? "
                     + "AND ORGANIZATION = ?";
 
-    public static final String GET_AM_BACKEND_API_REVISION_SQL =
-            "SELECT BACKEND_API_ID, BACKEND_API_NAME, ENDPOINT_CONFIG, API_DEFINITION "
-                    + "FROM AM_BACKEND_API "
+    public static final String GET_AM_BACKEND_REVISION_SQL =
+            "SELECT BACKEND_ID, BACKEND_NAME, ENDPOINT_CONFIG, DEFINITION "
+                    + "FROM AM_BACKEND "
                     + "WHERE REFERENCE_API_UUID = ? "
                     + "AND REFERENCE_API_REVISION_UUID = ? "
-                    + "AND BACKEND_API_ID = ? "
+                    + "AND BACKEND_ID = ? "
                     + "AND ORGANIZATION = ?";
 
-    public static final String UPDATE_AM_BACKEND_API_SQL =
-            "UPDATE AM_BACKEND_API "
-                    + "SET ENDPOINT_CONFIG = ?, API_DEFINITION = ? "
+    public static final String UPDATE_AM_BACKEND_SQL =
+            "UPDATE AM_BACKEND "
+                    + "SET ENDPOINT_CONFIG = ?, DEFINITION = ? "
                     + "WHERE REFERENCE_API_UUID = ? "
                     + "AND REFERENCE_API_REVISION_UUID IS NULL "
-                    + "AND BACKEND_API_ID = ? "
+                    + "AND BACKEND_ID = ? "
                     + "AND ORGANIZATION = ?";
 
-    public static final String REMOVE_AM_BACKEND_API_SQL =
-            "DELETE FROM AM_BACKEND_API "
+    public static final String REMOVE_AM_BACKEND_SQL =
+            "DELETE FROM AM_BACKEND "
                     + "WHERE REFERENCE_API_UUID = ?";
 
-    public static final String REMOVE_AM_BACKEND_API_REVISION_SQL =
-            "DELETE FROM AM_BACKEND_API "
+    public static final String REMOVE_AM_BACKEND_REVISION_SQL =
+            "DELETE FROM AM_BACKEND "
                     + "WHERE REFERENCE_API_UUID = ? "
                     + "AND REFERENCE_API_REVISION_UUID = ?";
 
-    public static final String REMOVE_AM_BACKEND_API_REVISION_OF_CURRENT_API_SQL =
-            "DELETE FROM AM_BACKEND_API "
+    public static final String REMOVE_AM_BACKEND_REVISION_OF_CURRENT_API_SQL =
+            "DELETE FROM AM_BACKEND "
                     + "WHERE REFERENCE_API_UUID = ? "
                     + "AND REFERENCE_API_REVISION_UUID IS NULL";
 

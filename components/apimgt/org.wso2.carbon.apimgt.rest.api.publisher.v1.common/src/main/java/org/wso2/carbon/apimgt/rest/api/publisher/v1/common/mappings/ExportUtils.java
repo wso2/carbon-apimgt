@@ -47,7 +47,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
-import org.wso2.carbon.apimgt.api.model.BackendAPI;
+import org.wso2.carbon.apimgt.api.model.Backend;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -73,7 +73,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
@@ -299,11 +299,10 @@ public class ExportUtils {
      * @return File containing the exported API artifact.
      * @throws APIManagementException If an error occurs while getting governance registry
      */
-    public static File exportAPI(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTOWrapper apiDtoToReturn,
+    public static File exportAPI(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTOTypeWrapper apiDtoToReturn,
                                  API api, String userName, ExportFormat exportFormat, boolean preserveStatus,
                                  boolean preserveDocs, String originalDevPortalUrl, String organization,
-                                 boolean preserveCredentials)
-            throws APIManagementException, APIImportExportException {
+                                 boolean preserveCredentials) throws APIManagementException, APIImportExportException {
 
         int tenantId;
         String currentApiUuid;
@@ -824,7 +823,7 @@ public class ExportUtils {
      * @param exportFormat Export format of file
      * @throws APIImportExportException If an error occurs while exporting endpoint certificates
      */
-    public static void addEndpointCertificatesToArchive(String archivePath, APIDTOWrapper dtoWrapper, int tenantId,
+    public static void addEndpointCertificatesToArchive(String archivePath, APIDTOTypeWrapper dtoWrapper, int tenantId,
                                                         ExportFormat exportFormat) throws APIImportExportException {
 
         List<String> productionEndpoints;
@@ -1109,16 +1108,16 @@ public class ExportUtils {
         String apiUuid = api.getUuid();
         try {
             if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
-                List<BackendAPI> backendAPIS = apiProvider.getMCPServerBackendAPIs(apiUuid, organization);
-                List<BackendAPIDTO> backendAPIDTOList = new ArrayList<>();
-                for (BackendAPI backendAPI : backendAPIS) {
+                List<Backend> backends = apiProvider.getMCPServerBackends(apiUuid, organization);
+                List<BackendDTO> backendAPIDTOList = new ArrayList<>();
+                for (Backend backend : backends) {
                     backendAPIDTOList.add(
-                            APIMappingUtil.fromBackendAPIToDTO(backendAPI, organization,
+                            APIMappingUtil.fromBackendAPIToDTO(backend, organization,
                                     preserveCredentials));
                 }
                 writeDTOListToFile(backendAPIDTOList, archivePath,
-                        ImportExportConstants.BACKEND_APIS_FILE_LOCATION,
-                        ImportExportConstants.BACKEND_APIS_TYPE, exportFormat);
+                        ImportExportConstants.BACKENDS_FILE_LOCATION,
+                        ImportExportConstants.BACKENDS_TYPE, exportFormat);
             }
         } catch (APIImportExportException e) {
             throw new APIManagementException("Error while adding operation endpoints details for API: " + apiUuid, e);
@@ -1445,7 +1444,7 @@ public class ExportUtils {
      * data are in api.json
      *
      * @param archivePath    Folder path to export meta information to export
-     * @param apiDtoWrapper  API DTO wrapper to be exported
+     * @param apiDtoTypeWrapper  API DTO wrapper to be exported
      * @param exportFormat   Export format of file
      * @param apiProvider    API Provider
      * @param apiIdentifier  API Identifier
@@ -1453,7 +1452,7 @@ public class ExportUtils {
      * @param currentApiUuid UUID of the API/ API Product
      * @throws APIImportExportException If an error occurs while exporting meta information
      */
-    public static void addAPIMetaInformationToArchive(String archivePath, APIDTOWrapper apiDtoWrapper,
+    public static void addAPIMetaInformationToArchive(String archivePath, APIDTOTypeWrapper apiDtoTypeWrapper,
                                                       ExportFormat exportFormat, APIProvider apiProvider,
                                                       APIIdentifier apiIdentifier, String organization,
                                                       String currentApiUuid) throws APIImportExportException {
@@ -1465,11 +1464,14 @@ public class ExportUtils {
         try {
             API api;
             boolean isMCPServer = false;
-            if (apiDtoWrapper.isAPIDTO()) {
-                api = APIMappingUtil.fromDTOtoAPI((APIDTO) apiDtoWrapper.getWrappedDTO(), apiDtoWrapper.getProvider());
-            } else if (apiDtoWrapper.isMCPServerDTO()) {
-                api = APIMappingUtil.fromMCPServerDTOtoAPI((MCPServerDTO) apiDtoWrapper.getWrappedDTO(),
-                        apiDtoWrapper.getProvider());
+            if (apiDtoTypeWrapper.isAPIDTO()) {
+                api = APIMappingUtil.fromDTOtoAPI(
+                        (APIDTO) apiDtoTypeWrapper.getWrappedDTO(), apiDtoTypeWrapper.getProvider()
+                );
+            } else if (apiDtoTypeWrapper.isMCPServerDTO()) {
+                api = APIMappingUtil.fromMCPServerDTOtoAPI(
+                        (MCPServerDTO) apiDtoTypeWrapper.getWrappedDTO(), apiDtoTypeWrapper.getProvider()
+                );
                 isMCPServer = true;
             } else {
                 throw new APIManagementException("Unsupported DTO Type in wrapper");
@@ -1483,9 +1485,9 @@ public class ExportUtils {
             }
             api.setId(apiIdentifier);
 
-            String apiType = apiDtoWrapper.getType() != null ? apiDtoWrapper.getType().toString() : null;
+            String apiType = apiDtoTypeWrapper.getType() != null ? apiDtoTypeWrapper.getType().toString() : null;
 
-            if (isMCPServer || !PublisherCommonUtils.isStreamingAPI((APIDTO) apiDtoWrapper.getWrappedDTO())) {
+            if (isMCPServer || !PublisherCommonUtils.isStreamingAPI((APIDTO) apiDtoTypeWrapper.getWrappedDTO())) {
                 if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                     if (organization != null) {
                         schemaContent = apiProvider.getGraphqlSchemaDefinition(currentApiUuid, organization);
@@ -1512,14 +1514,14 @@ public class ExportUtils {
                                 exportFormat, formattedSwaggerJson);
                     } else {
                         throw new APIImportExportException("Error while retrieving Swagger definition for API: "
-                                + apiDtoWrapper.getName() + " " + APIConstants.API_DATA_VERSION + ": "
-                                + apiDtoWrapper.getVersion());
+                                + apiDtoTypeWrapper.getName() + " " + APIConstants.API_DATA_VERSION + ": "
+                                + apiDtoTypeWrapper.getVersion());
                     }
                 }
 
                 if (log.isDebugEnabled()) {
-                    log.debug("Meta information retrieved successfully for API: " + apiDtoWrapper.getName()
-                            + " " + APIConstants.API_DATA_VERSION + ": " + apiDtoWrapper.getVersion());
+                    log.debug("Meta information retrieved successfully for API: " + apiDtoTypeWrapper.getName()
+                            + " " + APIConstants.API_DATA_VERSION + ": " + apiDtoTypeWrapper.getVersion());
                 }
             } else {
                 String asyncApiJson = RestApiCommonUtil.retrieveAsyncAPIDefinition(api, apiProvider);
@@ -1529,8 +1531,8 @@ public class ExportUtils {
                     String callBackEndpoint = parsedObject.get(ASYNC_DEFAULT_SUBSCRIBER).getAsString();
                     if (!StringUtils.isEmpty(callBackEndpoint)) {
                         String formattedSwaggerJson = RestApiCommonUtil.generateOpenAPIForAsync(
-                                apiDtoWrapper.getName(), apiDtoWrapper.getVersion(), apiDtoWrapper.getContext(),
-                                callBackEndpoint);
+                                apiDtoTypeWrapper.getName(), apiDtoTypeWrapper.getVersion(),
+                                apiDtoTypeWrapper.getContext(), callBackEndpoint);
                         CommonUtil.writeToYamlOrJson(
                                 archivePath + ImportExportConstants.OPENAPI_FOR_ASYNCAPI_DEFINITION_LOCATION,
                                 exportFormat, formattedSwaggerJson);
@@ -1549,7 +1551,7 @@ public class ExportUtils {
                         endpointConfig.put(API_DATA_PRODUCTION_ENDPOINTS, productionEndpoint);
                         endpointConfig.put(API_DATA_SANDBOX_ENDPOINTS, sandboxEndpoint);
 
-                        apiDtoWrapper.setEndpointConfig(endpointConfig);
+                        apiDtoTypeWrapper.setEndpointConfig(endpointConfig);
                     }
                 }
 
@@ -1558,19 +1560,19 @@ public class ExportUtils {
                             exportFormat, asyncApiJson);
                 } else {
                     throw new APIImportExportException("Error while retrieving AsyncAPI definition for API: "
-                            + apiDtoWrapper.getName() + " " + APIConstants.API_DATA_VERSION + ": "
-                            + apiDtoWrapper.getVersion());
+                            + apiDtoTypeWrapper.getName() + " " + APIConstants.API_DATA_VERSION + ": "
+                            + apiDtoTypeWrapper.getVersion());
                 }
             }
 
-            List<String> tiers = apiDtoWrapper.getPolicies();
+            List<String> tiers = apiDtoTypeWrapper.getPolicies();
             if (tiers != null && tiers.size() == 1
                     && tiers.get(0).contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
-                apiDtoWrapper.setPolicies(new ArrayList<>());
+                apiDtoTypeWrapper.setPolicies(new ArrayList<>());
             }
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            JsonElement apiObj = gson.toJsonTree(apiDtoWrapper.getWrappedDTO());
+            JsonElement apiObj = gson.toJsonTree(apiDtoTypeWrapper.getWrappedDTO());
             JsonObject apiJson = (JsonObject) apiObj;
 
             if (organization != null) {
@@ -1589,12 +1591,12 @@ public class ExportUtils {
             CommonUtil.writeDtoToFile(filePath, exportFormat, type, apiJson);
         } catch (APIManagementException e) {
             throw new APIImportExportException("Error while retrieving Swagger definition for API: "
-                    + apiDtoWrapper.getName() + " " + APIConstants.API_DATA_VERSION + ": "
-                    + apiDtoWrapper.getVersion(), e);
+                    + apiDtoTypeWrapper.getName() + " " + APIConstants.API_DATA_VERSION + ": "
+                    + apiDtoTypeWrapper.getVersion(), e);
         } catch (IOException e) {
             throw new APIImportExportException("Error while saving as YAML for API: "
-                    + apiDtoWrapper.getName() + " " + APIConstants.API_DATA_VERSION + ": "
-                    + apiDtoWrapper.getVersion(), e);
+                    + apiDtoTypeWrapper.getName() + " " + APIConstants.API_DATA_VERSION + ": "
+                    + apiDtoTypeWrapper.getVersion(), e);
         }
     }
 
@@ -1753,7 +1755,7 @@ public class ExportUtils {
             String apiProductRequesterDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), apiProductRequesterDomain);
             APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
-            File dependentAPI = exportAPI(provider, api.getId(), new APIDTOWrapper(apiDtoToReturn), api, userName,
+            File dependentAPI = exportAPI(provider, api.getId(), new APIDTOTypeWrapper(apiDtoToReturn), api, userName,
                     exportFormat, isStatusPreserved, preserveDocs, StringUtils.EMPTY, organization,
                     preserveCredentials);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);

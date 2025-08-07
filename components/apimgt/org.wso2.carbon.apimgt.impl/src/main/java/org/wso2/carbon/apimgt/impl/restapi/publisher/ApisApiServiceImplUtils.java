@@ -18,7 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
-import org.wso2.carbon.apimgt.api.model.BackendAPI;
+import org.wso2.carbon.apimgt.api.model.Backend;
 import org.apache.http.client.HttpClient;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -703,28 +703,23 @@ public class ApisApiServiceImplUtils {
         String definitionToAdd;
         APIDefinition apiDefinition = validationResponse.getParser();
         String definition = validationResponse.getJsonContent();
-        definition = OASParserUtil.preProcess(definition);
         int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
         String defaultAPILevelPolicy = APIUtil.getDefaultAPILevelPolicy(tenantId);
 
         if (APIConstants.API_TYPE_MCP.equals(apiToAdd.getType())) {
             String backendApiId = UUID.randomUUID().toString();
-            Set<URITemplate> uriTemplates = generateMCPFeatures(
-                    apiToAdd.getSubtype(), definition, backendApiId, apiToAdd.getUriTemplates(), apiDefinition);
+            Set<URITemplate> uriTemplates = generateMCPFeatures(apiToAdd.getSubtype(), definition, backendApiId,
+                    apiToAdd.getUriTemplates(), apiDefinition);
             applyDefaultThrottlingAndAuth(uriTemplates, defaultAPILevelPolicy);
             apiToAdd.setUriTemplates(uriTemplates);
-
             validateScopes(apiToAdd, apiProvider, username);
-            SwaggerData swaggerData = new SwaggerData(apiToAdd);
-            String backendApiDefinition = apiDefinition.generateAPIDefinitionForBackendAPI(swaggerData, definition);
-
-            BackendAPI backendAPI =
-                    createDefaultBackendAPI(backendApiId, backendApiDefinition, apiToAdd.getEndpointConfig());
-            apiToAdd.getBackendAPIs().add(backendAPI);
+            Backend backend = createDefaultBackend(backendApiId, definition, apiToAdd.getEndpointConfig());
+            apiToAdd.getBackends().add(backend);
             apiToAdd.setEndpointConfig(null);
-            swaggerData = new SwaggerData(apiToAdd);
+            SwaggerData swaggerData = new SwaggerData(apiToAdd);
             definitionToAdd = new OAS3Parser().generateAPIDefinition(swaggerData);
         } else {
+            definition = OASParserUtil.preProcess(definition);
             if (syncOperations) {
                 validateScopes(apiToAdd, apiProvider, username);
                 SwaggerData swaggerData = new SwaggerData(apiToAdd);
@@ -777,22 +772,21 @@ public class ApisApiServiceImplUtils {
     }
 
     /**
-     * Creates and initializes a BackendAPI instance with the given parameters.
+     * Creates and initializes a Backend instance with the given parameters.
      *
-     * @param backendApiId         unique identifier for the backend API
-     * @param backendApiDefinition OpenAPI definition for the backend API
-     * @param endpointConfig       endpoint configuration from the main API
-     * @return configured BackendAPI instance
+     * @param backendApiId      unique identifier for the backend
+     * @param backendDefinition OpenAPI definition for the backend
+     * @param endpointConfig    endpoint configuration
+     * @return configured Backend instance
      */
-    private static BackendAPI createDefaultBackendAPI(String backendApiId, String backendApiDefinition,
-                                                      String endpointConfig) {
+    private static Backend createDefaultBackend(String backendApiId, String backendDefinition, String endpointConfig) {
 
-        BackendAPI backendAPI = new BackendAPI();
-        backendAPI.setBackendApiId(backendApiId);
-        backendAPI.setBackendApiName(APIConstants.AI.MCP_DEFAULT_BACKEND_API_NAME);
-        backendAPI.setApiDefinition(backendApiDefinition);
-        backendAPI.setEndpointConfig(endpointConfig);
-        return backendAPI;
+        Backend backend = new Backend();
+        backend.setId(backendApiId);
+        backend.setName(APIConstants.AI.MCP_DEFAULT_BACKEND_NAME);
+        backend.setDefinition(backendDefinition);
+        backend.setEndpointConfig(endpointConfig);
+        return backend;
     }
 
     /**

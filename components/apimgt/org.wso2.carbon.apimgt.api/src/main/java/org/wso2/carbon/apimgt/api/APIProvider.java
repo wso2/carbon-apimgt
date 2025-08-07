@@ -2263,38 +2263,37 @@ public interface APIProvider extends APIManager {
     Map<String, String> getApiThemes(String organization, String apiId) throws APIManagementException;
 
     /**
-     * Retrieves the MCP server endpoint for the given API UUID and backend ID.
+     * Retrieves the MCP server backend for the given API UUID and backend ID.
      * Handles both regular API UUIDs and API revision UUIDs transparently.
      *
      * @param apiUuid      the UUID of the API or API revision
      * @param backendId    the ID of the backend
      * @param organization the organization name
-     * @return a {@link BackendAPI} object representing the MCP server endpoint; null if not found
+     * @return a {@link Backend} object representing the MCP server endpoint; null if not found
      * @throws APIManagementException if an error occurs while accessing the database
      */
-    BackendAPI getMCPServerEndpoint(String apiUuid, String backendId, String organization)
-            throws APIManagementException;
+    Backend getMCPServerBackend(String apiUuid, String backendId, String organization) throws APIManagementException;
 
     /**
-     * Retrieves the list of MCP server backend APIs for the given API UUID.
+     * Retrieves the list of MCP server backends for the given API UUID.
      * Handles both regular API UUIDs and API revision UUIDs transparently.
      *
      * @param apiUuid      the UUID of the API or API revision
      * @param organization the organization name
-     * @return a list of {@link BackendAPI} objects representing the MCP server backend APIs
+     * @return a list of {@link Backend} objects representing the MCP server backend APIs
      * @throws APIManagementException if an error occurs while accessing the database
      */
-    List<BackendAPI> getMCPServerBackendAPIs(String apiUuid, String organization) throws APIManagementException;
+    List<Backend> getMCPServerBackends(String apiUuid, String organization) throws APIManagementException;
 
     /**
-     * Updates the MCP server backend API with the provided details.
+     * Updates the MCP server backend with the provided details.
      *
-     * @param apiId      the UUID of the API or API revision
-     * @param backendAPI the {@link BackendAPI} object containing updated details
+     * @param apiId        the UUID of the API or API revision
+     * @param backend      the {@link Backend} object containing updated details
      * @param organization the organization name
      * @throws APIManagementException if an error occurs while updating the backend API
      */
-    void updateMCPServerBackendAPI(String apiId, BackendAPI backendAPI, String organization) throws APIManagementException;
+    void updateMCPServerBackend(String apiId, Backend backend, String organization) throws APIManagementException;
 
     /**
      * Retrieves the list of MCP servers used by a specific API.
