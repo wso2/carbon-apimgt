@@ -36,9 +36,12 @@ import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
+import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.gateway.handlers.Utils;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler;
+import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 
 import javax.xml.stream.XMLStreamException;
@@ -107,6 +110,8 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
                     setProperty(Constants.Configuration.HTTP_METHOD, httpVerb);
             return authenticationResolved;
         } else {
+            boolean isValidTopic = validateTopic(synCtx);
+            synCtx.setProperty(APIConstants.TOPIC_VALIDITY, String.valueOf(isValidTopic));
             org.apache.axis2.context.MessageContext axisMsgContext = ((Axis2MessageContext) synCtx).
                     getAxis2MessageContext();
             try {
@@ -129,6 +134,56 @@ public class WebhookApiHandler extends APIAuthenticationHandler {
                 return false;
             }
         }
+    }
+
+    public boolean validateTopic(MessageContext messageContext) {
+        if (log.isDebugEnabled()) {
+            log.debug("Validating topic for webhook event");
+        }
+        String urlQueryParams = (String) ((Axis2MessageContext) messageContext).getAxis2MessageContext()
+                .getProperty(APIConstants.TRANSPORT_URL_IN);
+        
+        if (urlQueryParams == null) {
+            log.debug("URL query parameters not found in the request");
+            return false;
+        }
+
+        List<NameValuePair> queryParameters;
+        try {
+            queryParameters = URLEncodedUtils.parse(new URI(urlQueryParams), StandardCharsets.UTF_8.name());
+        } catch (URISyntaxException e) {
+            log.error("Error parsing URI for topic validation: " + e.getMessage());
+            return false;
+        }
+        String topicName = null;
+        for (NameValuePair nvPair : queryParameters) {
+            if (APIConstants.Webhooks.TOPIC_QUERY_PARAM.equals(nvPair.getName())) {
+                topicName = nvPair.getValue();
+                break;
+            }
+        }
+
+        if (topicName == null || topicName.isEmpty()) {
+            if (log.isDebugEnabled()) {
+                log.debug("Invalid topic name in the request");
+            }
+            return false;
+        }
+
+        API api = GatewayUtils.getAPI(messageContext);
+        if (api != null) {
+            for (URLMapping mapping : api.getUrlMappings()) {
+                if (topicName.equals(mapping.getUrlPattern())) {
+                    log.info("Valid topic found for webhook event");
+                    return true;
+                }
+            }
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Topic validation failed for webhook event");
+        }
+        return false;
     }
 
     private String getContentType(org.apache.axis2.context.MessageContext axisMsgContext) {

@@ -522,6 +522,36 @@ public final class APIConstants {
     public static final String CNF = "cnf";
     public static final String HASHING = "Hashing";
     public static final String HASGING_ALGORITHM= "HashingAlgorithm";
+    public static final String ENDPOINT_SECURITY_AWS_SECRET_KEY = "secretKey";
+
+    public static class AWSConstants{
+        // AWS S4 Constants
+        public static final String AMZ_DATE_FORMAT = "yyyyMMdd'T'HHmmss'Z'";
+        public static final String DATE_FORMAT = "yyyyMMdd";
+        public static final String HOST_HEADER = "host";
+        public static final String AMZ_DATE_HEADER = "x-amz-date";
+        public static final String AMZ_SECURITY_TOKEN_HEADER = "x-amz-security-token";
+        public static final String AMZ_CONTENT_SHA_HEADER = "x-amz-content-sha256";
+        public static final String AWS4_ALGORITHM = "AWS4-HMAC-SHA256";
+        public static final String AWS4_REQUEST = "aws4_request";
+        public static final String AWS4_CREDENTIAL = "Credential";
+        public static final String AWS4_SIGNED_HEADERS = "SignedHeaders";
+        public static final String AWS4_SIGNATURE = "Signature";
+        public static final String AWS4 = "AWS4";
+        public static final String HMAC_SHA_256 = "HmacSHA256";
+        public static final String DEFAULT_REGION = "us-east-1";
+        public static final String STS = "sts";
+        public static final String AWS_DOMAIN = "amazonaws.com";
+        public static final String SESSION_FORMAT = "%d%d%d";
+        public static final String ASSUME_ROLE_QUERY_ACTION = "Action=AssumeRole";
+        public static final String ASSUME_ROLE_QUERY_VERSION = "&Version=2011-06-15";
+        public static final String ASSUME_ROLE_QUERY_ROLE_ARN_KEY = "&RoleArn=";
+        public static final String ASSUME_ROLE_QUERY_ROLE_SESSION_KEY = "&RoleSessionName=";
+        public static final String ASSUME_ROLE_QUERY_ROLE_EXTERNAL_ID_KEY = "&ExternalId=";
+        public static final String ASSUME_ROLE_ACCESS_KEY = "AccessKeyId";
+        public static final String ASSUME_ROLE_SECRET_KEY = "SecretAccessKey";
+        public static final String ASSUME_ROLE_SESSION_TOKEN = "SessionToken";
+    }
 
     // Constants related to AI features: API chat, Marketplace Assistant, Guardrails
     public static class AI {
@@ -923,6 +953,7 @@ public final class APIConstants {
             "EnableKeyManagerConfigurationRetriever";
     public static final String DEFAULT_KEY_MANAGER_TYPE = API_KEY_VALIDATOR + "DefaultKeyManagerType";
     public static final String KEY_VALIDATION_HANDLER_CLASSNAME = API_KEY_VALIDATOR + "KeyValidationHandlerClassName";
+    public static final String SKIP_CREATE_RESIDENT_KEY_MANAGER = API_KEY_VALIDATOR + "SkipCreateResidentKeyManager";
     // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";
     public static final String KEY_MANAGER_CLIENT = API_KEY_MANAGER + "KeyManagerClientImpl";
@@ -1940,6 +1971,8 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_TYPE_DIGEST = "digest";
     public static final String ENDPOINT_SECURITY_TYPE_OAUTH = "oauth";
     public static final String ENDPOINT_SECURITY_TYPE_API_KEY = "apikey";
+    public static final String ENDPOINT_SECURITY_TYPE_AWS =
+            org.wso2.carbon.apimgt.api.APIConstants.ENDPOINT_SECURITY_TYPE_AWS;
     public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER = "apiKeyIdentifier";
     public static final String ENDPOINT_SECURITY_API_KEY_VALUE = "apiKeyValue";
     public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE = "apiKeyIdentifierType";
@@ -2803,6 +2836,7 @@ public final class APIConstants {
     public static final String RECOMMENDATIONS_CACHE_KEY = "Recommendations";
     public static final String LAST_UPDATED_CACHE_KEY = "LastUpdated";
 
+    public static final String TOPIC_VALIDITY = "TOPIC_VALIDITY";
     public static final String CLONED_ITERATION_INDEX_PROPERTY = "CLONED_ITERATION_INDEX";
     public static final String TENANT_DOMAIN_INFO_PROPERTY = "tenant.info.domain";
     public static final String TENANT_ID_INFO_PROPERTY = "tenant.info.id";
@@ -2874,6 +2908,7 @@ public final class APIConstants {
         public static final String DEFAULT_KEY_MANAGER_TYPE = "default";
         public static final String DEFAULT_KEY_MANAGER_DESCRIPTION = "This is Resident Key Manager";
         public static final String WSO2_IS_KEY_MANAGER_TYPE = "WSO2-IS";
+        public static final String WSO2_IS7_KEY_MANAGER_TYPE = "WSO2-IS-7";
         public static final String SP_NAME_APPLICATION = "sp.name.application";
 
         public static final String ISSUER = "issuer";
@@ -2889,6 +2924,7 @@ public final class APIConstants {
         public static final String ENABLE = "Enable";
         public static final String USERNAME = "Username";
         public static final String PASSWORD = "Password";
+
         public static final String KM_ADMIN_AS_APP_OWNER = "km_admin_as_app_owner";
         public static final String SELF_VALIDATE_JWT = "self_validate_jwt";
         public static final String CLAIM_MAPPING = "claim_mappings";
@@ -3437,6 +3473,12 @@ public final class APIConstants {
     public static final String ORG_BASED_ACCESS_CONTROL_ENABLE = "Enable";
     public static final String ORG_BASED_ACCESS_CONTROL_ORG_NAME_CLAIM = "OrganizationNameLocalClaim";
     public static final String ORG_BASED_ACCESS_CONTROL_ORG_ID_CLAIM = "OrganizationIDLocalClaim";
+
+    public static final String TENANT_SHARING_CONFIGS = "TenantSharingConfigs";
+    public static final String TENANT_SHARING_CONFIG = "TenantSharingConfig";
+    public static final String TENANT_SHARING_CONFIG_TYPE = "type";
+    public static final String TENANT_SHARING_CONFIG_PROPERTY = "Property";
+    public static final String TENANT_SHARING_CONFIG_PROPERTY_KEY = "name";
 
     public static class TransactionCounter {
 

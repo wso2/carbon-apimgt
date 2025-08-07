@@ -58,6 +58,7 @@
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.LabelsApi,
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.OrganizationsApi,
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.DesignAssistantApi,
+                org.wso2.carbon.apimgt.rest.api.publisher.v1.AiServiceProvidersApi,
                 org.wso2.carbon.apimgt.rest.api.publisher.v1.McpServersApi
             </param-value>
         </init-param>
