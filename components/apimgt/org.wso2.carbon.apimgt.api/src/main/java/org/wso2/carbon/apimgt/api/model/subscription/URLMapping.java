@@ -18,8 +18,8 @@
 
 package org.wso2.carbon.apimgt.api.model.subscription;
 
-import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
-import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 
 import java.util.ArrayList;
@@ -38,8 +38,8 @@ public class URLMapping {
     private String schemaDefinition;
     private List<String> scopes = new ArrayList<>();
     private Set<OperationPolicy> operationPolicies = new HashSet<>();
-    private BackendAPIOperationMapping backendOperationMapping = new BackendAPIOperationMapping();
-    private ExistingAPIOperationMapping apiOperationMapping = new ExistingAPIOperationMapping();
+    private BackendOperationMapping backendOperationMapping = new BackendOperationMapping();
+    private APIOperationMapping apiOperationMapping = new APIOperationMapping();
 
     public String getDescription() {
         return description;
@@ -57,19 +57,19 @@ public class URLMapping {
         this.schemaDefinition = schemaDefinition;
     }
 
-    public BackendAPIOperationMapping getBackendOperationMapping() {
+    public BackendOperationMapping getBackendOperationMapping() {
         return backendOperationMapping;
     }
 
-    public void setBackendOperationMapping(BackendAPIOperationMapping backendOperationMapping) {
+    public void setBackendOperationMapping(BackendOperationMapping backendOperationMapping) {
         this.backendOperationMapping = backendOperationMapping;
     }
 
-    public void setApiOperationMapping(ExistingAPIOperationMapping apiOperationMapping) {
+    public void setApiOperationMapping(APIOperationMapping apiOperationMapping) {
         this.apiOperationMapping = apiOperationMapping;
     }
 
-    public ExistingAPIOperationMapping getApiOperationMapping() {
+    public APIOperationMapping getApiOperationMapping() {
         return apiOperationMapping;
     }
 

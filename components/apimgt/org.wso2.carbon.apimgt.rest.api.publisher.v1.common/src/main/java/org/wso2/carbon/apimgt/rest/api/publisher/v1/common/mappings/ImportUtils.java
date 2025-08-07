@@ -1471,7 +1471,7 @@ public class ImportUtils {
             APIManagementException {
         // Get MCP Backend API Definition as JSON
         String jsonContent =
-                getFileContentAsJson(pathToArchive + ImportExportConstants.BACKEND_APIS_FILE_LOCATION);
+                getFileContentAsJson(pathToArchive + ImportExportConstants.BACKENDS_FILE_LOCATION);
         if (jsonContent == null) {
             throw new APIManagementException("Cannot find API definition. api.yaml or api.json should present",
                     ExceptionCodes.ERROR_FETCHING_DEFINITION_FILE);
@@ -1555,7 +1555,7 @@ public class ImportUtils {
             JsonObject backendAPI = retrievedBackendAPIDtoJson(pathToArchive);
             JSONParser parser = new JSONParser();
             JSONObject endpointConfig = (JSONObject) parser.parse(backendAPI.get("endpointConfig").getAsString());
-            mcpServerDTO.setBackendAPIEndpointConfig(endpointConfig);
+            mcpServerDTO.endpointConfig(endpointConfig);
         }
 
         return mcpServerDTO;

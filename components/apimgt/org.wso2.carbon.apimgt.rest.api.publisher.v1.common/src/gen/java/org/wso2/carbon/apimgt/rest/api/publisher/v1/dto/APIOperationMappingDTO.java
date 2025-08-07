@@ -24,6 +24,7 @@ public class APIOperationMappingDTO   {
     private String apiId = null;
     private String apiName = null;
     private String apiVersion = null;
+    private String apiContext = null;
     private BackendOperationDTO backendOperation = null;
 
   /**
@@ -80,6 +81,23 @@ public class APIOperationMappingDTO   {
 
   /**
    **/
+  public APIOperationMappingDTO apiContext(String apiContext) {
+    this.apiContext = apiContext;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "1.0.0", value = "")
+  @JsonProperty("apiContext")
+ @Size(min=1,max=30)  public String getApiContext() {
+    return apiContext;
+  }
+  public void setApiContext(String apiContext) {
+    this.apiContext = apiContext;
+  }
+
+  /**
+   **/
   public APIOperationMappingDTO backendOperation(BackendOperationDTO backendOperation) {
     this.backendOperation = backendOperation;
     return this;
@@ -109,12 +127,13 @@ public class APIOperationMappingDTO   {
     return Objects.equals(apiId, apIOperationMapping.apiId) &&
         Objects.equals(apiName, apIOperationMapping.apiName) &&
         Objects.equals(apiVersion, apIOperationMapping.apiVersion) &&
+        Objects.equals(apiContext, apIOperationMapping.apiContext) &&
         Objects.equals(backendOperation, apIOperationMapping.backendOperation);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiId, apiName, apiVersion, backendOperation);
+    return Objects.hash(apiId, apiName, apiVersion, apiContext, backendOperation);
   }
 
   @Override
@@ -125,6 +144,7 @@ public class APIOperationMappingDTO   {
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
+    sb.append("    apiContext: ").append(toIndentedString(apiContext)).append("\n");
     sb.append("    backendOperation: ").append(toIndentedString(backendOperation)).append("\n");
     sb.append("}");
     return sb.toString();

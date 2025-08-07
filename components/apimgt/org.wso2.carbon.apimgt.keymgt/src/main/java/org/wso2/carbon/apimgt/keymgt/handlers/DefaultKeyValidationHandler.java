@@ -23,8 +23,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.AccessTokenInfo;
-import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.KeyManager;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -182,7 +182,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
                 for (URLMapping mapping : resources) {
                     String httpMethodFromMapping = mapping.getHttpMethod();
                     if (StringUtils.equals(APIConstants.API_TYPE_MCP, api.getApiType())) {
-                        BackendAPIOperationMapping backendAPIOperationMapping = mapping.getBackendOperationMapping();
+                        BackendOperationMapping backendAPIOperationMapping = mapping.getBackendOperationMapping();
                         if (backendAPIOperationMapping != null) {
                             BackendOperation backendOperation = backendAPIOperationMapping.getBackendOperation();
                             if (backendOperation != null) {
@@ -362,7 +362,7 @@ public class DefaultKeyValidationHandler extends AbstractKeyValidationHandler {
         String urlPattern = urlMapping.getUrlPattern().trim();
 
 
-        BackendAPIOperationMapping backendAPIOperationMapping = urlMapping.getBackendOperationMapping();
+        BackendOperationMapping backendAPIOperationMapping = urlMapping.getBackendOperationMapping();
         if (backendAPIOperationMapping != null) {
             BackendOperation backendOperation = backendAPIOperationMapping.getBackendOperation();
             if (backendOperation != null) {

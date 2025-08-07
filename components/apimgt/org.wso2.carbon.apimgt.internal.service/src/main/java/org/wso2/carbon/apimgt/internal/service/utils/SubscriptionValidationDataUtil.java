@@ -93,7 +93,7 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setDescription(urlMapping.getDescription());
                 urlMappingDTO.setSchemaDefinition(urlMapping.getSchemaDefinition());
 
-                BackendAPIOperationMapping backendOperationMapping = urlMapping.getBackendOperationMapping();
+                BackendOperationMapping backendOperationMapping = urlMapping.getBackendOperationMapping();
                 if (backendOperationMapping != null) {
                     BackendOperation backendOperation = backendOperationMapping.getBackendOperation();
                     if (backendOperation != null) {
@@ -102,13 +102,13 @@ public class SubscriptionValidationDataUtil {
                         backendOperationDTO.setTarget(backendOperation.getTarget());
 
                         BackendOperationMappingDTO backendOperationMappingDTO = new BackendOperationMappingDTO();
-                        backendOperationMappingDTO.setBackendId(backendOperationMapping.getBackendApiId());
+                        backendOperationMappingDTO.setBackendId(backendOperationMapping.getBackendId());
                         backendOperationMappingDTO.setBackendOperation(backendOperationDTO);
                         urlMappingDTO.setBackendOperationMapping(backendOperationMappingDTO);
                     }
                 }
 
-                ExistingAPIOperationMapping apiOperationMapping = urlMapping.getApiOperationMapping();
+                APIOperationMapping apiOperationMapping = urlMapping.getApiOperationMapping();
                 if (apiOperationMapping != null) {
                     BackendOperation backendOperation = apiOperationMapping.getBackendOperation();
                     if (backendOperation != null) {
@@ -192,7 +192,7 @@ public class SubscriptionValidationDataUtil {
                 urlMappingDTO.setDescription(urlMapping.getDescription());
                 urlMappingDTO.setSchemaDefinition(urlMapping.getSchemaDefinition());
 
-                BackendAPIOperationMapping backendOperationMapping = urlMapping.getBackendOperationMapping();
+                BackendOperationMapping backendOperationMapping = urlMapping.getBackendOperationMapping();
                 if (backendOperationMapping != null) {
                     BackendOperation backendOperation = backendOperationMapping.getBackendOperation();
                     if (backendOperation != null) {
@@ -201,13 +201,13 @@ public class SubscriptionValidationDataUtil {
                         backendOperationDTO.setTarget(backendOperation.getTarget());
 
                         BackendOperationMappingDTO backendOperationMappingDTO = new BackendOperationMappingDTO();
-                        backendOperationMappingDTO.setBackendId(backendOperationMapping.getBackendApiId());
+                        backendOperationMappingDTO.setBackendId(backendOperationMapping.getBackendId());
                         backendOperationMappingDTO.setBackendOperation(backendOperationDTO);
                         urlMappingDTO.setBackendOperationMapping(backendOperationMappingDTO);
                     }
                 }
 
-                ExistingAPIOperationMapping apiOperationMapping = urlMapping.getApiOperationMapping();
+                APIOperationMapping apiOperationMapping = urlMapping.getApiOperationMapping();
                 if (apiOperationMapping != null) {
                     BackendOperation backendOperation = apiOperationMapping.getBackendOperation();
                     if (backendOperation != null) {
