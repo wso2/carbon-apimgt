@@ -32,6 +32,7 @@ import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
 import org.wso2.carbon.apimgt.gateway.LLMProviderManager;
 import org.wso2.carbon.apimgt.gateway.TenancyLoader;
+import org.wso2.carbon.apimgt.gateway.notifiers.GatewayNotifier;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
@@ -99,12 +100,14 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     private String tenantsRootPath = CarbonBaseUtils.getCarbonHome() + File.separator + "repository" + File.separator
             + "tenants" + File.separator;
     private String synapseDeploymentPath = "synapse-configs" + File.separator + "default";
+    private GatewayNotifier gatewayNotifier;
 
     public GatewayStartupListener() {
 
         gatewayArtifactSynchronizerProperties =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration()
                         .getGatewayArtifactSynchronizerProperties();
+        gatewayNotifier = GatewayNotifier.getInstance();
         throttleProperties = ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getThrottleProperties();
         ThrottleProperties.JMSConnectionProperties jmsConnectionProperties =
                 throttleProperties.getJmsConnectionProperties();
@@ -228,6 +231,9 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
                     log.error("Error while loading All certificate", e);
                 }
             }
+            gatewayNotifier.registerGateway();
+            gatewayNotifier.startHeartbeat();
+
             ServiceReferenceHolder.getInstance().addLoadedTenant(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             retrieveAndDeployArtifacts(MultitenantConstants.SUPER_TENANT_DOMAIN_NAME);
             retrieveBlockConditionsAndKeyTemplates();
@@ -382,6 +388,9 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         if (jmsTransportHandlerForEventHub != null) {
             log.debug("Unsubscribe from JMS Events...");
             jmsTransportHandlerForEventHub.unSubscribeFromEvents();
+        }
+        if (gatewayNotifier != null) {
+            gatewayNotifier.stopHeartbeat();
         }
     }
 
