@@ -52,8 +52,6 @@ import org.wso2.carbon.apimgt.api.model.OrganizationInfo;
 import org.wso2.carbon.apimgt.api.model.ServiceEntry;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.Tier;
-import org.wso2.carbon.apimgt.governance.api.model.APIMGovernableState;
-import org.wso2.carbon.apimgt.governance.api.model.ArtifactType;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings.APIDTOTypeWrapper;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
@@ -796,12 +794,6 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         String[] tokenScopes = (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                 .get(RestApiConstants.USER_REST_API_SCOPES);
         ImportExportAPI importExportAPI = APIImportExportUtil.getImportExportAPI();
-
-        if (dryRun) {
-            String dryRunResults = PublisherCommonUtils
-                    .checkGovernanceComplianceDryRun(fileInputStream, organization);
-            return Response.ok(dryRunResults, MediaType.APPLICATION_JSON).build();
-        }
         ImportedAPIDTO
                 importedAPIDTO = importExportAPI.importAPI(fileInputStream, preserveProvider, rotateRevision, overwrite,
                 preservePortalConfigurations, tokenScopes, organization);
@@ -852,41 +844,41 @@ public class McpServersApiServiceImpl implements McpServersApiService {
         }
         populateDefaultValuesForMCPServer(apiDTOFromProperties, APIConstants.API_SUBTYPE_DIRECT_ENDPOINT);
 
-        APIDTOTypeWrapper mcpServerDtoWrapper = new APIDTOTypeWrapper(apiDTOFromProperties);
-        if (!PublisherCommonUtils.validateEndpoints(mcpServerDtoWrapper)) {
+        APIDTOTypeWrapper dtoWrapper = new APIDTOTypeWrapper(apiDTOFromProperties);
+        if (!PublisherCommonUtils.validateEndpoints(dtoWrapper)) {
             throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
                     ExceptionCodes.INVALID_ENDPOINT_URL);
         }
         try {
-            LinkedHashMap endpointConfig = (LinkedHashMap) mcpServerDtoWrapper.getEndpointConfig();
+            Map endpointConfig = (LinkedHashMap) dtoWrapper.getEndpointConfig();
             PublisherCommonUtils
                     .encryptEndpointSecurityOAuthCredentials(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
                             StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY,
-                            mcpServerDtoWrapper);
+                            dtoWrapper);
             PublisherCommonUtils
                     .encryptEndpointSecurityApiKeyCredentials(endpointConfig, CryptoUtil.getDefaultCryptoUtil(),
-                            StringUtils.EMPTY, StringUtils.EMPTY, mcpServerDtoWrapper);
+                            StringUtils.EMPTY, StringUtils.EMPTY, dtoWrapper);
 
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
             MCPServerDTO createdApiDTO = RestApiPublisherUtils.importOpenAPIDefinitionForMCPServers(fileInputStream,
-                    url, null, mcpServerDtoWrapper, fileDetail, null, organization);
+                    url, null, dtoWrapper, fileDetail, null, organization);
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + createdApiDTO.getId());
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (URISyntaxException e) {
             String errorMessage =
-                    "Error while retrieving MCP server location: " + mcpServerDtoWrapper.getProvider() + "-" +
-                            mcpServerDtoWrapper.getName() + "-" + mcpServerDtoWrapper.getVersion();
+                    "Error while retrieving MCP server location: " + dtoWrapper.getProvider() + "-" +
+                            dtoWrapper.getName() + "-" + dtoWrapper.getVersion();
             RestApiUtil.handleInternalServerError(errorMessage, e, log);
         } catch (CryptoException e) {
             String errorMessage =
-                    "Error while encrypting the secret key of MCP server: " + mcpServerDtoWrapper.getProvider() + "-"
-                            + mcpServerDtoWrapper.getName() + "-" + mcpServerDtoWrapper.getVersion();
+                    "Error while encrypting the secret key of MCP server: " + dtoWrapper.getProvider() + "-"
+                            + dtoWrapper.getName() + "-" + dtoWrapper.getVersion();
             throw new APIManagementException(errorMessage, e,
                     ExceptionCodes.from(ExceptionCodes.ENDPOINT_SECURITY_CRYPTO_EXCEPTION, errorMessage));
         } catch (ParseException e) {
             String errorMessage = "Error while parsing the endpoint configuration of MCP server: "
-                    + mcpServerDtoWrapper.getProvider() + "-" + mcpServerDtoWrapper.getName() + "-"
-                    + mcpServerDtoWrapper.getVersion();
+                    + dtoWrapper.getProvider() + "-" + dtoWrapper.getName() + "-"
+                    + dtoWrapper.getVersion();
             throw new APIManagementException(errorMessage, e);
         }
         return null;
@@ -1219,7 +1211,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
     /**
      * Creates a new MCP server.
-     * Validates the API existence, checks governance compliance, and adds the new API with generated Swagger
+     * Validates the API existence and adds the new API with generated Swagger
      * definition.
      *
      * @param body           DTO containing the details of the MCP server to be created.
@@ -1263,7 +1255,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
     /**
      * Creates a new revision for an MCP server.
-     * Validates the API existence, checks governance compliance, and adds the new revision.
+     * Validates the API existence and adds the new revision.
      *
      * @param mcpServerId    UUID of the MCP Server to create a revision for.
      * @param apIRevisionDTO DTO containing the revision details.
@@ -1288,23 +1280,12 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             APIRevision apiRevision = new APIRevision();
             apiRevision.setApiUUID(mcpServerId);
             apiRevision.setDescription(apIRevisionDTO.getDescription());
-            Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(mcpServerId,
-                    APIMGovernableState.API_DEPLOY, ArtifactType.API, organization, null, null);
-
-            if (!complianceResult.isEmpty()
-                    && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
-                    && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
-                throw new APIComplianceException(
-                        complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
-            }
             String revisionId = apiProvider.addAPIRevision(apiRevision, organization);
             APIRevision createdApiRevision = apiProvider.getAPIRevision(revisionId);
             APIRevisionDTO createdApiRevisionDTO = APIMappingUtil.fromAPIRevisiontoDTO(createdApiRevision);
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_MCP_SERVERS
                     + "/" + createdApiRevisionDTO.getApiInfo().getId() + "/"
                     + RestApiConstants.RESOURCE_PATH_REVISIONS + "/" + createdApiRevisionDTO.getId());
-            PublisherCommonUtils.checkGovernanceComplianceAsync(mcpServerId, APIMGovernableState.API_DEPLOY,
-                    ArtifactType.API, organization);
             return Response.created(createdApiUri).entity(createdApiRevisionDTO).build();
         } catch (APIManagementException e) {
             if (e instanceof APIComplianceException) {
@@ -1397,8 +1378,6 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             //This URI used to set the location header of the POST response
             newVersionedApiUri =
                     new URI(RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + newVersionedApi.getId());
-            PublisherCommonUtils.checkGovernanceComplianceAsync(newVersionedApi.getId(), APIMGovernableState.API_CREATE,
-                    ArtifactType.API, organization);
             return Response.created(newVersionedApiUri).entity(newVersionedApi).build();
         } catch (APIManagementException e) {
             if (isAuthorizationFailure(e)) {
@@ -1565,7 +1544,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
     /**
      * Deletes a specific document of an MCP server.
-     * Validates the API existence, checks governance compliance, and deletes the document.
+     * Validates the API existence and deletes the document.
      *
      * @param mcpServerId    UUID of the API.
      * @param documentId     UUID of the document to be deleted.
@@ -1613,7 +1592,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
     /**
      * Deletes a specific revision of an MCP server.
-     * Validates the API existence, checks governance compliance, and deletes the revision.
+     * Validates the API existence and deletes the revision.
      *
      * @param mcpServerId    UUID of the API.
      * @param revisionId     UUID of the revision to be deleted.
@@ -1638,7 +1617,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
     /**
      * Deploys a specific revision of an MCP server to the specified environments.
-     * Validates the API existence, checks governance compliance, and deploys the revision.
+     * Validates the API existence and deploys the revision.
      *
      * @param mcpServerId                  UUID of the API.
      * @param revisionId                   UUID of the revision to be deployed.
@@ -1682,13 +1661,6 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                             environments, environment, displayOnDevportal, vhost, true);
             apiRevisionDeployments.add(apiRevisionDeployment);
         }
-        Map<String, String> complianceResult = PublisherCommonUtils.checkGovernanceComplianceSync(mcpServerId,
-                APIMGovernableState.API_DEPLOY, ArtifactType.API, organization, null, null);
-        if (!complianceResult.isEmpty()
-                && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
-                && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
-            throw new APIComplianceException(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
-        }
         apiProvider.deployAPIRevision(mcpServerId, revisionId, apiRevisionDeployments, organization);
         List<APIRevisionDeployment> apiRevisionDeploymentsResponse =
                 apiProvider.getAPIRevisionsDeploymentList(mcpServerId);
@@ -1697,8 +1669,6 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             apiRevisionDeploymentDTOS.add(APIMappingUtil.fromAPIRevisionDeploymenttoDTO(apiRevisionDeployment));
         }
         Response.Status status = Response.Status.CREATED;
-        PublisherCommonUtils.checkGovernanceComplianceAsync(mcpServerId, APIMGovernableState.API_DEPLOY,
-                ArtifactType.API, organization);
         return Response.status(status).entity(apiRevisionDeploymentDTOS).build();
     }
 
@@ -1868,7 +1838,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
     /**
      * Updates an existing MCP server with the provided MCPServerDTO.
-     * Validates the API existence, checks governance compliance, and updates the API.
+     * Validates the API existence and updates the API.
      *
      * @param mcpServerId    UUID of the API to be updated.
      * @param body           MCPServerDTO containing the updated API details.
@@ -1913,23 +1883,11 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             originalAPI.setOrganization(organization);
 
             validateAPIOperationsPerLC(originalAPI.getStatus());
-            Map<String, String> complianceResult = PublisherCommonUtils
-                    .checkGovernanceComplianceSync(originalAPI.getUuid(), APIMGovernableState.API_UPDATE,
-                            ArtifactType.API, originalAPI.getOrganization(),
-                            null, null);
-            if (!complianceResult.isEmpty()
-                    && complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY) != null
-                    && !Boolean.parseBoolean(complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_KEY))) {
-                throw new APIComplianceException(
-                        complianceResult.get(APIConstants.GOVERNANCE_COMPLIANCE_ERROR_MESSAGE));
-            }
 
             API updatedApi =
                     PublisherCommonUtils.updateApi(originalAPI, new APIDTOTypeWrapper(body), apiProvider, tokenScopes,
                             organizationInfo);
 
-            PublisherCommonUtils.checkGovernanceComplianceAsync(originalAPI.getUuid(), APIMGovernableState.API_UPDATE,
-                    ArtifactType.API, originalAPI.getOrganization());
             return Response.ok().entity(APIMappingUtil.fromAPItoMCPServerDTO(updatedApi)).build();
         } catch (APIManagementException e) {
             if (RestApiUtil.isDueToResourceNotFound(e) || RestApiUtil.isDueToAuthorizationFailure(e)) {
@@ -1960,7 +1918,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
     /**
      * Updates a specific document of an MCP server.
-     * Validates the API existence, checks governance compliance, and updates the document.
+     * Validates the API existence and updates the document.
      *
      * @param mcpServerId    UUID of the API.
      * @param documentId     UUID of the document to be updated.
@@ -2044,7 +2002,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
     /**
      * Updates the backend API of an MCP server.
-     * Validates the API existence, checks governance compliance, and updates the backend API.
+     * Validates the API existence and updates the backend API.
      *
      * @param mcpServerId    UUID of the MCP Server.
      * @param backendApiId   UUID of the backend API to be updated.
@@ -2074,7 +2032,7 @@ public class McpServersApiServiceImpl implements McpServersApiService {
 
     /**
      * Updates the deployment details of a specific revision of an MCP server.
-     * Validates the API existence, checks governance compliance, and updates the deployment details.
+     * Validates the API existence and updates the deployment details.
      *
      * @param mcpServerId              UUID of the API.
      * @param deploymentId             ID of the deployment to be updated.

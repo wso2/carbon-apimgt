@@ -1367,7 +1367,7 @@ public class SubscriptionValidationDAO {
 
                         BackendOperation backendOperation = new BackendOperation();
                         backendOperation.setVerb(org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs.
-                                valueOf(resultSet.getString("VERB")));
+                                fromValue(resultSet.getString("VERB")));
                         backendOperation.setTarget(resultSet.getString("TARGET"));
                         backendOperationMapping.setBackendOperation(backendOperation);
 
@@ -1389,7 +1389,7 @@ public class SubscriptionValidationDAO {
 
                         BackendOperation backendOperation = new BackendOperation();
                         backendOperation.setVerb(org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs.
-                                valueOf(resultSet.getString("HTTP_METHOD")));
+                                fromValue(resultSet.getString("HTTP_METHOD")));
                         backendOperation.setTarget(resultSet.getString("URL_PATTERN"));
                         apiOperationMapping.setBackendOperation(backendOperation);
 
