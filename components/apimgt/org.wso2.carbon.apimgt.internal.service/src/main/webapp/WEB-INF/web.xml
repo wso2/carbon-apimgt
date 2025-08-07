@@ -60,7 +60,9 @@
                 org.wso2.carbon.apimgt.internal.service.SubscribeInternalApi,
                 org.wso2.carbon.apimgt.internal.service.LlmProvidersApi,
                 org.wso2.carbon.apimgt.internal.service.TransactionRecordsApi,
-                org.wso2.carbon.apimgt.internal.service.TenantInfoApi
+                org.wso2.carbon.apimgt.internal.service.TenantInfoApi,
+                org.wso2.carbon.apimgt.internal.service.NotifyGatewayApi,
+                org.wso2.carbon.apimgt.internal.service.NotifyApiDeploymentStatusApi
             </param-value>
         </init-param>
         <init-param>
