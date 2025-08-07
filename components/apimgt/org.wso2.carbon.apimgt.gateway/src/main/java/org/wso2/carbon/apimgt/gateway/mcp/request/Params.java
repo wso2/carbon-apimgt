@@ -3,20 +3,29 @@ package org.wso2.carbon.apimgt.gateway.mcp.request;
 import com.google.gson.annotations.SerializedName;
 
 public class Params {
+    //available in initialize method request
     @SerializedName("protocolVersion")
     public String protocolVersion;
 
+    //available in initialize method request
     @SerializedName("capabilities")
     public Capabilities capabilities;
 
+    //available in initialize method request
     @SerializedName("clientInfo")
     public ClientInfo clientInfo;
 
+    //available in tools/call method request
     @SerializedName("name")
     public String toolName;
 
+    //available in tools/call method request
     @SerializedName("arguments")
     public Object arguments;
+
+    //available in tools/list method request
+    @SerializedName("cursor")
+    public String cursor;
 
     public String getProtocolVersion() {
         return protocolVersion;
@@ -58,6 +67,14 @@ public class Params {
         this.arguments = arguments;
     }
 
+    public String getCursor() {
+        return cursor;
+    }
+
+    public void setCursor(String cursor) {
+        this.cursor = cursor;
+    }
+
     public static class Capabilities {
         @SerializedName("roots")
         public Object roots;
@@ -93,6 +110,7 @@ public class Params {
         }
     }
 
+    //available in initialize method request
     public static class ClientInfo {
         @SerializedName("name")
         public String name;
@@ -109,6 +127,22 @@ public class Params {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public void setVersion(String version) {
+            this.version = version;
         }
     }
 }

@@ -2163,8 +2163,11 @@ public class TemplateBuilderUtil {
     }
 
     private static String getEndpointURI(String[] uris, String scheme) {
+        if (uris == null || scheme == null) {
+            return null;
+        }
         for (String uri : uris) {
-            if (uri.startsWith(scheme)) {
+            if (uri != null && uri.startsWith(scheme)) {
                 return uri;
             }
         }

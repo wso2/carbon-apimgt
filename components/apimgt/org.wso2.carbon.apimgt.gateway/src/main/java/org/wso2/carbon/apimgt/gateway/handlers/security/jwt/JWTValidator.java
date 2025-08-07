@@ -168,7 +168,10 @@ public class JWTValidator {
 
         String apiType = (String) synCtx.getProperty(APIMgtGatewayConstants.API_TYPE);
         if (org.apache.commons.lang3.StringUtils.equals(APIConstants.API_TYPE_MCP, apiType)) {
-            httpMethod = synCtx.getProperty("MCP_HTTP_METHOD").toString();
+            Object mcpMethodProperty = synCtx.getProperty("MCP_HTTP_METHOD");
+            if (mcpMethodProperty != null) {
+                httpMethod = mcpMethodProperty.toString();
+            }
             matchingResource = (String) synCtx.getProperty("MCP_API_ELECTED_RESOURCE");
         }
 
