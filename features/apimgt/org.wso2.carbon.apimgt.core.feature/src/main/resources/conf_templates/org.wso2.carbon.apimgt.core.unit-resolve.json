@@ -13,6 +13,14 @@
     "apim.throttling.jms.start_delay" : "ms",
     "apim.jwt.expiry_time": "s",
     "apim.certificate_reloader.period": "s",
-    "transport.receiver.session_timeout": "m"
+    "transport.receiver.session_timeout": "m",
+    "apim.gateway_notification.heartbeat.notify_interval": "s",
+    "apim.gateway_notification.deployment_ack.batch_interval":"ms",
+    "apim.gateway_notification.deployment_ack.retry_duration":"ms",
+    "apim.gateway_notification.deployment_ack.batch_processor_keep_alive":"ms",
+    "apim.gateway_notification.registration.retry_duration":"ms",
+    "apim.gateway_cleanup.expire_time": "s",
+    "apim.gateway_cleanup.data_retention_period": "s",
+    "apim.gateway_cleanup.cleanup_interval": "s"
   }
 }
