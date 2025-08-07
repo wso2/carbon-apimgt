@@ -667,13 +667,13 @@ public class SubscriptionValidationSQLConstants {
 
     public static final String  GET_MCP_BACKEND_OPERATION_MAPPING_BY_REF_URL_MAPPING_ID =
             "SELECT " +
-                "AM_API_BACKEND_OPERATION_MAPPING.TARGET, " +
-                "AM_API_BACKEND_OPERATION_MAPPING.VERB " +
+                "AM_BACKEND_OPERATION_MAPPING.TARGET, " +
+                "AM_BACKEND_OPERATION_MAPPING.VERB " +
             "FROM " +
-                "AM_API_BACKEND_OPERATION_MAPPING " +
+                "AM_BACKEND_OPERATION_MAPPING " +
             "LEFT JOIN " +
                 "AM_API_URL_MAPPING " +
-                "ON AM_API_BACKEND_OPERATION_MAPPING.URL_MAPPING_ID=AM_API_URL_MAPPING.URL_MAPPING_ID " +
+                "ON AM_BACKEND_OPERATION_MAPPING.URL_MAPPING_ID=AM_API_URL_MAPPING.URL_MAPPING_ID " +
             "WHERE AM_API_URL_MAPPING.URL_MAPPING_ID=?";
 
     public static final String  GET_MCP_API_OPERATION_MAPPING_BY_REF_URL_MAPPING_ID =
