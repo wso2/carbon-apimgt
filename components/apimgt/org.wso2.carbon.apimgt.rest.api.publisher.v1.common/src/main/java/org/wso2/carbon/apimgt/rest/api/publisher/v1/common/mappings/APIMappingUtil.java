@@ -3656,6 +3656,10 @@ public class APIMappingUtil {
                         + model.getSuccessDeployedTime(), e);
             }
         }
+        apiRevisionDeploymentDTO.setLiveGatewayCount(model.getLiveGatewayCount());
+        apiRevisionDeploymentDTO.setDeployedGatewayCount(model.getDeployedGatewayCount());
+        apiRevisionDeploymentDTO.setFailedGatewayCount(model.getFailedGatewayCount());
+
         return apiRevisionDeploymentDTO;
     }
 
