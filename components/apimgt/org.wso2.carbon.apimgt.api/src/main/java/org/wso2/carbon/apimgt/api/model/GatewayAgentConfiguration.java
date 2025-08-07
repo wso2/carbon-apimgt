@@ -35,6 +35,15 @@ public interface GatewayAgentConfiguration {
     String getGatewayDeployerImplementation();
 
     /**
+     * Get the implementation class of the external gateway deployer
+     *
+     * @return String implementation class name
+     * @deprecated Use {@link #getGatewayDeployerImplementation()} instead.
+     */
+    @Deprecated
+    String getImplementation();
+
+    /**
      * Get the implementation class of the external gateway discovery agent
      *
      * @return String implementation class name

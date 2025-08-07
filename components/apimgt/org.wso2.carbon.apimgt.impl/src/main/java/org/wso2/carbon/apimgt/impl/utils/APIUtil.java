@@ -3573,9 +3573,7 @@ public final class APIUtil {
         } catch (APIManagementException e) {
             throw new RuntimeException(e);
         }
-
         if (config != null) {
-
             LinkedTreeMap<String, Object> supportedFeaturesMap = new Gson().fromJson(
                     (JsonObject) config.getSupportedFeatures(), LinkedTreeMap.class);
             gatewayConfigsMap.put(config.getGatewayType(), supportedFeaturesMap);

@@ -78,6 +78,7 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
      * Schedules the discovery of APIs at a specified interval.
      *
      * @param environment The environment from which APIs will be discovered.
+     * @param organization  The organization context for the discovery.
      */
     public void scheduleDiscovery(Environment environment, String organization) {
         GatewayAgentConfiguration gatewayConfiguration = org.wso2.carbon.apimgt.impl.internal.
@@ -132,6 +133,13 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
         }
     }
 
+    /**
+     * Processes the discovered APIs and deploys them to the federated gateway environment.
+     *
+     * @param apisToDeployInGatewayEnv List of APIs to be deployed.
+     * @param environment              The environment where the APIs will be deployed.
+     * @param organization             The organization context for the deployment.
+     */
     private void processDiscoveredAPIs(List<API> apisToDeployInGatewayEnv, Environment environment,
                                        String organization) {
 

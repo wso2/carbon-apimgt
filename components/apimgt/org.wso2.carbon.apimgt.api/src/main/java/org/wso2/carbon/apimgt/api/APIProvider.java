@@ -1355,6 +1355,7 @@ public interface APIProvider extends APIManager {
      * @param organization           Identifier of an organization
      * @throws APIManagementException if failed to add APIRevision
      */
+    @Deprecated
     void deployAPIRevision(String apiId, String apiRevisionId, List<APIRevisionDeployment> apiRevisionDeployments,
                            String organization) throws APIManagementException;
 
