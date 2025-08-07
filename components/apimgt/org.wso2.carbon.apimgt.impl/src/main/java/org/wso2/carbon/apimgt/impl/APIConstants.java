@@ -2977,8 +2977,7 @@ public final class APIConstants {
         public static final String PASSWORD_GRANT_TYPE = "password";
         public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
         public static final String APPLICATION_GRANT_TYPE = "application";
-        public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";
-        
+        public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";        
 
         public static class KeyManagerEvent {
 

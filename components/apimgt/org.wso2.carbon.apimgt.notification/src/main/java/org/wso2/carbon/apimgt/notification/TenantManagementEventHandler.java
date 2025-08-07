@@ -103,7 +103,6 @@ public class TenantManagementEventHandler implements EventHandler {
             }
 
         } catch (APIManagementException e) {
-            log.error("Error processing tenant management event", e);
             throw new APIManagementException("Error while creating tenant management client", e);
         }
         return true;
