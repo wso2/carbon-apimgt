@@ -6664,14 +6664,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, apiRevisionDeployments);
 
         for (APIRevisionDeployment deployment : apiRevisionDeployments) {
-            apiMgtDAO.updateAPIRevisionDeploymentStatus(apiRevisionUUID,
-                    APIConstants.APIRevisionStatus.API_REVISION_CREATED, deployment.getDeployment());
+
 
             if (!isInitiatedFromGateway) {
+                apiMgtDAO.updateAPIRevisionDeploymentStatus(apiRevisionUUID,
+                        APIConstants.APIRevisionStatus.API_REVISION_CREATED, deployment.getDeployment());
                 executeRevisionWorkflow(apiIdentifier, apiRevisionUUID, revisionId, organization, apiRevision,
                         deployment);
             } else {
-                apiMgtDAO.updateAPIRevisionDeployment(apiId, Collections.singleton(deployment));
+                apiMgtDAO.updateAPIRevisionDeploymentForDiscoveredAPIs(apiRevisionUUID,
+                        APIConstants.APIRevisionStatus.API_REVISION_APPROVED, Collections.singleton(deployment));
                 resumeDeployedAPIRevision(apiId, organization, apiRevisionUUID, String.valueOf(revisionId),
                         deployment.getDeployment(), true);
             }
