@@ -19,35 +19,35 @@ package org.wso2.carbon.apimgt.api.model;
 import java.io.Serializable;
 
 /**
- * Represents a Backend API in the API Management system.
- * This class encapsulates the details of a backend API including its ID, definition,
- * endpoint configuration, and name.
+ * Represents a Backend service.
+ * This class encapsulates the details of a backend service including its ID, name,
+ * definition, and endpoint configuration.
  */
-public class BackendAPI implements Serializable {
+public class Backend implements Serializable {
 
-    private String backendApiId;
-    private String apiDefinition;
+    private String id;
+    private String name;
+    private String definition;
     private String endpointConfig;
-    private String backendApiName;
 
-    public String getBackendApiId() {
+    public String getId() {
 
-        return backendApiId;
+        return id;
     }
 
-    public void setBackendApiId(String backendApiId) {
+    public void setId(String id) {
 
-        this.backendApiId = backendApiId;
+        this.id = id;
     }
 
-    public String getApiDefinition() {
+    public String getDefinition() {
 
-        return apiDefinition;
+        return definition;
     }
 
-    public void setApiDefinition(String apiDefinition) {
+    public void setDefinition(String definition) {
 
-        this.apiDefinition = apiDefinition;
+        this.definition = definition;
     }
 
     public String getEndpointConfig() {
@@ -61,13 +61,13 @@ public class BackendAPI implements Serializable {
 
     }
 
-    public String getBackendApiName() {
+    public String getName() {
 
-        return backendApiName;
+        return name;
     }
 
-    public void setBackendApiName(String backendApiName) {
+    public void setName(String name) {
 
-        this.backendApiName = backendApiName;
+        this.name = name;
     }
 }

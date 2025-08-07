@@ -74,9 +74,9 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIResourceMediationPolicy;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
-import org.wso2.carbon.apimgt.api.model.BackendAPIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.CORSConfiguration;
-import org.wso2.carbon.apimgt.api.model.ExistingAPIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
 import org.wso2.carbon.apimgt.api.model.URITemplate;
@@ -823,17 +823,15 @@ public class OAS3Parser extends APIDefinition {
      * @param method    HTTP method to match
      * @return Matching SwaggerData.Resource object or null if not found
      */
-    private SwaggerData.Resource findMatchingResource(Set<SwaggerData.Resource> resources,
-                                                      String path,
-                                                      String method) {
+    private SwaggerData.Resource findMatchingResource(Set<SwaggerData.Resource> resources, String path, String method) {
 
         for (SwaggerData.Resource resource : resources) {
             if (APISpecParserConstants.HTTP_VERB_TOOL.equalsIgnoreCase(resource.getVerb())
-                    && resource.getBackendAPIOperationMapping() != null) {
-                APIConstants.SupportedHTTPVerbs
-                        mappedMethod = resource.getBackendAPIOperationMapping().getBackendOperation().getVerb();
-                String mappedTarget = resource.getBackendAPIOperationMapping().getBackendOperation().getTarget();
-
+                    && resource.getBackendOperationMapping() != null) {
+                APIConstants.SupportedHTTPVerbs mappedMethod =
+                        resource.getBackendOperationMapping().getBackendOperation().getVerb();
+                String mappedTarget =
+                        resource.getBackendOperationMapping().getBackendOperation().getTarget();
                 if (method.equalsIgnoreCase(mappedMethod.toString()) && path.equalsIgnoreCase(mappedTarget)) {
                     return resource;
                 }
@@ -2598,16 +2596,14 @@ public class OAS3Parser extends APIDefinition {
             if (!mcpFeatureType.equalsIgnoreCase(template.getHttpVerb())) {
                 continue;
             }
-
             BackendOperation backendOperation = null;
-
             if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
-                BackendAPIOperationMapping mapping = template.getBackendOperationMapping();
+                BackendOperationMapping mapping = template.getBackendOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
             } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
-                ExistingAPIOperationMapping mapping = template.getExistingAPIOperationMapping();
+                APIOperationMapping mapping = template.getExistingAPIOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
@@ -2650,12 +2646,12 @@ public class OAS3Parser extends APIDefinition {
             BackendOperation backendOperation = null;
 
             if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
-                BackendAPIOperationMapping mapping = template.getBackendOperationMapping();
+                BackendOperationMapping mapping = template.getBackendOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
             } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
-                ExistingAPIOperationMapping mapping = template.getExistingAPIOperationMapping();
+                APIOperationMapping mapping = template.getExistingAPIOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
@@ -2734,12 +2730,12 @@ public class OAS3Parser extends APIDefinition {
         backendOperation.setTarget(match.path);
 
         if (uriTemplate.getBackendOperationMapping() != null) {
-            BackendAPIOperationMapping backendOperationMap = new BackendAPIOperationMapping();
-            backendOperationMap.setBackendApiId(backendId);
+            BackendOperationMapping backendOperationMap = new BackendOperationMapping();
+            backendOperationMap.setBackendId(backendId);
             backendOperationMap.setBackendOperation(backendOperation);
             uriTemplate.setBackendOperationMapping(backendOperationMap);
         } else if (uriTemplate.getExistingAPIOperationMapping() != null) {
-            ExistingAPIOperationMapping apiOperationMap = new ExistingAPIOperationMapping();
+            APIOperationMapping apiOperationMap = new APIOperationMapping();
             apiOperationMap.setApiUuid(refApiId.getUUID());
             apiOperationMap.setApiName(refApiId.getApiName());
             apiOperationMap.setApiVersion(refApiId.getVersion());
@@ -2753,8 +2749,8 @@ public class OAS3Parser extends APIDefinition {
                 uriTemplate.setAuthType(scopeKey);
                 uriTemplate.setAuthTypes(scopeKey);
             } else {
-                uriTemplate.setAuthType("Any");
-                uriTemplate.setAuthTypes("Any");
+                uriTemplate.setAuthType(APISpecParserConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+                uriTemplate.setAuthTypes(APISpecParserConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
             }
             if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER)) {
                 String throttlingTier = (String) extensions.get(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER);
@@ -2770,6 +2766,12 @@ public class OAS3Parser extends APIDefinition {
         return uriTemplate;
     }
 
+    /**
+     * Returns the ObjectMapper instance used for JSON processing.
+     * This is a singleton instance to avoid creating multiple ObjectMapper instances.
+     *
+     * @return ObjectMapper instance
+     */
     private ObjectMapper getObjectMapper() {
 
         return OBJECT_MAPPER;
@@ -2811,7 +2813,7 @@ public class OAS3Parser extends APIDefinition {
                                                         OpenAPI openAPI) {
 
         Map<String, Object> root = new LinkedHashMap<>();
-        root.put("type", "object");
+        root.put(APISpecParserConstants.TYPE, APISpecParserConstants.OBJECT);
 
         Map<String, Object> props = new LinkedHashMap<>();
         List<String> requiredFields = new ArrayList<>();
@@ -2822,11 +2824,19 @@ public class OAS3Parser extends APIDefinition {
                 Schema<?> schema = resolveSchema(param.getSchema(), openAPI);
 
                 if (schema != null) {
-                    paramSchema.put("type", schema.getType());
-                    if (schema.getFormat() != null) paramSchema.put("format", schema.getFormat());
-                    if (schema.getEnum() != null) paramSchema.put("enum", schema.getEnum());
-                    if (schema.getDefault() != null) paramSchema.put("default", schema.getDefault());
-                    if (param.getDescription() != null) paramSchema.put("description", param.getDescription());
+                    paramSchema.put(APISpecParserConstants.TYPE, schema.getType());
+                    if (schema.getFormat() != null) {
+                        paramSchema.put(APISpecParserConstants.FORMAT, schema.getFormat());
+                    }
+                    if (schema.getEnum() != null) {
+                        paramSchema.put(APISpecParserConstants.ENUM, schema.getEnum());
+                    }
+                    if (schema.getDefault() != null) {
+                        paramSchema.put(APISpecParserConstants.DEFAULT, schema.getDefault());
+                    }
+                    if (param.getDescription() != null) {
+                        paramSchema.put(APISpecParserConstants.DESCRIPTION, param.getDescription());
+                    }
                 }
                 props.put(name, paramSchema);
                 if (Boolean.TRUE.equals(param.getRequired())) {
@@ -2837,29 +2847,30 @@ public class OAS3Parser extends APIDefinition {
 
         if (requestBody != null &&
                 requestBody.getContent() != null &&
-                requestBody.getContent().get("application/json") != null) {
-            Schema<?> rawSchema = requestBody.getContent().get("application/json").getSchema();
+                requestBody.getContent().get(APISpecParserConstants.APPLICATION_JSON_MEDIA_TYPE) != null) {
+            Schema<?> rawSchema =
+                    requestBody.getContent().get(APISpecParserConstants.APPLICATION_JSON_MEDIA_TYPE).getSchema();
 
             Schema<?> bodySchema = resolveSchema(rawSchema, openAPI);
             Map<String, Object> requestBodyNode = new LinkedHashMap<>();
-            requestBodyNode.put("type", "object");
-            requestBodyNode.put("contentType", "application/json");
+            requestBodyNode.put(APISpecParserConstants.TYPE, APISpecParserConstants.OBJECT);
+            requestBodyNode.put(APISpecParserConstants.CONTENT_TYPE, APPLICATION_JSON_MEDIA_TYPE);
 
             if (bodySchema.getProperties() != null) {
-                requestBodyNode.put("properties", bodySchema.getProperties());
+                requestBodyNode.put(APISpecParserConstants.PROPERTIES, bodySchema.getProperties());
             }
 
             if (bodySchema.getRequired() != null) {
-                requestBodyNode.put("required", bodySchema.getRequired());
+                requestBodyNode.put(APISpecParserConstants.REQUIRED, bodySchema.getRequired());
             }
 
-            props.put("requestBody", requestBodyNode);
-            requiredFields.add("requestBody");
+            props.put(APISpecParserConstants.REQUEST_BODY, requestBodyNode);
+            requiredFields.add(APISpecParserConstants.REQUEST_BODY);
         }
 
-        root.put("properties", props);
+        root.put(APISpecParserConstants.PROPERTIES, props);
         if (!requiredFields.isEmpty()) {
-            root.put("required", requiredFields);
+            root.put(APISpecParserConstants.REQUIRED, requiredFields);
         }
 
         return root;
@@ -2878,6 +2889,15 @@ public class OAS3Parser extends APIDefinition {
         return resolveSchema(schema, openAPI, new HashSet<>());
     }
 
+    /**
+     * Resolves a schema by recursively resolving $ref, allOf, oneOf, anyOf, and not properties.
+     * This version tracks visited references to prevent circular references.
+     *
+     * @param schema      Schema to resolve
+     * @param openAPI     OpenAPI definition to resolve against
+     * @param visitedRefs Set of visited reference names to detect circular references
+     * @return Resolved Schema object
+     */
     private Schema<?> resolveSchema(Schema<?> schema, OpenAPI openAPI, Set<String> visitedRefs) {
 
         if (schema == null) return null;

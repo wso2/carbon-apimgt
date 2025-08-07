@@ -328,6 +328,6 @@ public final class ImportExportConstants {
     public static final String API_ENDPOINTS_TYPE = "endpoints";
     public static final String API_ENDPOINTS_FILE_LOCATION = File.separator + "endpoints";
 
-    public static final String BACKEND_APIS_TYPE = "backendAPI";
-    public static final String BACKEND_APIS_FILE_LOCATION = File.separator + "backendAPI";
+    public static final String BACKENDS_TYPE = "backends";
+    public static final String BACKENDS_FILE_LOCATION = File.separator + "backends";
 }

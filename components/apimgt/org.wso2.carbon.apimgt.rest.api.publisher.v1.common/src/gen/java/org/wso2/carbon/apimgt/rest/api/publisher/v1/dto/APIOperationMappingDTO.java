@@ -19,18 +19,17 @@ import javax.validation.Valid;
 
 
 
-public class ExistingAPIOperationMappingDTO   {
+public class APIOperationMappingDTO   {
   
     private String apiId = null;
     private String apiName = null;
     private String apiVersion = null;
-    private String apiContext = null;
     private BackendOperationDTO backendOperation = null;
 
   /**
    * UUID of the referenced API 
    **/
-  public ExistingAPIOperationMappingDTO apiId(String apiId) {
+  public APIOperationMappingDTO apiId(String apiId) {
     this.apiId = apiId;
     return this;
   }
@@ -47,7 +46,7 @@ public class ExistingAPIOperationMappingDTO   {
 
   /**
    **/
-  public ExistingAPIOperationMappingDTO apiName(String apiName) {
+  public APIOperationMappingDTO apiName(String apiName) {
     this.apiName = apiName;
     return this;
   }
@@ -64,7 +63,7 @@ public class ExistingAPIOperationMappingDTO   {
 
   /**
    **/
-  public ExistingAPIOperationMappingDTO apiVersion(String apiVersion) {
+  public APIOperationMappingDTO apiVersion(String apiVersion) {
     this.apiVersion = apiVersion;
     return this;
   }
@@ -81,24 +80,7 @@ public class ExistingAPIOperationMappingDTO   {
 
   /**
    **/
-  public ExistingAPIOperationMappingDTO apiContext(String apiContext) {
-    this.apiContext = apiContext;
-    return this;
-  }
-
-  
-  @ApiModelProperty(example = "1.0.0", value = "")
-  @JsonProperty("apiContext")
- @Size(min=1,max=30)  public String getApiContext() {
-    return apiContext;
-  }
-  public void setApiContext(String apiContext) {
-    this.apiContext = apiContext;
-  }
-
-  /**
-   **/
-  public ExistingAPIOperationMappingDTO backendOperation(BackendOperationDTO backendOperation) {
+  public APIOperationMappingDTO backendOperation(BackendOperationDTO backendOperation) {
     this.backendOperation = backendOperation;
     return this;
   }
@@ -123,28 +105,26 @@ public class ExistingAPIOperationMappingDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    ExistingAPIOperationMappingDTO existingAPIOperationMapping = (ExistingAPIOperationMappingDTO) o;
-    return Objects.equals(apiId, existingAPIOperationMapping.apiId) &&
-        Objects.equals(apiName, existingAPIOperationMapping.apiName) &&
-        Objects.equals(apiVersion, existingAPIOperationMapping.apiVersion) &&
-        Objects.equals(apiContext, existingAPIOperationMapping.apiContext) &&
-        Objects.equals(backendOperation, existingAPIOperationMapping.backendOperation);
+    APIOperationMappingDTO apIOperationMapping = (APIOperationMappingDTO) o;
+    return Objects.equals(apiId, apIOperationMapping.apiId) &&
+        Objects.equals(apiName, apIOperationMapping.apiName) &&
+        Objects.equals(apiVersion, apIOperationMapping.apiVersion) &&
+        Objects.equals(backendOperation, apIOperationMapping.backendOperation);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiId, apiName, apiVersion, apiContext, backendOperation);
+    return Objects.hash(apiId, apiName, apiVersion, backendOperation);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class ExistingAPIOperationMappingDTO {\n");
+    sb.append("class APIOperationMappingDTO {\n");
     
     sb.append("    apiId: ").append(toIndentedString(apiId)).append("\n");
     sb.append("    apiName: ").append(toIndentedString(apiName)).append("\n");
     sb.append("    apiVersion: ").append(toIndentedString(apiVersion)).append("\n");
-    sb.append("    apiContext: ").append(toIndentedString(apiContext)).append("\n");
     sb.append("    backendOperation: ").append(toIndentedString(backendOperation)).append("\n");
     sb.append("}");
     return sb.toString();

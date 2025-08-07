@@ -24,28 +24,31 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIBusinessInformationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 
 import java.util.Collections;
 import java.util.List;
+import javax.validation.Valid;
 
 /**
  * A unified wrapper to abstract differences between {@link APIDTO} and {@link MCPServerDTO}
  * and provide a common interface for accessing shared properties.
  */
-public class APIDTOWrapper {
+public class APIDTOTypeWrapper {
 
-    private static final Log log = LogFactory.getLog(APIDTOWrapper.class);
+    private static final Log log = LogFactory.getLog(APIDTOTypeWrapper.class);
 
     private final APIDTO apiDto;
     private final MCPServerDTO mcpServerDto;
 
-    public APIDTOWrapper(APIDTO apiDto) {
+    public APIDTOTypeWrapper(APIDTO apiDto) {
 
         if (apiDto == null) {
             throw new IllegalArgumentException("APIDTO cannot be null");
@@ -54,7 +57,7 @@ public class APIDTOWrapper {
         this.mcpServerDto = null;
     }
 
-    public APIDTOWrapper(MCPServerDTO mcpServerDto) {
+    public APIDTOTypeWrapper(MCPServerDTO mcpServerDto) {
 
         if (mcpServerDto == null) {
             throw new IllegalArgumentException("MCPServerDTO cannot be null");
@@ -174,9 +177,12 @@ public class APIDTOWrapper {
         }
     }
 
-    public List<APIOperationsDTO> getOperations() {
+    public boolean isOperationsEmpty() {
 
-        return isAPIDTO() ? apiDto.getOperations() : mcpServerDto.getOperations();
+        if (isAPIDTO()) {
+            return apiDto == null || apiDto.getOperations() == null || apiDto.getOperations().isEmpty();
+        }
+        return mcpServerDto == null || mcpServerDto.getOperations() == null || mcpServerDto.getOperations().isEmpty();
     }
 
     public String getAuthorizationHeader() {
@@ -209,7 +215,7 @@ public class APIDTOWrapper {
 
     public String getApiThrottlingPolicy() {
 
-        return isAPIDTO() ? apiDto.getApiThrottlingPolicy() : mcpServerDto.getApiThrottlingPolicy();
+        return isAPIDTO() ? apiDto.getApiThrottlingPolicy() : mcpServerDto.getThrottlingPolicy();
     }
 
     public List<String> getKeyManagers() {
@@ -234,7 +240,7 @@ public class APIDTOWrapper {
 
     public boolean isEgress() {
 
-        return isAPIDTO() ? apiDto.isEgress() : mcpServerDto.isEgress();
+        return isAPIDTO() ? apiDto.isEgress() : false;
     }
 
     public boolean isVisibilityRestricted() {
@@ -284,7 +290,7 @@ public class APIDTOWrapper {
 
     public List<APIInfoAdditionalPropertiesDTO> getAdditionalProperties() {
 
-        return isAPIDTO() ? apiDto.getAdditionalProperties() : mcpServerDto.getAdditionalProperties();
+        return isAPIDTO() ? apiDto.getAdditionalProperties() : null;
     }
 
     public void setLifeCycleStatus(String status) {
@@ -298,7 +304,7 @@ public class APIDTOWrapper {
 
     public Object getEndpointConfig() {
 
-        return isAPIDTO() ? apiDto.getEndpointConfig() : mcpServerDto.getBackendAPIEndpointConfig();
+        return isAPIDTO() ? apiDto.getEndpointConfig() : mcpServerDto.getEndpointConfig();
     }
 
     public void setEndpointConfig(Object endpointConfig) {
@@ -306,21 +312,19 @@ public class APIDTOWrapper {
         if (isAPIDTO()) {
             apiDto.setEndpointConfig(endpointConfig);
         } else {
-            mcpServerDto.setBackendAPIEndpointConfig(endpointConfig);
+            mcpServerDto.setEndpointConfig(endpointConfig);
         }
     }
 
     public List<MediationPolicyDTO> getMediationPolicies() {
 
-        return isAPIDTO() ? apiDto.getMediationPolicies() : mcpServerDto.getMediationPolicies();
+        return isAPIDTO() ? apiDto.getMediationPolicies() : null;
     }
 
     public void setMediationPolicies(List<MediationPolicyDTO> policies) {
 
         if (isAPIDTO()) {
             apiDto.setMediationPolicies(policies);
-        } else {
-            mcpServerDto.setMediationPolicies(policies);
         }
     }
 
@@ -349,6 +353,192 @@ public class APIDTOWrapper {
             apiDto.setOrganizationPolicies(policies);
         } else {
             mcpServerDto.setOrganizationPolicies(policies);
+        }
+    }
+
+    public String getLifeCycleStatus() {
+
+        if (isAPIDTO()) {
+            return apiDto.getLifeCycleStatus();
+        } else {
+            return mcpServerDto.getLifeCycleStatus();
+        }
+    }
+
+    public void setBusinessInformation(APIBusinessInformationDTO businessInformation) {
+
+        if (isAPIDTO()) {
+            apiDto.setBusinessInformation(businessInformation);
+        } else {
+            mcpServerDto.setBusinessInformation(businessInformation);
+        }
+    }
+
+    public void setAccessControl(APIDTO.AccessControlEnum accessControl) {
+
+        if (isAPIDTO()) {
+            apiDto.setAccessControl(accessControl);
+        }
+    }
+
+    public void setAccessControl(MCPServerDTO.AccessControlEnum accessControl) {
+
+        if (isMCPServerDTO()) {
+            mcpServerDto.setAccessControl(accessControl);
+        }
+    }
+
+    public void setCategories(List<String> categories) {
+
+        if (isAPIDTO()) {
+            apiDto.setCategories(categories);
+        } else {
+            mcpServerDto.setCategories(categories);
+        }
+    }
+
+    public void setAccessControlRoles(List<String> accessControlRoles) {
+
+        if (isAPIDTO()) {
+            apiDto.setAccessControlRoles(accessControlRoles);
+        } else {
+            mcpServerDto.setAccessControlRoles(accessControlRoles);
+        }
+    }
+
+    public void setHasThumbnail(Boolean hasThumbnail) {
+
+        if (isAPIDTO()) {
+            apiDto.setHasThumbnail(hasThumbnail);
+        } else {
+            mcpServerDto.setHasThumbnail(hasThumbnail);
+        }
+    }
+
+    public void setMonetization(APIMonetizationInfoDTO monetization) {
+
+        if (isAPIDTO()) {
+            apiDto.setMonetization(monetization);
+        } else {
+            mcpServerDto.setMonetization(monetization);
+        }
+    }
+
+    public void setVisibility(APIDTO.VisibilityEnum visibility) {
+
+        if (isAPIDTO()) {
+            apiDto.setVisibility(visibility);
+        }
+    }
+
+    public void setVisibility(MCPServerDTO.VisibilityEnum visibility) {
+
+        if (isMCPServerDTO()) {
+            mcpServerDto.setVisibility(visibility);
+        }
+    }
+
+    public void setVisibleRoles(List<String> visibleRoles) {
+
+        if (isAPIDTO()) {
+            apiDto.setVisibleRoles(visibleRoles);
+        } else {
+            mcpServerDto.setVisibleRoles(visibleRoles);
+        }
+    }
+
+    public void setVisibleTenants(List<String> visibleTenants) {
+
+        if (isAPIDTO()) {
+            apiDto.setVisibleTenants(visibleTenants);
+        } else {
+            mcpServerDto.setVisibleTenants(visibleTenants);
+        }
+    }
+
+    public void setVisibleOrganizations(List emptyList) {
+
+        if (isAPIDTO()) {
+            apiDto.setVisibleOrganizations(emptyList);
+        } else {
+            mcpServerDto.setVisibleOrganizations(emptyList);
+        }
+    }
+
+    public void setSubscriptionAvailability(APIDTO.SubscriptionAvailabilityEnum subscriptionAvailability) {
+
+        if (isAPIDTO()) {
+            apiDto.setSubscriptionAvailability(subscriptionAvailability);
+        }
+    }
+
+    public void setSubscriptionAvailableTenants(List<String> subscriptionAvailableTenants) {
+
+        if (isAPIDTO()) {
+            apiDto.setSubscriptionAvailableTenants(subscriptionAvailableTenants);
+        } else {
+            mcpServerDto.setSubscriptionAvailableTenants(subscriptionAvailableTenants);
+        }
+    }
+
+    public void monetization(@Valid APIMonetizationInfoDTO monetization) {
+
+        if (isAPIDTO()) {
+            apiDto.monetization(monetization);
+        } else {
+            mcpServerDto.monetization(monetization);
+        }
+    }
+
+    public void setTags(List<String> tags) {
+
+        if (isAPIDTO()) {
+            apiDto.setTags(tags);
+        } else {
+            mcpServerDto.setTags(tags);
+        }
+    }
+
+    public void setAdditionalProperties(List<APIInfoAdditionalPropertiesDTO> additionalPropertiesDTOList) {
+
+        if (isAPIDTO()) {
+            apiDto.setAdditionalProperties(additionalPropertiesDTOList);
+        }
+    }
+
+    public List<String> getSecurityScheme() {
+
+        if (isAPIDTO()) {
+            return apiDto.getSecurityScheme();
+        } else {
+            return mcpServerDto.getSecurityScheme();
+        }
+    }
+
+    public AdvertiseInfoDTO getAdvertiseInfo() {
+
+        if (isAPIDTO()) {
+            return apiDto.getAdvertiseInfo();
+        } else {
+            return null;
+        }
+    }
+
+    public String getPrimaryProductionEndpointId() {
+
+        if (isAPIDTO()) {
+            return apiDto.getPrimaryProductionEndpointId();
+        } else {
+            return null;
+        }
+    }
+
+    public String getPrimarySandboxEndpointId() {
+
+        if (isAPIDTO()) {
+            return apiDto.getPrimarySandboxEndpointId();
+        } else {
+            return null;
         }
     }
 }

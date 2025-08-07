@@ -7,8 +7,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentDTO
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionDeploymentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIRevisionListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ApiEndpointValidationResponseDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendAPIDTO;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendAPIListDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.CommentRequestDTO;
@@ -435,10 +435,10 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     }
 
     @GET
-    @Path("/{mcpServerId}/backend-apis/{backendApiId}")
+    @Path("/{mcpServerId}/backends/{backendId}")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get backend APIs of a MCP Server", notes = "This operation can be used to get a backend API of a MCP Server ", response = BackendAPIDTO.class, authorizations = {
+    @ApiOperation(value = "Get backends of a MCP Server", notes = "This operation can be used to get a backend of a MCP Server ", response = BackendDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
@@ -446,20 +446,20 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations")
         })
-    }, tags={ "MCP Server Backend APIs",  })
+    }, tags={ "MCP Server Backends",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. BackendAPI object is returned. ", response = BackendAPIDTO.class),
+        @ApiResponse(code = 200, message = "OK. Backend object is returned. ", response = BackendDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response getMCPServerBackendAPI(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId, @ApiParam(value = "**Backend API ID** consisting of the **UUID** of the Backend API**. ",required=true) @PathParam("backendApiId") String backendApiId) throws APIManagementException{
-        return delegate.getMCPServerBackendAPI(mcpServerId, backendApiId, securityContext);
+    public Response getMCPServerBackend(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId, @ApiParam(value = "**Backend ID** consisting of the **UUID** of the Backend**. ",required=true) @PathParam("backendId") String backendId) throws APIManagementException{
+        return delegate.getMCPServerBackend(mcpServerId, backendId, securityContext);
     }
 
     @GET
-    @Path("/{mcpServerId}/backend-apis")
+    @Path("/{mcpServerId}/backends")
     
     @Produces({ "application/json" })
-    @ApiOperation(value = "Get a list of backend APIs of a MCP Server", notes = "This operation can be used to get a list of backend APIs of a MCP server by the MCP Server UUID. ", response = BackendAPIListDTO.class, authorizations = {
+    @ApiOperation(value = "Get a list of backends of a MCP Server", notes = "This operation can be used to get a list of backends of a MCP server by the MCP Server UUID. ", response = BackendListDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
@@ -467,13 +467,13 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations")
         })
-    }, tags={ "MCP Server Backend APIs",  })
+    }, tags={ "MCP Server Backends",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. A list of BackendAPI objects are returned. ", response = BackendAPIListDTO.class),
+        @ApiResponse(code = 200, message = "OK. A list of Backend objects are returned. ", response = BackendListDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response getMCPServerBackendAPIs(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId) throws APIManagementException{
-        return delegate.getMCPServerBackendAPIs(mcpServerId, securityContext);
+    public Response getMCPServerBackends(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId) throws APIManagementException{
+        return delegate.getMCPServerBackends(mcpServerId, securityContext);
     }
 
     @GET
@@ -655,26 +655,6 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     }
 
     @GET
-    @Path("/{mcpServerId}/swagger")
-    
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Get Swagger Definition of a MCP Server", notes = "This operation can be used to retrieve the swagger definition of a MCP server. ", response = Void.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:mcp_server_view", description = "View MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
-        })
-    }, tags={ "MCP Servers",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Requested swagger document of the MCP server is returned ", response = Void.class),
-        @ApiResponse(code = 304, message = "Not Modified. Empty body because the client has already the latest version of the requested resource (Will be supported in future). ", response = Void.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
-    public Response getMCPServerSwagger(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId,  @ApiParam(value = "Media types acceptable for the response. Default is application/json. " , defaultValue="application/json")@HeaderParam("Accept") String accept,  @ApiParam(value = "Validator for conditional requests; based on the ETag of the formerly retrieved variant of the resource. " )@HeaderParam("If-None-Match") String ifNoneMatch) throws APIManagementException{
-        return delegate.getMCPServerSwagger(mcpServerId, accept, ifNoneMatch, securityContext);
-    }
-
-    @GET
     @Path("/{mcpServerId}/comments/{commentId}/replies")
     
     @Produces({ "application/json" })
@@ -777,25 +757,25 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     }
 
     @PUT
-    @Path("/{mcpServerId}/backend-apis/{backendApiId}")
+    @Path("/{mcpServerId}/backends/{backendId}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Update a backend API of a MCP Server", notes = "This operation can be used to update a backend API of a MCP Server ", response = BackendAPIDTO.class, authorizations = {
+    @ApiOperation(value = "Update a backend of a MCP Server", notes = "This operation can be used to update a backend of a MCP Server ", response = BackendDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations"),
             @AuthorizationScope(scope = "apim:mcp_server_publish", description = "Publish MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_import_export", description = "Import and export MCP Server related operations")
         })
-    }, tags={ "MCP Server Backend APIs",  })
+    }, tags={ "MCP Server Backends",  })
     @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Updated Backend API is returned. ", response = BackendAPIDTO.class),
+        @ApiResponse(code = 200, message = "OK. Updated Backend is returned. ", response = BackendDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response updateMCPServerBackendAPI(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId, @ApiParam(value = "**Backend API ID** consisting of the **UUID** of the Backend API**. ",required=true) @PathParam("backendApiId") String backendApiId, @ApiParam(value = "BackendAPI object with updated details" ) BackendAPIDTO backendAPIDTO) throws APIManagementException{
-        return delegate.updateMCPServerBackendAPI(mcpServerId, backendApiId, backendAPIDTO, securityContext);
+    public Response updateMCPServerBackend(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId, @ApiParam(value = "**Backend ID** consisting of the **UUID** of the Backend**. ",required=true) @PathParam("backendId") String backendId, @ApiParam(value = "Backend object with updated details" ) BackendDTO backendDTO) throws APIManagementException{
+        return delegate.updateMCPServerBackend(mcpServerId, backendId, backendDTO, securityContext);
     }
 
     @PUT
@@ -833,26 +813,6 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
     public Response updateMCPServerDocument(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId, @ApiParam(value = "Document Identifier ",required=true) @PathParam("documentId") String documentId, @ApiParam(value = "Document object that needs to be added" ,required=true) DocumentDTO documentDTO,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch) throws APIManagementException{
         return delegate.updateMCPServerDocument(mcpServerId, documentId, documentDTO, ifMatch, securityContext);
-    }
-
-    @PUT
-    @Path("/{mcpServerId}/swagger")
-    @Consumes({ "multipart/form-data" })
-    @Produces({ "application/json" })
-    @ApiOperation(value = "Update Swagger Definition", notes = "This operation can be used to update the swagger definition of an existing MCP Server. Swagger definition to be  updated is passed as a form data parameter `apiDefinition`. ", response = String.class, authorizations = {
-        @Authorization(value = "OAuth2Security", scopes = {
-            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
-            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
-        })
-    }, tags={ "MCP Servers",  })
-    @ApiResponses(value = { 
-        @ApiResponse(code = 200, message = "OK. Successful response with updated Swagger definition ", response = String.class),
-        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
-        @ApiResponse(code = 403, message = "Forbidden. The request must be conditional but no condition has been specified.", response = ErrorDTO.class),
-        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
-        @ApiResponse(code = 412, message = "Precondition Failed. The request has not been performed because one of the preconditions is not met.", response = ErrorDTO.class) })
-    public Response updateMCPServerSwagger(@ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server. ",required=true) @PathParam("mcpServerId") String mcpServerId,  @ApiParam(value = "Validator for conditional requests; based on ETag. " )@HeaderParam("If-Match") String ifMatch, @Multipart(value = "apiDefinition", required = false)  String apiDefinition, @Multipart(value = "url", required = false)  String url,  @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail) throws APIManagementException{
-        return delegate.updateMCPServerSwagger(mcpServerId, ifMatch, apiDefinition, url, fileInputStream, fileDetail, securityContext);
     }
 
     @POST

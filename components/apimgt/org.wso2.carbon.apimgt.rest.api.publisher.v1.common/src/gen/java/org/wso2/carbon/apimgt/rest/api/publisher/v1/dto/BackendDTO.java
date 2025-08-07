@@ -18,53 +18,53 @@ import javax.validation.Valid;
 
 
 
-public class BackendAPIDTO   {
+public class BackendDTO   {
   
-    private String backendApiId = null;
-    private String backendApiName = null;
+    private String id = null;
+    private String name = null;
     private Object endpointConfig = null;
-    private String apiDefinition = null;
+    private String definition = null;
 
   /**
    * Backend API ID consisting of the UUID of the Endpoint
    **/
-  public BackendAPIDTO backendApiId(String backendApiId) {
-    this.backendApiId = backendApiId;
+  public BackendDTO id(String id) {
+    this.id = id;
     return this;
   }
 
   
   @ApiModelProperty(example = "0c4439fd-9416-3c2e-be6e-1086e0b9aa93", value = "Backend API ID consisting of the UUID of the Endpoint")
-  @JsonProperty("backendApiId")
-  public String getBackendApiId() {
-    return backendApiId;
+  @JsonProperty("id")
+  public String getId() {
+    return id;
   }
-  public void setBackendApiId(String backendApiId) {
-    this.backendApiId = backendApiId;
+  public void setId(String id) {
+    this.id = id;
   }
 
   /**
    * Backend name
    **/
-  public BackendAPIDTO backendApiName(String backendApiName) {
-    this.backendApiName = backendApiName;
+  public BackendDTO name(String name) {
+    this.name = name;
     return this;
   }
 
   
   @ApiModelProperty(value = "Backend name")
-  @JsonProperty("backendApiName")
-  public String getBackendApiName() {
-    return backendApiName;
+  @JsonProperty("name")
+  public String getName() {
+    return name;
   }
-  public void setBackendApiName(String backendApiName) {
-    this.backendApiName = backendApiName;
+  public void setName(String name) {
+    this.name = name;
   }
 
   /**
    * Endpoint configuration of the backend.
    **/
-  public BackendAPIDTO endpointConfig(Object endpointConfig) {
+  public BackendDTO endpointConfig(Object endpointConfig) {
     this.endpointConfig = endpointConfig;
     return this;
   }
@@ -81,21 +81,21 @@ public class BackendAPIDTO   {
   }
 
   /**
-   * OpenAPI specification of the backend API
+   * Definition of the backend
    **/
-  public BackendAPIDTO apiDefinition(String apiDefinition) {
-    this.apiDefinition = apiDefinition;
+  public BackendDTO definition(String definition) {
+    this.definition = definition;
     return this;
   }
 
   
-  @ApiModelProperty(value = "OpenAPI specification of the backend API")
-  @JsonProperty("apiDefinition")
-  public String getApiDefinition() {
-    return apiDefinition;
+  @ApiModelProperty(value = "Definition of the backend")
+  @JsonProperty("definition")
+  public String getDefinition() {
+    return definition;
   }
-  public void setApiDefinition(String apiDefinition) {
-    this.apiDefinition = apiDefinition;
+  public void setDefinition(String definition) {
+    this.definition = definition;
   }
 
 
@@ -107,27 +107,27 @@ public class BackendAPIDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    BackendAPIDTO backendAPI = (BackendAPIDTO) o;
-    return Objects.equals(backendApiId, backendAPI.backendApiId) &&
-        Objects.equals(backendApiName, backendAPI.backendApiName) &&
-        Objects.equals(endpointConfig, backendAPI.endpointConfig) &&
-        Objects.equals(apiDefinition, backendAPI.apiDefinition);
+    BackendDTO backend = (BackendDTO) o;
+    return Objects.equals(id, backend.id) &&
+        Objects.equals(name, backend.name) &&
+        Objects.equals(endpointConfig, backend.endpointConfig) &&
+        Objects.equals(definition, backend.definition);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(backendApiId, backendApiName, endpointConfig, apiDefinition);
+    return Objects.hash(id, name, endpointConfig, definition);
   }
 
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class BackendAPIDTO {\n");
+    sb.append("class BackendDTO {\n");
     
-    sb.append("    backendApiId: ").append(toIndentedString(backendApiId)).append("\n");
-    sb.append("    backendApiName: ").append(toIndentedString(backendApiName)).append("\n");
+    sb.append("    id: ").append(toIndentedString(id)).append("\n");
+    sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
-    sb.append("    apiDefinition: ").append(toIndentedString(apiDefinition)).append("\n");
+    sb.append("    definition: ").append(toIndentedString(definition)).append("\n");
     sb.append("}");
     return sb.toString();
   }

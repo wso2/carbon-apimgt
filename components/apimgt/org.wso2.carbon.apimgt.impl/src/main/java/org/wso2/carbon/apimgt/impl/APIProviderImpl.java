@@ -70,7 +70,7 @@ import org.wso2.carbon.apimgt.api.model.APISearchResult;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
-import org.wso2.carbon.apimgt.api.model.BackendAPI;
+import org.wso2.carbon.apimgt.api.model.Backend;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
@@ -622,8 +622,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         addLocalScopes(api.getId().getApiName(), api.getUriTemplates(), api.getOrganization());
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
-        if (api.getBackendAPIs() != null && !api.getBackendAPIs().isEmpty()) {
-            addBackendAPIs(api.getUuid(), api.getBackendAPIs(), api.getOrganization());
+        if (api.getBackends() != null && !api.getBackends().isEmpty()) {
+            addBackend(api.getUuid(), api.getBackends(), api.getOrganization());
         }
         addURITemplates(apiId, api, tenantId);
         addAPIPolicies(api, tenantDomain);
@@ -661,14 +661,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Adds backend APIs to the API.
      *
      * @param apiUuid      UUID of the API
-     * @param backendAPIS  List of BackendAPI objects to be added
+     * @param backends     List of Backend objects to be added
      * @param organization Organization identifier
      * @throws APIManagementException if an error occurs while adding the backend APIs
      */
-    private void addBackendAPIs(String apiUuid, List<BackendAPI> backendAPIS, String organization)
-            throws APIManagementException {
+    private void addBackend(String apiUuid, List<Backend> backends, String organization) throws APIManagementException {
 
-        apiMgtDAO.addBackendAPIs(apiUuid, backendAPIS, organization);
+        apiMgtDAO.addBackends(apiUuid, backends, organization);
     }
 
     /**
@@ -8389,7 +8388,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
 
     @Override
-    public BackendAPI getMCPServerEndpoint(String uuid, String backendId, String organization)
+    public Backend getMCPServerBackend(String uuid, String backendId, String organization)
             throws APIManagementException {
 
         String currentApiUuid;
@@ -8400,15 +8399,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             currentApiUuid = uuid;
         }
         if (apiRevision != null) {
-            return apiMgtDAO.getBackendAPIRevision(currentApiUuid, apiRevision.getRevisionUUID(), backendId,
-                    organization);
+            return apiMgtDAO.getBackendRevision(currentApiUuid, apiRevision.getRevisionUUID(), backendId, organization);
         } else {
-            return apiMgtDAO.getBackendAPI(currentApiUuid, backendId, organization);
+            return apiMgtDAO.getBackend(currentApiUuid, backendId, organization);
         }
     }
 
     @Override
-    public List<BackendAPI> getMCPServerBackendAPIs(String uuid, String organization) throws APIManagementException {
+    public List<Backend> getMCPServerBackends(String uuid, String organization) throws APIManagementException {
 
         String currentApiUuid;
         APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
@@ -8418,17 +8416,17 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             currentApiUuid = uuid;
         }
         if (apiRevision != null) {
-            return apiMgtDAO.getBackendAPIRevisions(currentApiUuid, apiRevision.getRevisionUUID(), organization);
+            return apiMgtDAO.getBackendRevisions(currentApiUuid, apiRevision.getRevisionUUID(), organization);
         } else {
-            return apiMgtDAO.getBackendAPIs(currentApiUuid, organization);
+            return apiMgtDAO.getBackends(currentApiUuid, organization);
         }
     }
 
     @Override
-    public void updateMCPServerBackendAPI(String apiUuid, BackendAPI backendAPI, String organization)
+    public void updateMCPServerBackend(String apiUuid, Backend backend, String organization)
             throws APIManagementException {
 
-        apiMgtDAO.updateBackendAPI(apiUuid, backendAPI, organization);
+        apiMgtDAO.updateBackend(apiUuid, backend, organization);
     }
 
     @Override

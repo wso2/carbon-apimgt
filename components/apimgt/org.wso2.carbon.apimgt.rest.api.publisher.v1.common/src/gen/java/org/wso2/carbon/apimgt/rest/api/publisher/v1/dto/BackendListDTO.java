@@ -6,7 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.ArrayList;
 import java.util.List;
-import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendAPIDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendDTO;
 import javax.validation.constraints.*;
 
 
@@ -21,15 +21,15 @@ import javax.validation.Valid;
 
 
 
-public class BackendAPIListDTO   {
+public class BackendListDTO   {
   
     private Integer count = null;
-    private List<BackendAPIDTO> list = new ArrayList<BackendAPIDTO>();
+    private List<BackendDTO> list = new ArrayList<BackendDTO>();
 
   /**
    * Number of backends returned. 
    **/
-  public BackendAPIListDTO count(Integer count) {
+  public BackendListDTO count(Integer count) {
     this.count = count;
     return this;
   }
@@ -46,7 +46,7 @@ public class BackendAPIListDTO   {
 
   /**
    **/
-  public BackendAPIListDTO list(List<BackendAPIDTO> list) {
+  public BackendListDTO list(List<BackendDTO> list) {
     this.list = list;
     return this;
   }
@@ -55,10 +55,10 @@ public class BackendAPIListDTO   {
   @ApiModelProperty(value = "")
       @Valid
   @JsonProperty("list")
-  public List<BackendAPIDTO> getList() {
+  public List<BackendDTO> getList() {
     return list;
   }
-  public void setList(List<BackendAPIDTO> list) {
+  public void setList(List<BackendDTO> list) {
     this.list = list;
   }
 
@@ -71,9 +71,9 @@ public class BackendAPIListDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    BackendAPIListDTO backendAPIList = (BackendAPIListDTO) o;
-    return Objects.equals(count, backendAPIList.count) &&
-        Objects.equals(list, backendAPIList.list);
+    BackendListDTO backendList = (BackendListDTO) o;
+    return Objects.equals(count, backendList.count) &&
+        Objects.equals(list, backendList.list);
   }
 
   @Override
@@ -84,7 +84,7 @@ public class BackendAPIListDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class BackendAPIListDTO {\n");
+    sb.append("class BackendListDTO {\n");
     
     sb.append("    count: ").append(toIndentedString(count)).append("\n");
     sb.append("    list: ").append(toIndentedString(list)).append("\n");

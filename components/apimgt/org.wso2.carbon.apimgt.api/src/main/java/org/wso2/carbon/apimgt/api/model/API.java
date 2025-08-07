@@ -244,7 +244,7 @@ public class API implements Serializable {
   
     private String primaryProductionEndpointId;
 
-    private List<BackendAPI> backendAPIS = new ArrayList<>();
+    private List<Backend> backends = new ArrayList<>();
 
     public AIConfiguration getAiConfiguration() {
 
@@ -1622,13 +1622,13 @@ public class API implements Serializable {
         this.primarySandboxEndpointId = primarySandboxEndpointId;
     }
 
-    public List<BackendAPI> getBackendAPIs() {
+    public List<Backend> getBackends() {
 
-        return backendAPIS;
+        return backends;
     }
 
-    public void setBackendAPIs(List<BackendAPI> backendAPIS) {
+    public void setBackends(List<Backend> backends) {
 
-        this.backendAPIS = backendAPIS;
+        this.backends = backends;
     }
 }
