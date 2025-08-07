@@ -86,39 +86,40 @@ public class MCPUtils {
      * @param matchedMcpApi     matched API in the gateway
      * @param requestObject     MCP request payload
      * @param method            MCP JSON RPC method
-     * @param additionalHeaders additional headers to send
      * @return the response payload as a String
      */
     public static McpResponseDto processInternalRequest(MessageContext messageContext, API matchedMcpApi,
-            McpRequest requestObject, String method, Map<String, String> additionalHeaders) {
+            McpRequest requestObject, String method) {
         try {
             Object id = -1;
             if (!method.contains("notifications/")) {
                 id = requestObject.getId();
             }
-            if (APIConstants.MCP.METHOD_INITIALIZE.equals(method)) {
-                validateInitializeRequest(id, requestObject);
-                return handleMcpInitialize(id, matchedMcpApi);
-            } else if (APIConstants.MCP.METHOD_TOOL_LIST.equals(method)) {
-                return handleMcpToolList(id, matchedMcpApi, false);
-            } else if (APIConstants.MCP.METHOD_TOOL_CALL.equals(method)) {
-                validateToolsCallRequest(requestObject, matchedMcpApi);
-                return handleMcpToolsCall(messageContext, id, matchedMcpApi, requestObject, additionalHeaders);
-            } else if (APIConstants.MCP.METHOD_PING.equals(method)) {
-                return handleMcpPing(id);
-            } else if (APIConstants.MCP.METHOD_RESOURCES_LIST.equals(method)) {
 
-            } else if (APIConstants.MCP.METHOD_RESOURCE_TEMPLATE_LIST.equals(method)) {
-
-            } else if (APIConstants.MCP.METHOD_PROMPTS_LIST.equals(method)) {
-
-            } else if (APIConstants.MCP.METHOD_NOTIFICATION_INITIALIZED.equals(method)) {
-
-            } else {
-                throw new McpException(APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_CODE,
-                        APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_MESSAGE, "Method not found");
+            switch (method) {
+                case APIConstants.MCP.METHOD_INITIALIZE:
+                    validateInitializeRequest(id, requestObject);
+                    return handleMcpInitialize(id, matchedMcpApi);
+                case APIConstants.MCP.METHOD_TOOL_LIST:
+                    return handleMcpToolList(id, matchedMcpApi, false);
+                case APIConstants.MCP.METHOD_TOOL_CALL:
+                    validateToolsCallRequest(requestObject, matchedMcpApi);
+                    return handleMcpToolsCall(messageContext, id, matchedMcpApi, requestObject);
+                case APIConstants.MCP.METHOD_PING:
+                    return handleMcpPing(id);
+                case APIConstants.MCP.METHOD_RESOURCES_LIST:
+                    return new McpResponseDto(MCPPayloadGenerator.generateResourceListResponse(id), 200, null);
+                case APIConstants.MCP.METHOD_RESOURCE_TEMPLATE_LIST:
+                    return new McpResponseDto(MCPPayloadGenerator.generateResourceTemplateListResponse(id), 200, null);
+                case APIConstants.MCP.METHOD_PROMPTS_LIST:
+                    return new McpResponseDto(MCPPayloadGenerator.generatePromptListResponse(id), 200, null);
+                case APIConstants.MCP.METHOD_NOTIFICATION_INITIALIZED:
+                    // We don't need to send a reply when it's a notification
+                    return null;
+                default:
+                    throw new McpException(APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_CODE,
+                            APIConstants.MCP.RpcConstants.METHOD_NOT_FOUND_MESSAGE, "Method not found");
             }
-            return null; //todo: remove
         } catch (McpException e) {
             return new McpResponseDto(e.toJsonRpcErrorPayload(), 200, null);
         }
@@ -186,7 +187,7 @@ public class MCPUtils {
     }
 
     private static McpResponseDto handleMcpToolsCall(MessageContext messageContext, Object id, API matchedApi,
-        McpRequest mcpRequest, Map<String, String> additionalHeaders)
+        McpRequest mcpRequest)
             throws McpException {
         Params params = mcpRequest.getParams();
         if (params != null) {
@@ -229,8 +230,8 @@ public class MCPUtils {
                 String schemaDefinition = extendedOperation.getSchemaDefinition();
                 SchemaMapping schemaMapping = processMcpSchema(schemaDefinition);
 
-                //process endpoint URL including query and path params
-                processEndpoint(messageContext, schemaMapping, mcpRequest, backendOperation);
+                //process resource path including query and path params
+                processResource(messageContext, schemaMapping, mcpRequest, backendOperation);
 
                 //process headers
                 processHeaders(messageContext, schemaMapping, mcpRequest);
@@ -300,8 +301,9 @@ public class MCPUtils {
         return schemaMapping;
     }
 
-    private static void processEndpoint(MessageContext messageContext, SchemaMapping schemaMapping, McpRequest
+    private static void processResource(MessageContext messageContext, SchemaMapping schemaMapping, McpRequest
           mcpRequest, BackendOperation backendOperation) throws McpException {
+        //remove fully qualified path
         org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs httpMethod = backendOperation.getVerb();
         String target = backendOperation.getTarget();
 

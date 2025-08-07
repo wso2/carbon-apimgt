@@ -18,26 +18,19 @@
 
 package org.wso2.carbon.apimgt.gateway.mcp.request;
 
-
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import org.apache.synapse.MessageContext;
-import org.wso2.carbon.apimgt.gateway.exception.McpException;
 import org.wso2.carbon.apimgt.gateway.mcp.response.McpResponseDto;
 import org.wso2.carbon.apimgt.gateway.utils.MCPUtils;
-import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
-
-import java.util.Map;
 
 public class McpRequestProcessor {
 
-    public static McpResponseDto processRequest(MessageContext messageContext, API matchedMcpApi, McpRequest requestBody,
-                                                Map<String, String> additionalHeaders) {
+    public static McpResponseDto processRequest(MessageContext messageContext, API matchedMcpApi,
+                                                McpRequest requestBody) {
 
         // Todo: check subtype, implement MCP Server option
         String method = requestBody.getMethod();
-        return MCPUtils.processInternalRequest(messageContext, matchedMcpApi, requestBody, method, additionalHeaders);
+        return MCPUtils.processInternalRequest(messageContext, matchedMcpApi, requestBody, method);
     }
 
 }

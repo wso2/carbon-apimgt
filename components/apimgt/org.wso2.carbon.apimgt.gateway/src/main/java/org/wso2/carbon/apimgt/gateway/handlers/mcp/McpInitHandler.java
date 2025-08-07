@@ -102,7 +102,6 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                 method = request.getMethod();
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_METHOD, method);
                 messageContext.setProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY, request);
-                messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, APIConstants.API_TYPE_MCP);
 
                 if (StringUtils.equals(method, APIConstants.MCP.METHOD_TOOL_CALL)) {
                     Params params = request.getParams();
@@ -127,7 +126,7 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                                 backendOperation = existingAPIOperationMapping.getBackendOperation();
                             }
                             messageContext.setProperty("MCP_HTTP_METHOD", backendOperation.getVerb());
-                            messageContext.setProperty("MCP_API_ELECTED_RESOURCE", extendedOperation.getUrlPattern());
+                            messageContext.setProperty("MCP_API_ELECTED_RESOURCE", backendOperation.getTarget());
                         }
                     }
                 }
