@@ -54,6 +54,14 @@ public class DataHolder {
 
     private boolean isAllGatewayPoliciesDeployed = false;
     private boolean tenantsProvisioned = false;
+    private static GatewayRegistrationResponse gatewayRegistrationResponse = GatewayRegistrationResponse.NOT_RESPONDED;
+    private String gatewayID;
+        public enum GatewayRegistrationResponse {
+        NOT_RESPONDED,
+        ACKNOWLEDGED,
+        REGISTERED
+    }
+
     private DataHolder() {
     }
 
@@ -392,6 +400,32 @@ public class DataHolder {
     public synchronized void releaseCache(String apiKey) {
 
         apiSuspendedEndpoints.remove(apiKey);
+    }
+
+    public String getGatewayID() {
+        return gatewayID;
+    }
+
+    public void setGatewayID(String gatewayID) {
+        this.gatewayID = gatewayID;
+    }
+
+    public GatewayRegistrationResponse getGatewayRegistrationResponse() {
+        return gatewayRegistrationResponse;
+    }
+
+    /**
+     * Checks if the gateway is registered or acknowledged.
+     *
+     * @return true if the gateway registration response is REGISTERED or ACKNOWLEDGED, false otherwise
+     */
+    public boolean isGatewayRegistered() {
+        return gatewayRegistrationResponse == GatewayRegistrationResponse.REGISTERED || 
+               gatewayRegistrationResponse == GatewayRegistrationResponse.ACKNOWLEDGED;
+    }
+
+    public static void setGatewayRegistrationResponse(GatewayRegistrationResponse gatewayRegistrationResponse) {
+        DataHolder.gatewayRegistrationResponse = gatewayRegistrationResponse;
     }
 
 }

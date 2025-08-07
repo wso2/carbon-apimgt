@@ -35,8 +35,10 @@ import org.wso2.carbon.apimgt.gateway.EndpointCertificateDeployer;
 import org.wso2.carbon.apimgt.gateway.GatewayPolicyDeployer;
 import org.wso2.carbon.apimgt.gateway.GoogleAnalyticsConfigDeployer;
 import org.wso2.carbon.apimgt.gateway.InMemoryAPIDeployer;
+import org.wso2.carbon.apimgt.gateway.notifiers.GatewayNotifier;
 import org.wso2.carbon.apimgt.gateway.internal.DataHolder;
 import org.wso2.carbon.apimgt.gateway.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.gateway.notifiers.DeploymentStatusNotifier;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
 import org.wso2.carbon.apimgt.gateway.utils.TenantUtils;
 import org.wso2.carbon.apimgt.impl.APIConstants;
@@ -75,6 +77,8 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties = ServiceReferenceHolder
             .getInstance().getAPIManagerConfiguration().getGatewayArtifactSynchronizerProperties();
     ExecutorService executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "DeploymentThread"));
+    private static GatewayNotifier gatewayNotifier = GatewayNotifier.getInstance();
+    private static DeploymentStatusNotifier deploymentStatusNotifier = DeploymentStatusNotifier.getInstance();
 
     public GatewayJMSMessageListener() {
     }
@@ -648,6 +652,8 @@ public class GatewayJMSMessageListener implements MessageListener, JMSConnection
     @Override
     public void onReconnect() {
         if (refreshOnReconnect) {
+            log.info("Re-register gateway on reconnect.");
+            gatewayNotifier.registerGateway();
             log.info("Refreshing gateway data stores and deployments.");
             new Thread(() -> {
                 synchronized (this) {
