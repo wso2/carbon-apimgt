@@ -25,11 +25,13 @@ import org.wso2.carbon.apimgt.impl.APIConstants.MCP;
 /**
  * This class is used to represent the response for the MCP.
  */
-public class McpResponse {
+public class McpResponse <T> {
     @SerializedName("jsonrpc")
     private final String jsonRpcVersion = MCP.RpcConstants.JSON_RPC_VERSION;
     @SerializedName("id")
     private Object id;
+    @SerializedName("result")
+    private T Result;
 
     public McpResponse(Object id) {
         this.id = id;
@@ -45,5 +47,13 @@ public class McpResponse {
 
     public void setId(Object id) {
         this.id = id;
+    }
+
+    public T getResult() {
+        return Result;
+    }
+
+    public void setResult(T result) {
+        Result = result;
     }
 }

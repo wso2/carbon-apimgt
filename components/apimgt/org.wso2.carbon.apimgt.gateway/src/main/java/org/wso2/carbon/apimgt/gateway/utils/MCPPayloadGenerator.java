@@ -22,14 +22,18 @@ package org.wso2.carbon.apimgt.gateway.utils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import org.wso2.carbon.apimgt.api.model.mcp.MCPResponse;
 import org.wso2.carbon.apimgt.api.model.subscription.URLMapping;
+import org.wso2.carbon.apimgt.gateway.mcp.response.InitializeResult;
 import org.wso2.carbon.apimgt.gateway.mcp.response.McpError;
 import org.wso2.carbon.apimgt.gateway.mcp.response.McpErrorResponse;
+import org.wso2.carbon.apimgt.gateway.mcp.response.McpResponse;
+import org.wso2.carbon.apimgt.gateway.mcp.response.ToolCallResult;
+import org.wso2.carbon.apimgt.gateway.mcp.response.ToolListResult;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -52,29 +56,40 @@ public class MCPPayloadGenerator {
                                                String serverDescription, boolean toolListChangeNotified) {
         // Create the response object as specified in
         // https://modelcontextprotocol.io/specification/2025-03-26/basic/lifecycle#initialization
-        MCPResponse response = new MCPResponse(id);
-        JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
-        JsonObject result = new JsonObject();
-        result.addProperty(APIConstants.MCP.PROTOCOL_VERSION_KEY, APIConstants.MCP.PROTOCOL_VERSION_2025_MARCH);
+        McpResponse<InitializeResult> initializeResponse = new McpResponse<>(id);
+        InitializeResult result = new InitializeResult();
+        result.setProtocolVersion(APIConstants.MCP.PROTOCOL_VERSION_2025_JUNE);
 
-        JsonObject capabilities = new JsonObject();
-        JsonObject toolCapabilities = new JsonObject();
-        toolCapabilities.addProperty("listChanged", toolListChangeNotified);
-        capabilities.add("tools", toolCapabilities);
-        // Add empty objects for unsupported capabilities
-        capabilities.add("resources", new JsonObject());
-        capabilities.add("prompts", new JsonObject());
-        capabilities.add("logging", new JsonObject());
-        result.add("capabilities", capabilities);
+        InitializeResult.ServerInfo serverInfo = new InitializeResult.ServerInfo();
+        serverInfo.setName(serverName);
+        serverInfo.setVersion(serverVersion);
+        serverInfo.setDescription(serverDescription);
+        result.setServerInfo(serverInfo);
 
-        JsonObject serverInfo = new JsonObject();
-        serverInfo.addProperty("name", serverName);
-        serverInfo.addProperty("version", serverVersion);
-        serverInfo.addProperty("description", serverDescription);
-        result.add("serverInfo", serverInfo);
+        InitializeResult.Capabilities capabilities = getCapabilities(toolListChangeNotified);
+        
+        result.setCapabilities(capabilities);
+        initializeResponse.setResult(result);
 
-        responseObject.add(APIConstants.MCP.RESULT_KEY, result);
-        return gson.toJson(responseObject);
+        return gson.toJson(initializeResponse);
+    }
+
+    private static InitializeResult.Capabilities getCapabilities(boolean toolListChangeNotified) {
+        InitializeResult.Capabilities capabilities = new InitializeResult.Capabilities();
+        InitializeResult.Capabilities.Tools tools = new InitializeResult.Capabilities.Tools();
+        tools.setListChanged(toolListChangeNotified);
+        capabilities.setTools(tools);
+        capabilities.setLogging(new HashMap<>());
+
+        InitializeResult.Capabilities.Resources resources = new InitializeResult.Capabilities.Resources();
+        resources.setSubscribe(false); // Resources are not supported at the moment
+        resources.setListChanged(false); // Resources are not supported at the moment
+        capabilities.setResources(resources);
+
+        InitializeResult.Capabilities.Prompts prompts = new InitializeResult.Capabilities.Prompts();
+        prompts.setListChanged(false); // Prompts are not supported at the moment
+        capabilities.setPrompts(prompts);
+        return capabilities;
     }
 
     /**
@@ -94,92 +109,93 @@ public class MCPPayloadGenerator {
         return data;
     }
 
-    public static String generateToolListPayload(Object id, List<URLMapping> extendedOperations, boolean isThridParty) {
-        MCPResponse response = new MCPResponse(id);
-        JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
-        JsonObject result = new JsonObject();
-        JsonArray toolsArray = new JsonArray();
-        if (!isThridParty) {
-            for (URLMapping extendedOperation : extendedOperations) {
-                JsonObject toolObject = new JsonObject();
-                toolObject.addProperty(APIConstants.MCP.TOOL_NAME_KEY, extendedOperation.getUrlPattern());
-                toolObject.addProperty(APIConstants.MCP.TOOL_DESC_KEY, extendedOperation.getDescription());
-                String schema = extendedOperation.getSchemaDefinition();
-                if (schema != null) {
-                    JsonObject schemaObject = gson.fromJson(schema, JsonObject.class);
-                    toolObject.add("inputSchema", sanitizeInputSchema(schemaObject));
-                }
-                toolsArray.add(toolObject);
-            }
-            result.add("tools", toolsArray);
-            responseObject.add(APIConstants.MCP.RESULT_KEY, result);
-        }
+    //write a method to generate the tool list payload
+    public static String generateToolListPayload(Object id, List<URLMapping> extendedOperations, boolean isThirdParty) {
+        McpResponse<ToolListResult> toolListResponse = new McpResponse<>(id);
+        ToolListResult toolListResult = new ToolListResult();
+        List<ToolListResult.ToolInfo> toolInfoList = new ArrayList<>();
 
-        return gson.toJson(responseObject);
+        for (URLMapping extendedOperation : extendedOperations) {
+            ToolListResult.ToolInfo tool = new ToolListResult.ToolInfo();
+            tool.setName(extendedOperation.getUrlPattern());
+            tool.setDescription(extendedOperation.getDescription());
+            String schema = extendedOperation.getSchemaDefinition();
+            if (schema != null) {
+                ToolListResult.JsonSchema schemaObject = gson.fromJson(schema, ToolListResult.JsonSchema.class);
+                if (!isThirdParty) {
+                    tool.setInputSchema(sanitizeInputSchema(schemaObject));
+                } else {
+                    // For third-party tools, we do not sanitize the input schema
+                    tool.setInputSchema(schemaObject);
+                }
+
+            }
+            toolInfoList.add(tool);
+        }
+        toolListResult.setTools(toolInfoList);
+        toolListResponse.setResult(toolListResult);
+        return gson.toJson(toolListResponse);
     }
 
-    private static JsonObject sanitizeInputSchema(JsonObject inputObject) {
-        if (inputObject == null || inputObject.isEmpty()) {
-            JsonObject emptyObject = new JsonObject();
-            emptyObject.addProperty("type", "object");
-            emptyObject.add("properties", new JsonObject());
-            return emptyObject;
+    private static ToolListResult.JsonSchema sanitizeInputSchema(ToolListResult.JsonSchema inputSchema) {
+        if (inputSchema == null) {
+            // Return an empty object schema if the input schema is null
+            ToolListResult.JsonSchema emptySchema = new ToolListResult.JsonSchema();
+            emptySchema.setType("object");
+            emptySchema.setProperties(new HashMap<>());
+            return emptySchema;
         }
-        inputObject.remove("contentType");
-
-        JsonArray requiredArray = inputObject.getAsJsonArray(APIConstants.MCP.REQUIRED_KEY);
-        JsonArray sanitizedArray = new JsonArray();
+        inputSchema.removeProperty("contentType");
 
         // remove the header, query, and path prefixes from the required fields
-        if (requiredArray != null) {
-            for (JsonElement element : requiredArray) {
-                String requiredField = element.getAsString();
-                String sanitizedRequiredField;
-                if (!"requestBody".equalsIgnoreCase(requiredField)) {
-                    sanitizedRequiredField = requiredField.split("_", 2)[1];
+        List<String> requiredProperties = inputSchema.getRequired();
+        List<String> sanitizedRequiredProperties = new ArrayList<>();
+        if (requiredProperties != null && !requiredProperties.isEmpty()) {
+            for (String requiredProperty : requiredProperties) {
+                String sanitizedRequiredProperty;
+                if (!"requestBody".equalsIgnoreCase(requiredProperty)) {
+                    sanitizedRequiredProperty = requiredProperty.split("_", 2)[1];
                 } else {
-                    sanitizedRequiredField = requiredField;
+                    sanitizedRequiredProperty = requiredProperty;
                 }
-                sanitizedArray.add(sanitizedRequiredField);
+                sanitizedRequiredProperties.add(sanitizedRequiredProperty);
             }
         }
-        inputObject.add(APIConstants.MCP.REQUIRED_KEY, sanitizedArray);
+        inputSchema.setRequired(sanitizedRequiredProperties);
 
         // remove the header, query, and path prefixes from the properties keys
-        JsonObject propertiesObject = inputObject.getAsJsonObject(APIConstants.MCP.PROPERTIES_KEY);
-        JsonObject sanitizedPropertiesObject = new JsonObject();
-        if (propertiesObject != null) {
-            for (Map.Entry<String, JsonElement> entry : propertiesObject.entrySet()) {
+        Map<String, Object> properties = inputSchema.getProperties();
+        Map<String, Object> sanitizedProperties = new HashMap<>();
+        if (properties != null && !properties.isEmpty()) {
+            for (Map.Entry<String, Object> entry : properties.entrySet()) {
                 String key = entry.getKey();
                 if ("requestBody".equalsIgnoreCase(key)) {
-                    sanitizedPropertiesObject.add("requestBody", entry.getValue());
+                    sanitizedProperties.put("requestBody", entry.getValue());
                     continue;
                 }
                 String sanitizedKey = key.split("_", 2)[1];
-                sanitizedPropertiesObject.add(sanitizedKey, entry.getValue().getAsJsonObject());
+                Object property = entry.getValue();
+                sanitizedProperties.put(sanitizedKey, property);
             }
         }
-        inputObject.add(APIConstants.MCP.PROPERTIES_KEY, sanitizedPropertiesObject);
-        return inputObject;
+        inputSchema.setProperties(sanitizedProperties);
+        return inputSchema;
     }
 
     public static String generateMCPResponsePayload(Object id, boolean isError, String body) {
-        MCPResponse response = new MCPResponse(id);
-        JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
+        McpResponse<ToolCallResult> mcpResponse = new McpResponse<>(id);
+        ToolCallResult toolCallResult = new ToolCallResult();
 
-        JsonObject result = new JsonObject();
-        result.addProperty("isError", isError);
+        toolCallResult.setError(isError);
+        List<ToolCallResult.ContentItem> contentItems = new ArrayList<>();
+        ToolCallResult.ContentItem contentItem = new ToolCallResult.ContentItem();
+        contentItem.setType("text");
+        contentItem.setText(body);
+        contentItems.add(contentItem);
+        toolCallResult.setContent(contentItems);
+        mcpResponse.setResult(toolCallResult);
 
-        JsonArray content = new JsonArray();
-        JsonObject contentObject = new JsonObject();
-        contentObject.addProperty("type", "text");
-        contentObject.addProperty("text", body);
-
-        content.add(contentObject);
-        result.add("content", content);
-        responseObject.add(APIConstants.MCP.RESULT_KEY, result);
-
-        return gson.toJson(responseObject);
+        return gson.toJson(mcpResponse);
     }
 
     public static String generatePingResponse(Object id) {
@@ -202,11 +218,8 @@ public class MCPPayloadGenerator {
     }
 
     private static String generateEmptyResult(Object id) {
-        MCPResponse response = new MCPResponse(id);
-        JsonObject responseObject = gson.fromJson(gson.toJson(response), JsonObject.class);
-        JsonObject result = new JsonObject();
-        responseObject.add(APIConstants.MCP.RESULT_KEY, result);
-
-        return gson.toJson(responseObject);
+        McpResponse<JsonObject> response = new McpResponse<>(id);
+        response.setResult(new JsonObject());
+        return gson.toJson(response);
     }
 }
