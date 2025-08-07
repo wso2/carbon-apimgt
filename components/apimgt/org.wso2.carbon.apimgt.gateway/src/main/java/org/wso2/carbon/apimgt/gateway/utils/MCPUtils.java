@@ -359,7 +359,13 @@ public class MCPUtils {
             String resourcePathString = resourcePath.toString();
 
             for (String pathParam : pathParams) {
-                String paramValue = (String) argumentObj.get(pathParam);
+                Object paramValueObj = argumentObj.get(pathParam);
+                if (paramValueObj == null) {
+                    throw new McpException(APIConstants.MCP.RpcConstants.INVALID_PARAMS_CODE,
+                            APIConstants.MCP.RpcConstants.INVALID_PARAMS_MESSAGE,
+                            "Required path param " + pathParam + " is not defined");
+                }
+                String paramValue = paramValueObj.toString();
                 resourcePathString = resourcePathString.replace("{" + pathParam + "}", paramValue);
             }
             resourcePath.setLength(0);
