@@ -627,7 +627,7 @@ public class ThrottleHandler extends AbstractHandler implements ManagedLifecycle
         String apiType = (String) messageContext.getProperty(APIMgtGatewayConstants.API_TYPE);
         if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
             String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
-            if (StringUtils.isNotEmpty(mcpMethod) && !APIConstants.MCP.METHOD_TOOL_CALL.equalsIgnoreCase(mcpMethod)) {
+            if (!APIConstants.MCP.METHOD_TOOL_CALL.equalsIgnoreCase(mcpMethod)) {
                 if (log.isDebugEnabled()) {
                     log.debug("Skipping MCP call request throttling.");
                 }

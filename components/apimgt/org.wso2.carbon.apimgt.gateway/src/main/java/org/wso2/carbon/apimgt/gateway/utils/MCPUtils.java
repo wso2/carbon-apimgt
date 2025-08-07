@@ -26,6 +26,8 @@ import com.google.gson.JsonParser;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -50,6 +52,7 @@ import java.util.Map;
 import java.util.stream.StreamSupport;
 
 public class MCPUtils {
+    private static final Log log = LogFactory.getLog(MCPUtils.class);
 
     public static boolean validateRequest(McpRequest request) throws McpException {
         String jsonRpcVersion = request.getJsonRpcVersion();
@@ -277,6 +280,13 @@ public class MCPUtils {
             }
 
             String[] meta = key.split("_", 2);
+            if (meta.length < 2) {
+                // If the key does not follow the expected format, skip it
+                if (log.isDebugEnabled()) {
+                    log.debug("Skipping key: " + key + " as it does not follow the expected format");
+                }
+                continue;
+            }
             String paramType = meta[0];
             String paramName = meta[1];
 
@@ -320,17 +330,24 @@ public class MCPUtils {
 
 
                 if (argumentObj.get(paramName) != null) {
-                    String paramValue = (String) argumentObj.get(paramName);
-                    if (queryString.length() == 0) {
-                        queryString.append(paramName).append("=").append(paramValue);
+                    Object paramValueObj = argumentObj.get(paramName);
+                    String paramValue = paramValueObj != null ? paramValueObj.toString() : "";
+                    if (!StringUtils.isEmpty(paramValue)) {
+                        if (queryString.length() == 0) {
+                            queryString.append(paramName).append("=").append(paramValue);
+                        } else {
+                            queryString.append("&").append(paramName).append("=").append(paramValue);
+                        }
                     } else {
-                        queryString.append("&").append(paramName).append("=").append(paramValue);
+                        if (log.isDebugEnabled()) {
+                            log.debug("Query param " + paramName + " is defined but has no value, hence skipped");
+                        }
                     }
                 } else {
                     if (isParamRequired) {
                         throw new McpException(APIConstants.MCP.RpcConstants.INVALID_PARAMS_CODE,
                                 APIConstants.MCP.RpcConstants.INVALID_PARAMS_MESSAGE, "Required param " + paramName +
-                                "is not defined");
+                                " is not defined");
                     }
                 }
             }
@@ -384,7 +401,7 @@ public class MCPUtils {
     }
 
     public static void processRequestBody(MessageContext messageContext, SchemaMapping schemaMapping,
-                                          McpRequest mcpRequest) {
+                                          McpRequest mcpRequest) throws McpException {
         String contentType = schemaMapping.getContentType();
 
         Params paramsObj = mcpRequest.getParams();
@@ -407,10 +424,14 @@ public class MCPUtils {
                         axis2MessageContext.setProperty(Constants.Configuration.CONTENT_TYPE,
                                 APIConstants.APPLICATION_JSON_MEDIA_TYPE);
                     } catch (AxisFault e) {
-                        //todo: handle fault
+                        throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE,
+                                APIConstants.MCP.RpcConstants.INTERNAL_ERROR_MESSAGE,
+                                "Failed to process JSON request body: " + e.getMessage());
                     }
                 } else if (APIConstants.APPLICATION_XML_MEDIA_TYPE.equals(contentType)) {
-                    //todo: handle xml payloads
+                    throw new McpException(APIConstants.MCP.RpcConstants.INTERNAL_ERROR_CODE,
+                            APIConstants.MCP.RpcConstants.INTERNAL_ERROR_MESSAGE,
+                            "XML content type is not yet supported");
                 }
             }
         }

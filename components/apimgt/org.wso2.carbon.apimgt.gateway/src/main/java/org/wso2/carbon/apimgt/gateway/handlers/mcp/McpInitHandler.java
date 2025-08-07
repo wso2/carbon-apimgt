@@ -60,8 +60,16 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
     @Override
     public boolean handleRequest(MessageContext messageContext) {
         try {
-            boolean isNoAuthMCPRequest = isNoAuthMCPRequest(buildMCPRequest(messageContext));
-            messageContext.setProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST, isNoAuthMCPRequest);
+            String path = (String) messageContext.getProperty(APIMgtGatewayConstants.API_ELECTED_RESOURCE);
+            String httpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.HTTP_METHOD);
+
+            if (StringUtils.startsWith(path, APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE) &&
+                    StringUtils.equals(APIConstants.HTTP_GET, httpMethod)) {
+                messageContext.setProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST, true);
+            } else { //currently the only other mcp resource available is /mcp POST, it must have a jsonrpc payload
+                boolean isNoAuthMCPRequest = isNoAuthMCPRequest(buildMCPRequest(messageContext));
+                messageContext.setProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST, isNoAuthMCPRequest);
+            }
         } catch (McpException e) {
             log.error("Error in MCP handleRequest flow", e);
         }
@@ -118,13 +126,13 @@ public class McpInitHandler extends AbstractHandler implements ManagedLifecycle 
                         BackendOperationMapping backendAPIOperationMapping = extendedOperation.getBackendOperationMapping();
                         if (backendAPIOperationMapping != null) {
                             backendOperation = backendAPIOperationMapping.getBackendOperation();
-                            messageContext.setProperty("MCP_HTTP_METHOD", backendOperation.getVerb());
-                            messageContext.setProperty("MCP_API_ELECTED_RESOURCE", backendOperation.getTarget());
                         } else { //existing_api
                             APIOperationMapping existingAPIOperationMapping = extendedOperation.getApiOperationMapping();
                             if (existingAPIOperationMapping != null) {
                                 backendOperation = existingAPIOperationMapping.getBackendOperation();
                             }
+                        }
+                        if (backendOperation != null) {
                             messageContext.setProperty("MCP_HTTP_METHOD", backendOperation.getVerb());
                             messageContext.setProperty("MCP_API_ELECTED_RESOURCE", backendOperation.getTarget());
                         }

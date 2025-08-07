@@ -154,7 +154,8 @@ public class MCPPayloadGenerator {
             for (String requiredProperty : requiredProperties) {
                 String sanitizedRequiredProperty;
                 if (!"requestBody".equalsIgnoreCase(requiredProperty)) {
-                    sanitizedRequiredProperty = requiredProperty.split("_", 2)[1];
+                    String[] parts = requiredProperty.split("_", 2);
+                    sanitizedRequiredProperty = parts.length > 1 ? parts[1] : requiredProperty;
                 } else {
                     sanitizedRequiredProperty = requiredProperty;
                 }
@@ -173,7 +174,8 @@ public class MCPPayloadGenerator {
                     sanitizedProperties.put("requestBody", entry.getValue());
                     continue;
                 }
-                String sanitizedKey = key.split("_", 2)[1];
+                String[] parts = key.split("_", 2);
+                String sanitizedKey = parts.length > 1 ? parts[1] : key;
                 Object property = entry.getValue();
                 sanitizedProperties.put(sanitizedKey, property);
             }

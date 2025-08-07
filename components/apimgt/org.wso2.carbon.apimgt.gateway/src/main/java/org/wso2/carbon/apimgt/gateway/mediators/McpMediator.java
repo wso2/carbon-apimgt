@@ -42,7 +42,9 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.keymgt.model.entity.API;
 
 /**
- *
+ * Mediator for handling MCP (Model Context Protocol) requests and responses in the API Gateway.
+ * This mediator processes MCP JSON-RPC messages, handles initialization, tool listing,
+ * and tool calls, and transforms responses to MCP format.
  */
 public class McpMediator extends AbstractMediator implements ManagedLifecycle {
     private static final Log log = LogFactory.getLog(McpMediator.class);
@@ -77,18 +79,16 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
             if (path.startsWith(APIMgtGatewayConstants.MCP_RESOURCE) && httpMethod.equals(APIConstants.HTTP_POST)) {
                 handleMcpRequest(messageContext);
             } else if (path.startsWith(APIMgtGatewayConstants.MCP_WELL_KNOWN_RESOURCE) && httpMethod.equals(APIConstants.HTTP_GET)) {
-                //todo: implement
-            } else {
-                //TODO: handle unsupported MCP Method
+                handleWellKnownRequest(messageContext);
             }
         } else if ("OUT".equals(mcpDirection)) {
             try {
                 handleMcpResponse(messageContext);
             } catch (McpException e) {
-                throw new RuntimeException(e);
+                log.error("Error while handling MCP response", e);
+                return false;
             }
         }
-
         return true;
     }
 
@@ -96,13 +96,13 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
         API matchedAPI = GatewayUtils.getAPI(messageContext);
         McpRequest requestBody = (McpRequest) messageContext.getProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY);
         String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
 
         McpResponseDto mcpResponse = McpRequestProcessor.processRequest(messageContext, matchedAPI, requestBody);
         if (APIConstants.MCP.METHOD_INITIALIZE.equals(mcpMethod) || APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod)
-            || APIConstants.MCP.METHOD_PING.equals(mcpMethod) || APIConstants.MCP.METHOD_NOTIFICATION_INITIALIZED.equals(mcpMethod)) {
+            || APIConstants.MCP.METHOD_PING.equals(mcpMethod)) {
             messageContext.setProperty("MCP_PROCESSED", "true");
-            org.apache.axis2.context.MessageContext axis2MessageContext =
-                    ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             if (mcpResponse != null) {
                 try {
                     JsonUtil.removeJsonPayload(axis2MessageContext);
@@ -114,14 +114,14 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                     log.error("Error while generating mcp payload " + axis2MessageContext.getLogIDString(), e);
                 }
             } else {
-                if (StringUtils.equals(mcpMethod, APIConstants.MCP.METHOD_NOTIFICATION_INITIALIZED)) {
-                    JsonUtil.removeJsonPayload(axis2MessageContext);
-                    axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, HttpStatus.SC_ACCEPTED);
-                } else {
-                    JsonUtil.removeJsonPayload(axis2MessageContext);
-                    axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, HttpStatus.SC_NO_CONTENT);
-                }
+                // If no response is generated, set the HTTP status to 204 No Content
+                axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, HttpStatus.SC_NO_CONTENT);
             }
+        } else if (StringUtils.equals(mcpMethod, APIConstants.MCP.METHOD_NOTIFICATION_INITIALIZED)) {
+            JsonUtil.removeJsonPayload(axis2MessageContext);
+            messageContext.setProperty("MCP_PROCESSED", "true");
+            axis2MessageContext.setProperty(APIConstants.NO_ENTITY_BODY, true);
+            axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, HttpStatus.SC_ACCEPTED);
         }
     }
 
@@ -135,6 +135,14 @@ public class McpMediator extends AbstractMediator implements ManagedLifecycle {
                 buildMCPResponse(messageContext);
             }
         }
+    }
+
+    private void handleWellKnownRequest(MessageContext messageContext) {
+        // Send a 501 Not Implemented response as this is not implemented yet
+        org.apache.axis2.context.MessageContext axis2MessageContext =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        messageContext.setProperty("MCP_PROCESSED", "true");
+        axis2MessageContext.setProperty(APIMgtGatewayConstants.HTTP_SC, HttpStatus.SC_NOT_IMPLEMENTED);
     }
 
     private void buildMCPResponse(MessageContext messageContext) throws McpException {

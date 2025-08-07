@@ -351,27 +351,31 @@ public class APIKeyValidator {
         if (api != null && api.getApiType() != null && StringUtils.equals(api.getApiType(),
                 APIConstants.API_TYPE_MCP)) {
             McpRequest requestBody = (McpRequest) synCtx.getProperty(APIMgtGatewayConstants.MCP_REQUEST_BODY);
-            Params params = requestBody.getParams();
-            String toolName = params.getToolName();
-            URLMapping extendedOperation = api.getUrlMappings()
-                    .stream()
-                    .filter(operation -> operation.getUrlPattern().equals(toolName))
-                    .findFirst()
-                    .orElse(null);
-            if (extendedOperation != null) {
-                BackendOperation backendOperation = null;
-                if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_DIRECT_ENDPOINT)) {
-                    BackendOperationMapping backendAPIOperationMapping = extendedOperation.getBackendOperationMapping();
-                    backendOperation = backendAPIOperationMapping.getBackendOperation();
-                } else if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_EXISTING_API))  {
-                    APIOperationMapping existingAPIOperationMapping = extendedOperation.getApiOperationMapping();
-                    backendOperation = existingAPIOperationMapping.getBackendOperation();
-                    apiContext = existingAPIOperationMapping.getApiContext();
-                    apiVersion = existingAPIOperationMapping.getApiVersion();
-                }
-                if (backendOperation != null) {
-                    httpMethod = backendOperation.getVerb().toString();
-                    electedResource = backendOperation.getTarget();
+            if (requestBody != null) {
+                Params params = requestBody.getParams();
+                String toolName = params != null ? params.getToolName() : null;
+                if (!StringUtils.isEmpty(toolName)) {
+                    URLMapping extendedOperation = api.getUrlMappings()
+                            .stream()
+                            .filter(operation -> operation.getUrlPattern().equals(toolName))
+                            .findFirst()
+                            .orElse(null);
+                    if (extendedOperation != null) {
+                        BackendOperation backendOperation = null;
+                        if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_DIRECT_ENDPOINT)) {
+                            BackendOperationMapping backendAPIOperationMapping = extendedOperation.getBackendOperationMapping();
+                            backendOperation = backendAPIOperationMapping.getBackendOperation();
+                        } else if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_EXISTING_API))  {
+                            APIOperationMapping existingAPIOperationMapping = extendedOperation.getApiOperationMapping();
+                            backendOperation = existingAPIOperationMapping.getBackendOperation();
+                            apiContext = existingAPIOperationMapping.getApiContext();
+                            apiVersion = existingAPIOperationMapping.getApiVersion();
+                        }
+                        if (backendOperation != null) {
+                            httpMethod = backendOperation.getVerb().toString();
+                            electedResource = backendOperation.getTarget();
+                        }
+                    }
                 }
             }
         }
@@ -386,7 +390,7 @@ public class APIKeyValidator {
         }
 
         String requestPath = null;
-        if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_EXISTING_API)) {
+        if (api != null && StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_EXISTING_API)) {
             requestPath = electedResource;
         } else {
             requestPath = getRequestPath(synCtx, apiContext, apiVersion, fullRequestPath);
@@ -590,12 +594,14 @@ public class APIKeyValidator {
         String urlPattern = resourceInfoDTO.getUrlPattern().trim();
 
         //MCP direct_ep
-        VerbInfoDTO verbInfoDTO = (VerbInfoDTO) resourceInfoDTO.getHttpVerbs().toArray()[0];
-        BackendOperationMapping backendAPIOperationMapping = verbInfoDTO.getBackendAPIOperationMapping();
-        if (backendAPIOperationMapping != null) {
-            BackendOperation backendOperation = backendAPIOperationMapping.getBackendOperation();
-            if (backendOperation != null) {
-                urlPattern = backendOperation.getTarget();
+        if (resourceInfoDTO.getHttpVerbs() != null && !resourceInfoDTO.getHttpVerbs().isEmpty()) {
+            VerbInfoDTO verbInfoDTO = (VerbInfoDTO) resourceInfoDTO.getHttpVerbs().toArray()[0];
+            BackendOperationMapping backendAPIOperationMapping = verbInfoDTO.getBackendAPIOperationMapping();
+            if (backendAPIOperationMapping != null) {
+                BackendOperation backendOperation = backendAPIOperationMapping.getBackendOperation();
+                if (backendOperation != null) {
+                    urlPattern = backendOperation.getTarget();
+                }
             }
         }
 
