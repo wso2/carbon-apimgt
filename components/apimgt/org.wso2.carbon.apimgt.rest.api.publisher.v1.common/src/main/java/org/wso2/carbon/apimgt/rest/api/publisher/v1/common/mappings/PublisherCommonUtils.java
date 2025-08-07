@@ -65,7 +65,6 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.TokenBasedThrottlingCountHolder;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
-import org.wso2.carbon.apimgt.api.model.AIConfiguration;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIEndpointInfo;
@@ -269,57 +268,8 @@ public class PublisherCommonUtils {
     public static API updateApi(API originalAPI, APIDTO apiDtoToUpdate, APIProvider apiProvider, String[] tokenScopes,
                                 OrganizationInfo orginfo)
             throws ParseException, CryptoException, APIManagementException, FaultGatewaysException {
-        API apiToUpdate = prepareForUpdateApi(originalAPI, apiDtoToUpdate, apiProvider, tokenScopes);
 
-        if (orginfo != null && orginfo.getOrganizationId() != null) {
-            String visibleOrgs = apiToUpdate.getVisibleOrganizations();
-            if (!StringUtils.isEmpty(visibleOrgs) && APIConstants.VISIBLE_ORG_ALL.equals(visibleOrgs)) {
-                // IF visibility is all
-                apiToUpdate.setVisibleOrganizations(APIConstants.VISIBLE_ORG_ALL);
-            } else if (StringUtils.isEmpty(visibleOrgs) || APIConstants.VISIBLE_ORG_NONE.equals(visibleOrgs)) {
-                // IF visibility is none
-                apiToUpdate.setVisibleOrganizations(orginfo.getOrganizationId()); // set to current org
-            } else {
-                // add current id to existing visibility list
-                visibleOrgs = visibleOrgs + "," + orginfo.getOrganizationId();
-                apiToUpdate.setVisibleOrganizations(visibleOrgs);
-            }
-            OrganizationTiers parentOrgTiers = new OrganizationTiers(orginfo.getOrganizationId(),
-                    apiToUpdate.getAvailableTiers());
-            Set<OrganizationTiers> currentOrganizationTiers = apiToUpdate.getAvailableTiersForOrganizations();
-            if (currentOrganizationTiers == null) {
-                currentOrganizationTiers = new HashSet<>();
-            }
-            currentOrganizationTiers.add(parentOrgTiers);
-            apiToUpdate.setAvailableTiersForOrganizations(currentOrganizationTiers);
-        }
-
-        apiProvider.updateAPI(apiToUpdate, originalAPI);
-        API apiUpdated = apiProvider.getAPIbyUUID(originalAPI.getUuid(), originalAPI.getOrganization());
-
-        if (orginfo != null && apiUpdated.getVisibleOrganizations() != null) {
-            List<String> orgList = new ArrayList<>(Arrays.asList(apiUpdated.getVisibleOrganizations().split(",")));
-            orgList.remove(orginfo.getOrganizationId());  // remove current user org
-            String visibleOrgs = StringUtils.join(orgList, ',');
-            apiUpdated.setVisibleOrganizations(visibleOrgs);
-        }
-        // Remove parentOrgTiers from OrganizationTiers list
-        Set<OrganizationTiers> updatedOrganizationTiers = apiUpdated.getAvailableTiersForOrganizations();
-        if (updatedOrganizationTiers != null) {
-            updatedOrganizationTiers.removeIf(tier -> tier.getOrganizationID().equals(orginfo.getOrganizationId()));
-            apiUpdated.setAvailableTiersForOrganizations(updatedOrganizationTiers);
-        }
-
-        if (apiUpdated != null && !StringUtils.isEmpty(apiUpdated.getEndpointConfig())) {
-            JsonObject endpointConfig = JsonParser.parseString(apiUpdated.getEndpointConfig()).getAsJsonObject();
-            if (!APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                    endpointConfig.get(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && (
-                    APIConstants.API_TYPE_HTTP.equals(apiUpdated.getType()) || APIConstants.API_TYPE_SOAPTOREST.equals(
-                            apiUpdated.getType()))) {
-                apiProvider.deleteSequenceBackendByRevision(apiUpdated.getUuid(), "0");
-            }
-        }
-        return apiUpdated;
+        return updateApi(originalAPI, new APIDTOTypeWrapper(apiDtoToUpdate), apiProvider, tokenScopes, orginfo);
     }
 
     /**
@@ -2227,74 +2177,9 @@ public class PublisherCommonUtils {
     public static API addAPIWithGeneratedSwaggerDefinition(APIDTO apiDto, String oasVersion, String username,
                                                            String organization, OrganizationInfo orgInfo)
             throws APIManagementException, CryptoException, ParseException {
-        String name = apiDto.getName();
-        apiDto.setName(name.trim().replaceAll("\\s{2,}", " "));
-        if (APIDTO.TypeEnum.ASYNC.equals(apiDto.getType())) {
-            throw new APIManagementException("ASYNC API type does not support API creation from scratch",
-                    ExceptionCodes.API_CREATION_NOT_SUPPORTED_FOR_ASYNC_TYPE_APIS);
-        }
-        boolean isWSAPI = APIDTO.TypeEnum.WS.equals(apiDto.getType());
-        boolean isAsyncAPI =
-                isWSAPI || APIDTO.TypeEnum.WEBSUB.equals(apiDto.getType()) ||
-                        APIDTO.TypeEnum.SSE.equals(apiDto.getType()) || APIDTO.TypeEnum.ASYNC.equals(apiDto.getType());
-        username = StringUtils.isEmpty(username) ? RestApiCommonUtil.getLoggedInUsername() : username;
-        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
 
-        // validate context before proceeding
-        try {
-            APIUtil.validateAPIContext(apiDto.getContext(), apiDto.getName());
-        } catch (APIManagementException e) {
-            throw new APIManagementException("Error while importing API: " + e.getMessage(),
-                    ExceptionCodes.from(ExceptionCodes.API_CONTEXT_MALFORMED_EXCEPTION, e.getMessage()));
-        }
-
-        // validate web socket api endpoint configurations
-        if (isWSAPI && !PublisherCommonUtils.isValidWSAPI(apiDto)) {
-            throw new APIManagementException("Endpoint URLs should be valid web socket URLs",
-                    ExceptionCodes.INVALID_ENDPOINT_URL);
-        }
-
-        // validate sandbox and production endpoints
-        if (!PublisherCommonUtils.validateEndpoints(new APIDTOTypeWrapper(apiDto))) {
-            throw new APIManagementException("Invalid/Malformed endpoint URL(s) detected",
-                    ExceptionCodes.INVALID_ENDPOINT_URL);
-        }
-        APIUtil.validateAPIEndpointConfig(apiDto.getEndpointConfig(), apiDto.getType().toString(), apiDto.getName());
-
-        // validate gateway type before proceeding
-        String gatewayType = apiDto.getGatewayType();
-        if (APIConstants.WSO2_APK_GATEWAY.equals(gatewayType)) {
-            if (!(APIDTO.TypeEnum.HTTP.equals(apiDto.getType()) || APIDTO.TypeEnum.GRAPHQL.equals(apiDto.getType()))) {
-                throw new APIManagementException("APIs of type " + apiDto.getType() + " are not supported with " +
-                        "WSO2 APK", ExceptionCodes.INVALID_GATEWAY_TYPE);
-            }
-        }
-
-        Map endpointConfig = (Map) apiDto.getEndpointConfig();
-        CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
-
-        // OAuth 2.0 backend protection: API Key and API Secret encryption
-        encryptEndpointSecurityOAuthCredentials(endpointConfig, cryptoUtil, StringUtils.EMPTY, StringUtils.EMPTY,
-                StringUtils.EMPTY, StringUtils.EMPTY, new APIDTOTypeWrapper(apiDto));
-
-        encryptEndpointSecurityApiKeyCredentials(endpointConfig, cryptoUtil, StringUtils.EMPTY, StringUtils.EMPTY,
-                new APIDTOTypeWrapper(apiDto));
-
-        encryptEndpointSecurityAWSSecretKey(endpointConfig, cryptoUtil, StringUtils.EMPTY, StringUtils.EMPTY,
-                apiDto);
-        // AWS Lambda: secret key encryption while creating the API
-        if (apiDto.getEndpointConfig() != null) {
-            if (endpointConfig.containsKey(APIConstants.AMZN_SECRET_KEY)) {
-                String secretKey = (String) endpointConfig.get(APIConstants.AMZN_SECRET_KEY);
-                if (!StringUtils.isEmpty(secretKey)) {
-                    String encryptedSecretKey = cryptoUtil.encryptAndBase64Encode(secretKey.getBytes());
-                    endpointConfig.put(APIConstants.AMZN_SECRET_KEY, encryptedSecretKey);
-                    apiDto.setEndpointConfig(endpointConfig);
-                }
-            }
-        }
-        API apiToAdd = prepareToCreateAPIByDTO(new APIDTOTypeWrapper(apiDto), apiProvider, username, organization);
-        return addAPIWithGeneratedSwaggerDefinition(apiToAdd, oasVersion, username, organization, orgInfo, isAsyncAPI);
+        return addAPIWithGeneratedSwaggerDefinition(new APIDTOTypeWrapper(apiDto), oasVersion, username, organization,
+                orgInfo);
     }
 
     /**
@@ -2505,7 +2390,7 @@ public class PublisherCommonUtils {
                     -> tier.getOrganizationID().equals(orgInfo.getOrganizationId()));
             apiToAdd.setAvailableTiersForOrganizations(updatedOrganizationTiers);
         }
-        apiToAdd.setInitiatedFromGateway(apiDto.isInitiatedFromGateway());
+        apiToAdd.setInitiatedFromGateway(apiToAdd.isInitiatedFromGateway());
         return apiToAdd;
     }
 
@@ -2838,184 +2723,7 @@ public class PublisherCommonUtils {
                                               String organization)
             throws APIManagementException {
 
-        String context = body.getContext();
-        //Make sure context starts with "/". ex: /pizza
-        context = context.startsWith("/") ? context : ("/" + context);
-        if (!MultitenantConstants.SUPER_TENANT_DOMAIN_NAME.equalsIgnoreCase(organization) &&
-                !context.contains("/t/" + organization)) {
-            //Create tenant aware context for API
-            context = "/t/" + organization + context;
-        }
-        body.setContext(context);
-
-        if (body.getAccessControlRoles() != null) {
-            String errorMessage = PublisherCommonUtils.validateUserRoles(body.getAccessControlRoles());
-
-            if (!errorMessage.isEmpty()) {
-                throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_USER_ROLES);
-            }
-        }
-        if (body.getAdditionalProperties() != null) {
-            String errorMessage = PublisherCommonUtils.validateAdditionalProperties(body.getAdditionalProperties());
-            if (!errorMessage.isEmpty()) {
-                throw new APIManagementException(errorMessage, ExceptionCodes
-                        .from(ExceptionCodes.INVALID_ADDITIONAL_PROPERTIES, body.getName(), body.getVersion()));
-            }
-        }
-        if (body.getContext() == null) {
-            throw new APIManagementException("Parameter: \"context\" cannot be null",
-                    ExceptionCodes.PARAMETER_NOT_PROVIDED);
-        } else if (body.getContext().endsWith("/")) {
-            throw new APIManagementException("Context cannot end with '/' character",
-                    ExceptionCodes.from(ExceptionCodes.INVALID_CONTEXT, body.getName(), body.getVersion()));
-        }
-        if (apiProvider.isApiNameWithDifferentCaseExist(body.getName(), organization)) {
-            throw new APIManagementException(
-                    "Error occurred while adding API. API with name " + body.getName() + " already exists.",
-                    ExceptionCodes.from(ExceptionCodes.API_NAME_ALREADY_EXISTS, body.getName()));
-        }
-        if (body.getAuthorizationHeader() == null) {
-            body.setAuthorizationHeader(APIUtil.getOAuthConfigurationFromAPIMConfig(APIConstants.AUTHORIZATION_HEADER));
-        }
-        if (body.getAuthorizationHeader() == null) {
-            body.setAuthorizationHeader(APIConstants.AUTHORIZATION_HEADER_DEFAULT);
-        }
-        if (body.getApiKeyHeader() == null) {
-            body.setApiKeyHeader(APIConstants.API_KEY_HEADER_DEFAULT);
-        }
-
-        if (body.getVisibility() == APIDTO.VisibilityEnum.RESTRICTED && body.getVisibleRoles().isEmpty()) {
-            throw new APIManagementException(
-                    "Valid roles should be added under 'visibleRoles' to restrict " + "the visibility",
-                    ExceptionCodes.USER_ROLES_CANNOT_BE_NULL);
-        }
-        if (body.getVisibleRoles() != null) {
-            String errorMessage = PublisherCommonUtils.validateRoles(body.getVisibleRoles());
-            if (!errorMessage.isEmpty()) {
-                throw new APIManagementException(errorMessage, ExceptionCodes.INVALID_USER_ROLES);
-            }
-        }
-
-
-        //Get all existing versions of  api been adding
-        List<String> apiVersions = apiProvider.getApiVersionsMatchingApiNameAndOrganization(body.getName(),
-                username, organization);
-        if (apiVersions.size() > 0) {
-            //If any previous version exists
-            for (String version : apiVersions) {
-                if (version.equalsIgnoreCase(body.getVersion())) {
-                    //If version already exists
-                    if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context, organization)) {
-                        throw new APIManagementException(
-                                "Error occurred while " + "adding the API. A duplicate API already exists for "
-                                        + context + " in the organization : " + organization,
-                                ExceptionCodes.API_ALREADY_EXISTS);
-                    } else {
-                        throw new APIManagementException(
-                                "Error occurred while adding API. API with name " + body.getName()
-                                        + " already exists with different context" + context + " in the organization" +
-                                        " : " + organization, ExceptionCodes.API_ALREADY_EXISTS);
-                    }
-                }
-            }
-        } else {
-            //If no any previous version exists
-            if (apiProvider.isDuplicateContextTemplateMatchingOrganization(context, organization)) {
-                throw new APIManagementException(
-                        "Error occurred while adding the API. A duplicate API context already exists for "
-                                + context + " in the organization" + " : " + organization, ExceptionCodes
-                        .from(ExceptionCodes.API_CONTEXT_ALREADY_EXISTS, context));
-            }
-        }
-
-        String contextTemplate = body.getContext().contains(APIConstants.VERSION_PLACEHOLDER) ?
-                body.getContext() :
-                body.getContext() + "/" + APIConstants.VERSION_PLACEHOLDER;
-        if (!apiProvider.isValidContext(body.getProvider(), body.getName(), contextTemplate, username, organization)) {
-            throw new APIManagementException(
-                    ExceptionCodes.from(ExceptionCodes.BLOCK_CONDITION_UNSUPPORTED_API_CONTEXT));
-        }
-
-        //Check if the user has admin permission before applying a different provider than the current user
-        String provider = body.getProvider();
-        if (!StringUtils.isBlank(provider) && !provider.equals(username)) {
-            if (!APIUtil.hasPermission(username, APIConstants.Permissions.APIM_ADMIN)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("User " + username + " does not have admin permission ("
-                            + APIConstants.Permissions.APIM_ADMIN + ") hence provider (" + provider
-                            + ") overridden with current user (" + username + ")");
-                }
-                provider = username;
-            } else {
-                if (!APIUtil.isUserExist(provider)) {
-                    throw new APIManagementException("Specified provider " + provider + " not exist.",
-                            ExceptionCodes.PARAMETER_NOT_PROVIDED);
-                }
-            }
-        } else {
-            //Set username in case provider is null or empty
-            provider = username;
-        }
-
-        List<String> tiersFromDTO = body.getPolicies();
-
-        //check whether the added API's tiers are all valid
-        Set<Tier> definedTiers = apiProvider.getTiers();
-        List<String> invalidTiers = getInvalidTierNames(definedTiers, tiersFromDTO);
-        if (invalidTiers.size() > 0) {
-            throw new APIManagementException(
-                    "Specified tier(s) " + Arrays.toString(invalidTiers.toArray()) + " are invalid",
-                    ExceptionCodes.TIER_NAME_INVALID);
-        }
-        APIPolicy apiPolicy = apiProvider.getAPIPolicy(username, body.getApiThrottlingPolicy());
-        if (apiPolicy == null && body.getApiThrottlingPolicy() != null) {
-            throw new APIManagementException("Specified policy " + body.getApiThrottlingPolicy() + " is invalid",
-                    ExceptionCodes.UNSUPPORTED_THROTTLE_LIMIT_TYPE);
-        }
-
-        API apiToAdd = APIMappingUtil.fromDTOtoAPI(body, provider);
-        //Overriding some properties:
-        //only allow CREATED as the stating state for the new api if not status is PROTOTYPED
-        if (!APIConstants.PROTOTYPED.equals(apiToAdd.getStatus())) {
-            apiToAdd.setStatus(APIConstants.CREATED);
-        }
-
-        if (!apiToAdd.isAdvertiseOnly() || StringUtils.isBlank(apiToAdd.getApiOwner())) {
-            //we are setting the api owner as the logged in user until we support checking admin privileges and
-            //assigning the owner as a different user
-            apiToAdd.setApiOwner(provider);
-        }
-
-        if (body.getKeyManagers() instanceof List) {
-            apiToAdd.setKeyManagers((List<String>) body.getKeyManagers());
-        } else if (body.getKeyManagers() == null) {
-            apiToAdd.setKeyManagers(Collections.singletonList(APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS));
-        } else {
-            String errMsg = "KeyManagers value needs to be an array";
-            ExceptionCodes errorHandler = ExceptionCodes.KEYMANAGERS_VALUE_NOT_ARRAY;
-            throw new APIManagementException(errMsg, errorHandler);
-        }
-
-        // Set default gatewayVendor
-        if (body.getGatewayVendor() == null) {
-            apiToAdd.setGatewayVendor(APIConstants.WSO2_GATEWAY_ENVIRONMENT);
-        }
-        apiToAdd.setOrganization(organization);
-        apiToAdd.setGatewayType(body.getGatewayType());
-        if (body.getSubtypeConfiguration() != null && body.getSubtypeConfiguration().getSubtype() != null
-                && APIConstants.API_SUBTYPE_AI_API.equals(body.getSubtypeConfiguration().getSubtype())
-                && body.getSubtypeConfiguration().getConfiguration() != null) {
-            apiToAdd.setAiConfiguration(new Gson().fromJson(
-                    body.getSubtypeConfiguration().getConfiguration().toString(), AIConfiguration.class));
-            apiToAdd.setSubtype(APIConstants.API_SUBTYPE_AI_API);
-        } else if (body.getSubtypeConfiguration() != null && body.getSubtypeConfiguration().getSubtype() != null) {
-            apiToAdd.setSubtype(body.getSubtypeConfiguration().getSubtype());
-        } else {
-            apiToAdd.setSubtype(APIConstants.API_SUBTYPE_DEFAULT);
-        }
-        apiToAdd.setEgress(body.isEgress() ? 1 : 0);
-        apiToAdd.setInitiatedFromGateway(body.isInitiatedFromGateway());
-        return apiToAdd;
+        return prepareToCreateAPIByDTO(new APIDTOTypeWrapper(body), apiProvider, username, organization);
     }
 
     /**
