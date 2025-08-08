@@ -95,7 +95,8 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                             APISecurityConstants.API_AUTH_INVALID_CREDENTIALS_MESSAGE);
                 }
                 OpenAPI openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
-                if (openAPI == null && !APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))) {
+                if (openAPI == null && (!APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))
+                        && !APIConstants.API_TYPE_MCP.equals(synCtx.getProperty(APIConstants.API_TYPE)))) {
                     log.error("Swagger is missing in the gateway. " +
                             "Therefore, Internal Key authentication cannot be performed.");
                     return new AuthenticationResponse(false, true, false,
