@@ -71,6 +71,7 @@ import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
 import org.wso2.carbon.apimgt.api.model.Backend;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
@@ -2275,6 +2276,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, List<OperationPolicy>> operationPoliciesMap = extractAndDropOperationPoliciesFromURITemplate(
                 existingAPI.getUriTemplates());
         List<OperationPolicy> apiLevelPolicies = extractAndDropAPILevelPoliciesFromAPI(existingAPI);
+        updateMCPServerBackends(existingAPI, existingApiId, organization);
+
         API newAPI = addAPI(existingAPI);
         String newAPIId = newAPI.getUuid();
         cloneAPIPoliciesForNewAPIVersion(existingApiId, newAPI, operationPoliciesMap, apiLevelPolicies);
@@ -8694,4 +8697,52 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             api.setPrimarySandboxEndpointId(sandboxEndpointId);
         }
     }
+
+    /**
+     * This method updates the MCP server backends for the API if it is of type MCP and subtype DIRECT_ENDPOINT.
+     * It sets the first available backend as the selected backend and updates the backend ID in the URITemplates.
+     *
+     * @param api           The API object to be updated.
+     * @param existingApiId The existing API ID.
+     * @param organization  The organization name.
+     * @throws APIManagementException If an error occurs while updating the MCP server backends.
+     */
+    private void updateMCPServerBackends(API api, String existingApiId, String organization)
+            throws APIManagementException {
+
+        if (api == null || api.getType() == null) {
+            return;
+        }
+
+        if (!APIConstants.API_TYPE_MCP.equals(api.getType())
+                || !APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
+            return;
+        }
+
+        List<Backend> existingBackends = getMCPServerBackends(existingApiId, organization);
+        if (existingBackends == null || existingBackends.isEmpty()) {
+            throw new APIManagementException("No MCP backends available for DIRECT_ENDPOINT configuration");
+        }
+
+        Backend selectedBackend = existingBackends.get(0);
+        String newBackendId = UUID.randomUUID().toString();
+        selectedBackend.setId(newBackendId);
+
+        List<Backend> updatedBackends = new ArrayList<>();
+        updatedBackends.add(selectedBackend);
+        api.setBackends(updatedBackends);
+
+        if (api.getUriTemplates() != null) {
+            for (URITemplate uriTemplate : api.getUriTemplates()) {
+                if (uriTemplate == null) {
+                    continue;
+                }
+                BackendOperationMapping backendOperationMapping = uriTemplate.getBackendOperationMapping();
+                if (backendOperationMapping != null) {
+                    backendOperationMapping.setBackendId(newBackendId);
+                }
+            }
+        }
+    }
+
 }
