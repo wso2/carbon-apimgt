@@ -58,7 +58,7 @@ public class MCPPayloadGenerator {
         // https://modelcontextprotocol.io/specification/2025-03-26/basic/lifecycle#initialization
         McpResponse<InitializeResult> initializeResponse = new McpResponse<>(id);
         InitializeResult result = new InitializeResult();
-        result.setProtocolVersion(APIConstants.MCP.PROTOCOL_VERSION_2025_JUNE);
+        result.setProtocolVersion(APIConstants.MCP.PROTOCOL_VERSION_2025_MARCH);
 
         InitializeResult.ServerInfo serverInfo = new InitializeResult.ServerInfo();
         serverInfo.setName(serverName);
@@ -89,6 +89,9 @@ public class MCPPayloadGenerator {
         InitializeResult.Capabilities.Prompts prompts = new InitializeResult.Capabilities.Prompts();
         prompts.setListChanged(false); // Prompts are not supported at the moment
         capabilities.setPrompts(prompts);
+
+        capabilities.setCompletions(new HashMap<>());
+        capabilities.setExperimental(new HashMap<>());
         return capabilities;
     }
 
@@ -133,6 +136,7 @@ public class MCPPayloadGenerator {
             toolInfoList.add(tool);
         }
         toolListResult.setTools(toolInfoList);
+        toolListResult.setNextCursor(""); // No pagination support in this implementation
         toolListResponse.setResult(toolListResult);
         return gson.toJson(toolListResponse);
     }
