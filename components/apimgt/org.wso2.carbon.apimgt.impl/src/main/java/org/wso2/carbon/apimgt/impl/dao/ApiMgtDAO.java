@@ -22078,7 +22078,7 @@ public class ApiMgtDAO {
     /**
      * Retrieves a {@link Backend} for a given API and backend ID using the provided database connection.
      *
-     * @param apiId        the unique identifier of the API
+     * @param apiUuid      the unique identifier of the API
      * @param backendId    the unique identifier of the backend endpoint
      * @param connection   the JDBC {@link Connection} to use for the database operation
      * @param organization the organization name
@@ -22424,6 +22424,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while establishing DB connection for retrieving backends of apiId : " + apiId, e);
         }
+        return null;
     }
 
     private List<API> getMCPServersUsedByAPI(Connection connection, int apiId, String organization)
