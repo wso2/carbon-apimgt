@@ -15587,6 +15587,8 @@ public class ApiMgtDAO {
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
                     String gatewayType = rs.getString("GATEWAY_TYPE");
+                    String mode = rs.getString("MODE");
+                    int scheduledTime = rs.getInt("SCHEDULED_TIME");
                     Map<String, String> additionalProperties = new HashMap();
                     try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
                         if (configuration != null) {
@@ -15606,6 +15608,8 @@ public class ApiMgtDAO {
                     env.setDescription(description);
                     env.setProvider(provider);
                     env.setGatewayType(gatewayType);
+                    env.setMode(mode);
+                    env.setApiDiscoveryScheduledWindow(scheduledTime);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                     env.setPermissions(getGatewayVisibilityPermissions(uuid));
                     env.setAdditionalProperties(additionalProperties);
@@ -15641,6 +15645,8 @@ public class ApiMgtDAO {
                     String description = rs.getString("DESCRIPTION");
                     String provider = rs.getString("PROVIDER");
                     String gatewayType = rs.getString("GATEWAY_TYPE");
+                    String mode = rs.getString("MODE");
+                    int scheduledTime = rs.getInt("SCHEDULED_TIME");
                     Map<String, String> additionalProperties = new HashMap();
                     try (InputStream configuration = rs.getBinaryStream("CONFIGURATION")) {
                         if (configuration != null) {
@@ -15659,6 +15665,8 @@ public class ApiMgtDAO {
                     env.setDescription(description);
                     env.setProvider(provider);
                     env.setGatewayType(gatewayType);
+                    env.setMode(mode);
+                    env.setApiDiscoveryScheduledWindow(scheduledTime);
                     env.setVhosts(getVhostGatewayEnvironments(connection, id));
                     env.setPermissions(getGatewayVisibilityPermissions(uuid));
                     env.setAdditionalProperties(additionalProperties);
@@ -15698,6 +15706,8 @@ public class ApiMgtDAO {
                 String configurationJson = new Gson().toJson(environment.getAdditionalProperties());
                 prepStmt.setBinaryStream(8, new ByteArrayInputStream(configurationJson.getBytes()));
                 prepStmt.setString(9, tenantDomain);
+                prepStmt.setString(10, environment.getMode());
+                prepStmt.setInt(11, environment.getApiDiscoveryScheduledWindow());
                 prepStmt.executeUpdate();
 
                 GatewayVisibilityPermissionConfigurationDTO permissionDTO = environment.getPermissions();
@@ -15893,7 +15903,8 @@ public class ApiMgtDAO {
                 prepStmt.setString(2, environment.getDescription());
                 String configurationJson = new Gson().toJson(environment.getAdditionalProperties());
                 prepStmt.setBinaryStream(3, new ByteArrayInputStream(configurationJson.getBytes()));
-                prepStmt.setString(4, environment.getUuid());
+                prepStmt.setInt(4, environment.getApiDiscoveryScheduledWindow());
+                prepStmt.setString(5, environment.getUuid());
                 prepStmt.executeUpdate();
                 deleteGatewayVhosts(connection, environment.getId());
                 addGatewayVhosts(connection, environment.getId(), environment.getVhosts());

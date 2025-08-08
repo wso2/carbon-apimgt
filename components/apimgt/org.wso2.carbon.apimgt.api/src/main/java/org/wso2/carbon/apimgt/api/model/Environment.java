@@ -83,6 +83,8 @@ public class Environment implements Serializable {
         this.vhosts = new ArrayList<>(environment.vhosts);
         this.provider = environment.provider;
         this.gatewayType = environment.gatewayType;
+        this.mode = environment.mode;
+        this.apiDiscoveryScheduledWindow = environment.apiDiscoveryScheduledWindow;
         this.additionalProperties = new HashMap<>(environment.additionalProperties);
         this.visibilityRoles = environment.visibilityRoles;
         this.visibility = environment.visibility;
