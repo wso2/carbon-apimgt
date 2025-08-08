@@ -491,7 +491,6 @@ public final class APIConstants {
     public static final String API_KEY_HEADER = "ApiKeyHeader";
     public static final String API_SECURITY = "APISecurity";
     public static final String API_LEVEL_POLICY = "APILevelPolicy";
-    public static final String API_TYPE_PROP = "ApiType";
     public static final String CERTIFICATE_INFORMATION = "CertificateInformation";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
     public static final String API_KEY_HEADER_DEFAULT = "ApiKey";

@@ -3007,7 +3007,7 @@ public class APIMappingUtil {
                             .fromDTOToBackendOperationMapping(operation.getBackendOperationMapping()));
                 }
                 if (operation.getApiOperationMapping() != null) {
-                    template.setExistingAPIOperationMapping(OperationPolicyMappingUtil
+                    template.setAPIOperationMapping(OperationPolicyMappingUtil
                             .fromDTOToAPIOperationMapping(operation.getApiOperationMapping()));
                 }
 
@@ -3733,8 +3733,8 @@ public class APIMappingUtil {
         if (uriTemplate.getBackendOperationMapping() != null) {
             dto.setBackendOperationMapping(mapBackendOperationMapping(uriTemplate.getBackendOperationMapping()));
         }
-        if (uriTemplate.getExistingAPIOperationMapping() != null) {
-            dto.setApiOperationMapping(mapApiOperationMapping(uriTemplate.getExistingAPIOperationMapping()));
+        if (uriTemplate.getAPIOperationMapping() != null) {
+            dto.setApiOperationMapping(mapApiOperationMapping(uriTemplate.getAPIOperationMapping()));
         }
         return dto;
     }

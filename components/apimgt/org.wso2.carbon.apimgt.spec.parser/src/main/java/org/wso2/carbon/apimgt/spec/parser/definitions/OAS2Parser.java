@@ -2264,7 +2264,7 @@ public class OAS2Parser extends APIDefinition {
                     backendOperation = mapping.getBackendOperation();
                 }
             } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
-                APIOperationMapping mapping = template.getExistingAPIOperationMapping();
+                APIOperationMapping mapping = template.getAPIOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
@@ -2312,7 +2312,7 @@ public class OAS2Parser extends APIDefinition {
                     backendOperation = mapping.getBackendOperation();
                 }
             } else if (APISpecParserConstants.API_SUBTYPE_EXISTING_API.equals(mcpSubtype)) {
-                APIOperationMapping mapping = template.getExistingAPIOperationMapping();
+                APIOperationMapping mapping = template.getAPIOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
                 }
@@ -2401,13 +2401,13 @@ public class OAS2Parser extends APIDefinition {
             backendOperationMap.setBackendId(backendId);
             backendOperationMap.setBackendOperation(backendOperation);
             uriTemplate.setBackendOperationMapping(backendOperationMap);
-        } else if (uriTemplate.getExistingAPIOperationMapping() != null) {
+        } else if (uriTemplate.getAPIOperationMapping() != null) {
             APIOperationMapping apiOperationMap = new APIOperationMapping();
             apiOperationMap.setApiUuid(refApiId.getUUID());
             apiOperationMap.setApiName(refApiId.getApiName());
             apiOperationMap.setApiVersion(refApiId.getVersion());
             apiOperationMap.setBackendOperation(backendOperation);
-            uriTemplate.setExistingAPIOperationMapping(apiOperationMap);
+            uriTemplate.setAPIOperationMapping(apiOperationMap);
         }
         Map<String, Object> extensions = match.operation.getVendorExtensions();
         if (extensions != null) {

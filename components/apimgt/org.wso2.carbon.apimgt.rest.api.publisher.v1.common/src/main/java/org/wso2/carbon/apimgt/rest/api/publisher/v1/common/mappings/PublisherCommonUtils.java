@@ -441,7 +441,7 @@ public class PublisherCommonUtils {
             throw new APIManagementException("No URI templates defined for existing API subtype.");
         }
 
-        APIOperationMapping mapping = uriTemplates.iterator().next().getExistingAPIOperationMapping();
+        APIOperationMapping mapping = uriTemplates.iterator().next().getAPIOperationMapping();
         if (mapping == null) {
             throw new APIManagementException("API operation mapping is missing in the URI template.");
         }
@@ -2419,11 +2419,11 @@ public class PublisherCommonUtils {
 
         URITemplate template = apiToAdd.getUriTemplates().iterator().next();
 
-        if (template == null || template.getExistingAPIOperationMapping() == null) {
+        if (template == null || template.getAPIOperationMapping() == null) {
             return apiToAdd.getUriTemplates();
         }
 
-        String backendApiUuid = template.getExistingAPIOperationMapping().getApiUuid();
+        String backendApiUuid = template.getAPIOperationMapping().getApiUuid();
 
         API refApi = StringUtils.isNotEmpty(backendApiUuid)
                 ? apiProvider.getAPIbyUUID(backendApiUuid, organization)

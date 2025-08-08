@@ -298,7 +298,7 @@ public class APIKeyValidationService {
             if(StringUtils.equals(APIConstants.API_TYPE_MCP, api.getApiType())) {
                 template.setDescription(urlMapping.getDescription());
                 template.setSchemaDefinition(urlMapping.getSchemaDefinition());
-                template.setExistingAPIOperationMapping(urlMapping.getApiOperationMapping());
+                template.setAPIOperationMapping(urlMapping.getApiOperationMapping());
                 template.setBackendOperationMapping(urlMapping.getBackendOperationMapping());
             }
 

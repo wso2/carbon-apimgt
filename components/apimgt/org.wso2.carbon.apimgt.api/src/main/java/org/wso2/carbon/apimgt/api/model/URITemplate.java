@@ -494,12 +494,12 @@ public class URITemplate implements Serializable{
         this.schemaDefinition = schemaDefinition;
     }
 
-    public APIOperationMapping getExistingAPIOperationMapping() {
+    public APIOperationMapping getAPIOperationMapping() {
 
         return APIOperationMapping;
     }
 
-    public void setExistingAPIOperationMapping(APIOperationMapping APIOperationMapping) {
+    public void setAPIOperationMapping(APIOperationMapping APIOperationMapping) {
 
         this.APIOperationMapping = APIOperationMapping;
     }

@@ -6253,8 +6253,8 @@ public class ApiMgtDAO {
             Set<URITemplate> templates = api.getUriTemplates();
             if (templates != null && !templates.isEmpty()) {
                 URITemplate template = templates.iterator().next();
-                if (template.getExistingAPIOperationMapping() != null) {
-                    String refApiId = template.getExistingAPIOperationMapping().getApiUuid();
+                if (template.getAPIOperationMapping() != null) {
+                    String refApiId = template.getAPIOperationMapping().getApiUuid();
                     refUriTemplates = getURITemplatesOfAPI(refApiId);
                     if (refUriTemplates == null) {
                         log.error("Failed to retrieve URI templates for referenced API: " + refApiId);
@@ -6337,12 +6337,12 @@ public class ApiMgtDAO {
                     addBackendOperationMappingPrepStmt.setString(4,
                             uriTemplate.getBackendOperationMapping().getBackendOperation().getVerb().toString());
                     addBackendOperationMappingPrepStmt.addBatch();
-                } else if (uriTemplate.getExistingAPIOperationMapping() != null && refUriTemplates != null
+                } else if (uriTemplate.getAPIOperationMapping() != null && refUriTemplates != null
                         && !refUriTemplates.isEmpty()) {
                     String target =
-                            uriTemplate.getExistingAPIOperationMapping().getBackendOperation().getTarget();
+                            uriTemplate.getAPIOperationMapping().getBackendOperation().getTarget();
                     String verb =
-                            uriTemplate.getExistingAPIOperationMapping().getBackendOperation().getVerb().toString();
+                            uriTemplate.getAPIOperationMapping().getBackendOperation().getVerb().toString();
                     URITemplate match = findMatchingTemplate(refUriTemplates, target, verb);
                     if (match != null) {
                         addApiOperationMappingPrepStmt.setInt(1, uriMappingId);
@@ -19316,7 +19316,7 @@ public class ApiMgtDAO {
 
                             APIOperationMapping APIOperationMapping = new APIOperationMapping();
                             APIOperationMapping.setBackendOperation(backendOperation);
-                            uriTemplate.setExistingAPIOperationMapping(APIOperationMapping);
+                            uriTemplate.setAPIOperationMapping(APIOperationMapping);
                         }
                         urlMappingList.add(uriTemplate);
                     }
@@ -19431,10 +19431,10 @@ public class ApiMgtDAO {
                         addBackendOperationMappingPrepStmt.setString(4,
                                 urlMapping.getBackendOperationMapping().getBackendOperation().getVerb().toString());
                         addBackendOperationMappingPrepStmt.addBatch();
-                    } else if (urlMapping.getExistingAPIOperationMapping() != null) {
+                    } else if (urlMapping.getAPIOperationMapping() != null) {
                         addApiOperationMappingPrepStmt.setInt(1, urlMapping.getId());
                         addApiOperationMappingPrepStmt.setInt(2,
-                                urlMapping.getExistingAPIOperationMapping().getBackendOperation().getRefUriMappingId());
+                                urlMapping.getAPIOperationMapping().getBackendOperation().getRefUriMappingId());
                         addApiOperationMappingPrepStmt.addBatch();
                     }
                 }
@@ -20418,7 +20418,7 @@ public class ApiMgtDAO {
 
                             APIOperationMapping APIOperationMapping = new APIOperationMapping();
                             APIOperationMapping.setBackendOperation(backendOperation);
-                            uriTemplate.setExistingAPIOperationMapping(APIOperationMapping);
+                            uriTemplate.setAPIOperationMapping(APIOperationMapping);
                         }
                         urlMappingList.add(uriTemplate);
                     }
@@ -20513,11 +20513,11 @@ public class ApiMgtDAO {
                                             urlMapping.getBackendOperationMapping().getBackendOperation().getVerb()
                                                     .toString());
                                     addBackendOperationMappingPrepStmt.addBatch();
-                                } else if (urlMapping.getExistingAPIOperationMapping() != null) {
+                                } else if (urlMapping.getAPIOperationMapping() != null) {
                                     addApiOperationMappingPrepStmt.setInt(1,
                                             restoredUrlMappingID);
                                     addApiOperationMappingPrepStmt.setInt(2,
-                                            urlMapping.getExistingAPIOperationMapping().getBackendOperation().getRefUriMappingId());
+                                            urlMapping.getAPIOperationMapping().getBackendOperation().getRefUriMappingId());
                                     addApiOperationMappingPrepStmt.addBatch();
                                 }
                             }
@@ -22221,7 +22221,7 @@ public class ApiMgtDAO {
         String query = SQLConstants.REMOVE_FROM_AM_API_OPERATION_MAPPING_SQL;
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             for (URITemplate uriTemplate : uriTemplates) {
-                if (uriTemplate.getExistingAPIOperationMapping() != null) {
+                if (uriTemplate.getAPIOperationMapping() != null) {
                     preparedStatement.setInt(1,
                             uriTemplate.getId());
                     preparedStatement.addBatch();
@@ -22459,7 +22459,7 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Error while establishing DB connection for retrieving backends of apiId : " + apiId, e);
         }
-        return null;
+        return new ArrayList<>();
     }
 
     private List<API> getMCPServersUsedByAPI(Connection connection, int apiId, String organization)
@@ -23043,7 +23043,7 @@ public class ApiMgtDAO {
                     APIOperationMapping.setApiVersion(rs.getString("REF_API_VERSION"));
                     APIOperationMapping.setBackendOperation(backendOperation);
 
-                    uriTemplate.setExistingAPIOperationMapping(APIOperationMapping);
+                    uriTemplate.setAPIOperationMapping(APIOperationMapping);
 
                 }
             }
