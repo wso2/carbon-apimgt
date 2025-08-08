@@ -625,7 +625,7 @@ public class RegistrySearchUtil {
 
         if (!modifiedQuery.contains(APIConstants.TYPE)) {
             String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY
-                    + getORBasedSearchCriteria(APIConstants.API_SUPPORTED_TYPE_LIST);
+                    + getORBasedSearchCriteria(APIConstants.API_SUPPORTED_TYPE_LIST_DEVPORTAL);
             modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
         }
 
