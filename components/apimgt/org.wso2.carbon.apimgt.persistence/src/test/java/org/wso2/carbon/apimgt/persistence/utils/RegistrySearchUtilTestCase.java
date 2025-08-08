@@ -97,21 +97,21 @@ public class RegistrySearchUtilTestCase {
         String searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false, false);
 
         String expected = "name=*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK " +
-                "OR ASYNC)&enableStore=(true OR null)&group=true&group.field=name&group.ngroups=true" +
+                "OR ASYNC OR APIProduct)&enableStore=(true OR null)&group=true&group.field=name&group.ngroups=true" +
                 "&group.sort=versionComparable desc&status=(PUBLISHED OR PROTOTYPED)";
         Assert.assertEquals("Generated query mismatched. ", expected, searchQuery);
         
         // search for 'test' in description 
         inputQuery = "description:test";
         expected = "description=*test*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK " +
-                "OR ASYNC)&status=(PUBLISHED OR PROTOTYPED)";
+                "OR ASYNC OR APIProduct)&status=(PUBLISHED OR PROTOTYPED)";
         searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false, false);
         Assert.assertEquals("Generated query mismatched for description search. ", expected, searchQuery);
         
         // search for provider 'pubuser'
         inputQuery = "provider:pubuser";
         expected = "provider=*pubuser*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK " +
-                "OR ASYNC)&status=(PUBLISHED OR PROTOTYPED)";
+                "OR ASYNC OR APIProduct)&status=(PUBLISHED OR PROTOTYPED)";
         searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false, false);
         Assert.assertEquals("Generated query mismatched for provider search. ", expected, searchQuery);
     }
@@ -124,15 +124,15 @@ public class RegistrySearchUtilTestCase {
         String searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false, false);
 
         String expected = "store_view_roles=(null OR system\\/wso2.anonymous.role)&name=*" +
-                "&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC)" +
-                "&enableStore=(true OR null)&group=true&group.field=name&group.ngroups=true" +
+                "&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC OR " +
+                "APIProduct)&enableStore=(true OR null)&group=true&group.field=name&group.ngroups=true" +
                 "&group.sort=versionComparable desc&status=(PUBLISHED OR PROTOTYPED)";
         Assert.assertEquals("Generated query mismatched. ", expected, searchQuery);
         
         // search for 'test' in description 
         inputQuery = "description:test";
         expected = "store_view_roles=(null OR system\\/wso2.anonymous.role)&description=*test*&type=(HTTP OR WS " +
-                "OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC)" +
+                "OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC OR APIProduct)" +
                 "&status=(PUBLISHED OR PROTOTYPED)";
         searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false, false);
         Assert.assertEquals("Generated query mismatched for description search. ", expected, searchQuery);
@@ -140,7 +140,7 @@ public class RegistrySearchUtilTestCase {
         // search for provider 'pubuser'
         inputQuery = "provider:pubuser";
         expected = "store_view_roles=(null OR system\\/wso2.anonymous.role)&provider=*pubuser*&type=(HTTP OR WS " +
-                "OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC)" +
+                "OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC OR APIProduct)" +
                 "&status=(PUBLISHED OR PROTOTYPED)";
         searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false, false);
         Assert.assertEquals("Generated query mismatched for provider search. ", expected, searchQuery);
@@ -148,8 +148,8 @@ public class RegistrySearchUtilTestCase {
         // search for propertyname 'test'
         inputQuery = "property_name:test";
         expected =   "store_view_roles=(null OR system\\/wso2.anonymous.role)&api_meta.property_name__display=*test*" +
-                "&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC)" +
-                "&status=(PUBLISHED OR PROTOTYPED)";
+                "&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC " +
+                "OR APIProduct)&status=(PUBLISHED OR PROTOTYPED)";
         searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false, false);
         Assert.assertEquals("Generated query mismatched for property search. ", expected, searchQuery);
         
@@ -164,24 +164,24 @@ public class RegistrySearchUtilTestCase {
         String searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false, false);
 
         String expected = "store_view_roles=(null OR internal\\/subscriber OR internal\\/everyone)&name=*" +
-                "&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC)" +
-                "&enableStore=(true OR null)&group=true&group.field=name&group.ngroups=true" +
+                "&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC " +
+                "OR APIProduct)&enableStore=(true OR null)&group=true&group.field=name&group.ngroups=true" +
                 "&group.sort=versionComparable desc&status=(PUBLISHED OR PROTOTYPED)";
         Assert.assertEquals("Generated query mismatched. ", expected, searchQuery);
         
         // search for 'test' in description 
         inputQuery = "description:test";
         expected = "store_view_roles=(null OR internal\\/subscriber OR internal\\/everyone)&description=*test*" +
-                "&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC)" +
-                "&status=(PUBLISHED OR PROTOTYPED)";
+                "&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC OR " +
+                "APIProduct)&status=(PUBLISHED OR PROTOTYPED)";
         searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false, false);
         Assert.assertEquals("Generated query mismatched for description search. ", expected, searchQuery);
         
         // search for provider 'pubuser'
         inputQuery = "provider:pubuser";
         expected = "store_view_roles=(null OR internal\\/subscriber OR internal\\/everyone)&provider=*pubuser*" +
-                "&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC)" +
-                "&status=(PUBLISHED OR PROTOTYPED)";
+                "&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE OR WEBSUB OR WEBHOOK OR ASYNC " +
+                "OR APIProduct)&status=(PUBLISHED OR PROTOTYPED)";
         searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false, false);
         Assert.assertEquals("Generated query mismatched for provider search. ", expected, searchQuery);
         
@@ -189,7 +189,7 @@ public class RegistrySearchUtilTestCase {
         inputQuery = "property_name:test";
         expected =   "store_view_roles=(null OR internal\\/subscriber OR internal\\/everyone)" +
                 "&api_meta.property_name__display=*test*&type=(HTTP OR WS OR SOAPTOREST OR GRAPHQL OR SOAP OR SSE " +
-                "OR WEBSUB OR WEBHOOK OR ASYNC)&status=(PUBLISHED OR PROTOTYPED)";
+                "OR WEBSUB OR WEBHOOK OR ASYNC OR APIProduct)&status=(PUBLISHED OR PROTOTYPED)";
         searchQuery = RegistrySearchUtil.getDevPortalSearchQuery(inputQuery, ctx, false, false);
         Assert.assertEquals("Generated query mismatched for property search. ", expected, searchQuery);
     }
