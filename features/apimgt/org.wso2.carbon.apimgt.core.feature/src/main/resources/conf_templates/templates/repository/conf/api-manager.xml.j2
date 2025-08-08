@@ -490,7 +490,6 @@
       <EnableLightWeightAPIKeyGeneration>{{apim.key_manager.enable_lightweight_apikey_generation}}</EnableLightWeightAPIKeyGeneration>
       {% endif %}
       <AllowSubscriptionValidationDisabling>{{apim.key_manager.allow_subscription_validation_disabling}}</AllowSubscriptionValidationDisabling>
-      <SkipCreateResidentKeyManager>{{apim.key_manager.skip_create_resident_key_manager}}</SkipCreateResidentKeyManager>
     </APIKeyValidator>
 
 
@@ -1825,16 +1824,6 @@
             </CustomProperties>
         </PropertyConfigurations>
       {% endif %}
-
-      <TenantSharingConfigs>
-        {% for tenant_sharing_config in apim.tenant_sharing %}
-        <TenantSharingConfig type="{{tenant_sharing_config.type}}">
-            {% for key,value in tenant_sharing_config.properties.items() %}
-            <Property name="{{key}}">{{value}}</Property>
-            {% endfor %}
-        </TenantSharingConfig>
-        {% endfor %}
-      </TenantSharingConfigs>
 
       <Hashing>
         <HashingAlgorithm>{{apim.hashing.hashing_algorithm}}</HashingAlgorithm>

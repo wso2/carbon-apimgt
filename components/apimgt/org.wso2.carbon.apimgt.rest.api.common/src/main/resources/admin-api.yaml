@@ -6029,10 +6029,6 @@ components:
               defaultScopesClaim:
                 type: string
                 example: scope
-              authConfigurations:
-                type: array
-                items:
-                  $ref: '#/components/schemas/KeyManagerConfiguration'
               configurations:
                 type: array
                 items:
