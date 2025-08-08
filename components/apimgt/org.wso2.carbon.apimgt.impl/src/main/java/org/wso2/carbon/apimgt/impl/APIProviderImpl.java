@@ -6703,14 +6703,14 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, apiRevisionDeployments);
 
         for (APIRevisionDeployment deployment : apiRevisionDeployments) {
-            apiMgtDAO.updateAPIRevisionDeploymentStatus(apiRevisionUUID,
-                    APIConstants.APIRevisionStatus.API_REVISION_CREATED, deployment.getDeployment());
-
             if (!isInitiatedFromGateway) {
+                apiMgtDAO.updateAPIRevisionDeploymentStatus(apiRevisionUUID,
+                        APIConstants.APIRevisionStatus.API_REVISION_CREATED, deployment.getDeployment());
                 executeRevisionWorkflow(apiIdentifier, apiRevisionUUID, revisionId, organization, apiRevision,
                         deployment);
             } else {
-                apiMgtDAO.updateAPIRevisionDeployment(apiId, Collections.singleton(deployment));
+                apiMgtDAO.updateAPIRevisionDeploymentForDiscoveredAPIs(apiRevisionUUID,
+                        APIConstants.APIRevisionStatus.API_REVISION_APPROVED, Collections.singleton(deployment));
                 resumeDeployedAPIRevision(apiId, organization, apiRevisionUUID, String.valueOf(revisionId),
                         deployment.getDeployment(), true);
             }
@@ -6805,7 +6805,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 deployment.setDisplayOnDevportal(true);
                 apiMgtDAO.updateAPIRevisionDeployment(apiIdentifier.getUUID(), Collections.singleton(deployment));
                 resumeDeployedAPIRevision(apiIdentifier.getUUID(), organization, apiRevisionUUID,
-                        String.valueOf(revisionId), deployment.getDeployment());
+                        String.valueOf(revisionId), deployment.getDeployment(), false);
             }
 
         } catch (WorkflowException e) {
@@ -6825,6 +6825,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param environment  Deployment environment
      */
     @Override
+    @Deprecated
     public void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID,
                                           String revisionId, String environment) {
         resumeDeployedAPIRevisionInternal(apiId, organization, revisionUUID, revisionId, environment, false);
@@ -6843,11 +6844,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID,
                                           String revisionId, String environment, boolean isInitiatedFromGateway) {
-        if (isInitiatedFromGateway) {
-            resumeDeployedAPIRevisionInternal(apiId, organization, revisionUUID, revisionId, environment, true);
-        } else {
-            resumeDeployedAPIRevision(apiId, organization, revisionUUID, revisionId, environment);
-        }
+        resumeDeployedAPIRevisionInternal(apiId, organization, revisionUUID, revisionId, environment,
+                isInitiatedFromGateway);
     }
 
     /**
