@@ -195,7 +195,7 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     }
 
     @POST
-    @Path("/copy-api")
+    @Path("/copy-mcp-server")
     
     @Produces({ "application/json" })
     @ApiOperation(value = "Create a New MCP Server Version", notes = "This operation can be used to create a new version of an existing MCP server. The new version is specified as  `newVersion` query parameter. New MCP server will be in `CREATED` state. ", response = MCPServerDTO.class, authorizations = {
@@ -208,8 +208,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created MCP server as entity in the body. Location header contains URL of newly created MCP server. ", response = MCPServerDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
-    public Response createNewMCPServerVersion( @NotNull @Size(max=30) @ApiParam(value = "Version of the new MCP server.",required=true)  @QueryParam("newVersion") String newVersion,  @NotNull @ApiParam(value = "**API ID** consisting of the **UUID** of the API**. ",required=true)  @QueryParam("apiId") String apiId,  @ApiParam(value = "Specifies whether new MCP server should be added as default version.", defaultValue="false") @DefaultValue("false") @QueryParam("defaultVersion") Boolean defaultVersion,  @ApiParam(value = "Version of the Service that will used in creating new version")  @QueryParam("serviceVersion") String serviceVersion) throws APIManagementException{
-        return delegate.createNewMCPServerVersion(newVersion, apiId, defaultVersion, serviceVersion, securityContext);
+    public Response createNewMCPServerVersion( @NotNull @Size(max=30) @ApiParam(value = "Version of the new MCP server.",required=true)  @QueryParam("newVersion") String newVersion,  @NotNull @ApiParam(value = "**MCP Server ID** consisting of the **UUID** of the MCP Server**. ",required=true)  @QueryParam("mcpServerId") String mcpServerId,  @ApiParam(value = "Specifies whether new MCP server should be added as default version.", defaultValue="false") @DefaultValue("false") @QueryParam("defaultVersion") Boolean defaultVersion,  @ApiParam(value = "Version of the Service that will used in creating new version")  @QueryParam("serviceVersion") String serviceVersion) throws APIManagementException{
+        return delegate.createNewMCPServerVersion(newVersion, mcpServerId, defaultVersion, serviceVersion, securityContext);
     }
 
     @DELETE
@@ -351,8 +351,8 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @ApiResponse(code = 200, message = "OK. Export Successful. ", response = File.class),
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
         @ApiResponse(code = 500, message = "Internal Server Error.", response = ErrorDTO.class) })
-    public Response exportMCPServer( @ApiParam(value = "UUID of the MCP server")  @QueryParam("apiId") String apiId,  @ApiParam(value = "API Name ")  @QueryParam("name") String name,  @ApiParam(value = "Version of the MCP Server ")  @QueryParam("version") String version,  @ApiParam(value = "Revision number of the API artifact ")  @QueryParam("revisionNumber") String revisionNumber,  @ApiParam(value = "Provider name of the MCP Server ")  @QueryParam("providerName") String providerName,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format,  @ApiParam(value = "Preserve MCP Server Status during export ")  @QueryParam("preserveStatus") Boolean preserveStatus,  @ApiParam(value = "Export the latest revision of the MCP server ", defaultValue="false") @DefaultValue("false") @QueryParam("latestRevision") Boolean latestRevision,  @ApiParam(value = "Gateway environment of the exported MCP servers ")  @QueryParam("gatewayEnvironment") String gatewayEnvironment,  @ApiParam(value = "Preserve endpoint configuration credentials ")  @QueryParam("preserveCredentials") Boolean preserveCredentials) throws APIManagementException{
-        return delegate.exportMCPServer(apiId, name, version, revisionNumber, providerName, format, preserveStatus, latestRevision, gatewayEnvironment, preserveCredentials, securityContext);
+    public Response exportMCPServer( @ApiParam(value = "UUID of the MCP server")  @QueryParam("mcpServerId") String mcpServerId,  @ApiParam(value = "API Name ")  @QueryParam("name") String name,  @ApiParam(value = "Version of the MCP Server ")  @QueryParam("version") String version,  @ApiParam(value = "Revision number of the API artifact ")  @QueryParam("revisionNumber") String revisionNumber,  @ApiParam(value = "Provider name of the MCP Server ")  @QueryParam("providerName") String providerName,  @ApiParam(value = "Format of output documents. Can be YAML or JSON. ", allowableValues="JSON, YAML")  @QueryParam("format") String format,  @ApiParam(value = "Preserve MCP Server Status during export ")  @QueryParam("preserveStatus") Boolean preserveStatus,  @ApiParam(value = "Export the latest revision of the MCP server ", defaultValue="false") @DefaultValue("false") @QueryParam("latestRevision") Boolean latestRevision,  @ApiParam(value = "Gateway environment of the exported MCP servers ")  @QueryParam("gatewayEnvironment") String gatewayEnvironment,  @ApiParam(value = "Preserve endpoint configuration credentials ")  @QueryParam("preserveCredentials") Boolean preserveCredentials) throws APIManagementException{
+        return delegate.exportMCPServer(mcpServerId, name, version, revisionNumber, providerName, format, preserveStatus, latestRevision, gatewayEnvironment, preserveCredentials, securityContext);
     }
 
     @POST

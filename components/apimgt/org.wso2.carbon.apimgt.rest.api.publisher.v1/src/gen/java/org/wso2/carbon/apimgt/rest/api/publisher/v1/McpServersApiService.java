@@ -49,14 +49,14 @@ public interface McpServersApiService {
       public Response createMCPServer(MCPServerDTO mcPServerDTO, String openAPIVersion, MessageContext messageContext) throws APIManagementException;
       public Response createMCPServerFromOpenAPI(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, MessageContext messageContext) throws APIManagementException;
       public Response createMCPServerRevision(String mcpServerId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) throws APIManagementException;
-      public Response createNewMCPServerVersion(String newVersion, String apiId, Boolean defaultVersion, String serviceVersion, MessageContext messageContext) throws APIManagementException;
+      public Response createNewMCPServerVersion(String newVersion, String mcpServerId, Boolean defaultVersion, String serviceVersion, MessageContext messageContext) throws APIManagementException;
       public Response deleteCommentOfMCPServer(String commentId, String mcpServerId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deleteMCPServer(String mcpServerId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deleteMCPServerDocument(String mcpServerId, String documentId, String ifMatch, MessageContext messageContext) throws APIManagementException;
       public Response deleteMCPServerRevision(String mcpServerId, String revisionId, MessageContext messageContext) throws APIManagementException;
       public Response deployMCPServerRevision(String mcpServerId, String revisionId, List<APIRevisionDeploymentDTO> apIRevisionDeploymentDTO, MessageContext messageContext) throws APIManagementException;
       public Response editCommentOfMCPServer(String commentId, String mcpServerId, CommentRequestDTO commentRequestDTO, MessageContext messageContext) throws APIManagementException;
-      public Response exportMCPServer(String apiId, String name, String version, String revisionNumber, String providerName, String format, Boolean preserveStatus, Boolean latestRevision, String gatewayEnvironment, Boolean preserveCredentials, MessageContext messageContext) throws APIManagementException;
+      public Response exportMCPServer(String mcpServerId, String name, String version, String revisionNumber, String providerName, String format, Boolean preserveStatus, Boolean latestRevision, String gatewayEnvironment, Boolean preserveCredentials, MessageContext messageContext) throws APIManagementException;
       public Response generateInternalAPIKeyMCPServer(String mcpServerId, MessageContext messageContext) throws APIManagementException;
       public Response getAllMCPServers(Integer limit, Integer offset, String xWSO2Tenant, String query, String ifNoneMatch, String accept, MessageContext messageContext) throws APIManagementException;
       public Response getCommentOfMCPServer(String commentId, String mcpServerId, String xWSO2Tenant, String ifNoneMatch, Boolean includeCommenterInfo, Integer replyLimit, Integer replyOffset, MessageContext messageContext) throws APIManagementException;

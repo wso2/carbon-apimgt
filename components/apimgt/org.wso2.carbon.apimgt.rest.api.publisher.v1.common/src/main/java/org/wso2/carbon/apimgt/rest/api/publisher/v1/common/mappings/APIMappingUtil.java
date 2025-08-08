@@ -125,6 +125,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerMetadataDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerMetadataListDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerOperationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MockResponsePayloadListDTO;
@@ -755,6 +756,7 @@ public class APIMappingUtil {
             corsConfiguration = APIUtil.getDefaultCorsConfiguration();
         }
         model.setCorsConfiguration(corsConfiguration);
+        setMaxTpsFromMcpServerDTOToModel(dto, model);
         model.setAuthorizationHeader(dto.getAuthorizationHeader());
         model.setApiKeyHeader(dto.getApiKeyHeader());
         if (model.getApiKeyHeader() == null) {
@@ -1436,56 +1438,99 @@ public class APIMappingUtil {
     }
 
     /**
-     * Sets the maximum TPS (transactions per second) values from an {@link APIDTO}
-     * into the internal {@link API} model.
+     * Populates the {@link API} model with max TPS values from an {@link MCPServerDTO}.
      *
-     * @param dto the APIDTO containing max TPS details
-     * @param api the API model to populate
+     * @param mcpServerDto the MCP server DTO containing max TPS details
+     * @param api          the API model to populate
      */
-    private static void setMaxTpsFromApiDTOToModel(APIDTO dto, API api) {
+    private static void setMaxTpsFromMcpServerDTOToModel(MCPServerDTO mcpServerDto, API api) {
 
-        setMaxTpsFromMaxTpsDTO(dto.getMaxTps(), api);
+        if (mcpServerDto == null) {
+            return;
+        }
+        MaxTpsDTO maxTpsDto = mcpServerDto.getMaxTps();
+        BackendThrottlingConfiguration backendConfig = new BackendThrottlingConfiguration();
+
+        if (maxTpsDto != null) {
+            applyCommonMaxTpsToModel(
+                    maxTpsDto.getProduction(),
+                    maxTpsDto.getProductionTimeUnit() != null ? maxTpsDto.getProductionTimeUnit().toString() : null,
+                    maxTpsDto.getSandbox(),
+                    maxTpsDto.getSandboxTimeUnit() != null ? maxTpsDto.getSandboxTimeUnit().toString() : null,
+                    api,
+                    backendConfig
+            );
+        }
+        api.setBackendThrottlingConfiguration(backendConfig);
     }
 
     /**
-     * Applies max TPS configuration from an {@link APIMaxTpsDTO} to the {@link API} model.
-     * This includes production and sandbox TPS values, time units, and token-based throttling settings.
+     * Populates the {@link API} model with max TPS values from an {@link APIDTO}.
      *
-     * @param maxTpsDTO the DTO containing max TPS configuration
-     * @param api       the API model to update
+     * @param apiDto the API DTO containing max TPS details
+     * @param api    the API model to populate
      */
-    private static void setMaxTpsFromMaxTpsDTO(APIMaxTpsDTO maxTpsDTO, API api) {
+    private static void setMaxTpsFromApiDTOToModel(APIDTO apiDto, API api) {
 
-        BackendThrottlingConfiguration backendThrottlingConfiguration = new BackendThrottlingConfiguration();
-        if (maxTpsDTO != null) {
-            if (maxTpsDTO.getProduction() != null) {
-                String prodTps = maxTpsDTO.getProduction().toString();
-                api.setProductionMaxTps(prodTps);
-                backendThrottlingConfiguration.setProductionMaxTps(prodTps);
-            }
-            if (maxTpsDTO.getProductionTimeUnit() != null) {
-                String prodTimeUnit = getTimeUnitInMilliseconds(maxTpsDTO.getProductionTimeUnit().toString());
-                api.setProductionTimeUnit(prodTimeUnit);
-                backendThrottlingConfiguration.setProductionTimeUnit(prodTimeUnit);
-            }
-            if (maxTpsDTO.getSandbox() != null) {
-                String sandboxTps = maxTpsDTO.getSandbox().toString();
-                api.setSandboxMaxTps(sandboxTps);
-                backendThrottlingConfiguration.setSandboxMaxTps(sandboxTps);
-            }
-            if (maxTpsDTO.getSandboxTimeUnit() != null) {
-                String sandboxTimeUnit = getTimeUnitInMilliseconds(maxTpsDTO.getSandboxTimeUnit().toString());
-                api.setSandboxTimeUnit(sandboxTimeUnit);
-                backendThrottlingConfiguration.setSandboxTimeUnit(sandboxTimeUnit);
-            }
+        if (apiDto == null) {
+            return;
+        }
+        APIMaxTpsDTO maxTpsDto = apiDto.getMaxTps();
+        BackendThrottlingConfiguration backendConfig = new BackendThrottlingConfiguration();
+
+        if (maxTpsDto != null) {
+            applyCommonMaxTpsToModel(
+                    maxTpsDto.getProduction(),
+                    maxTpsDto.getProductionTimeUnit() != null ? maxTpsDto.getProductionTimeUnit().toString() : null,
+                    maxTpsDto.getSandbox(),
+                    maxTpsDto.getSandboxTimeUnit() != null ? maxTpsDto.getSandboxTimeUnit().toString() : null,
+                    api,
+                    backendConfig
+            );
+
             APIMaxTpsTokenBasedThrottlingConfigurationDTO tokenConfig =
-                    maxTpsDTO.getTokenBasedThrottlingConfiguration();
+                    maxTpsDto.getTokenBasedThrottlingConfiguration();
             if (tokenConfig != null && tokenConfig.isIsTokenBasedThrottlingEnabled()) {
-                backendThrottlingConfiguration.setTokenBasedThrottlingConfiguration(
-                        buildThrottlingConfiguration(tokenConfig));
+                backendConfig.setTokenBasedThrottlingConfiguration(buildThrottlingConfiguration(tokenConfig));
             }
         }
-        api.setBackendThrottlingConfiguration(backendThrottlingConfiguration);
+        api.setBackendThrottlingConfiguration(backendConfig);
+    }
+
+    /**
+     * Applies common max TPS values from DTOs into the API model and backend throttling configuration.
+     *
+     * @param productionTps      production TPS value
+     * @param productionTimeUnit production time unit
+     * @param sandboxTps         sandbox TPS value
+     * @param sandboxTimeUnit    sandbox time unit
+     * @param api                API model to populate
+     * @param backendConfig      backend throttling configuration to populate
+     */
+    private static void applyCommonMaxTpsToModel(Long productionTps, String productionTimeUnit,
+                                                 Long sandboxTps, String sandboxTimeUnit,
+                                                 API api, BackendThrottlingConfiguration backendConfig) {
+
+        if (productionTps != null) {
+            String prodTpsStr = productionTps.toString();
+            api.setProductionMaxTps(prodTpsStr);
+            backendConfig.setProductionMaxTps(prodTpsStr);
+        }
+        if (productionTimeUnit != null) {
+            String prodTimeUnitMs = getTimeUnitInMilliseconds(productionTimeUnit);
+            api.setProductionTimeUnit(prodTimeUnitMs);
+            backendConfig.setProductionTimeUnit(prodTimeUnitMs);
+        }
+        if (sandboxTps != null) {
+            String sandboxTpsStr = sandboxTps.toString();
+            api.setSandboxMaxTps(sandboxTpsStr);
+            backendConfig.setSandboxMaxTps(sandboxTpsStr);
+        }
+        if (sandboxTimeUnit != null) {
+            String sandboxTimeUnitMs = getTimeUnitInMilliseconds(sandboxTimeUnit);
+            api.setSandboxTimeUnit(sandboxTimeUnitMs);
+            backendConfig.setSandboxTimeUnit(sandboxTimeUnitMs);
+        }
     }
 
     /**
@@ -1495,12 +1540,12 @@ public class APIMappingUtil {
      */
     private static String getTimeUnitInMilliseconds(String timeUnit) {
         switch(timeUnit) {
-        case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE:
-            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE_MS;
-        case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR:
-            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR_MS;
-        default:
-            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_SECOND_MS;
+            case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE:
+                return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE_MS;
+            case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR:
+                return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR_MS;
+            default:
+                return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_SECOND_MS;
         }
     }
 
@@ -1511,12 +1556,12 @@ public class APIMappingUtil {
      */
     private static String convertFromMilliseconds(String timeUnitInMillis) {
         switch(timeUnitInMillis) {
-        case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE_MS:
-            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE;
-        case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR_MS:
-            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR;
-        default:
-            return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_SECOND;
+            case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE_MS:
+                return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_MINUTE;
+            case APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR_MS:
+                return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_HOUR;
+            default:
+                return APIConstants.API_BACKEND_THROTTLE_TIMEUNIT_SECOND;
         }
     }
 
@@ -1953,7 +1998,7 @@ public class APIMappingUtil {
         dto.setWsdlUrl(model.getWsdlUrl());
         setEndpointSecurityFromModel(model, ()
                 -> (Map) dto.getEndpointConfig(), dto::setEndpointConfig, preserveCredentials);
-        setMaxTpsFromModelToDTO(model, dto::setMaxTps);
+        setMaxTpsFromModelToApiDTO(model, dto);
 
         dto.setAuthorizationHeader(model.getAuthorizationHeader());
         dto.setApiKeyHeader(model.getApiKeyHeader());
@@ -2331,6 +2376,8 @@ public class APIMappingUtil {
         setEndpointSecurityFromModel(model, ()
                 -> (Map) dto.getEndpointConfig(), dto::setEndpointConfig, preserveCredentials);
 
+        setMaxTpsFromModelToMcpServerDTO(model, dto);
+
         dto.setAuthorizationHeader(model.getAuthorizationHeader());
         dto.setApiKeyHeader(model.getApiKeyHeader());
         if (model.getApiSecurity() != null) {
@@ -2617,46 +2664,108 @@ public class APIMappingUtil {
     }
 
     /**
-     * Sets the maximum TPS configurations from the API model to a generic DTO.
+     * Populates the Max TPS configuration in an {@link APIDTO} from the given {@link API} model.
+     * Preserves the same logic and behavior as the previous implementation, including
+     * handling of token-based throttling configuration if present.
      *
-     * @param api          API model containing maximum TPS information
-     * @param maxTpsSetter Consumer to set the maximum TPS information in the DTO
+     * @param api    the API model containing Max TPS values
+     * @param apiDto the APIDTO to populate
      */
-    private static void setMaxTpsFromModelToDTO(API api, Consumer<APIMaxTpsDTO> maxTpsSetter) {
+    private static void setMaxTpsFromModelToApiDTO(API api, APIDTO apiDto) {
 
-        if (StringUtils.isBlank(api.getProductionMaxTps()) && StringUtils.isBlank(api.getSandboxMaxTps())) {
-            return;
+        APIMaxTpsDTO built = buildApiMaxTpsDtoFromModel(api);
+        if (built != null) {
+            apiDto.setMaxTps(built);
+        }
+    }
+
+    /**
+     * Populates the Max TPS configuration in an {@link MCPServerDTO} from the given {@link API} model.
+     * Uses the common builder and converts the {@link APIMaxTpsDTO} to {@link MaxTpsDTO}
+     * since MCPServerDTO does not support token-based throttling.
+     *
+     * @param api          the API model containing Max TPS values
+     * @param mcpServerDto the MCPServerDTO to populate
+     */
+    private static void setMaxTpsFromModelToMcpServerDTO(API api, MCPServerDTO mcpServerDto) {
+
+        APIMaxTpsDTO built = buildApiMaxTpsDtoFromModel(api);
+        if (built != null) {
+            mcpServerDto.setMaxTps(toMaxTpsDTO(built));
+        }
+    }
+
+    /**
+     * Builds an {@link APIMaxTpsDTO} from the given {@link API} model.
+     * Reads production/sandbox TPS values, their time units, and optionally the
+     * token-based throttling configuration from the model. If both TPS values are blank
+     * or a number conversion error occurs, returns {@code null}.
+     *
+     * @param api the API model to read from
+     * @return a populated {@link APIMaxTpsDTO} or {@code null} if no values found
+     */
+    private static APIMaxTpsDTO buildApiMaxTpsDtoFromModel(API api) {
+
+        if (api == null || (StringUtils.isBlank(api.getProductionMaxTps())
+                && StringUtils.isBlank(api.getSandboxMaxTps()))) {
+            return null;
         }
         APIMaxTpsDTO maxTpsDTO = new APIMaxTpsDTO();
         try {
-            if (!StringUtils.isBlank(api.getProductionMaxTps())) {
+            if (StringUtils.isNotBlank(api.getProductionMaxTps())) {
                 maxTpsDTO.setProduction(Long.parseLong(api.getProductionMaxTps()));
             }
-            if (!StringUtils.isBlank(api.getSandboxMaxTps())) {
+            if (StringUtils.isNotBlank(api.getSandboxMaxTps())) {
                 maxTpsDTO.setSandbox(Long.parseLong(api.getSandboxMaxTps()));
             }
-            if (!StringUtils.isBlank(api.getProductionTimeUnit())) {
-                maxTpsDTO.setProductionTimeUnit(APIMaxTpsDTO.ProductionTimeUnitEnum.valueOf(
-                        convertFromMilliseconds(api.getProductionTimeUnit())));
+            if (StringUtils.isNotBlank(api.getProductionTimeUnit())) {
+                maxTpsDTO.setProductionTimeUnit(
+                        APIMaxTpsDTO.ProductionTimeUnitEnum.valueOf(
+                                convertFromMilliseconds(api.getProductionTimeUnit())));
             }
-            if (!StringUtils.isBlank(api.getSandboxTimeUnit())) {
-                maxTpsDTO.setSandboxTimeUnit(APIMaxTpsDTO.SandboxTimeUnitEnum.valueOf(
-                        convertFromMilliseconds(api.getSandboxTimeUnit())));
+            if (StringUtils.isNotBlank(api.getSandboxTimeUnit())) {
+                maxTpsDTO.setSandboxTimeUnit(
+                        APIMaxTpsDTO.SandboxTimeUnitEnum.valueOf(convertFromMilliseconds(api.getSandboxTimeUnit())));
             }
-            BackendThrottlingConfiguration backendThrottlingConfiguration = api.getBackendThrottlingConfiguration();
-            if (backendThrottlingConfiguration != null
-                    && backendThrottlingConfiguration.getTokenBasedThrottlingConfiguration() != null
-                    && backendThrottlingConfiguration.getTokenBasedThrottlingConfiguration()
-                    .isTokenBasedThrottlingEnabled()) {
-                APIMaxTpsTokenBasedThrottlingConfigurationDTO throttlingConfigurationsDTO =
-                        buildThrottlingConfigurationDTO(
-                                backendThrottlingConfiguration.getTokenBasedThrottlingConfiguration());
-                maxTpsDTO.setTokenBasedThrottlingConfiguration(throttlingConfigurationsDTO);
+            BackendThrottlingConfiguration backendConfig = api.getBackendThrottlingConfiguration();
+            if (backendConfig != null
+                    && backendConfig.getTokenBasedThrottlingConfiguration() != null
+                    && backendConfig.getTokenBasedThrottlingConfiguration().isTokenBasedThrottlingEnabled()) {
+                APIMaxTpsTokenBasedThrottlingConfigurationDTO tokenCfg =
+                        buildThrottlingConfigurationDTO(backendConfig.getTokenBasedThrottlingConfiguration());
+                maxTpsDTO.setTokenBasedThrottlingConfiguration(tokenCfg);
             }
-            maxTpsSetter.accept(maxTpsDTO);
+            return maxTpsDTO;
         } catch (NumberFormatException e) {
             log.error("Cannot convert to Long format when setting maxTps for API", e);
+            return null;
         }
+    }
+
+    /**
+     * Converts an {@link APIMaxTpsDTO} to a {@link MaxTpsDTO} for use in MCPServerDTO.
+     * This excludes token-based throttling configuration, as MCPServerDTO
+     * does not support it.
+     *
+     * @param source the APIMaxTpsDTO to convert
+     * @return the converted MaxTpsDTO or {@code null} if the source is null
+     */
+    private static MaxTpsDTO toMaxTpsDTO(APIMaxTpsDTO source) {
+
+        if (source == null) {
+            return null;
+        }
+        MaxTpsDTO target = new MaxTpsDTO();
+        target.setProduction(source.getProduction());
+        target.setSandbox(source.getSandbox());
+        if (source.getProductionTimeUnit() != null) {
+            target.setProductionTimeUnit(
+                    MaxTpsDTO.ProductionTimeUnitEnum.valueOf(source.getProductionTimeUnit().name()));
+        }
+        if (source.getSandboxTimeUnit() != null) {
+            target.setSandboxTimeUnit(MaxTpsDTO.SandboxTimeUnitEnum.valueOf(source.getSandboxTimeUnit().name()));
+        }
+        return target;
     }
 
     /**

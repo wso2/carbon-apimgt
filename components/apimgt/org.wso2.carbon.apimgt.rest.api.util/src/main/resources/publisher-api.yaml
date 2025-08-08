@@ -1222,24 +1222,25 @@ paths:
           "https://127.0.0.1:9443/api/am/publisher/v3/apis/2fd14eb8-b828-4013-b448-0739d2e76bf7/subscription-policies"'
       operationId: getAPISubscriptionPolicies
 
-  /apis/copy-api:
+  /mcp-servers/copy-mcp-server:
     post:
       tags:
-        - APIs
-      summary: Create a New API Version
+        - MCP Servers
+      summary: Create a New MCP Server Version
       description: |
-        This operation can be used to create a new version of an existing API. The new version is specified as `newVersion` query parameter. New API will be in `CREATED` state.
+        This operation can be used to create a new version of an existing MCP server. The new version is specified as 
+        `newVersion` query parameter. New MCP server will be in `CREATED` state.
       parameters:
         - name: newVersion
           in: query
-          description: Version of the new API.
+          description: Version of the new MCP server.
           required: true
           schema:
             maxLength: 30
             type: string
         - name: defaultVersion
           in: query
-          description: Specifies whether new API should be added as default version.
+          description: Specifies whether new MCP server should be added as default version.
           schema:
             type: boolean
             default: false
@@ -1249,7 +1250,7 @@ paths:
           schema:
             type: string
           required: false
-        - $ref: '#/components/parameters/apiId-Q'
+        - $ref: '#/components/parameters/mcpServerId-Q'
       responses:
         201:
           description: |
@@ -3891,7 +3892,7 @@ paths:
       description: |
         This operation can be used to export the details of a particular MCP server as a zip file.
       parameters:
-        - name: apiId
+        - name: mcpServerId
           in: query
           description: UUID of the MCP server
           schema:
@@ -11480,7 +11481,7 @@ components:
         visibility:
           type: string
           description: |
-            The visibility level of the API. Accepts one of the following: PUBLIC, PRIVATE, RESTRICTED.
+            The visibility level of the MCP Server. Accepts one of the following: PUBLIC, PRIVATE, RESTRICTED.
           example: PUBLIC
           default: PUBLIC
           enum:
@@ -11603,6 +11604,8 @@ components:
         workflowStatus:
           type: string
           example: APPROVED
+        specVersion:
+          type: string
         createdTime:
           type: string
         lastUpdatedTimestamp:
@@ -13209,6 +13212,33 @@ components:
           type: string
           description: media-type of the file
           example: image/jpeg
+    MaxTps:
+      type: object
+      properties:
+        production:
+          type: integer
+          format: int64
+          example: 1000
+        productionTimeUnit:
+          type: string
+          description: "Time unit for the production."
+          default: SECOND
+          enum:
+            - SECOND
+            - MINUTE
+            - HOUR
+        sandbox:
+          type: integer
+          format: int64
+          example: 1000
+        sandboxTimeUnit:
+          type: string
+          description: "Time unit for the sandbox."
+          default: SECOND
+          enum:
+            - SECOND
+            - MINUTE
+            - HOUR
     APIMaxTps:
       type: object
       properties:

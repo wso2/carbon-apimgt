@@ -15,6 +15,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIMonetizationInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerOperationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerOperationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerScopeDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MaxTpsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubtypeConfigurationDTO;
 import javax.validation.constraints.*;
@@ -69,6 +70,7 @@ public class MCPServerDTO   {
     private String authorizationHeader = null;
     private String apiKeyHeader = null;
     private List<String> securityScheme = new ArrayList<String>();
+    private MaxTpsDTO maxTps = null;
 
     @XmlType(name="VisibilityEnum")
     @XmlEnum(String.class)
@@ -190,6 +192,7 @@ return null;
     private APIBusinessInformationDTO businessInformation = null;
     private APICorsConfigurationDTO corsConfiguration = null;
     private String workflowStatus = null;
+    private String specVersion = null;
     private String createdTime = null;
     private String lastUpdatedTimestamp = null;
     @Scope(name = "apim:mcp_server_publish", description="", value ="")
@@ -611,7 +614,25 @@ return null;
   }
 
   /**
-   * The visibility level of the API. Accepts one of the following: PUBLIC, PRIVATE, RESTRICTED. 
+   **/
+  public MCPServerDTO maxTps(MaxTpsDTO maxTps) {
+    this.maxTps = maxTps;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+      @Valid
+  @JsonProperty("maxTps")
+  public MaxTpsDTO getMaxTps() {
+    return maxTps;
+  }
+  public void setMaxTps(MaxTpsDTO maxTps) {
+    this.maxTps = maxTps;
+  }
+
+  /**
+   * The visibility level of the MCP Server. Accepts one of the following: PUBLIC, PRIVATE, RESTRICTED. 
    **/
   public MCPServerDTO visibility(VisibilityEnum visibility) {
     this.visibility = visibility;
@@ -619,7 +640,7 @@ return null;
   }
 
   
-  @ApiModelProperty(example = "PUBLIC", value = "The visibility level of the API. Accepts one of the following: PUBLIC, PRIVATE, RESTRICTED. ")
+  @ApiModelProperty(example = "PUBLIC", value = "The visibility level of the MCP Server. Accepts one of the following: PUBLIC, PRIVATE, RESTRICTED. ")
   @JsonProperty("visibility")
   public VisibilityEnum getVisibility() {
     return visibility;
@@ -861,6 +882,23 @@ return null;
 
   /**
    **/
+  public MCPServerDTO specVersion(String specVersion) {
+    this.specVersion = specVersion;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("specVersion")
+  public String getSpecVersion() {
+    return specVersion;
+  }
+  public void setSpecVersion(String specVersion) {
+    this.specVersion = specVersion;
+  }
+
+  /**
+   **/
   public MCPServerDTO createdTime(String createdTime) {
     this.createdTime = createdTime;
     return this;
@@ -1069,6 +1107,7 @@ return null;
         Objects.equals(authorizationHeader, mcPServer.authorizationHeader) &&
         Objects.equals(apiKeyHeader, mcPServer.apiKeyHeader) &&
         Objects.equals(securityScheme, mcPServer.securityScheme) &&
+        Objects.equals(maxTps, mcPServer.maxTps) &&
         Objects.equals(visibility, mcPServer.visibility) &&
         Objects.equals(visibleRoles, mcPServer.visibleRoles) &&
         Objects.equals(visibleTenants, mcPServer.visibleTenants) &&
@@ -1083,6 +1122,7 @@ return null;
         Objects.equals(businessInformation, mcPServer.businessInformation) &&
         Objects.equals(corsConfiguration, mcPServer.corsConfiguration) &&
         Objects.equals(workflowStatus, mcPServer.workflowStatus) &&
+        Objects.equals(specVersion, mcPServer.specVersion) &&
         Objects.equals(createdTime, mcPServer.createdTime) &&
         Objects.equals(lastUpdatedTimestamp, mcPServer.lastUpdatedTimestamp) &&
         Objects.equals(lastUpdatedTime, mcPServer.lastUpdatedTime) &&
@@ -1097,7 +1137,7 @@ return null;
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, endpointConfig, version, provider, lifeCycleStatus, hasThumbnail, isDefaultVersion, isRevision, revisionedMCPServerId, revisionId, enableSchemaValidation, audiences, transport, tags, policies, organizationPolicies, throttlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, visibility, visibleRoles, visibleTenants, visibleOrganizations, mcpServerPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, createdTime, lastUpdatedTimestamp, lastUpdatedTime, subtypeConfiguration, scopes, operations, categories, keyManagers, gatewayVendor, gatewayType);
+    return Objects.hash(id, name, description, context, endpointConfig, version, provider, lifeCycleStatus, hasThumbnail, isDefaultVersion, isRevision, revisionedMCPServerId, revisionId, enableSchemaValidation, audiences, transport, tags, policies, organizationPolicies, throttlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, visibleOrganizations, mcpServerPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, specVersion, createdTime, lastUpdatedTimestamp, lastUpdatedTime, subtypeConfiguration, scopes, operations, categories, keyManagers, gatewayVendor, gatewayType);
   }
 
   @Override
@@ -1128,6 +1168,7 @@ return null;
     sb.append("    authorizationHeader: ").append(toIndentedString(authorizationHeader)).append("\n");
     sb.append("    apiKeyHeader: ").append(toIndentedString(apiKeyHeader)).append("\n");
     sb.append("    securityScheme: ").append(toIndentedString(securityScheme)).append("\n");
+    sb.append("    maxTps: ").append(toIndentedString(maxTps)).append("\n");
     sb.append("    visibility: ").append(toIndentedString(visibility)).append("\n");
     sb.append("    visibleRoles: ").append(toIndentedString(visibleRoles)).append("\n");
     sb.append("    visibleTenants: ").append(toIndentedString(visibleTenants)).append("\n");
@@ -1142,6 +1183,7 @@ return null;
     sb.append("    businessInformation: ").append(toIndentedString(businessInformation)).append("\n");
     sb.append("    corsConfiguration: ").append(toIndentedString(corsConfiguration)).append("\n");
     sb.append("    workflowStatus: ").append(toIndentedString(workflowStatus)).append("\n");
+    sb.append("    specVersion: ").append(toIndentedString(specVersion)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
     sb.append("    lastUpdatedTimestamp: ").append(toIndentedString(lastUpdatedTimestamp)).append("\n");
     sb.append("    lastUpdatedTime: ").append(toIndentedString(lastUpdatedTime)).append("\n");
