@@ -4750,7 +4750,7 @@ public class SQLConstants {
                     "JOIN AM_API_URL_MAPPING REF_MAP " +
                     "  ON REF_MAP.URL_MAPPING_ID = OP.REF_URL_MAPPING_ID " +
                     "  AND REF_MAP.REVISION_UUID IS NULL " +
-                    "WHERE REF_MAP.API_ID = ? AND MCP.ORGANIZATION = ?;";
+                    "WHERE REF_MAP.API_ID = ? AND MCP.ORGANIZATION = ? AND MCP.API_TYPE = ?";
     /**
      * Static class to hold database queries related to gateway policies tables
      */
