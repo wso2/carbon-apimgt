@@ -2057,7 +2057,7 @@
         <carbon.apimgt.imp.pkg.version>[9.0.0, 10.0.0)</carbon.apimgt.imp.pkg.version>
 
 
-        <carbon.analytics.common.version>5.3.20</carbon.analytics.common.version>
+        <carbon.analytics.common.version>5.3.23</carbon.analytics.common.version>
 
         <!-- Carbon kernel version -->
         <carbon.kernel.version>4.9.28</carbon.kernel.version>
@@ -2067,7 +2067,7 @@
         <carbon.commons.version>4.9.11</carbon.commons.version>
 
         <carbon.registry.version>4.8.43</carbon.registry.version>
-        <carbon.mediation.version>4.7.245</carbon.mediation.version>
+        <carbon.mediation.version>4.7.254</carbon.mediation.version>
 
         <mongodb.driver.version>4.1.0</mongodb.driver.version>
 
@@ -2147,7 +2147,7 @@
         <imp.package.version.osgi.framework>[1.6.0, 2.0.0)</imp.package.version.osgi.framework>
 
         <!-- Misc Versions -->
-        <synapse.version>4.0.0-wso2v221</synapse.version>
+        <synapse.version>4.0.0-wso2v240</synapse.version>
         <orbit.version.json>3.0.0.wso2v1</orbit.version.json>
 
         <!-- orbit httpmime versions-->
@@ -2210,7 +2210,7 @@
 
         <carbon.throttle.module.version>4.2.1</carbon.throttle.module.version>
 
-        <rule.validator.version>1.0.0</rule.validator.version>
+        <rule.validator.version>1.0.1</rule.validator.version>
 
         <!-- apache cxf version -->
         <cxf.version>3.6.5</cxf.version>
