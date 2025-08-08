@@ -97,7 +97,7 @@ public class InternalAPIKeyAuthenticator implements Authenticator {
                 OpenAPI openAPI = (OpenAPI) synCtx.getProperty(APIMgtGatewayConstants.OPEN_API_OBJECT);
                 if (openAPI == null && (!APIConstants.GRAPHQL_API.equals(synCtx.getProperty(APIConstants.API_TYPE))
                         && !APIConstants.API_TYPE_MCP.equals(synCtx.getProperty(APIConstants.API_TYPE)))) {
-                    log.error("Swagger is missing in the gateway. " +
+                    log.error("Swagger is missing in the gateway and API type is neither GraphQL nor MCP." +
                             "Therefore, Internal Key authentication cannot be performed.");
                     return new AuthenticationResponse(false, true, false,
                             APISecurityConstants.API_AUTH_MISSING_OPEN_API_DEF,
