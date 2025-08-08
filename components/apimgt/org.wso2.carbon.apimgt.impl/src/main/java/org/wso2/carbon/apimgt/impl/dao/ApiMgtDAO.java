@@ -7265,11 +7265,11 @@ public class ApiMgtDAO {
             prepStmt.setString(8, api.getGatewayVendor());
             prepStmt.setString(9,
                     APIUtil.setSubscriptionValidationStatusBeforeInsert(api.getAvailableTiers()));
-            prepStmt.setString(10, api.getUuid());
             if (api.getDisplayName() == null) {
                 api.setDisplayName(api.getId().getName());
             }
-            prepStmt.setString(11, api.getDisplayName());
+            prepStmt.setString(10, api.getDisplayName());
+            prepStmt.setString(11, api.getUuid());
             prepStmt.execute();
 
             if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { //A change has
