@@ -7265,11 +7265,11 @@ public class ApiMgtDAO {
             prepStmt.setString(8, api.getGatewayVendor());
             prepStmt.setString(9,
                     APIUtil.setSubscriptionValidationStatusBeforeInsert(api.getAvailableTiers()));
-            prepStmt.setString(10, api.getUuid());
             if (api.getDisplayName() == null) {
                 api.setDisplayName(api.getId().getName());
             }
-            prepStmt.setString(11, api.getDisplayName());
+            prepStmt.setString(10, api.getDisplayName());
+            prepStmt.setString(11, api.getUuid());
             prepStmt.execute();
 
             if (api.isDefaultVersion() ^ api.getId().getVersion().equals(previousDefaultVersion)) { //A change has
@@ -20047,6 +20047,41 @@ public class ApiMgtDAO {
         } catch (SQLException e) {
             handleException("Failed to update Deployment Mapping entry for API UUID "
                     + apiUUID, e);
+        }
+    }
+
+    /** Update API revision Deployment mapping record for Discovered APIs
+     *
+     * @param apiUUID
+     * @param status
+     * @param deployments
+     * @throws APIManagementException
+     */
+    public void updateAPIRevisionDeploymentForDiscoveredAPIs(String apiUUID, String status,
+                                                             Set<APIRevisionDeployment> deployments)
+            throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            // Update an entry from AM_DEPLOYMENT_REVISION_MAPPING table
+            try (PreparedStatement statement = connection
+                    .prepareStatement(SQLConstants.APIRevisionSqlConstants
+                            .UPDATE_API_REVISION_DEPLOYMENT_MAPPING_FOR_DISCOVERED_APIS)) {
+                for (APIRevisionDeployment deployment : deployments) {
+                    statement.setString(1, status);
+                    statement.setBoolean(2, deployment.isDisplayOnDevportal());
+                    statement.setString(3, deployment.getDeployment());
+                    statement.setString(4, deployment.getRevisionUUID());
+                    statement.addBatch();
+                }
+                statement.executeBatch();
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                throw e;
+            }
+        } catch (SQLException e) {
+            handleException("Failed to update Deployment Mapping entry for API UUID " + apiUUID, e);
         }
     }
 
