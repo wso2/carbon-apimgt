@@ -440,7 +440,12 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
 
             messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
-            messageContext.setProperty(APIConstants.API_TYPE, apiType); // for internal key auth
+            if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Setting API type for MCP internal key authentication: " + apiType);
+                }
+                messageContext.setProperty(APIConstants.API_TYPE, apiType); // for MCP internal key auth
+            }
             boolean isMCPNoAuthRequest = false;
             if (messageContext.getProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST) != null) {
                 isMCPNoAuthRequest = (boolean) messageContext.getProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST);
