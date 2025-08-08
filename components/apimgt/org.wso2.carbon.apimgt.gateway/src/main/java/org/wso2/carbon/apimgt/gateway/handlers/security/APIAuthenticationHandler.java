@@ -441,6 +441,9 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
 
             messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
             if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Setting API type for MCP internal key authentication: " + apiType);
+                }
                 messageContext.setProperty(APIConstants.API_TYPE, apiType); // for MCP internal key auth
             }
             boolean isMCPNoAuthRequest = false;
