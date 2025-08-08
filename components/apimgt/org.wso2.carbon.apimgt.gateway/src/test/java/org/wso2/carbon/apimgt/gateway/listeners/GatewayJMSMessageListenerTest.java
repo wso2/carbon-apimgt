@@ -33,6 +33,8 @@ import javax.jms.TextMessage;
 import javax.jms.JMSException;
 
 import org.wso2.andes.client.AMQTopic;
+import org.wso2.carbon.apimgt.gateway.notifiers.GatewayNotifier;
+import org.wso2.carbon.apimgt.gateway.notifiers.DeploymentStatusNotifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.andes.client.message.JMSTextMessage;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -45,11 +47,13 @@ import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever
  * Unit test cases related GatewayJMSMessageListener
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ServiceReferenceHolder.class})
+@PrepareForTest({ServiceReferenceHolder.class, DeploymentStatusNotifier.class, GatewayNotifier.class})
 public class GatewayJMSMessageListenerTest {
 
     private GatewayJMSMessageListener gatewayJMSMessageListener;
     private ServiceReferenceHolder serviceReferenceHolder;
+    private DeploymentStatusNotifier deploymentStatusNotifier;
+    private GatewayNotifier gatewayNotifier;
 
     @Before
     public void setup() {
@@ -66,6 +70,13 @@ public class GatewayJMSMessageListenerTest {
                 .thenReturn(gatewayArtifactSynchronizerProperties);
         EventHubConfigurationDto eventHubConfigurationDto = Mockito.mock(EventHubConfigurationDto.class);
         Mockito.when(apiManagerConfiguration.getEventHubConfigurationDto()).thenReturn(eventHubConfigurationDto);
+        Mockito.when(eventHubConfigurationDto.hasEventWaitingTime()).thenReturn(false);
+        PowerMockito.mockStatic(DeploymentStatusNotifier.class);
+        deploymentStatusNotifier = Mockito.mock(DeploymentStatusNotifier.class);
+        PowerMockito.when(DeploymentStatusNotifier.getInstance()).thenReturn(deploymentStatusNotifier);
+        PowerMockito.mockStatic(GatewayNotifier.class);
+        gatewayNotifier = Mockito.mock(GatewayNotifier.class);
+        PowerMockito.when(GatewayNotifier.getInstance()).thenReturn(gatewayNotifier);
         gatewayJMSMessageListener = new GatewayJMSMessageListener();
     }
 

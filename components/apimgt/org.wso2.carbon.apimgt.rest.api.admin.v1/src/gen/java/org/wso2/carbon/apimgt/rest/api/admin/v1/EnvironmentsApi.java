@@ -3,6 +3,7 @@ package org.wso2.carbon.apimgt.rest.api.admin.v1;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.EnvironmentListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.ErrorDTO;
+import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayInstanceListDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.EnvironmentsApiService;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.impl.EnvironmentsApiServiceImpl;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -52,6 +53,25 @@ EnvironmentsApiService delegate = new EnvironmentsApiServiceImpl();
         @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class) })
     public Response environmentsEnvironmentIdDelete(@ApiParam(value = "Environment UUID (or Environment name defined in config) ",required=true) @PathParam("environmentId") String environmentId) throws APIManagementException{
         return delegate.environmentsEnvironmentIdDelete(environmentId, securityContext);
+    }
+
+    @GET
+    @Path("/{environmentId}/gateways")
+    
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Get Gateway Instances in a Gateway Environment", notes = "Retrieve list of gateway Instances in the gateway environment. ", response = GatewayInstanceListDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:admin", description = "Manage all admin operations"),
+            @AuthorizationScope(scope = "apim:environment_read", description = "Retrieve gateway environments")
+        })
+    }, tags={ "Environments",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 200, message = "OK. List of gateway Instances in the gateway environment returned ", response = GatewayInstanceListDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 404, message = "Not Found. The specified resource does not exist.", response = ErrorDTO.class),
+        @ApiResponse(code = 406, message = "Not Acceptable. The requested media type is not supported.", response = ErrorDTO.class) })
+    public Response environmentsEnvironmentIdGatewaysGet(@ApiParam(value = "Environment UUID (or Environment name defined in config) ",required=true) @PathParam("environmentId") String environmentId) throws APIManagementException{
+        return delegate.environmentsEnvironmentIdGatewaysGet(environmentId, securityContext);
     }
 
     @GET

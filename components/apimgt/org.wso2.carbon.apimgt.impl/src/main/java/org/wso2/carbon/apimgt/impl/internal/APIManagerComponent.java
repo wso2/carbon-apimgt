@@ -64,6 +64,7 @@ import org.wso2.carbon.apimgt.impl.config.APIMConfigService;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.ExternalEnvironment;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
+import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.factory.SQLConstantManagerFactory;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
@@ -85,6 +86,7 @@ import org.wso2.carbon.apimgt.impl.observers.KeyMgtConfigDeployer;
 import org.wso2.carbon.apimgt.impl.observers.TenantLoadMessageSender;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.AccessTokenGenerator;
 import org.wso2.carbon.apimgt.impl.recommendationmgt.RecommendationEnvironment;
+import org.wso2.carbon.apimgt.impl.scheduler.GatewayValidationScheduler;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.utils.GatewayArtifactsMgtDBUtil;
@@ -339,6 +341,11 @@ public class APIManagerComponent {
              */
             registration = componentContext.getBundleContext()
                     .registerService(APIManagerConfigurationService.class.getName(), configurationService, null);
+
+            GatewayNotificationConfiguration cleanupConfig = configuration.getGatewayNotificationConfiguration();
+            if (cleanupConfig != null && cleanupConfig.isEnabled()) {
+                GatewayValidationScheduler.getInstance().start();
+            }
         } catch (APIManagementException e) {
             log.error("Error while initializing the API manager component", e);
         } catch (APIManagerDatabaseException e) {
@@ -351,6 +358,12 @@ public class APIManagerComponent {
     protected void deactivate(ComponentContext componentContext) {
         if (log.isDebugEnabled()) {
             log.debug("Deactivating API manager component");
+        }
+
+        GatewayNotificationConfiguration gatewayNotificationConfiguration =
+                configuration.getGatewayNotificationConfiguration();
+        if (gatewayNotificationConfiguration != null && gatewayNotificationConfiguration.isEnabled()) {
+            GatewayValidationScheduler.getInstance().stop();
         }
 
         registration.unregister();
