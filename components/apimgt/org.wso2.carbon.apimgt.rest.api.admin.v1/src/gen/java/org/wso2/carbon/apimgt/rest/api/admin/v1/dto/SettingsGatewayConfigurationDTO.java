@@ -25,6 +25,7 @@ public class SettingsGatewayConfigurationDTO   {
   
     private String type = null;
     private String displayName = null;
+    private List<String> supportedModes = new ArrayList<String>();
     private List<GatewayConfigurationDTO> configurations = new ArrayList<GatewayConfigurationDTO>();
     private String defaultHostnameTemplate = null;
 
@@ -60,6 +61,23 @@ public class SettingsGatewayConfigurationDTO   {
   }
   public void setDisplayName(String displayName) {
     this.displayName = displayName;
+  }
+
+  /**
+   **/
+  public SettingsGatewayConfigurationDTO supportedModes(List<String> supportedModes) {
+    this.supportedModes = supportedModes;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "")
+  @JsonProperty("supportedModes")
+  public List<String> getSupportedModes() {
+    return supportedModes;
+  }
+  public void setSupportedModes(List<String> supportedModes) {
+    this.supportedModes = supportedModes;
   }
 
   /**
@@ -109,13 +127,14 @@ public class SettingsGatewayConfigurationDTO   {
     SettingsGatewayConfigurationDTO settingsGatewayConfiguration = (SettingsGatewayConfigurationDTO) o;
     return Objects.equals(type, settingsGatewayConfiguration.type) &&
         Objects.equals(displayName, settingsGatewayConfiguration.displayName) &&
+        Objects.equals(supportedModes, settingsGatewayConfiguration.supportedModes) &&
         Objects.equals(configurations, settingsGatewayConfiguration.configurations) &&
         Objects.equals(defaultHostnameTemplate, settingsGatewayConfiguration.defaultHostnameTemplate);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(type, displayName, configurations, defaultHostnameTemplate);
+    return Objects.hash(type, displayName, supportedModes, configurations, defaultHostnameTemplate);
   }
 
   @Override
@@ -125,6 +144,7 @@ public class SettingsGatewayConfigurationDTO   {
     
     sb.append("    type: ").append(toIndentedString(type)).append("\n");
     sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
+    sb.append("    supportedModes: ").append(toIndentedString(supportedModes)).append("\n");
     sb.append("    configurations: ").append(toIndentedString(configurations)).append("\n");
     sb.append("    defaultHostnameTemplate: ").append(toIndentedString(defaultHostnameTemplate)).append("\n");
     sb.append("}");
