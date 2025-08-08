@@ -19363,13 +19363,13 @@ public class ApiMgtDAO {
                     insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
                     insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
                     insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                    insertURLMappingsStatement.setString(6, urlMapping.getDescription());
                     if (urlMapping.getSchemaDefinition() != null) {
-                        insertURLMappingsStatement.setBinaryStream(6,
+                        insertURLMappingsStatement.setBinaryStream(7,
                                 new ByteArrayInputStream(urlMapping.getSchemaDefinition().getBytes()));
                     } else {
-                        insertURLMappingsStatement.setBinaryStream(6, null);
+                        insertURLMappingsStatement.setBinaryStream(7, null);
                     }
-                    insertURLMappingsStatement.setString(7, urlMapping.getDescription());
                     insertURLMappingsStatement.setString(8, apiRevision.getRevisionUUID());
                     insertURLMappingsStatement.addBatch();
                 }
@@ -20421,13 +20421,13 @@ public class ApiMgtDAO {
                     insertURLMappingsStatement.setString(3, urlMapping.getAuthType());
                     insertURLMappingsStatement.setString(4, urlMapping.getUriTemplate());
                     insertURLMappingsStatement.setString(5, urlMapping.getThrottlingTier());
+                    insertURLMappingsStatement.setString(6, urlMapping.getDescription());
                     if (urlMapping.getSchemaDefinition() != null) {
-                        insertURLMappingsStatement.setBinaryStream(6,
+                        insertURLMappingsStatement.setBinaryStream(7,
                                 new ByteArrayInputStream(urlMapping.getSchemaDefinition().getBytes()));
                     } else {
-                        insertURLMappingsStatement.setBinaryStream(6, null);
+                        insertURLMappingsStatement.setBinaryStream(7, null);
                     }
-                    insertURLMappingsStatement.setString(7, urlMapping.getDescription());
                     insertURLMappingsStatement.addBatch();
                 }
                 insertURLMappingsStatement.executeBatch();
@@ -22420,11 +22420,9 @@ public class ApiMgtDAO {
             } catch (SQLException e) {
                 connection.rollback();
                 handleException("Error while retrieving backends for apiId : " + apiId, e);
-                return null;
             }
         } catch (SQLException e) {
             handleException("Error while establishing DB connection for retrieving backends of apiId : " + apiId, e);
-            return null;
         }
     }
 
