@@ -6433,7 +6433,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         .exportAPI(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON, false, true,
                                 organization);
 
-                String apiType = ApiMgtDAO.getInstance().getAPITypeFromUUID(apiId.getUUID());
+                String apiType = apiMgtDAO.getAPITypeFromUUID(apiId.getUUID());
                 if (StringUtils.equals(apiType, APIConstants.API_TYPE_MCP)) {
                     gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(), apiId.getApiName(),
                             apiId.getVersion(), apiRevision.getRevisionUUID(), organization, apiType,
