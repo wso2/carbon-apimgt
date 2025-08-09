@@ -19,6 +19,8 @@
 package org.wso2.carbon.apimgt.notification;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.handlers.EventHandler;
@@ -31,10 +33,14 @@ import java.util.Map;
  * Osgi Service to handle NotificationEvents
  */
 public class NotificationEventService {
-
+    private static final Log log = LogFactory.getLog(NotificationEventService.class);
+    
     public void processEvent(String type, String content, Map<String, List<String>> headers)
             throws APIManagementException {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Type: " + type + " Content: " + content + " Headers: " + headers.toString());
+        }
         if (StringUtils.isEmpty(type)) {
             type = APIConstants.KeyManager.DEFAULT_KEY_MANAGER_TYPE;
         }
