@@ -352,7 +352,7 @@ public class WorkflowUtils {
             PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(organization);
             APIProvider apiProvider = APIManagerFactory.getInstance().getAPIProvider(providerName);
             apiProvider.resumeDeployedAPIRevision(apiId, organization, workflow.getWorkflowReference(), revisionId,
-                    environment);
+                    environment, false);
 
             //Set displayOnDevportal to true
             APIRevisionDeployment apiRevisionDeployment = new APIRevisionDeployment();

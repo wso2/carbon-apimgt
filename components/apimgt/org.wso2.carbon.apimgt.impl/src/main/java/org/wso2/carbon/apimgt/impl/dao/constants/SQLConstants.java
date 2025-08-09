@@ -1476,8 +1476,8 @@ public class SQLConstants {
     public static final String ADD_API_SQL =
             " INSERT INTO AM_API (API_PROVIDER,API_NAME,API_VERSION,CONTEXT,CONTEXT_TEMPLATE,CREATED_BY," +
                     "CREATED_TIME,API_TIER,API_TYPE,API_UUID,STATUS,ORGANIZATION,GATEWAY_VENDOR,VERSION_COMPARABLE," +
-                    "SUB_VALIDATION, IS_EGRESS, API_SUBTYPE)" +
-                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "SUB_VALIDATION, IS_EGRESS, API_SUBTYPE, API_DISPLAY_NAME, INITIATED_FROM_GW)" +
+                    " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     public static final String GET_GATEWAY_TYPE_SQL_BY_UUID =
             "SELECT API.GATEWAY_TYPE FROM AM_API API WHERE API.API_UUID = ?";
@@ -1560,8 +1560,16 @@ public class SQLConstants {
 
     public static final String ADD_URL_MAPPING_SQL =
             " INSERT INTO " +
-            " AM_API_URL_MAPPING (API_ID,HTTP_METHOD,AUTH_SCHEME,URL_PATTERN,THROTTLING_TIER,MEDIATION_SCRIPT)" +
-            " VALUES (?,?,?,?,?,?)";
+            " AM_API_URL_MAPPING (API_ID,HTTP_METHOD,AUTH_SCHEME,URL_PATTERN,THROTTLING_TIER,MEDIATION_SCRIPT, " +
+                    "DESCRIPTION, SCHEMA_DEFINITION)" +
+            " VALUES (?,?,?,?,?,?,?,?)";
+
+    public static final String ADD_AM_BACKEND_OPERATION_MAPPING_SQL =
+            "INSERT INTO AM_BACKEND_OPERATION_MAPPING (URL_MAPPING_ID, BACKEND_ID, TARGET, VERB) " +
+                    "VALUES (?,?,?,?)";
+
+    public static final String ADD_AM_API_OPERATION_MAPPING_SQL =
+            "INSERT INTO AM_API_OPERATION_MAPPING (URL_MAPPING_ID, REF_URL_MAPPING_ID) VALUES (?, ?)";
 
     public static final String GET_APPLICATION_BY_NAME_PREFIX =
             " SELECT " +
@@ -1714,7 +1722,8 @@ public class SQLConstants {
                     "   API_TIER = ?, " +
                     "   API_TYPE = ?, " +
                     "   GATEWAY_VENDOR = ?, " +
-                    "   SUB_VALIDATION = ? " +
+                    "   SUB_VALIDATION = ?, " +
+                    "   API_DISPLAY_NAME = ? " +
                     " WHERE " +
                     "   API_UUID = ? ";
 
@@ -1749,6 +1758,12 @@ public class SQLConstants {
 
     public static final String REMOVE_FROM_API_URL_MAPPINGS_SQL =
             "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ?";
+
+    public static final String REMOVE_FROM_AM_BACKEND_OPERATION_MAPPING_SQL =
+            "DELETE FROM AM_BACKEND_OPERATION_MAPPING WHERE URL_MAPPING_ID = ? AND BACKEND_ID = ?";
+
+    public static final String REMOVE_FROM_AM_API_OPERATION_MAPPING_SQL =
+            "DELETE FROM AM_API_OPERATION_MAPPING WHERE URL_MAPPING_ID = ?";
 
     public static final String GET_API_LIST_SQL_BY_ORG = "SELECT API.API_ID, API.API_UUID,API.API_NAME," +
             "API.API_VERSION,API.API_PROVIDER FROM AM_API API WHERE API.ORGANIZATION = ?";
@@ -1790,6 +1805,8 @@ public class SQLConstants {
             "  AUM.URL_MAPPING_ID," +
             "   AUM.URL_PATTERN," +
             "   AUM.HTTP_METHOD," +
+            "   AUM.DESCRIPTION," +
+            "   AUM.SCHEMA_DEFINITION," +
             "   AUM.AUTH_SCHEME," +
             "   AUM.THROTTLING_TIER," +
             "   AUM.MEDIATION_SCRIPT," +
@@ -1832,6 +1849,8 @@ public class SQLConstants {
                     "  AUM.URL_MAPPING_ID," +
                     "   AUM.URL_PATTERN," +
                     "   AUM.HTTP_METHOD," +
+                    "   AUM.DESCRIPTION," +
+                    "   AUM.SCHEMA_DEFINITION," +
                     "   AUM.AUTH_SCHEME," +
                     "   AUM.THROTTLING_TIER," +
                     "   AUM.MEDIATION_SCRIPT," +
@@ -2790,19 +2809,20 @@ public class SQLConstants {
 
     public static final String INSERT_LLM_PROVIDER_SQL =
             "INSERT INTO AM_LLM_PROVIDER (UUID, NAME, API_VERSION, BUILT_IN_SUPPORT, ORGANIZATION, DESCRIPTION, " +
-                    "API_DEFINITION, CONFIGURATIONS) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    "API_DEFINITION, CONFIGURATIONS, MODEL_FAMILY_SUPPORTED) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)";
 
     public static final String GET_LLM_PROVIDERS_SQL =
             "SELECT UUID, NAME, API_VERSION, API_DEFINITION, BUILT_IN_SUPPORT, DESCRIPTION, ORGANIZATION, CONFIGURATIONS " +
                     "FROM AM_LLM_PROVIDER WHERE 1=1";
 
     public static final String GET_LLM_PROVIDER_SQL =
-            "SELECT UUID, NAME, API_VERSION, ORGANIZATION, BUILT_IN_SUPPORT, DESCRIPTION, API_DEFINITION, CONFIGURATIONS " +
-                    "FROM AM_LLM_PROVIDER PROVIDER WHERE UUID = ?";
+            "SELECT UUID, NAME, API_VERSION, ORGANIZATION, BUILT_IN_SUPPORT, DESCRIPTION, API_DEFINITION, " +
+                    "CONFIGURATIONS, MODEL_FAMILY_SUPPORTED FROM AM_LLM_PROVIDER PROVIDER WHERE UUID = ?";
 
     public static final String GET_LLM_PROVIDER_BY_NAME_AND_VERSION_SQL =
-            "SELECT UUID, NAME, API_VERSION, BUILT_IN_SUPPORT, DESCRIPTION, API_DEFINITION, CONFIGURATIONS " +
-                    "FROM AM_LLM_PROVIDER PROVIDER WHERE ORGANIZATION = ? AND NAME = ? AND API_VERSION = ?";
+            "SELECT UUID, NAME, API_VERSION, BUILT_IN_SUPPORT, DESCRIPTION, API_DEFINITION, CONFIGURATIONS," +
+                    "MODEL_FAMILY_SUPPORTED FROM AM_LLM_PROVIDER PROVIDER WHERE ORGANIZATION = ? AND NAME = ? AND " +
+                    "API_VERSION = ?";
 
     public static final String DELETE_LLM_PROVIDER_SQL =
             "DELETE FROM AM_LLM_PROVIDER WHERE ORGANIZATION = ? AND UUID = ? AND BUILT_IN_SUPPORT = ?";
@@ -2812,10 +2832,10 @@ public class SQLConstants {
                     "WHERE ORGANIZATION = ? AND UUID = ?";
 
     public static final String INSERT_LLM_PROVIDER_MODELS_SQL =
-            "INSERT INTO AM_LLM_PROVIDER_MODEL (MODEL_NAME, LLM_PROVIDER_UUID) VALUES (?, ?)";
+            "INSERT INTO AM_LLM_PROVIDER_MODEL (MODEL_NAME,MODEL_FAMILY_NAME,LLM_PROVIDER_UUID) VALUES (?, ?,?)";
 
     public static final String GET_LLM_PROVIDER_MODELS_SQL =
-            "SELECT M.MODEL_NAME FROM AM_LLM_PROVIDER_MODEL M " +
+            "SELECT M.MODEL_NAME,M.MODEL_FAMILY_NAME FROM AM_LLM_PROVIDER_MODEL M " +
                     "JOIN AM_LLM_PROVIDER P ON M.LLM_PROVIDER_UUID = P.UUID " +
                     "WHERE M.LLM_PROVIDER_UUID = ? AND P.ORGANIZATION = ?";
 
@@ -3201,7 +3221,8 @@ public class SQLConstants {
     public static final String RETRIEVE_API_SUBTYPE_WITH_UUID = "SELECT API_SUBTYPE FROM AM_API WHERE API_UUID = ?";
     public static final String RETRIEVE_API_INFO_FROM_UUID = "SELECT API_UUID, API_PROVIDER, API_NAME, API_VERSION, " +
             "CONTEXT, CONTEXT_TEMPLATE, API_TIER, API_TYPE, CREATED_BY, CREATED_TIME, UPDATED_BY, UPDATED_TIME, " +
-            " ORGANIZATION, REVISIONS_CREATED, STATUS, IS_EGRESS, API_SUBTYPE FROM AM_API WHERE API_UUID = ?";
+            " ORGANIZATION, REVISIONS_CREATED, STATUS, IS_EGRESS, API_SUBTYPE, API_DISPLAY_NAME, INITIATED_FROM_GW" +
+            " FROM AM_API WHERE API_UUID = ?";
     public static final String RETRIEVE_DEFAULT_VERSION = "SELECT DEFAULT_API_VERSION,PUBLISHED_DEFAULT_API_VERSION " +
             "FROM AM_API_DEFAULT_VERSION WHERE API_NAME = ? AND API_PROVIDER =?";
 
@@ -4017,11 +4038,17 @@ public class SQLConstants {
         public static final String ADD_API_REVISION =
                 " INSERT INTO AM_REVISION (ID, API_UUID, REVISION_UUID, DESCRIPTION, CREATED_BY, CREATED_TIME)" +
                         " VALUES (?,?,?,?,?,?)";
-        public static final String GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID = "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, " +
-                "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, ARSM.SCOPE_NAME, PROD_MAP.API_ID " +
-                "FROM AM_API_URL_MAPPING AUM LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
-                "LEFT JOIN AM_API_PRODUCT_MAPPING PROD_MAP ON AUM.URL_MAPPING_ID = PROD_MAP.URL_MAPPING_ID " +
-                "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID IS NULL";
+        public static final String GET_URL_MAPPINGS_WITH_SCOPE_PRODUCT_AND_BACKEND =
+                "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, " +
+                        "AUM.SCHEMA_DEFINITION, AUM.DESCRIPTION, " +
+                        "ARSM.SCOPE_NAME, PROD_MAP.API_ID, BACK_MAP.TARGET, BACK_MAP.VERB, API_MAP.REF_URL_MAPPING_ID " +
+                        "FROM AM_API_URL_MAPPING AUM " +
+                        "LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
+                        "LEFT JOIN AM_API_PRODUCT_MAPPING PROD_MAP ON AUM.URL_MAPPING_ID = PROD_MAP.URL_MAPPING_ID " +
+                        "LEFT JOIN AM_BACKEND_OPERATION_MAPPING BACK_MAP ON AUM.URL_MAPPING_ID = BACK_MAP.URL_MAPPING_ID " +
+                        "LEFT JOIN AM_API_OPERATION_MAPPING API_MAP ON AUM.URL_MAPPING_ID = API_MAP.URL_MAPPING_ID " +
+                        "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID IS NULL";
+
         public static final String GET_REVISIONED_URL_MAPPINGS_ID = "SELECT URL_MAPPING_ID FROM AM_API_URL_MAPPING " +
                 "WHERE API_ID = ? AND REVISION_UUID = ? AND HTTP_METHOD = ? AND AUTH_SCHEME = ? AND URL_PATTERN = ? " +
                 "AND THROTTLING_TIER = ? ";
@@ -4039,7 +4066,8 @@ public class SQLConstants {
                 "WHERE API_ID = ? AND HTTP_METHOD = ? AND AUTH_SCHEME = ? AND URL_PATTERN = ? " +
                 "AND THROTTLING_TIER = ? AND REVISION_UUID = ?";
         public static final String INSERT_URL_MAPPINGS = "INSERT INTO AM_API_URL_MAPPING(API_ID, HTTP_METHOD," +
-                " AUTH_SCHEME, URL_PATTERN, THROTTLING_TIER, REVISION_UUID) VALUES(?,?,?,?,?,?)";
+                " AUTH_SCHEME, URL_PATTERN, THROTTLING_TIER, DESCRIPTION, SCHEMA_DEFINITION, REVISION_UUID) " +
+                "VALUES(?,?,?,?,?,?,?,?)";
         public static final String GET_CLIENT_CERTIFICATES_OF_KEY_TYPE = "SELECT ALIAS, CERTIFICATE," +
                 " TIER_NAME FROM AM_API_CLIENT_CERTIFICATE WHERE API_ID = ? AND REVISION_UUID='Current API' AND" +
                 " KEY_TYPE=? AND REMOVED=FALSE";
@@ -4068,6 +4096,8 @@ public class SQLConstants {
         public static final String GET_REVISION_COUNT_BY_API_UUID = "SELECT COUNT(ID) FROM AM_REVISION WHERE API_UUID = ?";
         public static final String GET_MOST_RECENT_REVISION_ID = "SELECT REVISIONS_CREATED FROM AM_API WHERE API_UUID" +
                 " = ?";
+        public static final String GET_IS_API_PROXY_CREATED_FROM_GW = "SELECT INITIATED_FROM_GW FROM " +
+                "AM_API WHERE API_UUID = ?";
         public static final String GET_REVISION_BY_REVISION_UUID = "SELECT * FROM AM_REVISION WHERE REVISION_UUID = ?";
         public static final String GET_REVISION_UUID = "SELECT REVISION_UUID FROM AM_REVISION WHERE API_UUID = ? " +
                 "AND ID = ?";
@@ -4107,6 +4137,11 @@ public class SQLConstants {
                         + "ADR.REVISION_STATUS = ? AND AM.API_UUID = ?";
         public static final String UPDATE_API_REVISION_STATUS_SQL =
                 " UPDATE AM_DEPLOYMENT_REVISION_MAPPING SET REVISION_STATUS = ? WHERE REVISION_UUID = ? AND NAME = ?";
+
+        public static final String UPDATE_API_REVISION_DEPLOYMENT_MAPPING_FOR_DISCOVERED_APIS =
+                " UPDATE AM_DEPLOYMENT_REVISION_MAPPING SET REVISION_STATUS = ?, DISPLAY_ON_DEVPORTAL = ? " +
+                        "WHERE NAME = ? AND REVISION_UUID = ? ";
+
         static final String GET_API_REVISION_DEPLOYMENTS
                 = "(SELECT NAME, VHOST, REVISION_UUID, DEPLOYED_TIME, 0 AS DISPLAY_ON_DEVPORTAL, NULL AS DEPLOY_TIME, "
                 + "NULL AS REVISION_STATUS FROM AM_DEPLOYED_REVISION DR " +
@@ -4149,13 +4184,18 @@ public class SQLConstants {
                 "DELETE FROM AM_API_URL_MAPPING WHERE API_ID = ? AND REVISION_UUID IS NULL";
         public static final String REMOVE_CURRENT_API_PRODUCT_ENTRIES_IN_AM_API_URL_MAPPING =
                 "DELETE FROM AM_API_URL_MAPPING WHERE REVISION_UUID = ?";
-        public static final String GET_URL_MAPPINGS_WITH_SCOPE_AND_PRODUCT_ID_BY_REVISION_UUID = "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, " +
-                "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, ARSM.SCOPE_NAME, PROD_MAP.API_ID " +
+        public static final String GET_URL_MAPPINGS_WITH_SCOPE_PRODUCT_AND_BACKEND_BY_REVISION_UUID =
+                "SELECT AUM.HTTP_METHOD, AUM.AUTH_SCHEME, " +
+                "AUM.URL_PATTERN, AUM.THROTTLING_TIER, AUM.MEDIATION_SCRIPT, AUM.SCHEMA_DEFINITION, AUM.DESCRIPTION, " +
+                "ARSM.SCOPE_NAME, PROD_MAP.API_ID , " +
+                "BACK_MAP.TARGET, BACK_MAP.VERB, API_MAP.REF_URL_MAPPING_ID " +
                 "FROM AM_API_URL_MAPPING AUM LEFT JOIN AM_API_RESOURCE_SCOPE_MAPPING ARSM ON AUM.URL_MAPPING_ID = ARSM.URL_MAPPING_ID " +
                 "LEFT JOIN AM_API_PRODUCT_MAPPING PROD_MAP ON AUM.URL_MAPPING_ID = PROD_MAP.URL_MAPPING_ID " +
+                "LEFT JOIN AM_BACKEND_OPERATION_MAPPING BACK_MAP ON AUM.URL_MAPPING_ID = BACK_MAP.URL_MAPPING_ID " +
+                "LEFT JOIN AM_API_OPERATION_MAPPING API_MAP ON AUM.URL_MAPPING_ID = API_MAP.URL_MAPPING_ID " +
                 "WHERE AUM.API_ID = ? AND AUM.REVISION_UUID = ?";
         public static final String INSERT_URL_MAPPINGS_CURRENT_API = "INSERT INTO AM_API_URL_MAPPING(API_ID, HTTP_METHOD," +
-                " AUTH_SCHEME, URL_PATTERN, THROTTLING_TIER) VALUES(?,?,?,?,?)";
+                " AUTH_SCHEME, URL_PATTERN, THROTTLING_TIER, DESCRIPTION, SCHEMA_DEFINITION) VALUES(?,?,?,?,?,?,?)";
         public static final String GET_CURRENT_API_URL_MAPPINGS_ID = "SELECT URL_MAPPING_ID FROM AM_API_URL_MAPPING " +
                 "WHERE API_ID = ? AND REVISION_UUID IS NULL AND HTTP_METHOD = ? AND AUTH_SCHEME = ? AND URL_PATTERN = ? " +
                 "AND THROTTLING_TIER = ? ";
@@ -4570,8 +4610,152 @@ public class SQLConstants {
                         " AND " +
                         " APM.REVISION_UUID IS NULL " +
                         " ORDER BY APM.API_POLICY_MAPPING_ID ASC ";
+
+        public static final String GET_BACKEND_OPERATION_MAPPING_FOR_API_REVISION_SQL =
+                " SELECT " +
+                        " BOM.BACKEND_ID, BOM.TARGET, BOM.VERB" +
+                        " FROM " +
+                        " AM_API_URL_MAPPING AUM " +
+                        " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+                        " INNER JOIN AM_BACKEND_OPERATION_MAPPING BOM ON AUM.URL_MAPPING_ID = BOM.URL_MAPPING_ID" +
+                        " WHERE " +
+                        " API.API_UUID = ? " +
+                        " AND AUM.URL_MAPPING_ID = ? " +
+                        " AND AUM.REVISION_UUID = ? " +
+                        " ORDER BY AUM.URL_MAPPING_ID ASC ";
+
+        public static final String GET_BACKEND_OPERATION_MAPPING_OF_API_SQL =
+                " SELECT " +
+                        " BOM.BACKEND_ID, BOM.TARGET, BOM.VERB " +
+                        " FROM " +
+                        " AM_API_URL_MAPPING AUM " +
+                        " INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+                        " INNER JOIN AM_BACKEND_OPERATION_MAPPING BOM ON AUM.URL_MAPPING_ID = BOM.URL_MAPPING_ID" +
+                        " WHERE " +
+                        " API.API_UUID = ? " +
+                        " AND AUM.URL_MAPPING_ID = ? " +
+                        " AND AUM.REVISION_UUID IS NULL " +
+                        " ORDER BY AUM.URL_MAPPING_ID ASC ";
+
+        public static final String GET_API_OPERATION_MAPPING_OF_API_SQL =
+                "SELECT " +
+                        "   AUM.URL_MAPPING_ID, " +
+                        "   REF.URL_PATTERN AS TARGET, " +
+                        "   REF.HTTP_METHOD AS VERB, " +
+                        "   REF_API.API_UUID AS REF_API_UUID, " +
+                        "   REF_API.API_NAME AS REF_API_NAME, " +
+                        "   REF_API.API_VERSION AS REF_API_VERSION, " +
+                        "   REF_API.CONTEXT AS REF_API_CONTEXT " +
+                        " FROM " +
+                        "   AM_API_URL_MAPPING AUM " +
+                        "INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+                        "INNER JOIN AM_API_OPERATION_MAPPING AOM ON AUM.URL_MAPPING_ID = AOM.URL_MAPPING_ID " +
+                        "INNER JOIN AM_API_URL_MAPPING REF ON AOM.REF_URL_MAPPING_ID = REF.URL_MAPPING_ID " +
+                        "INNER JOIN AM_API REF_API ON REF.API_ID = REF_API.API_ID " +
+                        "WHERE " +
+                        "   API.API_UUID = ? " +
+                        "   AND AUM.URL_MAPPING_ID = ? " +
+                        "   AND AUM.REVISION_UUID IS NULL " +
+                        "ORDER BY AUM.URL_MAPPING_ID ASC";
+
+        public static final String GET_API_OPERATION_MAPPING_FOR_API_REVISION_SQL =
+                "SELECT " +
+                        "   AUM.URL_MAPPING_ID, " +
+                        "   REF.URL_PATTERN AS TARGET, " +
+                        "   REF.HTTP_METHOD AS VERB, " +
+                        "   REF_API.API_UUID AS REF_API_UUID, " +
+                        "   REF_API.API_NAME AS REF_API_NAME, " +
+                        "   REF_API.API_VERSION AS REF_API_VERSION, " +
+                        "   REF_API.CONTEXT AS REF_API_CONTEXT " +
+                        " FROM " +
+                        "   AM_API_URL_MAPPING AUM " +
+                        "INNER JOIN AM_API API ON AUM.API_ID = API.API_ID " +
+                        "INNER JOIN AM_API_OPERATION_MAPPING AOM ON AUM.URL_MAPPING_ID = AOM.URL_MAPPING_ID " +
+                        "INNER JOIN AM_API_URL_MAPPING REF ON AOM.REF_URL_MAPPING_ID = REF.URL_MAPPING_ID " +
+                        "INNER JOIN AM_API REF_API ON REF.API_ID = REF_API.API_ID " +
+                        "WHERE " +
+                        "   API.API_UUID = ? " +
+                        "   AND AUM.URL_MAPPING_ID = ? " +
+                        "   AND AUM.REVISION_UUID = ? " +
+                        "ORDER BY AUM.URL_MAPPING_ID ASC";
     }
 
+    public static final String ADD_AM_BACKEND_SQL =
+            "INSERT INTO AM_BACKEND ("
+                    + "BACKEND_ID, BACKEND_NAME, ENDPOINT_CONFIG, DEFINITION, REFERENCE_API_UUID, "
+                    + "ORGANIZATION) "
+                    + "VALUES (?, ?, ?, ?, ?, ?)";
+
+    public static final String ADD_AM_BACKEND_REVISION_SQL =
+            "INSERT INTO AM_BACKEND ("
+                    + "BACKEND_ID, BACKEND_NAME, ENDPOINT_CONFIG, DEFINITION, REFERENCE_API_UUID,"
+                    + " REFERENCE_API_REVISION_UUID, ORGANIZATION) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+    public static final String GET_AM_BACKENDS_SQL =
+            "SELECT BACKEND_ID, BACKEND_NAME, ENDPOINT_CONFIG, DEFINITION "
+                    + "FROM AM_BACKEND "
+                    + "WHERE REFERENCE_API_UUID = ? "
+                    + "AND REFERENCE_API_REVISION_UUID IS NULL "
+                    + "AND ORGANIZATION = ?";
+
+    public static final String GET_AM_BACKENDS_REVISION_SQL =
+            "SELECT BACKEND_ID, BACKEND_NAME, ENDPOINT_CONFIG, DEFINITION "
+                    + "FROM AM_BACKEND "
+                    + "WHERE REFERENCE_API_UUID = ? "
+                    + "AND REFERENCE_API_REVISION_UUID = ? "
+                    + "AND ORGANIZATION = ?";
+
+    public static final String GET_AM_BACKEND_SQL =
+            "SELECT BACKEND_ID, BACKEND_NAME, ENDPOINT_CONFIG, DEFINITION "
+                    + "FROM AM_BACKEND "
+                    + "WHERE REFERENCE_API_UUID = ? "
+                    + "AND REFERENCE_API_REVISION_UUID IS NULL "
+                    + "AND BACKEND_ID = ? "
+                    + "AND ORGANIZATION = ?";
+
+    public static final String GET_AM_BACKEND_REVISION_SQL =
+            "SELECT BACKEND_ID, BACKEND_NAME, ENDPOINT_CONFIG, DEFINITION "
+                    + "FROM AM_BACKEND "
+                    + "WHERE REFERENCE_API_UUID = ? "
+                    + "AND REFERENCE_API_REVISION_UUID = ? "
+                    + "AND BACKEND_ID = ? "
+                    + "AND ORGANIZATION = ?";
+
+    public static final String UPDATE_AM_BACKEND_SQL =
+            "UPDATE AM_BACKEND "
+                    + "SET ENDPOINT_CONFIG = ?, DEFINITION = ? "
+                    + "WHERE REFERENCE_API_UUID = ? "
+                    + "AND REFERENCE_API_REVISION_UUID IS NULL "
+                    + "AND BACKEND_ID = ? "
+                    + "AND ORGANIZATION = ?";
+
+    public static final String REMOVE_AM_BACKEND_SQL =
+            "DELETE FROM AM_BACKEND "
+                    + "WHERE REFERENCE_API_UUID = ?";
+
+    public static final String REMOVE_AM_BACKEND_REVISION_SQL =
+            "DELETE FROM AM_BACKEND "
+                    + "WHERE REFERENCE_API_UUID = ? "
+                    + "AND REFERENCE_API_REVISION_UUID = ?";
+
+    public static final String REMOVE_AM_BACKEND_REVISION_OF_CURRENT_API_SQL =
+            "DELETE FROM AM_BACKEND "
+                    + "WHERE REFERENCE_API_UUID = ? "
+                    + "AND REFERENCE_API_REVISION_UUID IS NULL";
+
+    public static final String GET_MCP_SERVER_BY_REFERENCED_API_ID =
+            "SELECT DISTINCT MCP.API_UUID, MCP.API_NAME, MCP.API_VERSION, MCP.API_PROVIDER " +
+                    "FROM AM_API MCP " +
+                    "JOIN AM_API_URL_MAPPING MCP_MAP " +
+                    "  ON MCP.API_ID = MCP_MAP.API_ID " +
+                    "  AND MCP_MAP.REVISION_UUID IS NULL " +
+                    "JOIN AM_API_OPERATION_MAPPING OP " +
+                    "  ON OP.URL_MAPPING_ID = MCP_MAP.URL_MAPPING_ID " +
+                    "JOIN AM_API_URL_MAPPING REF_MAP " +
+                    "  ON REF_MAP.URL_MAPPING_ID = OP.REF_URL_MAPPING_ID " +
+                    "  AND REF_MAP.REVISION_UUID IS NULL " +
+                    "WHERE REF_MAP.API_ID = ? AND MCP.ORGANIZATION = ? AND MCP.API_TYPE = ?";
     /**
      * Static class to hold database queries related to gateway policies tables
      */
@@ -4729,7 +4913,8 @@ public class SQLConstants {
                         "REVISION_UUID, " +
                         "ENDPOINT_NAME, " +
                         "KEY_TYPE, " +
-                        "ENDPOINT_CONFIG, ORGANIZATION) " +
+                        "ENDPOINT_CONFIG, " +
+                        "ORGANIZATION) " +
                         "VALUES(?,?,?,?,?,?,?)";
 
         public static final String DELETE_PRIMARY_ENDPOINT_MAPPING =

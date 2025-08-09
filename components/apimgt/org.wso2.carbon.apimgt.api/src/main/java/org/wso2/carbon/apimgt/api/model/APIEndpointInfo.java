@@ -24,38 +24,49 @@ import java.util.Map;
  * API Endpoint details.
  */
 public class APIEndpointInfo {
+
     private String id;
     private String name;
     private Map<String, Object> endpointConfig;
     private String deploymentStage;
 
-    public String getName() { return name; }
+    public String getName() {
+
+        return name;
+    }
 
     public void setName(String name) {
+
         this.name = name;
     }
 
     public Map<String, Object> getEndpointConfig() {
+
         return endpointConfig;
     }
 
-    public void setEndpointConfig(Map endpointConfig) {
-        this.endpointConfig = endpointConfig;
-    }
-
     public String getId() {
+
         return id;
     }
 
     public void setId(String id) {
+
         this.id = id;
     }
 
     public String getDeploymentStage() {
+
         return deploymentStage;
     }
 
     public void setDeploymentStage(String deploymentStage) {
+
         this.deploymentStage = deploymentStage;
+    }
+
+    public void setEndpointConfig(Map<String, Object> endpointConfig) {
+
+        this.endpointConfig = endpointConfig;
     }
 }

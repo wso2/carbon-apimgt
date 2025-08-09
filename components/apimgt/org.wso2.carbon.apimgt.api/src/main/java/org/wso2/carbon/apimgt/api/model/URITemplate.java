@@ -51,6 +51,10 @@ public class URITemplate implements Serializable{
     private int amznResourceTimeout;
     private boolean amznResourceContentEncoded;
     private List<OperationPolicy> operationPolicies = new ArrayList<>();
+    private String description;
+    private String schemaDefinition = null;
+    private APIOperationMapping APIOperationMapping = null;
+    private BackendOperationMapping backendOperationMapping = null;
 
     public ConditionGroupDTO[] getConditionGroups() {
         return conditionGroups;
@@ -197,6 +201,7 @@ public class URITemplate implements Serializable{
 
     @UsedByMigrationClient
     public void setUriTemplate(String template) {
+
         this.uriTemplate = template;
     }
 
@@ -389,13 +394,22 @@ public class URITemplate implements Serializable{
                 null) {
             return false;
         }
+        if (backendOperationMapping != null ? !backendOperationMapping.equals(that.backendOperationMapping) :
+                that.backendOperationMapping != null) {
+            return false;
+        }
+        if (APIOperationMapping != null ? !APIOperationMapping.equals(that.APIOperationMapping) :
+                that.APIOperationMapping != null) {
+            return false;
+        }
+
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
         return Arrays.equals(conditionGroups, that.conditionGroups);
     }
 
     @Override
     public int hashCode() {
-        int result = uriTemplate.hashCode();
+        int result = uriTemplate != null ? uriTemplate.hashCode() : 0;
         result = 31 * result + (resourceURI != null ? resourceURI.hashCode() : 0);
         result = 31 * result + (resourceSandboxURI != null ? resourceSandboxURI.hashCode() : 0);
         result = 31 * result + (httpVerb != null ? httpVerb.hashCode() : 0);
@@ -410,6 +424,8 @@ public class URITemplate implements Serializable{
         result = 31 * result + (mediationScript != null ? mediationScript.hashCode() : 0);
         result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
         result = 31 * result + (mediationScripts != null ? mediationScripts.hashCode() : 0);
+        result = 31 * result + (backendOperationMapping != null ? backendOperationMapping.hashCode() : 0);
+        result = 31 * result + (APIOperationMapping != null ? APIOperationMapping.hashCode() : 0);
         result = 31 * result + Arrays.hashCode(conditionGroups);
         return result;
     }
@@ -477,5 +493,55 @@ public class URITemplate implements Serializable{
 
     public void addOperationPolicy(OperationPolicy policy) {
         operationPolicies.add(policy);
+    }
+
+    public String getDescription() {
+
+        return description;
+    }
+
+    public void setDescription(String description) {
+
+        this.description = description;
+    }
+
+    public String getSchemaDefinition() {
+
+        return schemaDefinition;
+    }
+
+    public void setSchemaDefinition(String schemaDefinition) {
+
+        this.schemaDefinition = schemaDefinition;
+    }
+
+    public APIOperationMapping getExistingAPIOperationMapping() {
+
+        return APIOperationMapping;
+    }
+
+    public void setExistingAPIOperationMapping(APIOperationMapping APIOperationMapping) {
+
+        this.APIOperationMapping = APIOperationMapping;
+    }
+
+    public BackendOperationMapping getBackendOperationMapping() {
+
+        return backendOperationMapping;
+    }
+
+    public void setBackendOperationMapping(BackendOperationMapping backendOperationMapping) {
+
+        this.backendOperationMapping = backendOperationMapping;
+    }
+
+    public String getHttpVerb() {
+
+        return httpVerb;
+    }
+
+    public void setHttpVerb(String httpVerb) {
+
+        this.httpVerb = httpVerb;
     }
 }

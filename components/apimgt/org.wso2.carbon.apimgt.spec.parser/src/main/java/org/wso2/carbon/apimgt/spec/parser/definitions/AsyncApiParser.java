@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.dto.KeyManagerConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.api.model.SwaggerData;
@@ -1701,6 +1702,11 @@ public class AsyncApiParser extends APIDefinition {
         return scopeSet;
     }
 
+    public String generateAPIDefinitionForBackendAPI(SwaggerData swaggerData, String oasDefinition) {
+
+        return null;
+    }
+
     @Override
     public String generateAPIDefinition(SwaggerData swaggerData) throws APIManagementException {
         return null;
@@ -1848,6 +1854,7 @@ public class AsyncApiParser extends APIDefinition {
                     asyncApiDocument.info.version,
                     null,
                     asyncApiDocument.info.description,
+                    null,
                     null
             );
 
@@ -2221,5 +2228,22 @@ public class AsyncApiParser extends APIDefinition {
     @Override
     public String getType() {
         return APISpecParserConstants.WSO2_GATEWAY_ENVIRONMENT;
+    }
+
+    @Override
+    public Set<URITemplate> generateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
+                                             String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates) {
+
+        return null;
+    }
+
+    @Override
+    public Set<URITemplate> updateMCPTools(String backendApiDefinition,
+                                           APIIdentifier refApiId, String backendId,
+                                           String mcpFeatureType,
+                                           String mcpSubtype,
+                                           Set<URITemplate> uriTemplates) {
+
+        return null;
     }
 }

@@ -53,6 +53,7 @@ public class API implements Serializable {
     // uuid of registry artifact
     // this id is provider's username independent
     private String uuid;
+    private String displayName;
 
     private String description;
     private String url;
@@ -195,6 +196,7 @@ public class API implements Serializable {
     // API security at the gateway level.
     private String apiSecurity = "oauth2";
 
+    private boolean initiatedFromGateway = false;
     private static final String NULL_VALUE = "NULL";
 
     private List<APIEndpoint> endpoints = new ArrayList<APIEndpoint>();
@@ -244,6 +246,8 @@ public class API implements Serializable {
     private String primarySandboxEndpointId;
   
     private String primaryProductionEndpointId;
+
+    private List<Backend> backends = new ArrayList<>();
 
     public AIConfiguration getAiConfiguration() {
 
@@ -1048,6 +1052,40 @@ public class API implements Serializable {
         this.subscriptionAvailableTenants = subscriptionAvailableTenants;
     }
 
+    /**
+     * Set if the API is initiated from gateway or not
+     *
+     * @param initiatedFromGateway
+     */
+    public void setInitiatedFromGateway(boolean initiatedFromGateway) {
+        this.initiatedFromGateway = initiatedFromGateway;
+    }
+
+    /**
+     * Returns whether the API is initiated from gateway or not
+     *
+     * @return true if the API is initiated from gateway, false otherwise
+     */
+    public boolean isInitiatedFromGateway() {
+        return initiatedFromGateway;
+    }
+
+    /**
+     * Set API Display Name
+     * @param displayName
+     */
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    /**
+     * Get API Display Name
+     * @return displayName
+     */
+    public String getDisplayName() {
+        return displayName;
+    }
+
     public String getEndpointConfig() {
         // This is to support new Endpoint object
         if ((endpointConfig == null || StringUtils.isAllEmpty(endpointConfig) && endpoints.size() > 0)) {
@@ -1246,7 +1284,8 @@ public class API implements Serializable {
         return webSocketTopicMappingConfiguration;
     }
 
-    public void setWebSocketTopicMappingConfiguration(WebSocketTopicMappingConfiguration webSocketTopicMappingConfiguration) {
+    public void setWebSocketTopicMappingConfiguration(WebSocketTopicMappingConfiguration
+                                                              webSocketTopicMappingConfiguration) {
         this.webSocketTopicMappingConfiguration = webSocketTopicMappingConfiguration;
     }
 
@@ -1657,6 +1696,11 @@ public class API implements Serializable {
         return isEgress;
     }
 
+    public boolean isEgressAPI() {
+
+        return isEgress == 1;
+    }
+
     public void setEgress(int egress) {
         isEgress = egress;
     }
@@ -1677,5 +1721,15 @@ public class API implements Serializable {
 
     public void setPrimarySandboxEndpointId(String primarySandboxEndpointId) {
         this.primarySandboxEndpointId = primarySandboxEndpointId;
+    }
+
+    public List<Backend> getBackends() {
+
+        return backends;
+    }
+
+    public void setBackends(List<Backend> backends) {
+
+        this.backends = backends;
     }
 }

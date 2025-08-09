@@ -30,6 +30,15 @@ import java.util.Set;
 public final class APISpecParserConstants {
     public static final String STRING = "string";
     public static final String OBJECT = "object";
+    public static final String CONTENT_TYPE = "contentType";
+    public static final String REQUEST_BODY = "requestBody";
+    public static final String PROPERTIES = "properties";
+    public static final String REQUIRED = "required";
+    public static final String FORMAT = "format";
+    public static final String ENUM = "enum";
+    public static final String DEFAULT = "default";
+    public static final String DESCRIPTION = "description";
+    public static final String AUTH_TYPE_ANY = "Any";
     public static final String APPLICATION_JSON_MEDIA_TYPE = "application/json";
     public static final String APPLICATION_XML_MEDIA_TYPE = "application/xml";
     public static final String OPENAPI_ARCHIVES_TEMP_FOLDER = "OPENAPI-archives";
@@ -53,6 +62,8 @@ public final class APISpecParserConstants {
     public static final String GATEWAY_ENV_TYPE_SANDBOX = "sandbox";
     public static final String ENABLED = "Enabled";
     public static final String GRAPHQL_API = "GRAPHQL";
+    public static final String MCP_API = "MCP";
+    public static final String HTTP_VERB_TOOL = "TOOL";
     public static final String HTTP_VERB_PUBLISH = "PUBLISH";
     public static final String HTTP_VERB_SUBSCRIBE = "SUBSCRIBE";
     public static final String OAUTH2_DEFAULT_SCOPE = "default";
@@ -139,6 +150,7 @@ public final class APISpecParserConstants {
     public static final String JAVA_IO_TMPDIR = "java.io.tmpdir";
     public static final String TYPE = "type";
     public static final String HTTP_POST = "POST";
+    public static final String HTTP_GET = "GET";
     public static final String WSO2_GATEWAY_ENVIRONMENT = "wso2";
     public static final String HTTP_TRANSPORT_PROTOCOL_NAME = "http";
     public static final String WS_TRANSPORT_PROTOCOL_NAME = "ws";
@@ -178,7 +190,9 @@ public final class APISpecParserConstants {
 
     public static final Set<String> SUPPORTED_METHODS =
             Collections.unmodifiableSet(new HashSet<String>(
-                    Arrays.asList(new String[]{"get", "put", "post", "delete", "patch", "head", "options"})));
+                    Arrays.asList(new String[]{"get", "put", "post", "delete", "patch", "head", "options", "tool"})));
+    public static final String MCP_RESOURCES_MCP = "/mcp";
+    public static final String MCP_RESOURCES_WELL_KNOWN = "/.well-known/oauth-authorization-server";
 
     public static class OperationParameter {
         public static final String PAYLOAD_PARAM_NAME = "Payload";
@@ -214,6 +228,10 @@ public final class APISpecParserConstants {
         DELETE,
         PATCH,
         HEAD,
-        OPTIONS
+        OPTIONS,
+        TOOL
     }
+
+    public static final String API_SUBTYPE_DIRECT_ENDPOINT = "DIRECT_ENDPOINT";
+    public static final String API_SUBTYPE_EXISTING_API = "EXISTING_API";
 }

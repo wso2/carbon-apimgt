@@ -39,6 +39,7 @@
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.WorkflowsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.LabelsApi"/>
             <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.DesignAssistantApi"/>
+            <bean class="org.wso2.carbon.apimgt.rest.api.publisher.v1.AiServiceProvidersApi"/>
         </jaxrs:serviceBeans>
         <jaxrs:providers>
             <bean class="com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider"/>

@@ -38,8 +38,10 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIManagerDatabaseException;
 import org.wso2.carbon.apimgt.api.APIMgtInternalException;
+import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
+import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
@@ -49,6 +51,7 @@ import org.wso2.carbon.apimgt.common.gateway.http.BrowserHostnameVerifier;
 import org.wso2.carbon.apimgt.common.gateway.jwttransformer.JWTTransformer;
 import org.wso2.carbon.apimgt.eventing.EventPublisherException;
 import org.wso2.carbon.apimgt.eventing.EventPublisherFactory;
+import org.wso2.carbon.apimgt.impl.APIAdminImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerAnalyticsConfiguration;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
@@ -328,6 +331,7 @@ public class APIManagerComponent {
                     bundleContext.registerService(ArtifactRetriever.class.getName(), new DBRetriever(), null);
                 }
             }
+            initializeAPIDiscoveryTasks(tenantDomain);
             bundleContext.registerService(ScopeValidator.class, new SystemScopesIssuer(), null);
             /* The service registration was moved to the end because the HTTP client configuration was not available
             with the previous placement, where the http client configuration was populated after registering the
@@ -1081,6 +1085,33 @@ public class APIManagerComponent {
                 .withSSLContext(sslContext, hostnameVerifier).build());
     }
 
+    void initializeAPIDiscoveryTasks(String organization) {
+        try {
+            Map<String, Environment> environments = APIUtil.getEnvironments(organization);
+            FederatedAPIDiscoveryService federatedAPIDiscoveryService = ServiceReferenceHolder
+                    .getInstance().getFederatedAPIDiscoveryService();
+            APIAdminImpl apiAdmin = new APIAdminImpl();
+
+            environments.forEach((name, environment) -> {
+                if (environment.getProvider().equals(APIConstants.EXTERNAL_GATEWAY_VENDOR)) {
+                    try {
+                        Environment resolvedEnvironment = apiAdmin.getEnvironmentWithoutPropertyMasking(organization,
+                                environment.getUuid());
+                        resolvedEnvironment = apiAdmin.decryptGatewayConfigurationValues(resolvedEnvironment);
+                        federatedAPIDiscoveryService.scheduleDiscovery(resolvedEnvironment, organization);
+                    } catch (APIManagementException e) {
+                        log.error("Error while scheduling API Discovery for environment: "
+                                + name + " in organization: " + organization, e);
+                    }
+                }
+            });
+
+            ServiceReferenceHolder.getInstance().getFederatedAPIDiscoveryService();
+        } catch (APIManagementException e) {
+            log.error("Error while initializing API Discovery tasks for tenant " + organization, e);
+        }
+    }
+
     /**
      * Populate list of NonProxyHosts for given nonProxyHostsString through APIManagerConfiguration
      *
@@ -1104,5 +1135,18 @@ public class APIManagerComponent {
 
     protected void unsetWorkflowTaskService(WorkflowTaskService workflowTaskService) {
         ServiceReferenceHolder.getInstance().setWorkflowTaskService(null);
+    }
+
+    @Reference(
+            name = "apim.gateway.federation.service",
+            service = org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService.class,
+            cardinality = ReferenceCardinality.MULTIPLE,
+            policy = ReferencePolicy.DYNAMIC,
+            unbind = "unsetFederatedAPIDiscovery")
+    protected void setFederatedAPIDiscovery(FederatedAPIDiscoveryService federatedAPIDiscoveryService) {
+        ServiceReferenceHolder.getInstance().setFederatedAPIDiscovery(federatedAPIDiscoveryService);
+    }
+    protected void unsetFederatedAPIDiscovery(FederatedAPIDiscoveryService federatedAPIDiscoveryService) {
+        ServiceReferenceHolder.getInstance().setFederatedAPIDiscovery(null);
     }
 }

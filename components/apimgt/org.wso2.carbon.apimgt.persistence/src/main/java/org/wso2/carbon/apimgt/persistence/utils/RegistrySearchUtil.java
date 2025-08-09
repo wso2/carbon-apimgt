@@ -622,6 +622,13 @@ public class RegistrySearchUtil {
     public static String getDevPortalSearchQuery(String searchQuery, UserContext ctx, boolean displayMultipleStatus,
                             boolean isAllowDisplayMultipleVersions) throws APIPersistenceException {
         String modifiedQuery = RegistrySearchUtil.constructNewSearchQuery(searchQuery);
+
+        if (!modifiedQuery.contains(APIConstants.TYPE)) {
+            String typeCriteria = APIConstants.TYPE_SEARCH_TYPE_KEY
+                    + getORBasedSearchCriteria(APIConstants.API_SUPPORTED_TYPE_LIST_DEVPORTAL);
+            modifiedQuery = modifiedQuery + APIConstants.SEARCH_AND_TAG + typeCriteria;
+        }
+
         if (!APIConstants.DOCUMENTATION_SEARCH_TYPE_PREFIX_WITH_EQUALS.startsWith(modifiedQuery)) {
             
             String[] statusList = { APIConstants.PUBLISHED, APIConstants.PROTOTYPED };

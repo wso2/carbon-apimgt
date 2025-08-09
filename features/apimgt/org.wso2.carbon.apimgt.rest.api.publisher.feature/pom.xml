@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt-feature</artifactId>
-        <version>9.31.172-SNAPSHOT</version>
+        <version>9.32.7-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -70,6 +70,10 @@
         <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.common.gateway</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.federated.gateway</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.axis2.wso2</groupId>
@@ -248,6 +252,7 @@
                                 <bundleDef>
                                     org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.common.gateway:${carbon.apimgt.version}
                                 </bundleDef>
+                                <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.federated.gateway:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>org.wso2.carbon.apimgt:org.wso2.carbon.apimgt.rest.api.publisher.v1.common:${carbon.apimgt.version}</bundleDef>
                                 <bundleDef>org.wso2.orbit.graphQL:graphQL:${graphql.java.version}</bundleDef>
                                 <bundleDef>com.googlecode.json-simple:json-simple</bundleDef>
