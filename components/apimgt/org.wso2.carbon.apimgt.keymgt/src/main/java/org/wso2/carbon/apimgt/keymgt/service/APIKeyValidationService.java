@@ -23,6 +23,7 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.transport.http.HTTPConstants;
 import org.apache.axis2.wsdl.WSDLConstants;
 import org.apache.commons.httpclient.Header;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
@@ -293,6 +294,14 @@ public class APIKeyValidationService {
             template.setAuthType(urlMapping.getAuthScheme());
             template.setUriTemplate(urlMapping.getUrlPattern());
             template.setThrottlingTier(urlMapping.getThrottlingPolicy());
+
+            if(StringUtils.equals(APIConstants.API_TYPE_MCP, api.getApiType())) {
+                template.setDescription(urlMapping.getDescription());
+                template.setSchemaDefinition(urlMapping.getSchemaDefinition());
+                template.setExistingAPIOperationMapping(urlMapping.getApiOperationMapping());
+                template.setBackendOperationMapping(urlMapping.getBackendOperationMapping());
+            }
+
 
             if (store.isApiPoliciesInitialized()) {
                 log.debug("SubscriptionDataStore Initialized. Reading API Policies from SubscriptionDataStore");

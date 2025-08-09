@@ -168,9 +168,10 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
      * @param apiType API Type
      */
     public void setApiType(String apiType) {
-        // Since we currently support only Product APIs as the alternative, set the value to "PRODUCT_API" only if
-        // the same value is provided as the type. Else the default value will remain as "API".
-        if (APIConstants.ApiTypes.PRODUCT_API.name().equalsIgnoreCase(apiType)) {
+        // Since we currently support Product APIs and MCP Servers as alternatives, set the value to "PRODUCT_API" only
+        // if the same value is provided as the type. Else the default value will remain as "API".
+        if (APIConstants.ApiTypes.PRODUCT_API.name().equalsIgnoreCase(apiType) ||
+                APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)){
             this.apiType = apiType;
         }
     }
@@ -439,6 +440,24 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
             }
 
             messageContext.setProperty(APIMgtGatewayConstants.API_TYPE, apiType);
+            if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Setting API type for MCP internal key authentication: " + apiType);
+                }
+                messageContext.setProperty(APIConstants.API_TYPE, apiType); // for MCP internal key auth
+            }
+            boolean isMCPNoAuthRequest = false;
+            if (messageContext.getProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST) != null) {
+                isMCPNoAuthRequest = (boolean) messageContext.getProperty(APIMgtGatewayConstants.MCP_NO_AUTH_REQUEST);
+            }
+
+            if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) && isMCPNoAuthRequest) {
+                log.debug("Skipping authentication for MCP request"
+                        + ", method: " + messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD));
+                // TODO: Check if we need to handle same as the no auth case for REST
+                return true;
+            }
+
             if (ExtensionListenerUtil.preProcessRequest(messageContext, type)) {
                 if (!isAuthenticatorsInitialized) {
                     initializeAuthenticators();
@@ -446,7 +465,16 @@ public class APIAuthenticationHandler extends AbstractHandler implements Managed
                 if (!isOauthParamsInitialized) {
                     initOAuthParams();
                 }
-                String authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(messageContext);
+
+                String authenticationScheme;
+                String mcpMethod = (String) messageContext.getProperty(APIMgtGatewayConstants.MCP_METHOD);
+                if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(apiType) && (APIConstants.MCP.METHOD_TOOL_LIST.equals(mcpMethod))) {
+                    // todo: iterate tools and set auth scheme
+                    authenticationScheme = APIConstants.AUTH_NO_AUTHENTICATION;
+                } else {
+                    authenticationScheme = getAPIKeyValidator().getResourceAuthenticationScheme(messageContext);
+                }
+
                 if(APIConstants.AUTH_NO_AUTHENTICATION.equals(authenticationScheme)) {
                     if(log.isDebugEnabled()){
                         log.debug("Found Authentication Scheme: ".concat(authenticationScheme));

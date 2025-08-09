@@ -324,6 +324,9 @@ public final class APIConstants {
     public static final String[] API_SUPPORTED_TYPE_LIST =
             {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB", "WEBHOOK", "ASYNC"};
 
+    public static final String[] API_SUPPORTED_TYPE_LIST_DEVPORTAL =
+            {"HTTP", "WS", "SOAPTOREST", "GRAPHQL", "SOAP", "SSE", "WEBSUB", "WEBHOOK", "ASYNC", "APIProduct"};
+
     public static class AuditLogConstants {
         public static final String API_PRODUCT = "APIProduct";
     }

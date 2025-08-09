@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModelProperty;
 import javax.validation.constraints.*;
 
 /**
- * Configuration settings for the API subtype.
+ * Configuration settings for the subtype
  **/
 
 import io.swagger.annotations.*;
@@ -19,23 +19,23 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 
 import javax.validation.Valid;
 
-@ApiModel(description = "Configuration settings for the API subtype.")
+@ApiModel(description = "Configuration settings for the subtype")
 
-public class APISubtypeConfigurationDTO   {
+public class SubtypeConfigurationDTO   {
   
     private String subtype = "DEFAULT";
     private Object _configuration = null;
 
   /**
-   * The designated name of the API subtype.
+   * The designated name of the subtype.
    **/
-  public APISubtypeConfigurationDTO subtype(String subtype) {
+  public SubtypeConfigurationDTO subtype(String subtype) {
     this.subtype = subtype;
     return this;
   }
 
   
-  @ApiModelProperty(example = "AIAPI", value = "The designated name of the API subtype.")
+  @ApiModelProperty(example = "proxy", value = "The designated name of the subtype.")
   @JsonProperty("subtype")
   public String getSubtype() {
     return subtype;
@@ -45,15 +45,15 @@ public class APISubtypeConfigurationDTO   {
   }
 
   /**
-   * Specific configuration properties related to the API subtype.
+   * Specific configuration properties related to the subtype.
    **/
-  public APISubtypeConfigurationDTO _configuration(Object _configuration) {
+  public SubtypeConfigurationDTO _configuration(Object _configuration) {
     this._configuration = _configuration;
     return this;
   }
 
   
-  @ApiModelProperty(value = "Specific configuration properties related to the API subtype.")
+  @ApiModelProperty(value = "Specific configuration properties related to the subtype.")
       @Valid
   @JsonProperty("configuration")
   public Object getConfiguration() {
@@ -72,9 +72,9 @@ public class APISubtypeConfigurationDTO   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    APISubtypeConfigurationDTO apISubtypeConfiguration = (APISubtypeConfigurationDTO) o;
-    return Objects.equals(subtype, apISubtypeConfiguration.subtype) &&
-        Objects.equals(_configuration, apISubtypeConfiguration._configuration);
+    SubtypeConfigurationDTO subtypeConfiguration = (SubtypeConfigurationDTO) o;
+    return Objects.equals(subtype, subtypeConfiguration.subtype) &&
+        Objects.equals(_configuration, subtypeConfiguration._configuration);
   }
 
   @Override
@@ -85,7 +85,7 @@ public class APISubtypeConfigurationDTO   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class APISubtypeConfigurationDTO {\n");
+    sb.append("class SubtypeConfigurationDTO {\n");
     
     sb.append("    subtype: ").append(toIndentedString(subtype)).append("\n");
     sb.append("    _configuration: ").append(toIndentedString(_configuration)).append("\n");

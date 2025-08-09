@@ -64,6 +64,7 @@ public final class RestApiConstants {
 
     public static final String RESOURCE = "resource";
     public static final String RESOURCE_API = "API";
+    public static final String RESOURCE_MCP_SERVER = "MCP_SERVER";
     public static final String RESOURCE_API_PRODUCT = "API Product";
     public static final String RESOURCE_PRODUCT_DOCUMENTATION = "product documentation";
     public static final String RESOURCE_RATING = "Rating";
@@ -104,6 +105,7 @@ public final class RestApiConstants {
     public static final String APIPRODUCTID_PARAM = "{apiProductId}";
     public static final String APPLICATIONID_PARAM = "{applicationId}";
     public static final String DOCUMENTID_PARAM = "{documentId}";
+    public static final String MCP_SERVER_ID_PARAM = "{mcpServerId}";
     public static final String APICATEGORYID_PARAM = "{apiCategoryId}";
     public static final String API_VERSION_PARAM="{version}";
     public static final String SHARED_SCOPE_ID_PARAM = "{scopeId}";
@@ -112,6 +114,7 @@ public final class RestApiConstants {
 
     //todo better to take from cxf level
     public static final String RESOURCE_PATH_APIS = "/apis";
+    public static final String RESOURCE_PATH_MCP_SERVERS = "/mcp-servers";
     public static final String RESOURCE_PATH_ENDPOINT_CERTIFICATE_USAGE = "/endpoint-certificates/"
             + ALIAS_PARAM + "/usage";
     public static final String RESOURCE_PATH_API_PRODUCTS = "/api-products";
