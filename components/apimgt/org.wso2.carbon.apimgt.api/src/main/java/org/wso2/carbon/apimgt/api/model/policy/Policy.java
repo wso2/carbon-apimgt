@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+
 import java.io.Serializable;
 
 public class Policy implements Serializable {
@@ -49,6 +51,7 @@ public class Policy implements Serializable {
         this.tenantId = tenantId;
     }
 
+    @UsedByMigrationClient
     public String getDescription() {
         return description;
     }
@@ -57,6 +60,7 @@ public class Policy implements Serializable {
         this.description = description;
     }
 
+    @UsedByMigrationClient
     public String getPolicyName() {
         return policyName;
     }
@@ -77,6 +81,7 @@ public class Policy implements Serializable {
         this.defaultQuotaPolicy = defaultQuotaPolicy;
     }
 
+    @UsedByMigrationClient
     public QuotaPolicy getDefaultQuotaPolicy() {
         return defaultQuotaPolicy;
     }
@@ -108,6 +113,7 @@ public class Policy implements Serializable {
                 '}';
     }
 
+    @UsedByMigrationClient
     public String getDisplayName() {
         return displayName;
     }

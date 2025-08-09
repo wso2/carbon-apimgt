@@ -21,6 +21,7 @@ import org.apache.axiom.om.OMException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 
 import javax.xml.namespace.QName;
@@ -79,6 +80,7 @@ public class APIDescriptionGenUtil {
      * @return Allowed Requests Count
      * @throws APIManagementException if error occurs when processing XML
      */
+    @UsedByMigrationClient
     public static long getAllowedRequestCount(OMElement policy) throws APIManagementException {
         try {
             OMElement maxCount = policy.getFirstChildWithName(APIConstants.POLICY_ELEMENT).
@@ -111,6 +113,7 @@ public class APIDescriptionGenUtil {
      * @return Attributes map
      * @throws APIManagementException
      */
+    @UsedByMigrationClient
     public static Map<String, Object> getTierAttributes(OMElement policy) throws APIManagementException {
         Map<String, Object> attributesMap = new HashMap<String, Object>();
         OMElement attributes = null;
@@ -152,6 +155,7 @@ public class APIDescriptionGenUtil {
      * @return The request count for a minute((maxCount * 60000)/timeDuration)
      * @throws APIManagementException if policy or parsing error occurs
      */
+    @UsedByMigrationClient
     public static long getAllowedCountPerMinute(OMElement policy) throws APIManagementException {
         //Here as the method is about extracting some info from the policy. And it's not concern on compliance to
         // specification. So it just extract the required element.
@@ -192,6 +196,7 @@ public class APIDescriptionGenUtil {
      * @return time duration for requests
      * @throws APIManagementException if error occurs when processing XML
      */
+    @UsedByMigrationClient
     public static long getTimeDuration(OMElement policy) throws APIManagementException {
         try {
             OMElement duration = policy.getFirstChildWithName(APIConstants.POLICY_ELEMENT).

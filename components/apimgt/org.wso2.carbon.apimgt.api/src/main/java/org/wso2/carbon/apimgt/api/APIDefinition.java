@@ -56,6 +56,7 @@ public abstract class APIDefinition {
      *
      * @return URI templates
      */
+    @UsedByMigrationClient
     public abstract Set<URITemplate> getURITemplates(String resourceConfigsJSON) throws APIManagementException;
 
     /**

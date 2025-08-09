@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.impl.importexport.APIImportExportException;
 import org.wso2.carbon.apimgt.impl.importexport.ExportFormat;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
@@ -69,6 +70,7 @@ public class CommonUtil {
      * @param path Path of the directory
      * @throws APIImportExportException If directory creation failed
      */
+    @UsedByMigrationClient
     public static void createDirectory(String path) throws APIImportExportException {
 
         if (path != null) {
@@ -85,6 +87,7 @@ public class CommonUtil {
      *
      * @throws APIImportExportException If an error occurs while creating temporary location
      */
+    @UsedByMigrationClient
     public static File createTempDirectory(Identifier identifier) throws APIImportExportException {
 
         String currentDirectory = System.getProperty(APIConstants.JAVA_IO_TMPDIR);
@@ -121,6 +124,7 @@ public class CommonUtil {
      * @param sourceDirectory Source directory
      * @throws APIImportExportException If an error occurs while generating archive
      */
+    @UsedByMigrationClient
     public static void archiveDirectory(String sourceDirectory) throws APIImportExportException {
 
         File directoryToZip = new File(sourceDirectory);
@@ -448,6 +452,7 @@ public class CommonUtil {
      * @param exportFormat Format to be exported
      * @param fileContent  Content to be written
      */
+    @UsedByMigrationClient
     public static void writeToYamlOrJson(String filePath, ExportFormat exportFormat, String fileContent)
             throws APIImportExportException, IOException {
 
@@ -471,6 +476,7 @@ public class CommonUtil {
      * @throws APIImportExportException if an error occurs while writing the file to YAML or JSON
      * @throws IOException              if an error occurs while converting the file from JSON to YAML
      */
+    @UsedByMigrationClient
     public static void writeDtoToFile(String filePath, ExportFormat exportFormat, String type, Object dtoObject)
             throws APIImportExportException, IOException {
 

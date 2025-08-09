@@ -38,6 +38,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDL11SOAPOperationExtractor;
@@ -263,6 +264,7 @@ public class SOAPOperationBindingUtils {
      * @return true if the api is soap to rest converted one. false if the user have a pass through
      * @throws APIManagementException if an error occurs when accessing the registry
      */
+    @UsedByMigrationClient
     public static boolean isSOAPToRESTApi(String name, String version, String provider) throws APIManagementException {
         provider = (provider != null ? provider.trim() : null);
         name = (name != null ? name.trim() : null);

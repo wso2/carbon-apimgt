@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIMgtDAOException;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
@@ -69,6 +70,7 @@ public class SystemConfigurationsDAO {
      * @param type  Config Type
      * @param config  Configuration to be added
      */
+    @UsedByMigrationClient
     public void addSystemConfig(String organization, String type, String config) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();
@@ -97,6 +99,7 @@ public class SystemConfigurationsDAO {
      * @param type  Config Type
      * @return System Configuration
      */
+    @UsedByMigrationClient
     public String getSystemConfig(String organization, String type) throws APIManagementException {
 
         ResultSet rs;
@@ -126,6 +129,7 @@ public class SystemConfigurationsDAO {
      * @param type  Config Type
      * @param config  Configuration to be updated
      */
+    @UsedByMigrationClient
     public void updateSystemConfig(String organization, String type, String config) throws APIManagementException {
 
         try (Connection connection = APIMgtDBUtil.getConnection();

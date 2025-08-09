@@ -22,6 +22,7 @@ package org.wso2.carbon.apimgt.impl.importexport;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.dto.ImportedAPIDTO;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 
 import java.io.File;
 import java.io.InputStream;
@@ -50,6 +51,7 @@ public interface ImportExportAPI {
      * @throws APIManagementException
      * @throws APIImportExportException
      */
+    @UsedByMigrationClient
     public File exportAPI(String apiId, String name, String version, String revisionNum, String providerName,
             boolean preserveStatus, ExportFormat format, boolean preserveDocs, boolean preserveCredentials,
             boolean exportLatestRevision, String originalDevPortalUrl, String organization)

@@ -19,6 +19,7 @@
 package org.wso2.carbon.apimgt.impl.wsdl.model;
 
 import org.wso2.carbon.apimgt.api.ErrorHandler;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.impl.wsdl.WSDLProcessor;
 
 public class WSDLValidationResponse {
@@ -41,10 +42,12 @@ public class WSDLValidationResponse {
         this.wsdlArchiveInfo = wsdlArchiveInfo;
     }
 
+    @UsedByMigrationClient
     public ErrorHandler getError() {
         return error;
     }
 
+    @UsedByMigrationClient
     public boolean isValid() {
         return isValid;
     }

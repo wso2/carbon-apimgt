@@ -19,10 +19,13 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+
 public class BandwidthLimit extends Limit {
     private long dataAmount;
     private String dataUnit;
 
+    @UsedByMigrationClient
     public long getDataAmount() {
         return dataAmount;
     }
@@ -31,6 +34,7 @@ public class BandwidthLimit extends Limit {
         this.dataAmount = dataAmount;
     }
 
+    @UsedByMigrationClient
     public String getDataUnit() {
         return dataUnit;
     }

@@ -17,6 +17,8 @@
 */
 package org.wso2.carbon.apimgt.api.model;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+
 import java.io.Serializable;
 import java.util.Map;
 
@@ -55,6 +57,7 @@ public class Tier implements Serializable, Comparable<Tier>{
         return monetizationAttributes;
     }
 
+    @UsedByMigrationClient
     public void setMonetizationAttributes(Map<String, String> monetizationAttributes) {
         this.monetizationAttributes = monetizationAttributes;
     }
@@ -65,6 +68,7 @@ public class Tier implements Serializable, Comparable<Tier>{
         this.name = name;
     }
 
+    @UsedByMigrationClient
     public String getName() {
         return name;
     }
@@ -73,6 +77,7 @@ public class Tier implements Serializable, Comparable<Tier>{
         return description;
     }
 
+    @UsedByMigrationClient
     public void setDescription(String description) {
         this.description = description;
     }
@@ -81,6 +86,7 @@ public class Tier implements Serializable, Comparable<Tier>{
         return displayName;
     }
 
+    @UsedByMigrationClient
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
@@ -92,10 +98,12 @@ public class Tier implements Serializable, Comparable<Tier>{
     public void setPolicyContent(byte[] policyContent) {
         this.policyContent = policyContent;
     }
+    @UsedByMigrationClient
     public Map<String,Object> getTierAttributes() {
         return tierAttributes;
     }
 
+    @UsedByMigrationClient
     public void setTierAttributes(Map<String,Object> tierAttributes) {
         this.tierAttributes = tierAttributes;
     }
@@ -104,6 +112,7 @@ public class Tier implements Serializable, Comparable<Tier>{
         return requestsPerMin;
     }
 
+    @UsedByMigrationClient
     public void setRequestsPerMin(long requestsPerMin) {
         this.requestsPerMin = requestsPerMin;
     }
@@ -112,6 +121,7 @@ public class Tier implements Serializable, Comparable<Tier>{
         return requestCount;
     }
 
+    @UsedByMigrationClient
     public void setRequestCount(long requestCount) {
         this.requestCount = requestCount;
     }
@@ -120,6 +130,7 @@ public class Tier implements Serializable, Comparable<Tier>{
         return unitTime;
     }
 
+    @UsedByMigrationClient
     public void setUnitTime(long unitTime) {
         this.unitTime = unitTime;
     }
@@ -128,14 +139,17 @@ public class Tier implements Serializable, Comparable<Tier>{
         return timeUnit;
     }
 
+    @UsedByMigrationClient
     public void setTimeUnit(String timeUnit) {
         this.timeUnit = timeUnit;
     }
 
+    @UsedByMigrationClient
     public String getTierPlan() {
         return tierPlan;
     }
 
+    @UsedByMigrationClient
     public void setTierPlan(String tierPlan) {
         this.tierPlan = tierPlan;
     }
@@ -156,6 +170,7 @@ public class Tier implements Serializable, Comparable<Tier>{
         this.tierPermission = tierPermission;
     }
 
+    @UsedByMigrationClient
     public void setQuotaPolicyType(String quotaPolicyType) {
         this.quotaPolicyType = quotaPolicyType;
     }
@@ -172,14 +187,17 @@ public class Tier implements Serializable, Comparable<Tier>{
         return rateLimitTimeUnit;
     }
 
+    @UsedByMigrationClient
     public void setRateLimitCount(int rateLimitCount) {
         this.rateLimitCount = rateLimitCount;
     }
 
+    @UsedByMigrationClient
     public void setRateLimitTimeUnit(String rateLimitTimeUnit) {
         this.rateLimitTimeUnit = rateLimitTimeUnit;
     }
 
+    @UsedByMigrationClient
     public void setBandwidthDataUnit(String bandwidthDataUnit) {
         this.bandwidthDataUnit = bandwidthDataUnit;
     }

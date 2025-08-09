@@ -17,6 +17,8 @@
  */
 package org.wso2.carbon.apimgt.api.model;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -34,14 +36,17 @@ public class APIRevision implements Serializable {
         return id;
     }
 
+    @UsedByMigrationClient
     public void setId(int id) {
         this.id = id;
     }
 
+    @UsedByMigrationClient
     public String getApiUUID() {
         return apiUUID;
     }
 
+    @UsedByMigrationClient
     public void setApiUUID(String apiUUID) {
         this.apiUUID = apiUUID;
     }
@@ -50,6 +55,7 @@ public class APIRevision implements Serializable {
         return revisionUUID;
     }
 
+    @UsedByMigrationClient
     public void setRevisionUUID(String revisionUUID) {
         this.revisionUUID = revisionUUID;
     }
@@ -58,6 +64,7 @@ public class APIRevision implements Serializable {
         return description;
     }
 
+    @UsedByMigrationClient
     public void setDescription(String description) {
         this.description = description;
     }

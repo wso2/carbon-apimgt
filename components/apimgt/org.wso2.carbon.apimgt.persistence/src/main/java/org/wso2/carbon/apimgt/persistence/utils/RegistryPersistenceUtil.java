@@ -31,6 +31,7 @@ import org.json.simple.parser.ParseException;
 import org.wso2.carbon.CarbonConstants;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.TokenBasedThrottlingCountHolder;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.model.API;
 import org.wso2.carbon.apimgt.api.model.APICategory;
 import org.wso2.carbon.apimgt.api.model.APIIdentifier;
@@ -108,6 +109,7 @@ public class RegistryPersistenceUtil {
      * @param input inputString
      * @return String modifiedString
      */
+    @UsedByMigrationClient
     public static String replaceEmailDomainBack(String input) {
 
         if (input != null && input.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR_REPLACEMENT)) {
@@ -544,7 +546,7 @@ public class RegistryPersistenceUtil {
      * @param identifier APIIdentifier
      * @return API path
      */
-
+    @UsedByMigrationClient
     public static String getAPIPath(APIIdentifier identifier) {
 
         return APIConstants.API_ROOT_LOCATION + RegistryConstants.PATH_SEPARATOR
@@ -560,6 +562,7 @@ public class RegistryPersistenceUtil {
      * @param input inputString
      * @return String modifiedString
      */
+    @UsedByMigrationClient
     public static String replaceEmailDomain(String input) {
 
         if (input != null && input.contains(APIConstants.EMAIL_DOMAIN_SEPARATOR)) {
@@ -624,7 +627,7 @@ public class RegistryPersistenceUtil {
                     RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(tenantUserRealm);
                     resourcePath = authorizationManager.computePathOnMount(resourcePath);
 
-                    org.wso2.carbon.user.api.AuthorizationManager authManager = ServiceReferenceHolder.getInstance()
+                    AuthorizationManager authManager = ServiceReferenceHolder.getInstance()
                             .getRealmService().
                             getTenantUserRealm(tenantID)
                             .getAuthorizationManager();
@@ -706,7 +709,7 @@ public class RegistryPersistenceUtil {
      * @param artifact
      * @param registry
      * @return API
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
 
     public static API getAPI(GovernanceArtifact artifact, Registry registry)
@@ -1060,6 +1063,7 @@ public class RegistryPersistenceUtil {
         PrivilegedCarbonContext.getThreadLocalCarbonContext().setTenantDomain(tenantDomain, true);
     }
 
+    @UsedByMigrationClient
     public static API getApiForPublishing(Registry registry, GovernanceArtifact apiArtifact)
                                     throws APIManagementException {
         API api = getAPI(apiArtifact, registry);
@@ -1092,6 +1096,7 @@ public class RegistryPersistenceUtil {
                 + APIConstants.API_RESOURCE_NAME;
     }
 
+    @UsedByMigrationClient
     public static void endTenantFlow() {
         PrivilegedCarbonContext.endTenantFlow();
     }
@@ -1162,7 +1167,7 @@ public class RegistryPersistenceUtil {
                                             .equals(tenantDomain)) {
                 RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(tenantUserRealm);
                 resourcePath = authorizationManager.computePathOnMount(resourcePath);
-                org.wso2.carbon.user.api.AuthorizationManager authManager = tenantUserRealm.getAuthorizationManager();
+                AuthorizationManager authManager = tenantUserRealm.getAuthorizationManager();
                 if (visibility != null && APIConstants.API_RESTRICTED_VISIBILITY.equalsIgnoreCase(visibility)) {
                     boolean isRoleEveryOne = false;
                     /*If no roles have defined, authorize for everyone role */
@@ -1419,7 +1424,7 @@ public class RegistryPersistenceUtil {
                     getTenantUserRealm(tenantId);
             if (!org.wso2.carbon.utils.multitenancy.MultitenantConstants.SUPER_TENANT_DOMAIN_NAME
                     .equals(tenantDomain)) {
-                org.wso2.carbon.user.api.AuthorizationManager authManager = tenantUserRealm.getAuthorizationManager();
+                AuthorizationManager authManager = tenantUserRealm.getAuthorizationManager();
                 authManager.clearResourceAuthorizations(resourcePath);
             } else {
                 RegistryAuthorizationManager authorizationManager = new RegistryAuthorizationManager(tenantUserRealm);
@@ -1463,6 +1468,7 @@ public class RegistryPersistenceUtil {
      * @param identifier APIIdentifier
      * @return wsdl archive path
      */
+    @UsedByMigrationClient
     public static String getWsdlArchivePath(APIIdentifier identifier) {
 
         return APIConstants.API_WSDL_RESOURCE_LOCATION + APIConstants.API_WSDL_ARCHIVE_LOCATION
@@ -1518,6 +1524,7 @@ public class RegistryPersistenceUtil {
                 + APIConstants.API_RESOURCE_NAME;
     }
 
+    @UsedByMigrationClient
     public static String getRevisionPath(String apiUUID, int revisionId) {
         return APIConstants.API_REVISION_LOCATION + RegistryConstants.PATH_SEPARATOR + apiUUID +
                 RegistryConstants.PATH_SEPARATOR + revisionId + RegistryConstants.PATH_SEPARATOR;
@@ -1544,7 +1551,7 @@ public class RegistryPersistenceUtil {
 
         try {
             String filePathString = filePath.replaceFirst("/registry/resource/", "");
-            org.wso2.carbon.user.api.AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
+            AuthorizationManager accessControlAdmin = ServiceReferenceHolder.getInstance().
                     getRealmService().getTenantUserRealm(MultitenantConstants.SUPER_TENANT_ID).
                     getAuthorizationManager();
             if (!accessControlAdmin.isRoleAuthorized(CarbonConstants.REGISTRY_ANONNYMOUS_ROLE_NAME,
@@ -1564,6 +1571,7 @@ public class RegistryPersistenceUtil {
      * @param apiVersion API Version
      * @return WSDL file name
      */
+    @UsedByMigrationClient
     public static String createWsdlFileName(String provider, String apiName, String apiVersion) {
 
         return provider + "--" + apiName + apiVersion + ".wsdl";
@@ -1747,7 +1755,7 @@ public class RegistryPersistenceUtil {
      * @param artifact
      * @param registry
      * @return APIProduct
-     * @throws org.wso2.carbon.apimgt.api.APIManagementException
+     * @throws APIManagementException
      */
     public static APIProduct getAPIProduct(GovernanceArtifact artifact, Registry registry)
             throws APIManagementException {
@@ -2015,7 +2023,7 @@ public class RegistryPersistenceUtil {
     private static RegistryService getRegistryService() {
         return ServiceReferenceHolder.getInstance().getRegistryService();
     }
-    
+
     public static Map<String, String> getFields(String query) {
         // Map to hold the final output
         Map<String, String> outputMap = new HashMap<>();
@@ -2059,7 +2067,7 @@ public class RegistryPersistenceUtil {
         }
         outputMap.put("mediaType", "application/vnd.wso2-api+xml");
         //since store_view_roles and overview_visible_organizations are passed as property search value, remove this.
-        outputMap.remove("overview_store_view_roles"); 
+        outputMap.remove("overview_store_view_roles");
         outputMap.remove("overview_visible_organizations");
         return outputMap;
     }

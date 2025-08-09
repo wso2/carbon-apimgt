@@ -20,6 +20,7 @@ import org.wso2.carbon.apimgt.api.APIDefinition;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
@@ -113,6 +114,7 @@ public class ServiceReferenceHolder {
         this.registryService = registryService;
     }
 
+    @UsedByMigrationClient
     public APIManagerConfigurationService getAPIManagerConfigurationService() {
 
         return amConfigurationService;
@@ -123,6 +125,7 @@ public class ServiceReferenceHolder {
         this.amConfigurationService = amConfigurationService;
     }
 
+    @UsedByMigrationClient
     public RealmService getRealmService() {
 
         return realmService;
@@ -318,6 +321,7 @@ public class ServiceReferenceHolder {
         this.apimConfigService = apimConfigService;
     }
 
+    @UsedByMigrationClient
     public APIMConfigService getApimConfigService() {
         if (apimConfigService != null){
             return apimConfigService;

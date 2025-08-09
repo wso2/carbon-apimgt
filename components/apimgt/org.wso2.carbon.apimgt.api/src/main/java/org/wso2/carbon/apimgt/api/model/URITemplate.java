@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import org.json.simple.JSONValue;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 
@@ -76,6 +77,7 @@ public class URITemplate implements Serializable{
         this.throttlingConditions = throttlingConditions;
     }
 
+    @UsedByMigrationClient
     public void setMediationScript(String mediationScript) {
         this.mediationScript = mediationScript;
     }
@@ -127,10 +129,12 @@ public class URITemplate implements Serializable{
         }
     }
 
+    @UsedByMigrationClient
     public String getThrottlingTier() {
         return throttlingTier;
     }
 
+    @UsedByMigrationClient
     public void setThrottlingTier(String throttlingTier) {
         this.throttlingTier = throttlingTier;
     }
@@ -143,18 +147,22 @@ public class URITemplate implements Serializable{
         this.throttlingTiers = throttlingTiers;
     }
 
+    @UsedByMigrationClient
     public String getHTTPVerb() {
         return httpVerb;
     }
 
+    @UsedByMigrationClient
     public void setHTTPVerb(String httpVerb) {
         this.httpVerb = httpVerb;
     }
 
+    @UsedByMigrationClient
     public String getAuthType() {
         return authType;
     }
 
+    @UsedByMigrationClient
     public void setAuthType(String authType) {
         this.authType = authType;
 
@@ -164,6 +172,7 @@ public class URITemplate implements Serializable{
         return resourceURI;
     }
 
+    @UsedByMigrationClient
     public void setResourceURI(String resourceURI) {
         this.resourceURI = resourceURI;
     }
@@ -176,6 +185,7 @@ public class URITemplate implements Serializable{
         return resourceSandboxURI;
     }
 
+    @UsedByMigrationClient
     public void setResourceSandboxURI(String resourceSandboxURI) {
         this.resourceSandboxURI = resourceSandboxURI;
     }
@@ -184,10 +194,12 @@ public class URITemplate implements Serializable{
         return this.resourceSandboxURI != null;
     }
 
+    @UsedByMigrationClient
     public String getUriTemplate() {
         return uriTemplate;
     }
 
+    @UsedByMigrationClient
     public void setUriTemplate(String template) {
 
         this.uriTemplate = template;
@@ -271,17 +283,22 @@ public class URITemplate implements Serializable{
         return false;
     }
 
+    @UsedByMigrationClient
     public Scope getScope() {
         return scope;
     }
+
+    @UsedByMigrationClient
     public List<Scope> getScopes() {
         return scopes;
     }
 
+    @UsedByMigrationClient
     public void setScope(Scope scope) {
         this.scope = scope;
     }
 
+    @UsedByMigrationClient
     public void setScopes(Scope scope){
         this.scopes.add(scope);
     }
@@ -413,18 +430,22 @@ public class URITemplate implements Serializable{
         return result;
     }
 
+    @UsedByMigrationClient
     public int getId() {
         return id;
     }
 
+    @UsedByMigrationClient
     public void setId(int id) {
         this.id = id;
     }
 
+    @UsedByMigrationClient
     public List<Scope> retrieveAllScopes() {
         return this.scopes;
     }
 
+    @UsedByMigrationClient
     public void addAllScopes(List<Scope> scopes) {
 
         this.scopes = scopes;

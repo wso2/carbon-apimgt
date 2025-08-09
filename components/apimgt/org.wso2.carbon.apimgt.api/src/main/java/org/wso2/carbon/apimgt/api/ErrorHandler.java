@@ -34,6 +34,7 @@ public interface ErrorHandler {
      * Get error message that defined in the enum
      * @return  error message
      */
+    @UsedByMigrationClient
     String getErrorMessage();
 
     /**
@@ -41,6 +42,7 @@ public interface ErrorHandler {
      *
      * @return  error description.
      */
+    @UsedByMigrationClient
      String getErrorDescription();
 
     /**

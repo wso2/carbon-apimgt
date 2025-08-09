@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +41,7 @@ public class SubscriptionPolicy extends Policy {
         super(name);
     }
 
+    @UsedByMigrationClient
     public int getRateLimitCount() {
         return rateLimitCount;
     }
@@ -47,6 +50,7 @@ public class SubscriptionPolicy extends Policy {
         this.rateLimitCount = rateLimitCount;
     }
 
+    @UsedByMigrationClient
     public String getRateLimitTimeUnit() {
         return rateLimitTimeUnit;
     }
@@ -55,6 +59,7 @@ public class SubscriptionPolicy extends Policy {
         this.rateLimitTimeUnit = rateLimitTimeUnit;
     }
 
+    @UsedByMigrationClient
     public String getBillingPlan() {
         return billingPlan;
     }
@@ -71,6 +76,7 @@ public class SubscriptionPolicy extends Policy {
         this.stopOnQuotaReach = stopOnQuotaReach;
     }
 
+    @UsedByMigrationClient
     public byte[] getCustomAttributes() {
         return customAttributes;
     }
@@ -87,6 +93,7 @@ public class SubscriptionPolicy extends Policy {
         this.monetizationPlan = monetizationPlan;
     }
 
+    @UsedByMigrationClient
     public Map<String, String> getMonetizationPlanProperties() {
         return monetizationPlanProperties;
     }

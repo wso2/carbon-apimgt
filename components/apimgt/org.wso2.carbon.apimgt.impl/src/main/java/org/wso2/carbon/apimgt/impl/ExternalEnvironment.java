@@ -30,7 +30,6 @@ public interface ExternalEnvironment {
      *
      * @return List of protocol endpoint URLs map
      */
-
     public List<AsyncProtocolEndpoint> getExternalEndpointURLs(Environment environment) ;
 
     /**

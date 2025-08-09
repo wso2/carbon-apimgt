@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.apimgt.impl.caching;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
@@ -162,6 +163,7 @@ public class CacheProvider {
     /**
      * @return Tenant Config cache
      */
+    @UsedByMigrationClient
     public static Cache getTenantConfigCache() {
         return getCache(APIConstants.TENANT_CONFIG_CACHE_NAME);
     }
