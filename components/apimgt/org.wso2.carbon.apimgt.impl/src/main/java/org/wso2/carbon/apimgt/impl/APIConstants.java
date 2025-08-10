@@ -1551,6 +1551,13 @@ public final class APIConstants {
     public static final String CONFIG_REDIS_NUM_TESTS_PER_EVICTION_RUNS = "NumTestsPerEvictionRun";
     public static final String CONFIG_REDIS_GATEWAY_ID = "GatewayId";
 
+    // Distributed Throttle Configuration constants
+    public static final String DISTRIBUTED_THROTTLE_CONFIG = "DistributedThrottleConfig";
+    public static final String DISTRIBUTED_THROTTLE_ENABLED = "Enabled";
+    public static final String DISTRIBUTED_THROTTLE_TYPE = "Type";
+    public static final String DISTRIBUTED_THROTTLE_SYNC_INTERVAL = "SyncInterval";
+    public static final String DISTRIBUTED_THROTTLE_CORE_POOL_SIZE = "CorePoolSize";
+
     public static final String CONFIG_REDIS_MIN_GATEWAY_COUNT = "MinGatewayCount";
 
     public static final String CONFIG_REDIS_KEY_LOCK_RETRIEVAL_TIMEOUT = "KeyLockRetrievalTimeout";

@@ -48,6 +48,7 @@ import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.common.gateway.configdto.HttpClientConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.APIMGovernanceConfigDTO;
+import org.wso2.carbon.apimgt.impl.dto.DistributedThrottleConfig;
 import org.wso2.carbon.apimgt.impl.dto.EventHubConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.ExtendedJWTConfigurationDto;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
@@ -141,6 +142,7 @@ public class APIManagerConfiguration {
     private static Map<String, String> persistenceProperties = new HashMap<String, String>();
     private static String tokenRevocationClassName;
     private static String certificateBoundAccessEnabled;
+    private DistributedThrottleConfig distributedThrottleConfig = new DistributedThrottleConfig();
     private GatewayCleanupSkipList gatewayCleanupSkipList = new GatewayCleanupSkipList();
     private RedisConfig redisConfig = new RedisConfig();
     private OrgAccessControl orgAccessControl = new OrgAccessControl();
@@ -342,6 +344,8 @@ public class APIManagerConfiguration {
         }
     }
 
+
+
     private void readChildElements(OMElement serverConfig,
                                    Stack<String> nameStack) throws APIManagementException {
 
@@ -514,6 +518,9 @@ public class APIManagerConfiguration {
                         }
                     }
                 }
+                addRedisConfigsAsSystemProperties(redisConfig);
+            } else if (APIConstants.DISTRIBUTED_THROTTLE_CONFIG.equals(localName)) {
+                setDistributedThrottleConfiguration(element);
             } else if (elementHasText(element)) {
                 String key = getKey(nameStack);
                 String value = MiscellaneousUtil.resolve(element, secretResolver);
@@ -1178,6 +1185,87 @@ public class APIManagerConfiguration {
             //Since this is the server startup.Ignore the exceptions,invoked at the server startup
         } catch (MalformedURLException e) {
             log.error("Exception While resolving KeyManager Server URL or Port " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Set Redis configuration values as System properties.
+     *
+     * @param redisConfig RedisConfig object containing Redis configuration
+     */
+    private void addRedisConfigsAsSystemProperties(RedisConfig redisConfig) {
+        try {
+            if (redisConfig != null && redisConfig.isRedisEnabled()) {
+                // Set Redis pool configuration as system properties
+                System.setProperty("is.distributed", String.valueOf(redisConfig.getMaxTotal()));
+
+                log.info("Redis configuration values set as system properties successfully");
+            }
+        } catch (Exception e) {
+            log.error("Exception while setting Redis configuration as system properties: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Set distributed throttle configuration from the api-manager.xml file
+     *
+     * @param element OMElement of the DistributedThrottleConfig configuration block
+     */
+    private void setDistributedThrottleConfiguration(OMElement element) {
+        OMElement enabledElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_ENABLED));
+        if (enabledElement != null) {
+            distributedThrottleConfig.setEnabled(Boolean.parseBoolean(enabledElement.getText()));
+        }
+
+        OMElement typeElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_TYPE));
+        if (typeElement != null) {
+            distributedThrottleConfig.setType(typeElement.getText());
+        }
+
+        OMElement syncIntervalElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_SYNC_INTERVAL));
+        if (syncIntervalElement != null) {
+            try {
+                distributedThrottleConfig.setSyncInterval(Integer.parseInt(syncIntervalElement.getText()));
+            } catch (NumberFormatException e) {
+//                log.warn("Invalid sync interval specified: {}. Using default.", syncIntervalElement.getText());
+            }
+        }
+
+        OMElement corePoolSizeElement = element.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_CORE_POOL_SIZE));
+        if (corePoolSizeElement != null) {
+            try {
+                distributedThrottleConfig.setCorePoolSize(Integer.parseInt(corePoolSizeElement.getText()));
+            } catch (NumberFormatException e) {
+//                log.warn("Invalid core pool size specified: {}. Using default.", corePoolSizeElement.getText());
+            }
+        }
+
+        // Set distributed throttle configurations as system properties
+        addDistributedThrottleConfigsAsSystemProperties(distributedThrottleConfig);
+
+//        log.info("Distributed throttle configuration loaded - Enabled: {}, Type: {}, SyncInterval: {}, CorePoolSize: {}",
+//                distributedThrottleConfig.isEnabled(), distributedThrottleConfig.getType(),
+//                distributedThrottleConfig.getSyncInterval(), distributedThrottleConfig.getCorePoolSize());
+    }
+
+    /**
+     * Set distributed throttle configuration values as System properties.
+     *
+     * @param distributedThrottleConfig DistributedThrottleConfig object containing distributed throttle configuration
+     */
+    private void addDistributedThrottleConfigsAsSystemProperties(DistributedThrottleConfig distributedThrottleConfig) {
+        try {
+            if (distributedThrottleConfig != null) {
+                // Set distributed throttle properties as system properties
+                System.setProperty("distributed.throttle.enabled", String.valueOf(distributedThrottleConfig.isEnabled()));
+                System.setProperty("distributed.throttle.type", distributedThrottleConfig.getType());
+                System.setProperty("distributed.throttle.sync.interval", String.valueOf(distributedThrottleConfig.getSyncInterval()));
+                System.setProperty("distributed.throttle.core.pool.size", String.valueOf(distributedThrottleConfig.getCorePoolSize()));
+
+                log.info("Distributed throttle configuration values set as system properties successfully");
+            }
+        } catch (Exception e) {
+            log.error("Exception while setting distributed throttle configuration as system properties: " + e.getMessage(), e);
         }
     }
 
@@ -1894,6 +1982,11 @@ public class APIManagerConfiguration {
     public RedisConfig getRedisConfig() {
 
         return redisConfig;
+    }
+
+    public DistributedThrottleConfig getDistributedThrottleConfig() {
+
+        return distributedThrottleConfig;
     }
 
     /**
