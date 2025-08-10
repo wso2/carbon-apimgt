@@ -39,4 +39,5 @@ public class GatewayDto {
     public void setGatewayDeployer(GatewayDeployer gatewayDeployer) {
         this.gatewayDeployer = gatewayDeployer;
     }
+
 }

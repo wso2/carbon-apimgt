@@ -1105,7 +1105,8 @@ public class OASParserUtil {
      */
     public static void updateValidationResponseAsSuccess(APIDefinitionValidationResponse validationResponse,
                                                          String originalAPIDefinition, String openAPIVersion, String title, String version, String context,
-                                                         String description, List<String> endpoints) {
+                                                         String description, List<String> endpoints,
+                                                         List<URITemplate> uriTemplates) {
         validationResponse.setValid(true);
         validationResponse.setContent(originalAPIDefinition);
         APIDefinitionValidationResponse.Info info = new APIDefinitionValidationResponse.Info();
@@ -1115,6 +1116,7 @@ public class OASParserUtil {
         info.setContext(context);
         info.setDescription(description);
         info.setEndpoints(endpoints);
+        info.setUriTemplates(uriTemplates);
         validationResponse.setInfo(info);
     }
 

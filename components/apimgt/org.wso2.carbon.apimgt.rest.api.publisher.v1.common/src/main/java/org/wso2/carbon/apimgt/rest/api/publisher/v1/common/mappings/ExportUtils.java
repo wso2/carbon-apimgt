@@ -47,6 +47,7 @@ import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIRevision;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
+import org.wso2.carbon.apimgt.api.model.Backend;
 import org.wso2.carbon.apimgt.api.model.Documentation;
 import org.wso2.carbon.apimgt.api.model.DocumentationContent;
 import org.wso2.carbon.apimgt.api.model.Identifier;
@@ -72,7 +73,9 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIEndpointDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.AdvertiseInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.BackendDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.GraphQLQueryComplexityInfoDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ProductAPIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ResourcePolicyListDTO;
@@ -167,21 +170,48 @@ public class ExportUtils {
      * @return
      * @throws APIManagementException If an error occurs while getting governance registry
      */
+    @Deprecated
     public static File exportApi(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTO apiDtoToReturn, API api,
                                  String userName, ExportFormat exportFormat, boolean preserveStatus,
                                  boolean preserveDocs, String originalDevPortalUrl, String organization,
                                  boolean preserveCredentials)
             throws APIManagementException, APIImportExportException {
 
+        return exportAPI(apiProvider, apiIdentifier, new APIDTOTypeWrapper(apiDtoToReturn), api, userName, exportFormat,
+                preserveStatus, preserveDocs, originalDevPortalUrl, organization, preserveCredentials);
+    }
+
+    /**
+     * Exports an API from API Manager for a given API. Meta information, API icon, documentation,
+     * WSDL and sequences are exported.
+     *
+     * @param apiProvider          API Provider
+     * @param apiIdentifier        API Identifier
+     * @param apiDtoToReturn       API DTO
+     * @param api                  API
+     * @param userName             Username
+     * @param exportFormat         Format of output documents. Can be YAML or JSON
+     * @param preserveStatus       Preserve API status on export
+     * @param preserveDocs         Preserve documentation on Export.
+     * @param originalDevPortalUrl Original DevPortal URL (redirect URL) for the original Store
+     *                             (This is used for advertise only APIs).
+     * @param organization         Organization
+     * @param preserveCredentials  Preserve credentials on export
+     * @return File containing the exported API artifact.
+     * @throws APIManagementException If an error occurs while getting governance registry
+     */
+    public static File exportAPI(APIProvider apiProvider, APIIdentifier apiIdentifier, APIDTOTypeWrapper apiDtoToReturn,
+                                 API api, String userName, ExportFormat exportFormat, boolean preserveStatus,
+                                 boolean preserveDocs, String originalDevPortalUrl, String organization,
+                                 boolean preserveCredentials) throws APIManagementException, APIImportExportException {
+
         int tenantId;
         String currentApiUuid;
 
-        // If explicitly advertise only property has been specified as true, make it true and update the API DTO.
-        if (StringUtils.isNotBlank(originalDevPortalUrl)) {
-            setAdvertiseOnlySpecificPropertiesToDTO(apiDtoToReturn, originalDevPortalUrl);
+        if (apiDtoToReturn.isAPIDTO() && StringUtils.isNotBlank(originalDevPortalUrl)) {
+            setAdvertiseOnlySpecificPropertiesToDTO((APIDTO) apiDtoToReturn.getWrappedDTO(), originalDevPortalUrl);
         }
 
-        // Resolve whether an API or a corresponding revision
         APIRevision apiRevision = apiProvider.checkAPIUUIDIsARevisionUUID(apiDtoToReturn.getId());
         if (apiRevision != null && apiRevision.getApiUUID() != null) {
             currentApiUuid = apiRevision.getApiUUID();
@@ -189,65 +219,71 @@ public class ExportUtils {
             currentApiUuid = apiDtoToReturn.getId();
         }
 
-        // Create temp location for storing API data
         File exportFolder = CommonUtil.createTempDirectory(apiIdentifier);
         String exportAPIBasePath = exportFolder.toString();
         String archivePath = exportAPIBasePath
                 .concat(File.separator + apiIdentifier.getApiName() + "-" + apiIdentifier.getVersion());
         tenantId = APIUtil.getTenantId(userName);
-
         CommonUtil.createDirectory(archivePath);
+
         if (preserveDocs) {
             addThumbnailToArchive(archivePath, apiIdentifier, apiProvider, currentApiUuid);
             addDocumentationToArchive(archivePath, apiIdentifier, exportFormat, apiProvider,
                     APIConstants.API_IDENTIFIER_TYPE);
-        } 
-        
-        if (StringUtils.equals(apiDtoToReturn.getType().toString().toLowerCase(),
-                APIConstants.API_TYPE_SOAPTOREST.toLowerCase())) {
-            addSOAPToRESTMediationToArchive(archivePath, api);
         }
 
-        if (StringUtils
-                .equals(apiDtoToReturn.getType().toString().toLowerCase(), APIConstants.API_TYPE_SOAP.toLowerCase())
-                && preserveDocs) {
-            addWSDLtoArchive(archivePath, apiIdentifier, apiProvider);
-        } else if (log.isDebugEnabled()) {
-            log.debug("No WSDL URL found for API: " + apiIdentifier + ". Skipping WSDL export.");
+        if (apiDtoToReturn.isAPIDTO()) {
+            String apiType = apiDtoToReturn.getType() != null ? apiDtoToReturn.getType().toString().toLowerCase() : "";
+            if (APIConstants.API_TYPE_SOAPTOREST.equalsIgnoreCase(apiType)) {
+                addSOAPToRESTMediationToArchive(archivePath, api);
+            }
+            if (APIConstants.API_TYPE_SOAP.equalsIgnoreCase(apiType) && preserveDocs) {
+                addWSDLtoArchive(archivePath, apiIdentifier, apiProvider);
+            } else if (log.isDebugEnabled()) {
+                log.debug("No WSDL URL found for API: " + apiIdentifier + ". Skipping WSDL export.");
+            }
         }
 
-        // Set API status to created if the status is not preserved
         if (!preserveStatus) {
             apiDtoToReturn.setLifeCycleStatus(APIConstants.CREATED);
         }
+
         String tenantDomain = APIUtil.getTenantDomainFromTenantId(tenantId);
-        addOperationPoliciesToArchive(archivePath, tenantDomain, exportFormat, apiProvider,
-                api, currentApiUuid);
-        addAPIEndpointsToArchive(archivePath, apiDtoToReturn.getId(), exportFormat, apiProvider, organization,
-                preserveCredentials);
+        addOperationPoliciesToArchive(archivePath, tenantDomain, exportFormat, apiProvider, api, currentApiUuid);
+
+        if (apiDtoToReturn.isAPIDTO()) {
+            addAPIEndpointsToArchive(archivePath, api, exportFormat, apiProvider, organization, preserveCredentials);
+        } else if (apiDtoToReturn.isMCPServerDTO()) {
+            addBackendAPIsToArchive(archivePath, api, exportFormat, apiProvider, organization, preserveCredentials);
+        }
 
         if (api != null && !StringUtils.isEmpty(api.getEndpointConfig())) {
             JsonObject endpointConfig = JsonParser.parseString(api.getEndpointConfig()).getAsJsonObject();
-            if (endpointConfig != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                    endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString()) && StringUtils.equals(
-                    apiDtoToReturn.getType().toString().toLowerCase(), APIConstants.API_TYPE_HTTP.toLowerCase())) {
-                if (apiDtoToReturn.getEndpointConfig() != null) {
-                    Map endpointConf = (Map) apiDtoToReturn.getEndpointConfig();
-                    if (endpointConf != null && APIConstants.ENDPOINT_TYPE_SEQUENCE.equals(
-                            endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
-                        SequenceBackendData sqData = apiProvider.getCustomBackendByAPIUUID(currentApiUuid,
-                                APIConstants.API_KEY_TYPE_SANDBOX);
-                        if (sqData != null) {
-                            endpointConf.put("sandbox", sqData.getName());
-                        }
-                        sqData = apiProvider.getCustomBackendByAPIUUID(currentApiUuid,
-                                APIConstants.API_KEY_TYPE_PRODUCTION);
-                        if (sqData != null) {
-                            endpointConf.put("production", sqData.getName());
-                        }
-                        apiDtoToReturn.setEndpointConfig(endpointConf);
+            if (endpointConfig != null &&
+                    APIConstants.ENDPOINT_TYPE_SEQUENCE
+                            .equals(endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())
+                    && apiDtoToReturn.isAPIDTO()
+                    && apiDtoToReturn.getType() != null
+                    && APIConstants.API_TYPE_HTTP.equalsIgnoreCase(apiDtoToReturn.getType().toString())) {
+
+                Map endpointConf = (Map) apiDtoToReturn.getEndpointConfig();
+                if (endpointConf != null &&
+                        APIConstants.ENDPOINT_TYPE_SEQUENCE
+                                .equals(endpointConf.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE))) {
+
+                    SequenceBackendData sqData = apiProvider.getCustomBackendByAPIUUID(currentApiUuid,
+                            APIConstants.API_KEY_TYPE_SANDBOX);
+                    if (sqData != null) {
+                        endpointConf.put("sandbox", sqData.getName());
                     }
+                    sqData = apiProvider.getCustomBackendByAPIUUID(currentApiUuid,
+                            APIConstants.API_KEY_TYPE_PRODUCTION);
+                    if (sqData != null) {
+                        endpointConf.put("production", sqData.getName());
+                    }
+                    apiDtoToReturn.setEndpointConfig(endpointConf);
                 }
+
                 addCustomBackendToArchive(archivePath, apiProvider, currentApiUuid);
             }
         }
@@ -257,20 +293,24 @@ public class ExportUtils {
         if (migrationEnabled != null) {
             addRuntimeSequencesToArchive(archivePath, api);
         }
-        if (!ImportUtils.isAdvertiseOnlyAPI(apiDtoToReturn)) {
+
+        if (apiDtoToReturn.isMCPServerDTO() || (apiDtoToReturn.isAPIDTO() &&
+                !ImportUtils.isAdvertiseOnlyAPI((APIDTO) apiDtoToReturn.getWrappedDTO()))) {
             addEndpointCertificatesToArchive(archivePath, apiDtoToReturn, tenantId, exportFormat);
-            // Export mTLS authentication related certificates
             if (log.isDebugEnabled()) {
                 log.debug("Mutual SSL enabled. Exporting client certificates.");
             }
             addClientCertificatesToArchive(archivePath, apiIdentifier, tenantId, apiProvider, exportFormat,
                     organization);
         }
+
         if (apiDtoToReturn.getMediationPolicies() != null && !apiDtoToReturn.getMediationPolicies().isEmpty()) {
             apiDtoToReturn.setMediationPolicies(Collections.emptyList());
         }
-        addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier,
-                organization, currentApiUuid);
+
+        addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider,
+                apiIdentifier, organization, currentApiUuid);
+
         CommonUtil.archiveDirectory(exportAPIBasePath);
         FileUtils.deleteQuietly(new File(exportAPIBasePath));
         return new File(exportAPIBasePath + APIConstants.ZIP_FILE_EXTENSION);
@@ -612,7 +652,23 @@ public class ExportUtils {
      * @param exportFormat Export format of file
      * @throws APIImportExportException If an error occurs while exporting endpoint certificates
      */
+    @Deprecated
     public static void addEndpointCertificatesToArchive(String archivePath, APIDTO apiDto, int tenantId,
+                                                        ExportFormat exportFormat) throws APIImportExportException {
+
+        addEndpointCertificatesToArchive(archivePath, new APIDTOTypeWrapper(apiDto), tenantId, exportFormat);
+    }
+
+    /**
+     * Retrieve the endpoint certificates and store those in the archive directory.
+     *
+     * @param archivePath  File path to export the endpoint certificates
+     * @param dtoWrapper   API DTO Wrapper to be exported
+     * @param tenantId     Tenant id of the user
+     * @param exportFormat Export format of file
+     * @throws APIImportExportException If an error occurs while exporting endpoint certificates
+     */
+    public static void addEndpointCertificatesToArchive(String archivePath, APIDTOTypeWrapper dtoWrapper, int tenantId,
                                                         ExportFormat exportFormat) throws APIImportExportException {
 
         List<String> productionEndpoints;
@@ -622,55 +678,61 @@ public class ExportUtils {
         Set<String> uniqueEndpointURLs = new HashSet<>();
         JsonArray endpointCertificatesDetails = new JsonArray();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        String endpointConfigString = gson.toJson(apiDto.getEndpointConfig());
+
+        String endpointConfigString;
+        String apiName;
+        String apiVersion;
+
+        endpointConfigString = gson.toJson(dtoWrapper.getEndpointConfig());
+        apiName = dtoWrapper.getName();
+        apiVersion = dtoWrapper.getVersion();
+
         String endpointCertsDirectoryPath =
                 archivePath + File.separator + ImportExportConstants.ENDPOINT_CERTIFICATES_DIRECTORY;
         CommonUtil.createDirectory(endpointCertsDirectoryPath);
 
         if (StringUtils.isEmpty(endpointConfigString) || "null".equals(endpointConfigString)) {
             if (log.isDebugEnabled()) {
-                log.debug("Endpoint Details are empty for API: " + apiDto.getName() + StringUtils.SPACE
-                        + APIConstants.API_DATA_VERSION + ": " + apiDto.getVersion());
+                log.debug(
+                        "Endpoint Details are empty for API: " + apiName + " " + APIConstants.API_DATA_VERSION + ": " +
+                                apiVersion);
             }
             return;
         }
+
         try {
             JSONTokener tokener = new JSONTokener(endpointConfigString);
             JSONObject endpointConfig = new JSONObject(tokener);
-            productionEndpoints = getEndpointURLs(endpointConfig, API_DATA_PRODUCTION_ENDPOINTS,
-                    apiDto.getName());
-            sandboxEndpoints = getEndpointURLs(endpointConfig, API_DATA_SANDBOX_ENDPOINTS,
-                    apiDto.getName());
-            productionFailovers = getEndpointURLs(endpointConfig, APIConstants.ENDPOINT_PRODUCTION_FAILOVERS,
-                    apiDto.getName());
-            sandboxFailovers = getEndpointURLs(endpointConfig, APIConstants.ENDPOINT_SANDBOX_FAILOVERS,
-                    apiDto.getName());
-            uniqueEndpointURLs.addAll(productionEndpoints); // Remove duplicate and append result
+            productionEndpoints = getEndpointURLs(endpointConfig, API_DATA_PRODUCTION_ENDPOINTS, apiName);
+            sandboxEndpoints = getEndpointURLs(endpointConfig, API_DATA_SANDBOX_ENDPOINTS, apiName);
+            productionFailovers = getEndpointURLs(endpointConfig, APIConstants.ENDPOINT_PRODUCTION_FAILOVERS, apiName);
+            sandboxFailovers = getEndpointURLs(endpointConfig, APIConstants.ENDPOINT_SANDBOX_FAILOVERS, apiName);
+
+            uniqueEndpointURLs.addAll(productionEndpoints);
             uniqueEndpointURLs.addAll(sandboxEndpoints);
             uniqueEndpointURLs.addAll(productionFailovers);
             uniqueEndpointURLs.addAll(sandboxFailovers);
 
             for (String url : uniqueEndpointURLs) {
-                JsonArray certificateListOfUrl = getEndpointCertificateContentAndMetaData(tenantId, url,
-                        endpointCertsDirectoryPath);
+                JsonArray certificateListOfUrl =
+                        getEndpointCertificateContentAndMetaData(tenantId, url, endpointCertsDirectoryPath);
                 endpointCertificatesDetails.addAll(certificateListOfUrl);
             }
+
             if (endpointCertificatesDetails.size() > 0) {
                 CommonUtil.writeDtoToFile(endpointCertsDirectoryPath + ImportExportConstants.ENDPOINTS_CERTIFICATE_FILE,
                         exportFormat, ImportExportConstants.TYPE_ENDPOINT_CERTIFICATES, endpointCertificatesDetails);
             } else if (log.isDebugEnabled()) {
-                log.debug("No endpoint certificates available for API: " + apiDto.getName() + StringUtils.SPACE
-                        + APIConstants.API_DATA_VERSION + ": " + apiDto.getVersion()
-                        + ". Skipping certificate export.");
+                log.debug(
+                        "No endpoint certificates available for API: " + apiName + " " + APIConstants.API_DATA_VERSION +
+                                ": " + apiVersion + ". Skipping certificate export.");
             }
-        } catch (JSONException e) {
-            throw new APIImportExportException(
-                    "Error in converting Endpoint config to JSON object in API: " + apiDto.getName(), e);
-        } catch (IOException e) {
 
+        } catch (JSONException e) {
+            throw new APIImportExportException("Error converting Endpoint config to JSON for API: " + apiName, e);
+        } catch (IOException e) {
             throw new APIImportExportException(
-                    "Error while retrieving saving endpoint certificate details for API: " + apiDto.getName()
-                            + " as YAML", e);
+                    "Error retrieving/saving endpoint certificate details for API: " + apiName, e);
         }
     }
 
@@ -849,38 +911,80 @@ public class ExportUtils {
     }
 
     /**
-     * Add endpoint related information to the archive
+     * Adds API endpoint definitions to the export archive for the given API.
+     * Depending on the API type, retrieves either MCP server endpoints or standard API endpoints,
+     * maps them to DTOs, and writes the endpoint definitions into the archive as JSON.
      *
-     * @param archivePath         path to save API Endpoints
-     * @param apiID               Unique Identifier of API
-     * @param exportFormat        Format of export
-     * @param apiProvider         API provider
-     * @param organization        Organization identifier
-     * @param preserveCredentials Preserve credentials
-     * @throws APIManagementException If an error occurs while adding API endpoints to the archive
+     * @param archivePath         the file system path where the archive is being created
+     * @param api                 the {@link API} object whose endpoints should be exported
+     * @param exportFormat        the {@link ExportFormat} specifying how data should be written
+     * @param apiProvider         the {@link APIProvider} used to retrieve endpoint information
+     * @param organization        the organization context for the API retrieval
+     * @param preserveCredentials whether sensitive credentials should be retained in the exported data
+     * @throws APIManagementException if an error occurs while retrieving or writing endpoint data
      */
-    public static void addAPIEndpointsToArchive(String archivePath, String apiID, ExportFormat exportFormat,
-            APIProvider apiProvider, String organization, boolean preserveCredentials) throws APIManagementException {
+    public static void addAPIEndpointsToArchive(String archivePath, API api, ExportFormat exportFormat,
+                                                APIProvider apiProvider, String organization,
+                                                boolean preserveCredentials) throws APIManagementException {
+
+        String apiUuid = api.getUuid();
         try {
-            List<APIEndpointInfo> apiEndpointList = apiProvider.getAllAPIEndpointsByUUID(apiID, organization);
+            List<APIEndpointInfo> apiEndpointList = apiProvider.getAllAPIEndpointsByUUID(apiUuid, organization);
             List<APIEndpointDTO> apiEndpointDTOList = new ArrayList<>();
             for (APIEndpointInfo apiEndpointInfo : apiEndpointList) {
                 apiEndpointDTOList.add(
                         APIMappingUtil.fromAPIEndpointToDTO(apiEndpointInfo, organization, preserveCredentials));
             }
-
-            if (!apiEndpointDTOList.isEmpty()) {
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                JsonElement apiEndpointsObj = gson.toJsonTree(apiEndpointDTOList);
-                JsonArray apiEndpointsJson = (JsonArray) apiEndpointsObj;
-                CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_ENDPOINTS_FILE_LOCATION,
-                        exportFormat, ImportExportConstants.API_ENDPOINTS_TYPE, apiEndpointsJson);
-            }
+            writeDTOListToFile(apiEndpointDTOList, archivePath,
+                    ImportExportConstants.API_ENDPOINTS_FILE_LOCATION,
+                    ImportExportConstants.API_ENDPOINTS_TYPE, exportFormat);
         } catch (APIImportExportException e) {
-            throw new APIManagementException("Error while adding operation endpoints details for API: " + apiID, e);
+            throw new APIManagementException("Error while adding operation endpoints details for API: " + apiUuid, e);
         } catch (IOException e) {
             throw new APIManagementException(
-                    "Error while saving deployment operation endpoints details for API: " + apiID + " as File", e);
+                    "Error while saving deployment operation endpoints details for API: " + apiUuid + " as File", e);
+        }
+    }
+
+    public static void addBackendAPIsToArchive(String archivePath, API api, ExportFormat exportFormat,
+                                                APIProvider apiProvider, String organization,
+                                                boolean preserveCredentials) throws APIManagementException {
+
+        String apiUuid = api.getUuid();
+        try {
+            if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
+                List<Backend> backends = apiProvider.getMCPServerBackends(apiUuid, organization);
+                List<BackendDTO> backendAPIDTOList = new ArrayList<>();
+                for (Backend backend : backends) {
+                    backendAPIDTOList.add(
+                            APIMappingUtil.fromBackendAPIToDTO(backend, organization,
+                                    preserveCredentials));
+                }
+                writeDTOListToFile(backendAPIDTOList, archivePath,
+                        ImportExportConstants.BACKENDS_FILE_LOCATION,
+                        ImportExportConstants.BACKENDS_TYPE, exportFormat);
+            }
+        } catch (APIImportExportException e) {
+            throw new APIManagementException("Error while adding operation endpoints details for API: " + apiUuid, e);
+        } catch (IOException e) {
+            throw new APIManagementException(
+                    "Error while saving deployment operation endpoints details for API: " + apiUuid + " as File", e);
+        }
+    }
+
+    private static void writeDTOListToFile(List<?> dtoList, String archivePath, String fileLocation,
+                                           String dtoType, ExportFormat exportFormat)
+            throws APIImportExportException, IOException {
+
+        if (!dtoList.isEmpty()) {
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            JsonElement jsonElement = gson.toJsonTree(dtoList);
+            JsonArray jsonArray = (JsonArray) jsonElement;
+            CommonUtil.writeDtoToFile(
+                    archivePath + fileLocation,
+                    exportFormat,
+                    dtoType,
+                    jsonArray);
         }
     }
 
@@ -1056,18 +1160,55 @@ public class ExportUtils {
      * @param currentApiUuid UUID of the API/ API Product
      * @throws APIImportExportException If an error occurs while exporting meta information
      */
+    @Deprecated
     public static void addAPIMetaInformationToArchive(String archivePath, APIDTO apiDtoToReturn,
-            ExportFormat exportFormat, APIProvider apiProvider, APIIdentifier apiIdentifier, String organization,
-            String currentApiUuid) throws APIImportExportException {
+                                                      ExportFormat exportFormat, APIProvider apiProvider,
+                                                      APIIdentifier apiIdentifier, String organization,
+                                                      String currentApiUuid) throws APIImportExportException {
+
+        addAPIMetaInformationToArchive(archivePath, new APIDTOTypeWrapper(apiDtoToReturn), exportFormat, apiProvider,
+                apiIdentifier, organization, currentApiUuid);
+    }
+
+    /**
+     * Retrieve meta information of the API to export and store those in the archive directory.
+     * URL template information are stored in swagger.json definition while rest of the required
+     * data are in api.json
+     *
+     * @param archivePath    Folder path to export meta information to export
+     * @param apiDtoTypeWrapper  API DTO wrapper to be exported
+     * @param exportFormat   Export format of file
+     * @param apiProvider    API Provider
+     * @param apiIdentifier  API Identifier
+     * @param organization   Organization Identifier
+     * @param currentApiUuid UUID of the API/ API Product
+     * @throws APIImportExportException If an error occurs while exporting meta information
+     */
+    public static void addAPIMetaInformationToArchive(String archivePath, APIDTOTypeWrapper apiDtoTypeWrapper,
+                                                      ExportFormat exportFormat, APIProvider apiProvider,
+                                                      APIIdentifier apiIdentifier, String organization,
+                                                      String currentApiUuid) throws APIImportExportException {
+
         String apiTenantDomain = null;
         String schemaContent;
         CommonUtil.createDirectory(archivePath + File.separator + ImportExportConstants.DEFINITIONS_DIRECTORY);
 
         try {
-            // If a streaming API is exported, it does not contain a swagger file.
-            // Therefore swagger export is only required for REST or SOAP based APIs
-            String apiType = apiDtoToReturn.getType().toString();
-            API api = APIMappingUtil.fromDTOtoAPI(apiDtoToReturn, apiDtoToReturn.getProvider());
+            API api;
+            boolean isMCPServer = false;
+            if (apiDtoTypeWrapper.isAPIDTO()) {
+                api = APIMappingUtil.fromDTOtoAPI(
+                        (APIDTO) apiDtoTypeWrapper.getWrappedDTO(), apiDtoTypeWrapper.getProvider()
+                );
+            } else if (apiDtoTypeWrapper.isMCPServerDTO()) {
+                api = APIMappingUtil.fromMCPServerDTOtoAPI(
+                        (MCPServerDTO) apiDtoTypeWrapper.getWrappedDTO(), apiDtoTypeWrapper.getProvider()
+                );
+                isMCPServer = true;
+            } else {
+                throw new APIManagementException("Unsupported DTO Type in wrapper");
+            }
+
             if (organization != null) {
                 api.setOrganization(organization);
             } else {
@@ -1075,9 +1216,11 @@ public class ExportUtils {
                 api.setOrganization(apiTenantDomain);
             }
             api.setId(apiIdentifier);
-            if (!PublisherCommonUtils.isStreamingAPI(apiDtoToReturn)) {
-                // For Graphql APIs, the graphql schema definition should be exported.
-                if (StringUtils.equals(apiType, APIConstants.APITransportType.GRAPHQL.toString())) {
+
+            String apiType = apiDtoTypeWrapper.getType() != null ? apiDtoTypeWrapper.getType().toString() : null;
+
+            if (isMCPServer || !PublisherCommonUtils.isStreamingAPI((APIDTO) apiDtoTypeWrapper.getWrappedDTO())) {
+                if (APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
                     if (organization != null) {
                         schemaContent = apiProvider.getGraphqlSchemaDefinition(currentApiUuid, organization);
                     } else {
@@ -1085,96 +1228,107 @@ public class ExportUtils {
                     }
                     CommonUtil.writeFile(archivePath + ImportExportConstants.GRAPHQL_SCHEMA_DEFINITION_LOCATION,
                             schemaContent);
-                    GraphqlComplexityInfo graphqlComplexityInfo = apiProvider
-                            .getComplexityDetails(currentApiUuid);
-                    if (graphqlComplexityInfo.getList().size() != 0) {
-                        GraphQLQueryComplexityInfoDTO graphQLQueryComplexityInfoDTO =
+
+                    GraphqlComplexityInfo graphqlComplexityInfo = apiProvider.getComplexityDetails(currentApiUuid);
+                    if (!graphqlComplexityInfo.getList().isEmpty()) {
+                        GraphQLQueryComplexityInfoDTO dto =
                                 GraphqlQueryAnalysisMappingUtil.fromGraphqlComplexityInfotoDTO(graphqlComplexityInfo);
                         CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.GRAPHQL_COMPLEXITY_INFO_LOCATION,
-                                exportFormat, ImportExportConstants.GRAPHQL_COMPLEXITY, graphQLQueryComplexityInfoDTO);
+                                exportFormat, ImportExportConstants.GRAPHQL_COMPLEXITY, dto);
                     }
                 }
-                // For GraphQL APIs, swagger export is not needed
+
                 if (!APIConstants.APITransportType.GRAPHQL.toString().equalsIgnoreCase(apiType)) {
-                    String formattedSwaggerJson = RestApiCommonUtil.retrieveSwaggerDefinition(currentApiUuid, api,
-                            apiProvider);
+                    String formattedSwaggerJson =
+                            RestApiCommonUtil.retrieveSwaggerDefinition(currentApiUuid, api, apiProvider);
                     if (formattedSwaggerJson != null) {
                         CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.SWAGGER_DEFINITION_LOCATION,
                                 exportFormat, formattedSwaggerJson);
                     } else {
                         throw new APIImportExportException("Error while retrieving Swagger definition for API: "
-                                + apiDtoToReturn.getName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
-                                + apiDtoToReturn.getVersion());
+                                + apiDtoTypeWrapper.getName() + " " + APIConstants.API_DATA_VERSION + ": "
+                                + apiDtoTypeWrapper.getVersion());
                     }
                 }
+
                 if (log.isDebugEnabled()) {
-                    log.debug("Meta information retrieved successfully for API: " + apiDtoToReturn.getName()
-                            + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": " + apiDtoToReturn.getVersion());
+                    log.debug("Meta information retrieved successfully for API: " + apiDtoTypeWrapper.getName()
+                            + " " + APIConstants.API_DATA_VERSION + ": " + apiDtoTypeWrapper.getVersion());
                 }
             } else {
                 String asyncApiJson = RestApiCommonUtil.retrieveAsyncAPIDefinition(api, apiProvider);
-                // fetching the callback URL from asyncAPI definition.
                 JsonParser jsonParser = new JsonParser();
                 JsonObject parsedObject = jsonParser.parse(asyncApiJson).getAsJsonObject();
                 if (parsedObject.has(ASYNC_DEFAULT_SUBSCRIBER)) {
                     String callBackEndpoint = parsedObject.get(ASYNC_DEFAULT_SUBSCRIBER).getAsString();
                     if (!StringUtils.isEmpty(callBackEndpoint)) {
-                        // add openAPI definition to asyncAPI
-                        String formattedSwaggerJson = RestApiCommonUtil
-                                .generateOpenAPIForAsync(apiDtoToReturn.getName(), apiDtoToReturn.getVersion(),
-                                        apiDtoToReturn.getContext(), callBackEndpoint);
-                        CommonUtil
-                                .writeToYamlOrJson(
-                                        archivePath + ImportExportConstants.OPENAPI_FOR_ASYNCAPI_DEFINITION_LOCATION,
-                                        exportFormat, formattedSwaggerJson);
-                        // Adding endpoint config since adapter validates api.json for endpoint urls.
-                        HashMap<String, Object> endpointConfig = new HashMap<>();
+                        String formattedSwaggerJson = RestApiCommonUtil.generateOpenAPIForAsync(
+                                apiDtoTypeWrapper.getName(), apiDtoTypeWrapper.getVersion(),
+                                apiDtoTypeWrapper.getContext(), callBackEndpoint);
+                        CommonUtil.writeToYamlOrJson(
+                                archivePath + ImportExportConstants.OPENAPI_FOR_ASYNCAPI_DEFINITION_LOCATION,
+                                exportFormat, formattedSwaggerJson);
+
+                        Map<String, Object> endpointConfig = new HashMap<>();
                         endpointConfig.put(API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
                         endpointConfig.put("failOver", "false");
-                        HashMap<String, Object> productionEndpoint = new HashMap<>();
+
+                        Map<String, Object> productionEndpoint = new HashMap<>();
                         productionEndpoint.put("template_not_supported", "false");
                         productionEndpoint.put("url", callBackEndpoint);
-                        HashMap<String, Object> sandboxEndpoint = new HashMap<>();
+                        Map<String, Object> sandboxEndpoint = new HashMap<>();
                         sandboxEndpoint.put("template_not_supported", "false");
                         sandboxEndpoint.put("url", callBackEndpoint);
+
                         endpointConfig.put(API_DATA_PRODUCTION_ENDPOINTS, productionEndpoint);
                         endpointConfig.put(API_DATA_SANDBOX_ENDPOINTS, sandboxEndpoint);
-                        apiDtoToReturn.setEndpointConfig(endpointConfig);
+
+                        apiDtoTypeWrapper.setEndpointConfig(endpointConfig);
                     }
                 }
+
                 if (asyncApiJson != null) {
                     CommonUtil.writeToYamlOrJson(archivePath + ImportExportConstants.ASYNCAPI_DEFINITION_LOCATION,
                             exportFormat, asyncApiJson);
                 } else {
                     throw new APIImportExportException("Error while retrieving AsyncAPI definition for API: "
-                            + apiDtoToReturn.getName() + StringUtils.SPACE + APIConstants.API_DATA_VERSION + ": "
-                            + apiDtoToReturn.getVersion());
+                            + apiDtoTypeWrapper.getName() + " " + APIConstants.API_DATA_VERSION + ": "
+                            + apiDtoTypeWrapper.getVersion());
                 }
             }
-            List<String> tiers = apiDtoToReturn.getPolicies();
+
+            List<String> tiers = apiDtoTypeWrapper.getPolicies();
             if (tiers != null && tiers.size() == 1
                     && tiers.get(0).contains(APIConstants.DEFAULT_SUB_POLICY_SUBSCRIPTIONLESS)) {
-                apiDtoToReturn.setPolicies(new ArrayList<>());
+                apiDtoTypeWrapper.setPolicies(new ArrayList<>());
             }
+
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
-            JsonElement apiObj = gson.toJsonTree(apiDtoToReturn);
+            JsonElement apiObj = gson.toJsonTree(apiDtoTypeWrapper.getWrappedDTO());
             JsonObject apiJson = (JsonObject) apiObj;
+
             if (organization != null) {
                 apiJson.addProperty("organizationId", organization);
             } else {
                 apiJson.addProperty("organizationId", apiTenantDomain);
             }
+            String filePath = isMCPServer
+                    ? archivePath + ImportExportConstants.MCP_SERVER_FILE_LOCATION
+                    : archivePath + ImportExportConstants.API_FILE_LOCATION;
 
-            CommonUtil.writeDtoToFile(archivePath + ImportExportConstants.API_FILE_LOCATION, exportFormat,
-                    ImportExportConstants.TYPE_API, apiJson);
+            String type = isMCPServer
+                    ? ImportExportConstants.TYPE_MCP_SERVER
+                    : ImportExportConstants.TYPE_API;
+
+            CommonUtil.writeDtoToFile(filePath, exportFormat, type, apiJson);
         } catch (APIManagementException e) {
-            throw new APIImportExportException(
-                    "Error while retrieving Swagger definition for API: " + apiDtoToReturn.getName() + StringUtils.SPACE
-                            + APIConstants.API_DATA_VERSION + ": " + apiDtoToReturn.getVersion(), e);
+            throw new APIImportExportException("Error while retrieving Swagger definition for API: "
+                    + apiDtoTypeWrapper.getName() + " " + APIConstants.API_DATA_VERSION + ": "
+                    + apiDtoTypeWrapper.getVersion(), e);
         } catch (IOException e) {
-            throw new APIImportExportException(
-                    "Error while retrieving saving as YAML for API: " + apiDtoToReturn.getName() + StringUtils.SPACE
-                            + APIConstants.API_DATA_VERSION + ": " + apiDtoToReturn.getVersion(), e);
+            throw new APIImportExportException("Error while saving as YAML for API: "
+                    + apiDtoTypeWrapper.getName() + " " + APIConstants.API_DATA_VERSION + ": "
+                    + apiDtoTypeWrapper.getVersion(), e);
         }
     }
 
@@ -1333,8 +1487,9 @@ public class ExportUtils {
             String apiProductRequesterDomain = RestApiCommonUtil.getLoggedInUserTenantDomain();
             API api = provider.getAPIbyUUID(productAPIDTO.getApiId(), apiProductRequesterDomain);
             APIDTO apiDtoToReturn = APIMappingUtil.fromAPItoDTO(api, preserveCredentials, null);
-            File dependentAPI = exportApi(provider, api.getId(), apiDtoToReturn, api, userName, exportFormat,
-                    isStatusPreserved, preserveDocs, StringUtils.EMPTY, organization, preserveCredentials);
+            File dependentAPI = exportAPI(provider, api.getId(), new APIDTOTypeWrapper(apiDtoToReturn), api, userName,
+                    exportFormat, isStatusPreserved, preserveDocs, StringUtils.EMPTY, organization,
+                    preserveCredentials);
             CommonUtil.extractArchive(dependentAPI, apisDirectoryPath);
         }
     }

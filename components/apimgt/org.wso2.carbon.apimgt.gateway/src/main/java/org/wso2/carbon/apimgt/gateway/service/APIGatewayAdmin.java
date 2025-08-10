@@ -771,7 +771,6 @@ public class APIGatewayAdmin extends org.wso2.carbon.core.AbstractAdmin {
                                 ": " + gatewayAPIDTO.getTenantDomain());
             }
         }
-
         if (log.isDebugEnabled()) {
             log.debug(gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion() + " custom sequences deployed");
             log.debug("Start to deploy API Definition" + gatewayAPIDTO.getName() + ":" + gatewayAPIDTO.getVersion());
