@@ -1429,11 +1429,24 @@
         <KeyLockRetrievalTimeout>50</KeyLockRetrievalTimeout>
         {% endif %}
         <Properties>
-            {% if apim.redis_config.pool_options is defined %}
+            <!-- Pool Size Configurations -->
+            <MaxTotal>{{apim.redis_config.pool_options.max_total}}</MaxTotal>
+            <MaxIdle>{{apim.redis_config.pool_options.max_idle | default(3000)}}</MaxIdle>
+            <MinIdle>{{apim.redis_config.pool_options.min_idle | default(300)}}</MinIdle>
+            <BlockWhenExhausted>{{apim.redis_config.pool_options.block_when_exhausted | default('true')}}</BlockWhenExhausted>
+            
+            <!-- Additional pool configurations if needed -->
+            <TestOnBorrow>{{apim.redis_config.pool_options.test_on_borrow | default('false')}}</TestOnBorrow>
+            <TestOnReturn>{{apim.redis_config.pool_options.test_on_return | default('false')}}</TestOnReturn>
+            <TestWhileIdle>{{apim.redis_config.pool_options.test_while_idle | default('true')}}</TestWhileIdle>
+            <MinEvictableIdleTimeMillis>{{apim.redis_config.pool_options.min_evictable_idle_time_millis | default(60000)}}</MinEvictableIdleTimeMillis>
+            <TimeBetweenEvictionRunsMillis>{{apim.redis_config.pool_options.time_between_eviction_runs_millis | default(30000)}}</TimeBetweenEvictionRunsMillis>
+        
+            {# {% if apim.redis_config.pool_options is defined %}
             {% for property_name,property_value in apim.redis_config.pool_options.items() %}
              <{{property_name}}>{{property_value}}</{{property_name}}>
             {% endfor %}
-            {% endif %}
+            {% endif %} #}
         </Properties>
     </RedisConfig>
     {% endif %}
