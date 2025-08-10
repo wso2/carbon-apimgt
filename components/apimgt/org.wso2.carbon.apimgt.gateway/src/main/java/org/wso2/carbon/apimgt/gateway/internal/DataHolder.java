@@ -28,6 +28,7 @@ import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GraphQLSchemaDTO;
 import org.wso2.carbon.apimgt.api.model.LLMProviderInfo;
 import org.wso2.carbon.apimgt.gateway.utils.GatewayUtils;
+import org.wso2.carbon.apimgt.impl.APIConstants.GatewayNotification.GatewayRegistrationResponse;
 import org.wso2.carbon.apimgt.impl.notifier.events.APIEvent;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 import org.wso2.carbon.apimgt.keymgt.model.SubscriptionDataLoader;
@@ -56,11 +57,6 @@ public class DataHolder {
     private boolean tenantsProvisioned = false;
     private static GatewayRegistrationResponse gatewayRegistrationResponse = GatewayRegistrationResponse.NOT_RESPONDED;
     private String gatewayID;
-        public enum GatewayRegistrationResponse {
-        NOT_RESPONDED,
-        ACKNOWLEDGED,
-        REGISTERED
-    }
 
     private DataHolder() {
     }
@@ -420,8 +416,8 @@ public class DataHolder {
      * @return true if the gateway registration response is REGISTERED or ACKNOWLEDGED, false otherwise
      */
     public boolean isGatewayRegistered() {
-        return gatewayRegistrationResponse == GatewayRegistrationResponse.REGISTERED || 
-               gatewayRegistrationResponse == GatewayRegistrationResponse.ACKNOWLEDGED;
+        return gatewayRegistrationResponse == GatewayRegistrationResponse.REGISTERED
+                || gatewayRegistrationResponse == GatewayRegistrationResponse.ACKNOWLEDGED;
     }
 
     public static void setGatewayRegistrationResponse(GatewayRegistrationResponse gatewayRegistrationResponse) {

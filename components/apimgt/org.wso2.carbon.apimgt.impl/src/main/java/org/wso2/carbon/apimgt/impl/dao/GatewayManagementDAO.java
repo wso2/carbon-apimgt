@@ -24,8 +24,12 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIRevisionDeployment;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
+import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
+import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
+import org.wso2.carbon.apimgt.impl.utils.GatewayManagementUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
+import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -53,39 +57,6 @@ public class GatewayManagementDAO {
      */
     public static GatewayManagementDAO getInstance() {
         return INSTANCE;
-    }
-
-    /**
-     * Update gateway status to EXPIRED for gateways that haven't sent heartbeat within the expire time
-     *
-     * @param expireTimeThreshold The timestamp threshold for expiration
-     * @return Number of gateways updated
-     * @throws APIManagementException if database operation fails
-     */
-    public int updateExpiredGateways(Timestamp expireTimeThreshold) throws APIManagementException {
-        int updatedCount = 0;
-
-        try (Connection connection = APIMgtDBUtil.getConnection()) {
-            connection.setAutoCommit(false);
-
-            try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    SQLConstants.GatewayManagementSQLConstants.UPDATE_EXPIRED_GATEWAYS_SQL)) {
-                preparedStatement.setTimestamp(1, expireTimeThreshold);
-                updatedCount = preparedStatement.executeUpdate();
-                connection.commit();
-
-                if (log.isDebugEnabled()) {
-                    log.debug("Updated " + updatedCount + " gateways to EXPIRED status");
-                }
-            } catch (SQLException e) {
-                connection.rollback();
-                throw new APIManagementException("Error updating expired gateways", e);
-            }
-        } catch (SQLException e) {
-            throw new APIManagementException("Error getting database connection", e);
-        }
-
-        return updatedCount;
     }
 
     /**
@@ -161,15 +132,12 @@ public class GatewayManagementDAO {
                     PreparedStatement ps2 = connection.prepareStatement(
                             SQLConstants.GatewayManagementSQLConstants.INSERT_GATEWAY_ENV_MAPPING_SQL)) {
 
-                // Insert gateway instance
                 ps1.setString(1, gatewayId);
                 ps1.setString(2, organization);
                 ps1.setTimestamp(3, lastUpdated);
-                ps1.setBytes(4, gwProperties);
-                ps1.setString(5, APIConstants.GatewayNotification.STATUS_ACTIVE);
+                ps1.setBinaryStream(4, new ByteArrayInputStream(gwProperties));
                 ps1.executeUpdate();
 
-                // Insert environment mapping
                 if (envLabels != null && !envLabels.isEmpty()) {
                     for (String envLabel : envLabels) {
                         ps2.setString(1, envLabel);
@@ -295,9 +263,8 @@ public class GatewayManagementDAO {
             try (PreparedStatement ps = connection.prepareStatement(
                     SQLConstants.GatewayManagementSQLConstants.UPDATE_GATEWAY_HEARTBEAT_SQL)) {
                 ps.setTimestamp(1, lastUpdated);
-                ps.setString(2, APIConstants.GatewayNotification.STATUS_ACTIVE);
-                ps.setString(3, gatewayId);
-                ps.setString(4, organization);
+                ps.setString(2, gatewayId);
+                ps.setString(3, organization);
                 ps.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
@@ -333,10 +300,9 @@ public class GatewayManagementDAO {
 
                 // Update gateway instance
                 ps1.setTimestamp(1, lastUpdated);
-                ps1.setBytes(2, gwProperties);
-                ps1.setString(3, APIConstants.GatewayNotification.STATUS_ACTIVE);
-                ps1.setString(4, gatewayId);
-                ps1.setString(5, organization);
+                ps1.setBinaryStream(4, new ByteArrayInputStream(gwProperties));
+                ps1.setString(3, gatewayId);
+                ps1.setString(4, organization);
                 ps1.executeUpdate();
 
                 // Delete existing environment mappings
@@ -363,11 +329,11 @@ public class GatewayManagementDAO {
     }
 
     /**
-     * Get gateway instances by environment label and organization with status (ACTIVE/EXPIRED).
+     * Get gateway instances by environment label and organization with dynamically calculated status (ACTIVE/EXPIRED).
      *
      * @param envLabel     Environment label to filter
      * @param organization Organization to filter (entries with this organization or 'WSO2-ALL-TENANTS' will be returned)
-     * @return List of GatewayInstanceInfo for ACTIVE and EXPIRED gateway instances
+     * @return List of GatewayInstanceInfo with dynamically calculated status
      * @throws APIManagementException if DB error
      */
     public List<GatewayInstanceInfo> getGatewayInstancesByEnvironment(String envLabel, String organization)
@@ -382,17 +348,15 @@ public class GatewayManagementDAO {
                     GatewayInstanceInfo info = new GatewayInstanceInfo();
                     info.gatewayId = rs.getString(APIConstants.GatewayNotification.DB_COLUMN_GATEWAY_UUID);
                     info.lastUpdated = rs.getTimestamp(APIConstants.GatewayNotification.DB_COLUMN_LAST_UPDATED);
-                    info.status = rs.getString(APIConstants.GatewayNotification.DB_COLUMN_STATUS);
                     result.add(info);
                 }
             }
         } catch (SQLException e) {
-            throw new APIManagementException("Error fetching gateway instances by environment", e);
+            throw new APIManagementException("Error retrieving gateway instances by environment", e);
         }
-        return result;
-    }
 
-    /**
+        return result;
+    }    /**
      * Checks if the existing entry for the given gateway ID and organization has a timestamp previous to the given timestamp.
      *
      * @param gatewayId        the gateway identifier to check
@@ -473,12 +437,20 @@ public class GatewayManagementDAO {
         PreparedStatement ps = null;
         ResultSet resultSet = null;
 
+        // Calculate the expire time threshold for live gateways
+        GatewayNotificationConfiguration config = ServiceReferenceHolder.getInstance()
+                .getAPIManagerConfigurationService().getAPIManagerConfiguration().getGatewayNotificationConfiguration();
+        long currentTime = System.currentTimeMillis();
+        long expireTimeThreshold = currentTime - (config.getGatewayCleanupConfiguration().getExpireTimeSeconds() * 1000L);
+        Timestamp expireTimestamp = new Timestamp(expireTimeThreshold);
+
         try {
             connection = APIMgtDBUtil.getConnection();
 
             ps = connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GATEWAY_DEPLOYMENT_STATS_QUERY);
             ps.setString(1, revisionUuid);
             ps.setString(2, environmentName);
+            ps.setTimestamp(3, expireTimestamp);
 
             resultSet = ps.executeQuery();
 
@@ -500,7 +472,8 @@ public class GatewayManagementDAO {
             resultSet = null;
 
             ps = connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GATEWAY_LIVE_COUNT_QUERY);
-            ps.setString(1, environmentName);
+            ps.setTimestamp(1, expireTimestamp);
+            ps.setString(2, environmentName);
 
             resultSet = ps.executeQuery();
 
@@ -520,6 +493,5 @@ public class GatewayManagementDAO {
     public static class GatewayInstanceInfo {
         public String gatewayId;
         public Timestamp lastUpdated;
-        public String status;
     }
 }

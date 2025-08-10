@@ -24,6 +24,7 @@ import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
+import org.wso2.carbon.apimgt.impl.utils.GatewayManagementUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 
 import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
@@ -87,7 +88,6 @@ public class NotifyGatewayApiServiceImpl implements NotifyGatewayApiService {
             GatewayManagementDAO dao = GatewayManagementDAO.getInstance();
             Timestamp timeStamp = new Timestamp(dto.getTimeStamp());
 
-            // Loop through each organization
             for (String organization : organizations) {
                 if (dao.gatewayExists(gatewayId, organization)) {
                     if (dao.isGatewayTimestampInorder(gatewayId, organization, timeStamp)) {
@@ -95,7 +95,11 @@ public class NotifyGatewayApiServiceImpl implements NotifyGatewayApiService {
                     }
                 } else {
                     anyRegistered = true;
-                    performGatewayDataCleanup();
+                    try {
+                        GatewayManagementUtils.performGatewayDataCleanup();
+                    } catch (Exception e) {
+                        log.warn("Error during gateway data cleanup: " + e.getMessage(), e);
+                    }
                     dao.insertGatewayInstance(gatewayId, organization, envLabels, timeStamp, gwProperties);
                 }
             }
@@ -119,7 +123,6 @@ public class NotifyGatewayApiServiceImpl implements NotifyGatewayApiService {
             throws APIManagementException {
         String gatewayId = dto.getGatewayId();
 
-        // If organizations list is null or empty, add default organization
         if (organizations == null || organizations.isEmpty()) {
             organizations = new java.util.ArrayList<>();
             organizations.add(APIConstants.GatewayNotification.WSO2_ALL_TENANTS);
@@ -130,7 +133,6 @@ public class NotifyGatewayApiServiceImpl implements NotifyGatewayApiService {
         try {
             java.sql.Timestamp timeStamp = new java.sql.Timestamp(dto.getTimeStamp());
 
-            // Loop through each organization
             for (String organization : organizations) {
                 if (!dao.gatewayExists(gatewayId, organization)) {
                     log.error("Gateway with ID " + gatewayId + " and organization " + organization
@@ -155,26 +157,5 @@ public class NotifyGatewayApiServiceImpl implements NotifyGatewayApiService {
     /**
      * Performs cleanup of old gateway records based on the configured retention period.
      */
-    private void performGatewayDataCleanup() {
-        try {
-            long currentTime = System.currentTimeMillis();
-            configuration = ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService()
-                    .getAPIManagerConfiguration().getGatewayNotificationConfiguration();
-            long retentionThreshold =
-                    currentTime - (configuration.getGatewayCleanupConfiguration().getDataRetentionPeriodSeconds()
-                            * 1000L);
-            Timestamp retentionTimestamp = new Timestamp(retentionThreshold);
-
-            if (gatewayManagementDAO == null) {
-                gatewayManagementDAO = GatewayManagementDAO.getInstance();
-            }
-
-            int deletedCount = gatewayManagementDAO.deleteOldGatewayRecords(retentionTimestamp);
-            if (log.isInfoEnabled() && (deletedCount > 0)) {
-                log.info("Gateway cleanup completed - Deleted: " + deletedCount);
-            }
-        } catch (APIManagementException e) {
-            log.error("Gateway cleanup failed: " + e.getMessage(), e);
-        }
-    }
+    
 }

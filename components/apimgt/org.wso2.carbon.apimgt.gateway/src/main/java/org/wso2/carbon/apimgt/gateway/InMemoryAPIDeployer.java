@@ -275,13 +275,15 @@ public class InMemoryAPIDeployer {
                                             deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
                                                                                             gatewayAPIDTO.getRevision(),
                                                                                             true, APIConstants.AuditLogConstants.DEPLOY, null, null,
-                                                                                            tenantDomain, true);
+                                                                                            tenantDomain);
                                         } else if (DataHolder.getInstance().getGatewayRegistrationResponse()
-                                                != DataHolder.GatewayRegistrationResponse.ACKNOWLEDGED) {
+                                                != APIConstants.GatewayNotification.GatewayRegistrationResponse.ACKNOWLEDGED) {
+                                            // If the gateway is not registered yet or if it is registered during
+                                            // reconnect
                                             deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
                                                                                             gatewayAPIDTO.getRevision(),
                                                                                             true, APIConstants.AuditLogConstants.DEPLOY, null, null,
-                                                                                            tenantDomain, true);
+                                                                                            tenantDomain);
                                         }
                                     } else {
                                         if (log.isDebugEnabled()) {
@@ -293,7 +295,7 @@ public class InMemoryAPIDeployer {
 
                                     deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
                                                                                     gatewayAPIDTO.getRevision(), true,
-                                                                                    APIConstants.AuditLogConstants.DEPLOY, null, null, tenantDomain, true);
+                                                                                    APIConstants.AuditLogConstants.DEPLOY, null, null, tenantDomain);
                                 }
                             }
                         } catch (AxisFault axisFault) {
@@ -301,7 +303,7 @@ public class InMemoryAPIDeployer {
                                                                             gatewayAPIDTO.getRevision(), false,
                                                                             APIConstants.AuditLogConstants.DEPLOY,
                                                                             ExceptionCodes.INTERNAL_ERROR.getErrorCode(),
-                                                                            axisFault.getMessage(), tenantDomain, true);
+                                                                            axisFault.getMessage(), tenantDomain);
 
                             log.error("Error in deploying " + gatewayAPIDTO.getName() + " to the Gateway ", axisFault);
                             errorCount++;

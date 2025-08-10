@@ -4261,11 +4261,11 @@ public class SQLConstants {
                         "INNER JOIN AM_GW_INSTANCES gwi ON grd.GATEWAY_ID = gwi.GATEWAY_ID " +
                         "INNER JOIN AM_GW_INSTANCE_ENV_MAPPING envmap ON gwi.GATEWAY_ID = envmap.GATEWAY_ID " +
                         "WHERE grd.REVISION_UUID = ? " +
-                        "AND envmap.ENV_LABEL = ? AND gwi.STATUS = 'ACTIVE'";
+                        "AND envmap.ENV_LABEL = ? AND gwi.LAST_UPDATED >= ?";
 
         public static final String GATEWAY_LIVE_COUNT_QUERY ="SELECT COUNT(*) AS LIVE_COUNT FROM AM_GW_INSTANCES gwi " +
                 "INNER JOIN AM_GW_INSTANCE_ENV_MAPPING envmap ON gwi.GATEWAY_ID = envmap.GATEWAY_ID " +
-                "WHERE gwi.STATUS = 'ACTIVE' AND envmap.ENV_LABEL = ?";
+                "WHERE gwi.LAST_UPDATED >= ? AND envmap.ENV_LABEL = ?";
 
     }
 
@@ -4978,11 +4978,9 @@ public class SQLConstants {
     }
 
     public static class GatewayManagementSQLConstants {
-        public static final String UPDATE_EXPIRED_GATEWAYS_SQL =
-                "UPDATE AM_GW_INSTANCES SET STATUS = 'EXPIRED' WHERE LAST_UPDATED < ? AND STATUS = 'ACTIVE'";
         public static final String DELETE_OLD_GATEWAYS_SQL = "DELETE FROM AM_GW_INSTANCES WHERE LAST_UPDATED < ?";
         public static final String INSERT_GATEWAY_INSTANCE_SQL =
-                "INSERT INTO AM_GW_INSTANCES (GATEWAY_UUID, ORGANIZATION, LAST_UPDATED, GW_PROPERTIES, STATUS) VALUES (?, ?, ?, ?, ?) ";
+                "INSERT INTO AM_GW_INSTANCES (GATEWAY_UUID, ORGANIZATION, LAST_UPDATED, GW_PROPERTIES) VALUES (?, ?, ?, ?) ";
         public static final String SELECT_GATEWAY_SQL =
                 "SELECT 1 FROM AM_GW_INSTANCES WHERE GATEWAY_UUID=? AND (ORGANIZATION=? OR ORGANIZATION='WSO2-ALL-TENANTS')";
         public static final String SELECT_DEPLOYMENT_SQL =
@@ -4995,11 +4993,11 @@ public class SQLConstants {
                 "UPDATE AM_GW_REVISION_DEPLOYMENT SET STATUS = ?, ACTION = ?, REVISION_UUID = ?, LAST_UPDATED = ?, ORGANIZATION = ? "
                         + "WHERE GATEWAY_ID = (SELECT GATEWAY_ID FROM AM_GW_INSTANCES WHERE GATEWAY_UUID = ?) AND API_ID = ?";
         public static final String UPDATE_GATEWAY_HEARTBEAT_SQL =
-                "UPDATE AM_GW_INSTANCES SET LAST_UPDATED=?, STATUS=? WHERE GATEWAY_UUID=? AND ORGANIZATION=?";
+                "UPDATE AM_GW_INSTANCES SET LAST_UPDATED=? WHERE GATEWAY_UUID=? AND ORGANIZATION=?";
         public static final String UPDATE_GATEWAY_INSTANCE_SQL =
-                "UPDATE AM_GW_INSTANCES SET LAST_UPDATED=?, GW_PROPERTIES=?, STATUS=? WHERE GATEWAY_UUID=? AND ORGANIZATION=?";
+                "UPDATE AM_GW_INSTANCES SET LAST_UPDATED=?, GW_PROPERTIES=? WHERE GATEWAY_UUID=? AND ORGANIZATION=?";
         public static final String SELECT_GATEWAYS_BY_ENV_SQL =
-                "SELECT gwi.GATEWAY_UUID, gwi.LAST_UPDATED, gwi.STATUS FROM AM_GW_INSTANCES gwi "
+                "SELECT gwi.GATEWAY_UUID, gwi.LAST_UPDATED FROM AM_GW_INSTANCES gwi "
                         + "INNER JOIN AM_GW_INSTANCE_ENV_MAPPING envmap ON gwi.GATEWAY_ID = envmap.GATEWAY_ID "
                         + "WHERE envmap.ENV_LABEL = ? AND (gwi.ORGANIZATION = ? OR gwi.ORGANIZATION = 'WSO2-ALL-TENANTS')";
         public static final String SELECT_GATEWAY_TIMESTAMP_SQL =

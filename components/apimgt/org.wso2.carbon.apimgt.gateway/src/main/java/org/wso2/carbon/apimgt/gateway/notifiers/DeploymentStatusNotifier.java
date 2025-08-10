@@ -41,7 +41,6 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
@@ -54,12 +53,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Notifies deployment status of APIs to the event hub in batches or individually.
+ * Notifies deployment status of APIs to the event hub in batches.
  */
 public class DeploymentStatusNotifier {
 
-    private static final BlockingQueue<DeploymentStatusJob> currentBatch = new LinkedBlockingQueue<>(
-            APIConstants.GatewayNotification.MAX_QUEUE_SIZE);
+    private static final BlockingQueue<DeploymentStatusJob> currentBatch = new LinkedBlockingQueue<>();
     private static final Object batchLock = new Object();
     private static volatile DeploymentStatusNotifier instance;
     private final Log log = LogFactory.getLog(DeploymentStatusNotifier.class);
@@ -169,46 +167,30 @@ public class DeploymentStatusNotifier {
     }
 
     /**
-     * Submits an API deployment status notification for processing.
+     * Submits an API deployment status notification for batched processing.
      *
-     * @param apiId             the API identifier (required)
-     * @param revisionId        the API revision identifier (optional)
-     * @param success           true if the deployment was successful, false otherwise
-     * @param action            the deployment action performed (e.g., "DEPLOY", "UNDEPLOY")
-     * @param errorCode         error code for failed deployments (can be null)
-     * @param errorMessage      error message for failed deployments (can be null or empty)
-     * @param tenantDomain      the tenant domain (required)
-     * @param isBatchingEnabled true to enable batching, false to process immediately
+     * @param apiId        the API identifier (required)
+     * @param revisionId   the API revision identifier (optional)
+     * @param success      true if the deployment was successful, false otherwise
+     * @param action       the deployment action performed (e.g., "DEPLOY", "UNDEPLOY")
+     * @param errorCode    error code for failed deployments (can be null)
+     * @param errorMessage error message for failed deployments (can be null or empty)
+     * @param tenantDomain the tenant domain (required)
      */
     public void submitDeploymentStatus(String apiId, String revisionId, boolean success, String action, Long errorCode,
-                                       String errorMessage, String tenantDomain, boolean isBatchingEnabled) {
+                                       String errorMessage, String tenantDomain) {
         if (apiId == null || action == null || tenantDomain == null) {
             log.warn("Invalid deployment status submission: apiId, action, and tenantDomain cannot be null");
             return;
         }
-
         DeploymentStatusJob job = new DeploymentStatusJob(apiId, revisionId, success, action, errorCode, errorMessage,
                                                           tenantDomain);
-
-        try {
-            if (isBatchingEnabled) {
-                handleBatchedSubmission(job);
-            } else {
-                handleImmediateSubmission(job);
-            }
-        } catch (Exception e) {
-            log.error("Failed to submit deployment status job for API: " + apiId, e);
-        }
-    }
-
-    private void handleBatchedSubmission(DeploymentStatusJob job) {
         if (!currentBatch.offer(job)) {
             log.error(String.format("Deployment status notification queue is full. "
                                             + "Cannot accept new job for API: %s. Current queue size: %d, Max capacity: %d",
-                                    job.apiId, currentBatch.size(), APIConstants.GatewayNotification.MAX_QUEUE_SIZE));
+                                    job.apiId, currentBatch.size(), Integer.MAX_VALUE));
             return;
         }
-
         if (currentBatch.size() >= batchSize && DataHolder.getInstance().isGatewayRegistered()) {
             synchronized (batchLock) {
                 if (currentBatch.size() >= batchSize) {
@@ -216,21 +198,9 @@ public class DeploymentStatusNotifier {
                 }
             }
         }
+
     }
 
-    private void handleImmediateSubmission(DeploymentStatusJob job) {
-        if (DataHolder.getInstance().isGatewayRegistered()) {
-            List<DeploymentStatusJob> singleJobList = Collections.singletonList(job);
-            submitBatchForProcessing(singleJobList);
-        } else {
-            if (!currentBatch.offer(job)) {
-                log.error(String.format("Deployment status notification queue is full. "
-                                                + "Cannot accept new job for API: %s. Current queue size: %d, Max capacity: %d",
-                                        job.apiId, currentBatch.size(),
-                                        APIConstants.GatewayNotification.MAX_QUEUE_SIZE));
-            }
-        }
-    }
 
     private void processCurrentBatch() {
         if (currentBatch.isEmpty()) {
@@ -239,13 +209,6 @@ public class DeploymentStatusNotifier {
 
         List<DeploymentStatusJob> batchToProcess = new ArrayList<>();
         currentBatch.drainTo(batchToProcess);
-
-        if (!batchToProcess.isEmpty()) {
-            submitBatchForProcessing(batchToProcess);
-        }
-    }
-
-    private void submitBatchForProcessing(List<DeploymentStatusJob> batchToProcess) {
         try {
             threadPoolExecutor.submit(() -> processBatchedNotifications(batchToProcess));
 
@@ -257,44 +220,26 @@ public class DeploymentStatusNotifier {
             }
         } catch (RejectedExecutionException e) {
             log.error("Failed to submit batch for processing due to thread pool rejection. "
-                              + "Processing in current thread. Batch size: " + batchToProcess.size(), e);
-            // Fallback: process in current thread
-            processBatchedNotifications(batchToProcess);
+                              + "Batch size: " + batchToProcess.size(), e);
+            // Fallback: put batch back to currentBatch
+            currentBatch.addAll(batchToProcess);
         }
+
     }
 
     private void processBatchedNotifications(List<DeploymentStatusJob> jobs) {
         if (jobs == null || jobs.isEmpty()) {
             return;
         }
-
-        long startTime = System.currentTimeMillis();
-        String threadName = Thread.currentThread().getName();
-
         try {
+            String threadName = Thread.currentThread().getName();
             if (log.isDebugEnabled()) {
                 log.debug(String.format("[%s] Processing batch of %d deployment status notifications", threadName,
                                         jobs.size()));
             }
-
             BatchPayload payload = new BatchPayload(jobs.size(), new ArrayList<>(jobs));
             String jsonPayload = gson.toJson(payload);
 
-            notifyBatchedApiDeploymentStatus(jsonPayload);
-
-        } catch (Exception e) {
-            long processingTime = System.currentTimeMillis() - startTime;
-            log.error(String.format("[%s] Error notifying batched API deployment status for %d APIs after %dms",
-                                    threadName, jobs.size(), processingTime), e);
-        }
-    }
-
-    /**
-     * Sends the batched deployment status notification to the event hub.
-     */
-    private void notifyBatchedApiDeploymentStatus(String payload) {
-        try {
-            // Get event hub configuration
             EventHubConfigurationDto config =
                     ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEventHubConfigurationDto();
             String serviceURLStr = config.getServiceUrl().concat(
@@ -309,20 +254,19 @@ public class DeploymentStatusNotifier {
                             (config.getUsername() + APIConstants.DELEM_COLON + config.getPassword()).getBytes(
                                     StandardCharsets.UTF_8)), StandardCharsets.UTF_8));
             request.setHeader(APIConstants.HEADER_CONTENT_TYPE, APIConstants.APPLICATION_JSON_MEDIA_TYPE);
-            request.setEntity(new StringEntity(payload, ContentType.APPLICATION_JSON));
+            request.setEntity(new StringEntity(jsonPayload, ContentType.APPLICATION_JSON));
 
             try (CloseableHttpResponse response = APIUtil.executeHTTPRequestWithRetries(request, httpClient,
                                                                                         retryDuration, maxRetryCount,
                                                                                         retryProgressionFactor)) {
                 if (log.isDebugEnabled()) {
                     int statusCode = response.getStatusLine().getStatusCode();
-                    String responseBody = EntityUtils.toString(response.getEntity(), "UTF-8");
+                    String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
                     log.debug("Batched deployment status notification response. Status: " + statusCode
                                       + ", Response: " + responseBody);
 
                 }
             }
-
         } catch (IOException | APIManagementException e) {
             log.error("Error occurred while calling batched deployment status notification", e);
         }

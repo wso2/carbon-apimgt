@@ -3656,5 +3656,10 @@ public final class APIConstants {
         public static final String CLEANUP_INTERVAL_SECONDS = "CleanupIntervalSeconds";
         public static final int DEFAULT_CLEANUP_STARTUP_DELAY = 60;
 
+        public enum GatewayRegistrationResponse {
+            NOT_RESPONDED,
+            ACKNOWLEDGED,
+            REGISTERED
+        }
     }
 }

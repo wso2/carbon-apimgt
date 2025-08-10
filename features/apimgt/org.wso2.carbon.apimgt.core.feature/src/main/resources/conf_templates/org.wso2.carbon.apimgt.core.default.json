@@ -234,7 +234,7 @@
   "apim.gateway_notification.gateway_id": "",
   "apim.gateway_notification.heartbeat.notify_interval": "30",
   "apim.gateway_notification.deployment_ack.batch_size": "100",
-  "apim.gateway_notification.deployment_ack.batch_interval": "5000",
+  "apim.gateway_notification.deployment_ack.batch_interval": "2000",
   "apim.gateway_notification.deployment_ack.max_retry_count": "5",
   "apim.gateway_notification.deployment_ack.retry_duration": "10000",
   "apim.gateway_notification.deployment_ack.retry_progression_factor": "2.0",

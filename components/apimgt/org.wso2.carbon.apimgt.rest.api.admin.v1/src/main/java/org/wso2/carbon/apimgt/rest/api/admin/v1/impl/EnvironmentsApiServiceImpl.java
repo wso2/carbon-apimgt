@@ -23,6 +23,7 @@ import org.wso2.carbon.apimgt.rest.api.common.RestApiCommonUtil;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.GatewayManagementDAO;
+import org.wso2.carbon.apimgt.impl.utils.GatewayManagementUtils;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayInstanceDTO;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.GatewayInstanceListDTO;
 
@@ -81,7 +82,8 @@ public class EnvironmentsApiServiceImpl implements EnvironmentsApiService {
             GatewayInstanceDTO dto = new GatewayInstanceDTO();
             dto.setGatewayId(info.gatewayId);
             dto.setLastActive(info.lastUpdated.toInstant().toString());
-            dto.setStatus(GatewayInstanceDTO.StatusEnum.fromValue(info.status));
+            String status = GatewayManagementUtils.validateGatewayStatus(info.lastUpdated);
+            dto.setStatus(GatewayInstanceDTO.StatusEnum.fromValue(status));
             gatewayList.add(dto);
         }
         GatewayInstanceListDTO listDTO = new GatewayInstanceListDTO();
