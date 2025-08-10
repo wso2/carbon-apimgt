@@ -57,10 +57,85 @@
             <classifier>runtime</classifier>
             <scope>test</scope>
         </dependency>
+        <!-- Shaded dependencies -->
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>5.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+            <version>2.12.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20240303</version>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <!-- Shade Plugin MUST come BEFORE Bundle Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.2</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <promoteTransitiveDependencies>false</promoteTransitiveDependencies>
+                            <relocations>
+                                <relocation>
+                                    <pattern>redis.clients.jedis</pattern>
+                                    <shadedPattern>org.wso2.carbon.apimgt.throttling.siddhi.extension.shaded.jedis</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.apache.commons.pool2</pattern>
+                                    <shadedPattern>org.wso2.carbon.apimgt.throttling.siddhi.extension.shaded.commons.pool2</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.json</pattern>
+                                    <shadedPattern>org.wso2.carbon.apimgt.throttling.siddhi.extension.shaded.json</shadedPattern>
+                                </relocation>
+                            </relocations>
+                            <artifactSet>
+                                <includes>
+                                    <include>redis.clients:jedis</include>
+                                    <include>org.apache.commons:commons-pool2</include>
+                                    <include>org.json:json</include>
+                                </includes>
+                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <Implementation-Title>${project.name}</Implementation-Title>
+                                        <Implementation-Version>${project.version}</Implementation-Version>
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -70,16 +145,26 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.throttling.siddhi.extension,
-                            org.wso2.carbon.apimgt.throttling.siddhi.extension.*
+                            org.wso2.carbon.apimgt.throttling.siddhi.extension.*;version="${project.version}",
+                            !org.wso2.carbon.apimgt.throttling.siddhi.extension.shaded.*
                         </Export-Package>
+                        <Private-Package>
+                            org.wso2.carbon.apimgt.throttling.siddhi.extension.shaded.*
+                        </Private-Package>
                         <Import-Package>
+                            !redis.clients.jedis.*,
+                            !org.apache.commons.pool2.*,
+                            !org.json.*,
+                            org.wso2.siddhi.core.*,
+                            org.wso2.carbon.*,
+                            org.slf4j.*;version="[1.6,2)",
                             *;resolution:=optional
                         </Import-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
+                        <Bundle-ClassPath>.</Bundle-ClassPath>
                     </instructions>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
