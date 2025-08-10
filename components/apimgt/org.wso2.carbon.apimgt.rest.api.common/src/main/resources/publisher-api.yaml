@@ -6633,10 +6633,11 @@ paths:
         - name: preserveCredentials
           in: query
           description: |
-            Preserve endpoint configuration credentials
+            Preserve endpoint configuration credentials and secret parameters
           required: false
           schema:
             type: boolean
+            default: false
       responses:
         200:
           description: |

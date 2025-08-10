@@ -31,6 +31,7 @@ public class OperationPolicySpecAttribute {
         Boolean,
         Enum,
         Map,
+        Secret,
         JSON
     }
 
