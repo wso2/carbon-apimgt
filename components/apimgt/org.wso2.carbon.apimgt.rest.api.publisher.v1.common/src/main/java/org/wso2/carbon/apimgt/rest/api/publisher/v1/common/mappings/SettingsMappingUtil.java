@@ -111,6 +111,7 @@ public class SettingsMappingUtil {
             settingsDTO.setDesignAssistantEnabled(config.getDesignAssistantConfigurationDto().isEnabled());
             settingsDTO.setAiAuthTokenProvided(config.getDesignAssistantConfigurationDto().isAuthTokenProvided() ||
                     config.getDesignAssistantConfigurationDto().isKeyProvided());
+            settingsDTO.setIsGatewayNotificationEnabled(APIUtil.isGatewayNotificationEnabled());
         }
         return settingsDTO;
     }

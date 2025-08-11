@@ -17384,6 +17384,10 @@ components:
           type: boolean
           description: Checks if the auth token is provided for AI service usage.
           default: false
+        isGatewayNotificationEnabled:
+          type: boolean
+          description: Is Gateway Notification Enabled
+          default: false
         customProperties:
           type: array
           items:

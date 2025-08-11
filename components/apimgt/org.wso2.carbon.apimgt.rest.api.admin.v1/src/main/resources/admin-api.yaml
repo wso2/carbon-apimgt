@@ -6138,6 +6138,10 @@ components:
           type: boolean
           description: To determine whether the transaction counter is enabled or not
           example: false
+        isGatewayNotificationEnabled:
+          type: boolean
+          description: Is Gateway Notification Enabled
+          default: false
     ScopeList:
       title: Scope Role Mapping List
       type: object

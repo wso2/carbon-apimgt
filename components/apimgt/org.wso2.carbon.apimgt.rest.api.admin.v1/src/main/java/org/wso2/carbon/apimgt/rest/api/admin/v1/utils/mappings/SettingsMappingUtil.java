@@ -64,6 +64,7 @@ public class SettingsMappingUtil {
         settingsDTO.setGatewayTypes(APIUtil.getGatewayTypes());
         settingsDTO.setIsJWTEnabledForLoginTokens(APIUtil.isJWTEnabledForPortals());
         settingsDTO.setOrgAccessControlEnabled(APIUtil.isOrganizationAccessControlEnabled());
+        settingsDTO.setIsGatewayNotificationEnabled(APIUtil.isGatewayNotificationEnabled());
         return settingsDTO;
     }
 
