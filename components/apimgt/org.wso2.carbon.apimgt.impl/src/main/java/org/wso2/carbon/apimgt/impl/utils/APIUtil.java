@@ -3549,15 +3549,13 @@ public final class APIUtil {
 
         // Process OOTB supported external gateway types first to ensure correct order in publisher UI
         if (externalGatewayConnectorConfigurationMap.containsKey(APIConstants.EXTERNAL_AWS_GATEWAY)) {
-            processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, externalGatewayConnectorConfigurationMap.
-                    get(APIConstants.EXTERNAL_AWS_GATEWAY));
+            processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData,
+                    externalGatewayConnectorConfigurationMap.get(APIConstants.EXTERNAL_AWS_GATEWAY));
         }
 
-        externalGatewayConnectorConfigurationMap.forEach((gatewayName, gatewayConfiguration) -> {
-            if (!APIConstants.EXTERNAL_AWS_GATEWAY.equals(gatewayName)) {
-                processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, gatewayConfiguration);
-            }
-        });
+        externalGatewayConnectorConfigurationMap.entrySet().stream()
+            .filter(entry -> !APIConstants.EXTERNAL_AWS_GATEWAY.equals(entry.getKey()))
+            .forEach(entry -> processExternalGatewayFeatureCatalogs(gatewayConfigsMap, apiData, entry.getValue()));
 
         GatewayFeatureCatalog gatewayFeatureCatalog = new GatewayFeatureCatalog();
         gatewayFeatureCatalog.setApiTypes(apiData);
