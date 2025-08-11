@@ -2244,7 +2244,7 @@ public class OAS2Parser extends APIDefinition {
 
     @Override
     public Set<URITemplate> generateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
-                                             String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates)
+                                             String mcpSubtype, Set<URITemplate> uriTemplates)
             throws APIManagementException {
 
         Swagger backendDefinition = getSwagger(backendApiDefinition);
@@ -2254,9 +2254,6 @@ public class OAS2Parser extends APIDefinition {
         }
         Set<URITemplate> generatedTools = new HashSet<>();
         for (URITemplate template : uriTemplates) {
-            if (!mcpFeatureType.equalsIgnoreCase(template.getHttpVerb())) {
-                continue;
-            }
             BackendOperation backendOperation = null;
             if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
                 BackendOperationMapping mapping = template.getBackendOperationMapping();
@@ -2278,8 +2275,7 @@ public class OAS2Parser extends APIDefinition {
             OperationMatch match =
                     findMatchingOperation(backendDefinition, backendOperation.getTarget(), backendOperation.getVerb());
             if (match != null) {
-                URITemplate toolTemplate = populateURITemplate(template, match, mcpFeatureType, backendDefinition,
-                        backendId, refApiId);
+                URITemplate toolTemplate = populateURITemplate(template, match, backendDefinition, backendId, refApiId);
                 generatedTools.add(toolTemplate);
             }
         }
@@ -2289,7 +2285,7 @@ public class OAS2Parser extends APIDefinition {
 
     @Override
     public Set<URITemplate> updateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
-                                           String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates)
+                                           String mcpSubtype, Set<URITemplate> uriTemplates)
             throws APIManagementException {
 
         Swagger backendDefinition = getSwagger(backendApiDefinition);
@@ -2300,9 +2296,6 @@ public class OAS2Parser extends APIDefinition {
         Set<URITemplate> updatedTools = new HashSet<>();
 
         for (URITemplate template : uriTemplates) {
-            if (!mcpFeatureType.equalsIgnoreCase(template.getHttpVerb())) {
-                continue;
-            }
 
             BackendOperation backendOperation = null;
 
@@ -2324,12 +2317,10 @@ public class OAS2Parser extends APIDefinition {
             }
 
             OperationMatch match =
-                    findMatchingOperation(backendDefinition, backendOperation.getTarget(),
-                            backendOperation.getVerb());
+                    findMatchingOperation(backendDefinition, backendOperation.getTarget(), backendOperation.getVerb());
 
             if (match != null) {
-                URITemplate populated = populateURITemplate(template, match, mcpFeatureType, backendDefinition,
-                        backendId, refApiId);
+                URITemplate populated = populateURITemplate(template, match, backendDefinition, backendId, refApiId);
                 updatedTools.add(populated);
                 continue;
             }
@@ -2344,14 +2335,13 @@ public class OAS2Parser extends APIDefinition {
      *
      * @param uriTemplate          the URITemplate to populate
      * @param match                the matched OpenAPI operation details
-     * @param mcpFeatureType       the MCP feature type (used as the HTTP verb)
      * @param backendId            the backend ID to associate
      * @param backendAPIDefinition the backend OpenAPI definition
      * @param refApiId
      * @return the populated URITemplate
      */
-    private URITemplate populateURITemplate(URITemplate uriTemplate, OperationMatch match, String mcpFeatureType,
-                                            Swagger backendAPIDefinition, String backendId, APIIdentifier refApiId)
+    private URITemplate populateURITemplate(URITemplate uriTemplate, OperationMatch match, Swagger backendAPIDefinition,
+                                            String backendId, APIIdentifier refApiId)
             throws APIManagementException {
 
         if (uriTemplate.getUriTemplate() == null || uriTemplate.getUriTemplate().isEmpty()) {
@@ -2369,8 +2359,6 @@ public class OAS2Parser extends APIDefinition {
                     .orElse(match.operation.getSummary());
             uriTemplate.setDescription(description);
         }
-
-        uriTemplate.setHTTPVerb(mcpFeatureType);
 
         if (uriTemplate.getSchemaDefinition() == null || uriTemplate.getSchemaDefinition().isEmpty()) {
             try {

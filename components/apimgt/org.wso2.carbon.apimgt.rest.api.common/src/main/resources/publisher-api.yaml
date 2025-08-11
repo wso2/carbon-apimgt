@@ -2545,14 +2545,65 @@ paths:
               "https://127.0.0.1:9443/api/am/publisher/v4/apis/e93fb282-b456-48fc-8981-003fb89086ae/mcp-servers-usage"'
       operationId: getMCPServerUsage
 
-  /mcp-servers/create-from-openapi:
+  /mcp-servers/validate-mcp-server:
+    post:
+      tags:
+        - Validation
+      summary: Validate a third-party MCP Server
+      description: >
+        This operation can be used to validate an `url` of third party mcp server
+      requestBody:
+        description: Object containing validation input parameters
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MCPServerValidationRequest'
+      responses:
+        200:
+          description: >
+            OK. MCP Server validation result is returned.
+          headers:
+            Content-Type:
+              description: The content type of the response body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MCPServerValidationResponse'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        404:
+          $ref: '#/components/responses/NotFound'
+      security:
+        - OAuth2Security:
+            - apim:api_create
+            - apim:api_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -X POST "https://127.0.0.1:9443/api/am/publisher/v3/apis/validate-mcp-server" \
+              -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" \
+              -H "Content-Type: application/json" \
+              -d "{ 
+                "url": "https://example.com/api?wsdl",
+                "securityInfo": {
+                  "isSecure": true,
+                  "header": "Authorization",
+                  "value": "Bearer some-token"
+                }
+              }"'
+      operationId: validateThirdPartyMCPServer
+
+  /mcp-servers/create-from-definition:
     post:
       tags:
         - MCP Servers
-      summary: Create an MCP server using the backend API's OpenAPI definition
+      summary: |
+        Create an MCP server using the backend's definition.
       description: |
-        This operation can be used to create a MCP server using the backend API's OpenAPI definition. Provide 
-        either `url` or `file` to specify the definition.
+        This operation can be used to create a MCP server using the backend's definition. Definition can be a OpenAPI
+        definition or a JSON schema definition Provide either `url` or `file` to specify the definition.
 
         Specify additionalProperties with **at least** API's name, version, context and endpointConfig.
       requestBody:
@@ -2569,7 +2620,13 @@ paths:
                   description: Definition url
                 additionalProperties:
                   type: string
-                  description: Additional attributes specified as a stringified JSON with API's schema
+                  description: Additional attributes specified as a stringified JSON with MCP Server's schema
+                securityInfo:
+                  type: string
+                  description: SecurityInfo object specified as a stringified JSON
+            encoding:
+              securityInfo:
+                contentType: application/json
       responses:
         201:
           description: |
@@ -2607,8 +2664,8 @@ paths:
       x-code-samples:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file=@openapi.json 
-          -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/import-mcp-server"'
-      operationId: createMCPServerFromOpenAPI
+          -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/create-from-backend-definition"'
+      operationId: createMCPServerFromDefinition
 
   /mcp-servers:
     post:
@@ -16324,7 +16381,9 @@ components:
           example: listBooks
         feature:
           type: string
-          example: TOOL
+          description: Backend target method
+          enum:
+            - TOOL
         authType:
           type: string
           example: Application & Application User
@@ -16458,6 +16517,7 @@ components:
             - PATCH
             - HEAD
             - OPTIONS
+            - TOOL
           example: POST
     BackendList:
       title: BackendList
@@ -16870,6 +16930,63 @@ components:
             graphQLSchema:
               $ref: '#/components/schemas/GraphQLSchema'
           description: Summary of the GraphQL including the basic information
+
+    MCPServerValidationRequest:
+      title: MCP URL Validation Request
+      type: object
+      properties:
+        url:
+          type: string
+          description: The URL to be validated.
+          example: https://example.com/mcp
+        securityInfo:
+          $ref: '#/components/schemas/SecurityInfo'
+
+    SecurityInfo:
+      title: MCP Server Security Information
+      type: object
+      description: Optional security headers to use during URL validation.
+      properties:
+        isSecure:
+          type: boolean
+          description: Indicates whether the URL is secure (HTTPS) or not (HTTP).
+          default: false
+        header:
+          type: string
+          description: Header name used for authentication, if required.
+          example: Authorization
+        value:
+          type: string
+          description: Value used for the authentication header.
+          example: Bearer <token>
+
+    MCPServerValidationResponse:
+      title: MCP Server validation Response
+      required:
+        - errorMessage
+        - isValid
+      type: object
+      properties:
+        isValid:
+          type: boolean
+          description: |
+            This attribute declares whether this definition is valid or not.
+            example: true
+        errorMessage:
+          type: string
+          description: |
+            This attribute declares the validation error message
+        content:
+            type: string
+            description: |
+                MCP Server schema definition content.
+        toolInfo:
+          type: object
+          properties:
+            operations:
+              type: array
+              items:
+                $ref: '#/components/schemas/MCPServerOperation'
     ApiEndpointValidationResponse:
       title: API Endpoint url validation response
       required:

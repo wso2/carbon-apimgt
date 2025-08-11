@@ -92,8 +92,11 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ErrorListItemDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ImportAPIResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.LifecycleStateDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationRequestDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OpenAPIDefinitionValidationResponseDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.OrganizationPoliciesDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SecurityInfoDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.SubtypeConfigurationDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.ThrottlingPolicyDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.WorkflowResponseDTO;
@@ -817,8 +820,9 @@ public class McpServersApiServiceImpl implements McpServersApiService {
      * @return Response containing the created MCPServerDTO or an error response
      * @throws APIManagementException if an error occurs during import or validation
      */
-    public Response createMCPServerFromOpenAPI(InputStream fileInputStream, Attachment fileDetail, String url,
-                                               String additionalProperties, MessageContext messageContext)
+    public Response createMCPServerFromDefinition(InputStream fileInputStream, Attachment fileDetail, String url,
+                                                  String additionalProperties, String securityInfo,
+                                                  MessageContext messageContext)
             throws APIManagementException {
 
         if (StringUtils.isBlank(additionalProperties)) {
@@ -842,7 +846,16 @@ public class McpServersApiServiceImpl implements McpServersApiService {
             throw new APIManagementException("Error while parsing 'additionalProperties'", e,
                     ExceptionCodes.ADDITIONAL_PROPERTIES_PARSE_ERROR);
         }
-        populateDefaultValuesForMCPServer(apiDTOFromProperties, APIConstants.API_SUBTYPE_DIRECT_ENDPOINT);
+        SecurityInfoDTO securityInfoDTO = null;
+        if (securityInfo != null && !securityInfo.isEmpty()) {
+            try {
+                securityInfoDTO = objectMapper.readValue(securityInfo, SecurityInfoDTO.class);
+            } catch (IOException e) {
+                throw new APIManagementException("Error while parsing 'securityInfo'", e);
+            }
+        }
+        populateDefaultValuesForMCPServer(apiDTOFromProperties,
+                apiDTOFromProperties.getSubtypeConfiguration().getSubtype());
 
         APIDTOTypeWrapper dtoWrapper = new APIDTOTypeWrapper(apiDTOFromProperties);
         if (!PublisherCommonUtils.validateEndpoints(dtoWrapper)) {
@@ -860,8 +873,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                             StringUtils.EMPTY, StringUtils.EMPTY, dtoWrapper);
 
             String organization = RestApiUtil.getValidatedOrganization(messageContext);
-            MCPServerDTO createdApiDTO = RestApiPublisherUtils.importOpenAPIDefinitionForMCPServers(fileInputStream,
-                    url, null, dtoWrapper, fileDetail, null, organization);
+            MCPServerDTO createdApiDTO = RestApiPublisherUtils.importDefinitionForMCPServers(fileInputStream,
+                    url, null, dtoWrapper, fileDetail, null, organization, securityInfoDTO);
             URI createdApiUri = new URI(RestApiConstants.RESOURCE_PATH_MCP_SERVERS + "/" + createdApiDTO.getId());
             return Response.created(createdApiUri).entity(createdApiDTO).build();
         } catch (URISyntaxException e) {
@@ -1367,8 +1380,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 if (ServiceEntry.DefinitionType.OAS2.equals(service.getDefinitionType()) || ServiceEntry
                         .DefinitionType.OAS3.equals(service.getDefinitionType())) {
                     newVersionedApi =
-                            RestApiPublisherUtils.importOpenAPIDefinitionForMCPServers(service.getEndpointDef(),
-                                    null, null, new APIDTOTypeWrapper(apidto), null, service, organization);
+                            RestApiPublisherUtils.importDefinitionForMCPServers(service.getEndpointDef(), null,
+                                    null, new APIDTOTypeWrapper(apidto), null, service, organization, null);
                 }
             } else {
                 API versionedAPI =
@@ -2187,6 +2200,48 @@ public class McpServersApiServiceImpl implements McpServersApiService {
     }
 
     /**
+     * Validate a third-party MCP server and return the DTO result.
+     *
+     * @param dto             Request payload with URL and optional security info
+     * @param messageContext  Request context
+     * @return 200 OK with validation result DTO
+     * @throws APIManagementException On unexpected internal errors
+     */
+    public Response validateThirdPartyMCPServer(MCPServerValidationRequestDTO dto, MessageContext messageContext)
+            throws APIManagementException {
+
+        final String serverUrl = StringUtils.trimToEmpty(dto.getUrl());
+        if (StringUtils.isBlank(serverUrl)) {
+            RestApiUtil.handleBadRequest("MCP server URL cannot be empty.", log);
+        }
+
+        final String organization = RestApiUtil.getValidatedOrganization(messageContext);
+        SecurityInfoDTO securityInfo = dto.getSecurityInfo();
+        final boolean isSecure = securityInfo != null && Boolean.TRUE.equals(securityInfo.isIsSecure());
+
+        if (isSecure && !StringUtils.startsWithIgnoreCase(serverUrl, "https://")) {
+            RestApiUtil.handleBadRequest("Secure validation requires an HTTPS URL.", log);
+        }
+
+        if (securityInfo != null) {
+            String header = StringUtils.trimToNull(securityInfo.getHeader());
+            String value  = StringUtils.trimToNull(securityInfo.getValue());
+
+            if ((header == null) != (value == null)) {
+                RestApiUtil.handleBadRequest("Provide both security header and value together.", log);
+            }
+
+            securityInfo.setHeader(header);
+            securityInfo.setValue(value);
+        }
+
+        MCPServerValidationResponseDTO result =
+                PublisherCommonUtils.validateMCPServer(serverUrl, securityInfo, true, organization);
+
+        return Response.ok(result).build();
+    }
+
+    /**
      * Validates whether the API operations are permitted based on the lifecycle state.
      * Throws an exception if the operation is not allowed for the given lifecycle state.
      *
@@ -2200,10 +2255,8 @@ public class McpServersApiServiceImpl implements McpServersApiService {
                 (String[]) PhaseInterceptorChain.getCurrentMessage().getExchange()
                         .get(RestApiConstants.USER_REST_API_SCOPES);
         for (String scope : tokenScopes) {
-            if (RestApiConstants.PUBLISHER_SCOPE.equals(scope)
-                    || RestApiConstants.API_IMPORT_EXPORT_SCOPE.equals(scope)
-                    || RestApiConstants.API_MANAGE_SCOPE.equals(scope)
-                    || RestApiConstants.ADMIN_SCOPE.equals(scope)) {
+            if (RestApiConstants.PUBLISHER_SCOPE.equals(scope) || RestApiConstants.API_IMPORT_EXPORT_SCOPE.equals(scope)
+                    || RestApiConstants.API_MANAGE_SCOPE.equals(scope) || RestApiConstants.ADMIN_SCOPE.equals(scope)) {
                 updatePermittedForPublishedDeprecated = true;
                 break;
             }

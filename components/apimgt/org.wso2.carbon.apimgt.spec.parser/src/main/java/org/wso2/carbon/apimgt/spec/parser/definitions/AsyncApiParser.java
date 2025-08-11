@@ -2230,17 +2230,14 @@ public class AsyncApiParser extends APIDefinition {
 
     @Override
     public Set<URITemplate> generateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
-                                             String mcpFeatureType, String mcpSubtype, Set<URITemplate> uriTemplates) {
+                                             String mcpSubtype, Set<URITemplate> uriTemplates) {
 
         return null;
     }
 
     @Override
-    public Set<URITemplate> updateMCPTools(String backendApiDefinition,
-                                           APIIdentifier refApiId, String backendId,
-                                           String mcpFeatureType,
-                                           String mcpSubtype,
-                                           Set<URITemplate> uriTemplates) {
+    public Set<URITemplate> updateMCPTools(String backendApiDefinition, APIIdentifier refApiId, String backendId,
+                                           String mcpSubtype, Set<URITemplate> uriTemplates) {
 
         return null;
     }

@@ -1554,8 +1554,6 @@ public final class APIConstants {
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE"})));
     public static final Set<String> WS_SUPPORTED_METHOD_LIST =
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE", "PUBLISH"})));
-    public static final Set<String> MCP_SUPPORTED_FEATURE_LIST =
-            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"TOOL"})));
 
     public static final String HTTP_VERB_PUBLISH = "PUBLISH";
     public static final String HTTP_VERB_SUBSCRIBE = "SUBSCRIBE";
@@ -2247,7 +2245,8 @@ public final class APIConstants {
             "C"};
     public static final String API_SUBTYPE_DEFAULT = "DEFAULT";
     public static final String API_SUBTYPE_AI_API = "AIAPI";
-    public static final String API_SUBTYPE_DIRECT_ENDPOINT = "DIRECT_ENDPOINT";
+    public static final String API_SUBTYPE_SERVER_PROXY = "SERVER_PROXY";
+    public static final String API_SUBTYPE_DIRECT_BACKEND = "DIRECT_BACKEND";
     public static final String API_SUBTYPE_EXISTING_API = "EXISTING_API";
     public static final String API_PRODUCT_REVISION = "Current";
     public static class AdvancedThrottleConstants {
@@ -3534,11 +3533,15 @@ public final class APIConstants {
         public static final String PROTOCOL_MISMATCH_ERROR = "Unsupported protocol version";
         public static final String PARAMS_KEY = "params";
         public static final String TOOL_NAME_KEY = "name";
-        public static final String TOOL_DESC_KEY = "description";
+        public static final String TOOL_DESCRIPTION_KEY = "description";
         public static final String REQUIRED_KEY = "required";
         public static final String PROPERTIES_KEY = "properties";
         public static final String ARGUMENTS_KEY = "arguments";
         public static final String RESULT_KEY = "result";
+        public static final String ERROR_KEY = "error";
+        public static final String BODY_KEY = "body";
+        public static final String TOOLS_KEY = "tools";
+        public static final String SESSION_ID_KEY = "sessionId";
         public static final String VHOST_HEADER = "x-wso2-mcp-vhost";
         public static final String BASEPATH_HEADER = "x-wso2-mcp-basepath";
         public static final String VERSION_HEADER = "x-wso2-mcp-version";
@@ -3555,6 +3558,32 @@ public final class APIConstants {
         public static final String ASGARDEO_WK_PLACEHOLDER
                 = "https://api.asgardeo.io/t/{organization}/oauth2/token/.well-known/openid-configuration";
         public static final String MCP_PROTOCOL_VERSION_HEADER = "MCP-Protocol-Version";
+        public static final String HEADER_CONTENT_TYPE = "Content-Type";
+        public static final String HEADER_ACCEPT = "Accept";
+        public static final String HEADER_MCP_SESSION_ID = "Mcp-Session-Id";
+        public static final String ACCEPT_JSON_AND_SSE = "application/json, text/event-stream";
+
+        // JSON keys used in payloads
+        public static final String CAPABILITIES_KEY = "capabilities";
+        public static final String ROOTS_KEY = "roots";
+        public static final String LIST_CHANGED_KEY = "listChanged";
+        public static final String SAMPLING_KEY = "sampling";
+        public static final String CLIENT_INFO_KEY = "clientInfo";
+        public static final String CLIENT_NAME_KEY = "name";
+        public static final String CLIENT_VERSION_KEY = "version";
+
+        // Client identity
+        public static final String CLIENT_NAME = "WSO2_API_Manager";
+        public static final String CLIENT_VERSION = "1.0";
+
+        // Tools payload
+        public static final String TOOLS_METHOD = METHOD_TOOL_LIST;
+        public static final String TOOL_INPUT_SCHEMA_KEY = "inputSchema";
+
+        // SSE parsing
+        public static final String SSE_DATA_PREFIX = "data:";
+
+        public static final String MCP_FEATURE_TYPE_TOOL = "TOOL";
 
         /**
          * This class contains constants used for RPC processing

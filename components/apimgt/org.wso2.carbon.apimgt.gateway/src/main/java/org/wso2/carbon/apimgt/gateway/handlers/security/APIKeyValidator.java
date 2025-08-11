@@ -28,8 +28,6 @@ import org.apache.synapse.rest.RESTConstants;
 import org.apache.synapse.rest.RESTUtils;
 import org.apache.synapse.api.Resource;
 import org.apache.synapse.api.dispatch.RESTDispatcher;
-import org.wso2.carbon.apimgt.api.APIDefinition;
-import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BackendOperation;
 import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
@@ -362,7 +360,7 @@ public class APIKeyValidator {
                             .orElse(null);
                     if (extendedOperation != null) {
                         BackendOperation backendOperation = null;
-                        if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_DIRECT_ENDPOINT)) {
+                        if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_DIRECT_BACKEND)) {
                             BackendOperationMapping backendAPIOperationMapping = extendedOperation.getBackendOperationMapping();
                             backendOperation = backendAPIOperationMapping.getBackendOperation();
                         } else if (StringUtils.equals(api.getSubtype(), APIConstants.API_SUBTYPE_EXISTING_API))  {

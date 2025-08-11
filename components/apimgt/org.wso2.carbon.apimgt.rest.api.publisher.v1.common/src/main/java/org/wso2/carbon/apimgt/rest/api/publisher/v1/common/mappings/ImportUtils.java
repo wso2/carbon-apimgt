@@ -1599,7 +1599,7 @@ public class ImportUtils {
         JsonObject mcpServer = retrievedMCPDtoJson(pathToArchive);
         MCPServerDTO mcpServerDTO = new Gson().fromJson(mcpServer, MCPServerDTO.class);
         if (StringUtils.equals(mcpServerDTO.getSubtypeConfiguration().getSubtype(),
-                APIConstants.API_SUBTYPE_DIRECT_ENDPOINT)) {
+                APIConstants.API_SUBTYPE_DIRECT_BACKEND)) {
             JsonObject backendAPI = retrievedBackendAPIDtoJson(pathToArchive);
             JSONParser parser = new JSONParser();
             JSONObject endpointConfig = (JSONObject) parser.parse(backendAPI.get("endpointConfig").getAsString());

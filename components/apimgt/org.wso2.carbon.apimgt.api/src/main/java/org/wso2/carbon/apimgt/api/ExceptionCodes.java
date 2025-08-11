@@ -812,6 +812,8 @@ public enum ExceptionCodes implements ErrorHandler {
             "Endpoint URL is invalid"),
     INVALID_MEDIA_TYPE_VALIDATION(902050, "Invalid or mismatched media type detected.", 415,
             "File extension '%s' does not match detected MIME type '%s'"),
+    INVALID_MCP_SEVER_VALIDATION(902051, "Failed to validate given MCP Server", 500,
+            "Error occurred while validating the MCP Server."),
 
     // Guardrail related codes
     GUARDRAIL_VIOLATION(900514, "Guardrail intervened.", 446,

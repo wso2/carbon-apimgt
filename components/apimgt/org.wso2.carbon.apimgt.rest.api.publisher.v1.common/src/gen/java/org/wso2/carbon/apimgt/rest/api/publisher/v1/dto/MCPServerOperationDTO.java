@@ -27,7 +27,37 @@ public class MCPServerOperationDTO   {
   
     private String id = null;
     private String target = null;
-    private String feature = null;
+
+    @XmlType(name="FeatureEnum")
+    @XmlEnum(String.class)
+    public enum FeatureEnum {
+        TOOL("TOOL");
+        private String value;
+
+        FeatureEnum (String v) {
+            value = v;
+        }
+
+        public String value() {
+            return value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        @JsonCreator
+        public static FeatureEnum fromValue(String v) {
+            for (FeatureEnum b : FeatureEnum.values()) {
+                if (String.valueOf(b.value).equals(v)) {
+                    return b;
+                }
+            }
+return null;
+        }
+    }
+    private FeatureEnum feature = null;
     private String authType = "Any";
     private String throttlingPolicy = null;
     private List<String> scopes = new ArrayList<String>();
@@ -74,19 +104,20 @@ public class MCPServerOperationDTO   {
   }
 
   /**
+   * Backend target method
    **/
-  public MCPServerOperationDTO feature(String feature) {
+  public MCPServerOperationDTO feature(FeatureEnum feature) {
     this.feature = feature;
     return this;
   }
 
   
-  @ApiModelProperty(example = "TOOL", value = "")
+  @ApiModelProperty(value = "Backend target method")
   @JsonProperty("feature")
-  public String getFeature() {
+  public FeatureEnum getFeature() {
     return feature;
   }
-  public void setFeature(String feature) {
+  public void setFeature(FeatureEnum feature) {
     this.feature = feature;
   }
 
