@@ -4756,6 +4756,10 @@ public class SQLConstants {
                     "  ON REF_MAP.URL_MAPPING_ID = OP.REF_URL_MAPPING_ID " +
                     "  AND REF_MAP.REVISION_UUID IS NULL " +
                     "WHERE REF_MAP.API_ID = ? AND MCP.ORGANIZATION = ? AND MCP.API_TYPE = ?";
+
+
+    public static final String ADD_API_METADATA =
+            "INSERT INTO AM_API_METADATA (API_UUID, METADATA_KEY, METADATA_VALUE) VALUES (?, ?, ?)";
     /**
      * Static class to hold database queries related to gateway policies tables
      */

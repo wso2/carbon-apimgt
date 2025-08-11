@@ -14232,7 +14232,7 @@ components:
         workflowStatus:
           type: string
           example: APPROVED
-        specVersion:
+        protocolVersion:
           type: string
         createdTime:
           type: string

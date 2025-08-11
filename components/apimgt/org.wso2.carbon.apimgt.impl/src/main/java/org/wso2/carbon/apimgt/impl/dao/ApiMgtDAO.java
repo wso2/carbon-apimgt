@@ -22487,6 +22487,42 @@ public class ApiMgtDAO {
         return referencedMCPServers;
     }
 
+    public void addAPIMetadata(String apiId, Map<String, String> metadata) throws APIManagementException {
+
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                addAPIMetadata(connection, apiId, metadata);
+                connection.commit();
+            } catch (SQLException e) {
+                connection.rollback();
+                handleException("Failed to add API metadata for API: " + apiId, e);
+            }
+        } catch (SQLException e) {
+            handleException("Error while establishing DB connection for adding metadata of API: " + apiId, e);
+        }
+    }
+
+    public void addAPIMetadata(Connection connection, String apiUuid, Map<String, String> metadata)
+            throws APIManagementException {
+
+        if (metadata == null || metadata.isEmpty()) {
+            return;
+        }
+        String sql = SQLConstants.ADD_API_METADATA;
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            for (Map.Entry<String, String> entry : metadata.entrySet()) {
+                ps.setString(1, apiUuid);
+                ps.setString(2, entry.getKey());
+                ps.setString(3, entry.getValue());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        } catch (SQLException e) {
+            throw new APIManagementException("Failed to add API metadata for API: " + apiUuid, e);
+        }
+    }
+
     private class SubscriptionInfo {
 
         private int subscriptionId;

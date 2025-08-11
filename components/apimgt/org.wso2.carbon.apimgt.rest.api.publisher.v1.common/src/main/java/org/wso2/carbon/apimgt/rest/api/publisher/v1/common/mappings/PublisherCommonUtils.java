@@ -938,7 +938,7 @@ public class PublisherCommonUtils {
      * @throws ParseException         If an error occurs while parsing the endpoint configuration
      * @throws CryptoException        If an error occurs while encrypting the secret key of API
      */
-    public static API prepareForUpdateApi(API originalAPI, MCPServerDTO apiDtoToUpdate, APIProvider apiProvider,
+    private static API prepareForUpdateApi(API originalAPI, MCPServerDTO apiDtoToUpdate, APIProvider apiProvider,
                                            String[] tokenScopes)
             throws APIManagementException {
 
@@ -2891,6 +2891,7 @@ public class PublisherCommonUtils {
         api.setAiConfiguration(apiDtoTypeWrapper.getAiConfiguration());
         api.setInitiatedFromGateway(apiDtoTypeWrapper.getInitiatedFromGateway());
         api.setDisplayName(apiDtoTypeWrapper.getDisplayName());
+        api.getMetadata().put(APIConstants.MCP.PROTOCOL_VERSION_KEY, apiDtoTypeWrapper.getProtocolVersion());
         return api;
     }
 

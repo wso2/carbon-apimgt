@@ -568,4 +568,13 @@ public class APIDTOTypeWrapper {
             return mcpServerDto.getDisplayName();
         }
     }
+
+    public String getProtocolVersion() {
+
+        if (isAPIDTO()) {
+            return null;
+        } else {
+            return mcpServerDto.getProtocolVersion();
+        }
+    }
 }

@@ -626,6 +626,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (api.getBackends() != null && !api.getBackends().isEmpty()) {
             addBackend(api.getUuid(), api.getBackends(), api.getOrganization());
         }
+        addAPIMetadata(api.getUuid(), api);
         addURITemplates(apiId, api, tenantId);
         addAPIPolicies(api, tenantDomain);
         addSubtypeConfiguration(api);
@@ -656,6 +657,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), api.getApiSecurity());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+    }
+
+    private void addAPIMetadata(String uuid, API api) throws APIManagementException {
+        apiMgtDAO.addAPIMetadata(uuid, api.getMetadata());
     }
 
     /**
