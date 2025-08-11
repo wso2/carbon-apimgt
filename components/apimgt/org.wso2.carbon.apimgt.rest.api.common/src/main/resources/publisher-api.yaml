@@ -17015,6 +17015,9 @@ components:
             advertiseOnly:
               type: boolean
               example: true
+            gatewayVendor:
+              type: string
+              example: wso2
             hasThumbnail:
               type: boolean
               example: true

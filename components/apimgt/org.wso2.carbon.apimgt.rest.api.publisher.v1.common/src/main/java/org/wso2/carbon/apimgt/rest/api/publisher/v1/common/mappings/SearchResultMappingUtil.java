@@ -76,6 +76,9 @@ public class SearchResultMappingUtil {
         apiResultDTO.setStatus(api.getStatus());
         apiResultDTO.setThumbnailUri(api.getThumbnailUrl());
         apiResultDTO.setAdvertiseOnly(api.isAdvertiseOnly());
+        apiResultDTO.setGatewayVendor(
+                APIConstants.WSO2_APK_GATEWAY.equals(api.getGatewayType()) || APIConstants.WSO2_SYNAPSE_GATEWAY.equals(
+                        api.getGatewayType()) ? APIConstants.WSO2_GATEWAY_ENVIRONMENT : api.getGatewayType());
         apiResultDTO.setHasThumbnail(!StringUtils.isBlank(api.getThumbnailUrl()));
         apiResultDTO.setBusinessOwner(api.getBusinessOwner());
         apiResultDTO.setBusinessOwnerEmail(api.getBusinessOwnerEmail());
