@@ -19990,7 +19990,7 @@ public class ApiMgtDAO {
             }
             statement.setString(1, apiUUID);
             try (ResultSet rs = statement.executeQuery()) {
-                return APIMgtDBUtil.mergeRevisionDeploymentDTOs(rs);
+                return APIMgtDBUtil.mergeRevisionDeploymentDTOs(rs, apiUUID);
             }
         } catch (SQLException e) {
             handleException("Failed to get API Revision deployment mapping details for api uuid: " +

@@ -242,7 +242,7 @@ public final class APIMgtDBUtil {
      * @throws SQLException sql exception
      * @throws APIManagementException api management exception
      */
-    public static List<APIRevisionDeployment> mergeRevisionDeploymentDTOs(ResultSet rs) throws APIManagementException,
+    public static List<APIRevisionDeployment> mergeRevisionDeploymentDTOs(ResultSet rs, String apiUuid) throws APIManagementException,
             SQLException {
         List<APIRevisionDeployment> apiRevisionDeploymentList = new ArrayList<>();
         Map<String, APIRevisionDeployment> uniqueSet = new HashMap<>();
@@ -292,7 +292,7 @@ public final class APIMgtDBUtil {
                 apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
 
                 gatewayManagementDAO.calculateGatewayDeploymentStats(apiRevisionDeployment, revisionUuid,
-                                                                     environmentName);
+                                                                     environmentName, apiUuid);
 
                 apiRevisionDeploymentList.add(apiRevisionDeployment);
                 uniqueSet.put(uniqueKey, apiRevisionDeployment);

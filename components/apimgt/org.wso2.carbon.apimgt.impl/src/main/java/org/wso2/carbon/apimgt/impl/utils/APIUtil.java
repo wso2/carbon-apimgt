@@ -10622,6 +10622,16 @@ public final class APIUtil {
     }
 
     /**
+     * Check whether gateway notification is enabled
+     *
+     * @return true if enabled, false otherwise
+     */
+    public static boolean isGatewayNotificationEnabled() {
+        return ServiceReferenceHolder.getInstance().getAPIManagerConfigurationService().getAPIManagerConfiguration()
+                .getGatewayNotificationConfiguration().isEnabled();
+    }
+
+    /**
      * Check whether organizations are available in the system
      *
      * @return

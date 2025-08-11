@@ -255,41 +255,7 @@ public class InMemoryAPIDeployer {
                             if (StringUtils.isNotEmpty(runtimeArtifact)) {
                                 gatewayAPIDTO = new Gson().fromJson(runtimeArtifact, GatewayAPIDTO.class);
                                 if (redeployChangedAPIs && apiMap != null) {
-                                    org.wso2.carbon.apimgt.keymgt.model.entity.API api =
-                                            apiMap.get(gatewayAPIDTO.getApiContext());
-                                    // Here, we redeploy APIs only if there is a new revision deployed in the
-                                    // Control Plane and not synced with the gateway due to connection issues.
-                                    if (api != null && api.getRevisionId() != null) {
-                                        if (!api.getRevisionId().equalsIgnoreCase(gatewayAPIDTO.getRevision())) {
-                                            DeployAPIInGatewayEvent deployAPIInGatewayEvent =
-                                                    new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
-                                                                                System.currentTimeMillis(),
-                                                                                APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(),
-                                                                                tenantDomain, api.getApiId(),
-                                                                                api.getUuid(), assignedGatewayLabels,
-                                                                                api.getName(), api.getVersion(),
-                                                                                api.getApiProvider(), api.getApiType(),
-                                                                                api.getContext());
-                                            unDeployAPI(deployAPIInGatewayEvent);
-                                            deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
-                                            deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
-                                                                                            gatewayAPIDTO.getRevision(),
-                                                                                            true, APIConstants.AuditLogConstants.DEPLOY, null, null,
-                                                                                            tenantDomain);
-                                        } else if (DataHolder.getInstance().getGatewayRegistrationResponse()
-                                                != APIConstants.GatewayNotification.GatewayRegistrationResponse.ACKNOWLEDGED) {
-                                            // If the gateway is not registered yet or if it is registered during
-                                            // reconnect
-                                            deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
-                                                                                            gatewayAPIDTO.getRevision(),
-                                                                                            true, APIConstants.AuditLogConstants.DEPLOY, null, null,
-                                                                                            tenantDomain);
-                                        }
-                                    } else {
-                                        if (log.isDebugEnabled()) {
-                                            log.debug("API " + gatewayAPIDTO.getName() + " is already deployed");
-                                        }
-                                    }
+                                    reDeployAPIs(gatewayAPIDTO, apiMap, assignedGatewayLabels, tenantDomain, apiGatewayAdmin);
                                 } else {
                                     deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
 
@@ -335,6 +301,59 @@ public class InMemoryAPIDeployer {
             }
         }
         return result;
+    }
+
+    /**
+     * Redeploy an API if there is a new revision deployed in the Control Plane
+     * and not synced with the gateway due to connection issues.
+     *
+     * @param gatewayAPIDTO         The GatewayAPIDTO containing API information
+     * @param apiMap                Map of existing APIs
+     * @param assignedGatewayLabels Gateway labels assigned to this instance
+     * @param tenantDomain          Tenant domain
+     * @param apiGatewayAdmin       API Gateway Admin instance
+     * @throws AxisFault if error occurs during deployment
+     */
+    private void reDeployAPIs(GatewayAPIDTO gatewayAPIDTO,
+                              Map<String, org.wso2.carbon.apimgt.keymgt.model.entity.API> apiMap,
+                              Set<String> assignedGatewayLabels, String tenantDomain,
+                              APIGatewayAdmin apiGatewayAdmin) throws AxisFault, ArtifactSynchronizerException {
+        
+        org.wso2.carbon.apimgt.keymgt.model.entity.API api =
+                apiMap.get(gatewayAPIDTO.getApiContext());
+        // Here, we redeploy APIs only if there is a new revision deployed in the
+        // Control Plane and not synced with the gateway due to connection issues.
+        if (api != null && api.getRevisionId() != null) {
+            if (!api.getRevisionId().equalsIgnoreCase(gatewayAPIDTO.getRevision())) {
+                DeployAPIInGatewayEvent deployAPIInGatewayEvent =
+                        new DeployAPIInGatewayEvent(UUID.randomUUID().toString(),
+                                                    System.currentTimeMillis(),
+                                                    APIConstants.EventType.REMOVE_API_FROM_GATEWAY.name(),
+                                                    tenantDomain, api.getApiId(),
+                                                    api.getUuid(), assignedGatewayLabels,
+                                                    api.getName(), api.getVersion(),
+                                                    api.getApiProvider(), api.getApiType(),
+                                                    api.getContext());
+                unDeployAPI(deployAPIInGatewayEvent);
+                deployAPIFromDTO(gatewayAPIDTO, apiGatewayAdmin);
+                deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
+                                                                gatewayAPIDTO.getRevision(),
+                                                                true, APIConstants.AuditLogConstants.DEPLOY, null, null,
+                                                                tenantDomain);
+            } else if (DataHolder.getInstance().getGatewayRegistrationResponse()
+                    != APIConstants.GatewayNotification.GatewayRegistrationResponse.ACKNOWLEDGED) {
+                // If the gateway is not registered yet or if it is registered during
+                // reconnect
+                deploymentStatusNotifier.submitDeploymentStatus(gatewayAPIDTO.getApiId(),
+                                                                gatewayAPIDTO.getRevision(),
+                                                                true, APIConstants.AuditLogConstants.DEPLOY, null, null,
+                                                                tenantDomain);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("API " + gatewayAPIDTO.getName() + " is already deployed");
+            }
+        }
     }
 
     private void deployAPIFromDTO(GatewayAPIDTO gatewayAPIDTO, APIGatewayAdmin apiGatewayAdmin) throws AxisFault {

@@ -110,7 +110,7 @@ public class GatewayNotifier {
 
         environmentLabels = new ArrayList<>(gatewayArtifactSynchronizerProperties.getGatewayLabels());
 
-        if (gatewayArtifactSynchronizerProperties.getLoadingTenants().isIncludeAllTenants()) {
+        if (!gatewayArtifactSynchronizerProperties.isTenantLoading()) {
             loadingTenants = List.of(APIConstants.GatewayNotification.WSO2_ALL_TENANTS);
         } else {
             loadingTenants = gatewayArtifactSynchronizerProperties.getLoadingTenants().getIncludingTenants();

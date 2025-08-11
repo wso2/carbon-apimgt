@@ -26,7 +26,6 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.dto.GatewayNotificationConfiguration;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
-import org.wso2.carbon.apimgt.impl.utils.GatewayManagementUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
 import java.io.ByteArrayInputStream;
@@ -142,6 +141,7 @@ public class GatewayManagementDAO {
                     for (String envLabel : envLabels) {
                         ps2.setString(1, envLabel);
                         ps2.setString(2, gatewayId);
+                        ps2.setString(3, organization);
                         ps2.executeUpdate();
                     }
                 }
@@ -201,6 +201,7 @@ public class GatewayManagementDAO {
                 ps.setString(5, revisionUuid);
                 ps.setTimestamp(6, lastUpdated);
                 ps.setString(7, gatewayId);
+                ps.setString(8, organization);
                 ps.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
@@ -235,7 +236,8 @@ public class GatewayManagementDAO {
                 ps.setTimestamp(4, lastUpdated);
                 ps.setString(5, organization);
                 ps.setString(6, gatewayId);
-                ps.setString(7, apiId);
+                ps.setString(7, organization);
+                ps.setString(8, apiId);
                 ps.executeUpdate();
                 connection.commit();
             } catch (SQLException e) {
@@ -300,13 +302,14 @@ public class GatewayManagementDAO {
 
                 // Update gateway instance
                 ps1.setTimestamp(1, lastUpdated);
-                ps1.setBinaryStream(4, new ByteArrayInputStream(gwProperties));
+                ps1.setBinaryStream(2, new ByteArrayInputStream(gwProperties));
                 ps1.setString(3, gatewayId);
                 ps1.setString(4, organization);
                 ps1.executeUpdate();
 
                 // Delete existing environment mappings
                 ps2.setString(1, gatewayId);
+                ps2.setString(2, organization);
                 ps2.executeUpdate();
 
                 // Insert new environment mappings
@@ -314,6 +317,7 @@ public class GatewayManagementDAO {
                     for (String envLabel : envLabels) {
                         ps3.setString(1, envLabel);
                         ps3.setString(2, gatewayId);
+                        ps3.setString(3, organization);
                         ps3.executeUpdate();
                     }
                 }
@@ -356,7 +360,9 @@ public class GatewayManagementDAO {
         }
 
         return result;
-    }    /**
+    }
+
+    /**
      * Checks if the existing entry for the given gateway ID and organization has a timestamp previous to the given timestamp.
      *
      * @param gatewayId        the gateway identifier to check
@@ -431,62 +437,62 @@ public class GatewayManagementDAO {
         }
     }
 
+    /**
+     * Calculates gateway deployment statistics for a specific API revision and environment.
+     * This includes deployed count, failed count, latest success time, and live gateway count.
+     *
+     * @param apiRevisionDeployment the APIRevisionDeployment object to populate with stats
+     * @param revisionUuid          the UUID of the API revision
+     * @param environmentName       the name of the environment
+     * @param apiUuid               the UUID of the API
+     * @throws APIManagementException if database operation fails
+     */
     public void calculateGatewayDeploymentStats(APIRevisionDeployment apiRevisionDeployment, String revisionUuid,
-                                                 String environmentName) throws APIManagementException {
-        Connection connection = null;
-        PreparedStatement ps = null;
-        ResultSet resultSet = null;
-
-        // Calculate the expire time threshold for live gateways
+                                                 String environmentName, String apiUuid) throws APIManagementException {
         GatewayNotificationConfiguration config = ServiceReferenceHolder.getInstance()
                 .getAPIManagerConfigurationService().getAPIManagerConfiguration().getGatewayNotificationConfiguration();
         long currentTime = System.currentTimeMillis();
         long expireTimeThreshold = currentTime - (config.getGatewayCleanupConfiguration().getExpireTimeSeconds() * 1000L);
         Timestamp expireTimestamp = new Timestamp(expireTimeThreshold);
 
-        try {
-            connection = APIMgtDBUtil.getConnection();
+        try (Connection connection = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement ps = connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GATEWAY_DEPLOYMENT_STATS_QUERY)) {
+                ps.setString(1, revisionUuid);
+                ps.setString(2, environmentName);
+                ps.setTimestamp(3, expireTimestamp);
 
-            ps = connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GATEWAY_DEPLOYMENT_STATS_QUERY);
-            ps.setString(1, revisionUuid);
-            ps.setString(2, environmentName);
-            ps.setTimestamp(3, expireTimestamp);
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    if (resultSet.next()) {
+                        int deployedCount = resultSet.getInt(APIConstants.GatewayNotification.DEPLOYED_COUNT);
+                        int failedCount = resultSet.getInt(APIConstants.GatewayNotification.FAILED_COUNT);
+                        Timestamp latestSuccessTime = resultSet.getTimestamp(APIConstants.GatewayNotification.LATEST_SUCCESS_TIME);
 
-            resultSet = ps.executeQuery();
+                        apiRevisionDeployment.setDeployedGatewayCount(deployedCount);
+                        apiRevisionDeployment.setFailedGatewayCount(failedCount);
 
-            if (resultSet.next()) {
-                int deployedCount = resultSet.getInt(APIConstants.GatewayNotification.DEPLOYED_COUNT);
-                int failedCount = resultSet.getInt(APIConstants.GatewayNotification.FAILED_COUNT);
-                Timestamp latestSuccessTime = resultSet.getTimestamp(APIConstants.GatewayNotification.LATEST_SUCCESS_TIME);
-
-                apiRevisionDeployment.setDeployedGatewayCount(deployedCount);
-                apiRevisionDeployment.setFailedGatewayCount(failedCount);
-
-                if (latestSuccessTime != null) {
-                    apiRevisionDeployment.setSuccessDeployedTime(latestSuccessTime.toString());
+                        if (latestSuccessTime != null) {
+                            apiRevisionDeployment.setSuccessDeployedTime(latestSuccessTime.toString());
+                        }
+                    }
                 }
             }
 
-            APIMgtDBUtil.closeAllConnections(ps, null, resultSet);
-            ps = null;
-            resultSet = null;
+            try (PreparedStatement ps = connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GATEWAY_LIVE_COUNT_WITH_API_ORGANIZATION_QUERY)) {
+                ps.setTimestamp(1, expireTimestamp);
+                ps.setString(2, environmentName);
+                ps.setString(3, apiUuid);
 
-            ps = connection.prepareStatement(SQLConstants.APIRevisionSqlConstants.GATEWAY_LIVE_COUNT_QUERY);
-            ps.setTimestamp(1, expireTimestamp);
-            ps.setString(2, environmentName);
-
-            resultSet = ps.executeQuery();
-
-            if (resultSet.next()) {
-                int liveCount = resultSet.getInt(APIConstants.GatewayNotification.LIVE_COUNT);
-                apiRevisionDeployment.setLiveGatewayCount(liveCount);
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    if (resultSet.next()) {
+                        int liveCount = resultSet.getInt(APIConstants.GatewayNotification.LIVE_COUNT);
+                        apiRevisionDeployment.setLiveGatewayCount(liveCount);
+                    }
+                }
             }
 
         } catch (SQLException e) {
             log.error("Error while calculating gateway deployment statistics for revision: " + revisionUuid
                               + " and environment: " + environmentName, e);
-        } finally {
-            APIMgtDBUtil.closeAllConnections(ps, connection, resultSet);
         }
     }
 
