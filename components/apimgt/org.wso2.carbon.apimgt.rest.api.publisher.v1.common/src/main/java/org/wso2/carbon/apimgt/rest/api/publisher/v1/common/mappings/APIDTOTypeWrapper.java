@@ -541,4 +541,14 @@ public class APIDTOTypeWrapper {
             return null;
         }
     }
+
+    public String getSubtype() {
+
+        if (isAPIDTO()) {
+            return apiDto.getSubtypeConfiguration() != null ? apiDto.getSubtypeConfiguration().getSubtype() : null;
+        } else {
+            return mcpServerDto.getSubtypeConfiguration() != null ?
+                    mcpServerDto.getSubtypeConfiguration().getSubtype() : null;
+        }
+    }
 }

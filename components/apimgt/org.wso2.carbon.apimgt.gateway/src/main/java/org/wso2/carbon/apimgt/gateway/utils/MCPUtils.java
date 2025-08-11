@@ -221,7 +221,7 @@ public class MCPUtils {
                 if (apiOperationMapping != null) {
                     backendOperation = apiOperationMapping.getBackendOperation();
                 }
-            } else if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(subType)) {
+            } else if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(subType)) {
                 BackendOperationMapping backendOperationMapping = extendedOperation.getBackendOperationMapping();
                 if (backendOperationMapping != null) {
                     backendOperation = backendOperationMapping.getBackendOperation();

@@ -1268,7 +1268,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         }
         if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
-            if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
+            if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(api.getSubtype())) {
                 apiMgtDAO.removeBackendOperationMapping(oldURITemplates);
             } else if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
                 apiMgtDAO.removeApiOperationMapping(oldURITemplates);
@@ -2864,10 +2864,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             apiMgtDAO.deleteAIConfiguration(api.getUuid());
         }
         if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
-            if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
-                apiMgtDAO.removeBackendOperationMapping(uriTemplates);
-            } else if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
+            if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
                 apiMgtDAO.removeApiOperationMapping(uriTemplates);
+            } else {
+                apiMgtDAO.removeBackendOperationMapping(uriTemplates);
             }
         }
         apiMgtDAO.deleteAPI(api.getUuid());
@@ -8713,7 +8713,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
 
         if (!APIConstants.API_TYPE_MCP.equals(api.getType())
-                || !APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
+                || APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
             return;
         }
 

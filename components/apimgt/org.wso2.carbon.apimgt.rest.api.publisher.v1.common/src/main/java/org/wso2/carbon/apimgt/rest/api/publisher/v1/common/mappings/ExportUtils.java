@@ -254,7 +254,7 @@ public class ExportUtils {
         if (apiDtoToReturn.isAPIDTO()) {
             addAPIEndpointsToArchive(archivePath, api, exportFormat, apiProvider, organization, preserveCredentials);
         } else if (apiDtoToReturn.isMCPServerDTO()) {
-            addBackendAPIsToArchive(archivePath, api, exportFormat, apiProvider, organization, preserveCredentials);
+            addBackendsToArchive(archivePath, api, exportFormat, apiProvider, organization, preserveCredentials);
         }
 
         if (api != null && !StringUtils.isEmpty(api.getEndpointConfig())) {
@@ -935,8 +935,7 @@ public class ExportUtils {
                 apiEndpointDTOList.add(
                         APIMappingUtil.fromAPIEndpointToDTO(apiEndpointInfo, organization, preserveCredentials));
             }
-            writeDTOListToFile(apiEndpointDTOList, archivePath,
-                    ImportExportConstants.API_ENDPOINTS_FILE_LOCATION,
+            writeDTOListToFile(apiEndpointDTOList, archivePath, ImportExportConstants.API_ENDPOINTS_FILE_LOCATION,
                     ImportExportConstants.API_ENDPOINTS_TYPE, exportFormat);
         } catch (APIImportExportException e) {
             throw new APIManagementException("Error while adding operation endpoints details for API: " + apiUuid, e);
@@ -946,22 +945,34 @@ public class ExportUtils {
         }
     }
 
-    public static void addBackendAPIsToArchive(String archivePath, API api, ExportFormat exportFormat,
-                                                APIProvider apiProvider, String organization,
-                                                boolean preserveCredentials) throws APIManagementException {
+    /**
+     * Adds backend APIs to the export archive for the given API.
+     * If the API is of type DIRECT_BACKEND or SERVER_PROXY, retrieves backend APIs,
+     * maps them to DTOs, and writes the backend definitions into the archive as JSON.
+     *
+     * @param archivePath         the file system path where the archive is being created
+     * @param api                 the {@link API} object whose backend APIs should be exported
+     * @param exportFormat        the {@link ExportFormat} specifying how data should be written
+     * @param apiProvider         the {@link APIProvider} used to retrieve backend information
+     * @param organization        the organization context for the API retrieval
+     * @param preserveCredentials whether sensitive credentials should be retained in the exported data
+     * @throws APIManagementException if an error occurs while retrieving or writing backend data
+     */
+    public static void addBackendsToArchive(String archivePath, API api, ExportFormat exportFormat,
+                                            APIProvider apiProvider, String organization, boolean preserveCredentials)
+            throws APIManagementException {
 
         String apiUuid = api.getUuid();
         try {
-            if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
+            if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(api.getSubtype())
+                    || APIConstants.API_SUBTYPE_SERVER_PROXY.equals(api.getSubtype())) {
                 List<Backend> backends = apiProvider.getMCPServerBackends(apiUuid, organization);
                 List<BackendDTO> backendAPIDTOList = new ArrayList<>();
                 for (Backend backend : backends) {
-                    backendAPIDTOList.add(
-                            APIMappingUtil.fromBackendAPIToDTO(backend, organization,
-                                    preserveCredentials));
+                    backendAPIDTOList.add(APIMappingUtil.fromBackendAPIToDTO(backend, organization,
+                            preserveCredentials));
                 }
-                writeDTOListToFile(backendAPIDTOList, archivePath,
-                        ImportExportConstants.BACKENDS_FILE_LOCATION,
+                writeDTOListToFile(backendAPIDTOList, archivePath, ImportExportConstants.BACKENDS_FILE_LOCATION,
                         ImportExportConstants.BACKENDS_TYPE, exportFormat);
             }
         } catch (APIImportExportException e) {
@@ -972,19 +983,25 @@ public class ExportUtils {
         }
     }
 
-    private static void writeDTOListToFile(List<?> dtoList, String archivePath, String fileLocation,
-                                           String dtoType, ExportFormat exportFormat)
-            throws APIImportExportException, IOException {
+    /**
+     * Writes a list of DTOs to a file in the specified archive path.
+     *
+     * @param dtoList      List of DTOs to be written to the file
+     * @param archivePath  Path where the file will be written
+     * @param fileLocation Location of the file within the archive
+     * @param dtoType      Type of the DTOs being written
+     * @param exportFormat Format in which the data should be exported
+     * @throws APIImportExportException If an error occurs while writing the DTOs to the file
+     * @throws IOException              If an I/O error occurs during file operations
+     */
+    private static void writeDTOListToFile(List<?> dtoList, String archivePath, String fileLocation, String dtoType,
+                                           ExportFormat exportFormat) throws APIImportExportException, IOException {
 
         if (!dtoList.isEmpty()) {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             JsonElement jsonElement = gson.toJsonTree(dtoList);
             JsonArray jsonArray = (JsonArray) jsonElement;
-            CommonUtil.writeDtoToFile(
-                    archivePath + fileLocation,
-                    exportFormat,
-                    dtoType,
-                    jsonArray);
+            CommonUtil.writeDtoToFile(archivePath + fileLocation, exportFormat, dtoType, jsonArray);
         }
     }
 

@@ -17,7 +17,6 @@
  */
 package org.wso2.carbon.apimgt.impl.dao;
 
-import com.google.gson.Gson;
 import edu.emory.mathcs.backport.java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
@@ -58,9 +57,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1357,7 +1354,7 @@ public class SubscriptionValidationDAO {
     private void populateMcpOperationMappings(Connection connection, int urlMappingId, URLMapping urlMapping, API api)
             throws SQLException {
         String sql;
-        if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
+        if (APIConstants.API_SUBTYPE_DIRECT_BACKEND.equals(api.getSubtype())) {
             sql = SubscriptionValidationSQLConstants.GET_MCP_BACKEND_OPERATION_MAPPING_BY_REF_URL_MAPPING_ID;
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
                 ps.setInt(1, urlMappingId);

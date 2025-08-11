@@ -20,6 +20,9 @@ package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
 import org.wso2.carbon.apimgt.api.model.Backend;
 import org.apache.http.client.HttpClient;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
+import org.wso2.carbon.apimgt.impl.MCPInitializerAndToolFetcher;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -106,6 +109,10 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -707,13 +714,13 @@ public class ApisApiServiceImplUtils {
         String defaultAPILevelPolicy = APIUtil.getDefaultAPILevelPolicy(tenantId);
 
         if (APIConstants.API_TYPE_MCP.equals(apiToAdd.getType())) {
-            String backendApiId = UUID.randomUUID().toString();
-            Set<URITemplate> uriTemplates = generateMCPFeatures(apiToAdd.getSubtype(), definition, backendApiId,
+            String backendId = UUID.randomUUID().toString();
+            Set<URITemplate> uriTemplates = generateMCPFeatures(apiToAdd.getSubtype(), definition, backendId,
                     apiToAdd.getUriTemplates(), apiDefinition);
             applyDefaultThrottlingAndAuth(uriTemplates, defaultAPILevelPolicy);
             apiToAdd.setUriTemplates(uriTemplates);
             validateScopes(apiToAdd, apiProvider, username);
-            Backend backend = createDefaultBackend(backendApiId, definition, apiToAdd.getEndpointConfig());
+            Backend backend = createDefaultBackend(backendId, definition, apiToAdd.getEndpointConfig());
             apiToAdd.getBackends().add(backend);
             apiToAdd.setEndpointConfig(null);
             SwaggerData swaggerData = new SwaggerData(apiToAdd);
@@ -794,23 +801,166 @@ public class ApisApiServiceImplUtils {
      *
      * @param subtype              MCP feature subtype
      * @param backendApiDefinition API definition string
-     * @param backendApiId         backend API ID
+     * @param backendId         backend API ID
      * @param uriTemplates         existing URI templates
      * @param parser               parser to generate MCP tools
      * @return generated MCP feature templates
      * @throws APIManagementException if generation fails
      */
-    public static Set<URITemplate> generateMCPFeatures(String subtype, String backendApiDefinition, String backendApiId,
+    public static Set<URITemplate> generateMCPFeatures(String subtype, String backendApiDefinition, String backendId,
                                                        Set<URITemplate> uriTemplates, APIDefinition parser)
             throws APIManagementException {
 
-        Set<URITemplate> mcpTools = parser.generateMCPTools(backendApiDefinition, null,
-                backendApiId, APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE, subtype, uriTemplates);
-        if (mcpTools == null) {
-            throw new APIManagementException("Failed to generate MCP feature.");
+        Set<URITemplate> mcpTools;
+        if (subtype.equals(APIConstants.API_SUBTYPE_SERVER_PROXY)) {
+            mcpTools = findMatchingTools(backendApiDefinition, uriTemplates, backendId);
+        } else {
+            mcpTools = parser.generateMCPTools(backendApiDefinition, null, backendId, subtype, uriTemplates);
+            if (mcpTools == null) {
+                throw new APIManagementException("Failed to generate MCP feature.");
+            }
         }
         return mcpTools;
     }
+
+    /**
+     * Update URI templates with tool metadata from the MCP backend definition and return the matched templates.
+     *
+     * @param backendApiDefinitionJson Backend definition as JSON string (must contain a non-empty "tools" array)
+     * @param uriTemplates             Candidate URI templates to enrich
+     * @param backendId                Backend identifier to set on matched templates' mappings
+     * @return Templates that were matched and updated (never null)
+     * @throws APIManagementException If the definition JSON is invalid or required tool fields are missing
+     */
+    public static Set<URITemplate> findMatchingTools(String backendApiDefinitionJson, Set<URITemplate> uriTemplates,
+                                                     String backendId) throws APIManagementException {
+
+        org.json.JSONObject backendDefinitionJson = parseBackendDefinition(backendApiDefinitionJson);
+        org.json.JSONArray toolsArray = MCPInitializerAndToolFetcher.extractToolsArray(backendDefinitionJson);
+
+        Map<String, String> schemaByToolName = new HashMap<>();
+        Map<String, String> descriptionByToolName = new HashMap<>();
+        populateToolLookups(toolsArray, schemaByToolName, descriptionByToolName);
+
+        return populateURITemplatesWithTools(uriTemplates, schemaByToolName, descriptionByToolName, backendId);
+    }
+
+    /**
+     * Parse backend definition JSON string.
+     */
+    private static org.json.JSONObject parseBackendDefinition(String backendJson) throws APIManagementException {
+
+        if (StringUtils.isBlank(backendJson)) {
+            throw new APIManagementException("Backend API definition cannot be empty.",
+                    ExceptionCodes.INVALID_MCP_SEVER_VALIDATION);
+        }
+        try {
+            return new org.json.JSONObject(backendJson);
+        } catch (org.json.JSONException e) {
+            throw new APIManagementException("Invalid backend API definition JSON: " + e.getMessage(), e,
+                    ExceptionCodes.INVALID_MCP_SEVER_VALIDATION);
+        }
+    }
+
+    /**
+     * Populates lookup maps for tool schemas and descriptions using the provided tools array.
+     *
+     * @param toolsArray            JSON array of tool objects
+     * @param schemaByToolName      Map to populate with tool name → input schema JSON string
+     * @param descriptionByToolName Map to populate with tool name → tool description
+     * @throws APIManagementException If any tool entry is missing a required field
+     */
+    private static void populateToolLookups(org.json.JSONArray toolsArray, Map<String, String> schemaByToolName,
+                                            Map<String, String> descriptionByToolName) throws APIManagementException {
+
+        for (int index = 0; index < toolsArray.length(); index++) {
+            org.json.JSONObject toolJson = toolsArray.optJSONObject(index);
+            if (toolJson == null) {
+                continue;
+            }
+
+            String toolName = StringUtils.trimToNull(toolJson.optString(APIConstants.MCP.TOOL_NAME_KEY, null));
+            String toolDescription =
+                    StringUtils.trimToNull(toolJson.optString(APIConstants.MCP.TOOL_DESCRIPTION_KEY, null));
+            org.json.JSONObject inputSchemaJson = toolJson.optJSONObject(APIConstants.MCP.TOOL_INPUT_SCHEMA_KEY);
+            String inputSchema = (inputSchemaJson != null) ? inputSchemaJson.toString() : null;
+
+            if (StringUtils.isBlank(toolName)) {
+                throw new APIManagementException("Tool[" + index + "]: name is required.",
+                        ExceptionCodes.PARAMETER_NOT_PROVIDED);
+            }
+            if (StringUtils.isBlank(toolDescription)) {
+                throw new APIManagementException("Tool[" + index + "]: description is required.",
+                        ExceptionCodes.PARAMETER_NOT_PROVIDED);
+            }
+            if (StringUtils.isBlank(inputSchema)) {
+                throw new APIManagementException("Tool[" + index + "]: input schema is required.",
+                        ExceptionCodes.PARAMETER_NOT_PROVIDED);
+            }
+
+            schemaByToolName.put(toolName, inputSchema);
+            descriptionByToolName.put(toolName, toolDescription);
+        }
+    }
+
+    /**
+     * Populate URI templates with tool metadata from the MCP backend definition.
+     *
+     * @param uriTemplates          Candidate URI templates to enrich
+     * @param schemaByToolName      Map of tool names to their input schemas
+     * @param descriptionByToolName Map of tool names to their descriptions
+     * @param backendId             Backend identifier to set on matched templates' mappings
+     * @return Templates that were matched and updated (never null)
+     */
+    private static Set<URITemplate> populateURITemplatesWithTools(Set<URITemplate> uriTemplates,
+                                                                  Map<String, String> schemaByToolName,
+                                                                  Map<String, String> descriptionByToolName,
+                                                                  String backendId) {
+
+        if (uriTemplates == null || uriTemplates.isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        Set<URITemplate> matchedTemplates = new LinkedHashSet<>();
+        for (URITemplate uriTemplate : uriTemplates) {
+            if (uriTemplate == null) {
+                continue;
+            }
+            BackendOperationMapping backendMapping = uriTemplate.getBackendOperationMapping();
+            if (backendMapping == null) {
+                continue;
+            }
+            BackendOperation backendOperation = backendMapping.getBackendOperation();
+            if (backendOperation == null) {
+                continue;
+            }
+
+            String operationVerb = (backendOperation.getVerb() != null) ? backendOperation.getVerb().toString() : null;
+            String operationTarget = StringUtils.trimToNull(backendOperation.getTarget());
+
+            if (!APIConstants.MCP.MCP_FEATURE_TYPE_TOOL.equalsIgnoreCase(operationVerb) || operationTarget == null) {
+                continue;
+            }
+
+            String toolSchema = schemaByToolName.get(operationTarget);
+            if (toolSchema == null) {
+                continue;
+            }
+            if (uriTemplate.getUriTemplate() == null || uriTemplate.getUriTemplate().isEmpty()) {
+                uriTemplate.setUriTemplate(operationTarget);
+            }
+            if (uriTemplate.getDescription() == null || uriTemplate.getDescription().isEmpty()) {
+                uriTemplate.setDescription(descriptionByToolName.get(operationTarget));
+            }
+            if (uriTemplate.getSchemaDefinition() == null || uriTemplate.getSchemaDefinition().isEmpty()) {
+                uriTemplate.setSchemaDefinition(toolSchema);
+            }
+            backendMapping.setBackendId(backendId);
+            matchedTemplates.add(uriTemplate);
+        }
+        return matchedTemplates;
+    }
+
 
     /**
      * @param api           API
@@ -1092,4 +1242,6 @@ public class ApisApiServiceImplUtils {
         serviceInfo.put("md5", service.getMd5());
         return serviceInfo;
     }
+
+
 }
