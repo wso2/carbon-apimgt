@@ -2614,7 +2614,8 @@ public class OAS3Parser extends APIDefinition {
             OperationMatch match =
                     findMatchingOperation(backendDefinition, backendOperation.getTarget(), backendOperation.getVerb());
             if (match != null) {
-                URITemplate toolTemplate = populateURITemplate(template, match, backendDefinition, backendId, refApiId);
+                URITemplate toolTemplate = populateURITemplate(template, match, backendDefinition, backendId,
+                        refApiId, true);
                 generatedTools.add(toolTemplate);
             }
         }
@@ -2659,7 +2660,8 @@ public class OAS3Parser extends APIDefinition {
                     backendOperation.getVerb());
 
             if (match != null) {
-                URITemplate populated = populateURITemplate(template, match, backendDefinition, backendId, refApiId);
+                URITemplate populated = populateURITemplate(template, match, backendDefinition, backendId, refApiId,
+                        false);
                 updatedTools.add(populated);
                 continue;
             }
@@ -2669,18 +2671,19 @@ public class OAS3Parser extends APIDefinition {
     }
 
     /**
-     * Populates a URITemplate with details from a matched OpenAPI operation.
-     * Sets the template’s name, description, HTTP verb, JSON schema, and backend or proxy mappings.
+     * Populates the URITemplate with details from the OpenAPI definition and the matched operation.
      *
-     * @param uriTemplate          the URITemplate to populate
-     * @param match                the matched OpenAPI operation details
-     * @param backendId            the backend ID to associate
-     * @param backendAPIDefinition the backend OpenAPI definition
-     * @param refApiId
-     * @return the populated URITemplate
+     * @param uriTemplate            URITemplate to populate
+     * @param match                  OperationMatch containing path, method, and operation details
+     * @param backendAPIDefinition   OpenAPI definition of the backend API
+     * @param backendId              Backend ID for the operation mapping
+     * @param refApiId               APIIdentifier for the reference API
+     * @param setPropsFromDefinition Whether to set properties from the OpenAPI definition
+     * @return Populated URITemplate
+     * @throws APIManagementException If an error occurs while populating the URITemplate
      */
     private URITemplate populateURITemplate(URITemplate uriTemplate, OperationMatch match, OpenAPI backendAPIDefinition,
-                                            String backendId, APIIdentifier refApiId)
+                                            String backendId, APIIdentifier refApiId, boolean setPropsFromDefinition)
             throws APIManagementException {
 
         if (uriTemplate.getUriTemplate() == null || uriTemplate.getUriTemplate().isEmpty()) {
@@ -2737,25 +2740,27 @@ public class OAS3Parser extends APIDefinition {
             apiOperationMap.setBackendOperation(backendOperation);
             uriTemplate.setAPIOperationMapping(apiOperationMap);
         }
-        Map<String, Object> extensions = match.operation.getExtensions();
-        if (extensions != null) {
-            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_AUTH_TYPE)) {
-                String scopeKey = (String) extensions.get(APISpecParserConstants.SWAGGER_X_AUTH_TYPE);
-                uriTemplate.setAuthType(scopeKey);
-                uriTemplate.setAuthTypes(scopeKey);
-            } else {
-                uriTemplate.setAuthType(APISpecParserConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
-                uriTemplate.setAuthTypes(APISpecParserConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
-            }
-            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER)) {
-                String throttlingTier = (String) extensions.get(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER);
-                uriTemplate.setThrottlingTier(throttlingTier);
-                uriTemplate.setThrottlingTiers(throttlingTier);
-            }
-            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
-                String mediationScript = (String) extensions.get(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT);
-                uriTemplate.setMediationScript(mediationScript);
-                uriTemplate.setMediationScripts(uriTemplate.getHTTPVerb(), mediationScript);
+        if (setPropsFromDefinition) {
+            Map<String, Object> extensions = match.operation.getExtensions();
+            if (extensions != null) {
+                if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_AUTH_TYPE)) {
+                    String scopeKey = (String) extensions.get(APISpecParserConstants.SWAGGER_X_AUTH_TYPE);
+                    uriTemplate.setAuthType(scopeKey);
+                    uriTemplate.setAuthTypes(scopeKey);
+                } else {
+                    uriTemplate.setAuthType(APISpecParserConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+                    uriTemplate.setAuthTypes(APISpecParserConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+                }
+                if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER)) {
+                    String throttlingTier = (String) extensions.get(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER);
+                    uriTemplate.setThrottlingTier(throttlingTier);
+                    uriTemplate.setThrottlingTiers(throttlingTier);
+                }
+                if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
+                    String mediationScript = (String) extensions.get(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT);
+                    uriTemplate.setMediationScript(mediationScript);
+                    uriTemplate.setMediationScripts(uriTemplate.getHTTPVerb(), mediationScript);
+                }
             }
         }
         return uriTemplate;

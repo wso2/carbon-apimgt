@@ -2275,7 +2275,8 @@ public class OAS2Parser extends APIDefinition {
             OperationMatch match =
                     findMatchingOperation(backendDefinition, backendOperation.getTarget(), backendOperation.getVerb());
             if (match != null) {
-                URITemplate toolTemplate = populateURITemplate(template, match, backendDefinition, backendId, refApiId);
+                URITemplate toolTemplate = populateURITemplate(template, match, backendDefinition, backendId,
+                        refApiId, true);
                 generatedTools.add(toolTemplate);
             }
         }
@@ -2296,9 +2297,7 @@ public class OAS2Parser extends APIDefinition {
         Set<URITemplate> updatedTools = new HashSet<>();
 
         for (URITemplate template : uriTemplates) {
-
             BackendOperation backendOperation = null;
-
             if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
                 BackendOperationMapping mapping = template.getBackendOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
@@ -2320,7 +2319,8 @@ public class OAS2Parser extends APIDefinition {
                     findMatchingOperation(backendDefinition, backendOperation.getTarget(), backendOperation.getVerb());
 
             if (match != null) {
-                URITemplate populated = populateURITemplate(template, match, backendDefinition, backendId, refApiId);
+                URITemplate populated = populateURITemplate(template, match, backendDefinition, backendId, refApiId,
+                        false);
                 updatedTools.add(populated);
                 continue;
             }
@@ -2341,7 +2341,7 @@ public class OAS2Parser extends APIDefinition {
      * @return the populated URITemplate
      */
     private URITemplate populateURITemplate(URITemplate uriTemplate, OperationMatch match, Swagger backendAPIDefinition,
-                                            String backendId, APIIdentifier refApiId)
+                                            String backendId, APIIdentifier refApiId, boolean setPropsFromDefinition)
             throws APIManagementException {
 
         if (uriTemplate.getUriTemplate() == null || uriTemplate.getUriTemplate().isEmpty()) {
@@ -2397,30 +2397,31 @@ public class OAS2Parser extends APIDefinition {
             apiOperationMap.setBackendOperation(backendOperation);
             uriTemplate.setAPIOperationMapping(apiOperationMap);
         }
-        Map<String, Object> extensions = match.operation.getVendorExtensions();
-        if (extensions != null) {
-            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_AUTH_TYPE)) {
-                String authType = (String) extensions.get(APISpecParserConstants.SWAGGER_X_AUTH_TYPE);
-                uriTemplate.setAuthType(authType);
-                uriTemplate.setAuthTypes(authType);
-            } else {
-                uriTemplate.setAuthType(APISpecParserConstants.AUTH_TYPE_ANY);
-                uriTemplate.setAuthTypes(APISpecParserConstants.AUTH_TYPE_ANY);
-            }
-            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER)) {
-                String throttlingTier =
-                        (String) extensions.get(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER);
-                uriTemplate.setThrottlingTier(throttlingTier);
-                uriTemplate.setThrottlingTiers(throttlingTier);
-            }
-            if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
-                String mediationScript =
-                        (String) extensions.get(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT);
-                uriTemplate.setMediationScript(mediationScript);
-                uriTemplate.setMediationScripts(uriTemplate.getHTTPVerb(), mediationScript);
+        if (setPropsFromDefinition) {
+            Map<String, Object> extensions = match.operation.getVendorExtensions();
+            if (extensions != null) {
+                if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_AUTH_TYPE)) {
+                    String authType = (String) extensions.get(APISpecParserConstants.SWAGGER_X_AUTH_TYPE);
+                    uriTemplate.setAuthType(authType);
+                    uriTemplate.setAuthTypes(authType);
+                } else {
+                    uriTemplate.setAuthType(APISpecParserConstants.AUTH_TYPE_ANY);
+                    uriTemplate.setAuthTypes(APISpecParserConstants.AUTH_TYPE_ANY);
+                }
+                if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER)) {
+                    String throttlingTier =
+                            (String) extensions.get(APISpecParserConstants.SWAGGER_X_THROTTLING_TIER);
+                    uriTemplate.setThrottlingTier(throttlingTier);
+                    uriTemplate.setThrottlingTiers(throttlingTier);
+                }
+                if (extensions.containsKey(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT)) {
+                    String mediationScript =
+                            (String) extensions.get(APISpecParserConstants.SWAGGER_X_MEDIATION_SCRIPT);
+                    uriTemplate.setMediationScript(mediationScript);
+                    uriTemplate.setMediationScripts(uriTemplate.getHTTPVerb(), mediationScript);
+                }
             }
         }
-
         return uriTemplate;
     }
 
