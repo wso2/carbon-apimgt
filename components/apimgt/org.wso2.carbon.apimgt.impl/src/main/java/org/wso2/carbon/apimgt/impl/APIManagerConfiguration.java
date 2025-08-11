@@ -42,6 +42,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
@@ -325,6 +326,7 @@ public class APIManagerConfiguration {
         return null;
     }
 
+    @UsedByMigrationClient
     public String getFirstProperty(String key) {
 
         List<String> value = configuration.get(key);

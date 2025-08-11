@@ -19,9 +19,12 @@
 
 package org.wso2.carbon.apimgt.api.model.policy;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+
 public class RequestCountLimit extends Limit {
     private long requestCount;
 
+    @UsedByMigrationClient
     public long getRequestCount() {
         return requestCount;
     }
