@@ -23495,15 +23495,15 @@ public class ApiMgtDAO {
 
             // Handled Custom Backend batch update separately since mssql gives stream close issue
             // due to TDS protocol
-            if (connection.getMetaData().getDriverName().contains("MS SQL") || connection.getMetaData().getDriverName()
-                    .contains("Microsoft")) {
+            String driverName = connection.getMetaData().getDriverName();
+            if (driverName != null && (driverName.contains("MS SQL") || driverName.contains("Microsoft"))) {
                 try (ResultSet rs = getPstmt.executeQuery()) {
                     while (rs.next()) {
                         addPstmt.setString(1, rs.getString("ID"));
                         addPstmt.setString(2, apiRevision.getApiUUID());
                         try (InputStream sequenceStream = rs.getBinaryStream("SEQUENCE")) {
                             try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
-                                byte[] data = new byte[64 * 1024];
+                                byte[] data = new byte[64 * 1024]; // Assume 64kb is the maximum
                                 int bytesRead;
                                 while ((bytesRead = sequenceStream.read(data)) != -1) {
                                     buffer.write(data, 0, bytesRead);
