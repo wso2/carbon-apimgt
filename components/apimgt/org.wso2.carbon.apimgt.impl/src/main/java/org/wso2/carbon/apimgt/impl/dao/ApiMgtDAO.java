@@ -20380,7 +20380,7 @@ public class ApiMgtDAO {
                 Map<String, String> apiMetadata = getAPIMetadataRevision(connection, apiRevision.getApiUUID(),
                         apiRevision.getRevisionUUID());
                 if (!apiMetadata.isEmpty()) {
-                    addAPIMetadata(apiRevision.getApiUUID(), apiMetadata);
+                    addAPIMetadata(connection, apiRevision.getApiUUID(), apiMetadata);
                 }
 
                 // Restoring to AM_API_ENDPOINTS_TABLE

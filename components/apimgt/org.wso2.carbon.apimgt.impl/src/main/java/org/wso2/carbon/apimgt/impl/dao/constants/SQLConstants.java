@@ -4768,20 +4768,23 @@ public class SQLConstants {
 
     public static final String GET_CURRENT_API_METADATA =
             "SELECT METADATA_KEY, METADATA_VALUE FROM AM_API_METADATA " +
-                    "WHERE API_UUID = ? AND REVISION_UUID IS NULL";
+                    "WHERE API_UUID = ? AND REVISION_UUID = 'Current API'";
 
     public static final String GET_API_METADATA_REVISION =
             "SELECT METADATA_KEY, METADATA_VALUE FROM AM_API_METADATA " +
                     "WHERE API_UUID = ? AND REVISION_UUID = ?";
 
     public static final String DELETE_CURRENT_API_METADATA =
-            "DELETE FROM AM_API_METADATA WHERE API_UUID = ? AND REVISION_UUID IS NULL";
+            "DELETE FROM AM_API_METADATA " +
+                    "WHERE API_UUID = ? AND REVISION_UUID = 'Current API'";
 
     public static final String DELETE_ALL_API_METADATA =
-            "DELETE FROM AM_API_METADATA WHERE API_UUID = ?";
+            "DELETE FROM AM_API_METADATA " +
+                    "WHERE API_UUID = ?";
 
     public static final String DELETE_ALL_API_METADATA_REVISION =
-            "DELETE FROM AM_API_METADATA WHERE API_UUID = ? AND REVISION_UUID = ?";
+            "DELETE FROM AM_API_METADATA " +
+                    "WHERE API_UUID = ? AND REVISION_UUID = ?";
 
     /**
      * Static class to hold database queries related to gateway policies tables

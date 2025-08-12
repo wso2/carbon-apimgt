@@ -935,8 +935,6 @@ public class PublisherCommonUtils {
      * @param tokenScopes    token scopes
      * @return updated API
      * @throws APIManagementException If an error occurs while updating the API and API definition
-     * @throws ParseException         If an error occurs while parsing the endpoint configuration
-     * @throws CryptoException        If an error occurs while encrypting the secret key of API
      */
     public static API prepareForUpdateApi(API originalAPI, MCPServerDTO apiDtoToUpdate, APIProvider apiProvider,
                                            String[] tokenScopes)
@@ -1108,6 +1106,7 @@ public class PublisherCommonUtils {
 
         apiToUpdate.setOrganization(originalAPI.getOrganization());
         apiToUpdate.setSubtype(originalAPI.getSubtype());
+
         return apiToUpdate;
     }
 
@@ -2891,7 +2890,12 @@ public class PublisherCommonUtils {
         api.setAiConfiguration(apiDtoTypeWrapper.getAiConfiguration());
         api.setInitiatedFromGateway(apiDtoTypeWrapper.getInitiatedFromGateway());
         api.setDisplayName(apiDtoTypeWrapper.getDisplayName());
-        api.getMetadata().put(APIConstants.MCP.PROTOCOL_VERSION_KEY, apiDtoTypeWrapper.getProtocolVersion());
+        if (apiDtoTypeWrapper.isMCPServerDTO()) {
+            String protocolVersion = apiDtoTypeWrapper.getProtocolVersion();
+            api.getMetadata().put(APIConstants.MCP.PROTOCOL_VERSION_KEY,
+                    (protocolVersion != null && !protocolVersion.isEmpty()) ? protocolVersion
+                            : APIConstants.MCP.PROTOCOL_VERSION_2025_JUNE);
+        }
         return api;
     }
 
