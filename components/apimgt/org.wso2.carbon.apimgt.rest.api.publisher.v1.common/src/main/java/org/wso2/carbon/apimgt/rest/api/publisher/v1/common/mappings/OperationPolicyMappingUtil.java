@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.rest.api.publisher.v1.common.mappings;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs;
 import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.APIProvider;
@@ -59,6 +61,9 @@ import java.util.Map;
  * and vice versa.
  */
 public class OperationPolicyMappingUtil {
+
+    private static final Log log = LogFactory.getLog(OperationPolicyMappingUtil.class);
+    private static final String EMPTY_STRING = "";
 
     public static List<OperationPolicy> fromDTOListToOperationPolicyList(
             List<OperationPolicyDTO> operationPolicyDTOList) {
@@ -138,10 +143,17 @@ public class OperationPolicyMappingUtil {
                 // In governance artifact retrieval scenarios, getLoggedInUserProvider() throws APIManagementException
                 // as there is no logged-in user. Therefore, we need to handle this case separately.
                 if (apiUuid != null) {
-                    APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiUuid);
-                    String userName = apiIdentifier.getProviderName();
-                    apiProvider = APIManagerFactory.getInstance().getAPIProvider(userName);
-                    tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
+                    try {
+                        APIIdentifier apiIdentifier = APIMappingUtil.getAPIIdentifierFromUUID(apiUuid);
+                        String userName = apiIdentifier.getProviderName();
+                        apiProvider = APIManagerFactory.getInstance().getAPIProvider(userName);
+                        tenantDomain = MultitenantUtils.getTenantDomain(APIUtil.replaceEmailDomainBack(userName));
+                    } catch (APIManagementException ex) {
+                        // If we cannot retrieve the APIProvider, we cannot proceed with processing the policy
+                        // parameters. Return the DTO with parameters as it is.
+                        dto.setParameters(maskedParameters);
+                        return dto;
+                    }
                 } else {
                     // If apiUuid is not provided, and the APIProvider cannot be retrieved, we cannot proceed with
                     // processing the policy parameters. Return the DTO with parameters as it is.
@@ -154,12 +166,18 @@ public class OperationPolicyMappingUtil {
 
             // If apiUuid exists, look for API specific operation policy first
             if (apiUuid != null && !apiUuid.isEmpty()) {
+                log.debug(
+                        "Looking for API specific operation policy: " + operationPolicy.getPolicyName()
+                                + ", version: " + operationPolicy.getPolicyVersion());
                 policyData = apiProvider.getAPISpecificOperationPolicyByPolicyName(operationPolicy.getPolicyName(),
                         operationPolicy.getPolicyVersion(), apiUuid, null, tenantDomain, false);
             }
 
             // If API specific operation policy is not found, look for common policy
             if (policyData == null) {
+                log.debug(
+                        "API specific operation policy not found. Looking for common operation policy: "
+                                + operationPolicy.getPolicyName() + ", version: " + operationPolicy.getPolicyVersion());
                 policyData = apiProvider.getCommonOperationPolicyByPolicyName(operationPolicy.getPolicyName(),
                         operationPolicy.getPolicyVersion(), tenantDomain, false);
             }
@@ -189,7 +207,7 @@ public class OperationPolicyMappingUtil {
                                 }
                             } else {
                                 // Replace the value with an empty string
-                                maskedParameters.put(attribute.getName(), "");
+                                maskedParameters.put(attribute.getName(), EMPTY_STRING);
                             }
                         }
                     }
