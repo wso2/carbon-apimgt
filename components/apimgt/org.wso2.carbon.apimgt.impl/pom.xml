@@ -12,7 +12,7 @@
     <parent>
         <groupId>org.wso2.carbon.apimgt</groupId>
         <artifactId>apimgt</artifactId>
-        <version>9.31.143-SNAPSHOT</version>
+        <version>9.32.10-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -361,6 +361,10 @@
             <artifactId>org.wso2.carbon.event.stream.core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.wso2.carbon.multitenancy</groupId>
+            <artifactId>org.wso2.carbon.tenant.mgt.stub</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.persistence</artifactId>
         </dependency>
@@ -420,6 +424,11 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.apimgt</groupId>
+            <artifactId>org.wso2.carbon.apimgt.spec.parser</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>
@@ -636,6 +645,7 @@
                             org.wso2.carbon.user.api;version="${imp.pkg.version.org.wso2.carbon.user.api}",
                             org.wso2.carbon.user.mgt.stub.*;version="${carbon.identity.imp.pkg.version}",
                             org.wso2.carbon.user.mgt.*;version="${carbon.identity.imp.pkg.version}",
+                            org.wso2.carbon.tenant.mgt.stub.*,
                             org.xml.sax,
                             org.wso2.carbon.um.ws.api.stub,
                             org.wso2.securevault.*,

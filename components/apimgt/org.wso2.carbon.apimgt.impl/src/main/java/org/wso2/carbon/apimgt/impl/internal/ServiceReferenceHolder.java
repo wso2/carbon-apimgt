@@ -17,8 +17,10 @@
 package org.wso2.carbon.apimgt.impl.internal;
 
 import org.wso2.carbon.apimgt.api.APIDefinition;
+import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
 import org.wso2.carbon.apimgt.api.OrganizationResolver;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.WorkflowTaskService;
@@ -79,6 +81,7 @@ public class ServiceReferenceHolder {
     private Map<String, ExternalEnvironment> externalEnvironmentsMap = new HashMap<>();
     private Map<String, APIDefinition> apiDefinitionMap = new HashMap<>();
     private WorkflowTaskService workflowTaskService;
+    private FederatedAPIDiscoveryService federatedAPIDiscoveryService;
 
     private Map<String, LLMProviderService> llmProviderServiceMap = new HashMap();
 
@@ -111,6 +114,7 @@ public class ServiceReferenceHolder {
         this.registryService = registryService;
     }
 
+    @UsedByMigrationClient
     public APIManagerConfigurationService getAPIManagerConfigurationService() {
 
         return amConfigurationService;
@@ -121,6 +125,7 @@ public class ServiceReferenceHolder {
         this.amConfigurationService = amConfigurationService;
     }
 
+    @UsedByMigrationClient
     public RealmService getRealmService() {
 
         return realmService;
@@ -316,6 +321,7 @@ public class ServiceReferenceHolder {
         this.apimConfigService = apimConfigService;
     }
 
+    @UsedByMigrationClient
     public APIMConfigService getApimConfigService() {
         if (apimConfigService != null){
             return apimConfigService;
@@ -404,5 +410,19 @@ public class ServiceReferenceHolder {
     public Map<String, LLMProviderService> getLLMProviderServiceMap() {
 
         return this.llmProviderServiceMap;
+    }
+
+    public static UserRealm getUserRealm() {
+        return userRealm;
+    }
+
+    public void setFederatedAPIDiscovery(FederatedAPIDiscoveryService federatedAPIDiscoveryService) {
+
+        this.federatedAPIDiscoveryService = federatedAPIDiscoveryService;
+    }
+
+    public FederatedAPIDiscoveryService getFederatedAPIDiscoveryService() {
+
+        return federatedAPIDiscoveryService;
     }
 }

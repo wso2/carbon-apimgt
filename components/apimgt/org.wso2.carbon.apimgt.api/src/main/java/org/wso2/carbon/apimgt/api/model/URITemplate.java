@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.api.model;
 
 import org.json.simple.JSONValue;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 
@@ -50,6 +51,10 @@ public class URITemplate implements Serializable{
     private int amznResourceTimeout;
     private boolean amznResourceContentEncoded;
     private List<OperationPolicy> operationPolicies = new ArrayList<>();
+    private String description;
+    private String schemaDefinition = null;
+    private APIOperationMapping APIOperationMapping = null;
+    private BackendOperationMapping backendOperationMapping = null;
 
     public ConditionGroupDTO[] getConditionGroups() {
         return conditionGroups;
@@ -72,6 +77,7 @@ public class URITemplate implements Serializable{
         this.throttlingConditions = throttlingConditions;
     }
 
+    @UsedByMigrationClient
     public void setMediationScript(String mediationScript) {
         this.mediationScript = mediationScript;
     }
@@ -123,10 +129,12 @@ public class URITemplate implements Serializable{
         }
     }
 
+    @UsedByMigrationClient
     public String getThrottlingTier() {
         return throttlingTier;
     }
 
+    @UsedByMigrationClient
     public void setThrottlingTier(String throttlingTier) {
         this.throttlingTier = throttlingTier;
     }
@@ -139,18 +147,22 @@ public class URITemplate implements Serializable{
         this.throttlingTiers = throttlingTiers;
     }
 
+    @UsedByMigrationClient
     public String getHTTPVerb() {
         return httpVerb;
     }
 
+    @UsedByMigrationClient
     public void setHTTPVerb(String httpVerb) {
         this.httpVerb = httpVerb;
     }
 
+    @UsedByMigrationClient
     public String getAuthType() {
         return authType;
     }
 
+    @UsedByMigrationClient
     public void setAuthType(String authType) {
         this.authType = authType;
 
@@ -160,6 +172,7 @@ public class URITemplate implements Serializable{
         return resourceURI;
     }
 
+    @UsedByMigrationClient
     public void setResourceURI(String resourceURI) {
         this.resourceURI = resourceURI;
     }
@@ -172,6 +185,7 @@ public class URITemplate implements Serializable{
         return resourceSandboxURI;
     }
 
+    @UsedByMigrationClient
     public void setResourceSandboxURI(String resourceSandboxURI) {
         this.resourceSandboxURI = resourceSandboxURI;
     }
@@ -180,11 +194,14 @@ public class URITemplate implements Serializable{
         return this.resourceSandboxURI != null;
     }
 
+    @UsedByMigrationClient
     public String getUriTemplate() {
         return uriTemplate;
     }
 
+    @UsedByMigrationClient
     public void setUriTemplate(String template) {
+
         this.uriTemplate = template;
     }
 
@@ -266,17 +283,22 @@ public class URITemplate implements Serializable{
         return false;
     }
 
+    @UsedByMigrationClient
     public Scope getScope() {
         return scope;
     }
+
+    @UsedByMigrationClient
     public List<Scope> getScopes() {
         return scopes;
     }
 
+    @UsedByMigrationClient
     public void setScope(Scope scope) {
         this.scope = scope;
     }
 
+    @UsedByMigrationClient
     public void setScopes(Scope scope){
         this.scopes.add(scope);
     }
@@ -372,13 +394,22 @@ public class URITemplate implements Serializable{
                 null) {
             return false;
         }
+        if (backendOperationMapping != null ? !backendOperationMapping.equals(that.backendOperationMapping) :
+                that.backendOperationMapping != null) {
+            return false;
+        }
+        if (APIOperationMapping != null ? !APIOperationMapping.equals(that.APIOperationMapping) :
+                that.APIOperationMapping != null) {
+            return false;
+        }
+
         // Probably incorrect - comparing Object[] arrays with Arrays.equals
         return Arrays.equals(conditionGroups, that.conditionGroups);
     }
 
     @Override
     public int hashCode() {
-        int result = uriTemplate.hashCode();
+        int result = uriTemplate != null ? uriTemplate.hashCode() : 0;
         result = 31 * result + (resourceURI != null ? resourceURI.hashCode() : 0);
         result = 31 * result + (resourceSandboxURI != null ? resourceSandboxURI.hashCode() : 0);
         result = 31 * result + (httpVerb != null ? httpVerb.hashCode() : 0);
@@ -393,22 +424,28 @@ public class URITemplate implements Serializable{
         result = 31 * result + (mediationScript != null ? mediationScript.hashCode() : 0);
         result = 31 * result + (scopes != null ? scopes.hashCode() : 0);
         result = 31 * result + (mediationScripts != null ? mediationScripts.hashCode() : 0);
+        result = 31 * result + (backendOperationMapping != null ? backendOperationMapping.hashCode() : 0);
+        result = 31 * result + (APIOperationMapping != null ? APIOperationMapping.hashCode() : 0);
         result = 31 * result + Arrays.hashCode(conditionGroups);
         return result;
     }
 
+    @UsedByMigrationClient
     public int getId() {
         return id;
     }
 
+    @UsedByMigrationClient
     public void setId(int id) {
         this.id = id;
     }
 
+    @UsedByMigrationClient
     public List<Scope> retrieveAllScopes() {
         return this.scopes;
     }
 
+    @UsedByMigrationClient
     public void addAllScopes(List<Scope> scopes) {
 
         this.scopes = scopes;
@@ -456,5 +493,55 @@ public class URITemplate implements Serializable{
 
     public void addOperationPolicy(OperationPolicy policy) {
         operationPolicies.add(policy);
+    }
+
+    public String getDescription() {
+
+        return description;
+    }
+
+    public void setDescription(String description) {
+
+        this.description = description;
+    }
+
+    public String getSchemaDefinition() {
+
+        return schemaDefinition;
+    }
+
+    public void setSchemaDefinition(String schemaDefinition) {
+
+        this.schemaDefinition = schemaDefinition;
+    }
+
+    public APIOperationMapping getExistingAPIOperationMapping() {
+
+        return APIOperationMapping;
+    }
+
+    public void setExistingAPIOperationMapping(APIOperationMapping APIOperationMapping) {
+
+        this.APIOperationMapping = APIOperationMapping;
+    }
+
+    public BackendOperationMapping getBackendOperationMapping() {
+
+        return backendOperationMapping;
+    }
+
+    public void setBackendOperationMapping(BackendOperationMapping backendOperationMapping) {
+
+        this.backendOperationMapping = backendOperationMapping;
+    }
+
+    public String getHttpVerb() {
+
+        return httpVerb;
+    }
+
+    public void setHttpVerb(String httpVerb) {
+
+        this.httpVerb = httpVerb;
     }
 }

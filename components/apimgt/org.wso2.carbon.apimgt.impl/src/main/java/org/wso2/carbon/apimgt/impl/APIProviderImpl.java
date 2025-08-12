@@ -46,6 +46,7 @@ import org.wso2.carbon.apimgt.api.ExceptionCodes;
 import org.wso2.carbon.apimgt.api.FaultGatewaysException;
 import org.wso2.carbon.apimgt.api.MonetizationException;
 import org.wso2.carbon.apimgt.api.UnsupportedPolicyTypeException;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.WorkflowResponse;
 import org.wso2.carbon.apimgt.api.doc.model.APIResource;
 import org.wso2.carbon.apimgt.api.dto.CertificateInformationDTO;
@@ -70,6 +71,8 @@ import org.wso2.carbon.apimgt.api.model.APISearchResult;
 import org.wso2.carbon.apimgt.api.model.APIStateChangeResponse;
 import org.wso2.carbon.apimgt.api.model.APIStore;
 import org.wso2.carbon.apimgt.api.model.ApiTypeWrapper;
+import org.wso2.carbon.apimgt.api.model.Backend;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.BlockConditionsDTO;
 import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.CommentList;
@@ -124,8 +127,6 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.ResponseCode;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ServiceCatalogDAO;
-import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.APIRevisionWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.JwtTokenInfoDTO;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
@@ -207,6 +208,8 @@ import org.wso2.carbon.apimgt.persistence.exceptions.WSDLPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.APIProductMapper;
 import org.wso2.carbon.apimgt.persistence.mapper.DocumentMapper;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.context.CarbonContext;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.databridge.commons.Event;
@@ -260,12 +263,12 @@ import static org.wso2.carbon.apimgt.impl.APIConstants.COMMERCIAL_TIER_PLAN;
 class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     private static final Log log = LogFactory.getLog(APIProviderImpl.class);
-    private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX  = "endpointConfig:";
+    private static final String ENDPOINT_CONFIG_SEARCH_TYPE_PREFIX = "endpointConfig:";
     private ServiceCatalogDAO serviceCatalogDAO = ServiceCatalogDAO.getInstance();
 
     private final String userNameWithoutChange;
     private CertificateManager certificateManager;
-    protected  ArtifactSaver artifactSaver;
+    protected ArtifactSaver artifactSaver;
     protected ImportExportAPI importExportAPI;
     protected GatewayArtifactsMgtDAO gatewayArtifactsMgtDAO;
     private RecommendationEnvironment recommendationEnvironment;
@@ -621,6 +624,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         addLocalScopes(api.getId().getApiName(), api.getUriTemplates(), api.getOrganization());
         String tenantDomain = MultitenantUtils
                 .getTenantDomain(APIUtil.replaceEmailDomainBack(api.getId().getProviderName()));
+        if (api.getBackends() != null && !api.getBackends().isEmpty()) {
+            addBackend(api.getUuid(), api.getBackends(), api.getOrganization());
+        }
         addURITemplates(apiId, api, tenantId);
         addAPIPolicies(api, tenantDomain);
         addSubtypeConfiguration(api);
@@ -651,6 +657,19 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), api.getApiSecurity());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
+    }
+
+    /**
+     * Adds backend APIs to the API.
+     *
+     * @param apiUuid      UUID of the API
+     * @param backends     List of Backend objects to be added
+     * @param organization Organization identifier
+     * @throws APIManagementException if an error occurs while adding the backend APIs
+     */
+    private void addBackend(String apiUuid, List<Backend> backends, String organization) throws APIManagementException {
+
+        apiMgtDAO.addBackends(apiUuid, backends, organization);
     }
 
     /**
@@ -754,7 +773,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if fails to extract Scopes from URI templates
      */
     private Set<Scope> getScopesToRegisterFromURITemplates(String apiName, String organization,
-            Set<URITemplate> uriTemplates) throws APIManagementException {
+                                                           Set<URITemplate> uriTemplates)
+            throws APIManagementException {
 
         int tenantId = APIUtil.getInternalOrganizationId(organization);
         Set<Scope> scopesToRegister = new HashSet<>();
@@ -884,7 +904,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 || !hasValidLength(apiVersion, APIConstants.MAX_LENGTH_VERSION)
                 || !hasValidLength(api.getId().getProviderName(), APIConstants.MAX_LENGTH_PROVIDER)
                 || !hasValidLength(api.getContext(), APIConstants.MAX_LENGTH_CONTEXT)
-                ) {
+        ) {
             throw new APIManagementException("Character length exceeds the allowable limit",
                     ExceptionCodes.LENGTH_EXCEEDS);
         }
@@ -992,7 +1012,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String organization = api.getOrganization();
         Map<String, String> oldMonetizationProperties =
                 gson.fromJson(existingAPI.getMonetizationProperties().toString(),
-                HashMap.class);
+                        HashMap.class);
         if (oldMonetizationProperties != null && !oldMonetizationProperties.isEmpty()) {
             Map<String, String> newMonetizationProperties = gson.fromJson(api.getMonetizationProperties().toString(),
                     HashMap.class);
@@ -1025,9 +1045,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 || APIUtil.isSequenceDefined(api.getFaultSequence())) {
             migrateMediationPoliciesOfAPI(api, tenantDomain, false);
         }
-
-        //get product resource mappings on API before updating the API. Update uri templates on api will remove all
-        //product mappings as well.
         List<APIProductResource> productResources = apiMgtDAO.getProductMappingsForAPI(api);
         updateAPI(api, tenantId, userNameWithoutChange);
         updateProductResourceMappings(api, organization, productResources);
@@ -1077,7 +1094,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 APIConstants.EventType.API_UPDATE.name(), tenantId, organization, api.getId().getApiName(), apiId,
                 api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), action,
-                                         api.getApiSecurity(), api.getVisibility(), api.getVisibleRoles());
+                api.getApiSecurity(), api.getVisibility(), api.getVisibleRoles());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
 
         // Extracting API details for the recommendation system
@@ -1107,7 +1124,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void updateCustomBackend(String apiUUID, String type, String sequence, String seqName,
-            String customBackendUUID) throws APIManagementException {
+                                    String customBackendUUID) throws APIManagementException {
         apiMgtDAO.updateCustomBackend(apiUUID, seqName, sequence, type, customBackendUUID);
     }
 
@@ -1124,6 +1141,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     public void deleteCustomBackendByAPIID(String apiUUID) throws APIManagementException {
         apiMgtDAO.deleteCustomBackendByAPIID(apiUUID);
     }
+
     @Override
     public void deleteCustomBackendByID(String apiUUID, String type) throws APIManagementException {
         apiMgtDAO.deleteCustomBackend(apiUUID, type);
@@ -1138,7 +1156,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             if (!APIConstants.KeyManager.API_LEVEL_ALL_KEY_MANAGERS.equals(keyManager)) {
                 KeyManagerDto selectedKeyManager = null;
 
-                for (String kmName: tenantKeyManagers.keySet()) {
+                for (String kmName : tenantKeyManagers.keySet()) {
                     if (keyManager.equals(tenantKeyManagers.get(kmName).getName())) {
                         selectedKeyManager = tenantKeyManagers.get(kmName);
                         break;
@@ -1250,6 +1268,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 oldLocalScopesItr.remove();
             }
         }
+        if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
+            if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
+                apiMgtDAO.removeBackendOperationMapping(oldURITemplates);
+            } else if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
+                apiMgtDAO.removeApiOperationMapping(oldURITemplates);
+            }
+        }
         validateAndUpdateURITemplates(api, tenantId);
         apiMgtDAO.updateURITemplates(api, tenantId);
         if (log.isDebugEnabled()) {
@@ -1268,7 +1293,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                             uriTemplates);
                     if (log.isDebugEnabled()) {
                         log.debug("Successfully updated the resource scopes of API: " + apiIdentifier +
-                                " in Key Manager "+ keyManagerDtoEntry.getKey()+" .");
+                                " in Key Manager " + keyManagerDtoEntry.getKey() + " .");
                     }
                 } catch (APIManagementException e) {
                     log.error("Error while updating resource to scope attachment in Key Manager " +
@@ -1396,7 +1421,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                         new JSONParser()
                                                 .parse(new ObjectMapper().writeValueAsString(endpointSecurity)));
                             }
-                            endpointConfigJson.replace(APIConstants.ENDPOINT_SECURITY,endpointSecurityJson);
+                            endpointConfigJson.replace(APIConstants.ENDPOINT_SECURITY, endpointSecurityJson);
                         }
                     }
                     api.setEndpointConfig(endpointConfigJson.toJSONString());
@@ -1424,7 +1449,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_IN.equals(mediationInfo.getType())
                                 && api.getInSequence().equals(mediationInfo.getName())) {
                             org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
-                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                                    .getMediationPolicy(org, apiUUID, mediationInfo.getId());
                             Mediation mediation = new Mediation();
                             mediation.setConfig(mediationPolicy.getConfig());
                             mediation.setName(mediationPolicy.getName());
@@ -1458,7 +1483,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_OUT.equals(mediationInfo.getType())
                                 && api.getOutSequence().equals(mediationInfo.getName())) {
                             org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
-                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                                    .getMediationPolicy(org, apiUUID, mediationInfo.getId());
                             Mediation mediation = new Mediation();
                             mediation.setConfig(mediationPolicy.getConfig());
                             mediation.setName(mediationPolicy.getName());
@@ -1492,7 +1517,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         if (APIConstants.API_CUSTOM_SEQUENCE_TYPE_FAULT.equals(mediationInfo.getType())
                                 && api.getFaultSequence().equals(mediationInfo.getName())) {
                             org.wso2.carbon.apimgt.persistence.dto.Mediation mediationPolicy = apiPersistenceInstance
-                                        .getMediationPolicy(org, apiUUID, mediationInfo.getId());
+                                    .getMediationPolicy(org, apiUUID, mediationInfo.getId());
                             Mediation mediation = new Mediation();
                             mediation.setConfig(mediationPolicy.getConfig());
                             mediation.setName(mediationPolicy.getName());
@@ -1693,7 +1718,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException If failed to set the policy IDs
      */
     private void setMigratedPolicyIdsToPolicies(API api, Map<String, String> clonedPoliciesMap,
-            boolean updatePolicyMapping) throws APIManagementException {
+                                                boolean updatePolicyMapping) throws APIManagementException {
 
         boolean policyUpdated = false;
         for (OperationPolicy policy : api.getApiPolicies()) {
@@ -1779,6 +1804,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     /**
      * This method used to validate and set transports in api
+     *
      * @param api
      * @throws APIManagementException
      */
@@ -1800,6 +1826,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     /**
      * This method used to validate and set transports in api product
+     *
      * @param apiProduct
      * @throws APIManagementException
      */
@@ -1828,7 +1855,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private void validateAPIPolicyParameters(API api, String tenantDomain) throws APIManagementException {
 
-        if (APIConstants.API_TYPE_WS.equals(api.getType()) || APIConstants.API_TYPE_SSE.equals(api.getType())
+        if (APIConstants.API_TYPE_SSE.equals(api.getType())
                 || APIConstants.API_TYPE_WEBSUB.equals(api.getType())) {
             if (log.isDebugEnabled()) {
                 log.debug("Operation policies are not allowed for " + api.getType() + " APIs");
@@ -1859,9 +1886,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * This method will validate a list of policies and throw error if validation fails
      *
-     * @param apiPoliciesList   Policy list
-     * @param api               API object
-     * @param tenantDomain      Tenant domain
+     * @param apiPoliciesList Policy list
+     * @param api             API object
+     * @param tenantDomain    Tenant domain
      * @throws APIManagementException if an error occurs while validating policies
      */
     private List<OperationPolicy> validatePolicies(List<OperationPolicy> apiPoliciesList, API api, String tenantDomain)
@@ -1892,7 +1919,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                                 || (policyData.getSpecification().getDisplayName()).equals(policy.getPolicyName() + "_imported");
                     }
                     if (!isPolicyNameMatch || !policyData.getSpecification().getVersion()
-                                    .equals(policy.getPolicyVersion())) {
+                            .equals(policy.getPolicyVersion())) {
                         throw new APIManagementException("Applied policy " + policy.getPolicyName()
                                 + "_" + policy.getPolicyVersion() + " does not match the specification");
                     }
@@ -2066,6 +2093,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     /**
      * This method used to select security level according to given api Security
+     *
      * @param apiSecurity
      * @return
      */
@@ -2099,7 +2127,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 securityLevels.add(APIConstants.API_SECURITY_BASIC_AUTH);
                 securitySchemeFound = true;
             }
-            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)){
+            if (apiSecurityLevel.trim().equalsIgnoreCase(APIConstants.API_SECURITY_API_KEY)) {
                 isApiKey = true;
                 securityLevels.add(APIConstants.API_SECURITY_API_KEY);
                 securitySchemeFound = true;
@@ -2152,7 +2180,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void validateAndSetAPISecurity(API api) {
         String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
         String security = api.getApiSecurity();
-        if (security!= null) {
+        if (security != null) {
             apiSecurity = security;
             ArrayList<String> securityLevels = selectSecurityLevels(apiSecurity);
             apiSecurity = String.join(",", securityLevels);
@@ -2172,7 +2200,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void validateAndSetAPISecurity(APIProduct apiProduct) {
         String apiSecurity = APIConstants.DEFAULT_API_SECURITY_OAUTH2;
         String security = apiProduct.getApiSecurity();
-        if (security!= null) {
+        if (security != null) {
             apiSecurity = security;
             ArrayList<String> securityLevels = selectSecurityLevels(apiSecurity);
             apiSecurity = String.join(",", securityLevels);
@@ -2249,6 +2277,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         Map<String, List<OperationPolicy>> operationPoliciesMap = extractAndDropOperationPoliciesFromURITemplate(
                 existingAPI.getUriTemplates());
         List<OperationPolicy> apiLevelPolicies = extractAndDropAPILevelPoliciesFromAPI(existingAPI);
+        updateMCPServerBackends(existingAPI, existingApiId, organization);
+
         API newAPI = addAPI(existingAPI);
         String newAPIId = newAPI.getUuid();
         cloneAPIPoliciesForNewAPIVersion(existingApiId, newAPI, operationPoliciesMap, apiLevelPolicies);
@@ -2287,7 +2317,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         // copy graphql definition
         String graphQLSchema = getGraphqlSchemaDefinition(existingApiId, organization);
-        if(graphQLSchema != null) {
+        if (graphQLSchema != null) {
             saveGraphqlSchemaDefinition(newAPIId, graphQLSchema, organization);
         }
 
@@ -2317,15 +2347,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     /**
      * Create a new API Product version from an existing API Product
+     *
      * @param existingApiProductId The id of the API Product to be copied
-     * @param newVersion The version of the new API Product
-     * @param isDefaultVersion whether this version is default or not
-     * @param organization Identifier of an organization
+     * @param newVersion           The version of the new API Product
+     * @param isDefaultVersion     whether this version is default or not
+     * @param organization         Identifier of an organization
      * @return APIProduct object
      * @throws APIManagementException
      */
     public APIProduct createNewAPIProductVersion(String existingApiProductId, String newVersion,
-            Boolean isDefaultVersion, String organization) throws APIManagementException {
+                                                 Boolean isDefaultVersion, String organization) throws APIManagementException {
 
         APIProductIdentifier apiProductIdentifier = APIUtil.getAPIProductIdentifierFromUUID(existingApiProductId);
         if (apiProductIdentifier == null) {
@@ -2397,8 +2428,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     private void cloneAPIPoliciesForNewAPIVersion(String oldAPIUuid, API newAPI,
-            Map<String, List<OperationPolicy>> extractedOperationPoliciesMap,
-            List<OperationPolicy> extractedAPILevelPolicies) throws APIManagementException {
+                                                  Map<String, List<OperationPolicy>> extractedOperationPoliciesMap,
+                                                  List<OperationPolicy> extractedAPILevelPolicies) throws APIManagementException {
 
         Map<String, String> clonedPolicies = new HashMap<>();
         List<ClonePolicyMetadataDTO> toBeClonedPolicyDetails = new ArrayList<>();
@@ -2479,7 +2510,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      *
      * @param apiId         id of the document
      * @param documentation Documentation
-     * @param organization identifier of the organization
+     * @param organization  identifier of the organization
      * @return updated documentation Documentation
      * @throws APIManagementException if failed to update docs
      */
@@ -2577,7 +2608,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Returns the details of all the life-cycle changes done per API or API Product
      *
-     * @param      uuid Unique UUID of the API or API Product
+     * @param uuid Unique UUID of the API or API Product
      * @return List of lifecycle events per given API or API Product
      * @throws APIManagementException if failed to copy docs
      */
@@ -2589,9 +2620,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Update the subscription status
      *
-     * @param apiId     API Identifier
-     * @param subStatus Subscription Status
-     * @param appId     Application Id
+     * @param apiId        API Identifier
+     * @param subStatus    Subscription Status
+     * @param appId        Application Id
      * @param organization Organization
      * @throws APIManagementException If failed to update subscription status
      */
@@ -2833,6 +2864,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
             apiMgtDAO.deleteAIConfiguration(api.getUuid());
         }
+        if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
+            if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
+                apiMgtDAO.removeBackendOperationMapping(uriTemplates);
+            } else if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
+                apiMgtDAO.removeApiOperationMapping(uriTemplates);
+            }
+        }
         apiMgtDAO.deleteAPI(api.getUuid());
         if (log.isDebugEnabled()) {
             log.debug("API : " + apiIdentifier + " is successfully deleted from the database and Key Manager.");
@@ -2840,15 +2878,21 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     public void deleteAPIRevisions(String apiUUID, String organization) throws APIManagementException {
+        boolean isAPIInitiatedFromGateway = apiMgtDAO.getIsAPIInitiatedFromGateway(apiUUID);
         List<APIRevision> apiRevisionList = apiMgtDAO.getRevisionsListByAPIUUID(apiUUID);
         WorkflowExecutor apiRevisionDeploymentWFExecutor = getWorkflowExecutor(
                 WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
         WorkflowDTO wfDTO;
 
         for (APIRevision apiRevision : apiRevisionList) {
-            if (apiRevision.getApiRevisionDeploymentList().size() != 0) {
-                undeployAPIRevisionDeployment(apiUUID, apiRevision.getRevisionUUID(),
-                        apiRevision.getApiRevisionDeploymentList(), organization);
+            if (!apiRevision.getApiRevisionDeploymentList().isEmpty()) {
+                if (!isAPIInitiatedFromGateway) {
+                    undeployAPIRevisionDeployment(apiUUID, apiRevision.getRevisionUUID(),
+                            apiRevision.getApiRevisionDeploymentList(), organization);
+                } else {
+                    apiMgtDAO.removeAPIRevisionDeployment(apiRevision.getRevisionUUID(),
+                            apiRevision.getApiRevisionDeploymentList());
+                }
             }
             wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(apiRevision.getRevisionUUID(),
                     WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
@@ -3309,7 +3353,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void addAPIProductSwagger(String productId, Map<API, List<APIProductResource>> apiToProductResourceMapping,
-                APIProduct apiProduct, String orgId) throws APIManagementException {
+                                     APIProduct apiProduct, String orgId) throws APIManagementException {
         APIDefinition parser = new OAS3Parser();
         SwaggerData swaggerData = new SwaggerData(apiProduct);
         String apiProductSwagger = parser.generateAPIDefinition(swaggerData);
@@ -3343,7 +3387,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public APIStateChangeResponse changeLifeCycleStatus(String orgId, ApiTypeWrapper apiTypeWrapper, String action,
-                                                        Map<String, Boolean> checklist) throws APIManagementException{
+                                                        Map<String, Boolean> checklist) throws APIManagementException {
         APIStateChangeResponse response = new APIStateChangeResponse();
         String uuid = null;
         try {
@@ -3442,6 +3486,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         return response;
     }
+
     /**
      * Execute state change workflow
      *
@@ -3456,7 +3501,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @param uuid              UUID of the API or API Product
      * @param gatewayVendor     Gateway vendor
      * @param workflowType      Workflow Type
-     * @return  APIStateChangeResponse
+     * @return APIStateChangeResponse
      * @throws APIManagementException Error when executing the state change workflow
      */
     private APIStateChangeResponse executeStateChangeWorkflow(String currentStatus, String action, String apiName,
@@ -3468,9 +3513,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         APIStateChangeResponse response = new APIStateChangeResponse();
         try {
             WorkflowExecutor apiStateWFExecutor =
-             WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
+                    WorkflowExecutorFactory.getInstance().getWorkflowExecutor(workflowType);
             APIStateWorkflowDTO apiStateWorkflow = setAPIStateWorkflowDTOParameters(currentStatus, action, apiName,
-             apiContext, apiType, apiVersion, providerName, apiOrApiProductId, uuid, gatewayVendor, workflowType,
+                    apiContext, apiType, apiVersion, providerName, apiOrApiProductId, uuid, gatewayVendor, workflowType,
                     apiStateWFExecutor);
             WorkflowResponse workflowResponse = apiStateWFExecutor.execute(apiStateWorkflow);
             response.setWorkflowResponse(workflowResponse);
@@ -3483,18 +3528,18 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Set API or API Product state change workflow parameters
      *
-     * @param currentStatus Current state of the API or API Product
-     * @param action        LC state change action
-     * @param name          Name of the API or API Product
-     * @param context       Context of the API or API Product
-     * @param apiType       API or API Product
-     * @param version       Version of API or API Product
-     * @param providerName  Owner of the API or API Product
-     * @param apiOrApiProductId Unique ID of the API or API Product
-     * @param uuid              Unique UUID of the API or API Product
-     * @param gatewayVendor     Gateway Vendor
-     * @param workflowType      Workflow Type
-     * @param apiStateWFExecutor    WorkflowExecutor
+     * @param currentStatus      Current state of the API or API Product
+     * @param action             LC state change action
+     * @param name               Name of the API or API Product
+     * @param context            Context of the API or API Product
+     * @param apiType            API or API Product
+     * @param version            Version of API or API Product
+     * @param providerName       Owner of the API or API Product
+     * @param apiOrApiProductId  Unique ID of the API or API Product
+     * @param uuid               Unique UUID of the API or API Product
+     * @param gatewayVendor      Gateway Vendor
+     * @param workflowType       Workflow Type
+     * @param apiStateWFExecutor WorkflowExecutor
      * @return APIStateWorkflowDTO Object
      */
     private APIStateWorkflowDTO setAPIStateWorkflowDTOParameters(String currentStatus, String action, String name,
@@ -3641,8 +3686,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), APIConstants.EventType.POLICY_CREATE.name(), tenantId, subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
                     subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
-                    subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),
-                    subPolicy.getGraphQLMaxDepth(),subPolicy.getGraphQLMaxComplexity(),subPolicy.getSubscriberCount());
+                    subPolicy.getRateLimitCount(), subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),
+                    subPolicy.getGraphQLMaxDepth(), subPolicy.getGraphQLMaxComplexity(), subPolicy.getSubscriberCount());
             APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof GlobalPolicy) {
             GlobalPolicy globalPolicy = (GlobalPolicy) policy;
@@ -3848,9 +3893,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             //policy id is not set. retrieving policy to get the id.
             SubscriptionPolicy retrievedPolicy = apiMgtDAO.getSubscriptionPolicy(subPolicy.getPolicyName(), tenantId);
             SubscriptionPolicyEvent subscriptionPolicyEvent = new SubscriptionPolicyEvent(UUID.randomUUID().toString(),
-                    System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId,subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
+                    System.currentTimeMillis(), APIConstants.EventType.POLICY_UPDATE.name(), tenantId, subPolicy.getTenantDomain(), retrievedPolicy.getPolicyId(),
                     subPolicy.getPolicyName(), subPolicy.getDefaultQuotaPolicy().getType(),
-                    subPolicy.getRateLimitCount(),subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(),subPolicy.getGraphQLMaxDepth(),
+                    subPolicy.getRateLimitCount(), subPolicy.getRateLimitTimeUnit(), subPolicy.isStopOnQuotaReach(), subPolicy.getGraphQLMaxDepth(),
                     subPolicy.getGraphQLMaxComplexity(), subPolicy.getSubscriberCount());
             APIUtil.sendNotification(subscriptionPolicyEvent, APIConstants.NotifierType.POLICY.name());
         } else if (policy instanceof GlobalPolicy) {
@@ -3878,7 +3923,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (oldKeyTemplate != null && newKeyTemplate != null) {
             KeyTemplateEvent keyTemplateEvent = new KeyTemplateEvent(UUID.randomUUID().toString(), System.currentTimeMillis(),
                     tenantId, tenantDomain, APIConstants.EventType.CUSTOM_POLICY_UPDATE.name(),
-                    "update", oldKeyTemplate, newKeyTemplate );
+                    "update", oldKeyTemplate, newKeyTemplate);
             APIUtil.sendNotification(keyTemplateEvent, APIConstants.NotifierType.KEY_TEMPLATE.name());
         }
     }
@@ -4189,6 +4234,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     /**
      * Publishes the changes on blocking conditions.
+     *
      * @param blockConditionsDTO Blockcondition Dto event
      */
     private void publishBlockingEvent(BlockConditionsDTO blockConditionsDTO, String state) {
@@ -4224,8 +4270,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             responseCode = certificateManager
                     .addCertificateToParentNode(certificate, alias, endpoint, tenantId);
             CertificateEvent certificateEvent = new CertificateEvent(UUID.randomUUID().toString(),
-                    System.currentTimeMillis(),APIConstants.EventType.ENDPOINT_CERTIFICATE_ADD.toString(),
-                    tenantDomain,alias,endpoint);
+                    System.currentTimeMillis(), APIConstants.EventType.ENDPOINT_CERTIFICATE_ADD.toString(),
+                    tenantDomain, alias, endpoint);
             APIUtil.sendNotification(certificateEvent, APIConstants.NotifierType.CERTIFICATE.name());
         } catch (UserStoreException e) {
             handleException("Error while reading tenant information", e);
@@ -4319,13 +4365,13 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, String keyType,
-            APIIdentifier apiIdentifier, String organization) throws APIManagementException {
+                                                               APIIdentifier apiIdentifier, String organization) throws APIManagementException {
         return certificateManager.searchClientCertificates(tenantId, alias, keyType, apiIdentifier, organization);
     }
 
     @Override
     public List<ClientCertificateDTO> searchClientCertificates(int tenantId, String alias, String keyType,
-            APIProductIdentifier apiProductIdentifier, String organization) throws APIManagementException {
+                                                               APIProductIdentifier apiProductIdentifier, String organization) throws APIManagementException {
         APIIdentifier apiIdentifier = new APIIdentifier(apiProductIdentifier.getProviderName(),
                 apiProductIdentifier.getName(), apiProductIdentifier.getVersion());
         apiIdentifier.setUuid(apiMgtDAO.getUUIDFromIdentifier(apiIdentifier));
@@ -4423,8 +4469,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Get the workflow status information for the given api for the given workflow type
      *
-     * @param uuid Api uuid
-     * @param workflowType  workflow type
+     * @param uuid         Api uuid
+     * @param workflowType workflow type
      * @return WorkflowDTO
      * @throws APIManagementException
      */
@@ -4525,7 +4571,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             for (int i = 0; i < regexList.length; i++) {
                 Pattern p = Pattern.compile(regexList[i]);
                 Iterator<String> itr = filteredUserRoles.iterator();
-                while(itr.hasNext()) {
+                while (itr.hasNext()) {
                     String role = itr.next();
                     Matcher m = p.matcher(role);
                     if (m.matches()) {
@@ -4938,8 +4984,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         String status = api.getStatus();
 
         if (APIConstants.BLOCKED.equals(status) ||
-            APIConstants.PROTOTYPED.equals(status) ||
-            APIConstants.RETIRED.equals(status)) {
+                APIConstants.PROTOTYPED.equals(status) ||
+                APIConstants.RETIRED.equals(status)) {
             throw new APIManagementException("Cannot create API Product using API with following status: " + status,
                     ExceptionCodes.from(ExceptionCodes.API_PRODUCT_WITH_UNSUPPORTED_LIFECYCLE_API, status));
         }
@@ -4984,6 +5030,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         validateAPIProductContextTemplate(product);
     }
+
     /**
      * Create an Api Product
      *
@@ -5065,8 +5112,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Check whether the given scope name exists as a shared scope in the tenant domain.
      *
-     * @param scopeName    Shared Scope name
-     * @param tenantId Tenant Id
+     * @param scopeName Shared Scope name
+     * @param tenantId  Tenant Id
      * @return Scope availability
      * @throws APIManagementException if failed to check the availability
      */
@@ -5301,6 +5348,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    @UsedByMigrationClient
     public void saveAsyncApiDefinition(API api, String jsonText) throws APIManagementException {
         String apiId;
         String organization = api.getOrganization();
@@ -5384,9 +5432,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void addScopes(Set<Scope> scopes, int tenantId) throws APIManagementException {
 
         if (scopes != null) {
-            if(scopesDAO.addScopes(scopes, tenantId)) {
+            if (scopesDAO.addScopes(scopes, tenantId)) {
                 APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, APIUtil
-                                .getScopesAsString(scopes), APIConstants.AuditLogConstants.CREATED, this.username);
+                        .getScopesAsString(scopes), APIConstants.AuditLogConstants.CREATED, this.username);
             }
             for (Scope scope : scopes) {
                 ScopeEvent scopeEvent = new ScopeEvent(UUID.randomUUID().toString(),
@@ -5449,7 +5497,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     private void deleteScope(String scopeKey, int tenantId) throws APIManagementException {
 
         if (StringUtils.isNotEmpty(scopeKey)) {
-            if(scopesDAO.deleteScope(scopeKey, tenantId)) {
+            if (scopesDAO.deleteScope(scopeKey, tenantId)) {
                 APIUtil.logAuditMessage(APIConstants.AuditLogConstants.SCOPE, scopeKey,
                         APIConstants.AuditLogConstants.DELETED, this.username);
             }
@@ -5480,7 +5528,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     *
      * @param policy
      * @param apiOperationPolicyIdToClonedPolicyIdMap
      * @return
@@ -5649,7 +5696,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     /**
      * Sets the default token endpoint connection configuration type for the given endpoint.
-     *
+     * <p>
      * If the endpoint's security type is OAuth, this method ensures that the default values
      * for connection timeout and proxy configurations types are properly assigned.
      *
@@ -5686,7 +5733,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     /**
      * Checks if the connection timeout value for the given endpoint is set to the default value.
-     *
+     * <p>
      * This method checks if the value for the specified connection timeout type in the provided
      * endpoint is either null, or equals to the default connection timeout value.
      *
@@ -5750,7 +5797,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         try {
             URI uri = new URI(endpoint);
             fqdn = uri.getHost();
-            if(fqdn == null) {
+            if (fqdn == null) {
                 return result;
             }
         } catch (URISyntaxException e) {
@@ -5784,10 +5831,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 result.setApiCount(searchAPIs.getTotalAPIsCount());
             }
         } catch (APIPersistenceException e) {
-            throw new APIManagementException("Error while searching for APIs with Solr query: " + query , e);
+            throw new APIManagementException("Error while searching for APIs with Solr query: " + query, e);
         }
 
-        return result ;
+        return result;
     }
 
     private void populateAPITier(APIProduct apiProduct) throws APIManagementException {
@@ -5827,6 +5874,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.setEgress(apiInfo.isEgress());
         api.setStatus(apiInfo.getStatus());
         api.setSubtype(apiInfo.getApiSubtype());
+        api.setInitiatedFromGateway(apiInfo.isInitiatedFromGateway());
     }
 
     private void populateApiInfo(APIProduct apiProduct) throws APIManagementException {
@@ -5913,7 +5961,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String errorMsg = (e.getMessage() == null || e.getMessage().isEmpty()) ? "Error while searching the api" : e.getMessage();
             throw new APIManagementException(errorMsg, e);
         }
-        return result ;
+        return result;
     }
 
     @Override
@@ -5929,7 +5977,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public CommentList getComments(ApiTypeWrapper apiTypeWrapper, String parentCommentID,
-                                                                    Integer replyLimit, Integer replyOffset) throws
+                                   Integer replyLimit, Integer replyOffset) throws
             APIManagementException {
         return apiMgtDAO.getComments(apiTypeWrapper, parentCommentID, replyLimit, replyOffset);
     }
@@ -5948,7 +5996,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Get minimal details of API by registry artifact id
      *
-     * @param uuid Registry artifact id
+     * @param uuid         Registry artifact id
      * @param organization identifier of the organization
      * @return API of the provided artifact id
      * @throws APIManagementException
@@ -6167,7 +6215,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 compoundResult.sort(new SimpleContentSearchResultNameComparator());
                 result.put("length", results.getTotalCount());
             } else {
-                result.put("length", compoundResult.size() );
+                result.put("length", compoundResult.size());
             }
 
         } catch (APIPersistenceException e) {
@@ -6207,7 +6255,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     protected void checkAccessControlPermission(String userNameWithTenantDomain, String accessControlProperty,
-            String publisherAccessControlRoles) throws APIManagementException {
+                                                String publisherAccessControlRoles) throws APIManagementException {
 
         // String userNameWithTenantDomain = (userNameWithoutChange != null) ? userNameWithoutChange : username;
 
@@ -6319,7 +6367,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         } catch (APIPersistenceException e) {
             throw new APIManagementException("Error while searching the api ", e);
         }
-        return result ;
+        return result;
     }
 
     /**
@@ -6374,26 +6422,34 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             }
         } catch (APIManagementException e) {
             try {
-                    apiPersistenceInstance.deleteAPIRevision(new Organization(organization), apiId.getUUID(), revisionUUID,
-                                    revisionId);
-                } catch (APIPersistenceException e1) {
-                    String errorMessage = "Failed to remove revision registry artifacts";
-                    throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
-                                    ERROR_DELETING_API_REVISION, apiRevision.getApiUUID()));
-                }
+                apiPersistenceInstance.deleteAPIRevision(new Organization(organization), apiId.getUUID(), revisionUUID,
+                        revisionId);
+            } catch (APIPersistenceException e1) {
+                String errorMessage = "Failed to remove revision registry artifacts";
+                throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
+                        ERROR_DELETING_API_REVISION, apiRevision.getApiUUID()));
+            }
             throw new APIManagementException("Failed to add API Revision entry of API UUID "
-                            + apiRevision.getApiUUID(), e);
+                    + apiRevision.getApiUUID(), e);
         }
         if (importExportAPI != null) {
             try {
                 File artifact = importExportAPI
                         .exportAPI(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON, false, true,
                                 organization);
-                // Keeping the organization as tenant domain since MG does not support organization-wise deployment
-                // Artifacts will be deployed in ST for all organizations
-                gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(), apiId.getApiName(),
-                        apiId.getVersion(), apiRevision.getRevisionUUID(), organization, APIConstants.HTTP_PROTOCOL,
-                         artifact);
+
+                String apiType = apiMgtDAO.getAPITypeFromUUID(apiId.getUUID());
+                if (StringUtils.equals(apiType, APIConstants.API_TYPE_MCP)) {
+                    gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(), apiId.getApiName(),
+                            apiId.getVersion(), apiRevision.getRevisionUUID(), organization, apiType,
+                            artifact);
+                } else {
+                    // Keeping the organization as tenant domain since MG does not support organization-wise deployment
+                    // Artifacts will be deployed in ST for all organizations
+                    gatewayArtifactsMgtDAO.addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(), apiId.getApiName(),
+                            apiId.getVersion(), apiRevision.getRevisionUUID(), organization, APIConstants.HTTP_PROTOCOL,
+                            artifact);
+                }
                 if (artifactSaver != null) {
                     // Keeping the organization as tenant domain since MG does not support organization-wise deployment
                     // Artifacts will be deployed in ST for all organizations
@@ -6412,10 +6468,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * Adds AI configuration for the specified API revision. Validates the LLM provider details and
      * assigns a unique AI configuration ID.
      *
-     * @param uuid              API UUID
-     * @param revisionUuid      Revision UUID
-     * @param aiConfiguration   AI configuration object containing LLM provider details
-     * @param organization      Organization to which the API belongs
+     * @param uuid            API UUID
+     * @param revisionUuid    Revision UUID
+     * @param aiConfiguration AI configuration object containing LLM provider details
+     * @param organization    Organization to which the API belongs
      * @throws APIManagementException if the LLM provider details are invalid or an error occurs while adding the configuration
      */
     private void addAIConfiguration(String uuid, String revisionUuid, AIConfiguration aiConfiguration,
@@ -6483,7 +6539,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     private int getMaxRevisionCount(String organization) throws APIManagementException {
         JSONObject jsonObject = APIUtil.getTenantConfig(organization);
-        if (jsonObject.containsKey(APIConstants.API_MAX_REVISION_COUNT_PROPERTY_NAME)){
+        if (jsonObject.containsKey(APIConstants.API_MAX_REVISION_COUNT_PROPERTY_NAME)) {
             return Integer.valueOf(jsonObject.get(APIConstants.API_MAX_REVISION_COUNT_PROPERTY_NAME).toString());
         } else {
             return 5;
@@ -6505,8 +6561,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Get the revision UUID from the Revision no and API UUID
      *
-     * @param revisionNum   revision number
-     * @param apiUUID       UUID of the API
+     * @param revisionNum revision number
+     * @param apiUUID     UUID of the API
      * @return UUID of the revision
      * @throws APIManagementException if failed to get the API revision uuid
      */
@@ -6518,9 +6574,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Get the revision UUID from the Revision no and API UUID
      *
-     * @param revisionNum   revision number
-     * @param apiUUID       UUID of the API
-     * @param organization  organization ID of the API
+     * @param revisionNum  revision number
+     * @param apiUUID      UUID of the API
+     * @param organization organization ID of the API
      * @return UUID of the revision
      * @throws APIManagementException if failed to get the API revision uuid
      */
@@ -6566,34 +6622,75 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * Adds a new APIRevisionDeployment to an existing API
+     * Adds a new APIRevisionDeployment to an existing API.
      *
-     * @param apiId API UUID
-     * @param apiRevisionUUID API Revision UUID
+     * @param apiId                  API UUID
+     * @param apiRevisionUUID        API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
-     * @param organization identifier of the organization
-     * @throws APIManagementException if failed to add APIRevision
+     * @param organization           Organization identifier
+     * @throws APIManagementException if deployment fails
      */
+    @Deprecated
     @Override
     public void deployAPIRevision(String apiId, String apiRevisionUUID,
-            List<APIRevisionDeployment> apiRevisionDeployments, String organization)
+                                  List<APIRevisionDeployment> apiRevisionDeployments, String organization)
             throws APIManagementException {
+        deployAPIRevisionInternal(apiId, apiRevisionUUID, apiRevisionDeployments, organization, false);
+    }
+
+    /**
+     * Adds a new APIRevisionDeployment to an existing API, optionally initiated from a gateway.
+     *
+     * @param apiId                  API UUID
+     * @param apiRevisionUUID        API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization           Organization identifier
+     * @param isInitiatedFromGateway Indicates if call was initiated from a gateway
+     * @throws APIManagementException if deployment fails
+     */
+    @Override
+    @UsedByMigrationClient
+    public void deployAPIRevision(String apiId, String apiRevisionUUID,
+                                  List<APIRevisionDeployment> apiRevisionDeployments, String organization,
+                                  boolean isInitiatedFromGateway)
+            throws APIManagementException {
+        deployAPIRevisionInternal(apiId, apiRevisionUUID, apiRevisionDeployments, organization, isInitiatedFromGateway);
+    }
+
+    /**
+     * Internal method to deploy an API revision.
+     *
+     * @param apiId                  API UUID
+     * @param apiRevisionUUID        API Revision UUID
+     * @param apiRevisionDeployments List of APIRevisionDeployment objects
+     * @param organization           Organization identifier
+     * @param isInitiatedFromGateway Indicates if call was initiated from a gateway
+     * @throws APIManagementException if deployment fails
+     */
+    private void deployAPIRevisionInternal(String apiId, String apiRevisionUUID,
+                                           List<APIRevisionDeployment> apiRevisionDeployments, String organization,
+                                           boolean isInitiatedFromGateway)
+            throws APIManagementException {
+
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
+        if (apiIdentifier == null) {
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve API for UUID: " + apiId,
+                    ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
+        }
+
         if (organization == null) {
             String tenantDomain = getTenantDomain(apiIdentifier);
             if (tenantDomain != null) {
                 organization = tenantDomain;
             }
         }
-        if (apiIdentifier == null) {
-            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API with API UUID: "
-                    + apiId, ExceptionCodes.from(ExceptionCodes.API_NOT_FOUND, apiId));
-        }
+
         APIRevision apiRevision = apiMgtDAO.getRevisionByRevisionUUID(apiRevisionUUID);
         if (apiRevision == null) {
-            throw new APIMgtResourceNotFoundException("Couldn't retrieve existing API Revision with Revision UUID: "
-                    + apiRevisionUUID, ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionUUID));
+            throw new APIMgtResourceNotFoundException("Couldn't retrieve API Revision for UUID: " + apiRevisionUUID,
+                    ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, apiRevisionUUID));
         }
+
         int revisionId = apiRevision.getId();
         API api = getLightweightAPIByUUID(apiId, organization);
         api.setRevisionedApiId(apiRevision.getRevisionUUID());
@@ -6602,140 +6699,233 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         api.getId().setUuid(apiId);
         api.setOrganization(organization);
 
-        // If there are pending deployments, get the details of those deployments
-        List<APIRevisionDeployment> currentPendingDeployments = apiMgtDAO.getAPIRevisionDeploymentsByWorkflowStatusAndApiUUID(
-                apiId, String.valueOf(WorkflowStatus.CREATED));
-        Set<APIRevisionDeployment> matchingRevisions = new HashSet<>();
-        for (APIRevisionDeployment pendingRevision : apiRevisionDeployments) {
-            // Set the displayOnDevportal to false for the pending revisions
-            pendingRevision.setDisplayOnDevportal(false);
-            if (StringUtils.isEmpty(pendingRevision.getRevisionUUID())) {
-                pendingRevision.setRevisionUUID(apiRevisionUUID);
-            }
-            for (APIRevisionDeployment currentRevision : currentPendingDeployments) {
-                if (pendingRevision.getDeployment().equals(currentRevision.getDeployment())) {
-                    matchingRevisions.add(currentRevision);
-                }
-            }
+        if (!isInitiatedFromGateway) {
+            handlePendingDeployments(apiId, apiRevisionUUID, apiRevisionDeployments);
         }
-        // Remove pending deployments
-        if (!matchingRevisions.isEmpty()) {
-            WorkflowExecutor apiRevisionDeploymentExecutor = getWorkflowExecutor(
-                    WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
-            apiMgtDAO.removeAPIRevisionDeployment(apiId, matchingRevisions);
-            for (APIRevisionDeployment matchingRevision : matchingRevisions) {
-                WorkflowDTO matchingWFDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(
-                        matchingRevision.getRevisionUUID(), WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
-                try {
-                    apiRevisionDeploymentExecutor.cleanUpPendingTask(matchingWFDTO.getExternalWorkflowReference());
-                } catch (WorkflowException e) {
-                    log.error("Unable to clean pending task for workflow reference id "
-                            + matchingWFDTO.getExternalWorkflowReference(), e);
-                }
-            }
-        }
+
         apiMgtDAO.addAPIRevisionDeployment(apiRevisionUUID, apiRevisionDeployments);
 
-        WorkflowExecutor revisionDeploymentWFExecutor = getWorkflowExecutor(
-                WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
-
-        for (APIRevisionDeployment apiRevisionDeployment : apiRevisionDeployments) {
-            apiMgtDAO.updateAPIRevisionDeploymentStatus(apiRevisionUUID,
-                    APIConstants.APIRevisionStatus.API_REVISION_CREATED, apiRevisionDeployment.getDeployment());
-            APIRevisionWorkflowDTO revisionWFDto = new APIRevisionWorkflowDTO();
-            try {
-                revisionWFDto.setAPIRevision(apiRevision);
-                revisionWFDto.setExternalWorkflowReference(revisionDeploymentWFExecutor.generateUUID());
-                revisionWFDto.setWorkflowReference(apiRevisionUUID);
-                revisionWFDto.setWorkflowType(WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
-                revisionWFDto.setCallbackUrl(revisionDeploymentWFExecutor.getCallbackURL());
-                revisionWFDto.setStatus(WorkflowStatus.CREATED);
-                revisionWFDto.setTenantDomain(organization);
-                revisionWFDto.setTenantId(tenantId);
-                revisionWFDto.setCreatedTime(System.currentTimeMillis());
-                revisionWFDto.setUserName(userNameWithoutChange);
-                revisionWFDto.setApiName(apiIdentifier.getApiName());
-                revisionWFDto.setApiVersion(apiIdentifier.getVersion());
-                revisionWFDto.setApiProvider(apiIdentifier.getProviderName());
-                revisionWFDto.setEnvironment(apiRevisionDeployment.getDeployment());
-                revisionWFDto.setRevisionId(String.valueOf(revisionId));
-                revisionDeploymentWFExecutor.execute(revisionWFDto);
-            } catch (WorkflowException e) {
-                log.error("Unable to execute Revision Deployment Workflow for revision: " + apiRevisionUUID, e);
-                handleException("Unable to execute Revision Deployment Workflow for revision: " + apiRevisionUUID, e);
-            }
-
-            WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflow(revisionWFDto.getExternalWorkflowReference());
-            // only send the notification if approved
-            // wfDTO is null when simple wf executor is used because wf state is not stored in the db.
-            if (wfDTO == null || WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
-                apiRevisionDeployment.setDisplayOnDevportal(true);
-                apiMgtDAO.updateAPIRevisionDeployment(apiId, Collections.singleton(apiRevisionDeployment));
+        for (APIRevisionDeployment deployment : apiRevisionDeployments) {
+            if (!isInitiatedFromGateway) {
+                apiMgtDAO.updateAPIRevisionDeploymentStatus(apiRevisionUUID,
+                        APIConstants.APIRevisionStatus.API_REVISION_CREATED, deployment.getDeployment());
+                executeRevisionWorkflow(apiIdentifier, apiRevisionUUID, revisionId, organization, apiRevision,
+                        deployment);
+            } else {
+                apiMgtDAO.updateAPIRevisionDeploymentForDiscoveredAPIs(apiRevisionUUID,
+                        APIConstants.APIRevisionStatus.API_REVISION_APPROVED, Collections.singleton(deployment));
                 resumeDeployedAPIRevision(apiId, organization, apiRevisionUUID, String.valueOf(revisionId),
-                        apiRevisionDeployment.getDeployment());
+                        deployment.getDeployment(), true);
             }
         }
     }
 
     /**
-     * Resume API revision deployment process
+     * Handles pending deployments by removing existing ones and updating new deployments.
      *
-     * @param apiId        API Id using for the revision deployment
-     * @param organization organization identifier
-     * @param revisionUUID revision UUID
-     * @param revisionId   revision number
-     * @param environment  environment the deployment is happening
+     * @param apiId              API UUID
+     * @param apiRevisionUUID    API Revision UUID
+     * @param newDeployments     List of new APIRevisionDeployment objects
+     * @throws APIManagementException if an error occurs while handling pending deployments
      */
-    @Override public void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID,
-            String revisionId, String environment) {
+    private void handlePendingDeployments(String apiId, String apiRevisionUUID,
+                                          List<APIRevisionDeployment> newDeployments)
+            throws APIManagementException {
 
+        List<APIRevisionDeployment> existingPending = apiMgtDAO.getAPIRevisionDeploymentsByWorkflowStatusAndApiUUID(
+                apiId, String.valueOf(WorkflowStatus.CREATED));
+        Set<APIRevisionDeployment> toRemove = new HashSet<>();
+
+        for (APIRevisionDeployment newDeployment : newDeployments) {
+            newDeployment.setDisplayOnDevportal(false);
+            if (StringUtils.isEmpty(newDeployment.getRevisionUUID())) {
+                newDeployment.setRevisionUUID(apiRevisionUUID);
+            }
+
+            for (APIRevisionDeployment existing : existingPending) {
+                if (existing.getDeployment().equals(newDeployment.getDeployment())) {
+                    toRemove.add(existing);
+                }
+            }
+        }
+
+        if (!toRemove.isEmpty()) {
+            WorkflowExecutor executor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
+            apiMgtDAO.removeAPIRevisionDeployment(apiId, toRemove);
+
+            for (APIRevisionDeployment removed : toRemove) {
+                WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(
+                        removed.getRevisionUUID(), WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
+                try {
+                    executor.cleanUpPendingTask(wfDTO.getExternalWorkflowReference());
+                } catch (WorkflowException e) {
+                    log.error("Unable to clean pending task for workflow reference id "
+                            + wfDTO.getExternalWorkflowReference(), e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Execute the revision deployment workflow.
+     *
+     * @param apiIdentifier      API Identifier
+     * @param apiRevisionUUID    API Revision UUID
+     * @param revisionId         Revision ID
+     * @param organization       Organization identifier
+     * @param apiRevision        API Revision object
+     * @param deployment         API Revision Deployment object
+     * @throws APIManagementException if workflow execution fails
+     */
+    private void executeRevisionWorkflow(APIIdentifier apiIdentifier, String apiRevisionUUID, int revisionId,
+                                         String organization, APIRevision apiRevision, APIRevisionDeployment deployment)
+            throws APIManagementException {
+
+        WorkflowExecutor executor = getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
+        APIRevisionWorkflowDTO workflowDTO = new APIRevisionWorkflowDTO();
+
+        try {
+            workflowDTO.setAPIRevision(apiRevision);
+            workflowDTO.setExternalWorkflowReference(executor.generateUUID());
+            workflowDTO.setWorkflowReference(apiRevisionUUID);
+            workflowDTO.setWorkflowType(WorkflowConstants.WF_TYPE_AM_REVISION_DEPLOYMENT);
+            workflowDTO.setCallbackUrl(executor.getCallbackURL());
+            workflowDTO.setStatus(WorkflowStatus.CREATED);
+            workflowDTO.setTenantDomain(organization);
+            workflowDTO.setTenantId(tenantId);
+            workflowDTO.setCreatedTime(System.currentTimeMillis());
+            workflowDTO.setUserName(userNameWithoutChange);
+            workflowDTO.setApiName(apiIdentifier.getApiName());
+            workflowDTO.setApiVersion(apiIdentifier.getVersion());
+            workflowDTO.setApiProvider(apiIdentifier.getProviderName());
+            workflowDTO.setEnvironment(deployment.getDeployment());
+            workflowDTO.setRevisionId(String.valueOf(revisionId));
+
+            executor.execute(workflowDTO);
+
+            WorkflowDTO persisted = apiMgtDAO.retrieveWorkflow(workflowDTO.getExternalWorkflowReference());
+            if (persisted == null || WorkflowStatus.APPROVED.equals(persisted.getStatus())) {
+                deployment.setDisplayOnDevportal(true);
+                apiMgtDAO.updateAPIRevisionDeployment(apiIdentifier.getUUID(), Collections.singleton(deployment));
+                resumeDeployedAPIRevision(apiIdentifier.getUUID(), organization, apiRevisionUUID,
+                        String.valueOf(revisionId), deployment.getDeployment(), false);
+            }
+
+        } catch (WorkflowException e) {
+            log.error("Unable to execute Revision Deployment Workflow for revision: " + apiRevisionUUID, e);
+            handleException("Unable to execute Revision Deployment Workflow for revision: " + apiRevisionUUID, e);
+        }
+    }
+
+
+    /**
+     * Resume API revision deployment process.
+     *
+     * @param apiId        API Id used for the revision deployment
+     * @param organization Organization identifier
+     * @param revisionUUID Revision UUID
+     * @param revisionId   Revision number
+     * @param environment  Deployment environment
+     */
+    @Override
+    @Deprecated
+    public void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID,
+                                          String revisionId, String environment) {
+        resumeDeployedAPIRevisionInternal(apiId, organization, revisionUUID, revisionId, environment, false);
+    }
+
+    /**
+     * Resume API revision deployment process, with flag to indicate if it's initiated from gateway.
+     *
+     * @param apiId                 API Id used for the revision deployment
+     * @param organization          Organization identifier
+     * @param revisionUUID          Revision UUID
+     * @param revisionId            Revision number
+     * @param environment           Deployment environment
+     * @param isInitiatedFromGateway Whether the call originated from a gateway
+     */
+    @Override
+    public void resumeDeployedAPIRevision(String apiId, String organization, String revisionUUID,
+                                          String revisionId, String environment, boolean isInitiatedFromGateway) {
+        resumeDeployedAPIRevisionInternal(apiId, organization, revisionUUID, revisionId, environment,
+                isInitiatedFromGateway);
+    }
+
+    /**
+     * Internal method to resume API revision deployment.
+     *
+     * @param apiId                 API Id used for the revision deployment
+     * @param organization          Organization identifier
+     * @param revisionUUID          Revision UUID
+     * @param revisionId            Revision number
+     * @param environment           Deployment environment
+     * @param skipDeployToGateway   Flag to skip deployment to gateway
+     */
+    private void resumeDeployedAPIRevisionInternal(String apiId, String organization, String revisionUUID,
+                                                   String revisionId, String environment, boolean skipDeployToGateway) {
         try {
             APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
             APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
-            APIRevisionDeployment apiRevisionDeployment = getAPIRevisionDeployment(environment, revisionUUID);
+            APIRevisionDeployment newDeployment = getAPIRevisionDeployment(environment, revisionUUID);
             API api = getLightweightAPIByUUID(apiId, organization);
+
             api.setRevisionedApiId(apiId);
             api.setRevisionId(Integer.parseInt(revisionId));
-            List<APIRevisionDeployment> currentApiRevisionDeploymentList = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(
-                    apiId);
 
-            Set<APIRevisionDeployment> environmentsToRemove = new HashSet<>();
-            for (APIRevisionDeployment currentAPIRevisionDeployment : currentApiRevisionDeploymentList) {
-                if (StringUtils.equalsIgnoreCase(currentAPIRevisionDeployment.getDeployment(), environment)
-                        && !currentAPIRevisionDeployment.getRevisionUUID().equals(revisionUUID)) {
-                    environmentsToRemove.add(currentAPIRevisionDeployment);
-                }
+            List<APIRevisionDeployment> existingDeployments = apiMgtDAO.getAPIRevisionDeploymentsByApiUUID(apiId);
+            Set<APIRevisionDeployment> deploymentsToRemove = existingDeployments.stream()
+                    .filter(d -> StringUtils.equalsIgnoreCase(d.getDeployment(), environment)
+                            && !d.getRevisionUUID().equals(revisionUUID))
+                    .collect(Collectors.toSet());
+
+            Set<String> targetEnvironments = Collections.singleton(environment);
+            Map<String, String> gatewayVhosts = Collections.singletonMap(environment, newDeployment.getVhost());
+
+            if (!deploymentsToRemove.isEmpty() && !skipDeployToGateway) {
+                apiMgtDAO.removeAPIRevisionDeployment(apiId, deploymentsToRemove);
+                removeFromGateway(api, deploymentsToRemove, targetEnvironments);
             }
 
-            Set<String> environmentToPublish = Collections.singleton(environment);
-            Map<String, String> gatewayVhosts = new HashMap<>();
-            gatewayVhosts.put(environment, apiRevisionDeployment.getVhost());
-            if (!environmentsToRemove.isEmpty()) {
-                apiMgtDAO.removeAPIRevisionDeployment(apiId, environmentsToRemove);
-                removeFromGateway(api, environmentsToRemove, environmentToPublish);
-            }
-            GatewayArtifactsMgtDAO.getInstance()
-                    .addAndRemovePublishedGatewayLabels(apiId, revisionUUID, environmentToPublish, gatewayVhosts,
-                            environmentsToRemove);
+            GatewayArtifactsMgtDAO.getInstance().addAndRemovePublishedGatewayLabels(
+                    apiId, revisionUUID, targetEnvironments, gatewayVhosts, deploymentsToRemove);
 
-            // TODO remove this to organization once the microgateway can build gateway based on organization.
-            gatewayManager.deployToGateway(api, organization, environmentToPublish);
-
-            String publishedDefaultVersion = getPublishedDefaultVersion(apiIdentifier);
-            String defaultVersion = getDefaultVersion(apiIdentifier);
-            apiMgtDAO.updateDefaultAPIPublishedVersion(apiIdentifier);
-            if (publishedDefaultVersion != null) {
-                if (apiIdentifier.getVersion().equals(defaultVersion)) {
-                    api.setAsPublishedDefaultVersion(true);
-                }
-                if (api.isPublishedDefaultVersion() && !apiIdentifier.getVersion().equals(publishedDefaultVersion)) {
-                    APIIdentifier previousDefaultVersionIdentifier = new APIIdentifier(api.getId().getProviderName(),
-                            api.getId().getApiName(), publishedDefaultVersion);
-                    sendUpdateEventToPreviousDefaultVersion(previousDefaultVersionIdentifier, organization);
-                }
+            // Skip deployToGateway only if explicitly called from the gateway
+            if (!skipDeployToGateway) {
+                gatewayManager.deployToGateway(api, organization, targetEnvironments);
+                updatePublishedDefaultVersionIfRequired(apiIdentifier, api, organization);
             }
+
         } catch (APIManagementException e) {
-            log.error("Error while getting API info from API: " + apiId, e);
+            log.error("Error while resuming API revision deployment for API ID: " + apiId, e);
+        }
+    }
+
+    /**
+     * Updates the published default version of an API if required.
+     * @param apiIdentifier
+     * @param api
+     * @param organization
+     * @throws APIManagementException
+     */
+    private void updatePublishedDefaultVersionIfRequired(APIIdentifier apiIdentifier, API api, String organization)
+            throws APIManagementException {
+        String publishedDefaultVersion = getPublishedDefaultVersion(apiIdentifier);
+        String currentDefaultVersion = getDefaultVersion(apiIdentifier);
+        apiMgtDAO.updateDefaultAPIPublishedVersion(apiIdentifier);
+
+        if (publishedDefaultVersion != null) {
+            if (apiIdentifier.getVersion().equals(currentDefaultVersion)) {
+                api.setAsPublishedDefaultVersion(true);
+            }
+
+            if (api.isPublishedDefaultVersion() && !apiIdentifier.getVersion().equals(publishedDefaultVersion)) {
+                APIIdentifier previousDefault = new APIIdentifier(
+                        api.getId().getProviderName(),
+                        api.getId().getApiName(),
+                        publishedDefaultVersion
+                );
+                sendUpdateEventToPreviousDefaultVersion(previousDefault, organization);
+            }
         }
     }
 
@@ -6889,26 +7079,26 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public APIRevisionDeployment getAPIRevisionDeployment(String name, String revisionId) throws APIManagementException {
-         return apiMgtDAO.getAPIRevisionDeploymentByNameAndRevsionID(name,revisionId);
+        return apiMgtDAO.getAPIRevisionDeploymentByNameAndRevsionID(name, revisionId);
     }
 
     @Override
     public List<APIRevisionDeployment> getAPIRevisionDeploymentList(String revisionUUID) throws APIManagementException {
-         return apiMgtDAO.getAPIRevisionDeploymentByRevisionUUID(revisionUUID);
+        return apiMgtDAO.getAPIRevisionDeploymentByRevisionUUID(revisionUUID);
     }
 
     /**
      * Remove a new APIRevisionDeployment to an existing API
      *
-     * @param apiId API UUID
-     * @param apiRevisionId API Revision UUID
+     * @param apiId                  API UUID
+     * @param apiRevisionId          API Revision UUID
      * @param apiRevisionDeployments List of APIRevisionDeployment objects
-     * @param organization organization
+     * @param organization           organization
      * @throws APIManagementException if failed to add APIRevision
      */
     @Override
     public void undeployAPIRevisionDeployment(String apiId, String apiRevisionId,
-            List<APIRevisionDeployment> apiRevisionDeployments, String organization)
+                                              List<APIRevisionDeployment> apiRevisionDeployments, String organization)
             throws APIManagementException {
 
         APIIdentifier apiIdentifier = APIUtil.getAPIIdentifierFromUUID(apiId);
@@ -6946,7 +7136,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Restore a provided API Revision as the current API of the API
      *
-     * @param apiId API UUID
+     * @param apiId         API UUID
      * @param apiRevisionId API Revision UUID
      * @throws APIManagementException if failed to restore APIRevision
      */
@@ -6969,8 +7159,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     apiIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to restore registry artifacts";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
+                    ERROR_RESTORING_API_REVISION, apiRevision.getApiUUID()));
         }
         apiMgtDAO.restoreAPIRevision(apiRevision, organization);
     }
@@ -6978,9 +7168,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Delete an API Revision
      *
-     * @param apiId API UUID
+     * @param apiId         API UUID
      * @param apiRevisionId API Revision UUID
-     * @param organization identifier of the organization
+     * @param organization  identifier of the organization
      * @throws APIManagementException if failed to delete APIRevision
      */
     @Override
@@ -7011,8 +7201,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     apiIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to delete registry artifacts";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
+                    ERROR_DELETING_API_REVISION, apiRevision.getApiUUID()));
         }
         apiMgtDAO.deleteAPIRevision(apiRevision);
         apiMgtDAO.deleteAIConfigurationRevision(apiRevision.getRevisionUUID());
@@ -7056,7 +7246,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         }
         if (StringUtils.isEmpty(revisionUUID)) {
             String errorMessage = "Failed to retrieve revision uuid";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
+            throw new APIManagementException(errorMessage,
+                    ExceptionCodes.from(ExceptionCodes.API_REVISION_UUID_NOT_FOUND));
         }
         apiRevision.setRevisionUUID(revisionUUID);
         apiMgtDAO.addAPIProductRevision(apiRevision);
@@ -7065,8 +7256,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     .exportAPIProduct(apiRevision.getApiUUID(), revisionUUID, true, ExportFormat.JSON,
                             false, true, organization);
             gatewayArtifactsMgtDAO
-                    .addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(),apiProductIdentifier.getName(),
-                    apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(), tenantDomain,
+                    .addGatewayAPIArtifactAndMetaData(apiRevision.getApiUUID(), apiProductIdentifier.getName(),
+                            apiProductIdentifier.getVersion(), apiRevision.getRevisionUUID(), tenantDomain,
                             APIConstants.API_PRODUCT, artifact);
             if (artifactSaver != null) {
                 artifactSaver.saveArtifact(apiRevision.getApiUUID(), apiProductIdentifier.getName(),
@@ -7080,6 +7271,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     @Override
+    @UsedByMigrationClient
     public void deployAPIProductRevision(String apiProductId, String apiRevisionId,
                                          List<APIRevisionDeployment> apiRevisionDeployments)
             throws APIManagementException {
@@ -7111,7 +7303,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             gatewayVhosts.put(apiRevisionDeployment.getDeployment(), apiRevisionDeployment.getVhost());
         }
         if (environmentsToRemove.size() > 0) {
-            apiMgtDAO.removeAPIRevisionDeployment(apiProductId,environmentsToRemove);
+            apiMgtDAO.removeAPIRevisionDeployment(apiProductId, environmentsToRemove);
             removeFromGateway(product, tenantDomain, environmentsToRemove, environmentsToAdd);
         }
         GatewayArtifactsMgtDAO.getInstance()
@@ -7136,7 +7328,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
             if (product.isPublishedDefaultVersion() && !apiProductIdentifier.getVersion()
                     .equals(publishedDefaultVersion)) {
-                sendUpdateEventToPreviousDefaultVersion(product.getId().getProviderName(),  product.getId().getName(),
+                sendUpdateEventToPreviousDefaultVersion(product.getId().getProviderName(), product.getId().getName(),
                         publishedDefaultVersion);
             }
         }
@@ -7197,7 +7389,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             environmentsToRemove.add(apiRevisionDeployment.getDeployment());
         }
         product.setEnvironments(environmentsToRemove);
-        removeFromGateway(product, tenantDomain, new HashSet<>(apiRevisionDeployments),Collections.emptySet());
+        removeFromGateway(product, tenantDomain, new HashSet<>(apiRevisionDeployments), Collections.emptySet());
         apiMgtDAO.removeAPIRevisionDeployment(apiRevisionId, apiRevisionDeployments);
         if (environmentsToRemove.size() > 0) {
             GatewayArtifactsMgtDAO.getInstance().removePublishedGatewayLabels(apiProductId, apiRevisionId,
@@ -7224,8 +7416,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     apiProductIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to restore registry artifacts";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    ERROR_RESTORING_API_REVISION,apiRevision.getApiUUID()));
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
+                    ERROR_RESTORING_API_REVISION, apiRevision.getApiUUID()));
         }
         apiMgtDAO.restoreAPIProductRevision(apiRevision, organization);
     }
@@ -7248,7 +7440,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String errorMessage = "Couldn't delete API revision since API revision is currently deployed to a gateway." +
                     "You need to undeploy the API Revision from the gateway before attempting deleting API Revision: "
                     + apiRevision.getRevisionUUID();
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
                     EXISTING_API_REVISION_DEPLOYMENT_FOUND, apiRevisionId));
         }
         apiProductIdentifier.setUuid(apiProductId);
@@ -7257,8 +7449,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     apiProductIdentifier.getUUID(), apiRevision.getRevisionUUID(), apiRevision.getId());
         } catch (APIPersistenceException e) {
             String errorMessage = "Failed to delete registry artifacts";
-            throw new APIManagementException(errorMessage,ExceptionCodes.from(ExceptionCodes.
-                    ERROR_DELETING_API_REVISION,apiRevision.getApiUUID()));
+            throw new APIManagementException(errorMessage, ExceptionCodes.from(ExceptionCodes.
+                    ERROR_DELETING_API_REVISION, apiRevision.getApiUUID()));
         }
         apiMgtDAO.deleteAPIProductRevision(apiRevision);
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
@@ -7318,7 +7510,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public void addEnvironmentSpecificAPIProperties(String apiUuid, String envUuid,
-            EnvironmentPropertiesDTO environmentPropertyDTO) throws APIManagementException {
+                                                    EnvironmentPropertiesDTO environmentPropertyDTO) throws APIManagementException {
         String content = new Gson().toJson(environmentPropertyDTO);
         environmentSpecificAPIPropertyDAO.addOrUpdateEnvironmentSpecificAPIProperties(apiUuid, envUuid, content);
     }
@@ -7465,7 +7657,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * If there aren't any existing policies, a new API specific policy will be created.
      *
      * @param importedPolicyData Imported policy
-     * @param organization Organization name
+     * @param organization       Organization name
      * @return corrosponding policy ID for imported data
      * @throws APIManagementException if failed to delete APIRevision
      */
@@ -7494,7 +7686,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             policyId = existingOperationPolicy.getPolicyId();
         } else {
             existingOperationPolicy = getCommonOperationPolicyByPolicyName(importedSpec.getName(),
-                    importedSpec.getVersion(),organization, false);
+                    importedSpec.getVersion(), organization, false);
             if (existingOperationPolicy != null) {
                 if (APIUtil.verifyHashValues(existingOperationPolicy, importedPolicyData)) {
                     if (log.isDebugEnabled()) {
@@ -7573,7 +7765,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         organization);
                 if (log.isDebugEnabled()) {
                     log.debug("There is no common policy currently available for the imported policy. " +
-                                    "A new policy created with ID " + policyId);
+                            "A new policy created with ID " + policyId);
                 }
             }
         } else { //api level policy by default
@@ -7646,7 +7838,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public List<OperationPolicyData> getCommonOperationPolicyByPolicyName(String policyName, String tenantDomain,
-                                                                    boolean isWithPolicyDefinition)
+                                                                          boolean isWithPolicyDefinition)
             throws APIManagementException {
 
         return apiMgtDAO.getCommonOperationPolicyByPolicyName(policyName, tenantDomain, isWithPolicyDefinition);
@@ -7733,7 +7925,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         return policies;
     }
 
-    public  APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException {
+    public APIRevision checkAPIUUIDIsARevisionUUID(String apiUUID) throws APIManagementException {
         return apiMgtDAO.checkAPIUUIDIsARevisionUUID(apiUUID);
     }
 
@@ -7809,7 +8001,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     public String applyGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPoliciesList, String description,
-            String name, String orgId) throws APIManagementException {
+                                             String name, String orgId) throws APIManagementException {
         String policyMappingUUID = UUID.randomUUID().toString();
         return apiMgtDAO.addGatewayGlobalPolicy(gatewayGlobalPoliciesList, description, name, orgId, policyMappingUUID);
     }
@@ -7823,7 +8015,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException
      */
     public void engageGatewayGlobalPolicies(Map<Boolean, List<GatewayPolicyDeployment>> gatewayPolicyDeploymentMap,
-            String orgId, String gatewayPolicyMappingId) throws APIManagementException {
+                                            String orgId, String gatewayPolicyMappingId) throws APIManagementException {
 
         APIGatewayManager gatewayManager = APIGatewayManager.getInstance();
         List<GatewayPolicyDeployment> gatewayPolicyDeploymentList = new ArrayList<>();
@@ -7879,7 +8071,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public List<OperationPolicyData> getGatewayPolicyDataListByPolicyId(String policyMappingUUID,
-            boolean isWithPolicyDefinition) throws APIManagementException {
+                                                                        boolean isWithPolicyDefinition) throws APIManagementException {
         return apiMgtDAO.getAllGatewayPoliciesDataForPolicyMappingUUID(policyMappingUUID, isWithPolicyDefinition);
     }
 
@@ -7933,7 +8125,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public String updateGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPolicyList, String description,
-            String name, String orgId, String policyMappingId) throws APIManagementException {
+                                              String name, String orgId, String policyMappingId) throws APIManagementException {
         List<OperationPolicy> policyList = apiMgtDAO.getGatewayPoliciesOfPolicyMapping(policyMappingId);
         if (policyList.isEmpty()) {
             String message = "Cannot update the gateway policy mapping. The policy mapping ID: " + policyMappingId
@@ -7985,7 +8177,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     @Override
     public GatewayPolicyData getLightweightGatewayPolicyMappings(String organization,
-            String gatewayLabel) throws APIManagementException {
+                                                                 String gatewayLabel) throws APIManagementException {
         return apiMgtDAO.getPolicyMappingUUIDByGatewayLabel(gatewayLabel, organization);
     }
 
@@ -8048,8 +8240,8 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * Checks whether a policy mapping deployment exists for a given gateway label.
      *
-     * @param gatewayLabel           Gateway label
-     * @param tenantDomain           Tenant domain
+     * @param gatewayLabel Gateway label
+     * @param tenantDomain Tenant domain
      * @return true if a policy mapping deployment exists for a given policy mapping ID and gateway label
      * @throws APIManagementException
      */
@@ -8236,7 +8428,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * To get the hashmap of what mappingId is deployed or undeployed in which gateway.
      */
     private Map<String, Set<String>> getGatewayPolicyDeploymentMap(List<GatewayPolicyDeployment>
-            gatewayPolicyDeploymentList, boolean toAdd, String tenantDomain) throws APIManagementException {
+                                                                           gatewayPolicyDeploymentList, boolean toAdd, String tenantDomain) throws APIManagementException {
         Map<String, Set<String>> gatewayPolicyDeploymentMapForResponse = new HashMap<>();
         for (GatewayPolicyDeployment gatewayPolicyDeployment : gatewayPolicyDeploymentList) {
             String mappingUuid = gatewayPolicyDeployment.getMappingUuid();
@@ -8342,12 +8534,67 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
     @Override
     public InputStream getApiTheme(String uuid, String organization, String apiId) throws APIManagementException {
-        return apiMgtDAO.getApiTheme(uuid, organization,apiId);
+        return apiMgtDAO.getApiTheme(uuid, organization, apiId);
     }
 
     @Override
     public Map<String, String> getApiThemes(String organization, String apiId) throws APIManagementException {
         return apiMgtDAO.getApiThemes(organization, apiId);
+    }
+
+    @Override
+    public boolean isAPIInitiatedFromGateway(String apiUUID) throws APIManagementException {
+        return apiMgtDAO.getIsAPIInitiatedFromGateway(apiUUID);
+    }
+
+
+    @Override
+    public Backend getMCPServerBackend(String uuid, String backendId, String organization)
+            throws APIManagementException {
+
+        String currentApiUuid;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+        } else {
+            currentApiUuid = uuid;
+        }
+        if (apiRevision != null) {
+            return apiMgtDAO.getBackendRevision(currentApiUuid, apiRevision.getRevisionUUID(), backendId, organization);
+        } else {
+            return apiMgtDAO.getBackend(currentApiUuid, backendId, organization);
+        }
+    }
+
+    @Override
+    public List<Backend> getMCPServerBackends(String uuid, String organization) throws APIManagementException {
+
+        String currentApiUuid;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(uuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            currentApiUuid = apiRevision.getApiUUID();
+        } else {
+            currentApiUuid = uuid;
+        }
+        if (apiRevision != null) {
+            return apiMgtDAO.getBackendRevisions(currentApiUuid, apiRevision.getRevisionUUID(), organization);
+        } else {
+            return apiMgtDAO.getBackends(currentApiUuid, organization);
+        }
+    }
+
+    @Override
+    public void updateMCPServerBackend(String apiUuid, Backend backend, String organization)
+            throws APIManagementException {
+
+        apiMgtDAO.updateBackend(apiUuid, backend, organization);
+    }
+
+    @Override
+    public List<API> getMCPServersUsedByAPI(String apiUuid, String organization) throws APIManagementException{
+
+        int apiId = apiMgtDAO.getAPIID(apiUuid);
+        return apiMgtDAO.getMCPServersUsedByAPI(apiId, organization);
     }
 
     @Override
@@ -8409,7 +8656,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     /**
      * It fetches the primary endpoint mappings of an API and populate their UUIDs.
      *
-     * @param api API model Object
+     * @param api  API model Object
      * @param uuid unique identifier of an API
      * @throws APIManagementException if an error occurs while fetching the primary endpoint mappings
      */
@@ -8450,6 +8697,53 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             String sandboxEndpointId = apiMgtDAO.getPrimaryEndpointUUIDByApiIdAndEnv(currentApiUuid,
                     APIConstants.APIEndpoint.SANDBOX, revisionUuid, organization);
             api.setPrimarySandboxEndpointId(sandboxEndpointId);
+        }
+    }
+
+    /**
+     * This method updates the MCP server backends for the API if it is of type MCP and subtype DIRECT_ENDPOINT.
+     * It sets the first available backend as the selected backend and updates the backend ID in the URITemplates.
+     *
+     * @param api           The API object to be updated.
+     * @param existingApiId The existing API ID.
+     * @param organization  The organization name.
+     * @throws APIManagementException If an error occurs while updating the MCP server backends.
+     */
+    private void updateMCPServerBackends(API api, String existingApiId, String organization)
+            throws APIManagementException {
+
+        if (api == null || api.getType() == null) {
+            return;
+        }
+
+        if (!APIConstants.API_TYPE_MCP.equals(api.getType())
+                || !APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
+            return;
+        }
+
+        List<Backend> existingBackends = getMCPServerBackends(existingApiId, organization);
+        if (existingBackends == null || existingBackends.isEmpty()) {
+            throw new APIManagementException("No MCP backends available for DIRECT_ENDPOINT configuration");
+        }
+
+        Backend selectedBackend = existingBackends.get(0);
+        String newBackendId = UUID.randomUUID().toString();
+        selectedBackend.setId(newBackendId);
+
+        List<Backend> updatedBackends = new ArrayList<>();
+        updatedBackends.add(selectedBackend);
+        api.setBackends(updatedBackends);
+
+        if (api.getUriTemplates() != null) {
+            for (URITemplate uriTemplate : api.getUriTemplates()) {
+                if (uriTemplate == null) {
+                    continue;
+                }
+                BackendOperationMapping backendOperationMapping = uriTemplate.getBackendOperationMapping();
+                if (backendOperationMapping != null) {
+                    backendOperationMapping.setBackendId(newBackendId);
+                }
+            }
         }
     }
 

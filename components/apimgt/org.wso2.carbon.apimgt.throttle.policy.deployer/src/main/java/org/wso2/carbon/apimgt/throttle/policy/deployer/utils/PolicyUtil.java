@@ -49,6 +49,7 @@ import org.wso2.carbon.event.processor.core.exception.ExecutionPlanConfiguration
 import org.wso2.carbon.event.processor.core.exception.ExecutionPlanDependencyValidationException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +74,12 @@ public class PolicyUtil {
         }
         EventProcessorService eventProcessorService =
                 ServiceReferenceHolder.getInstance().getEventProcessorService();
+        APIManagerConfiguration apiManagerConfiguration =
+                ServiceReferenceHolder.getInstance().getAPIMConfiguration();
+        List<String> skipPolicyNames =
+                apiManagerConfiguration.getThrottleProperties().getSkipDeployingPolicies() != null ?
+                        apiManagerConfiguration.getThrottleProperties().getSkipDeployingPolicies() :
+                        Collections.emptyList();
         ThrottlePolicyTemplateBuilder policyTemplateBuilder = new ThrottlePolicyTemplateBuilder();
 
         Map<String, String> policiesToDeploy = new HashMap<>();
@@ -85,25 +92,33 @@ public class PolicyUtil {
             String policyFile;
             String policyString;
             if (Policy.PolicyType.SUBSCRIPTION.equals(policy.getType()) && policy instanceof SubscriptionPolicy) {
-                // Add Subscription policy
-                policyFile = String.join(APIConstants.DELEM_UNDERSCORE,
-                        policy.getTenantDomain(), PolicyConstants.POLICY_LEVEL_SUB, policy.getName());
-                policyString = policyTemplateBuilder.getThrottlePolicyForSubscriptionLevel((SubscriptionPolicy) policy);
-                policiesToDeploy.put(policyFile, policyString);
+                policyFile = String.join(APIConstants.DELEM_UNDERSCORE, policy.getTenantDomain(),
+                        PolicyConstants.POLICY_LEVEL_SUB, policy.getName());
+                if (shouldDeployPolicy(policyFile, skipPolicyNames)) {
+                    // Add Subscription policy
+                    policyString = policyTemplateBuilder.getThrottlePolicyForSubscriptionLevel(
+                            (SubscriptionPolicy) policy);
+                    policiesToDeploy.put(policyFile, policyString);
+                }
             } else if (Policy.PolicyType.APPLICATION.equals(policy.getType()) && policy instanceof ApplicationPolicy) {
-                // Add Application policy
-                policyFile = String.join(APIConstants.DELEM_UNDERSCORE,
-                        policy.getTenantDomain(), PolicyConstants.POLICY_LEVEL_APP, policy.getName());
-                policyString = policyTemplateBuilder.getThrottlePolicyForAppLevel((ApplicationPolicy) policy);
-                policiesToDeploy.put(policyFile, policyString);
+                policyFile = String.join(APIConstants.DELEM_UNDERSCORE, policy.getTenantDomain(),
+                        PolicyConstants.POLICY_LEVEL_APP, policy.getName());
+                if (shouldDeployPolicy(policyFile, skipPolicyNames)) {
+                    // Add Application policy
+                    policyString = policyTemplateBuilder.getThrottlePolicyForAppLevel((ApplicationPolicy) policy);
+                    policiesToDeploy.put(policyFile, policyString);
+                }
             } else if (Policy.PolicyType.API.equals(policy.getType()) && policy instanceof ApiPolicy) {
-                // Add API policy
-                policiesToDeploy = policyTemplateBuilder.getThrottlePolicyForAPILevel((ApiPolicy) policy);
-                String defaultPolicy = policyTemplateBuilder.getThrottlePolicyForAPILevelDefault((ApiPolicy) policy);
-                policyFile = String.join(APIConstants.DELEM_UNDERSCORE,
-                        policy.getTenantDomain(), PolicyConstants.POLICY_LEVEL_RESOURCE, policy.getName());
-                String defaultPolicyName = policyFile + APIConstants.THROTTLE_POLICY_DEFAULT;
-                policiesToDeploy.put(defaultPolicyName, defaultPolicy);
+                policyFile = String.join(APIConstants.DELEM_UNDERSCORE, policy.getTenantDomain(),
+                        PolicyConstants.POLICY_LEVEL_RESOURCE, policy.getName());
+                if (shouldDeployPolicy(policyFile, skipPolicyNames)) {
+                    // Add API policy
+                    policiesToDeploy = policyTemplateBuilder.getThrottlePolicyForAPILevel((ApiPolicy) policy);
+                    String defaultPolicy = policyTemplateBuilder.getThrottlePolicyForAPILevelDefault(
+                            (ApiPolicy) policy);
+                    String defaultPolicyName = policyFile + APIConstants.THROTTLE_POLICY_DEFAULT;
+                    policiesToDeploy.put(defaultPolicyName, defaultPolicy);
+                }
                 if (policyEvent instanceof APIPolicyEvent) {
                     List<Integer> deletedConditionGroupIds =
                             ((APIPolicyEvent) policyEvent).getDeletedConditionGroupIds();
@@ -116,12 +131,14 @@ public class PolicyUtil {
                     }
                 }
             } else if (Policy.PolicyType.GLOBAL.equals(policy.getType()) && policy instanceof GlobalPolicy) {
-                // Add Global policy
-                GlobalPolicy globalPolicy = (GlobalPolicy) policy;
                 policyFile = String.join(APIConstants.DELEM_UNDERSCORE,
                         PolicyConstants.POLICY_LEVEL_GLOBAL, policy.getName());
-                policyString = policyTemplateBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
-                policiesToDeploy.put(policyFile, policyString);
+                if (shouldDeployPolicy(policyFile, skipPolicyNames)) {
+                    // Add Global policy
+                    GlobalPolicy globalPolicy = (GlobalPolicy) policy;
+                    policyString = policyTemplateBuilder.getThrottlePolicyForGlobalLevel(globalPolicy);
+                    policiesToDeploy.put(policyFile, policyString);
+                }
             }
 
             // Undeploy removed policies
@@ -193,6 +210,20 @@ public class PolicyUtil {
         } catch (ThrottlePolicyDeployerException e) {
             log.error("Error in retrieving throttle policies", e);
         }
+    }
+
+    /**
+     * Utility method to determine if a policy should be skipped
+     * @param policyFileName Name of the policy file
+     * @param skipPolicyNames List of policy file names to be skipped deploying
+     * @return true or false
+     */
+    private static boolean shouldDeployPolicy(String policyFileName,
+                                              List<String> skipPolicyNames) {
+        if (!skipPolicyNames.isEmpty()) {
+            return !skipPolicyNames.contains(policyFileName);
+        }
+        return true;
     }
 
     /**

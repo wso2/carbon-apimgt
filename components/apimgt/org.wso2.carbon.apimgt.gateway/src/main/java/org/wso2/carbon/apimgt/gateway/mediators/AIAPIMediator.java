@@ -18,8 +18,15 @@ package org.wso2.carbon.apimgt.gateway.mediators;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 import org.apache.axiom.om.OMElement;
 import org.apache.axis2.AxisFault;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -38,6 +45,7 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.LLMProviderConfiguration;
 import org.wso2.carbon.apimgt.api.LLMProviderMetadata;
 import org.wso2.carbon.apimgt.api.LLMProviderService;
+import org.wso2.carbon.apimgt.api.LLMResponseMetaData;
 import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyConfigDTO;
 import org.wso2.carbon.apimgt.api.gateway.FailoverPolicyDeploymentConfigDTO;
 import org.wso2.carbon.apimgt.api.gateway.ModelEndpointDTO;
@@ -367,11 +375,37 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext();
             RelayUtils.buildMessage(axis2Ctx);
             modifyRequestPayload(targetModelEndpoint.getModel(), targetModelMetadata, axis2Ctx);
+        } else if (APIConstants.AIAPIConstants.INPUT_SOURCE_PATH.equalsIgnoreCase(
+                targetModelMetadata.getInputSource())) {
+            modifyRequestPath(targetModelEndpoint.getModel(), targetModelMetadata, messageContext);
         } else {
             log.debug("Unsupported input source for attribute: " + targetModelMetadata.getAttributeName());
         }
 
         messageContext.setProperty(APIConstants.AIAPIConstants.TARGET_ENDPOINT, targetModelEndpoint.getEndpointId());
+    }
+
+    private void modifyRequestPath(String model, LLMProviderMetadata targetModelMetadata,
+                                   MessageContext messageContext) {
+        org.apache.axis2.context.MessageContext axis2Ctx =
+                ((Axis2MessageContext) messageContext).getAxis2MessageContext();
+        String requestPath = (String) axis2Ctx.getProperty(NhttpConstants.REST_URL_POSTFIX);
+        if (StringUtils.isNotEmpty(requestPath)) {
+            requestPath = URLDecoder.decode(requestPath, Charset.defaultCharset());
+            String updatedPath = requestPath.replaceAll(targetModelMetadata.getAttributeIdentifier(), model);
+            String encodedPath = Arrays.stream(updatedPath.split("/"))
+                    .map(segment -> {
+                        try {
+                            // Encode each segment individually
+                            return URLEncoder.encode(segment, StandardCharsets.UTF_8.toString());
+                        } catch (Exception e) {
+                            // In Java 10+, this exception is no longer thrown for UTF-8
+                            return segment;
+                        }
+                    })
+                    .collect(Collectors.joining("/"));
+            axis2Ctx.setProperty(NhttpConstants.REST_URL_POSTFIX, encodedPath);
+        }
     }
 
     /**
@@ -481,10 +515,9 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
         String payload = extractPayloadFromContext(messageContext, providerConfigs);
         Map<String, String> queryParams = extractQueryParamsFromContext(messageContext);
         Map<String, String> headers = extractHeadersFromContext(messageContext);
-
-        llmProviderService
-                .getResponseMetadata(payload, headers, queryParams, providerConfigs.getMetadata(), metadataMap);
-
+        String requestPath = (String) messageContext.getProperty(RESTConstants.REST_FULL_REQUEST_PATH);
+        LLMResponseMetaData llmResponseMetaData = new LLMResponseMetaData(payload, headers, queryParams, requestPath);
+        llmProviderService.getResponseMetadata(llmResponseMetaData, providerConfigs.getMetadata(), metadataMap);
         messageContext.setProperty(APIConstants.AIAPIConstants.AI_API_RESPONSE_METADATA, metadataMap);
 
         Map<String, Object> roundRobinConfigs = null;
@@ -557,9 +590,11 @@ public class AIAPIMediator extends AbstractMediator implements ManagedLifecycle 
                     .getAxis2MessageContext().getProperty(
                             org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
 
-            String remainingTokenCountHeader =
-                    getRemainingTokenCountMetadata(providerConfiguration).getAttributeIdentifier();
-
+            String remainingTokenCountHeader = null;
+            LLMProviderMetadata remainingTokenCountMetadata = getRemainingTokenCountMetadata(providerConfiguration);
+            if (remainingTokenCountMetadata != null){
+                remainingTokenCountHeader = remainingTokenCountMetadata.getAttributeIdentifier();
+            }
             if (remainingTokenCountHeader != null && transportHeaders.containsKey(remainingTokenCountHeader)) {
                 long remainingTokenCount = Long.parseLong((String) transportHeaders.get(remainingTokenCountHeader));
                 if (remainingTokenCount <= 0) {

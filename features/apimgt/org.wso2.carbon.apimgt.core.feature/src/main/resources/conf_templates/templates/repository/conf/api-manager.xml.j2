@@ -490,6 +490,7 @@
       <EnableLightWeightAPIKeyGeneration>{{apim.key_manager.enable_lightweight_apikey_generation}}</EnableLightWeightAPIKeyGeneration>
       {% endif %}
       <AllowSubscriptionValidationDisabling>{{apim.key_manager.allow_subscription_validation_disabling}}</AllowSubscriptionValidationDisabling>
+      <SkipCreateResidentKeyManager>{{apim.key_manager.skip_create_resident_key_manager}}</SkipCreateResidentKeyManager>
     </APIKeyValidator>
 
 
@@ -1726,6 +1727,7 @@
             <Sequence>_cors_request_handler_.xml</Sequence>
             <Sequence>dispatchSeq.xml</Sequence>
             <Sequence>fault.xml</Sequence>
+            <Sequence>guardrail_fault.xml</Sequence>
             <Sequence>_graphql_failure_handler_.xml</Sequence>
             <Sequence>main.xml</Sequence>
             <Sequence>outDispatchSeq.xml</Sequence>
@@ -1898,8 +1900,36 @@
             {% endif %}
         </DistributedThrottleConfig>
         {% endif %}
+      <TenantSharingConfigs>
+        {% for tenant_sharing_config in apim.tenant_sharing %}
+        <TenantSharingConfig type="{{tenant_sharing_config.type}}">
+            {% for key,value in tenant_sharing_config.properties.items() %}
+            <Property name="{{key}}">{{value}}</Property>
+            {% endfor %}
+        </TenantSharingConfig>
+        {% endfor %}
+      </TenantSharingConfigs>
 
       <Hashing>
         <HashingAlgorithm>{{apim.hashing.hashing_algorithm}}</HashingAlgorithm>
       </Hashing>
+
+      <AI>
+          <!-- Custom Guardrail Providers -->
+          <GuardrailProviders>
+              {% for guardrail_provider in apim.ai.guardrail_provider %}
+              <GuardrailProvider type="{{guardrail_provider.type}}">
+                  {% for key,value in guardrail_provider.properties.items() %}
+                  <Property name="{{key}}">{{value}}</Property>
+                  {% endfor %}
+              </GuardrailProvider>
+              {% endfor %}
+          </GuardrailProviders>
+
+          <EmbeddingProvider type="{{apim.ai.embedding_provider.type}}">
+              {% for key,value in apim.ai.embedding_provider.properties.items() %}
+              <Property name="{{key}}">{{value}}</Property>
+              {% endfor %}
+          </EmbeddingProvider>
+      </AI>
 </APIManager>

@@ -27,7 +27,6 @@ import org.wso2.carbon.apimgt.api.model.GatewayDeployer;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.APIManagerFactory;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
 import org.wso2.carbon.apimgt.impl.factory.GatewayHolder;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
@@ -37,7 +36,6 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.context.CarbonContext;
 
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Set;
 
@@ -76,7 +74,6 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
      * @throws NotifierException if error occurs when deploying APIs to external gateway
      */
     private void deployApi(DeployAPIInGatewayEvent deployAPIInGatewayEvent) throws NotifierException {
-        boolean deployed;
         ApiMgtDAO apiMgtDAO = ApiMgtDAO.getInstance();
         Set<String> gateways = deployAPIInGatewayEvent.getGatewayLabels();
         String apiId = deployAPIInGatewayEvent.getUuid();
@@ -93,7 +90,7 @@ public class ExternalGatewayNotifier extends DeployAPIInGatewayNotifier {
                             .getExternalGatewayConnectorConfiguration(environments.get(deploymentEnv).getGatewayType());
                     GatewayDeployer deployer = null;
                     if (gatewayConfiguration != null &&
-                            StringUtils.isNotEmpty(gatewayConfiguration.getImplementation())) {
+                            StringUtils.isNotEmpty(gatewayConfiguration.getGatewayDeployerImplementation())) {
                         deployer = GatewayHolder.getTenantGatewayInstance(deployAPIInGatewayEvent.getTenantDomain(),
                                 deploymentEnv);
                     }

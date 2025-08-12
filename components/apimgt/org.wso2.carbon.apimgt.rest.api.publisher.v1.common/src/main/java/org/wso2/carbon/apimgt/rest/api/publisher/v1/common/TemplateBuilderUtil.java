@@ -44,6 +44,7 @@ import org.wso2.carbon.apimgt.api.gateway.CredentialDto;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.api.gateway.GatewayContentDTO;
 import org.wso2.carbon.apimgt.api.model.API;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
 import org.wso2.carbon.apimgt.api.model.APIProduct;
 import org.wso2.carbon.apimgt.api.model.APIProductIdentifier;
 import org.wso2.carbon.apimgt.api.model.APIProductResource;
@@ -57,8 +58,6 @@ import org.wso2.carbon.apimgt.common.gateway.graphql.GraphQLSchemaDefinitionUtil
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.GraphQLSchemaDefinition;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.SoapToRestMediationDto;
 import org.wso2.carbon.apimgt.impl.importexport.ImportExportConstants;
 import org.wso2.carbon.apimgt.impl.template.APITemplateBuilder;
@@ -73,6 +72,8 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.common.template.APITemplateB
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIOperationsDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MediationPolicyDTO;
+import org.wso2.carbon.apimgt.spec.parser.definitions.GraphQLSchemaDefinition;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -237,6 +238,7 @@ public class TemplateBuilderUtil {
         authProperties.put(APIConstants.AUDIENCES, audiences);
         authProperties.put(APIConstants.API_SECURITY, apiSecurity);
         authProperties.put(APIConstants.API_LEVEL_POLICY, apiLevelPolicy);
+        authProperties.put(APIConstants.API_TYPE_PROP, api.getType());
         if (!clientCertificateObject.isEmpty()) {
             authProperties.put(APIConstants.CERTIFICATE_INFORMATION, clientCertificateObject.toString());
         }
@@ -271,6 +273,10 @@ public class TemplateBuilderUtil {
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.streaming.sse.SseApiHandler",
                     authProperties);
         } else if (!(APIConstants.APITransportType.WS.toString().equals(api.getType()))) {
+            if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
+                vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.mcp.McpInitHandler",
+                        Collections.emptyMap());
+            }
             vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.security.APIAuthenticationHandler",
                     authProperties);
         }
@@ -352,6 +358,11 @@ public class TemplateBuilderUtil {
                 vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.APIManagerExtensionHandler",
                         Collections.emptyMap());
             }
+        }
+
+        if (APIConstants.APITransportType.WS.toString().equals(api.getType())) {
+            vtb.addHandler("org.wso2.carbon.apimgt.gateway.handlers.ext.WebSocketExtensionHandler",
+                    Collections.emptyMap());
         }
 
         return vtb;
@@ -701,7 +712,59 @@ public class TemplateBuilderUtil {
                     }
                 }
             }
+
+            //reset uri-templates of MCP Servers to default resources
+            if (APIConstants.API_TYPE_MCP.equalsIgnoreCase(api.getType())) {
+                if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
+                    Set<URITemplate> mcpToolTemplates = api.getUriTemplates();
+                    if (!mcpToolTemplates.isEmpty()) {
+                        URITemplate tool = (URITemplate) (mcpToolTemplates.toArray())[0];
+                        APIOperationMapping apiOperationMapping = tool.getExistingAPIOperationMapping();
+
+                        //set apiOperationMapping info to the mcp default resources
+                        for (URITemplate uriTemplate : uriTemplates) {
+                            uriTemplate.setExistingAPIOperationMapping(apiOperationMapping);
+                        }
+                    }
+
+                    String endpointsString = environment.getApiGatewayEndpoint();
+                    if (!StringUtils.isEmpty(endpointsString)) {
+                        String[] gwEndpoints = endpointsString.split(",");
+
+                        StringBuilder endpoint = new StringBuilder();
+                        String httpsURI = getEndpointURI(gwEndpoints, APIConstants.HTTPS_TRANSPORT_PROTOCOL_NAME);
+                        if (!StringUtils.isEmpty(httpsURI)) {
+                            endpoint.append(httpsURI);
+                        } else {
+                            String httpURI = getEndpointURI(gwEndpoints, APIConstants.HTTP_TRANSPORT_PROTOCOL_NAME);
+                            endpoint.append(httpURI);
+                        }
+
+                        //construct gw URL for reference API
+                        Set<URITemplate> uriTemplateSet = api.getUriTemplates();
+                        if (!uriTemplateSet.isEmpty()) {
+                            URITemplate tempUri = (URITemplate) (uriTemplateSet.toArray()[0]);
+                            APIOperationMapping apiOperationMapping = tempUri.getExistingAPIOperationMapping();
+                            if (apiOperationMapping != null) {
+                                String refApiContext = apiOperationMapping.getApiContext();
+                                endpoint.append(refApiContext);
+                            }
+                        }
+
+                        JsonObject urlObj = new JsonObject();
+                        urlObj.addProperty("url", endpoint.toString());
+                        JsonObject endpointConfig = new JsonObject();
+                        endpointConfig.addProperty(APIConstants.API_ENDPOINT_CONFIG_PROTOCOL_TYPE, "http");
+                        endpointConfig.add(APIConstants.APIEndpoint.ENDPOINT_CONFIG_SANDBOX_ENDPOINTS, urlObj);
+                        endpointConfig.add(APIConstants.APIEndpoint.ENDPOINT_CONFIG_PRODUCTION_ENDPOINTS, urlObj);
+
+                        api.setEndpointConfig(endpointConfig.toString());
+                    }
+                }
+                api.setUriTemplates(uriTemplates);
+            }
         }
+
         return retrieveGatewayAPIDto(api, environment, tenantDomain, apidto, extractedFolderPath);
     }
 
@@ -2097,6 +2160,18 @@ public class TemplateBuilderUtil {
             throw new APIManagementException("Error while deriving subscription endpoint from GraphQL API endpoint "
                     + "config: " + endpointConfig, e);
         }
+    }
+
+    private static String getEndpointURI(String[] uris, String scheme) {
+        if (uris == null || scheme == null) {
+            return null;
+        }
+        for (String uri : uris) {
+            if (uri != null && uri.startsWith(scheme)) {
+                return uri;
+            }
+        }
+        return null;
     }
 
 }

@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.apimgt.impl.restapi.publisher;
 
+import org.wso2.carbon.apimgt.api.model.Backend;
+import org.apache.http.client.HttpClient;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -63,12 +65,12 @@ import org.wso2.carbon.apimgt.api.model.URITemplate;
 import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.OAS2Parser;
-import org.wso2.carbon.apimgt.impl.definitions.OAS3Parser;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.restapi.CommonUtils;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.impl.wsdl.util.SOAPOperationBindingUtils;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OAS2Parser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OAS3Parser;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.base.ServerConfiguration;
 import org.wso2.carbon.core.util.CryptoException;
 import org.wso2.carbon.core.util.CryptoUtil;
@@ -104,10 +106,10 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.constructEndpointConfigForService;
 import static org.wso2.carbon.apimgt.impl.restapi.CommonUtils.validateScopes;
@@ -639,7 +641,13 @@ public class ApisApiServiceImplUtils {
             throws APIManagementException {
         APIDefinitionValidationResponse validationResponse = new APIDefinitionValidationResponse();
         if (url != null) {
-            validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, returnContent);
+            try {
+                URL urlObj = new URL(url);
+                HttpClient httpClient = APIUtil.getHttpClient(urlObj.getPort(), urlObj.getProtocol());
+                validationResponse = OASParserUtil.validateAPIDefinitionByURL(url, httpClient, returnContent);
+            } catch (MalformedURLException e) {
+                throw new APIManagementException("Error while processing the API definition URL", e);
+            }
         } else if (inputStream != null) {
             try {
                 if (fileName != null) {
@@ -691,40 +699,48 @@ public class ApisApiServiceImplUtils {
                 apiToAdd.setApiSecurity(service.getSecurityType().toString());
             }
         }
-        APIDefinition apiDefinition = validationResponse.getParser();
-        SwaggerData swaggerData;
-        String definitionToAdd = validationResponse.getJsonContent();
-        if (syncOperations) {
-            validateScopes(apiToAdd, apiProvider, username);
-            swaggerData = new SwaggerData(apiToAdd);
-            definitionToAdd = apiDefinition.populateCustomManagementInfo(definitionToAdd, swaggerData);
-        }
-        definitionToAdd = OASParserUtil.preProcess(definitionToAdd);
 
-        Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definitionToAdd);
+        String definitionToAdd;
+        APIDefinition apiDefinition = validationResponse.getParser();
+        String definition = validationResponse.getJsonContent();
         int tenantId = APIUtil.getTenantIdFromTenantDomain(organization);
         String defaultAPILevelPolicy = APIUtil.getDefaultAPILevelPolicy(tenantId);
-        for (URITemplate uriTemplate : uriTemplates) {
-            if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
-                uriTemplate.setThrottlingTier(defaultAPILevelPolicy);
-            }
-            if (StringUtils.isEmpty(uriTemplate.getAuthType())) {
-                uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
-            }
-        }
 
-        Set<Scope> scopes = apiDefinition.getScopes(definitionToAdd);
-        apiToAdd.setUriTemplates(uriTemplates);
-        apiToAdd.setScopes(scopes);
-        //Set extensions from API definition to API object
-        apiToAdd = OASParserUtil.setExtensionsToAPI(definitionToAdd, apiToAdd);
-        if (!syncOperations) {
+        if (APIConstants.API_TYPE_MCP.equals(apiToAdd.getType())) {
+            String backendApiId = UUID.randomUUID().toString();
+            Set<URITemplate> uriTemplates = generateMCPFeatures(apiToAdd.getSubtype(), definition, backendApiId,
+                    apiToAdd.getUriTemplates(), apiDefinition);
+            applyDefaultThrottlingAndAuth(uriTemplates, defaultAPILevelPolicy);
+            apiToAdd.setUriTemplates(uriTemplates);
             validateScopes(apiToAdd, apiProvider, username);
-            swaggerData = new SwaggerData(apiToAdd);
-            definitionToAdd = apiDefinition
-                    .populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
-        }
+            Backend backend = createDefaultBackend(backendApiId, definition, apiToAdd.getEndpointConfig());
+            apiToAdd.getBackends().add(backend);
+            apiToAdd.setEndpointConfig(null);
+            SwaggerData swaggerData = new SwaggerData(apiToAdd);
+            definitionToAdd = new OAS3Parser().generateAPIDefinition(swaggerData);
+        } else {
+            definition = OASParserUtil.preProcess(definition);
+            if (syncOperations) {
+                validateScopes(apiToAdd, apiProvider, username);
+                SwaggerData swaggerData = new SwaggerData(apiToAdd);
+                definition = apiDefinition.populateCustomManagementInfo(definition, swaggerData);
+            }
+            Set<URITemplate> uriTemplates = apiDefinition.getURITemplates(definition);
+            applyDefaultThrottlingAndAuth(uriTemplates, defaultAPILevelPolicy);
 
+            Set<Scope> scopes = apiDefinition.getScopes(definition);
+            apiToAdd.setUriTemplates(uriTemplates);
+            apiToAdd.setScopes(scopes);
+            apiToAdd = OASParserUtil.setExtensionsToAPI(definition, apiToAdd);
+
+            if (!syncOperations) {
+                validateScopes(apiToAdd, apiProvider, username);
+                SwaggerData swaggerData = new SwaggerData(apiToAdd);
+                definition =
+                        apiDefinition.populateCustomManagementInfo(validationResponse.getJsonContent(), swaggerData);
+            }
+            definitionToAdd = definition;
+        }
         // adding the definition
         apiToAdd.setSwaggerDefinition(definitionToAdd);
 
@@ -734,6 +750,66 @@ public class ApisApiServiceImplUtils {
         addedAPI = apiProvider.getAPIbyUUID(addedAPI.getUuid(), organization);
 
         return addedAPI;
+    }
+
+    /**
+     * Applies default throttling tier and authentication type to the given set of URI templates,
+     * if they are not already defined.
+     *
+     * @param uriTemplates          the set of URI templates to update
+     * @param defaultThrottlingTier the default throttling policy to apply when none is set
+     */
+    private static void applyDefaultThrottlingAndAuth(Set<URITemplate> uriTemplates, String defaultThrottlingTier) {
+
+        for (URITemplate uriTemplate : uriTemplates) {
+            if (StringUtils.isEmpty(uriTemplate.getThrottlingTier())) {
+                uriTemplate.setThrottlingTier(defaultThrottlingTier);
+            }
+            if (StringUtils.isEmpty(uriTemplate.getAuthType())) {
+                uriTemplate.setAuthType(APIConstants.AUTH_APPLICATION_OR_USER_LEVEL_TOKEN);
+            }
+        }
+    }
+
+    /**
+     * Creates and initializes a Backend instance with the given parameters.
+     *
+     * @param backendApiId      unique identifier for the backend
+     * @param backendDefinition OpenAPI definition for the backend
+     * @param endpointConfig    endpoint configuration
+     * @return configured Backend instance
+     */
+    private static Backend createDefaultBackend(String backendApiId, String backendDefinition, String endpointConfig) {
+
+        Backend backend = new Backend();
+        backend.setId(backendApiId);
+        backend.setName(APIConstants.AI.MCP_DEFAULT_BACKEND_NAME);
+        backend.setDefinition(backendDefinition);
+        backend.setEndpointConfig(endpointConfig);
+        return backend;
+    }
+
+    /**
+     * Generates MCP feature URI templates for a backend API.
+     *
+     * @param subtype              MCP feature subtype
+     * @param backendApiDefinition API definition string
+     * @param backendApiId         backend API ID
+     * @param uriTemplates         existing URI templates
+     * @param parser               parser to generate MCP tools
+     * @return generated MCP feature templates
+     * @throws APIManagementException if generation fails
+     */
+    public static Set<URITemplate> generateMCPFeatures(String subtype, String backendApiDefinition, String backendApiId,
+                                                       Set<URITemplate> uriTemplates, APIDefinition parser)
+            throws APIManagementException {
+
+        Set<URITemplate> mcpTools = parser.generateMCPTools(backendApiDefinition, null,
+                backendApiId, APIConstants.AI.MCP_DEFAULT_FEATURE_TYPE, subtype, uriTemplates);
+        if (mcpTools == null) {
+            throw new APIManagementException("Failed to generate MCP feature.");
+        }
+        return mcpTools;
     }
 
     /**

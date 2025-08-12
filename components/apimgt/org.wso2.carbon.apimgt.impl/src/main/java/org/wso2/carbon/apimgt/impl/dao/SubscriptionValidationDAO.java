@@ -26,6 +26,9 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.SubscriptionAlreadyExistingException;
 import org.wso2.carbon.apimgt.api.dto.ConditionDTO;
 import org.wso2.carbon.apimgt.api.dto.ConditionGroupDTO;
+import org.wso2.carbon.apimgt.api.model.APIOperationMapping;
+import org.wso2.carbon.apimgt.api.model.BackendOperation;
+import org.wso2.carbon.apimgt.api.model.BackendOperationMapping;
 import org.wso2.carbon.apimgt.api.model.OperationPolicy;
 import org.wso2.carbon.apimgt.api.model.policy.AIAPIQuotaLimit;
 import org.wso2.carbon.apimgt.api.model.policy.BandwidthLimit;
@@ -55,7 +58,9 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1316,6 +1321,9 @@ public class SubscriptionValidationDAO {
                     String urlPattern = resultSet.getString("URL_PATTERN");
                     String throttlingTier = resultSet.getString("THROTTLING_TIER");
                     String scopeName = resultSet.getString("SCOPE_NAME");
+                    String description = resultSet.getString("DESCRIPTION");
+                    String schemaDefinition = resultSet.getString("SCHEMA_DEFINITION");
+                    int urlMappingId = resultSet.getInt("URL_MAPPING_ID");
                     URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
                     if (urlMapping == null) {
                         urlMapping = new URLMapping();
@@ -1323,6 +1331,12 @@ public class SubscriptionValidationDAO {
                         urlMapping.setHttpMethod(httpMethod);
                         urlMapping.setThrottlingPolicy(throttlingTier);
                         urlMapping.setUrlPattern(urlPattern);
+                        urlMapping.setDescription(description);
+                        urlMapping.setSchemaDefinition(schemaDefinition);
+
+                        if (APIConstants.API_TYPE_MCP.equals(api.getApiType())) {
+                            populateMcpOperationMappings(connection, urlMappingId, urlMapping, api);
+                        }
                     }
                     if (StringUtils.isNotEmpty(scopeName)) {
                         urlMapping.addScope(scopeName);
@@ -1336,6 +1350,52 @@ public class SubscriptionValidationDAO {
             boolean isPolicyEnabled = Boolean.parseBoolean(configs.get(POLICY_ENABLED_FOR_ANALYTICS));
             if (isPolicyEnabled) {
                 attachPolicies(connection, revisionId, api);
+            }
+        }
+    }
+
+    private void populateMcpOperationMappings(Connection connection, int urlMappingId, URLMapping urlMapping, API api)
+            throws SQLException {
+        String sql;
+        if (APIConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(api.getSubtype())) {
+            sql = SubscriptionValidationSQLConstants.GET_MCP_BACKEND_OPERATION_MAPPING_BY_REF_URL_MAPPING_ID;
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, urlMappingId);
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    if (resultSet.next()) {
+                        BackendOperationMapping backendOperationMapping = new BackendOperationMapping();
+
+                        BackendOperation backendOperation = new BackendOperation();
+                        backendOperation.setVerb(org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs.
+                                fromValue(resultSet.getString("VERB")));
+                        backendOperation.setTarget(resultSet.getString("TARGET"));
+                        backendOperationMapping.setBackendOperation(backendOperation);
+
+                        urlMapping.setBackendOperationMapping(backendOperationMapping);
+                    }
+                }
+            }
+        } else if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
+            sql = SubscriptionValidationSQLConstants.GET_MCP_API_OPERATION_MAPPING_BY_REF_URL_MAPPING_ID;
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, urlMappingId);
+                try (ResultSet resultSet = ps.executeQuery()) {
+                    if (resultSet.next()) {
+
+                        APIOperationMapping apiOperationMapping = new APIOperationMapping();
+                        apiOperationMapping.setApiName(resultSet.getString("API_NAME"));
+                        apiOperationMapping.setApiVersion(resultSet.getString("API_VERSION"));
+                        apiOperationMapping.setApiContext(resultSet.getString("CONTEXT"));
+
+                        BackendOperation backendOperation = new BackendOperation();
+                        backendOperation.setVerb(org.wso2.carbon.apimgt.api.APIConstants.SupportedHTTPVerbs.
+                                fromValue(resultSet.getString("HTTP_METHOD")));
+                        backendOperation.setTarget(resultSet.getString("URL_PATTERN"));
+                        apiOperationMapping.setBackendOperation(backendOperation);
+
+                        urlMapping.setApiOperationMapping(apiOperationMapping);
+                    }
+                }
             }
         }
     }
@@ -1357,7 +1417,8 @@ public class SubscriptionValidationDAO {
                         String policyVersion = resultSet.getString("POLICY_VERSION");
                         String operationPolicyDirection = resultSet.getString("OPERATION_POLICY_DIRECTION");
                         String operationPolicyID = resultSet.getString("OPERATION_POLICY_UUID");
-                        String parameters = resultSet.getString("OPERATION_PARAMS");
+                        String parameters = APIMgtDBUtil.getStringFromInputStream(resultSet.getBinaryStream("OPERATION_PARAMS"));
+
                         URLMapping urlMapping = null;
                         if (StringUtils.isNotEmpty(httpMethod) && StringUtils.isNotEmpty(urlPattern)) {
                             urlMapping = api.getResource(urlPattern, httpMethod);
@@ -1401,8 +1462,9 @@ public class SubscriptionValidationDAO {
                     String apiPolicyUUID = resultSet.getString("API_POLICY_UUID");
 
                     // We get parameters of the policies separately. However, this can be retrieved from the AM_API_OPERATION_POLICY_MAPPING as it contains both API and Operation Policies
-                    String operationParameters = resultSet.getString("OPERATION_PARAMS");
-                    String apiParams = resultSet.getString("API_PARAMS");
+                    String operationParameters = APIMgtDBUtil.getStringFromInputStream(resultSet.getBinaryStream("OPERATION_PARAMS"));
+                    String apiParams = APIMgtDBUtil.getStringFromInputStream(resultSet.getBinaryStream("API_PARAMS"));
+
                     URLMapping urlMapping = null;
                     if (StringUtils.isNotEmpty(httpMethod) && StringUtils.isNotEmpty(urlPattern)) {
                         urlMapping = api.getResource(urlPattern, httpMethod);

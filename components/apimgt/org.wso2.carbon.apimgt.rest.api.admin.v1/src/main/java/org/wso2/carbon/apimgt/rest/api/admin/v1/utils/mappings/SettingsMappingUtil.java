@@ -27,11 +27,11 @@ import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.KeyManagerConnectorConfiguration;
 import org.wso2.carbon.apimgt.api.model.Scope;
 import org.wso2.carbon.apimgt.impl.APIConstants;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.apimgt.rest.api.admin.v1.dto.*;
 import org.wso2.carbon.apimgt.rest.api.util.utils.RestApiUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -77,6 +77,7 @@ public class SettingsMappingUtil {
                         keyManagerConfiguration.getDisplayName(),keyManagerConfiguration.getDefaultScopesClaim(),
                         keyManagerConfiguration.getDefaultConsumerKeyClaim(),
                         keyManagerConfiguration.getConnectionConfigurations(),
+                        keyManagerConfiguration.getAuthConfigurations(),
                         keyManagerConfiguration.getEndpointConfigurations()));
             }
         });
@@ -102,7 +103,8 @@ public class SettingsMappingUtil {
 
     private static SettingsKeyManagerConfigurationDTO fromKeyManagerConfigurationToSettingsKeyManagerConfigurationDTO(
             String name, String displayName, String scopesClaim, String consumerKeyClaim,
-            List<ConfigurationDto> connectionConfigurationDtoList,List<ConfigurationDto> endpointConfigurations) {
+            List<ConfigurationDto> connectionConfigurationDtoList, List<ConfigurationDto> authConfigurationDtoList,
+            List<ConfigurationDto> endpointConfigurations) {
 
         SettingsKeyManagerConfigurationDTO settingsKeyManagerConfigurationDTO =
                 new SettingsKeyManagerConfigurationDTO();
@@ -123,6 +125,21 @@ public class SettingsMappingUtil {
                 keyManagerConfigurationDTO.setDefault(configurationDto.getDefaultValue());
                 keyManagerConfigurationDTO.setValues(configurationDto.getValues());
                 settingsKeyManagerConfigurationDTO.getConfigurations().add(keyManagerConfigurationDTO);
+            }
+        }
+        if (authConfigurationDtoList != null) {
+            for (ConfigurationDto configurationDto : authConfigurationDtoList) {
+                KeyManagerConfigurationDTO keyManagerConfigurationDTO = new KeyManagerConfigurationDTO();
+                keyManagerConfigurationDTO.setName(configurationDto.getName());
+                keyManagerConfigurationDTO.setLabel(configurationDto.getLabel());
+                keyManagerConfigurationDTO.setType(configurationDto.getType());
+                keyManagerConfigurationDTO.setRequired(configurationDto.isRequired());
+                keyManagerConfigurationDTO.setMask(configurationDto.isMask());
+                keyManagerConfigurationDTO.setMultiple(configurationDto.isMultiple());
+                keyManagerConfigurationDTO.setTooltip(configurationDto.getTooltip());
+                keyManagerConfigurationDTO.setDefault(configurationDto.getDefaultValue());
+                keyManagerConfigurationDTO.setValues(configurationDto.getValues());
+                settingsKeyManagerConfigurationDTO.getAuthConfigurations().add(keyManagerConfigurationDTO);
             }
         }
         if (endpointConfigurations != null) {

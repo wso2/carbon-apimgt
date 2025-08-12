@@ -29,6 +29,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONObject;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 
 public class APIProduct implements Serializable {
     // TODO add rest of the properties
@@ -149,6 +150,7 @@ public class APIProduct implements Serializable {
     public void setID(APIProductIdentifier id) {
         this.id = id;
     }
+    @UsedByMigrationClient
     public APIProductIdentifier getId() {
         return id;
     }

@@ -119,7 +119,7 @@ public class APIConfigContext extends ConfigContext {
     private void setApiProductVelocityContext(APIProduct apiProduct, VelocityContext context) {
         APIProductIdentifier id = apiProduct.getId();
         //set the api name version and context
-        context.put("apiName", id.getName());
+        context.put("apiName", this.getAPIProductName(apiProduct));
         context.put("apiVersion", id.getVersion());
 
         // We set the context pattern now to support plugable version strategy
@@ -137,6 +137,18 @@ public class APIConfigContext extends ConfigContext {
             context.put("apiIsOauthProtected", Boolean.TRUE);
         } else {
             context.put("apiIsOauthProtected", Boolean.FALSE);
+        }
+        // if API is secured with api_Key
+        if (apiSecurity != null && apiSecurity.contains(APIConstants.API_SECURITY_API_KEY)) {
+            context.put("apiIsApiKeyProtected", Boolean.TRUE);
+        } else {
+            context.put("apiIsApiKeyProtected", Boolean.FALSE);
+        }
+        // if API is secured with basic_auth
+        if (apiSecurity != null && apiSecurity.contains(APIConstants.API_SECURITY_BASIC_AUTH)) {
+            context.put("apiIsBasicAuthProtected", Boolean.TRUE);
+        } else {
+            context.put("apiIsBasicAuthProtected", Boolean.FALSE);
         }
         if (apiProduct.isEnabledSchemaValidation()) {
             context.put("enableSchemaValidation", Boolean.TRUE);
@@ -157,7 +169,11 @@ public class APIConfigContext extends ConfigContext {
     }
 
     public String getAPIName(API api) {
-        return api.getId().getApiName();
+        return APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + api.getId().getApiName();
+    }
+
+    public String getAPIProductName(APIProduct product) {
+        return APIConstants.SYNAPSE_API_NAME_PREFIX + "--" + product.getId().getName();
     }
 
     /**

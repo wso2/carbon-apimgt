@@ -16,7 +16,11 @@
 
 package org.wso2.carbon.apimgt.impl.dto;
 
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -47,6 +51,7 @@ public class ThrottleProperties {
     private boolean enableJwtConditions = false;
     private boolean enableQueryParamConditions =false;
     private String[] skipRedeployingPolicies = new String[]{};
+    private List<String> skipDeployingPolicies = new ArrayList<>();
     private Map<String, Long> defaultThrottleTierLimits = new HashMap<String, Long>();
     private boolean enablePolicyRecreate;
     private TrafficManager trafficManager;
@@ -82,6 +87,7 @@ public class ThrottleProperties {
         this.policyDeployer = policyDeployer;
     }
 
+    @UsedByMigrationClient
     public boolean isEnableUnlimitedTier() {
         return enableUnlimitedTier;
     }
@@ -640,6 +646,13 @@ public class ThrottleProperties {
 
     public void setSkipRedeployingPolicies(String[] skipRedeployingPolicies) {
         this.skipRedeployingPolicies = skipRedeployingPolicies;
+    }
+    public List<String>  getSkipDeployingPolicies() {
+        return skipDeployingPolicies;
+    }
+
+    public void setSkipDeployingPolicies(List<String> skipDeployingPolicies) {
+        this.skipDeployingPolicies = skipDeployingPolicies;
     }
 }
 

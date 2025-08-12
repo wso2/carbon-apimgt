@@ -75,7 +75,6 @@ import org.wso2.carbon.apimgt.impl.certificatemgt.CertificateManagerImpl;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.GatewayArtifactsMgtDAO;
 import org.wso2.carbon.apimgt.impl.dao.ScopesDAO;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.GatewayArtifactSynchronizerProperties;
 import org.wso2.carbon.apimgt.impl.dto.KeyManagerDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowDTO;
@@ -101,6 +100,7 @@ import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.MediationPolicyPersistenceException;
 import org.wso2.carbon.apimgt.persistence.utils.RegistryPersistenceUtil;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.governance.api.generic.GenericArtifactManager;
 import org.wso2.carbon.governance.api.generic.dataobjects.GenericArtifact;
@@ -1163,6 +1163,7 @@ public class APIProviderImplTest {
         Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
         Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
         Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+        Mockito.when(apimgtDAO.getAPITypeFromUUID(Mockito.anyString())).thenReturn(APIConstants.API_TYPE_HTTP);
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
         Mockito.when(APIUtil.getTenantConfig(Mockito.anyString())).thenReturn(new JSONObject());
@@ -1199,6 +1200,7 @@ public class APIProviderImplTest {
         Mockito.when(apimgtDAO.getMostRecentRevisionId(Mockito.anyString())).thenReturn(0);
         Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
         Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
+        Mockito.when(apimgtDAO.getAPITypeFromUUID(Mockito.anyString())).thenReturn(APIConstants.API_TYPE_HTTP);
 
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
@@ -1239,6 +1241,7 @@ public class APIProviderImplTest {
         Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
         Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
         Mockito.when(APIUtil.getTenantConfig(Mockito.anyString())).thenReturn(new JSONObject());
+        Mockito.when(apimgtDAO.getAPITypeFromUUID(Mockito.anyString())).thenReturn(APIConstants.API_TYPE_HTTP);
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
         try {
@@ -1278,6 +1281,7 @@ public class APIProviderImplTest {
         Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
         Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
         Mockito.when(APIUtil.getTenantConfig(Mockito.anyString())).thenReturn(new JSONObject());
+        Mockito.when(apimgtDAO.getAPITypeFromUUID(Mockito.anyString())).thenReturn(APIConstants.API_TYPE_HTTP);
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
         try {
@@ -1323,6 +1327,7 @@ public class APIProviderImplTest {
         Mockito.when(APIUtil.getAPIIdentifierFromUUID(Mockito.anyString())).thenReturn(apiId);
         Mockito.when(APIUtil.getAPIPath(apiId)).thenReturn(apiPath);
         Mockito.when(APIUtil.getTenantConfig(Mockito.anyString())).thenReturn(new JSONObject());
+        Mockito.when(apimgtDAO.getAPITypeFromUUID(Mockito.anyString())).thenReturn(APIConstants.API_TYPE_HTTP);
         PowerMockito.when(apiPersistenceInstance.addAPIRevision(any(Organization.class), Mockito.anyString(), Mockito.anyInt()))
                 .thenReturn("b55e0fc3-9829-4432-b99e-02056dc91838");
         try {

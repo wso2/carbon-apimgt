@@ -491,6 +491,7 @@ public final class APIConstants {
     public static final String API_KEY_HEADER = "ApiKeyHeader";
     public static final String API_SECURITY = "APISecurity";
     public static final String API_LEVEL_POLICY = "APILevelPolicy";
+    public static final String API_TYPE_PROP = "ApiType";
     public static final String CERTIFICATE_INFORMATION = "CertificateInformation";
     public static final String AUTHORIZATION_HEADER_DEFAULT = "Authorization";
     public static final String API_KEY_HEADER_DEFAULT = "ApiKey";
@@ -521,10 +522,40 @@ public final class APIConstants {
     public static final String CNF = "cnf";
     public static final String HASHING = "Hashing";
     public static final String HASGING_ALGORITHM= "HashingAlgorithm";
+    public static final String ENDPOINT_SECURITY_AWS_SECRET_KEY = "secretKey";
 
-    // Constants related to AI features: API chat and Marketplace Assistant
+    public static class AWSConstants{
+        // AWS S4 Constants
+        public static final String AMZ_DATE_FORMAT = "yyyyMMdd'T'HHmmss'Z'";
+        public static final String DATE_FORMAT = "yyyyMMdd";
+        public static final String HOST_HEADER = "host";
+        public static final String AMZ_DATE_HEADER = "x-amz-date";
+        public static final String AMZ_SECURITY_TOKEN_HEADER = "x-amz-security-token";
+        public static final String AMZ_CONTENT_SHA_HEADER = "x-amz-content-sha256";
+        public static final String AWS4_ALGORITHM = "AWS4-HMAC-SHA256";
+        public static final String AWS4_REQUEST = "aws4_request";
+        public static final String AWS4_CREDENTIAL = "Credential";
+        public static final String AWS4_SIGNED_HEADERS = "SignedHeaders";
+        public static final String AWS4_SIGNATURE = "Signature";
+        public static final String AWS4 = "AWS4";
+        public static final String HMAC_SHA_256 = "HmacSHA256";
+        public static final String DEFAULT_REGION = "us-east-1";
+        public static final String STS = "sts";
+        public static final String AWS_DOMAIN = "amazonaws.com";
+        public static final String SESSION_FORMAT = "%d%d%d";
+        public static final String ASSUME_ROLE_QUERY_ACTION = "Action=AssumeRole";
+        public static final String ASSUME_ROLE_QUERY_VERSION = "&Version=2011-06-15";
+        public static final String ASSUME_ROLE_QUERY_ROLE_ARN_KEY = "&RoleArn=";
+        public static final String ASSUME_ROLE_QUERY_ROLE_SESSION_KEY = "&RoleSessionName=";
+        public static final String ASSUME_ROLE_QUERY_ROLE_EXTERNAL_ID_KEY = "&ExternalId=";
+        public static final String ASSUME_ROLE_ACCESS_KEY = "AccessKeyId";
+        public static final String ASSUME_ROLE_SECRET_KEY = "SecretAccessKey";
+        public static final String ASSUME_ROLE_SESSION_TOKEN = "SessionToken";
+    }
+
+    // Constants related to AI features: API chat, Marketplace Assistant, Guardrails
     public static class AI {
-
+        public static final String AI = "AI";
         public static final String API_CHAT = "APIChat";
         public static final String ENABLED = "Enabled";
         public static final String API_CHAT_AUTH_TOKEN = "AuthToken";
@@ -563,11 +594,89 @@ public final class APIConstants {
         public static final String DESIGN_ASSISTANT_TOKEN_ENDPOINT = "TokenEndpoint";
         public static final String DESIGN_ASSISTANT_CHAT_RESOURCE = "ChatResource";
         public static final String DESIGN_ASSISTANT_GEN_API_PAYLOAD_RESOURCE = "GenApiPayloadResource";
+        public static final String MCP_DEFAULT_FEATURE_TYPE = "TOOL";
+        public static final String MCP_DEFAULT_BACKEND_NAME = "Default Backend";
+
+        public static final String OPENAI_EMBEDDING_PROVIDER_TYPE = "openai";
+        public static final String AZURE_OPENAI_EMBEDDING_PROVIDER_TYPE = "azure-openai";
+        public static final String MISTRAL_EMBEDDING_PROVIDER_TYPE = "mistral";
+        public static final String EMBEDDING_PROVIDER = "EmbeddingProvider";
+        public static final String EMBEDDING_PROVIDER_TYPE = "type";
+        public static final String EMBEDDING_PROVIDER_PROPERTY = "Property";
+        public static final String EMBEDDING_PROVIDER_PROPERTY_KEY = "name";
+        public static final String EMBEDDING_PROVIDER_API_KEY = "apikey";
+        public static final String EMBEDDING_PROVIDER_EMBEDDING_ENDPOINT = "embedding_endpoint";
+        public static final String EMBEDDING_PROVIDER_EMBEDDING_MODEL = "embedding_model";
+        public static final String EMBEDDING_PROVIDER_EMBEDDING_REQUEST_MODEL = "model";
+        public static final String EMBEDDING_PROVIDER_EMBEDDING_REQUEST_INPUT = "input";
+        public static final String EMBEDDING_PROVIDER_RESPONSE_EMBEDDING_PATH = "/data/0/embedding";
+
+        public static final String GUARDRAIL_PROVIDERS = "GuardrailProviders";
+        public static final String GUARDRAIL_PROVIDER = "GuardrailProvider";
+        public static final String GUARDRAIL_PROVIDER_TYPE = "type";
+        public static final String GUARDRAIL_PROVIDER_PROPERTY = "Property";
+        public static final String GUARDRAIL_PROVIDER_PROPERTY_KEY = "name";
+        public static final String AZURE_OCP_APIM_SUBSCRIPTION_KEY_HEADER = "Ocp-Apim-Subscription-Key";
+        public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_TYPE = "azure-contentsafety";
+        public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_KEY = "key";
+        public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_ENDPOINT = "endpoint";
+        public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_CALLOUT_SERVICE = "service";
+        public static final String GUARDRAIL_PROVIDER_AZURE_CONTENTSAFETY_CALLOUT_PAYLOAD = "request_payload";
+
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_TYPE = "awsbedrock-guardrails";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_ACCESS_KEY = "access_key";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_SECRET_KEY = "secret_key";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_SESSION_TOKEN = "session_token";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_ROLE_ARN = "role_arn";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_ROLE_REGION = "role_region";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_ROLE_EXTERNAL_ID = "role_external_id";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_SERVICE = "service";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_SERVICE_REGION = "guardrail_region";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_HOST = "request_host";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_URI = "request_uri";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_URL = "request_url";
+        public static final String GUARDRAIL_PROVIDER_AWSBEDROCK_CALLOUT_PAYLOAD = "request_payload";
+
+        // Retry configuration
+        public static final String RETRIEVAL_TIMEOUT = "retrieval_timeout";
+        public static final String RETRY_COUNT = "retry_count";
+        public static final String RETRY_PROGRESSION_FACTOR = "retry_progression_factor";
+        public static final String DEFAULT_RETRIEVAL_TIMEOUT = "500"; // 500 milliseconds
+        public static final String DEFAULT_RETRY_COUNT = "0"; // 0 retry
+        public static final String DEFAULT_RETRY_PROGRESSION_FACTOR = "1"; // No progression factor, fixed retry time
 
         private AI() {
 
         }
     }
+
+    // AWS S4 Constants
+    public static final String AMZ_DATE_FORMAT = "yyyyMMdd'T'HHmmss'Z'";
+    public static final String DATE_FORMAT = "yyyyMMdd";
+    public static final String HOST_HEADER = "host";
+    public static final String AMZ_DATE_HEADER = "x-amz-date";
+    public static final String AMZ_SECURITY_TOKEN_HEADER = "x-amz-security-token";
+    public static final String AMZ_CONTENT_SHA_HEADER = "x-amz-content-sha256";
+    public static final String AWS4_ALGORITHM = "AWS4-HMAC-SHA256";
+    public static final String AWS4_REQUEST = "aws4_request";
+    public static final String AWS4_CREDENTIAL = "Credential";
+    public static final String AWS4_SIGNED_HEADERS = "SignedHeaders";
+    public static final String AWS4_SIGNATURE = "Signature";
+    public static final String AWS4 = "AWS4";
+    public static final String HMAC_SHA_256 = "HmacSHA256";
+    public static final String DEFAULT_REGION = "us-east-1";
+    public static final String STS = "sts";
+    public static final String AWS_DOMAIN = "amazonaws.com";
+    public static final String SESSION_FORMAT = "%d%d%d";
+    public static final String ASSUME_ROLE_QUERY_ACTION = "Action=AssumeRole";
+    public static final String ASSUME_ROLE_QUERY_VERSION = "&Version=2011-06-15";
+    public static final String ASSUME_ROLE_QUERY_ROLE_ARN_KEY = "&RoleArn=";
+    public static final String ASSUME_ROLE_QUERY_ROLE_SESSION_KEY = "&RoleSessionName=";
+    public static final String ASSUME_ROLE_QUERY_ROLE_EXTERNAL_ID_KEY = "&ExternalId=";
+    public static final String ASSUME_ROLE_ACCESS_KEY = "AccessKeyId";
+    public static final String ASSUME_ROLE_SECRET_KEY = "SecretAccessKey";
+    public static final String ASSUME_ROLE_SESSION_TOKEN = "SessionToken";
+
 
     //documentation rxt
 
@@ -844,6 +953,7 @@ public final class APIConstants {
             "EnableKeyManagerConfigurationRetriever";
     public static final String DEFAULT_KEY_MANAGER_TYPE = API_KEY_VALIDATOR + "DefaultKeyManagerType";
     public static final String KEY_VALIDATION_HANDLER_CLASSNAME = API_KEY_VALIDATOR + "KeyValidationHandlerClassName";
+    public static final String SKIP_CREATE_RESIDENT_KEY_MANAGER = API_KEY_VALIDATOR + "SkipCreateResidentKeyManager";
     // Constants needed for KeyManager section
     public static final String API_KEY_MANAGER = "APIKeyManager.";
     public static final String KEY_MANAGER_CLIENT = API_KEY_MANAGER + "KeyManagerClientImpl";
@@ -867,6 +977,8 @@ public final class APIConstants {
             "internal_user_mgt_list"};
     public static final String KEY_MANAGER_CLIENT_APPLICATION_PREFIX = "wso2_apim_km_";
     public static final String DEFAULT_APP_SHARING_KEYWORD = "private";
+    public static final String APP_SHARING_WITH_THE_ORGANIZATION_DISABLED = "Private";
+    public static final String APP_SHARING_WITH_THE_ORGANIZATION_ENABLED = "Shared";
 
     public static final String TOKEN_URL = "TokenURL";
     public static final String REVOKE_URL = "RevokeURL";
@@ -1158,6 +1270,11 @@ public final class APIConstants {
     public static final String TIER_PERMISSION_ALLOW = "allow";
     public static final String TIER_PERMISSION_DENY = "deny";
 
+
+    public static final String CURRENT_TENANT = "CURRENT_TENANT";
+    public static final String ALL_TENANTS = "ALL_TENANTS";
+    public static final String SPECIFIC_TENANTS = "SPECIFIC_TENANTS";
+
     public static final String SUBSCRIPTION_TO_CURRENT_TENANT = "current_tenant";
     public static final String SUBSCRIPTION_TO_ALL_TENANTS = "all_tenants";
     public static final String SUBSCRIPTION_TO_SPECIFIC_TENANTS = "specific_tenants";
@@ -1347,6 +1464,8 @@ public final class APIConstants {
         public static final String APPLICATION_REJECTED = "REJECTED";
         public static final String APPLICATION_ONHOLD = "ON_HOLD";
         public static final String DELETE_PENDING = "DELETE_PENDING";
+        public static final String UPDATE_PENDING = "UPDATE_PENDING";
+        public static final String UPDATE_REJECTED = "UPDATE_REJECTED";
     }
 
     public static class APIRevisionStatus {
@@ -1436,6 +1555,8 @@ public final class APIConstants {
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE"})));
     public static final Set<String> WS_SUPPORTED_METHOD_LIST =
             Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"SUBSCRIBE", "PUBLISH"})));
+    public static final Set<String> MCP_SUPPORTED_FEATURE_LIST =
+            Collections.unmodifiableSet(new HashSet<>(Arrays.asList(new String[]{"TOOL"})));
 
     public static final String HTTP_VERB_PUBLISH = "PUBLISH";
     public static final String HTTP_VERB_SUBSCRIBE = "SUBSCRIBE";
@@ -1871,6 +1992,8 @@ public final class APIConstants {
     public static final String ENDPOINT_SECURITY_TYPE_DIGEST = "digest";
     public static final String ENDPOINT_SECURITY_TYPE_OAUTH = "oauth";
     public static final String ENDPOINT_SECURITY_TYPE_API_KEY = "apikey";
+    public static final String ENDPOINT_SECURITY_TYPE_AWS =
+            org.wso2.carbon.apimgt.api.APIConstants.ENDPOINT_SECURITY_TYPE_AWS;
     public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER = "apiKeyIdentifier";
     public static final String ENDPOINT_SECURITY_API_KEY_VALUE = "apiKeyValue";
     public static final String ENDPOINT_SECURITY_API_KEY_IDENTIFIER_TYPE = "apiKeyIdentifierType";
@@ -2146,6 +2269,8 @@ public final class APIConstants {
             "C"};
     public static final String API_SUBTYPE_DEFAULT = "DEFAULT";
     public static final String API_SUBTYPE_AI_API = "AIAPI";
+    public static final String API_SUBTYPE_DIRECT_ENDPOINT = "DIRECT_ENDPOINT";
+    public static final String API_SUBTYPE_EXISTING_API = "EXISTING_API";
     public static final String API_PRODUCT_REVISION = "Current";
     public static class AdvancedThrottleConstants {
 
@@ -2192,6 +2317,7 @@ public final class APIConstants {
         public static final String ENABLE_JWT_CLAIM_CONDITIONS = "EnableJWTClaimConditions";
         public static final String ENABLE_QUERY_PARAM_CONDITIONS = "EnableQueryParamConditions";
         public static final String SKIP_REDEPLOYING_POLICIES = "SkipRedeployingPolicies";
+        public static final String SKIP_DEPLOYING_POLICIES = "SkipDeployingPolicies";
         public static final String ENABLED = "Enabled";
         public static final String IS_THROTTLED = "isThrottled";
         public static final String THROTTLE_KEY = "throttleKey";
@@ -2390,6 +2516,7 @@ public final class APIConstants {
 
     public static final String API_TYPE_WEBSUB = "WEBSUB";
     public static final String API_TYPE_SSE = "SSE";
+    public static final String API_TYPE_MCP = "MCP";
 
     public static final String API_TYPE_SOAP = "SOAP";
     public static final String API_TYPE_SOAPTOREST = "SOAPTOREST";
@@ -2606,7 +2733,9 @@ public final class APIConstants {
     // Supported API Types
     public enum ApiTypes {
         API,
-        PRODUCT_API
+        PRODUCT_API,
+
+        MCP_SERVER
     }
 
     public static final String TENANT_STATE_ACTIVE = "ACTIVE";
@@ -2729,6 +2858,7 @@ public final class APIConstants {
     public static final String RECOMMENDATIONS_CACHE_KEY = "Recommendations";
     public static final String LAST_UPDATED_CACHE_KEY = "LastUpdated";
 
+    public static final String TOPIC_VALIDITY = "TOPIC_VALIDITY";
     public static final String CLONED_ITERATION_INDEX_PROPERTY = "CLONED_ITERATION_INDEX";
     public static final String TENANT_DOMAIN_INFO_PROPERTY = "tenant.info.domain";
     public static final String TENANT_ID_INFO_PROPERTY = "tenant.info.id";
@@ -2800,6 +2930,8 @@ public final class APIConstants {
         public static final String DEFAULT_KEY_MANAGER_TYPE = "default";
         public static final String DEFAULT_KEY_MANAGER_DESCRIPTION = "This is Resident Key Manager";
         public static final String WSO2_IS_KEY_MANAGER_TYPE = "WSO2-IS";
+        public static final String WSO2_IS7_KEY_MANAGER_TYPE = "WSO2-IS-7";
+        public static final String SP_NAME_APPLICATION = "sp.name.application";
 
         public static final String ISSUER = "issuer";
         public static final String JWKS_ENDPOINT = "jwks_endpoint";
@@ -2814,6 +2946,7 @@ public final class APIConstants {
         public static final String ENABLE = "Enable";
         public static final String USERNAME = "Username";
         public static final String PASSWORD = "Password";
+
         public static final String KM_ADMIN_AS_APP_OWNER = "km_admin_as_app_owner";
         public static final String SELF_VALIDATE_JWT = "self_validate_jwt";
         public static final String CLAIM_MAPPING = "claim_mappings";
@@ -2865,7 +2998,7 @@ public final class APIConstants {
         public static final String PASSWORD_GRANT_TYPE = "password";
         public static final String CLIENT_CREDENTIALS_GRANT_TYPE = "client_credentials";
         public static final String APPLICATION_GRANT_TYPE = "application";
-        public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";
+        public static final String ACCESS_CODE_GRANT_TYPE = "accessCode";        
 
         public static class KeyManagerEvent {
 
@@ -2883,6 +3016,16 @@ public final class APIConstants {
             public static final String TOKEN_TYPE = "tokenType";
             public static final String KEY_MANAGER_STREAM_ID = "org.wso2.apimgt.keymgt.stream:1.0.0";
         }
+        
+    }
+    
+    public static class TenantManagementEvent {
+        public static final String TENANT_MANAGEMENT_TYPE = "TENANT_MANAGEMENT";
+        public static final String TYPE_ADD_TENANT = "CREATE";
+        public static final String TYPE_UPDATE_TENANT = "UPDATE";
+        public static final String TYPE_ACTIVATE_TENANT = "ACTIVATE";
+        public static final String TYPE_DEACTIVATE_TENANT = "DEACTIVATE";
+        
     }
 
     public static class GlobalCacheInvalidation {
@@ -3075,6 +3218,7 @@ public final class APIConstants {
         public static final String HUB_MODE_QUERY_PARAM = "hub.mode";
         public static final String HUB_LEASE_SECONDS_QUERY_PARAM = "hub.lease_seconds";
         public static final String TOPIC_QUERY_PARAM = "topic";
+        public static final String SIGNATURE_HEADER_NAME_PROPERTY = "signature_header_name";
         public static final String SUBSCRIBERS_LIST_PROPERTY = "SUBSCRIBERS_LIST";
         public static final String SUBSCRIBERS_COUNT_PROPERTY = "SUBSCRIBERS_COUNT";
         public static final String SUBSCRIBER_CALLBACK_PROPERTY = "SUBSCRIBER_CALLBACK";
@@ -3292,11 +3436,16 @@ public final class APIConstants {
     public static final String EXTERNAL_GATEWAY_VENDOR = "external";
     public static final String WSO2_APK_GATEWAY = "wso2/apk";
     public static final String WSO2_SYNAPSE_GATEWAY = "wso2/synapse";
+    public static final String EXTERNAL_AWS_GATEWAY = "AWS";
     public static final List<String> API_TYPES = Arrays.asList("rest", "soap", "graphql", "ws", "wh", "sse", "ai");
 
     public static final String PERMISSION_ALLOW = "ALLOW";
     public static final String PERMISSION_DENY = "DENY";
     public static final String PERMISSION_NOT_RESTRICTED = "PUBLIC";
+
+    public static final String PRIVATE = "PRIVATE";
+    public static final String PUBLIC = "PUBLIC";
+    public static final String RESTRICTED = "RESTRICTED";
 
     // Protocol variables
     public static final String HTTP_TRANSPORT_PROTOCOL_NAME = "http";
@@ -3357,6 +3506,12 @@ public final class APIConstants {
     public static final String ORG_BASED_ACCESS_CONTROL_ORG_NAME_CLAIM = "OrganizationNameLocalClaim";
     public static final String ORG_BASED_ACCESS_CONTROL_ORG_ID_CLAIM = "OrganizationIDLocalClaim";
 
+    public static final String TENANT_SHARING_CONFIGS = "TenantSharingConfigs";
+    public static final String TENANT_SHARING_CONFIG = "TenantSharingConfig";
+    public static final String TENANT_SHARING_CONFIG_TYPE = "type";
+    public static final String TENANT_SHARING_CONFIG_PROPERTY = "Property";
+    public static final String TENANT_SHARING_CONFIG_PROPERTY_KEY = "name";
+
     public static class TransactionCounter {
 
         public static final String TRANSACTIONCOUNTER = "TransactionCounter";
@@ -3387,4 +3542,72 @@ public final class APIConstants {
         public static final String SCHEDULER_TASK_CHECK_INTERVAL = "TaskCheckIntervalMinutes";
         public static final String SCHEDULER_TASK_CLEANUP_INTERVAL = "TaskCleanupIntervalMinutes";
     }
+
+    public static class MCP {
+        public static final String MCP_ENABLED = "MCP_ENABLED";
+        public static final String METHOD_INITIALIZE = "initialize";
+        public static final String METHOD_TOOL_LIST = "tools/list";
+        public static final String METHOD_TOOL_CALL = "tools/call";
+        public static final String METHOD_PING = "ping";
+        public static final String METHOD_NOTIFICATION_INITIALIZED = "notifications/initialized";
+        public static final String METHOD_RESOURCES_LIST = "resources/list";
+        public static final String METHOD_RESOURCE_TEMPLATE_LIST = "resources/templates/list";
+        public static final String METHOD_PROMPTS_LIST = "prompts/list";
+        public static final List<String> ALLOWED_METHODS = Arrays.asList(METHOD_INITIALIZE, METHOD_TOOL_LIST,
+                METHOD_TOOL_CALL, METHOD_PING, METHOD_NOTIFICATION_INITIALIZED, METHOD_RESOURCES_LIST, METHOD_PROMPTS_LIST,
+                METHOD_RESOURCE_TEMPLATE_LIST);
+        public static final String PROTOCOL_VERSION_KEY = "protocolVersion";
+        public static final String PROTOCOL_VERSION_2024_NOVEMBER = "2024-11-05";
+        public static final String PROTOCOL_VERSION_2025_MARCH = "2025-03-26";
+        public static final String PROTOCOL_VERSION_2025_JUNE = "2025-06-18";
+        public static final List<String> SUPPORTED_PROTOCOL_VERSIONS = Arrays.asList(PROTOCOL_VERSION_2025_MARCH);
+        public static final String PROTOCOL_VERSION_REQUESTED = "requested";
+        public static final String PROTOCOL_VERSION_SUPPORTED = "supported";
+        public static final String PROTOCOL_MISMATCH_ERROR = "Unsupported protocol version";
+        public static final String PARAMS_KEY = "params";
+        public static final String TOOL_NAME_KEY = "name";
+        public static final String TOOL_DESC_KEY = "description";
+        public static final String REQUIRED_KEY = "required";
+        public static final String PROPERTIES_KEY = "properties";
+        public static final String ARGUMENTS_KEY = "arguments";
+        public static final String RESULT_KEY = "result";
+        public static final String VHOST_HEADER = "x-wso2-mcp-vhost";
+        public static final String BASEPATH_HEADER = "x-wso2-mcp-basepath";
+        public static final String VERSION_HEADER = "x-wso2-mcp-version";
+        public static final String ORG_HEADER = "x-wso2-mcp-organization";
+        public static final String PAYLOAD_TOOL_NAME = "tool_name";
+        public static final String PAYLOAD_SCHEMA = "schema";
+        public static final String PAYLOAD_API_NAME = "api_name";
+        public static final String PAYLOAD_CONTEXT = "context";
+        public static final String PAYLOAD_VERSION = "version";
+        public static final String PAYLOAD_PATH = "path";
+        public static final String PAYLOAD_VERB = "verb";
+        public static final String PAYLOAD_AUTH = "auth";
+        public static final String PAYLOAD_ENDPOINT = "endpoint";
+        public static final String ASGARDEO_WK_PLACEHOLDER
+                = "https://api.asgardeo.io/t/{organization}/oauth2/token/.well-known/openid-configuration";
+        public static final String MCP_PROTOCOL_VERSION_HEADER = "MCP-Protocol-Version";
+
+        /**
+         * This class contains constants used for RPC processing
+         */
+        public static class RpcConstants {
+            public static final String JSON_RPC = "jsonrpc";
+            public static final String METHOD = "method";
+            public static final String ID = "id";
+            public static final String JSON_RPC_VERSION = "2.0";
+            public static final int PARSE_ERROR_CODE = -32700;
+            public static final int INVALID_REQUEST_CODE = -32600;
+            public static final int METHOD_NOT_FOUND_CODE = -32601;
+            public static final int INVALID_PARAMS_CODE = -32602;
+            public static final int INTERNAL_ERROR_CODE = -32603;
+            public static final String PARSE_ERROR_MESSAGE = "Parse error";
+            public static final String INVALID_REQUEST_MESSAGE = "Invalid Request";
+            public static final String METHOD_NOT_FOUND_MESSAGE = "Method not found";
+            public static final String INVALID_PARAMS_MESSAGE = "Invalid params";
+            public static final String INTERNAL_ERROR_MESSAGE = "Internal error";
+        }
+    }
+
+    public static final String SYNAPSE_API_NAME_PREFIX = "prod";
 }

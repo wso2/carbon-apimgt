@@ -17,6 +17,7 @@
 package org.wso2.carbon.apimgt.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,6 +42,7 @@ import org.apache.commons.logging.LogFactory;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.UsedByMigrationClient;
 import org.wso2.carbon.apimgt.api.dto.GatewayVisibilityPermissionConfigurationDTO;
 import org.wso2.carbon.apimgt.api.model.APIPublisher;
 import org.wso2.carbon.apimgt.api.model.APIStore;
@@ -56,12 +58,15 @@ import org.wso2.carbon.apimgt.impl.dto.GatewayCleanupSkipList;
 import org.wso2.carbon.apimgt.impl.dto.LoadingTenants;
 import org.wso2.carbon.apimgt.impl.dto.OrgAccessControl;
 import org.wso2.carbon.apimgt.impl.dto.RedisConfig;
+import org.wso2.carbon.apimgt.impl.dto.TenantSharingConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ThrottleProperties;
 import org.wso2.carbon.apimgt.impl.dto.TokenValidationDto;
 import org.wso2.carbon.apimgt.impl.dto.WorkflowProperties;
 import org.wso2.carbon.apimgt.impl.dto.ai.AIAPIConfigurationsDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.DesignAssistantConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.EmbeddingProviderConfigurationDTO;
+import org.wso2.carbon.apimgt.api.dto.GuardrailProviderConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ai.MarketplaceAssistantConfigurationDTO;
 import org.wso2.carbon.apimgt.common.gateway.dto.ClaimMappingDto;
 import org.wso2.carbon.apimgt.common.gateway.dto.JWKSConfigurationDTO;
@@ -136,6 +141,10 @@ public class APIManagerConfiguration {
 
     private WorkflowProperties workflowProperties = new WorkflowProperties();
     private Map<String, Environment> apiGatewayEnvironments = new LinkedHashMap<String, Environment>();
+    private final Map<String, GuardrailProviderConfigurationDTO> guardrailProviders = new HashMap<>();
+    private final Map<String, TenantSharingConfigurationDTO> tenantSharingConfigurations = new HashMap<>();
+    private final EmbeddingProviderConfigurationDTO embeddingProviderConfigurationDTO =
+            new EmbeddingProviderConfigurationDTO();
     private static Properties realtimeNotifierProperties;
     private static Properties persistentNotifierProperties;
     private static Map<String, String> analyticsProperties;
@@ -320,6 +329,7 @@ public class APIManagerConfiguration {
         return null;
     }
 
+    @UsedByMigrationClient
     public String getFirstProperty(String key) {
 
         List<String> value = configuration.get(key);
@@ -775,6 +785,45 @@ public class APIManagerConfiguration {
                 setTokenValidation(element);
             } else if (APIConstants.ORG_BASED_ACCESS_CONTROL.equals(localName)) {
                 setOrgBasedAccessControlConfigs(element);
+            } else if (APIConstants.TENANT_SHARING_CONFIGS.equals(localName)) {
+                    // Iterate through each <TenantSharingConfig>
+                    for (Iterator<?> tenantSharingConfigs = element.getChildElements(); tenantSharingConfigs.hasNext(); ) {
+                        OMElement tenantSharingConfigElement = (OMElement) tenantSharingConfigs.next();
+
+                        if (APIConstants.TENANT_SHARING_CONFIG.equals(tenantSharingConfigElement.getLocalName())) {
+                            // Get the tenantSharingConfigs type
+                            String type = tenantSharingConfigElement.getAttributeValue(
+                                    new QName(APIConstants.TENANT_SHARING_CONFIG_TYPE));
+                            if (type == null || type.isEmpty()) {
+                                continue; // skip if no type defined
+                            }
+
+                            Map<String, String> propertiesMap = new HashMap<>();
+
+                            // Iterate through each <Property>
+                            for (Iterator<?> props = tenantSharingConfigElement.getChildElements(); props.hasNext(); ) {
+                                OMElement prop = (OMElement) props.next();
+
+                                if (APIConstants.TENANT_SHARING_CONFIG_PROPERTY.equals(prop.getLocalName())) {
+                                    String key = prop.getAttributeValue(
+                                            new QName(APIConstants.TENANT_SHARING_CONFIG_PROPERTY_KEY));
+                                    String value = MiscellaneousUtil.resolve(prop, secretResolver);
+
+                                    if (key != null && !key.isEmpty()) {
+                                        propertiesMap.put(key, value);
+                                    }
+                                }
+                            }
+
+                            // Add to the main map
+                            TenantSharingConfigurationDTO tenantSharingConfigurationDTO =
+                                    new TenantSharingConfigurationDTO();
+                            tenantSharingConfigurationDTO.setType(type);
+                            tenantSharingConfigurationDTO.setProperties(propertiesMap);
+                            tenantSharingConfigurations.put(type, tenantSharingConfigurationDTO);
+                        }
+                    }
+
             } else if (APIConstants.HASHING.equals(localName)) {
                 setHashingAlgorithm(element);
             } else if (APIConstants.TransactionCounter.TRANSACTIONCOUNTER.equals(localName)) {
@@ -784,6 +833,79 @@ public class APIManagerConfiguration {
                 }
             } else if (APIConstants.APIMGovernance.GOVERNANCE_CONFIG.equals(localName)) {
                 setAPIMGovernanceConfigurations(element);
+            } else if (APIConstants.AI.AI.equals(localName)) {
+                for (Iterator<?> aiChildren = element.getChildElements(); aiChildren.hasNext(); ) {
+                    OMElement aiChildElement = (OMElement) aiChildren.next();
+
+                    if (APIConstants.AI.GUARDRAIL_PROVIDERS.equals(aiChildElement.getLocalName())) {
+                        // Iterate through each <EmbeddingProvider>
+                        for (Iterator<?> providers = aiChildElement.getChildElements(); providers.hasNext(); ) {
+                            OMElement providerElement = (OMElement) providers.next();
+
+                            if (APIConstants.AI.GUARDRAIL_PROVIDER.equals(providerElement.getLocalName())) {
+                                // Get the provider type
+                                String type = providerElement.getAttributeValue(
+                                        new QName(APIConstants.AI.GUARDRAIL_PROVIDER_TYPE));
+                                if (type == null || type.isEmpty()) {
+                                    continue; // skip if no type defined
+                                }
+
+                                Map<String, String> propertiesMap = new HashMap<>();
+
+                                // Iterate through each <Property>
+                                for (Iterator<?> props = providerElement.getChildElements(); props.hasNext(); ) {
+                                    OMElement prop = (OMElement) props.next();
+
+                                    if (APIConstants.AI.GUARDRAIL_PROVIDER_PROPERTY.equals(prop.getLocalName())) {
+                                        String key = prop.getAttributeValue(
+                                                new QName(APIConstants.AI.GUARDRAIL_PROVIDER_PROPERTY_KEY));
+                                        String value = MiscellaneousUtil.resolve(prop, secretResolver);
+
+                                        if (key != null && !key.isEmpty()) {
+                                            propertiesMap.put(key, value);
+                                        }
+                                    }
+                                }
+
+                                // Add to the main map
+                                GuardrailProviderConfigurationDTO guardrailProviderConfigurationDTO =
+                                        new GuardrailProviderConfigurationDTO();
+                                guardrailProviderConfigurationDTO.setType(type);
+                                guardrailProviderConfigurationDTO.setProperties(propertiesMap);
+                                guardrailProviders.put(type, guardrailProviderConfigurationDTO);
+                            }
+                        }
+                    }
+
+                    if (APIConstants.AI.EMBEDDING_PROVIDER.equals(aiChildElement.getLocalName())) {
+                        // Get the provider type
+                        String type = aiChildElement.getAttributeValue(
+                                new QName(APIConstants.AI.EMBEDDING_PROVIDER_TYPE));
+                        if (type == null || type.isEmpty()) {
+                            continue; // skip if no type defined
+                        }
+
+                        Map<String, String> propertiesMap = new HashMap<>();
+
+                        // Iterate through each <Property>
+                        for (Iterator<?> props = aiChildElement.getChildElements(); props.hasNext(); ) {
+                            OMElement prop = (OMElement) props.next();
+
+                            if (APIConstants.AI.EMBEDDING_PROVIDER_PROPERTY.equals(prop.getLocalName())) {
+                                String key = prop.getAttributeValue(
+                                        new QName(APIConstants.AI.EMBEDDING_PROVIDER_PROPERTY_KEY));
+                                String value = MiscellaneousUtil.resolve(prop, secretResolver);
+
+                                if (key != null && !key.isEmpty()) {
+                                    propertiesMap.put(key, value);
+                                }
+                            }
+                        }
+
+                        this.embeddingProviderConfigurationDTO.setType(type);
+                        this.embeddingProviderConfigurationDTO.setProperties(propertiesMap);
+                    }
+                }
             }
             readChildElements(element, nameStack);
             nameStack.pop();
@@ -808,7 +930,6 @@ public class APIManagerConfiguration {
             orgAccessControl.setOrgIdLocalClaim(orgIdElement.getText());
         }
     }
-        
     public boolean getTransactionCounterProperties() {
         return isTransactionCounterEnabled;
     }
@@ -1209,6 +1330,21 @@ public class APIManagerConfiguration {
         return apiGatewayEnvironments;
     }
 
+    public EmbeddingProviderConfigurationDTO getEmbeddingProvider() {
+
+        return embeddingProviderConfigurationDTO;
+    }
+
+    public GuardrailProviderConfigurationDTO getGuardrailProvider(String type) {
+
+        return guardrailProviders.get(type);
+    }
+
+    public TenantSharingConfigurationDTO getTenantSharingConfiguration(String type) {
+
+        return tenantSharingConfigurations.get(type);
+    }
+
     public RecommendationEnvironment getApiRecommendationEnvironment() {
 
         return recommendationEnvironment;
@@ -1410,6 +1546,19 @@ public class APIManagerConfiguration {
             if (skipRedeployingPoliciesElement != null) {
                 throttleProperties.setSkipRedeployingPolicies(skipRedeployingPoliciesElement
                         .getText().split(APIConstants.DELEM_COMMA));
+            }
+            // Check skip deploy throttle policies
+            OMElement skipDeployingPoliciesElement = throttleConfigurationElement
+                    .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants
+                            .SKIP_DEPLOYING_POLICIES));
+            if (skipDeployingPoliciesElement != null) {
+                throttleProperties.setSkipDeployingPolicies(
+                        Arrays.asList(skipDeployingPoliciesElement.getText().split(APIConstants.DELEM_COMMA)));
+                if (log.isDebugEnabled()) {
+                    if (throttleProperties.getSkipDeployingPolicies() != null) {
+                        log.debug("Skip deploying throttle policies: " + throttleProperties.getSkipDeployingPolicies());
+                    }
+                }
             }
             OMElement enablePolicyDeployElement = throttleConfigurationElement
                     .getFirstChildWithName(new QName(APIConstants.AdvancedThrottleConstants.ENABLE_POLICY_DEPLOYMENT));

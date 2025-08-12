@@ -91,11 +91,10 @@ import org.wso2.carbon.apimgt.api.model.VHost;
 import org.wso2.carbon.apimgt.api.model.policy.PolicyConstants;
 import org.wso2.carbon.apimgt.api.model.webhooks.Subscription;
 import org.wso2.carbon.apimgt.api.model.webhooks.Topic;
-import org.wso2.carbon.apimgt.impl.deployer.exceptions.DeployerException;
+import org.wso2.carbon.apimgt.api.model.ApplicationResponse;
 import org.wso2.carbon.apimgt.impl.dto.ai.ApiChatConfigurationDTO;
 import org.wso2.carbon.apimgt.impl.caching.CacheProvider;
 import org.wso2.carbon.apimgt.impl.dao.ApiMgtDAO;
-import org.wso2.carbon.apimgt.impl.definitions.OASParserUtil;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationRegistrationWorkflowDTO;
 import org.wso2.carbon.apimgt.impl.dto.ApplicationWorkflowDTO;
@@ -141,6 +140,7 @@ import org.wso2.carbon.apimgt.persistence.dto.UserContext;
 import org.wso2.carbon.apimgt.persistence.exceptions.APIPersistenceException;
 import org.wso2.carbon.apimgt.persistence.exceptions.OASPersistenceException;
 import org.wso2.carbon.apimgt.persistence.mapper.APIMapper;
+import org.wso2.carbon.apimgt.spec.parser.definitions.OASParserUtil;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -164,6 +164,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.SortedSet;
@@ -1766,10 +1767,11 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
      * Updates an Application identified by its id
      *
      * @param application Application object to be updated
+     * @return
      * @throws APIManagementException
      */
     @Override
-    public void updateApplication(Application application) throws APIManagementException {
+    public ApplicationResponse updateApplication(Application application) throws APIManagementException {
 
         Application existingApp;
         String uuid = application.getUUID();
@@ -1902,38 +1904,103 @@ public class APIConsumerImpl extends AbstractAPIManager implements APIConsumer {
         if (StringUtils.isEmpty(application.getSharedOrganization())) {
             application.setSharedOrganization(APIConstants.DEFAULT_APP_SHARING_KEYWORD);
         }
-        apiMgtDAO.updateApplication(application);
-        Application updatedApplication = apiMgtDAO.getApplicationById(application.getId());
-        if (log.isDebugEnabled()) {
-            log.debug("Successfully updated the Application: " + application.getId() + " in the database.");
+
+        apiMgtDAO.updateApplicationStatus(application.getId(), APIConstants.ApplicationStatus.UPDATE_PENDING);
+        WorkflowResponse workflowResponse = null;
+        try {
+            WorkflowExecutor updateApplicationWFExecutor =
+                    getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
+            ApplicationWorkflowDTO appWFDto = new ApplicationWorkflowDTO();
+            appWFDto.setApplication(application);
+            appWFDto.setExistingApplication(existingApp);
+            appWFDto.setExternalWorkflowReference(updateApplicationWFExecutor.generateUUID());
+            appWFDto.setWorkflowReference(String.valueOf(existingApp.getId()));
+            appWFDto.setWorkflowType(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
+            appWFDto.setCallbackUrl(updateApplicationWFExecutor.getCallbackURL());
+            appWFDto.setStatus(WorkflowStatus.CREATED);
+            appWFDto.setTenantDomain(organization);
+            appWFDto.setTenantId(tenantId);
+            appWFDto.setUserName(existingApp.getOwner());
+            appWFDto.setCreatedTime(System.currentTimeMillis());
+            workflowResponse = updateApplicationWFExecutor.execute(appWFDto);
+
+        } catch (WorkflowException e) {
+            throw new APIManagementException("Could not execute application update workflow",
+                    ExceptionCodes.WORKFLOW_EXCEPTION);
+        }
+        boolean updateRejected = false;
+        String updateStatus = null;
+        if (workflowResponse != null && workflowResponse.getJSONPayload() != null
+                && !workflowResponse.getJSONPayload().isEmpty()) {
+            try {
+                JSONObject wfResponseJson = (JSONObject) new JSONParser().parse(workflowResponse.getJSONPayload());
+                if (APIConstants.ApplicationStatus.APPLICATION_REJECTED.equals(wfResponseJson.get("Status"))) {
+                    updateRejected = true;
+                    updateStatus = APIConstants.ApplicationStatus.APPLICATION_REJECTED;
+                }
+            } catch (ParseException e) {
+                log.error('\'' + workflowResponse.getJSONPayload() + "' is not a valid JSON.", e);
+            }
         }
 
-        JSONObject appLogObject = new JSONObject();
-        appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
-        appLogObject.put(APIConstants.AuditLogConstants.TIER, application.getTier());
-        appLogObject.put(APIConstants.AuditLogConstants.STATUS, existingApp != null ? existingApp.getStatus() : "");
-        appLogObject.put(APIConstants.AuditLogConstants.CALLBACK, application.getCallbackUrl());
-        appLogObject.put(APIConstants.AuditLogConstants.GROUPS, application.getGroupId());
-        appLogObject.put(APIConstants.AuditLogConstants.OWNER, application.getSubscriber().getName());
+        Application updatedApplication = apiMgtDAO.getApplicationById(application.getId());
 
-        APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
-                APIConstants.AuditLogConstants.UPDATED, this.username);
+        if (!updateRejected) {
+            updateStatus = updatedApplication.getStatus();
+            updatedApplication.getUUID();
+
+            JSONObject appLogObject = new JSONObject();
+            appLogObject.put(APIConstants.AuditLogConstants.NAME, application.getName());
+            appLogObject.put(APIConstants.AuditLogConstants.TIER, application.getTier());
+            appLogObject.put(APIConstants.AuditLogConstants.STATUS, existingApp != null ? existingApp.getStatus() : "");
+            appLogObject.put(APIConstants.AuditLogConstants.CALLBACK, application.getCallbackUrl());
+            appLogObject.put(APIConstants.AuditLogConstants.GROUPS, application.getGroupId());
+            appLogObject.put(APIConstants.AuditLogConstants.OWNER, application.getSubscriber().getName());
+
+            APIUtil.logAuditMessage(APIConstants.AuditLogConstants.APPLICATION, appLogObject.toString(),
+                    APIConstants.AuditLogConstants.UPDATED, this.username);
+
+            if (workflowResponse == null) {
+                workflowResponse = new GeneralWorkflowResponse();
+            }
+        }
 
         // Extracting API details for the recommendation system
         if (recommendationEnvironment != null) {
             RecommenderEventPublisher extractor = new RecommenderDetailsExtractor(application, username,
- requestedTenant);
+                    requestedTenant);
             Thread recommendationThread = new Thread(extractor);
             recommendationThread.start();
         }
 
-        ApplicationEvent applicationEvent = new ApplicationEvent(UUID.randomUUID().toString(),
-                System.currentTimeMillis(), APIConstants.EventType.APPLICATION_UPDATE.name(), tenantId,
-                existingApp.getOrganization(), updatedApplication.getId(), updatedApplication.getUUID(),
-                updatedApplication.getName(), updatedApplication.getTokenType(), updatedApplication.getTier(),
-                updatedApplication.getGroupId(), updatedApplication.getApplicationAttributes(),
-                existingApp.getSubscriber().getName());
-        APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        WorkflowDTO wfDTO = apiMgtDAO.retrieveWorkflowFromInternalReference(Integer.toString(application.getId()),
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
+
+        if ((wfDTO == null) || WorkflowStatus.APPROVED.equals(wfDTO.getStatus())) {
+            ApplicationEvent applicationEvent = new ApplicationEvent(
+                    UUID.randomUUID().toString(),
+                    System.currentTimeMillis(),
+                    APIConstants.EventType.APPLICATION_UPDATE.name(),
+                    tenantId,
+                    existingApp.getOrganization(),
+                    updatedApplication.getId(),
+                    updatedApplication.getUUID(),
+                    updatedApplication.getName(),
+                    updatedApplication.getTokenType(),
+                    updatedApplication.getTier(),
+                    updatedApplication.getGroupId(),
+                    updatedApplication.getApplicationAttributes(),
+                    existingApp.getSubscriber().getName()
+            );
+            APIUtil.sendNotification(applicationEvent, APIConstants.NotifierType.APPLICATION.name());
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("Successfully updated the Application: " + application.getId() + " in the database.");
+        }
+
+        return new ApplicationResponse(updateStatus, updatedApplication.getUUID(), workflowResponse);
+
     }
 
     /**
@@ -2148,6 +2215,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         try {
             WorkflowExecutor createApplicationWFExecutor =
  getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION);
+            WorkflowExecutor updateApplicationWFExecutor =
+            getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
             WorkflowExecutor createSubscriptionWFExecutor =
             getWorkflowExecutor(WorkflowConstants.WF_TYPE_AM_SUBSCRIPTION_CREATION);
             WorkflowExecutor deleteSubscriptionWFExecutor =
@@ -2198,6 +2267,14 @@ APIConstants.AuditLogConstants.DELETED, this.username);
             if (appCreationWorkflowExtRef != null) {
                 cleanupAppCreationPendingTask(applicationId, createApplicationWFExecutor, appCreationWorkflowExtRef);
             }
+
+            //cleanup pending application update task
+            String appUpdateWorkflowExtRef = apiMgtDAO.getExternalWorkflowRefByInternalRefWorkflowType(applicationId,
+                    WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE);
+            if (appUpdateWorkflowExtRef != null) {
+                cleanupAppUpdatePendingTask(applicationId, updateApplicationWFExecutor, appUpdateWorkflowExtRef);
+            }
+
         } catch (WorkflowException ex) {
             log.warn("Failed to load workflow executors");
         }
@@ -2215,6 +2292,16 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
     }
 
+    private void cleanupAppUpdatePendingTask(int applicationId, WorkflowExecutor workflowExecutor,
+                                               String workflowRef) {
+
+        try {
+            workflowExecutor.cleanUpPendingTask(workflowRef);
+        } catch (WorkflowException ex) {
+            // failed cleanup processes are ignored to prevent failing the application removal process
+            log.warn("Failed to clean pending application update approval task of " + applicationId);
+        }
+    }
     private void cleanupPendingApplicationRegistrationTask(String state, int applicationId, String apiKeyType,
                                                            String keyManagerName,
                                                            WorkflowExecutor applicationRegistrationWFExecutor) {
@@ -3452,13 +3539,33 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         Environment environment = APIUtil.getEnvironments().get(environmentName);
         GatewayAgentConfiguration gatewayConfiguration = ServiceReferenceHolder.getInstance()
                 .getExternalGatewayConnectorConfiguration(environment.getGatewayType());
+        KeyManagerConfigurationDTO keyManagerConfigurationDTO = null;
+        try {
+            if (StringUtils.isNotEmpty(kmId)) {
+                String tenantDomain = PrivilegedCarbonContext.getThreadLocalCarbonContext().getTenantDomain();
+                APIAdmin apiAdmin = new APIAdminImpl();
+                keyManagerConfigurationDTO = apiAdmin.getKeyManagerConfigurationById(tenantDomain, kmId);
+                // If the key manager is not found by ID, try to get the default key manager.
+                if (keyManagerConfigurationDTO == null) {
+                    keyManagerConfigurationDTO = apiAdmin.getKeyManagerConfigurationByName(tenantDomain,
+                            APIConstants.KeyManager.DEFAULT_KEY_MANAGER);
+                }
+            }
+        } catch (APIManagementException e) {
+            if (!StringUtils.isEmpty(kmId)) {
+                throw new APIManagementException("Failed to retrieve key manager information by ID: " + kmId,
+                        ExceptionCodes.ERROR_RETRIEVE_KM_INFORMATION);
+            } else {
+                throw new APIManagementException("Failed to retrieve key manager information "
+                        + APIConstants.KeyManager.DEFAULT_KEY_MANAGER, ExceptionCodes.ERROR_RETRIEVE_KM_INFORMATION);
+            }
+        }
         if (gatewayConfiguration != null) {
             api.setContext("");
-            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
         } else {
             api.setContext(getBasePath(apiTenantDomain, api.getContext()));
-            updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, kmId);
         }
+        updatedDefinition = oasParser.getOASDefinitionForStore(api, definition, hostsWithSchemes, keyManagerConfigurationDTO);
         return updatedDefinition;
     }
 
@@ -3645,7 +3752,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
             boolean isExternalGateway = false;
             GatewayDeployer gatewayDeployer = null;
-            if (gatewayConfiguration != null && StringUtils.isNotEmpty(gatewayConfiguration.getImplementation())) {
+            if (gatewayConfiguration != null && StringUtils.isNotEmpty(gatewayConfiguration
+                    .getGatewayDeployerImplementation())) {
                 gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain, environmentName);
                 isExternalGateway = true;
             }
@@ -3810,7 +3918,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
 
     @Override
-    public Set<Subscription> getTopicSubscriptions(String applicationUUID, String apiUUID) throws APIManagementException {
+    public Set<Subscription> getTopicSubscriptions(String applicationUUID, String apiUUID)
+            throws APIManagementException {
 
         if (StringUtils.isNotEmpty(apiUUID)) {
             return apiMgtDAO.getTopicSubscriptionsByApiUUID(applicationUUID, apiUUID);
@@ -3899,15 +4008,16 @@ APIConstants.AuditLogConstants.DELETED, this.username);
     }
     
     @Override
-    public Map<String, Object> searchPaginatedAPIs(String searchQuery, OrganizationInfo organizationInfo, int start, int end,
-                                                   String sortBy, String sortOrder) throws APIManagementException {
+    public Map<String, Object> searchPaginatedAPIs(String searchQuery, OrganizationInfo organizationInfo, int start,
+                                                   int end, String sortBy, String sortOrder)
+            throws APIManagementException {
         Organization org = new Organization(organizationInfo.getSuperOrganization());
         String userName = (userNameWithoutChange != null) ? userNameWithoutChange : username;
         String[] roles = APIUtil.getListOfRoles(userName);
         Map<String, Object> properties = APIUtil.getUserProperties(userName);
         UserContext userCtx = new UserContext(userNameWithoutChange,
-                new Organization(organizationInfo.getName(), organizationInfo.getOrganizationId(), null), properties,
-                roles);
+                new Organization(organizationInfo.getName(), organizationInfo.getOrganizationId(), null),
+                properties, roles);
 
         return searchPaginatedAPIs(searchQuery, start, end, org, userCtx, organizationInfo);
     }
@@ -4035,7 +4145,8 @@ APIConstants.AuditLogConstants.DELETED, this.username);
                 // and publishers having the roles which has been specified under publisher access control irrespective
                 // of devportal visibility restrictions.
                 if (publisherAccessControlRoles != null && !publisherAccessControlRoles.trim().isEmpty()) {
-                    String[] accessControlRoleList = publisherAccessControlRoles.replaceAll("\\s+", "").split(",");
+                    String[] accessControlRoleList = publisherAccessControlRoles.replaceAll("\\s+",
+                            "").split(",");
                     if (log.isDebugEnabled()) {
                         log.debug("API has restricted access to creators and publishers with the roles : "
                                 + Arrays.toString(accessControlRoleList));

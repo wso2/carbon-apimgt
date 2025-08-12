@@ -102,7 +102,8 @@ public class WorkflowExecutorFactory {
 
         WorkflowDTO workflowDTO = null;
         if (WorkflowConstants.WF_TYPE_AM_APPLICATION_CREATION.equals(wfType) ||
-                WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(wfType)) {
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_DELETION.equals(wfType) ||
+                WorkflowConstants.WF_TYPE_AM_APPLICATION_UPDATE.equals(wfType)) {
             workflowDTO = new ApplicationWorkflowDTO();
             workflowDTO.setWorkflowType(wfType);
         } else if (WorkflowConstants.WF_TYPE_AM_APPLICATION_REGISTRATION_PRODUCTION.equals(wfType)) {

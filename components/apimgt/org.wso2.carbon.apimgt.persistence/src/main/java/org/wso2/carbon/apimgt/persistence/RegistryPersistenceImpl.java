@@ -2136,7 +2136,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             GenericArtifact apiArtifact = artifactManager.getGenericArtifact(apiId);
 
-            String apiProviderName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER);
+            String apiProviderName = RegistryPersistenceUtil.replaceEmailDomain(
+                    apiArtifact.getAttribute(APIConstants.API_OVERVIEW_PROVIDER));
             String apiName = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_NAME);
             String apiVersion = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VERSION);
             String visibleRoles = apiArtifact.getAttribute(APIConstants.API_OVERVIEW_VISIBLE_ROLES);
@@ -3605,8 +3606,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
         boolean isTenantFlowStarted = false;
         PublisherAPIProductSearchResult result = new PublisherAPIProductSearchResult();
         try {
-            RegistryHolder holder = getRegistry(ctx.getUserame(), requestedTenantDomain);
-            Registry userRegistry = holder.getRegistry();
+            RegistryHolder holder = getRegistry(requestedTenantDomain);
+            Registry sysRegistry = holder.getRegistry();
             isTenantFlowStarted = holder.isTenantFlowStarted();
 
             log.debug("Requested query for publisher product search: " + searchQuery);
@@ -3615,15 +3616,16 @@ public class RegistryPersistenceImpl implements APIPersistence {
 
             log.debug("Modified query for publisher product search: " + modifiedQuery);
 
-            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(ctx.getUserame());
+            String tenantAdminUsername = getTenantAwareUsername(
+                    RegistryPersistenceUtil.getTenantAdminUserName(requestedTenantDomain));
+            PrivilegedCarbonContext.getThreadLocalCarbonContext().setUsername(tenantAdminUsername);
 
             final int maxPaginationLimit = getMaxPaginationLimit();
 
             PaginationContext.init(start, offset, "ASC", APIConstants.API_OVERVIEW_NAME, maxPaginationLimit);
 
-            List<GovernanceArtifact> governanceArtifacts = GovernanceUtils
-                    .findGovernanceArtifacts(modifiedQuery, userRegistry, APIConstants.API_RXT_MEDIA_TYPE,
-                            true);
+            List<GovernanceArtifact> governanceArtifacts = GovernanceUtils.findGovernanceArtifacts(modifiedQuery,
+                    sysRegistry, APIConstants.API_RXT_MEDIA_TYPE, true);
             int totalLength = PaginationContext.getInstance().getLength();
 
             // Check to see if we can speculate that there are more APIs to be loaded
@@ -3670,8 +3672,8 @@ public class RegistryPersistenceImpl implements APIPersistence {
             result.setReturnedAPIsCount(publisherAPIProductInfoList.size());
             result.setTotalAPIsCount(totalLength);
 
-        } catch (GovernanceException e) {
-            throw new APIPersistenceException("Error while searching APIs ", e);
+        } catch (GovernanceException | APIManagementException e) {
+            throw new APIPersistenceException("Error while searching API products ", e);
         } finally {
             PaginationContext.destroy();
             if (isTenantFlowStarted) {
@@ -4071,10 +4073,18 @@ public class RegistryPersistenceImpl implements APIPersistence {
                     throw new APIPersistenceException(errorMessage);
                 }
                 GenericArtifact artifact = getAPIArtifact(apiId, userRegistry);
-                artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, providerName);
+                if (log.isDebugEnabled()) {
+                    log.debug("Changing the provider name of API with id: " + apiId + " to " + providerName);
+                }
+                artifact.setAttribute(APIConstants.API_OVERVIEW_PROVIDER, RegistryPersistenceUtil
+                        .replaceEmailDomain(providerName));
                 artifactManager.updateGenericArtifact(artifact);
                 userRegistry.commitTransaction();
-                transactionCommitted=true;
+                if (log.isDebugEnabled()) {
+                    log.debug("Successfully changed the provider name of API with id: " + apiId + " " +
+                            "to " + providerName);
+                }
+                transactionCommitted = true;
             }
         } catch (RegistryException e) {
             throw new APIPersistenceException("Error while Changing the api Provider", e);

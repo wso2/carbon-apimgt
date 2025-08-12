@@ -58,7 +58,8 @@
               "HTTP",
               "SOAP",
               "SOAPTOREST",
-              "GRAPHQL"
+              "GRAPHQL",
+              "WS"
             ]
           },
           {
@@ -70,7 +71,8 @@
                   "HTTP",
                   "SOAP",
                   "SOAPTOREST",
-                  "GRAPHQL"
+                  "GRAPHQL",
+                  "WS"
                 ]
               },
               "subType": {
@@ -111,7 +113,8 @@
               "Boolean",
               "Integer",
               "Enum",
-              "Map"
+              "Map",
+              "JSON"
             ]
           },
           "defaultValue": {

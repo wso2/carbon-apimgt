@@ -25,6 +25,7 @@ import org.wso2.carbon.apimgt.api.model.Comment;
 import org.wso2.carbon.apimgt.api.model.Identifier;
 import org.wso2.carbon.apimgt.api.model.SubscribedAPI;
 import org.wso2.carbon.apimgt.api.model.SubscriptionResponse;
+import org.wso2.carbon.apimgt.api.model.ApplicationResponse;
 import org.wso2.carbon.apimgt.impl.internal.ServiceReferenceHolder;
 
 /**
@@ -94,8 +95,8 @@ public class UserAwareAPIConsumer extends APIConsumerImpl {
     }
 
     @Override
-    public void updateApplication(Application application) throws APIManagementException {
-        super.updateApplication(application);
+    public ApplicationResponse updateApplication(Application application) throws APIManagementException {
+        return super.updateApplication(application);
     }
 
     @Override
