@@ -43,6 +43,7 @@ import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIInfoAdditionalPropertiesMapDTO;
 import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.APIProductDTO;
+import org.wso2.carbon.apimgt.rest.api.publisher.v1.dto.MCPServerDTO;
 
 import java.io.File;
 import java.io.IOException;
@@ -184,6 +185,57 @@ public class APIControllerUtil {
         JsonElement additionalProperties = envParams.get(ImportExportConstants.ADDITIONAL_PROPERTIES_FIELD);
         if (additionalProperties != null && !additionalProperties.isJsonNull()) {
             handleAdditionalProperties(additionalProperties, importedApiDto, null);
+        }
+        return importedApiDto;
+    }
+
+    public static MCPServerDTO injectEnvParamsToMCPServer(MCPServerDTO importedApiDto, JsonObject envParams)
+            throws APIManagementException {
+
+        if (envParams == null || envParams.isJsonNull()) {
+            return importedApiDto;
+        }
+
+        JsonElement policies = envParams.get(ImportExportConstants.POLICIES_FIELD);
+        if (policies != null && !policies.isJsonNull()) {
+            JsonArray definedPolicies = policies.getAsJsonArray();
+            List<String> policiesListToAdd = new ArrayList<>();
+            for (JsonElement definedPolicy : definedPolicies) {
+                if (!definedPolicy.isJsonNull()) {
+                    String policyToAdd = definedPolicy.getAsString();
+                    if (!StringUtils.isEmpty(policyToAdd)) {
+                        policiesListToAdd.add(definedPolicy.getAsString());
+                    }
+                }
+            }
+            if (!policiesListToAdd.isEmpty()) {
+                    importedApiDto.setPolicies(policiesListToAdd);
+            }
+        }
+
+        // handle available additional properties
+        JsonElement additionalProperties = envParams.get(ImportExportConstants.ADDITIONAL_PROPERTIES_FIELD);
+        if (additionalProperties != null && !additionalProperties.isJsonNull()) {
+            JsonArray definedAdditionalProperties = additionalProperties.getAsJsonArray();
+            Map<String, APIInfoAdditionalPropertiesMapDTO> additionalPropertiesMap = new HashMap<>();
+            for (JsonElement definedAdditionalProperty : definedAdditionalProperties) {
+                if (!definedAdditionalProperty.isJsonNull()) {
+                    JsonElement propertyName = (((JsonObject) definedAdditionalProperty).get("name"));
+                    JsonElement propertyValue = (((JsonObject) definedAdditionalProperty).get("value"));
+                    JsonElement propertyDisplay = (((JsonObject) definedAdditionalProperty).get("display"));
+                    if (propertyName != null && propertyValue != null && propertyDisplay != null
+                            && !propertyName.isJsonNull() && !propertyValue.isJsonNull() &&
+                            !propertyDisplay.isJsonNull()) {
+                        APIInfoAdditionalPropertiesMapDTO apiInfoAdditionalPropertiesMapDTO =
+                                new APIInfoAdditionalPropertiesMapDTO();
+                        apiInfoAdditionalPropertiesMapDTO.setName(propertyName.getAsString());
+                        apiInfoAdditionalPropertiesMapDTO.setValue(propertyValue.getAsString());
+                        apiInfoAdditionalPropertiesMapDTO.setDisplay(propertyDisplay.getAsBoolean());
+                        additionalPropertiesMap.put(propertyName.getAsString(), apiInfoAdditionalPropertiesMapDTO);
+                    }
+                }
+            }
+            importedApiDto.setAdditionalPropertiesMap(additionalPropertiesMap);
         }
         return importedApiDto;
     }
