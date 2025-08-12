@@ -25,7 +25,7 @@ public class DistributedThrottleConfig {
 
     private boolean enabled = false;
     private String type = "redis";
-    private int syncInterval = 1;
+    private int syncInterval = 10;
     private int corePoolSize = 200;
 
     /**
