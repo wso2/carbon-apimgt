@@ -1741,6 +1741,10 @@ public final class APIConstants {
     public static final String CONFIG_REDIS_TIME_BETWEEN_EVICTION_RUNS_IN_MILLIS = "TimeBetweenEvictionRunsMillis";
     public static final String CONFIG_REDIS_NUM_TESTS_PER_EVICTION_RUNS = "NumTestsPerEvictionRun";
     public static final String CONFIG_REDIS_GATEWAY_ID = "GatewayId";
+    public static final String CONFIG_REDIS_MIN_GATEWAY_COUNT = "MinGatewayCount";
+
+    public static final String CONFIG_REDIS_KEY_LOCK_RETRIEVAL_TIMEOUT = "KeyLockRetrievalTimeout";
+    public static final String HYBRID_THROTTLE_PROCESSOR_TYPE_START_TIME_BASED = "start_time_based";
 
     // Distributed Throttle Configuration constants
     public static final String DISTRIBUTED_THROTTLE_CONFIG = "DistributedThrottleConfig";
@@ -1748,11 +1752,19 @@ public final class APIConstants {
     public static final String DISTRIBUTED_THROTTLE_TYPE = "Type";
     public static final String DISTRIBUTED_THROTTLE_SYNC_INTERVAL = "SyncInterval";
     public static final String DISTRIBUTED_THROTTLE_CORE_POOL_SIZE = "CorePoolSize";
-
-    public static final String CONFIG_REDIS_MIN_GATEWAY_COUNT = "MinGatewayCount";
-
-    public static final String CONFIG_REDIS_KEY_LOCK_RETRIEVAL_TIMEOUT = "KeyLockRetrievalTimeout";
-    public static final String HYBRID_THROTTLE_PROCESSOR_TYPE_START_TIME_BASED = "start_time_based";
+    public static final String DISTRIBUTED_THROTTLE_PROPERTIES = "KeyValueStoreOptions";
+    public static final String DISTRIBUTED_THROTTLE_HOST = "Host";
+    public static final String DISTRIBUTED_THROTTLE_PORT =  "Port";
+    public static final String DISTRIBUTED_THROTTLE_MAX_TOTAL = "MaxTotal";
+    public static final String DISTRIBUTED_THROTTLE_MAX_IDLE = "MaxIdle";
+    public static final String DISTRIBUTED_THROTTLE_MIN_IDLE = "MinIdle";
+    public static final String DISTRIBUTED_THROTTLE_TEST_ON_BORROW = "TestOnBorrow";
+    public static final String DISTRIBUTED_THROTTLE_TEST_ON_RETURN = "TestOnReturn";
+    public static final String DISTRIBUTED_THROTTLE_TEST_WHILE_IDLE = "TestWhileIdle";
+    public static final String DISTRIBUTED_THROTTLE_BLOCK_WHEN_EXHAUSTED = "BlockWhenExhausted";
+    public static final String DISTRIBUTED_THROTTLE_MIN_EVICTABLE_IDLE_TIME_IN_MILLIS = "MinEvictableIdleTimeMillis";
+    public static final String DISTRIBUTED_THROTTLE_TIME_BETWEEN_EVICTION_RUNS_IN_MILLIS = "TimeBetweenEvictionRunsMillis";
+    public static final String DISTRIBUTED_THROTTLE_NUM_TESTS_PER_EVICTION_RUNS = "NumTestsPerEvictionRun";
 
     // Primary/Secondary Login configuration
     public static final String USERID_LOGIN = "UserIdLogin";

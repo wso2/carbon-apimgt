@@ -66,4 +66,5 @@ public class DistributedThrottleConfig {
     public void setCorePoolSize(int corePoolSize) {
         this.corePoolSize = corePoolSize;
     }
+
 }

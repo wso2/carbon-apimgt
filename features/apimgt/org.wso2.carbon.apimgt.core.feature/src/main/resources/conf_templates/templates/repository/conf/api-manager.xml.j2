@@ -1869,6 +1869,37 @@
             {% else %}
             <CorePoolSize>200</CorePoolSize>
             {% endif %}
+            {% if apim.distributed_throttle_properties.keyvalue_store_options is defined %}
+            <KeyValueStoreOptions>
+                {% if apim.distributed_throttle_properties.keyvalue_store_options.host is defined %}
+                <Host>{{apim.distributed_throttle_properties.keyvalue_store_options.host}}</Host>
+                {% endif %}
+                {% if apim.distributed_throttle_properties.keyvalue_store_options.port is defined %}
+                <Port>{{apim.distributed_throttle_properties.keyvalue_store_options.port}}</Port>
+                {% endif %}
+                {% if apim.distributed_throttle_properties.keyvalue_store_options.max_total is defined %}
+                <MaxTotal>{{apim.distributed_throttle_properties.keyvalue_store_options.max_total}}</MaxTotal>
+                {% endif %}
+                {% if apim.distributed_throttle_properties.keyvalue_store_options.max_idle is defined %}
+                <MaxIdle>{{apim.distributed_throttle_properties.keyvalue_store_options.max_idle}}</MaxIdle>
+                {% endif %}
+                {% if apim.distributed_throttle_properties.keyvalue_store_options.min_idle is defined %}
+                <MinIdle>{{apim.distributed_throttle_properties.keyvalue_store_options.min_idle}}</MinIdle>
+                {% endif %}
+                {% if apim.distributed_throttle_properties.keyvalue_store_options.block_when_exhausted is defined %}
+                <BlockWhenExhausted>{{apim.distributed_throttle_properties.keyvalue_store_options.block_when_exhausted}}</BlockWhenExhausted>
+                {% endif %}
+                {% if apim.distributed_throttle_properties.keyvalue_store_options.test_while_idle is defined %}
+                <TestWhileIdle>{{apim.distributed_throttle_properties.keyvalue_store_options.test_while_idle}}</TestWhileIdle>
+                {% endif %}
+                {% if apim.distributed_throttle_properties.keyvalue_store_options.min_evictable_idle_time_millis is defined %}
+                <MinEvictableIdleTimeMillis>{{apim.distributed_throttle_properties.keyvalue_store_options.min_evictable_idle_time_millis}}</MinEvictableIdleTimeMillis>
+                {% endif %}
+                {% if apim.distributed_throttle_properties.keyvalue_store_options.time_between_eviction_runs_millis is defined %}
+                <TimeBetweenEvictionRunsMillis>{{apim.distributed_throttle_properties.keyvalue_store_options.time_between_eviction_runs_millis}}</TimeBetweenEvictionRunsMillis>
+                {% endif %}
+            </KeyValueStoreOptions>
+            {% endif %}
         </DistributedThrottleConfig>
         {% endif %}
 
