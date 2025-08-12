@@ -4758,8 +4758,31 @@ public class SQLConstants {
                     "WHERE REF_MAP.API_ID = ? AND MCP.ORGANIZATION = ? AND MCP.API_TYPE = ?";
 
 
-    public static final String ADD_API_METADATA =
-            "INSERT INTO AM_API_METADATA (API_UUID, METADATA_KEY, METADATA_VALUE) VALUES (?, ?, ?)";
+    public static final String ADD_CURRENT_API_METADATA =
+            "INSERT INTO AM_API_METADATA (API_UUID, METADATA_KEY, METADATA_VALUE) " +
+                    "VALUES (?, ?, ?)";
+
+    public static final String ADD_API_METADATA_REVISION =
+            "INSERT INTO AM_API_METADATA (API_UUID, REVISION_UUID, METADATA_KEY, METADATA_VALUE) " +
+                    "VALUES (?, ?, ?, ?)";
+
+    public static final String GET_CURRENT_API_METADATA =
+            "SELECT METADATA_KEY, METADATA_VALUE FROM AM_API_METADATA " +
+                    "WHERE API_UUID = ? AND REVISION_UUID IS NULL";
+
+    public static final String GET_API_METADATA_REVISION =
+            "SELECT METADATA_KEY, METADATA_VALUE FROM AM_API_METADATA " +
+                    "WHERE API_UUID = ? AND REVISION_UUID = ?";
+
+    public static final String DELETE_CURRENT_API_METADATA =
+            "DELETE FROM AM_API_METADATA WHERE API_UUID = ? AND REVISION_UUID IS NULL";
+
+    public static final String DELETE_ALL_API_METADATA =
+            "DELETE FROM AM_API_METADATA WHERE API_UUID = ?";
+
+    public static final String DELETE_ALL_API_METADATA_REVISION =
+            "DELETE FROM AM_API_METADATA WHERE API_UUID = ? AND REVISION_UUID = ?";
+
     /**
      * Static class to hold database queries related to gateway policies tables
      */

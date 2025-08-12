@@ -938,7 +938,7 @@ public class PublisherCommonUtils {
      * @throws ParseException         If an error occurs while parsing the endpoint configuration
      * @throws CryptoException        If an error occurs while encrypting the secret key of API
      */
-    private static API prepareForUpdateApi(API originalAPI, MCPServerDTO apiDtoToUpdate, APIProvider apiProvider,
+    public static API prepareForUpdateApi(API originalAPI, MCPServerDTO apiDtoToUpdate, APIProvider apiProvider,
                                            String[] tokenScopes)
             throws APIManagementException {
 

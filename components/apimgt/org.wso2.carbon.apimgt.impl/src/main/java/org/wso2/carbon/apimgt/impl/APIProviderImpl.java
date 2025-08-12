@@ -626,7 +626,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (api.getBackends() != null && !api.getBackends().isEmpty()) {
             addBackend(api.getUuid(), api.getBackends(), api.getOrganization());
         }
-        addAPIMetadata(api.getUuid(), api);
+        if (!api.getMetadata().isEmpty()) {
+            apiMgtDAO.addAPIMetadata(api.getUuid(), api.getMetadata());
+        }
         addURITemplates(apiId, api, tenantId);
         addAPIPolicies(api, tenantDomain);
         addSubtypeConfiguration(api);
@@ -657,10 +659,6 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                 apiId, api.getUuid(), api.getId().getVersion(), api.getType(), api.getContext(),
                 APIUtil.replaceEmailDomainBack(api.getId().getProviderName()), api.getStatus(), api.getApiSecurity());
         APIUtil.sendNotification(apiEvent, APIConstants.NotifierType.API.name());
-    }
-
-    private void addAPIMetadata(String uuid, API api) throws APIManagementException {
-        apiMgtDAO.addAPIMetadata(uuid, api.getMetadata());
     }
 
     /**
@@ -1192,8 +1190,16 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (log.isDebugEnabled()) {
             log.debug("Successfully updated the API: " + api.getId() + " metadata in the database");
         }
+        updateAPIMetadata(api);
         updateAPIResources(api, tenantId);
         updateAPIPrimaryEndpointsMapping(api);
+    }
+
+    private void updateAPIMetadata(API api) throws APIManagementException {
+        apiMgtDAO.deleteCurrentAPIMetadata(api.getUuid());
+        if (api.getMetadata() != null && !api.getMetadata().isEmpty()) {
+            apiMgtDAO.addAPIMetadata(api.getUuid(), api.getMetadata());
+        }
     }
 
     /**
@@ -2867,6 +2873,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         deleteScopes(localScopeKeysToDelete, tenantId);
         if (API_SUBTYPE_AI_API.equals(api.getSubtype())) {
             apiMgtDAO.deleteAIConfiguration(api.getUuid());
+        }
+        if (!api.getMetadata().isEmpty()) {
+            apiMgtDAO.deleteAllAPIMetadata(api.getUuid());
         }
         if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
             if (APIConstants.API_SUBTYPE_EXISTING_API.equals(api.getSubtype())) {
@@ -5647,6 +5656,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     }
                 }
                 populateApiInfo(api);
+                populateApiMetadata(api);
                 populateSubtypeConfiguration(api);
                 populateDefaultVersion(api);
                 populatePolicyTypeInAPI(api);
@@ -5670,6 +5680,30 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             throw new APIManagementException("Error while retrieving the Async API definition", e,
                     ExceptionCodes.from(ExceptionCodes.ASYNCAPI_RETRIEVAL_ERROR, uuid));
         }
+    }
+
+    /**
+     * Populates the API metadata for the given API object.
+     *
+     * @param api The API object to populate metadata for.
+     * @throws APIManagementException If an error occurs while retrieving metadata.
+     */
+    private void populateApiMetadata(API api) throws APIManagementException {
+
+        String apiUuid = api.getUuid();
+        String revisionUuid = null;
+        APIRevision apiRevision = checkAPIUUIDIsARevisionUUID(apiUuid);
+        if (apiRevision != null && apiRevision.getApiUUID() != null) {
+            apiUuid = apiRevision.getApiUUID();
+            revisionUuid = apiRevision.getRevisionUUID();
+        }
+        Map<String, String> metadataMap = new HashMap<>();
+        if (revisionUuid == null) {
+            metadataMap = apiMgtDAO.getCurrentAPIMetadata(apiUuid);
+        } else {
+            metadataMap = apiMgtDAO.getAPIMetadataRevision(apiUuid, revisionUuid);
+        }
+        api.setMetadata(metadataMap);
     }
 
     /**
@@ -7207,6 +7241,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                     ERROR_DELETING_API_REVISION, apiRevision.getApiUUID()));
         }
         apiMgtDAO.deleteAPIRevision(apiRevision);
+        apiMgtDAO.deleteAllAPIMetadataRevision(apiId, apiRevisionId);
         apiMgtDAO.deleteAIConfigurationRevision(apiRevision.getRevisionUUID());
         gatewayArtifactsMgtDAO.deleteGatewayArtifact(apiRevision.getApiUUID(), apiRevision.getRevisionUUID());
         if (artifactSaver != null) {
