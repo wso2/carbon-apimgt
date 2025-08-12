@@ -18,6 +18,7 @@
 package org.wso2.carbon.apimgt.impl.dao;
 
 import edu.emory.mathcs.backport.java.util.Arrays;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,6 +58,7 @@ import org.wso2.carbon.apimgt.impl.utils.APIUtil;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.utils.multitenancy.MultitenantConstants;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -1318,8 +1320,22 @@ public class SubscriptionValidationDAO {
                     String urlPattern = resultSet.getString("URL_PATTERN");
                     String throttlingTier = resultSet.getString("THROTTLING_TIER");
                     String scopeName = resultSet.getString("SCOPE_NAME");
-                    String description = resultSet.getString("DESCRIPTION");
-                    String schemaDefinition = resultSet.getString("SCHEMA_DEFINITION");
+                    String description = null;
+                    try (InputStream descriptionDefStream = resultSet.getBinaryStream("DESCRIPTION")) {
+                        if (descriptionDefStream != null) {
+                            description = IOUtils.toString(descriptionDefStream);
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while reading description of the URI template", e);
+                    }
+                    String schemaDefinition = null;
+                    try (InputStream schemaDefStream = resultSet.getBinaryStream("SCHEMA_DEFINITION")) {
+                        if (schemaDefStream != null) {
+                            schemaDefinition = IOUtils.toString(schemaDefStream);
+                        }
+                    } catch (IOException e) {
+                        log.error("Error while reading schema definition of the URI template", e);
+                    }
                     int urlMappingId = resultSet.getInt("URL_MAPPING_ID");
                     URLMapping urlMapping = api.getResource(urlPattern, httpMethod);
                     if (urlMapping == null) {

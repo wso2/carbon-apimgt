@@ -140,7 +140,7 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     }
 
     @POST
-    @Path("/build-from-api")
+    @Path("/generate-from-api")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @ApiOperation(value = "Create a New MCP Server", notes = "This operation can be used to create a new MCP server using an existing API. ", response = MCPServerDTO.class, authorizations = {
@@ -158,10 +158,10 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     }
 
     @POST
-    @Path("/build-from-openapi")
+    @Path("/generate-from-openapi")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Create an MCP server using an OpenAPI definition. ", notes = "This operation can be used to create a MCP server using the OpenAPI definition.  Provide either `url` or `file` to specify the definition.  Specify additionalProperties with **at least** API's name, version, context and endpointConfig. ", response = MCPServerDTO.class, authorizations = {
+    @ApiOperation(value = "Create a MCP server using an OpenAPI definition. ", notes = "This operation can be used to create a MCP server using the OpenAPI definition.  Provide either `url` or `file` to specify the definition.  Specify additionalProperties with **at least** API's name, version, context and endpointConfig. ", response = MCPServerDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
@@ -176,10 +176,10 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     }
 
     @POST
-    @Path("/build-from-mcp-server")
+    @Path("/generate-from-mcp-server")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Create an MCP server using a third party MCP Server. ", notes = "This operation can be used to create a MCP server using a third party MCP Server.   Specify additionalProperties with **at least** API's name, version, context and endpointConfig. ", response = MCPServerDTO.class, authorizations = {
+    @ApiOperation(value = "Create a MCP server using a third party MCP Server. ", notes = "This operation can be used to create a MCP server using a third party MCP Server.   Specify additionalProperties with **at least** API's name, version, context and endpointConfig. ", response = MCPServerDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")

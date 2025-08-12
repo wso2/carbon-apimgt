@@ -2263,12 +2263,12 @@ paths:
               }"'
       operationId: validateThirdPartyMCPServer
 
-  /mcp-servers/build-from-openapi:
+  /mcp-servers/generate-from-openapi:
     post:
       tags:
         - MCP Servers
       summary: |
-        Create an MCP server using an OpenAPI definition.
+        Create a MCP server using an OpenAPI definition.
       description: |
         This operation can be used to create a MCP server using the OpenAPI definition. 
         Provide either `url` or `file` to specify the definition.
@@ -2329,12 +2329,12 @@ paths:
           -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/create-from-backend-definition"'
       operationId: createMCPServerFromOpenAPI
 
-  /mcp-servers/build-from-mcp-server:
+  /mcp-servers/generate-from-mcp-server:
     post:
       tags:
         - MCP Servers
       summary: |
-        Create an MCP server using a third party MCP Server.
+        Create a MCP server using a third party MCP Server.
       description: |
         This operation can be used to create a MCP server using a third party MCP Server. 
 
@@ -2396,7 +2396,7 @@ paths:
           -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/create-from-backend-definition"'
       operationId: createMCPServerProxy
 
-  /mcp-servers/build-from-api:
+  /mcp-servers/generate-from-api:
     post:
       tags:
         - MCP Servers
@@ -11913,7 +11913,7 @@ components:
         workflowStatus:
           type: string
           example: APPROVED
-        specVersion:
+        protocolVersion:
           type: string
         createdTime:
           type: string
@@ -14783,6 +14783,10 @@ components:
           type: boolean
           description: Checks if the auth token is provided for AI service usage.
           default: false
+        isMCPPortalEnabled:
+          type: boolean
+          description: This indicates whether the MCP portal is enabled or not.
+          default: true
         customProperties:
             type: array
             items:

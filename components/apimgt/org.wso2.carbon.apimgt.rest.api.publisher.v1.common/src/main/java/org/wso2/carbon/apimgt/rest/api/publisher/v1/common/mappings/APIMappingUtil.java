@@ -788,6 +788,10 @@ public class APIMappingUtil {
         if (dto.getSubtypeConfiguration() != null && dto.getSubtypeConfiguration().getSubtype() != null) {
             model.setSubtype(dto.getSubtypeConfiguration().getSubtype());
         }
+        String protocolVersion = dto.getProtocolVersion();
+        if (protocolVersion != null && !protocolVersion.isEmpty()) {
+            model.getMetadata().put(APIConstants.MCP.PROTOCOL_VERSION_KEY, protocolVersion);
+        }
 
         try {
             GatewayAgentConfiguration gatewayConfiguration =
@@ -805,6 +809,7 @@ public class APIMappingUtil {
             String msg = "Error while fetching gateway deployer instance";
             handleException(msg, e);
         }
+
         return model;
     }
 
@@ -2426,6 +2431,11 @@ public class APIMappingUtil {
         dto.setSubtypeConfiguration(subtypeConfigurationDTO);
         dto.setInitiatedFromGateway(model.isInitiatedFromGateway());
         dto.displayName(model.getDisplayName());
+        String protocolVersion = model.getMetadata() != null
+                ? model.getMetadata().get(APIConstants.MCP.PROTOCOL_VERSION_KEY) : null;
+        if (protocolVersion != null) {
+            dto.setProtocolVersion(protocolVersion);
+        }
         return dto;
     }
 

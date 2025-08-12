@@ -48,6 +48,7 @@ public class SettingsDTO   {
     private Boolean allowSubscriptionValidationDisabling = true;
     private Boolean designAssistantEnabled = true;
     private Boolean aiAuthTokenProvided = false;
+    private Boolean isMCPPortalEnabled = true;
     private List<SettingsCustomPropertiesDTO> customProperties = new ArrayList<SettingsCustomPropertiesDTO>();
 
   /**
@@ -426,6 +427,24 @@ public class SettingsDTO   {
   }
 
   /**
+   * This indicates whether the MCP portal is enabled or not.
+   **/
+  public SettingsDTO isMCPPortalEnabled(Boolean isMCPPortalEnabled) {
+    this.isMCPPortalEnabled = isMCPPortalEnabled;
+    return this;
+  }
+
+  
+  @ApiModelProperty(value = "This indicates whether the MCP portal is enabled or not.")
+  @JsonProperty("isMCPPortalEnabled")
+  public Boolean isIsMCPPortalEnabled() {
+    return isMCPPortalEnabled;
+  }
+  public void setIsMCPPortalEnabled(Boolean isMCPPortalEnabled) {
+    this.isMCPPortalEnabled = isMCPPortalEnabled;
+  }
+
+  /**
    **/
   public SettingsDTO customProperties(List<SettingsCustomPropertiesDTO> customProperties) {
     this.customProperties = customProperties;
@@ -474,12 +493,13 @@ public class SettingsDTO   {
         Objects.equals(allowSubscriptionValidationDisabling, settings.allowSubscriptionValidationDisabling) &&
         Objects.equals(designAssistantEnabled, settings.designAssistantEnabled) &&
         Objects.equals(aiAuthTokenProvided, settings.aiAuthTokenProvided) &&
+        Objects.equals(isMCPPortalEnabled, settings.isMCPPortalEnabled) &&
         Objects.equals(customProperties, settings.customProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, designAssistantEnabled, aiAuthTokenProvided, customProperties);
+    return Objects.hash(devportalUrl, environment, gatewayTypes, gatewayFeatureCatalog, scopes, monetizationAttributes, subscriberContactAttributes, securityAuditProperties, externalStoresEnabled, docVisibilityEnabled, portalConfigurationOnlyModeEnabled, retryCallWithNewOAuthTokenEnabled, crossTenantSubscriptionEnabled, defaultAdvancePolicy, defaultSubscriptionPolicy, authorizationHeader, isJWTEnabledForLoginTokens, orgAccessControlEnabled, allowSubscriptionValidationDisabling, designAssistantEnabled, aiAuthTokenProvided, isMCPPortalEnabled, customProperties);
   }
 
   @Override
@@ -508,6 +528,7 @@ public class SettingsDTO   {
     sb.append("    allowSubscriptionValidationDisabling: ").append(toIndentedString(allowSubscriptionValidationDisabling)).append("\n");
     sb.append("    designAssistantEnabled: ").append(toIndentedString(designAssistantEnabled)).append("\n");
     sb.append("    aiAuthTokenProvided: ").append(toIndentedString(aiAuthTokenProvided)).append("\n");
+    sb.append("    isMCPPortalEnabled: ").append(toIndentedString(isMCPPortalEnabled)).append("\n");
     sb.append("    customProperties: ").append(toIndentedString(customProperties)).append("\n");
     sb.append("}");
     return sb.toString();
