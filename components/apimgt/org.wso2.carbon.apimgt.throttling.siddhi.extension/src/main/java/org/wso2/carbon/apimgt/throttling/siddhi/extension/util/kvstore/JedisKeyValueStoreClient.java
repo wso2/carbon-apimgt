@@ -46,28 +46,13 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
     private static JedisPoolConfig createPoolConfig(RedisConfig config) {
         JedisPoolConfig poolConfig = new JedisPoolConfig();
 
-        if (config != null) {
-            poolConfig.setMaxTotal(config.getMaxTotal());
-            poolConfig.setMaxIdle(config.getMaxIdle());
-            poolConfig.setMinIdle(config.getMinIdle());
-            poolConfig.setBlockWhenExhausted(config.isBlockWhenExhausted());
-            poolConfig.setTestOnBorrow(config.isTestOnBorrow());
-            poolConfig.setTestOnReturn(config.isTestOnReturn());
-            poolConfig.setTestWhileIdle(config.isTestWhileIdle());
-
-            log.debug("Pool configuration from config: MaxTotal={}, MaxIdle={}, MinIdle={}",
-                    config.getMaxTotal(), config.getMaxIdle(), config.getMinIdle());
-        } else {
-            poolConfig.setMaxTotal(8);
-            poolConfig.setMaxIdle(8);
-            poolConfig.setMinIdle(0);
-            poolConfig.setBlockWhenExhausted(true);
-            poolConfig.setTestOnBorrow(false);
-            poolConfig.setTestOnReturn(false);
-            poolConfig.setTestWhileIdle(true);
-
-            log.warn("Using default pool configuration values");
-        }
+        poolConfig.setMaxTotal(config.getMaxTotal());
+        poolConfig.setMaxIdle(config.getMaxIdle());
+        poolConfig.setMinIdle(config.getMinIdle());
+        poolConfig.setBlockWhenExhausted(config.isBlockWhenExhausted());
+        poolConfig.setTestOnBorrow(config.isTestOnBorrow());
+        poolConfig.setTestOnReturn(config.isTestOnReturn());
+        poolConfig.setTestWhileIdle(config.isTestWhileIdle());
 
         return poolConfig;
     }
@@ -83,14 +68,13 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                     int port = config != null && config.getPort() > 0 ?
                             config.getPort() : DEFAULT_PORT;
 
-                    JedisPoolConfig poolConfig = createPoolConfig(config);
-
-                    try {
-                        jedisPool = new JedisPool(poolConfig, host, port);
-                        log.info("KeyValue JedisPool initialized for server at {}:{} with MaxTotal={}, MaxIdle={}, MinIdle={}",
-                                host, port, poolConfig.getMaxTotal(), poolConfig.getMaxIdle(), poolConfig.getMinIdle());
-                    } catch (Exception e) {
-                        log.error("Failed to initialize KeyValue JedisPool for server at {}:{}", host, port, e);
+                    if (config != null) {
+                        JedisPoolConfig poolConfig = createPoolConfig(config);
+                        try {
+                            jedisPool = new JedisPool(poolConfig, host, port);
+                        } catch (Exception e) {
+                            log.error("Failed to initialize KeyValue JedisPool for server at {}:{}", host, port, e);
+                        }
                     }
                 }
             }
@@ -119,26 +103,6 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
             } catch (JedisException e) {
                 log.error("Error while returning Jedis resource to pool", e);
             }
-        }
-    }
-
-    // KeyValueStoreClient Interface Implementation
-
-    @Override
-    public void connect() {
-        log.info("Attempting to ensure KeyValue connection pool is initialized.");
-        Jedis jedis = null;
-        try {
-            jedis = getJedis();
-            if (jedis != null) {
-                log.info("Successfully obtained a connection from KeyValue pool. Connection appears to be available.");
-            } else {
-                log.warn("Failed to obtain a connection from KeyValue pool during connect(). Pool might be uninitialized or KeyValue unavailable.");
-            }
-        } catch (Exception e) {
-            log.error("Error while trying to establish initial connection to KeyValue via pool.", e);
-        } finally {
-            closeJedis(jedis);
         }
     }
 
