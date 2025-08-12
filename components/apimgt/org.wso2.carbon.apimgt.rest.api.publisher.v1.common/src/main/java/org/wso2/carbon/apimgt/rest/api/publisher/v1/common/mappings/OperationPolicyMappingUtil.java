@@ -93,7 +93,6 @@ public class OperationPolicyMappingUtil {
      *
      * @param operationPolicy the OperationPolicy to convert
      * @return the converted OperationPolicyDTO
-     * @throws APIManagementException if an error occurs during conversion
      * @deprecated Use {@link #fromOperationPolicyToDTO(OperationPolicy, String, boolean)} instead
      */
     @Deprecated
