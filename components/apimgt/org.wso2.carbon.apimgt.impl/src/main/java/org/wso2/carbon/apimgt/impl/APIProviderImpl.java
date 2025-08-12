@@ -2065,7 +2065,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
         if (policySpecification.getPolicyAttributes() != null) {
             for (OperationPolicySpecAttribute attribute : policySpecification.getPolicyAttributes()) {
                 if (attribute.isRequired()) {
-                    Object appliedPolicyAttribute = appliedPolicy.getParameters().get(attribute.getName());
+                    Map<String, Object> params = appliedPolicy.getParameters();
+                    if (params == null || !params.containsKey(attribute.getName())) {
+                        throw new APIManagementException(
+                                "Required policy attribute " + attribute.getName() + " is not found for the policy "
+                                        + policySpecification.getName() + " " + appliedPolicy.getDirection() + " flow.",
+                                ExceptionCodes.MISSING_MANDATORY_POLICY_ATTRIBUTES);
+                    }
+                    Object appliedPolicyAttribute = params.get(attribute.getName());
+
                     if (appliedPolicyAttribute != null) {
                         // Handle validation for secret type attributes
                         if (attribute.getType().equals(OperationPolicySpecAttribute.AttributeType.Secret)) {
@@ -2203,6 +2211,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         }
                     }
                 } else {
+                    if (attribute.isRequired()) {
+                        throw new APIManagementException(
+                                "Required policy attribute " + paramName + " is not found for the policy "
+                                        + appliedPolicy.getPolicyName() + ".",
+                                ExceptionCodes.MISSING_MANDATORY_POLICY_ATTRIBUTES);
+                    }
                     parameters.remove(paramName);
                 }
             }

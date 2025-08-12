@@ -86,6 +86,7 @@ public class GatewayPolicyArtifactGeneratorUtil {
                                 (existing, replacement) -> existing));
 
                 // Iterate through the gateway policies and decrypt Secret type attributes
+                CryptoUtil cryptoUtil = null;
                 for (OperationPolicy gatewayPolicy : gatewayPolicyList) {
                     Map<String, Object> parameters = gatewayPolicy.getParameters();
 
@@ -105,7 +106,9 @@ public class GatewayPolicyArtifactGeneratorUtil {
                                         // Decrypt the Secret type attributes
                                         Object encryptedValue = parameters.get(attribute.getName());
                                         if (encryptedValue != null && !encryptedValue.toString().isEmpty()) {
-                                            CryptoUtil cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                                            if (cryptoUtil == null) {
+                                                cryptoUtil = CryptoUtil.getDefaultCryptoUtil();
+                                            }
                                             try {
                                                 String decryptedValue = new String(
                                                         cryptoUtil.base64DecodeAndDecrypt(encryptedValue.toString()));
