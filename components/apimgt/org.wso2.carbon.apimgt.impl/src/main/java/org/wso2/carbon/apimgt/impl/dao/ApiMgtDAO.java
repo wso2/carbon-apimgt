@@ -20264,12 +20264,12 @@ public class ApiMgtDAO {
 
     /** Update API revision Deployment mapping record for Discovered APIs
      *
-     * @param apiUUID
+     * @param apiRevisionUUID
      * @param status
      * @param deployments
      * @throws APIManagementException
      */
-    public void updateAPIRevisionDeploymentForDiscoveredAPIs(String apiUUID, String status,
+    public void updateAPIRevisionDeploymentForDiscoveredAPIs(String apiRevisionUUID, String status,
                                                              Set<APIRevisionDeployment> deployments)
             throws APIManagementException {
 
@@ -20283,7 +20283,7 @@ public class ApiMgtDAO {
                     statement.setString(1, status);
                     statement.setBoolean(2, deployment.isDisplayOnDevportal());
                     statement.setString(3, deployment.getDeployment());
-                    statement.setString(4, deployment.getRevisionUUID());
+                    statement.setString(4, apiRevisionUUID);
                     statement.addBatch();
                 }
                 statement.executeBatch();
@@ -20293,7 +20293,7 @@ public class ApiMgtDAO {
                 throw e;
             }
         } catch (SQLException e) {
-            handleException("Failed to update Deployment Mapping entry for API UUID " + apiUUID, e);
+            handleException("Failed to update Deployment Mapping entry for API Revision UUID " + apiRevisionUUID, e);
         }
     }
 
