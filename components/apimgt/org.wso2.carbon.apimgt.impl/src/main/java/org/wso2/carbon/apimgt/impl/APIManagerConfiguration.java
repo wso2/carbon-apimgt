@@ -167,6 +167,7 @@ public class APIManagerConfiguration {
     private boolean enableAiConfiguration;
     private String hashingAlgorithm = SHA_256;
     private boolean isTransactionCounterEnabled;
+    private static boolean isMCPPortalEnabled;
 
     public Map<String, List<String>> getRestApiJWTAuthAudiences() {
         return restApiJWTAuthAudiences;
@@ -698,8 +699,10 @@ public class APIManagerConfiguration {
                 setApiChatConfiguration(element);
             } else if (APIConstants.AI.DESIGN_ASSISTANT.equals(localName)) {
                 setDesignAssistantConfiguration(element);
-            } else if (APIConstants.AI.AI_CONFIGURATION.equals(localName)){
+            } else if (APIConstants.AI.AI_CONFIGURATION.equals(localName)) {
                 setAiConfiguration(element);
+            } else if (APIConstants.AI.MCP.equals(localName)) {
+                setMCPPortalConfiguration(element);
             } else if (APIConstants.TokenValidationConstants.TOKEN_VALIDATION_CONFIG.equals(localName)) {
                 setTokenValidation(element);
             } else if (APIConstants.ORG_BASED_ACCESS_CONTROL.equals(localName)) {
@@ -2869,6 +2872,36 @@ public class APIManagerConfiguration {
     public static AIAPIConfigurationsDTO getAiApiConfigurationsDTO() {
 
         return aiapiConfigurationsDTO;
+    }
+
+    /**
+     * Set MCP Portal Configuration
+     *
+     * @param omElement XML Config
+     */
+    private void setMCPPortalConfiguration(OMElement omElement) {
+
+        if (omElement == null) {
+            log.debug("MCP Server configuration element is null. Skipping configuration parsing.");
+            return;
+        }
+        OMElement mcpServerConfigElement =
+                omElement.getFirstChildWithName(new QName(APIConstants.AI.MCP_PORTAL_ENABLED));
+        if (mcpServerConfigElement != null
+                && StringUtils.isNotEmpty(mcpServerConfigElement.getText())) {
+
+            isMCPPortalEnabled = Boolean.parseBoolean(mcpServerConfigElement.getText().trim());
+        }
+    }
+
+    /**
+     * Returns whether the MCP Portal is enabled or not.
+     *
+     * @return true if MCP Portal is enabled, false otherwise.
+     */
+    public boolean isMCPPortalEnabled() {
+
+        return isMCPPortalEnabled;
     }
 
     private void setHashingAlgorithm(OMElement omElement) {

@@ -579,6 +579,8 @@ public final class APIConstants {
         public static final String MARKETPLACE_ASSISTANT_DELETE_API_RESOURCE = "ApiDeleteResource";
         public static final String MARKETPLACE_ASSISTANT_API_COUNT_RESOURCE = "ApiCountResource";
         public static final String AI_CONFIGURATION = "AiConfiguration";
+        public static final String MCP = "MCP";
+        public static final String MCP_PORTAL_ENABLED = "MCPPortalEnabled";
         public static final String AI_CONFIGURATION_FAILOVER_CONFIGURATIONS = "FailoverConfigurations";
         public static final String AI_CONFIGURATION_ROUND_ROBIN_CONFIGURATIONS = "RoundRobinConfigurations";
         public static final String AI_CONFIGURATION_FAILOVER_CONFIGURATIONS_FAILOVER_ENDPOINTS_LIMIT =

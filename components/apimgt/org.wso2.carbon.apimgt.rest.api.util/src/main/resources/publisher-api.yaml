@@ -14783,6 +14783,10 @@ components:
           type: boolean
           description: Checks if the auth token is provided for AI service usage.
           default: false
+        isMCPPortalEnabled:
+          type: boolean
+          description: This indicates whether the MCP portal is enabled or not.
+          default: true
         customProperties:
             type: array
             items:
