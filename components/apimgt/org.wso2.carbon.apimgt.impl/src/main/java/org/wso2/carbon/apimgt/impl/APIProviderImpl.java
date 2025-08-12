@@ -8697,7 +8697,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     }
 
     /**
-     * This method updates the MCP server backends for the API if it is of type MCP and subtype DIRECT_ENDPOINT.
+     * This method updates the MCP server backends for the API if it is of type MCP and subtype DIRECT_BACKEND.
      * It sets the first available backend as the selected backend and updates the backend ID in the URITemplates.
      *
      * @param api           The API object to be updated.
@@ -8719,7 +8719,7 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
         List<Backend> existingBackends = getMCPServerBackends(existingApiId, organization);
         if (existingBackends == null || existingBackends.isEmpty()) {
-            throw new APIManagementException("No MCP backends available for DIRECT_ENDPOINT configuration");
+            throw new APIManagementException("No MCP backends available for DIRECT_BACKEND configuration");
         }
 
         Backend selectedBackend = existingBackends.get(0);

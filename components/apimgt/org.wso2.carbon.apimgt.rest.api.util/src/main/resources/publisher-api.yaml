@@ -2263,15 +2263,15 @@ paths:
               }"'
       operationId: validateThirdPartyMCPServer
 
-  /mcp-servers/create-from-definition:
+  /mcp-servers/build-from-openapi:
     post:
       tags:
         - MCP Servers
       summary: |
-        Create an MCP server using the backend's definition.
+        Create an MCP server using an OpenAPI definition.
       description: |
-        This operation can be used to create a MCP server using the backend's definition. Definition can be a OpenAPI
-        definition or a JSON schema definition Provide either `url` or `file` to specify the definition.
+        This operation can be used to create a MCP server using the OpenAPI definition. 
+        Provide either `url` or `file` to specify the definition.
 
         Specify additionalProperties with **at least** API's name, version, context and endpointConfig.
       requestBody:
@@ -2283,6 +2283,67 @@ paths:
                   type: string
                   description: Definition to upload as a file
                   format: binary
+                url:
+                  type: string
+                  description: Definition url
+                additionalProperties:
+                  type: string
+                  description: Additional attributes specified as a stringified JSON with MCP Server's schema
+      responses:
+        201:
+          description: |
+            Created.
+            Successful response with the newly created object as entity in the body.
+            Location header contains URL of newly created entity.
+          headers:
+            ETag:
+              description: |
+                Entity Tag of the response resource. Used by caches, or in conditional requests.
+              schema:
+                type: string
+            Location:
+              description: |
+                The URL of the newly created resource.
+              schema:
+                type: string
+            Content-Type:
+              description: |
+                The content type of the body.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MCPServer'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        415:
+          $ref: '#/components/responses/UnsupportedMediaType'
+      security:
+        - OAuth2Security:
+            - apim:mcp_server_create
+            - apim:mcp_server_manage
+      x-code-samples:
+        - lang: Curl
+          source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file=@openapi.json 
+          -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/create-from-backend-definition"'
+      operationId: createMCPServerFromOpenAPI
+
+  /mcp-servers/build-from-mcp-server:
+    post:
+      tags:
+        - MCP Servers
+      summary: |
+        Create an MCP server using a third party MCP Server.
+      description: |
+        This operation can be used to create a MCP server using a third party MCP Server. 
+
+        Specify additionalProperties with **at least** API's name, version, context and endpointConfig.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
                 url:
                   type: string
                   description: Definition url
@@ -2333,20 +2394,15 @@ paths:
         - lang: Curl
           source: 'curl -k -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8" -F file=@openapi.json 
           -F additionalProperties=@data.json "https://127.0.0.1:9443/mcp-servers/am/publisher/v4/apis/create-from-backend-definition"'
-      operationId: createMCPServerFromDefinition
+      operationId: createMCPServerProxy
 
-  /mcp-servers:
+  /mcp-servers/build-from-api:
     post:
       tags:
         - MCP Servers
       summary: Create a New MCP Server
       description: |
-        This operation can be used to create a new MCP server specifying the details of the object in the payload. The 
-        new MCP server will be in `CREATED` state.
-
-        There is a special capability for a user who has `APIM Admin` permission such that he can create MCP servers on 
-        behalf of other users. For that he can to specify `"provider" : "some_other_user"` in the payload so that the 
-        creator will be shown as `some_other_user` in the UI.
+        This operation can be used to create a new MCP server using an existing API.
       parameters:
         - name: openAPIVersion
           in: query
@@ -2402,8 +2458,9 @@ paths:
         - lang: Curl
           source: 'curl -k -X POST -H "Authorization: Bearer ae4eae22-3f65-387b-a171-d37eaa366fa8"
           -H "Content-Type: application/json" -d @data.json "https://127.0.0.1:9443/api/am/publisher/v4/mcp-servers"'
-      operationId: createMCPServer
+      operationId: createMCPServerFromAPI
 
+  /mcp-servers:
     get:
       tags:
         - MCP Servers
@@ -11627,6 +11684,11 @@ components:
           minLength: 1
           pattern: '(^[^~!@#;:%^*()+={}|\\<>"'',&$\[\]\/]*$)'
           example: ReadingList
+        displayName:
+          description: Human-friendly name shown in UI. Length limited to DB column size.
+          minLength: 1
+          type: string
+          example: Reading List
         description:
           type: string
           maxLength: 32766
@@ -11910,6 +11972,14 @@ components:
             wso2/apk
             AWS
           default: wso2/synapse
+        initiatedFromGateway:
+          type: boolean
+          description: |
+            Whether the MCP Server is initiated from the gateway or not. This is used to identify
+            whether the MCP Server is created from the publisher or discovered from the gateway.
+          example: false
+          default: false
+          readOnly: true
       x-scopes:
         - apim:mcp_server_create
         - apim:mcp_server_import_export
@@ -14412,6 +14482,7 @@ components:
             - DOC
             - API
             - APIProduct
+            - MCP
         transportType:
           type: string
           description: Accepted values are HTTP, WS, SOAPTOREST, GRAPHQL

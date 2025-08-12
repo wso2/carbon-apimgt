@@ -2255,7 +2255,7 @@ public class OAS2Parser extends APIDefinition {
         Set<URITemplate> generatedTools = new HashSet<>();
         for (URITemplate template : uriTemplates) {
             BackendOperation backendOperation = null;
-            if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
+            if (APISpecParserConstants.API_SUBTYPE_DIRECT_BACKEND.equals(mcpSubtype)) {
                 BackendOperationMapping mapping = template.getBackendOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();
@@ -2298,7 +2298,7 @@ public class OAS2Parser extends APIDefinition {
 
         for (URITemplate template : uriTemplates) {
             BackendOperation backendOperation = null;
-            if (APISpecParserConstants.API_SUBTYPE_DIRECT_ENDPOINT.equals(mcpSubtype)) {
+            if (APISpecParserConstants.API_SUBTYPE_DIRECT_BACKEND.equals(mcpSubtype)) {
                 BackendOperationMapping mapping = template.getBackendOperationMapping();
                 if (mapping != null && mapping.getBackendOperation() != null) {
                     backendOperation = mapping.getBackendOperation();

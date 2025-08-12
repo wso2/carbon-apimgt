@@ -140,10 +140,10 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
     }
 
     @POST
-    
+    @Path("/build-from-api")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Create a New MCP Server", notes = "This operation can be used to create a new MCP server specifying the details of the object in the payload. The  new MCP server will be in `CREATED` state.  There is a special capability for a user who has `APIM Admin` permission such that he can create MCP servers on  behalf of other users. For that he can to specify `\"provider\" : \"some_other_user\"` in the payload so that the  creator will be shown as `some_other_user` in the UI. ", response = MCPServerDTO.class, authorizations = {
+    @ApiOperation(value = "Create a New MCP Server", notes = "This operation can be used to create a new MCP server using an existing API. ", response = MCPServerDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
@@ -153,15 +153,15 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = MCPServerDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response createMCPServer(@ApiParam(value = "API object that needs to be added" ,required=true) MCPServerDTO mcPServerDTO,  @ApiParam(value = "Open API version", allowableValues="v2, v3", defaultValue="v3") @DefaultValue("v3") @QueryParam("openAPIVersion") String openAPIVersion) throws APIManagementException{
-        return delegate.createMCPServer(mcPServerDTO, openAPIVersion, securityContext);
+    public Response createMCPServerFromAPI(@ApiParam(value = "API object that needs to be added" ,required=true) MCPServerDTO mcPServerDTO,  @ApiParam(value = "Open API version", allowableValues="v2, v3", defaultValue="v3") @DefaultValue("v3") @QueryParam("openAPIVersion") String openAPIVersion) throws APIManagementException{
+        return delegate.createMCPServerFromAPI(mcPServerDTO, openAPIVersion, securityContext);
     }
 
     @POST
-    @Path("/create-from-definition")
+    @Path("/build-from-openapi")
     @Consumes({ "multipart/form-data" })
     @Produces({ "application/json" })
-    @ApiOperation(value = "Create an MCP server using the backend's definition. ", notes = "This operation can be used to create a MCP server using the backend's definition. Definition can be a OpenAPI definition or a JSON schema definition Provide either `url` or `file` to specify the definition.  Specify additionalProperties with **at least** API's name, version, context and endpointConfig. ", response = MCPServerDTO.class, authorizations = {
+    @ApiOperation(value = "Create an MCP server using an OpenAPI definition. ", notes = "This operation can be used to create a MCP server using the OpenAPI definition.  Provide either `url` or `file` to specify the definition.  Specify additionalProperties with **at least** API's name, version, context and endpointConfig. ", response = MCPServerDTO.class, authorizations = {
         @Authorization(value = "OAuth2Security", scopes = {
             @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
             @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
@@ -171,8 +171,26 @@ McpServersApiService delegate = new McpServersApiServiceImpl();
         @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = MCPServerDTO.class),
         @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
         @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
-    public Response createMCPServerFromDefinition( @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail, @Multipart(value = "url", required = false)  String url, @Multipart(value = "additionalProperties", required = false)  String additionalProperties, @Multipart(value = "securityInfo", required = false)  String securityInfo) throws APIManagementException{
-        return delegate.createMCPServerFromDefinition(fileInputStream, fileDetail, url, additionalProperties, securityInfo, securityContext);
+    public Response createMCPServerFromOpenAPI( @Multipart(value = "file", required = false) InputStream fileInputStream, @Multipart(value = "file" , required = false) Attachment fileDetail, @Multipart(value = "url", required = false)  String url, @Multipart(value = "additionalProperties", required = false)  String additionalProperties) throws APIManagementException{
+        return delegate.createMCPServerFromOpenAPI(fileInputStream, fileDetail, url, additionalProperties, securityContext);
+    }
+
+    @POST
+    @Path("/build-from-mcp-server")
+    @Consumes({ "multipart/form-data" })
+    @Produces({ "application/json" })
+    @ApiOperation(value = "Create an MCP server using a third party MCP Server. ", notes = "This operation can be used to create a MCP server using a third party MCP Server.   Specify additionalProperties with **at least** API's name, version, context and endpointConfig. ", response = MCPServerDTO.class, authorizations = {
+        @Authorization(value = "OAuth2Security", scopes = {
+            @AuthorizationScope(scope = "apim:mcp_server_create", description = "Create MCP Server"),
+            @AuthorizationScope(scope = "apim:mcp_server_manage", description = "Manage all MCP Server related operations")
+        })
+    }, tags={ "MCP Servers",  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 201, message = "Created. Successful response with the newly created object as entity in the body. Location header contains URL of newly created entity. ", response = MCPServerDTO.class),
+        @ApiResponse(code = 400, message = "Bad Request. Invalid request or validation error.", response = ErrorDTO.class),
+        @ApiResponse(code = 415, message = "Unsupported Media Type. The entity of the request was not in a supported format.", response = ErrorDTO.class) })
+    public Response createMCPServerProxy(@Multipart(value = "url", required = false)  String url, @Multipart(value = "additionalProperties", required = false)  String additionalProperties, @Multipart(value = "securityInfo", required = false)  String securityInfo) throws APIManagementException{
+        return delegate.createMCPServerProxy(url, additionalProperties, securityInfo, securityContext);
     }
 
     @POST

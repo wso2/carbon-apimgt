@@ -2424,7 +2424,8 @@ public class APIMappingUtil {
         SubtypeConfigurationDTO subtypeConfigurationDTO = new SubtypeConfigurationDTO();
         subtypeConfigurationDTO.setSubtype(model.getSubtype());
         dto.setSubtypeConfiguration(subtypeConfigurationDTO);
-
+        dto.setInitiatedFromGateway(model.isInitiatedFromGateway());
+        dto.displayName(model.getDisplayName());
         return dto;
     }
 

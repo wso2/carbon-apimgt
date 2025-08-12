@@ -70,7 +70,11 @@ public class SearchResultMappingUtil {
         }
         apiResultDTO.setContext(context);
         apiResultDTO.setContextTemplate(api.getContextTemplate());
-        apiResultDTO.setType(SearchResultDTO.TypeEnum.API);
+        if (APIConstants.API_TYPE_MCP.equals(api.getType())) {
+            apiResultDTO.setType(SearchResultDTO.TypeEnum.MCP);
+        } else {
+            apiResultDTO.setType(SearchResultDTO.TypeEnum.API); // To maintain backward compatibility
+        }
         apiResultDTO.setTransportType(api.getType());
         apiResultDTO.setDescription(api.getDescription());
         apiResultDTO.setStatus(api.getStatus());

@@ -39,6 +39,7 @@ public class MCPServerDTO   {
   
     private String id = null;
     private String name = null;
+    private String displayName = null;
     private String description = null;
     private String context = null;
     private Object endpointConfig = null;
@@ -206,6 +207,7 @@ return null;
     private Object keyManagers = null;
     private String gatewayVendor = null;
     private String gatewayType = "wso2/synapse";
+    private Boolean initiatedFromGateway = false;
 
   /**
    * UUID of the MCP Server
@@ -241,6 +243,24 @@ return null;
   }
   public void setName(String name) {
     this.name = name;
+  }
+
+  /**
+   * Human-friendly name shown in UI. Length limited to DB column size.
+   **/
+  public MCPServerDTO displayName(String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "Reading List", value = "Human-friendly name shown in UI. Length limited to DB column size.")
+  @JsonProperty("displayName")
+ @Size(min=1)  public String getDisplayName() {
+    return displayName;
+  }
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   /**
@@ -1074,6 +1094,24 @@ return null;
     this.gatewayType = gatewayType;
   }
 
+  /**
+   * Whether the MCP Server is initiated from the gateway or not. This is used to identify whether the MCP Server is created from the publisher or discovered from the gateway. 
+   **/
+  public MCPServerDTO initiatedFromGateway(Boolean initiatedFromGateway) {
+    this.initiatedFromGateway = initiatedFromGateway;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "Whether the MCP Server is initiated from the gateway or not. This is used to identify whether the MCP Server is created from the publisher or discovered from the gateway. ")
+  @JsonProperty("initiatedFromGateway")
+  public Boolean isInitiatedFromGateway() {
+    return initiatedFromGateway;
+  }
+  public void setInitiatedFromGateway(Boolean initiatedFromGateway) {
+    this.initiatedFromGateway = initiatedFromGateway;
+  }
+
 
   @Override
   public boolean equals(java.lang.Object o) {
@@ -1086,6 +1124,7 @@ return null;
     MCPServerDTO mcPServer = (MCPServerDTO) o;
     return Objects.equals(id, mcPServer.id) &&
         Objects.equals(name, mcPServer.name) &&
+        Objects.equals(displayName, mcPServer.displayName) &&
         Objects.equals(description, mcPServer.description) &&
         Objects.equals(context, mcPServer.context) &&
         Objects.equals(endpointConfig, mcPServer.endpointConfig) &&
@@ -1132,12 +1171,13 @@ return null;
         Objects.equals(categories, mcPServer.categories) &&
         Objects.equals(keyManagers, mcPServer.keyManagers) &&
         Objects.equals(gatewayVendor, mcPServer.gatewayVendor) &&
-        Objects.equals(gatewayType, mcPServer.gatewayType);
+        Objects.equals(gatewayType, mcPServer.gatewayType) &&
+        Objects.equals(initiatedFromGateway, mcPServer.initiatedFromGateway);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, endpointConfig, version, provider, lifeCycleStatus, hasThumbnail, isDefaultVersion, isRevision, revisionedMCPServerId, revisionId, enableSchemaValidation, audiences, transport, tags, policies, organizationPolicies, throttlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, visibleOrganizations, mcpServerPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, specVersion, createdTime, lastUpdatedTimestamp, lastUpdatedTime, subtypeConfiguration, scopes, operations, categories, keyManagers, gatewayVendor, gatewayType);
+    return Objects.hash(id, name, displayName, description, context, endpointConfig, version, provider, lifeCycleStatus, hasThumbnail, isDefaultVersion, isRevision, revisionedMCPServerId, revisionId, enableSchemaValidation, audiences, transport, tags, policies, organizationPolicies, throttlingPolicy, authorizationHeader, apiKeyHeader, securityScheme, maxTps, visibility, visibleRoles, visibleTenants, visibleOrganizations, mcpServerPolicies, subscriptionAvailability, subscriptionAvailableTenants, additionalPropertiesMap, monetization, accessControl, accessControlRoles, businessInformation, corsConfiguration, workflowStatus, specVersion, createdTime, lastUpdatedTimestamp, lastUpdatedTime, subtypeConfiguration, scopes, operations, categories, keyManagers, gatewayVendor, gatewayType, initiatedFromGateway);
   }
 
   @Override
@@ -1147,6 +1187,7 @@ return null;
     
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    description: ").append(toIndentedString(description)).append("\n");
     sb.append("    context: ").append(toIndentedString(context)).append("\n");
     sb.append("    endpointConfig: ").append(toIndentedString(endpointConfig)).append("\n");
@@ -1194,6 +1235,7 @@ return null;
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    gatewayVendor: ").append(toIndentedString(gatewayVendor)).append("\n");
     sb.append("    gatewayType: ").append(toIndentedString(gatewayType)).append("\n");
+    sb.append("    initiatedFromGateway: ").append(toIndentedString(initiatedFromGateway)).append("\n");
     sb.append("}");
     return sb.toString();
   }
