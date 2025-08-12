@@ -3496,6 +3496,9 @@ public class APIMappingUtil {
      */
     private static List<APIOperationsDTO> getOperationsFromAPI(API api, boolean preserveCredentials)
             throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Getting operations from API. API UUID: " + api.getUuid() + ", Type: " + api.getType());
+        }
         Set<URITemplate> uriTemplates = api.getUriTemplates();
         List<APIOperationsDTO> operationsDTOList = new ArrayList<>();
         for (URITemplate uriTemplate : uriTemplates) {
@@ -3545,6 +3548,9 @@ public class APIMappingUtil {
      */
     private static List<APIOperationsDTO> getOperationsFromSwaggerDef(API api, String swaggerDefinition,
             boolean preserveCredentials) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Extracting operations from swagger definition for API UUID: " + api.getUuid());
+        }
         APIDefinition apiDefinition = OASParserUtil.getOASParser(swaggerDefinition);
         Set<URITemplate> uriTemplates;
         if (APIConstants.GRAPHQL_API.equals(api.getType())) {
@@ -3574,6 +3580,10 @@ public class APIMappingUtil {
      */
     private static void setOperationPoliciesToOperationsDTO(API api, List<APIOperationsDTO> apiOperationsDTO,
             boolean preserveCredentials) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Setting operation policies to operations DTO for API UUID: " + api.getUuid());
+        }
+
         Set<URITemplate> uriTemplates = api.getUriTemplates();
 
         Map<String, URITemplate> uriTemplateMap = new HashMap<>();
@@ -3587,6 +3597,9 @@ public class APIMappingUtil {
             if (uriTemplateMap.get(key) != null) {
                 List<OperationPolicy> operationPolicies = uriTemplateMap.get(key).getOperationPolicies();
                 if (operationPolicies != null && !operationPolicies.isEmpty()) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Found " + operationPolicies.size() + " operation policies for " + key);
+                    }
                     operationsDTO.setOperationPolicies(
                             OperationPolicyMappingUtil.fromOperationPolicyListToDTO(operationPolicies, api.getUuid(),
                                     preserveCredentials));
@@ -3840,7 +3853,11 @@ public class APIMappingUtil {
         return listDto;
     }
 
+    /**
+     * @deprecated Use {@link #fromAPIProducttoDTO(APIProduct, boolean)} instead.
+     */
     @UsedByMigrationClient
+    @Deprecated
     public static APIProductDTO fromAPIProducttoDTO(APIProduct product) throws APIManagementException {
         return fromAPIProducttoDTO(product, false);
     }
@@ -3855,6 +3872,11 @@ public class APIMappingUtil {
      */
     public static APIProductDTO fromAPIProducttoDTO(APIProduct product, boolean preserveCredentials)
             throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug(
+                    "Converting APIProduct to DTO. Product UUID: " + product.getUuid()
+                            + ", preserveCredentials: " + preserveCredentials);
+        }
 
         APIProductDTO productDto = new APIProductDTO();
         APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();

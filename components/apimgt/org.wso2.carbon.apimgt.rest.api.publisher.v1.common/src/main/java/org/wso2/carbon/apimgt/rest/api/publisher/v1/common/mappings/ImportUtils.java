@@ -639,7 +639,11 @@ public class ImportUtils {
      * @param tenantDomain        Tenant domain
      * @param apiType             Type of the API
      * @param provider            Api provider object
+     * @return Map of extracted operation policies
      * @throws APIManagementException If there is an error in extracting process
+     * @deprecated Use
+     *         {@link #extractValidateAndDropOperationPoliciesFromURITemplate(List, String, API, String, String,
+     *         APIProvider)} instead
      */
     @Deprecated
     public static Map<String, List<OperationPolicy>> extractValidateAndDropOperationPoliciesFromURITemplate
@@ -673,6 +677,7 @@ public class ImportUtils {
      * @param tenantDomain        Tenant domain
      * @param apiType             Type of the API
      * @param provider            Api provider object
+     * @return Map of extracted operation policies
      * @throws APIManagementException If there is an error in extracting process
      */
     public static Map<String, List<OperationPolicy>> extractValidateAndDropOperationPoliciesFromURITemplate
@@ -724,6 +729,9 @@ public class ImportUtils {
      * @param provider            API Provider
      * @return List of policies
      * @throws APIManagementException If an error occurs while extracting, validating or dropping the policies
+     * @deprecated Use
+     *         {@link #extractValidateAndDropAPIPoliciesFromAPI(APIDTO, String, API, String, String, APIProvider)}
+     *         instead.
      */
     @Deprecated
     public static List<OperationPolicy> extractValidateAndDropAPIPoliciesFromAPI(APIDTO importedApiDTO,
@@ -797,6 +805,9 @@ public class ImportUtils {
      * @param tenantDomain        Tenant domain
      * @param apiType             Type of the API.
      * @throws APIManagementException If there is an error in validating applied policy
+     * @deprecated Use
+     *         {@link #validateAndProcessAppliedPolicy (OperationPolicy, Map, String, String, APIProvider, String,
+     *         String, List)} instead.
      */
     @Deprecated
     public static void validateAppliedPolicy(OperationPolicy appliedPolicy,

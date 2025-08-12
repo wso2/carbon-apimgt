@@ -89,6 +89,7 @@ public class OperationPolicyMappingUtil {
      * @param operationPolicy the OperationPolicy to convert
      * @return the converted OperationPolicyDTO
      * @throws APIManagementException if an error occurs during conversion
+     * @deprecated Use {@link #fromOperationPolicyToDTO(OperationPolicy, String, boolean)} instead
      */
     @Deprecated
     public static OperationPolicyDTO fromOperationPolicyToDTO(OperationPolicy operationPolicy) {
@@ -205,9 +206,11 @@ public class OperationPolicyMappingUtil {
 
     /**
      * Converts a list of {@link OperationPolicy} to an {@link APIOperationPoliciesDTO}.
+     * This method is deprecated and should not be used in implementations that has secret type policy parameters.
      *
      * @param operationPolicyList the list of OperationPolicy to convert
      * @return the converted APIOperationPoliciesDTO
+     * @deprecated Use {@link #fromOperationPolicyListToDTO(List, String, boolean)} instead
      */
     @Deprecated
     public static APIOperationPoliciesDTO fromOperationPolicyListToDTO(List<OperationPolicy> operationPolicyList) {

@@ -1119,6 +1119,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      * @throws APIManagementException if an error occurs while updating the policy mappings
      */
     private void updateAPIPolicies(API api, API existingApi, String tenantDomain) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Updating API level and operation level policies for API: " + api.getId().getApiName());
+        }
         // Validate and process API level and operation level policies
         validateAndProcessAPIPolicyParameters(api, existingApi, tenantDomain);
         // Update API level and operation level policies
@@ -2067,6 +2070,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
                         // Handle validation for secret type attributes
                         if (attribute.getType().equals(OperationPolicySpecAttribute.AttributeType.Secret)) {
                             String attributeValue = appliedPolicyAttribute.toString();
+                            if (log.isDebugEnabled()) {
+                                log.debug("Validating secret attribute: " + attribute.getName());
+                            }
 
                             // Skip validation if the value is empty, as it will preserve the existing value
                             if (attributeValue.isEmpty()) {
@@ -2122,6 +2128,10 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public void processSecretPolicyParameters(OperationPolicySpecification policySpecification,
             OperationPolicy appliedPolicy, List<OperationPolicy> existingPolicies) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Processing secret policy parameters for policy: " + appliedPolicy.getPolicyName());
+        }
+
         Map<String, Object> parameters = appliedPolicy.getParameters();
         List<OperationPolicySpecAttribute> attributes = policySpecification.getPolicyAttributes();
 
@@ -2140,6 +2150,12 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
 
                     if (updatedStrValue.isEmpty()) {
                         // If value is empty string, copy from existing policy
+                        if (log.isDebugEnabled()) {
+                            log.debug(
+                                    "Empty value received for secret parameter: " + paramName
+                                            + ". Attempting to preserve existing value.");
+                        }
+
                         Object existingValue = null;
                         if (existingPolicies != null) {
                             // Find the matching policy
@@ -8129,6 +8145,9 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
      */
     public String applyGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPoliciesList, String description,
                                              String name, String orgId) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Applying gateway global policies for policy mapping: " + name);
+        }
         String policyMappingUUID = UUID.randomUUID().toString();
 
         // Validate and process the policies before adding them to DB
@@ -8257,6 +8276,11 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
     @Override
     public String updateGatewayGlobalPolicies(List<OperationPolicy> gatewayGlobalPolicyList, String description,
                                               String name, String orgId, String policyMappingId) throws APIManagementException {
+        if (log.isDebugEnabled()) {
+            log.debug("Updating gateway global policies for policy mapping: " + policyMappingId
+                    + " in organization: " + orgId);
+        }
+
         List<OperationPolicy> policyList = apiMgtDAO.getGatewayPoliciesOfPolicyMapping(policyMappingId);
         if (policyList.isEmpty()) {
             String message = "Cannot update the gateway policy mapping. The policy mapping ID: " + policyMappingId
