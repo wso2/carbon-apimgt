@@ -8288,14 +8288,15 @@ class APIProviderImpl extends AbstractAPIManager implements APIProvider {
             log.error(message);
             throw new APIManagementException(message);
         }
+
+        // Validate and process the policies before deleting the existing policies
+        // The secret policy attributes will be encrypted during this
+        validateAndProcessPolicies(gatewayGlobalPolicyList, null, policyList, orgId);
+
         // Keep the existing deployments and update the policy mapping.
         Set<String> activeGatewayLabels = apiMgtDAO.getGatewayPolicyMappingDeploymentsByPolicyMappingId(policyMappingId,
                 orgId);
         apiMgtDAO.deleteGatewayPolicyMappingByPolicyId(policyMappingId, false);
-
-        // Validate and process the policies
-        // The secret policy attributes will be encrypted before storing in the database.
-        validateAndProcessPolicies(gatewayGlobalPolicyList, null, policyList, orgId);
 
         String mappingID = apiMgtDAO.updateGatewayGlobalPolicy(gatewayGlobalPolicyList, description, name, orgId, policyMappingId);
         // Redeploy the updated policy mappings to the gateways.
