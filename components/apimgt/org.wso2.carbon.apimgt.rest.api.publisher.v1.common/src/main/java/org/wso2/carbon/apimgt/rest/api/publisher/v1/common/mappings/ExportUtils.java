@@ -262,8 +262,7 @@ public class ExportUtils {
             if (endpointConfig != null &&
                     APIConstants.ENDPOINT_TYPE_SEQUENCE
                             .equals(endpointConfig.get(API_ENDPOINT_CONFIG_PROTOCOL_TYPE).getAsString())
-                    && apiDtoToReturn.isAPIDTO()
-                    && apiDtoToReturn.getType() != null
+                    && apiDtoToReturn.isAPIDTO() && apiDtoToReturn.getType() != null
                     && APIConstants.API_TYPE_HTTP.equalsIgnoreCase(apiDtoToReturn.getType().toString())) {
 
                 Map endpointConf = (Map) apiDtoToReturn.getEndpointConfig();
@@ -308,8 +307,8 @@ public class ExportUtils {
             apiDtoToReturn.setMediationPolicies(Collections.emptyList());
         }
 
-        addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider,
-                apiIdentifier, organization, currentApiUuid);
+        addAPIMetaInformationToArchive(archivePath, apiDtoToReturn, exportFormat, apiProvider, apiIdentifier,
+                organization, currentApiUuid);
 
         CommonUtil.archiveDirectory(exportAPIBasePath);
         FileUtils.deleteQuietly(new File(exportAPIBasePath));

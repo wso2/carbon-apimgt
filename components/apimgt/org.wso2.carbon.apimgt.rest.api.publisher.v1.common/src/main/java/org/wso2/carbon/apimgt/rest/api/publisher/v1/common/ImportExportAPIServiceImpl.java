@@ -109,6 +109,49 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
     }
 
     @Override
+    public File exportMCPServer(String apiId, String name, String version, String revisionNum, String providerName,
+                                boolean preserveStatus, ExportFormat format, boolean preserveDocs,
+                                boolean preserveCredentials, boolean exportLatestRevision, String originalDevPortalUrl,
+                                String organization) throws APIManagementException, APIImportExportException {
+
+        APIIdentifier apiIdentifier;
+        MCPServerDTO apiDtoToReturn;
+        APIProvider apiProvider = RestApiCommonUtil.getLoggedInUserProvider();
+        String userName = RestApiCommonUtil.getLoggedInUsername();
+        API api;
+        String exportAPIUUID;
+
+        if (apiId == null) {
+            String provider = ExportUtils.validateExportParams(name, version, providerName);
+            apiIdentifier = new APIIdentifier(APIUtil.replaceEmailDomain(provider), name, version);
+            apiId = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
+            if (apiId == null) {
+                throw new APIImportExportException("MCP Server Id not found for the provided details");
+            }
+        }
+
+        if (exportLatestRevision) {
+            exportAPIUUID = apiProvider.getLatestRevisionUUID(apiId);
+        } else if (StringUtils.isNotBlank(revisionNum)) {
+            exportAPIUUID = apiProvider.getAPIRevisionUUID(revisionNum, apiId);
+        } else {
+            exportAPIUUID = apiId;
+        }
+
+        if (StringUtils.isBlank(exportAPIUUID)) {
+            throw new APIMgtResourceNotFoundException("Incorrect revision number provided: " + revisionNum,
+                    ExceptionCodes.from(ExceptionCodes.API_REVISION_NOT_FOUND, revisionNum));
+        }
+
+        api = apiProvider.getAPIbyUUID(exportAPIUUID, organization);
+        apiDtoToReturn = APIMappingUtil.fromAPItoMCPServerDTO(api, preserveCredentials, apiProvider);
+        apiIdentifier = api.getId();
+        apiIdentifier.setUuid(exportAPIUUID);
+        return ExportUtils.exportAPI(apiProvider, apiIdentifier, new APIDTOTypeWrapper(apiDtoToReturn), api, userName,
+                format, preserveStatus, preserveDocs, originalDevPortalUrl, organization, preserveCredentials);
+    }
+
+    @Override
     public File exportAPI(String apiId, String revisionUUID, boolean preserveStatus, ExportFormat format,
                           boolean preserveDocs, boolean preserveCredentials, String organization)
             throws APIManagementException, APIImportExportException {
@@ -220,6 +263,22 @@ public class ImportExportAPIServiceImpl implements ImportExportAPI {
                     ExceptionCodes.ERROR_PROCESSING_DIRECTORY_TO_IMPORT);
         }
         return ImportUtils.importApi(extractedFolderPath, null, preserveProvider, rotateRevision,
+                overwrite, preservePortalConfigurations, false, tokenScopes, null, organization);
+    }
+
+    @Override
+    public ImportedAPIDTO importMCPServer(InputStream fileInputStream, Boolean preserveProvider, Boolean rotateRevision,
+                                          Boolean overwrite, Boolean preservePortalConfigurations, String[] tokenScopes,
+                                          String organization) throws APIManagementException {
+
+        String extractedFolderPath;
+        try {
+            extractedFolderPath = ImportUtils.getArchivePathOfExtractedDirectory(fileInputStream);
+        } catch (APIImportExportException e) {
+            throw new APIManagementException("Error extracting and processing the directory", e,
+                    ExceptionCodes.ERROR_PROCESSING_DIRECTORY_TO_IMPORT);
+        }
+        return ImportUtils.importMCPServer(extractedFolderPath, null, preserveProvider, rotateRevision,
                 overwrite, preservePortalConfigurations, false, tokenScopes, null, organization);
     }
 
