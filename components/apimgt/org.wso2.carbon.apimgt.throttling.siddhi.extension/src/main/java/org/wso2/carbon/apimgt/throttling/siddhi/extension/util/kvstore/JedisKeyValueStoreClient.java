@@ -1,5 +1,6 @@
 package org.wso2.carbon.apimgt.throttling.siddhi.extension.util.kvstore;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.siddhi.core.util.kvstore.KeyValueStoreException;
@@ -69,9 +70,20 @@ public class JedisKeyValueStoreClient implements KeyValueStoreClient {
                             config.getPort() : DEFAULT_PORT;
 
                     if (config != null) {
-                        JedisPoolConfig poolConfig = createPoolConfig(config);
+                        JedisPoolConfig jedisPoolConfig = createPoolConfig(config);
                         try {
-                            jedisPool = new JedisPool(poolConfig, host, port);
+                            if (StringUtils.isNotEmpty(config.getUser()) && config.getPassword() != null) {
+                                jedisPool = new JedisPool(jedisPoolConfig, config.getHost(), config.getPort(),
+                                        config.getConnectionTimeout(), config.getUser(),
+                                        String.valueOf(config.getPassword()), config.isSslEnabled());
+                            } else if (config.getPassword() != null) {
+                                jedisPool = new JedisPool(jedisPoolConfig, config.getHost(), config.getPort(),
+                                        config.getConnectionTimeout(), String.valueOf(config.getPassword()), config.isSslEnabled());
+                            } else {
+                                jedisPool = new JedisPool(jedisPoolConfig, config.getHost(), config.getPort(),
+                                        config.getConnectionTimeout(), config.isSslEnabled());
+                            }
+                            return jedisPool;
                         } catch (Exception e) {
                             log.error("Failed to initialize KeyValue JedisPool for server at {}:{}", host, port, e);
                         }
