@@ -192,7 +192,7 @@ public final class APISpecParserConstants {
             Collections.unmodifiableSet(new HashSet<String>(
                     Arrays.asList(new String[]{"get", "put", "post", "delete", "patch", "head", "options", "tool"})));
     public static final String MCP_RESOURCES_MCP = "/mcp";
-    public static final String MCP_RESOURCES_WELL_KNOWN = "/.well-known/oauth-authorization-server";
+    public static final String MCP_RESOURCES_WELL_KNOWN = "/.well-known/oauth-protected-resource";
 
     public static class OperationParameter {
         public static final String PAYLOAD_PARAM_NAME = "Payload";
@@ -232,6 +232,6 @@ public final class APISpecParserConstants {
         TOOL
     }
 
-    public static final String API_SUBTYPE_DIRECT_ENDPOINT = "DIRECT_ENDPOINT";
+    public static final String API_SUBTYPE_DIRECT_BACKEND = "DIRECT_BACKEND";
     public static final String API_SUBTYPE_EXISTING_API = "EXISTING_API";
 }
