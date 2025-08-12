@@ -34,6 +34,9 @@ import org.wso2.carbon.utils.CarbonUtils;
 
 import java.rmi.RemoteException;
 
+/**
+ * Client to invoke TenantMgtAdminService for tenant related tasks.
+ */
 public class TenantManagementClient {
     private static final Log log = LogFactory.getLog(TenantManagementClient.class);
     private static final String TENANT_MANAGEMENT_ADMIN_SERVICE = "/services/TenantMgtAdminService";
