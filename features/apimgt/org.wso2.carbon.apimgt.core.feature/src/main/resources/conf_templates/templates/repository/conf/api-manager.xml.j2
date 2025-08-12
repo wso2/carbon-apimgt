@@ -1867,6 +1867,12 @@
                 {% if apim.distributed_throttle_properties.keyvalue_store_options.port is defined %}
                 <Port>{{apim.distributed_throttle_properties.keyvalue_store_options.port}}</Port>
                 {% endif %}
+                {% if apim.distributed_throttle_properties.keyvalue_store_options.user is defined %}
+                <User>{{apim.distributed_throttle_properties.keyvalue_store_options.user}}</User>
+                {% endif %}
+                {% if apim.distributed_throttle_properties.keyvalue_store_options.password is defined %}
+                <Password>{{apim.distributed_throttle_properties.keyvalue_store_options.password}}</Password>
+                {% endif %}
                 {% if apim.distributed_throttle_properties.keyvalue_store_options.max_total is defined %}
                 <MaxTotal>{{apim.distributed_throttle_properties.keyvalue_store_options.max_total}}</MaxTotal>
                 {% endif %}

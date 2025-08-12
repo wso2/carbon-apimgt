@@ -548,15 +548,26 @@ public class APIManagerConfiguration {
                 }
                 if (propertiesElement != null) {
                     kvStoreConfig = new RedisConfig();
+                    OMElement host = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_HOST));
+                    OMElement port = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PORT));
+                    OMElement user = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_USER));
+                    OMElement password = propertiesElement.getFirstChildWithName(new QName(APIConstants.DISTRIBUTED_THROTTLE_PASSWORD));
+
+                    kvStoreConfig.setHost(host.getText());
+                    kvStoreConfig.setPort(Integer.parseInt(port.getText()));
+
+                    if (user != null) {
+                        kvStoreConfig.setUser(user.getText());
+                    }
+                    if (password != null) {
+                        kvStoreConfig.setPassword(MiscellaneousUtil.resolve(password, secretResolver).toCharArray());
+                    }
+
                     Iterator<OMElement> properties = propertiesElement.getChildElements();
                     if (properties != null) {
                         while (properties.hasNext()) {
                             OMElement propertyNode = properties.next();
-                            if (APIConstants.DISTRIBUTED_THROTTLE_HOST.equals(propertyNode.getLocalName())) {
-                                kvStoreConfig.setHost(propertyNode.getText());
-                            } else if (APIConstants.DISTRIBUTED_THROTTLE_PORT.equals(propertyNode.getLocalName())) {
-                                kvStoreConfig.setPort(Integer.parseInt(propertyNode.getText()));
-                            }else if (APIConstants.DISTRIBUTED_THROTTLE_MAX_TOTAL.equals(propertyNode.getLocalName())) {
+                            if (APIConstants.DISTRIBUTED_THROTTLE_MAX_TOTAL.equals(propertyNode.getLocalName())) {
                                 kvStoreConfig.setMaxTotal(Integer.parseInt(propertyNode.getText()));
                             } else if (APIConstants.DISTRIBUTED_THROTTLE_MAX_IDLE.equals(propertyNode.getLocalName())) {
                                 kvStoreConfig.setMaxIdle(Integer.parseInt(propertyNode.getText()));
