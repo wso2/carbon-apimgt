@@ -57,7 +57,6 @@ public final class APIMgtDBUtil {
     private static final String DB_CHECK_SQL = "SELECT * FROM AM_SUBSCRIBER";
     
     private static final String DATA_SOURCE_NAME = "DataSourceName";
-    private static final GatewayManagementDAO gatewayManagementDAO = GatewayManagementDAO.getInstance();
 
     /**
      * Initializes the data source
@@ -291,6 +290,7 @@ public final class APIMgtDBUtil {
                 apiRevisionDeployment.setDeployedTime(rs.getString("DEPLOY_TIME"));
                 apiRevisionDeployment.setSuccessDeployedTime(rs.getString("DEPLOYED_TIME"));
 
+                GatewayManagementDAO gatewayManagementDAO = getGatewayManagementDAO();
                 gatewayManagementDAO.calculateGatewayDeploymentStats(apiRevisionDeployment, revisionUuid,
                                                                      environmentName, apiUuid);
 
@@ -310,6 +310,10 @@ public final class APIMgtDBUtil {
             }
         }
         return  apiRevisionDeploymentList;
+    }
+
+    private static GatewayManagementDAO getGatewayManagementDAO() {
+        return GatewayManagementDAO.getInstance();
     }
 
     /**

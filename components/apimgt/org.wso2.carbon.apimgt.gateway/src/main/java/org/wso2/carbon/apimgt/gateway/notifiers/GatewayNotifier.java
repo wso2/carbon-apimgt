@@ -276,7 +276,9 @@ public class GatewayNotifier {
 
                 int statusCode = response.getStatusLine().getStatusCode();
                 String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-                log.debug("/notify-gateway called. Status: " + statusCode + ", Response: " + responseBody);
+                if (log.isDebugEnabled()) {
+                    log.debug("/notify-gateway called. Status: " + statusCode + ", Response: " + responseBody);
+                }
                 if (statusCode != HttpStatus.SC_OK) {
                     log.error("Failed to send heartbeat notification. Status: " + statusCode + ", Response: "
                                       + responseBody);
