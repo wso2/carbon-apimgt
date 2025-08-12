@@ -305,6 +305,7 @@ public class APIMappingUtil {
         if (dto.getGatewayType() != null) {
             model.setGatewayType(dto.getGatewayType());
         }
+        model.setInitiatedFromGateway(dto.isInitiatedFromGateway());
 
         //URI Templates
         // No default topics for AsyncAPIs. Therefore set URITemplates only for non-AsyncAPIs.

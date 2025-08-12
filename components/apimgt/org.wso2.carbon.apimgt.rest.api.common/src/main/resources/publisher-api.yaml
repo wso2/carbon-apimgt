@@ -17028,7 +17028,6 @@ components:
                 wso2/synapse
                 wso2/apk
                 AWS
-              default: wso2/synapse
             hasThumbnail:
               type: boolean
               example: true

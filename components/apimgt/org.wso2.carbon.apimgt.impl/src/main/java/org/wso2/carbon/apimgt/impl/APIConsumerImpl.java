@@ -3524,6 +3524,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         String updatedDefinition = null;
         Map<String, String> hostsWithSchemes;
         String definition;
+        populateApiInfo(api, false);
         if (api.getSwaggerDefinition() != null) {
             definition = api.getSwaggerDefinition();
         } else {
@@ -3752,24 +3753,34 @@ APIConstants.AuditLogConstants.DELETED, this.username);
 
             boolean isExternalGateway = false;
             GatewayDeployer gatewayDeployer = null;
-            if (gatewayConfiguration != null && StringUtils.isNotEmpty(gatewayConfiguration
-                    .getGatewayDeployerImplementation())) {
-                gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain, environmentName);
-                isExternalGateway = true;
-            }
+            String httpUrl;
+            String httpsUrl;
+            if (gatewayConfiguration != null && StringUtils.isNotEmpty(
+                    gatewayConfiguration.getDiscoveryImplementation()) && api.isInitiatedFromGateway()) {
+                httpUrl = vhost.getHttpUrl();
+                httpsUrl = vhost.getHttpsUrl();
+            } else {
+                if (gatewayConfiguration != null && StringUtils.isNotEmpty(
+                        gatewayConfiguration.getGatewayDeployerImplementation())) {
+                    gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain, environmentName);
+                    isExternalGateway = true;
+                }
 
-            String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(),
-                    environment.getUuid());
-            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTP_PROTOCOL)
-                    && vhost.getHttpPort() != -1) {
-                String httpUrl = isExternalGateway ? gatewayDeployer.getAPIExecutionURL(externalReference) :
+                String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(api.getUuid(),
+                        environment.getUuid());
+                httpUrl = isExternalGateway ?
+                        gatewayDeployer.getAPIExecutionURL(externalReference) :
                         vhost.getHttpUrl();
+                httpsUrl = isExternalGateway ?
+                        gatewayDeployer.getAPIExecutionURL(externalReference) :
+                        vhost.getHttpsUrl();
+            }
+            if (StringUtils.containsIgnoreCase(api.getTransports(),
+                    APIConstants.HTTP_PROTOCOL) && vhost.getHttpPort() != -1) {
                 hostsWithSchemes.put(APIConstants.HTTP_PROTOCOL, httpUrl);
             }
-            if (StringUtils.containsIgnoreCase(api.getTransports(), APIConstants.HTTPS_PROTOCOL)
-                    && vhost.getHttpsPort() != -1) {
-                String httpsUrl = isExternalGateway ? gatewayDeployer.getAPIExecutionURL(externalReference) :
-                        vhost.getHttpsUrl();
+            if (StringUtils.containsIgnoreCase(api.getTransports(),
+                    APIConstants.HTTPS_PROTOCOL) && vhost.getHttpsPort() != -1) {
                 hostsWithSchemes.put(APIConstants.HTTPS_PROTOCOL, httpsUrl);
             }
         }
@@ -4929,6 +4940,7 @@ APIConstants.AuditLogConstants.DELETED, this.username);
         }
         api.setEgress(apiInfo.isEgress());
         api.setSubtype(apiInfo.getApiSubtype());
+        api.setInitiatedFromGateway(apiInfo.isInitiatedFromGateway());
         if (setStatus) {
             api.setStatus(apiInfo.getStatus());
         }

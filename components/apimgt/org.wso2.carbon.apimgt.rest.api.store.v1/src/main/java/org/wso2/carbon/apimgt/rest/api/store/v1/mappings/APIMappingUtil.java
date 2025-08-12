@@ -288,6 +288,7 @@ public class APIMappingUtil {
         } else {
             dto.setGatewayVendor("wso2");
         }
+        dto.setInitiatedFromGateway(model.isInitiatedFromGateway());
 
         if (model.getAsyncTransportProtocols() != null) {
             dto.setAsyncTransportProtocols(Arrays.asList(model.getAsyncTransportProtocols().split(",")));
@@ -599,14 +600,21 @@ public class APIMappingUtil {
             GatewayDeployer gatewayDeployer = GatewayHolder.getTenantGatewayInstance(tenantDomain,
                     environment.getName());
             context = gatewayDeployer != null ? "" : context;
-
-            String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(apidto.getId(),
-                    environment.getUuid());
-            String httpUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(externalReference)
-                    : vHost.getHttpUrl();
-            String httpsUrl = gatewayDeployer != null ? gatewayDeployer.getAPIExecutionURL(externalReference)
-                    : vHost.getHttpsUrl();
-
+            String httpUrl;
+            String httpsUrl;
+            if (apidto.isInitiatedFromGateway()) {
+                httpUrl = vHost.getHttpUrl();
+                httpsUrl = vHost.getHttpsUrl();
+            } else {
+                String externalReference = APIUtil.getApiExternalApiMappingReferenceByApiId(apidto.getId(),
+                        environment.getUuid());
+                httpUrl = gatewayDeployer != null ?
+                        gatewayDeployer.getAPIExecutionURL(externalReference) :
+                        vHost.getHttpUrl();
+                httpsUrl = gatewayDeployer != null ?
+                        gatewayDeployer.getAPIExecutionURL(externalReference) :
+                        vHost.getHttpsUrl();
+            }
             if (apidto.getTransport().contains(APIConstants.HTTP_PROTOCOL)) {
                 apiurLsDTO.setHttp(httpUrl + context);
             }

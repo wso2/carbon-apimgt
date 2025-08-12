@@ -59,6 +59,7 @@ public class APIDTO   {
     private Long subscriptions = null;
     private AdvertiseInfoDTO advertiseInfo = null;
     private Boolean isSubscriptionAvailable = null;
+    private Boolean initiatedFromGateway = null;
     private List<String> categories = new ArrayList<String>();
     private Object keyManagers = null;
     private String createdTime = null;
@@ -594,6 +595,23 @@ public class APIDTO   {
   }
 
   /**
+   **/
+  public APIDTO initiatedFromGateway(Boolean initiatedFromGateway) {
+    this.initiatedFromGateway = initiatedFromGateway;
+    return this;
+  }
+
+  
+  @ApiModelProperty(example = "false", value = "")
+  @JsonProperty("initiatedFromGateway")
+  public Boolean isInitiatedFromGateway() {
+    return initiatedFromGateway;
+  }
+  public void setInitiatedFromGateway(Boolean initiatedFromGateway) {
+    this.initiatedFromGateway = initiatedFromGateway;
+  }
+
+  /**
    * API categories 
    **/
   public APIDTO categories(List<String> categories) {
@@ -774,6 +792,7 @@ public class APIDTO   {
         Objects.equals(subscriptions, API.subscriptions) &&
         Objects.equals(advertiseInfo, API.advertiseInfo) &&
         Objects.equals(isSubscriptionAvailable, API.isSubscriptionAvailable) &&
+        Objects.equals(initiatedFromGateway, API.initiatedFromGateway) &&
         Objects.equals(categories, API.categories) &&
         Objects.equals(keyManagers, API.keyManagers) &&
         Objects.equals(createdTime, API.createdTime) &&
@@ -786,7 +805,7 @@ public class APIDTO   {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, apiKeyHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, subscriptions, advertiseInfo, isSubscriptionAvailable, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols, egress, subtype);
+    return Objects.hash(id, name, description, context, version, provider, apiDefinition, wsdlUri, lifeCycleStatus, isDefaultVersion, type, transport, operations, authorizationHeader, apiKeyHeader, securityScheme, tags, tiers, hasThumbnail, additionalProperties, monetization, endpointURLs, businessInformation, environmentList, scopes, avgRating, subscriptions, advertiseInfo, isSubscriptionAvailable, initiatedFromGateway, categories, keyManagers, createdTime, lastUpdatedTime, gatewayVendor, asyncTransportProtocols, egress, subtype);
   }
 
   @Override
@@ -823,6 +842,7 @@ public class APIDTO   {
     sb.append("    subscriptions: ").append(toIndentedString(subscriptions)).append("\n");
     sb.append("    advertiseInfo: ").append(toIndentedString(advertiseInfo)).append("\n");
     sb.append("    isSubscriptionAvailable: ").append(toIndentedString(isSubscriptionAvailable)).append("\n");
+    sb.append("    initiatedFromGateway: ").append(toIndentedString(initiatedFromGateway)).append("\n");
     sb.append("    categories: ").append(toIndentedString(categories)).append("\n");
     sb.append("    keyManagers: ").append(toIndentedString(keyManagers)).append("\n");
     sb.append("    createdTime: ").append(toIndentedString(createdTime)).append("\n");
