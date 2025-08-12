@@ -3723,6 +3723,7 @@ public class APIMappingUtil {
         mappingDTO.setApiId(mapping.getApiUuid());
         mappingDTO.setApiName(mapping.getApiName());
         mappingDTO.setApiVersion(mapping.getApiVersion());
+        mappingDTO.setApiContext(mapping.getApiContext());
         mappingDTO.setBackendOperation(operationDTO);
         return mappingDTO;
     }
