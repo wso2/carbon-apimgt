@@ -551,4 +551,21 @@ public class APIDTOTypeWrapper {
                     mcpServerDto.getSubtypeConfiguration().getSubtype() : null;
         }
     }
+
+    public boolean getInitiatedFromGateway() {
+        if (isAPIDTO()) {
+            return apiDto.isInitiatedFromGateway() != null ? apiDto.isInitiatedFromGateway() : false;
+        } else {
+            return false;
+        }
+
+    }
+
+    public String getDisplayName() {
+        if (isAPIDTO()) {
+            return apiDto.getDisplayName();
+        } else {
+            return mcpServerDto.getDisplayName();
+        }
+    }
 }

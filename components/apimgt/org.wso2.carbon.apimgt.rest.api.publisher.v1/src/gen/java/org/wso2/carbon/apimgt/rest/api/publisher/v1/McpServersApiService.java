@@ -48,8 +48,9 @@ public interface McpServersApiService {
       public Response addMCPServerDocument(String mcpServerId, DocumentDTO documentDTO, MessageContext messageContext) throws APIManagementException;
       public Response addMCPServerDocumentContent(String mcpServerId, String documentId, String ifMatch, InputStream fileInputStream, Attachment fileDetail, String inlineContent, MessageContext messageContext) throws APIManagementException;
       public Response changeMCPServerLifecycle(String action, String mcpServerId, String lifecycleChecklist, String ifMatch, MessageContext messageContext) throws APIManagementException;
-      public Response createMCPServer(MCPServerDTO mcPServerDTO, String openAPIVersion, MessageContext messageContext) throws APIManagementException;
-      public Response createMCPServerFromDefinition(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, String securityInfo, MessageContext messageContext) throws APIManagementException;
+      public Response createMCPServerFromAPI(MCPServerDTO mcPServerDTO, String openAPIVersion, MessageContext messageContext) throws APIManagementException;
+      public Response createMCPServerFromOpenAPI(InputStream fileInputStream, Attachment fileDetail, String url, String additionalProperties, MessageContext messageContext) throws APIManagementException;
+      public Response createMCPServerProxy(String url, String additionalProperties, String securityInfo, MessageContext messageContext) throws APIManagementException;
       public Response createMCPServerRevision(String mcpServerId, APIRevisionDTO apIRevisionDTO, MessageContext messageContext) throws APIManagementException;
       public Response createNewMCPServerVersion(String newVersion, String mcpServerId, Boolean defaultVersion, String serviceVersion, MessageContext messageContext) throws APIManagementException;
       public Response deleteCommentOfMCPServer(String commentId, String mcpServerId, String ifMatch, MessageContext messageContext) throws APIManagementException;
