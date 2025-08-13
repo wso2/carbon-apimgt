@@ -83,6 +83,10 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
      * @param organization  The organization context for the discovery.
      */
     public void scheduleDiscovery(Environment environment, String organization) {
+        if (log.isDebugEnabled()) {
+            log.debug("Scheduling federated API discovery for environment: " + environment.getName()
+                    + " in organization: " + organization);
+        }
         GatewayAgentConfiguration gatewayConfiguration = org.wso2.carbon.apimgt.impl.internal.
                 ServiceReferenceHolder.getInstance().
                 getExternalGatewayConnectorConfiguration(environment.getGatewayType());
@@ -123,6 +127,11 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                         }, 0, environment.getApiDiscoveryScheduledWindow(), TimeUnit.MINUTES);
                         scheduledDiscoveryTasks.put(environment.getName() + ":" + organization, newTask);
                     }
+                    if (log.isDebugEnabled()) {
+                        log.debug("Successfully scheduled federated API discovery for environment: "
+                                + environment.getName() + " in organization: " + organization + " with interval: " +
+                                environment.getApiDiscoveryScheduledWindow() + " minutes");
+                    }
                 } catch (ClassNotFoundException | IllegalAccessException | InstantiationException |
                          NoSuchMethodException | InvocationTargetException | APIManagementException e) {
                     log.error("Error while loading federated API discovery for environment "
@@ -145,6 +154,10 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
     private void processDiscoveredAPIs(List<API> apisToDeployInGatewayEnv, Environment environment,
                                        String organization) {
 
+        if (log.isDebugEnabled()) {
+            log.debug("Processing discovered APIs for environment: " + environment.getName()
+                    + " in organization: " + organization);
+        }
         boolean debugLogEnabled = log.isDebugEnabled();
         try {
             FederatedGatewayUtil.startTenantFlow(organization);
@@ -231,10 +244,10 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                         alreadyDiscoveredAPIsList.add(apidto.getName() + APIConstants.DELEM_COLON
                                 + apidto.getVersion());
                     }
-
-                    log.info((update ? "Updated" : "Created") + " API: " + api.getId().getName()
-                            + " in environment: " + environment.getName());
-
+                    if (debugLogEnabled) {
+                        log.debug((update ? "Updated" : "Created") + " API: " + api.getId().getName()
+                                + " in environment: " + environment.getName());
+                    }
                 } catch (IOException e) {
                     log.error("IO error while processing API: " + api.getId().getName()
                             + " in organization: " + organization, e);
@@ -243,7 +256,6 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             + " in organization: " + organization, e);
                 }
             }
-
             for (String apiName : alreadyDiscoveredAPIsList) {
                 if (!discoveredAPIsFromFederatedGW.contains(apiName)) {
                     try {
@@ -262,7 +274,10 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     }
                 }
             }
-
+            if (debugLogEnabled) {
+                log.debug("Successfully processed discovered APIs for environment: " + environment.getName()
+                        + " in organization: " + organization);
+            }
         } catch (APIManagementException e) {
             log.error("Failed during federated API processing for environment: " + environment.getName() +
                     " and organization: " + organization, e);
