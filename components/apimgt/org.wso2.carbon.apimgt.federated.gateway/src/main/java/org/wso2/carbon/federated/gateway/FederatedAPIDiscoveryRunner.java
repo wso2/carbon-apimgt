@@ -153,12 +153,11 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
      */
     private void processDiscoveredAPIs(List<API> apisToDeployInGatewayEnv, Environment environment,
                                        String organization) {
-
-        if (log.isDebugEnabled()) {
+        boolean debugLogEnabled = log.isDebugEnabled();
+        if (debugLogEnabled) {
             log.debug("Processing discovered APIs for environment: " + environment.getName()
                     + " in organization: " + organization);
         }
-        boolean debugLogEnabled = log.isDebugEnabled();
         try {
             FederatedGatewayUtil.startTenantFlow(organization);
             String adminUsername = APIUtil.getAdminUsername();
