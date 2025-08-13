@@ -30,7 +30,6 @@ import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscovery;
 import org.wso2.carbon.apimgt.api.FederatedAPIDiscoveryService;
 import org.wso2.carbon.apimgt.api.model.API;
-import org.wso2.carbon.apimgt.api.model.APIIdentifier;
 import org.wso2.carbon.apimgt.api.model.Environment;
 import org.wso2.carbon.apimgt.api.model.GatewayAgentConfiguration;
 import org.wso2.carbon.apimgt.api.model.GatewayMode;
@@ -170,7 +169,9 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                     boolean update = alreadyDiscoveredAPIsList.contains(apiKey) ||
                             alreadyDiscoveredAPIsList.contains(envScopedKey);
                     boolean alreadyExistsWithEnvScope = alreadyDiscoveredAPIsList.contains(envScopedKey);
-
+                    boolean isNewVersion = alreadyDiscoveredAPIsList.stream().map(s -> s.split(":", 2))
+                            .anyMatch(parts -> parts[0].equals(apidto.getName())
+                                    && !parts[1].equals(apidto.getVersion()));
                     if (isPublishedAPIFromCP) {
                         continue;
                     }
@@ -180,6 +181,15 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
                             apidto.displayName(apidto.getName());
                         }
                         apidto.setName(apidto.getName() + APIConstants.DELEM_UNDERSCORE + environment.getName());
+                    }
+
+                    if (isNewVersion) {
+                        String existingApiUUID = FederatedGatewayUtil.getAPIUUID(apiKey, adminUsername, organization);
+                        if (existingApiUUID != null) {
+                            FederatedGatewayUtil.createNewAPIVersion(existingApiUUID, apidto.getVersion(),
+                                    organization);
+                            update = true;
+                        }
                     }
 
                     // Map to DTO and create ZIP
@@ -221,29 +231,17 @@ public class FederatedAPIDiscoveryRunner implements FederatedAPIDiscoveryService
             for (String apiName : alreadyDiscoveredAPIsList) {
                 if (!discoveredAPIsFromFederatedGW.contains(apiName)) {
                     try {
-                        String[] parts = apiName.split(APIConstants.DELEM_COLON);
-                        if (parts.length < 2) {
-                            log.warn("Invalid API identifier format for: " + apiName);
-                            continue;
-                        }
-
-                        APIIdentifier apiIdentifier = new APIIdentifier(adminUsername, parts[0], parts[1]);
-                        String apiUUID = APIUtil.getUUIDFromIdentifier(apiIdentifier, organization);
-
+                        String apiUUID = FederatedGatewayUtil.getAPIUUID(apiName, adminUsername, organization);
                         if (apiUUID != null) {
-                            FederatedGatewayUtil.deleteAPI(apiUUID, organization, environment);
-                            if (debugLogEnabled) {
-                                log.debug("Removed API: " + apiName + " from environment: " + environment.getName());
-                            }
+                            FederatedGatewayUtil.deleteDeployment(apiUUID, organization, environment);
                         } else {
                             if (debugLogEnabled) {
                                 log.debug("API UUID not found for: " + apiName
                                         + ". Skipping removal from environment: " + environment.getName());
                             }
                         }
-
                     } catch (Exception e) {
-                        log.error("Failed to delete API: " + apiName + " from environment: "
+                        log.error("Failed to delete revision for API: " + apiName + " from environment: "
                                 + environment.getName(), e);
                     }
                 }
